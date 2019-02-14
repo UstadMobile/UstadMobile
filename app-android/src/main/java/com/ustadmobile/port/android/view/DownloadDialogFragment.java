@@ -37,9 +37,15 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private RelativeLayout stackedOptionHolderView;
 
+    private RelativeLayout sdCardOptionHolderView;
+
+    private RelativeLayout wifiOnlyHolder;
+
     private TextView statusTextView;
 
     private CheckBox wifiOnlyView;
+
+    private CheckBox useSDCardView;
 
     private RelativeLayout calculateHolder;
 
@@ -52,15 +58,22 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         rootView = inflater.inflate(R.layout.fragment_download_layout_view,null);
 
         stackedOptionHolderView  = rootView.findViewById(R.id.stacked_option_holder);
+        sdCardOptionHolderView  = rootView.findViewById(R.id.use_sdcard_option_holder);
         statusTextView = rootView.findViewById(R.id.download_option_status_text);
         wifiOnlyView = rootView.findViewById(R.id.wifi_only_option);
+        useSDCardView = rootView.findViewById(R.id.use_sdcard_option);
         calculateHolder = rootView.findViewById(R.id.download_calculate_holder);
         TextView calculateTextView = rootView.findViewById(R.id.download_dialog_calculating);
-        RelativeLayout wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder);
+        wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder);
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         ((TextView)rootView.findViewById(R.id.wifi_only_option_label))
                 .setText(impl.getString(MessageID.download_wifi_only , getContext()));
+
+        ((TextView)rootView.findViewById(R.id.use_sdcard_option_label))
+                .setText(impl.getString(MessageID.download_sdcard_option, getContext()));
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setPositiveButton(R.string.ok, this);
         builder.setNegativeButton(R.string.cancel, this);
@@ -72,8 +85,9 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         wifiOnlyView.setOnCheckedChangeListener(this);
+        useSDCardView.setOnCheckedChangeListener(this);
         wifiOnlyHolder.setOnClickListener(this);
-
+        sdCardOptionHolderView.setOnClickListener(this);
         calculateTextView.setText(impl.getString(MessageID.download_calculating,getContext()));
 
         return mDialog;
@@ -140,6 +154,23 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     }
 
     @Override
+    public boolean isSDCardAvailableAndSupported() {
+       //TODO: make this using new logic and the choices should be dropdown not checkbox
+        return true;
+    }
+
+    @Override
+    public void setSDCardOptionVisible(boolean visible) {
+        sdCardOptionHolderView.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setWifiOnlyOptionVisible(boolean visible) {
+        wifiOnlyHolder.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+
+    @Override
     public void setCalculatingViewVisible(boolean visible) {
         calculateHolder.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
@@ -160,16 +191,29 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     @Override
     public void onClick(View stackedButton) {
         int viewId = stackedButton.getId();
-        if(viewId != R.id.wifi_only_option_holder){
+        if(viewId != R.id.wifi_only_option_holder && viewId != R.id.use_sdcard_option_holder){
             mPresenter.handleClickStackedButton(viewId);
-        }else{
+        }else if(viewId == R.id.wifi_only_option_holder){
             mPresenter.handleWiFiOnlyOption(!wifiOnlyView.isChecked());
+        }else {
+            mPresenter.handleSDCardSelection(!useSDCardView.isChecked());
         }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        mPresenter.handleWiFiOnlyOption(isChecked);
+        if(buttonView.getId() == R.id.wifi_only_option){
+            mPresenter.handleWiFiOnlyOption(isChecked);
+        }else if(buttonView.getId() == R.id.use_sdcard_option){
+            mPresenter.handleSDCardSelection(isChecked);
+        }
+    }
+
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        mPresenter.handleClickNegative(false);
+        super.onCancel(dialog);
     }
 
     @Override

@@ -274,5 +274,6 @@
     <string name="download_cancel_all">CANCEL ALL</string>
     <string name="download_pause_all">PAUSE ALL</string>
     <string name="download_pause_download">Pause</string>
+    <string name="download_sdcard_option">Store on SD Card</string>
 
 </resources>

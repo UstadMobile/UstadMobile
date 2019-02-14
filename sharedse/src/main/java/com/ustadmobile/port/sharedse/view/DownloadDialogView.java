@@ -24,6 +24,12 @@ public interface DownloadDialogView extends UstadView {
 
     void dismissDialog();
 
+    boolean isSDCardAvailableAndSupported();
+
+    void setSDCardOptionVisible(boolean visible);
+
+    void setWifiOnlyOptionVisible(boolean visible);
+
     void setCalculatingViewVisible(boolean visible);
 
 

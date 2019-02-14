@@ -105,7 +105,7 @@ public abstract class NetworkManagerBle {
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
-    private static final int MAX_THREAD_COUNT = 10;
+    private static final int MAX_THREAD_COUNT = 1;
 
     /**
      * Holds all created entry status tasks
