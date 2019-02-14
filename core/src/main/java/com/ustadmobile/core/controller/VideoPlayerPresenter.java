@@ -29,7 +29,7 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
 
 
         videoPath = (String) getArguments().get(ARG_VIDEO_PATH);
-        long entryUuid = (Long) getArguments().get(ARG_CONTENT_ENTRY_ID);
+        long entryUuid = Long.parseLong(getArguments().get(ARG_CONTENT_ENTRY_ID).toString());
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
