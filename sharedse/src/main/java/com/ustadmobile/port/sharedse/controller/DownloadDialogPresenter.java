@@ -10,6 +10,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadSet;
@@ -47,6 +48,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private String destinationDir = null;
 
+    private boolean isSDCardAvailableAndSupported = false;
+
     private static final int stackedButtonPauseIndex = 0;
 
     private static final int stackedButtonCancelIndex = 1;
@@ -65,6 +68,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         impl = UstadMobileSystemImpl.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
+        isSDCardAvailableAndSupported = view.isSDCardAvailableAndSupported();
+        view.runOnUiThread(() ->{
+            view.setSDCardOptionVisible(isSDCardAvailableAndSupported);
+            view.setWifiOnlyOptionVisible(false);
+        });
         new Thread(this::setup).start();
     }
 
@@ -94,6 +102,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         if(downloadJob != null){
             int downloadStatus = downloadJob.getDjStatus();
             view.setCalculatingViewVisible(false);
+            view.setWifiOnlyOptionVisible(true);
             if(downloadStatus >= JobStatus.COMPLETE_MIN
                     && downloadStatus <= JobStatus.COMPLETE_MAX){
                 deleteFileOptions = true;
@@ -127,6 +136,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 view.setBottomButtonNegativeText(impl.getString(
                         MessageID.download_cancel_label,getContext()));
             }
+
 
             new Thread(() -> {
                 DownloadJobItemDao.DownloadJobInfo jobInfo = umAppDatabase.getDownloadJobItemDao()
@@ -210,6 +220,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                         .findJobItemsToBeCreatedForDownloadSet(downloadSetUid);
 
         List<DownloadJobItem> jobItems = new ArrayList<>();
+        List<ContentEntryStatus> statusList = new ArrayList<>();
 
         for(DownloadJobItemDao.DownloadJobItemToBeCreated item: itemToBeCreated){
             DownloadJobItem jobItem = new DownloadJobItem();
@@ -220,9 +231,12 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             jobItem.setDestinationFile(UMFileUtil.joinPaths(destinationDir,
                     String.valueOf(item.getContentEntryFileUid())));
             jobItems.add(jobItem);
+
+            statusList.add(new ContentEntryStatus(item.getContentEntryUid(),
+                    item.getFileSize() > 0, item.getFileSize()));
         }
 
-
+        umAppDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
         umAppDatabase.getDownloadJobItemDao().insert(jobItems);
         umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobId,null);
     }
@@ -236,10 +250,20 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         }
     }
 
-    public void handleClickNegative() {
+    /**
+     * Handle negative click. If the underlying system is already dismissing the dialog
+     * set dismissAfter to false to avoid a call to dismissDialog
+     * @param dismissAfter
+     */
+    public void handleClickNegative(boolean dismissAfter) {
         //if the download has not been started
         umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
-        dismissDialog();
+        if(dismissAfter)
+            dismissDialog();
+    }
+
+    public void handleClickNegative() {
+        handleClickNegative(true);
     }
 
     public void handleClickStackedButton(int idClicked) {
@@ -255,7 +279,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             dismissDialog();
         }
     }
-
 
 
 
@@ -297,6 +320,10 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     public void handleWiFiOnlyOption(boolean wifiOnly){
         new Thread(() -> umAppDatabase.getDownloadSetDao()
                 .setMeteredConnectionBySetUid(downloadSetUid,!wifiOnly)).start();
+    }
+
+    public void handleSDCardSelection(boolean useSdcard){
+
     }
 
     @Override
