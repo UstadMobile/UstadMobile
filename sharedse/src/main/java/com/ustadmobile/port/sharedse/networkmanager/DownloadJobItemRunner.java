@@ -90,6 +90,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private EntryStatusResponse currentContentEntryFileStatus;
 
+    private boolean isFromCloud = true;
+
     private static final int BAD_PEER_FAILURE_THRESHOLD = 3;
 
     /**
@@ -104,7 +106,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 appDb.getDownloadJobItemDao().updateDownloadJobItemProgress(
                         downloadItem.getDjiUid(), httpDownload.getDownloadedSoFar(),
                         httpDownload.getCurrentDownloadSpeed());
-                appDb.getDownloadJobDao().updateBytesDownloadedSoFar(downloadItem.getDjiDjUid(),
+                appDb.getDownloadJobDao().updateBytesDownloadedSoFar
+                        (downloadItem.getDjiDjUid(),
                         null);
             }
         }
@@ -204,8 +207,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
     private void stopAsync(int newStatus){
         runnerStatus.set(JobStatus.STOPPING);
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() + " stop async " +
-                " status = " + newStatus);
         new Thread(() -> stop(newStatus)).start();
     }
 
@@ -217,8 +218,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
     private void stop(int newStatus) {
         if(runnerStatus.get() != JobStatus.STOPPED){
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() + " stopping " +
-                    " status = " + newStatus);
             runnerStatus.set(JobStatus.STOPPED);
 
             if(httpDownload != null){
@@ -235,8 +234,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             updateItemStatus(newStatus);
             appDb.getDownloadJobDao().updateJobStatusToCompleteIfAllItemsAreCompleted(
                     downloadItem.getDjiDjUid());
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() + " stopped " +
-                    " status = " + newStatus);
         }
     }
 
@@ -291,8 +288,9 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                         minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
 
         if(currentContentEntryFileStatus == null || currentNetworkNode == null){
-            startDownload(true);
+            startDownload();
         }else{
+            isFromCloud = false;
             startLocalConnectionHandShake();
         }
     }
@@ -320,9 +318,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     /**
      * Start downloading a file
      */
-    private void startDownload(boolean fromCloud){
-        UstadMobileSystemImpl.l(UMLog.DEBUG,699,
-                mkLogPrefix() + "Started from "+getFileUrl(fromCloud));
+    private void startDownload(){
         int attemptsRemaining = 3;
 
         boolean downloaded = false;
@@ -330,22 +326,22 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         statusCheckTimer.scheduleAtFixedRate(statusCheckTask,
                 0, TimeUnit.SECONDS.toMillis(1));
         DownloadJobItemHistory history = new DownloadJobItemHistory();
-        history.setMode(fromCloud ? MODE_CLOUD : MODE_LOCAL);
+        history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
         history.setDownloadJobItemId(downloadItem.getDjiUid());
-        history.setNetworkNode(fromCloud ? 0L: currentNetworkNode.getNodeId());
-        history.setUrl(getFileUrl(fromCloud));
+        history.setNetworkNode(isFromCloud ? 0L: currentNetworkNode.getNodeId());
+        history.setUrl(getFileUrl());
         history.setId((int) appDb.getDownloadJobItemHistoryDao().insert(history));
         do {
             try {
                 appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
-                httpDownload = new ResumableHttpDownload(getFileUrl(fromCloud),
+                httpDownload = new ResumableHttpDownload(getFileUrl(),
                         downloadItem.getDestinationFile());
                 httpDownloadRef.set(httpDownload);
                 history.setStartTime(System.currentTimeMillis());
                 downloaded = httpDownload.download();
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
-                        "Failed to download a file from "+getFileUrl(fromCloud),e);
+                        "Failed to download a file from "+getFileUrl(),e);
             }
 
             if(!downloaded) {
@@ -365,9 +361,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         httpDownloadRef.set(null);
 
         if(downloaded){
-            UstadMobileSystemImpl.l(UMLog.DEBUG,699,
-                    mkLogPrefix() + "completed from "+getFileUrl(fromCloud) + " total "
-                            +appDb.getDownloadJobItemDao().findByJobUid(downloadItem.getDjiDjUid()).size());
             ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
             fileStatus.setFilePath(downloadItem.getDestinationFile());
             fileStatus.setCefsContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
@@ -387,11 +380,9 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     /**
      * Create URL where the runner will get the file from
-     * @param isFromCloud True if the download will be coming from the cloud otherwise
-     *                    it will be a peer download.
      * @return constructed file URL
      */
-    private String getFileUrl(boolean isFromCloud){
+    private String getFileUrl(){
         return (isFromCloud ? this.endpointUrl :  wiFiDirectGroupBle.getEndpoint())
                 + "ContentEntryFile/" + downloadItem.getDjiContentEntryFileUid();
     }
@@ -403,6 +394,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
     private void updateItemStatus(int itemStatus) {
         appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
+        appDb.getContentEntryStatusDao().updateDownloadStatus(
+                downloadItem.getDownloadSetItem().getDsiContentEntryUid(), itemStatus);
     }
 
 
