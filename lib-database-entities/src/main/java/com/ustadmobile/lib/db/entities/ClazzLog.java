@@ -36,6 +36,16 @@ public class ClazzLog{
     @UmSyncLocalChangeSeqNum
     private long clazzLogChangeLocalChangeSeqNum;
 
+    public ClazzLog() {
+
+    }
+
+    public ClazzLog(long clazzLogUid, long clazzUid, long logDate) {
+        this.clazzLogUid = clazzLogUid;
+        this.clazzLogClazzUid = clazzUid;
+        this.logDate = logDate;
+    }
+
     public int getClazzLogLastChangedBy() {
         return clazzLogLastChangedBy;
     }

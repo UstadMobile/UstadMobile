@@ -45,6 +45,22 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
         }
     }
 
+    /**
+     * As the ClazzLog object is added using a timer, we need to ensure that the object created for
+     * a specific time should come with the same primary key. For this purposes, we generate a
+     * a hashcode using the clazzuid and startTime.
+     *
+     * @param clazzUid UID of the clazz
+     * @param startTime scheduled start time of this instance of the clazz
+     * @return a hashcode computed from the above
+     */
+    public static int generateClazzLogUid(long clazzUid, long startTime) {
+        int hash = Long.valueOf(clazzUid).hashCode();
+        hash = (31 * hash) + Long.valueOf(startTime).hashCode();
+        return hash;
+    }
+
+
     @UmInsert
     public abstract long insert(ClazzLog entity);
 

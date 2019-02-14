@@ -333,4 +333,41 @@ public class UMCalendarUtil {
                 &&  today.get(Calendar.YEAR) == specifiedDate.get(Calendar.YEAR);
     }
 
+    /**
+     * Advance a calendar to the next occurence of a particular day (e.g. Monday, Tuesday, etc).
+     *
+     * @param calendar the calendar to use as the start time
+     * @param dayOfWeek the day of the week to go to as per Calendar constants
+     * @param incToday if true, then if the start date matches the end date, make no changes. If false,
+     *                 and the input calendar is already on the same day of the week, then return 7
+     *
+     * @return A new calendar instance advanced to the next occurence of the given day of the week
+     */
+    public static Calendar advanceCalendarToOccurenceOf(Calendar calendar, int dayOfWeek, boolean incToday) {
+        Calendar result = Calendar.getInstance();
+        result.setTimeInMillis(calendar.getTimeInMillis());
+
+        int today = calendar.get(Calendar.DAY_OF_WEEK);
+
+        if(today == dayOfWeek) {
+            if(!incToday) {
+                result.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
+            }
+
+            return result;
+        }
+
+
+        int deltaDays;
+        if(dayOfWeek > today) {
+            deltaDays = dayOfWeek - today;
+        }else {
+            deltaDays = (7 - today) + dayOfWeek;
+        }
+
+        result.setTimeInMillis(calendar.getTimeInMillis() + (deltaDays * 1000 * 60 * 60 * 24));
+
+        return result;
+    }
+
 }

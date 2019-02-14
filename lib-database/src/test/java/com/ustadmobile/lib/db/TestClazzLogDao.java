@@ -18,6 +18,11 @@ public class TestClazzLogDao extends AbstractDaoTest{
         initDb();
     }
 
+    protected void addScheduleToMyClazz() {
+        //add scheduled occurences to myclazz
+
+    }
+
     @Test
     public void givenClazzLogInsertedByAccountWithPermission_whenSynced_thenShouldBeOnServer() {
         ClazzDao dao = UmAppDatabase.getInstance(null).getClazzDao();
@@ -58,6 +63,10 @@ public class TestClazzLogDao extends AbstractDaoTest{
                 100, 100);
 
         Assert.assertNotNull(serverDb.getClazzLogDao().findByUid(clazzLog.getClazzLogUid()));
+    }
+
+    public void givenScheduledClazzLogNotExisting_whenCreateClazzLogsCalled_thenClazzLogShouldExist() {
+
     }
 
 }

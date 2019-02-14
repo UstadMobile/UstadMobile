@@ -325,4 +325,8 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                 TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
     public abstract int countPendingLocalChanges(long accountPersonUid);
 
+    @UmQuery("SELECT Clazz.* FROM Clazz WHERE " + ENTITY_LEVEL_PERMISSION_CONDITION1
+            + Role.PERMISSION_CLAZZ_SELECT + ENTITY_LEVEL_PERMISSION_CONDITION2)
+    public abstract List<Clazz> findAllClazzesWithSelectPermission(long accountPersonUid);
+
 }
