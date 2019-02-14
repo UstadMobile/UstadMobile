@@ -309,7 +309,7 @@ public class ShrinkerUtil {
             int exitValue = process.exitValue();
             if (exitValue != 0) {
                 UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
-                pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath() + "-fix" + PNG_EXT));
+                pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath()) + "-fix" + PNG_EXT);
                 convertJpgToPng(src, pngFile);
                 convertImageToWebp(pngFile, dest);
                 pngFile.delete();
