@@ -78,16 +78,10 @@ public abstract class DownloadJobDao {
     @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
     public abstract void update(long djUid, int djStatus);
 
-    @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus")
-    public abstract void updateAll(int djStatus);
 
     @UmQuery("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " +
             "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
     public abstract void updateJobItems(long djUid, int djiStatus, int jobStatusFrom,
-                                        int jobStatusTo);
-
-    @UmQuery("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
-    public abstract void updateAllJobItems(int djiStatus, int jobStatusFrom,
                                         int jobStatusTo);
 
     @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :djDsUid")
@@ -101,13 +95,6 @@ public abstract class DownloadJobDao {
         if(activeJobItemsStatus != -1)
             updateJobItems(djUid, activeJobItemsStatus, JobStatus.RUNNING_MIN, JobStatus.RUNNING_MAX);
     }
-
-    @UmTransaction
-    public void updateAllJobsAndItems(int djStatus){
-        updateAll(djStatus);
-        updateAllJobItems(djStatus,JobStatus.RUNNING_MIN, JobStatus.RUNNING_MAX);
-    }
-
 
     @UmQuery("SELECT * From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
