@@ -309,7 +309,7 @@ public class ShrinkerUtil {
             int exitValue = process.exitValue();
             if (exitValue != 0) {
                 UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
-                pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath() + "-fix" + PNG_EXT));
+                pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath()) + PNG_EXT);
                 convertJpgToPng(src, pngFile);
                 convertImageToWebp(pngFile, dest);
                 pngFile.delete();
@@ -351,7 +351,9 @@ public class ShrinkerUtil {
 
         Runtime runTime = Runtime.getRuntime();
         try {
-            Process process = runTime.exec("mogrify -format png " + src.getPath() + " " + dest.getPath());
+            String cmd = "/usr/bin/mogrify -format png " + src.getPath() + " " + dest.getPath();
+            UMLogUtil.logInfo("Runng " + cmd + " to fix jpg");
+            Process process = runTime.exec(cmd);
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
@@ -366,7 +368,7 @@ public class ShrinkerUtil {
         }
 
         if (!dest.exists()) {
-            throw new IOException("convertImaegToWebP: source existed, but output does not " +
+            throw new IOException("convertJpegToPng: source existed, but output does not " +
                     dest.getPath());
         }
 
