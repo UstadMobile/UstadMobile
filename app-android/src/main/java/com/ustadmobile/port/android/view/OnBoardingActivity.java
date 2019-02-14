@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,7 @@ import com.ustadmobile.core.controller.OnBoardingPresenter;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-public class OnBoardingActivity extends AppCompatActivity implements OnBoardingView {
+public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingView {
 
     private PageIndicatorView pageIndicatorView;
 

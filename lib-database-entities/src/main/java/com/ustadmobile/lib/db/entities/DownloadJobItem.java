@@ -28,6 +28,7 @@ public class DownloadJobItem {
 
     private long currentSpeed;
 
+    @UmIndexField
     private long timeStarted;
 
     private long timeFinished;

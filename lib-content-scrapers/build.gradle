@@ -14,6 +14,9 @@ apply plugin: 'java-library'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "jacoco"
 
+ext.localProperties = new Properties()
+ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
 task scrapeContent(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     if (project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
@@ -93,27 +96,40 @@ task scrapeContent(type: JavaExec) {
     outputs.upToDateWhen { false }
 }
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
-ext.localProperties = new Properties()
-ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
-
 task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+
     inputs.files(rootProject.file("local.properties"))
     outputDir = new File("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
-    appName = project.ext.buildConfigProperties['appName']
+    appName = rootProject.ext.buildConfigProperties['appName']
     clsName = "ScraperBuildConfig"
     version = rootProject.version
 
     buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
+    buildConfigField "String", "WEBP_PATH", rootProject.ext.buildConfigProperties["shrinker.webp"]
+    buildConfigField "String", "WEBM_PATH", rootProject.ext.buildConfigProperties["ffmpeg.webm"]
 
 }
 compileJava.dependsOn(generateScraperBuildConfig)
 
+
+if (!rootProject.file(rootProject.ext.buildConfigProperties["shrinker.webp"]).exists()) {
+    throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
+            " You must define a path to the cwebp executable in buildconfig.local.properties.  " +
+            " On Ubuntu you can install this using apt-get install webp. " +
+            "Please open the README file in lib-content-scrapers for further instructions")
+}
+
 if (!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
     throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
             " You must define a path to the chrome driver in local.properties. " +
+            "Please open the README file in lib-content-scrapers for further instructions")
+}
+
+if (!rootProject.file(rootProject.ext.buildConfigProperties["ffmpeg.webm"]).exists()) {
+    throw new GradleException("Shrinker Util requires ffmpeg to turn videos to webm format which needs to run on the command line" +
+            " You must define a path to the ffmpeg executable in buildconfig.local.properties.  " +
+            " On Ubuntu you can install this using apt-get install ffmpeg. " +
             "Please open the README file in lib-content-scrapers for further instructions")
 }
 
@@ -126,6 +142,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
     implementation project(":core")
     implementation project(":lib-database-entities")
+    implementation project(":app-javase")
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"

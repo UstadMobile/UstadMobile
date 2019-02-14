@@ -35,6 +35,7 @@ import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper.PHET;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
@@ -242,7 +243,7 @@ public class PhetContentScraper {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Tin can file not created for " + link.toString());
             }
-            ContentScraperUtil.zipDirectory(simulationLocation, title, languageLocation);
+            ContentScraperUtil.zipDirectory(simulationLocation, title + ZIP_EXT, languageLocation);
         } catch (Exception e) {
             UMLogUtil.logError("Error download content for url " + simulationUrl + " with href " + hrefLink);
         }finally {

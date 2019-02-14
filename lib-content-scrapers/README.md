@@ -11,6 +11,23 @@ Open local.properties and add the following line of code:
 
 scraper.chrome_driver_path= path_to_file
 
+
+## Setup WEbp Lossy
+
+if using ubuntu:
+use apt-get install webp
+
+and for other os use:
+Download the latest webp compressor for your operating system from https://developers.google.com/speed/webp/docs/precompiled
+Unzip the file and copy the filepath to cwebp.exe which is found in the bin folder
+Open local.properties and add the following line:
+
+shrinker.webp = path_to_file
+
+or for ubuntu only
+use apt-get install webp
+
+
 ###Find and Scrap Edraak K12 Content
 
 ####To Find All Edraak Content

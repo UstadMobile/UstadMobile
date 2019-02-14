@@ -45,6 +45,14 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private String statusMessage = null;
 
+    private String destinationDir = null;
+
+    private static final int stackedButtonPauseIndex = 0;
+
+    private static final int stackedButtonCancelIndex = 1;
+
+    private static final int stackedButtonContinueIndex = 2;
+
     public DownloadDialogPresenter(Object context, Hashtable arguments, DownloadDialogView view) {
         super(context, arguments, view);
 
@@ -78,8 +86,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         });
     }
 
-    private void handleDownloadSetMeteredStateChange(boolean meteredConnection){
-        view.setDownloadOverWifiOnly(!meteredConnection);
+    private void handleDownloadSetMeteredStateChange(Boolean meteredConnection){
+        view.setDownloadOverWifiOnly(meteredConnection != null && !meteredConnection);
     }
 
     private void handleDownloadJobStatusChange(DownloadJob downloadJob){
@@ -154,7 +162,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         DownloadSet downloadSet = new DownloadSet();
         UMStorageDir[] storageDir = UstadMobileSystemImpl.getInstance()
                 .getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE, getContext());
-        downloadSet.setDestinationDir(storageDir[0].getDirURI());
+        destinationDir = storageDir[0].getDirURI();
+        downloadSet.setDestinationDir(destinationDir);
         downloadSet.setDsRootContentEntryUid(contentEntryUid);
 
         downloadSetUid = umAppDatabase.getDownloadSetDao().insert(downloadSet);
@@ -208,34 +217,64 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             jobItem.setDjiDjUid(downloadJobId);
             jobItem.setDownloadLength(item.getFileSize());
             jobItem.setDjiDsiUid(item.getDownloadSetItemUid());
+            jobItem.setDestinationFile(UMFileUtil.joinPaths(destinationDir,
+                    String.valueOf(item.getContentEntryFileUid())));
             jobItems.add(jobItem);
         }
 
 
         umAppDatabase.getDownloadJobItemDao().insert(jobItems);
+        umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobId,null);
     }
 
 
-    public void handleDismissDialog(){
-        view.runOnUiThread(() -> view.cancelDialog());
+    public void handleClickPositive() {
+        if(deleteFileOptions){
+            deleteDownloadFile();
+        }else{
+            continueDownloading();
+        }
     }
 
-    public void handleContinueDownloading(){
-        new Thread(() -> umAppDatabase.getDownloadJobDao()
-                .update(downloadSetUid,JobStatus.QUEUED)).start();
+    public void handleClickNegative() {
+        //if the download has not been started
+        umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
+        dismissDialog();
     }
 
-    public void handleCancelDownload(){
+    public void handleClickStackedButton(int idClicked) {
+        if (idClicked == view.getOptionIds()[stackedButtonPauseIndex]) {
+            new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+                    JobStatus.PAUSED, JobStatus.PAUSING)).start();
+            dismissDialog();
+        }else if(idClicked == view.getOptionIds()[stackedButtonCancelIndex]){
+            cancelDownload();
+            dismissDialog();
+        }else if(idClicked == view.getOptionIds()[stackedButtonContinueIndex]){
+            continueDownloading();
+            dismissDialog();
+        }
+    }
+
+
+
+
+    private void continueDownloading(){
+        new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+                JobStatus.QUEUED, -1)).start();
+    }
+
+    private void dismissDialog(){
+        view.runOnUiThread(() -> view.dismissDialog());
+    }
+
+    private void cancelDownload(){
         new Thread(() -> umAppDatabase.getDownloadJobDao()
                 .update(downloadSetUid,JobStatus.CANCELED)).start();
     }
 
-    public void handlePauseDownload(){
-        new Thread(() -> umAppDatabase.getDownloadJobDao()
-                .update(downloadSetUid,JobStatus.PAUSED)).start();
-    }
 
-    public void handleDeleteDownloadFile(){
+    private void deleteDownloadFile(){
         new Thread(() -> {
             List<DownloadJobItem> downloadSetItemList = umAppDatabase.getDownloadJobItemDao()
                             .findByJobUid(downloadJobUid);
@@ -251,15 +290,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                     }
                 }
             }
-
-
-
         }).start();
     }
 
-    public boolean isDeleteFileOptions(){
-        return deleteFileOptions;
-    }
 
     public void handleWiFiOnlyOption(boolean wifiOnly){
         new Thread(() -> umAppDatabase.getDownloadSetDao()

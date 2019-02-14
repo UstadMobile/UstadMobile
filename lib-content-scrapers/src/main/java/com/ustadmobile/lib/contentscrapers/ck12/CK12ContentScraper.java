@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -89,6 +90,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 
 /**
@@ -343,7 +345,7 @@ public class CK12ContentScraper {
         }
 
         FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(indexList), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDirectory);
+        ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT, destinationDirectory);
     }
 
     public void scrapeVideoContent() throws IOException {
@@ -408,7 +410,7 @@ public class CK12ContentScraper {
             UMLogUtil.logError("Video Tin can file unable to create for url" +  urlString);
         }
 
-        ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
+        ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName + ZIP_EXT, destinationDirectory);
     }
 
     public boolean isContentUpdated() {
@@ -539,7 +541,7 @@ public class CK12ContentScraper {
             UMLogUtil.logError("Read Tin can file unable to create for url" +  urlString);
         }
 
-        ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
+        ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName + ZIP_EXT, destinationDirectory);
     }
 
     private String appendMathJaxScript() {
@@ -756,7 +758,7 @@ public class CK12ContentScraper {
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.TROPHY_PATH), new File(practiceDirectory, TROPHY_NAME));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CHECK_PATH), new File(practiceDirectory, CHECK_NAME));
 
-        ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl, destinationDirectory);
+        ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl + ZIP_EXT, destinationDirectory);
 
     }
 

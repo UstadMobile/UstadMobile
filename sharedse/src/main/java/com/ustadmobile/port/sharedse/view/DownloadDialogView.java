@@ -22,8 +22,9 @@ public interface DownloadDialogView extends UstadView {
 
     int [] getOptionIds();
 
-    void cancelDialog();
+    void dismissDialog();
 
     void setCalculatingViewVisible(boolean visible);
+
 
 }

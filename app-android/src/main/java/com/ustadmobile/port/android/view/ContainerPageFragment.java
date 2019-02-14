@@ -230,7 +230,7 @@ public class ContainerPageFragment extends Fragment {
         //t.show();
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+    // TODO: Rename method, updateState argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);

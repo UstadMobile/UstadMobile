@@ -77,7 +77,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
 
 
-    /** Check if a permission is present on a specific entity e.g. update/modify etc*/
+    /** Check if a permission is present on a specific entity e.g. updateState/modify etc*/
     @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")
     public abstract void personHasPermission(long accountPersonUid, long clazzUid, long permission,
@@ -100,7 +100,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "WHERE " +
             "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
             "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
-            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can update it
+            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can updateState it
                 ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
             " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_INSERT + //can insert on table
                 TABLE_LEVEL_PERMISSION_CONDITION2 + "))")

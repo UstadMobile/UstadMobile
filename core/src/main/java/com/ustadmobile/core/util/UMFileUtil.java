@@ -634,6 +634,17 @@ public class UMFileUtil {
         }
     }
 
+    public static String stripExtensionIfPresent(String uri) {
+        int lastSlashPos = uri.lastIndexOf('/');
+        int lastDotPos = uri.lastIndexOf('.');
+        if(lastDotPos != -1 && lastDotPos > lastSlashPos) {
+            return uri.substring(0,lastDotPos);
+        }else {
+            return uri;
+        }
+    }
+
+
     /**
      * Remove the anchor section of a link if present (e.g. for index.html#foo
      * remove #foo)

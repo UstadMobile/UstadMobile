@@ -146,7 +146,7 @@ public class UmHttpRequest {
      * cache will be returned. It is possible to determine if the cached reply is fresh (in which
      * case no network request is needed) by using HttpResponse.isFresh . If the response is cached,
      * but the headers do not provide sufficient information for validation, then the network response
-     * might be 304 not modified, in which case no update to cached content on the view would be
+     * might be 304 not modified, in which case no updateState to cached content on the view would be
      * needed, using AbstractCacheResponse.isNetworkResponseNotModified .
      *
      * @param onlyIfCached

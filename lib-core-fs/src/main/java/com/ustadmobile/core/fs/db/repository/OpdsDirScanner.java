@@ -154,7 +154,7 @@ public class OpdsDirScanner implements Runnable{
 
             containerFile.setEntries(containerFileEntries);
 
-//            TODO: check that we update the file size
+//            TODO: check that we updateState the file size
             dbManager.getContainerFileDao().updateLastUpdatedById(containerFile.getId(),
                     System.currentTimeMillis());
             break;

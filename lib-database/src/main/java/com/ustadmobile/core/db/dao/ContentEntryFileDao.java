@@ -17,12 +17,12 @@ import java.util.List;
 public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFile, ContentEntryFileDao> {
 
     @UmInsert
-    public abstract Long [] insert(List<ContentEntryFile> files);
+    public abstract Long[] insert(List<ContentEntryFile> files);
 
     @UmQuery("Select ContentEntryFile.* FROM ContentEntryFile LEFT JOIN ContentEntryContentEntryFileJoin " +
-                    "ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
-                    "WHERE ContentEntryContentEntryFileJoin.cecefjContentEntryUid = :contentEntryUid " +
-                    "ORDER BY lastModified DESC")
+            "ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
+            "WHERE ContentEntryContentEntryFileJoin.cecefjContentEntryUid = :contentEntryUid " +
+            "ORDER BY lastModified DESC")
     public abstract void findFilesByContentEntryUid(long contentEntryUid, UmCallback<List<ContentEntryFile>> callback);
 
     @UmQuery("SELECT ContentEntryFile.* FROM ContentEntryFile LEFT JOIN ContentEntryContentEntryFileJoin " +
@@ -48,6 +48,14 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
             "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
             "WHERE ContentEntryFileStatus.filePath LIKE '%/khan/en/%'")
     public abstract List<ContentEntryFileWithFilePath> findKhanFiles();
+
+    @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.filePath from ContentEntryFile " +
+            "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
+            "WHERE ContentEntryFile.mimetype = 'application/epub+zip'")
+    public abstract List<ContentEntryFileWithFilePath> findEpubsFiles();
+
+    @UmQuery("UPDATE ContentEntryFile SET fileSize = :length, md5sum = :md5 WHERE contentEntryFileUid = :cefsUid")
+    public abstract void updateEpubFiles(long length, String md5, long cefsUid);
 
     @UmQuery("UPDATE ContentEntryFile SET fileSize = :length, md5sum = :md5, mimeType = :mimeType  WHERE contentEntryFileUid = :cefsUid")
     public abstract void updateFiles(long length, String md5, String mimeType, long cefsUid);

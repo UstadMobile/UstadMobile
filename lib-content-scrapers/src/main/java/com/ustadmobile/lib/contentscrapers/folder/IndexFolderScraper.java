@@ -30,6 +30,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.XML_NAMESPACE;
@@ -134,7 +135,7 @@ public class IndexFolderScraper {
 
             } else if (folder.isFile()) {
 
-                if (folder.getName().contains("epub")) {
+                if (folder.getName().contains(EPUB_EXT)) {
 
                     try {
                         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

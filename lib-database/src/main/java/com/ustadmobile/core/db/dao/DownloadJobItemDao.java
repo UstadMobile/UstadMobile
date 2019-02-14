@@ -1,9 +1,11 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 
@@ -90,7 +92,7 @@ public abstract class DownloadJobItemDao {
     /**
      * Update the main status fields for the given DownloadJobitem
      *
-     * @param djiUid DownloadJobItemId to update (primary key)
+     * @param djiUid DownloadJobItemId to updateState (primary key)
      * @param djiStatus status property to set
      * @param downloadedSoFar downloadedSoFar property to set
      * @param downloadLength downloadLength property to set
@@ -100,15 +102,33 @@ public abstract class DownloadJobItemDao {
             "djiStatus = :djiStatus, downloadedSoFar = :downloadedSoFar, " +
             "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
             " WHERE djiUid = :djiUid")
-    public abstract void updateDownloadJobItemStatus(long djiUid, int djiStatus,
+    protected abstract void updateDownloadJobItemStatusIm(long djiUid, int djiStatus,
                                                      long downloadedSoFar, long downloadLength,
                                                      long currentSpeed);
 
-    @UmQuery("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
-    public abstract void updateStatus(long djiUid, long status);
+    public  void updateDownloadJobItemStatus(long djiUid, int djiStatus,
+                                                     long downloadedSoFar, long downloadLength,
+                                                     long currentSpeed) {
+        System.out.println("updateDownloadJobItemStatus " + djiUid + " -> " + djiStatus);
+        updateDownloadJobItemStatusIm(djiUid, djiStatus, downloadedSoFar, downloadLength,
+                currentSpeed);
+    }
 
-    @UmQuery("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djiDjUid")
-    public abstract void updateStatusByJobId(long djiDjUid, int djiStatus);
+    @UmQuery("UPDATE DownloadJobItem SET downloadedSoFar = :downloadedSoFar, " +
+            "currentSpeed = :currentSpeed " +
+            "WHERE djiUid = :djiUid")
+    public abstract void updateDownloadJobItemProgress(long djiUid, long downloadedSoFar,
+                                                       long currentSpeed);
+
+
+    @UmQuery("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
+    protected abstract void updateItemStatusInt(long djiUid, long status);
+
+    public void updateStatus(long djiUid, long status){
+        System.out.println("DownloadJob #" +djiUid+ " updating status to " + status);
+        updateItemStatusInt(djiUid,status);
+    }
+
 
     @UmQuery("UPDATE DownloadJobItem SET numAttempts = numAttempts + 1 WHERE djiUid = :djiUid")
     public abstract void incrementNumAttempts(long djiUid);
@@ -146,13 +166,24 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT * FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
     public abstract List<DownloadJobItem> findByJobUid(long djiDjUid);
 
-    @UmQuery("DELETE FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
-    public abstract int deleteByDownloadSetUid(long djiDjUid);
+    @UmQuery("DELETE FROM DownloadJobItem WHERE djiDsiUid = :djiDsiUid")
+    public abstract int deleteByDownloadSetUid(long djiDsiUid);
 
-    @UmQuery("SELECT * FROM DownloadJobItem " +
+
+    @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
+            "LEFT JOIN DownloadSet on DownloadSetItem.dsiDsUid = DownloadSet.dsUid " +
+            "WHERE " +
+            " DownloadJobItem.djiContentEntryFileUid != 0 " +
+            " AND DownloadJobItem.djiStatus >= " + JobStatus.WAITING_MIN +
+            " AND DownloadJobItem.djiStatus < " + JobStatus.RUNNING_MIN +
+            " AND (((SELECT connectivityState FROM ConnectivityStatus) =  " + ConnectivityStatus.STATE_UNMETERED + ") " +
+                " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
+                " AND DownloadSet.meteredNetworkAllowed) " +
             "LIMIT 1")
-    public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItem();
+    public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItems();
+
+
 
 
 }
