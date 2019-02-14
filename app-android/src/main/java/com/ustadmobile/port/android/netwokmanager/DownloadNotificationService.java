@@ -1,20 +1,15 @@
 package com.ustadmobile.port.android.netwokmanager;
-
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.toughra.ustadmobile.R;
@@ -27,15 +22,15 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static android.support.v4.app.NotificationCompat.GROUP_ALERT_SUMMARY;
 
 /**
  * This services monitors the download job statuses and act accordingly
@@ -54,8 +49,6 @@ public class DownloadNotificationService extends Service {
         private String jobTitle;
 
         private NotificationCompat.Builder mBuilder;
-
-        private List<UmAction> knownActions = new ArrayList<>();
 
         UmNotification(int notificationId ,String jobTitle, NotificationCompat.Builder builder){
             this.mBuilder = builder;
@@ -84,37 +77,6 @@ public class DownloadNotificationService extends Service {
             return jobTitle;
         }
 
-        UmNotification addAction(UmAction action){
-            knownActions.add(action);
-            return this;
-        }
-
-        List<UmAction> getKnownActions() {
-            return knownActions;
-        }
-    }
-
-    /**
-     * Holder class for the notification action
-     */
-    private class UmAction{
-
-        private String actionKey;
-
-        private NotificationCompat.Action action;
-
-        UmAction(String actionKey, NotificationCompat.Action action) {
-            this.actionKey = actionKey;
-            this.action = action;
-        }
-
-        String getActionKey() {
-            return actionKey;
-        }
-
-        public NotificationCompat.Action getAction() {
-            return action;
-        }
     }
 
 
@@ -126,26 +88,25 @@ public class DownloadNotificationService extends Service {
 
     public static final String ACTION_CANCEL_ALL_DOWNLOADS = "ACTION_CANCEL_ALL_DOWNLOADS";
 
-    public static final String ACTION_CONTINUE_DOWNLOAD = "ACTION_CONTINUE_DOWNLOAD";
-
     public static final String ACTION_CANCEL_DOWNLOAD = "ACTION_CANCEL_DOWNLOAD";
 
     public static final String NOTIFICATION_CHANNEL_ID = "UM_NOTIFICATION_CHANNEL_ID";
 
     public static final String JOB_ID_TAG = "UM_JOB_ID";
 
-    public static final String KEY_NOTIFICATION_GROUP = "UM_NOTIFICATION_GROUP";
+    public static final String NOTIFICATION_GROUP_KEY = "com.android.example.UstadMobile";
 
     public static final int MAX_PROGRESS_VALUE = 100;
 
-    public static final long GROUP_SUMMARY_ID = 9L;
+    public static final long GROUP_SUMMARY_ID = -1L;
 
     private long totalBytesToBeDownloaded;
 
     private long totalBytesDownloadedSoFar;
 
 
-    private NotificationManager mNotificationManager;
+    private NotificationManagerCompat mNotificationManager;
+
 
     private UmLiveData<List<DownloadJob>> activeDownloadJobData = null;
 
@@ -167,9 +128,7 @@ public class DownloadNotificationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        mNotificationManager =
-                (NotificationManager) getApplication().getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager = NotificationManagerCompat.from(this);
         createChannel();
 
         umAppDatabase = UmAppDatabase.getInstance(this);
@@ -198,11 +157,11 @@ public class DownloadNotificationService extends Service {
             switch (action){
                 case ACTION_START_FOREGROUND_SERVICE:
                     timeLastUpdate = Calendar.getInstance().getTimeInMillis();
-                    String contentTitle = impl.getString(MessageID.download_calculating,
+                    String contentTitle = impl.getString(MessageID.downloading,
                             getApplicationContext());
                     Notification groupSummary = createNotification(GROUP_SUMMARY_ID,
-                            notificationIdRef.get(), contentTitle, "", contentTitle,
-                            true, ACTION_PAUSE_DOWNLOAD);
+                            notificationIdRef.get(), contentTitle, "", "",
+                            true);
                     startForeground(notificationIdRef.get(), groupSummary);
                     break;
                 case ACTION_CANCEL_ALL_DOWNLOADS:
@@ -219,21 +178,16 @@ public class DownloadNotificationService extends Service {
                     break;
 
                 case ACTION_PAUSE_DOWNLOAD:
-                    //TODO: pause all download task
                     new Thread(() ->
                             umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobId,
-                                    JobStatus.PAUSING, -1)).start();
+                                    JobStatus.PAUSED, JobStatus.PAUSING)).start();
                     break;
-                case ACTION_CONTINUE_DOWNLOAD:
-                    new Thread(() ->
-                            umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobId,
-                            JobStatus.QUEUED, -1)).start();
-                    break;
+
                 case ACTION_CANCEL_DOWNLOAD:
                     if(umNotification != null){
                         new Thread(() ->
                                 umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobId,
-                                JobStatus.CANCELLING, -1)).start();
+                                JobStatus.CANCELED, JobStatus.CANCELLING)).start();
                     }
                     break;
             }
@@ -246,12 +200,6 @@ public class DownloadNotificationService extends Service {
      * @param activeJobs list of all jobs being monitored
      */
     private void handleJobListChanged(List<DownloadJob> activeJobs){
-        new Thread(() -> {
-            //breakpoint to allow for checking status;
-            List<DownloadJobItem> allDownloadJobItems = umAppDatabase.getDownloadJobItemDao().findAll();
-            System.out.print(allDownloadJobItems.size());
-        }).start();
-
         List<Long> inactiveDownloadJobs = new ArrayList<>();
         for(Long knownDownloadId : knownNotifications.keySet()) {
             boolean activeJobsContainedKnownId = false;
@@ -278,9 +226,6 @@ public class DownloadNotificationService extends Service {
         for(DownloadJob job: activeJobs){
             long downloadJobId = job.getDjUid();
             UmNotification umNotification = knownNotifications.get(downloadJobId);
-            String keyToExclude = job.getDjStatus() >= JobStatus.RUNNING_MIN
-                    && job.getDjStatus() <= JobStatus.RUNNING_MAX ?
-                    ACTION_CONTINUE_DOWNLOAD : ACTION_PAUSE_DOWNLOAD;
             boolean isRunning = job.getDjStatus() >= JobStatus.RUNNING_MIN
                     && job.getDjStatus() <= JobStatus.RUNNING_MAX;
 
@@ -297,9 +242,8 @@ public class DownloadNotificationService extends Service {
                     @Override
                     public void onSuccess(String title) {
                         Notification download = createNotification(downloadJobId, notificationId,
-                                title ,contentTitle,contentTitle,false, keyToExclude);
+                                title ,contentTitle,contentTitle,false);
                         mNotificationManager.notify(notificationId,download);
-                        System.out.print("Create notification called with job id ="+job.getDjUid());
                     }
 
                     @Override
@@ -323,10 +267,9 @@ public class DownloadNotificationService extends Service {
                         MessageID.download_downloading_placeholder,this),
                         UMFileUtil.formatFileSize(job.getBytesDownloadedSoFar()),
                         UMFileUtil.formatFileSize(job.getTotalBytesToDownload()));
-                updateDownloadNotification(downloadJobId, progress,contentTitle,
-                        umNotification.getJobTitle(), umNotification.getJobTitle(), keyToExclude);
-                updateSummary();
-                totalBytesDownloadedSoFar = 0L;
+                updateDownloadJobNotification(downloadJobId, progress,contentTitle,
+                        umNotification.getJobTitle(), umNotification.getJobTitle());
+                updateDownloadSummary();
             }
         }
 
@@ -347,7 +290,8 @@ public class DownloadNotificationService extends Service {
                 NOTIFICATION_CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH);
         mNotificationChannel.setVibrationPattern(new long[]{0});
         mNotificationChannel.enableVibration(true);
-        mNotificationManager.createNotificationChannel(mNotificationChannel);
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
+                .createNotificationChannel(mNotificationChannel);
     }
 
     /**
@@ -375,99 +319,64 @@ public class DownloadNotificationService extends Service {
      * @param contentText Notification content text
      * @param contentSubText Notification content sub text
      * @param isGroupSummary Flag to indicate if the notification will act as a group summary or not.
-     * @param keyToExclude Action button to be excluded when updating the notification view
      * @return constructed notification object
      */
     public Notification createNotification(long downloadJobId, int notificationId,String contentTitle,
                                            String contentText, String contentSubText,
-                                           boolean isGroupSummary, String keyToExclude){
+                                           boolean isGroupSummary){
 
         Intent intent = new Intent();
         PendingIntent mNotificationPendingIntent =
                 PendingIntent.getActivity(this, 0, intent, 0);
-        Bitmap largeIconBitmap = getBitmap(R.drawable.ic_launch_green);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,
                 NOTIFICATION_CHANNEL_ID);
-        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        builder.setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.ic_file_download_white_24dp)
                 .setColor(ContextCompat.getColor(this, R.color.primary))
-                .setLargeIcon(largeIconBitmap)
-                .setContentTitle(contentTitle)
-                .setContentText(contentText)
-                .setSubText(contentSubText)
                 .setOngoing(true)
+                .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 .setAutoCancel(true)
-                .setOnlyAlertOnce(true)
                 .setContentIntent(mNotificationPendingIntent)
-                .setDefaults(Notification.DEFAULT_SOUND)
-                .setStyle(new NotificationCompat.InboxStyle())
-                .setGroup(KEY_NOTIFICATION_GROUP);
+                .setDefaults(Notification.DEFAULT_SOUND);
 
         UmNotification umNotification = new UmNotification(notificationId,contentTitle,builder);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             builder.setVisibility(Notification.VISIBILITY_PUBLIC);
 
         if(isGroupSummary){
-            builder.setProgress(MAX_PROGRESS_VALUE,0,true);
-            UmAction mCancel = new UmAction(ACTION_CANCEL_ALL_DOWNLOADS, createAction(downloadJobId,
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle()
+                    .setBigContentTitle(contentTitle)
+                    .setSummaryText(contentSubText);
+
+            builder.setGroupSummary(true)
+                    .addAction(createAction(downloadJobId,
                     ACTION_CANCEL_ALL_DOWNLOADS, impl.getString(MessageID.download_cancel_all,
-                            getApplicationContext())));
-
-            UmAction mPause = new UmAction(ACTION_PAUSE_ALL_DOWNLOADS, createAction(downloadJobId,
+                            getApplicationContext())))
+                    .addAction(createAction(downloadJobId,
                     ACTION_PAUSE_ALL_DOWNLOADS, impl.getString(MessageID.download_pause_all,
-                            getApplicationContext())));
-            umNotification.addAction(mCancel).addAction(mPause);
+                            getApplicationContext())))
+                    .setStyle(inboxStyle);
         }else{
-
-
-            UmAction mContinue = new UmAction(ACTION_CONTINUE_DOWNLOAD, createAction(downloadJobId,
-                    ACTION_CONTINUE_DOWNLOAD, impl.getString(MessageID.download_continue_btn_label,
-                            getApplicationContext())));
-
-            UmAction mCancel = new UmAction(ACTION_CANCEL_DOWNLOAD, createAction(downloadJobId,
+            builder.setProgress(MAX_PROGRESS_VALUE,0,true)
+                    .addAction(createAction(downloadJobId,
                     ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
-                            getApplicationContext())));
-
-            UmAction mPause = new UmAction(ACTION_PAUSE_DOWNLOAD, createAction(downloadJobId,
+                            getApplicationContext())))
+                    .addAction(createAction(downloadJobId,
                     ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
-                            getApplicationContext())));
-
-            umNotification.addAction(mCancel).addAction(mContinue).addAction(mPause);
+                            getApplicationContext())))
+                    .setContentTitle(contentTitle)
+                    .setContentText(contentText)
+                    .setSubText(contentSubText);
         }
-
-        attachActionOnBuilder(builder,umNotification,keyToExclude);
+        builder.setGroup(NOTIFICATION_GROUP_KEY);
 
         if(!knownNotifications.containsKey(downloadJobId)){
             knownNotifications.put(downloadJobId,umNotification);
         }
 
-
         return builder.build();
-    }
-
-    /**
-     * Attache required action buttons to the notification builder
-     * @param builder Builder to attach the button to
-     * @param umNotification UmNotification object which has all actions list to be included
-     * @param keyToExclude Action button to be excluded when updating the notification view
-     */
-    private void attachActionOnBuilder(NotificationCompat.Builder builder,
-                                       UmNotification umNotification, String keyToExclude){
-        for (UmAction action : umNotification.getKnownActions()) {
-            if (!action.getActionKey().equals(keyToExclude)) {
-                builder.addAction(action.getAction());
-            }
-        }
-    }
-
-    /**
-     * Cancel specific job notification
-     * @param notificationId notification id to be canceled.
-     */
-    private void cancelNotification(int notificationId){
-
     }
 
 
@@ -478,21 +387,16 @@ public class DownloadNotificationService extends Service {
      * @param contentTitle Notification content title
      * @param contentText Notification content text
      * @param contentSubText Notification content sub text
-     * @param actionToExclude Action button to be excluded when updating the notification view
      */
-    @SuppressLint("RestrictedApi")
-    private void updateDownloadNotification(long downloadJobId, int progress, String contentTitle ,
-                                            String contentText, String contentSubText,
-                                            String actionToExclude){
+    private void updateDownloadJobNotification(long downloadJobId, int progress, String contentTitle ,
+                                               String contentText, String contentSubText){
         UmNotification umNotification = knownNotifications.get(downloadJobId);
         if(umNotification != null){
             NotificationCompat.Builder builder = umNotification.getBuilder();
-            builder.mActions.clear();
             builder.setContentTitle(contentTitle)
                     .setContentText(contentText)
                     .setSubText(contentSubText)
                     .setProgress(MAX_PROGRESS_VALUE,progress,false);
-            attachActionOnBuilder(builder,umNotification,actionToExclude);
             mNotificationManager.notify(umNotification.getNotificationId(),
                     umNotification.getBuilder().build());
         }
@@ -501,14 +405,19 @@ public class DownloadNotificationService extends Service {
     /**
      * Update summary notification to show progress as the sum of all download notifications
      */
-    private void updateSummary(){
-        String summaryLabel = impl.getString(MessageID.download_downloading_placeholder,
-                getApplicationContext());
-        int progress = (int)((double) totalBytesDownloadedSoFar / totalBytesToBeDownloaded * 100);
-        String title = String.format(summaryLabel,
-                UMFileUtil.formatFileSize(totalBytesDownloadedSoFar),
-                UMFileUtil.formatFileSize(totalBytesToBeDownloaded));
-        updateDownloadNotification(GROUP_SUMMARY_ID,progress,title,"","","");
+    private void updateDownloadSummary(){
+        UmNotification umNotification = knownNotifications.get(GROUP_SUMMARY_ID);
+        if(umNotification != null){
+            String summaryLabel = impl.getString(MessageID.download_downloading_placeholder,
+                    getApplicationContext());
+            String title = String.format(summaryLabel,
+                    UMFileUtil.formatFileSize(totalBytesDownloadedSoFar),
+                    UMFileUtil.formatFileSize(totalBytesToBeDownloaded));
+            totalBytesDownloadedSoFar = 0L;
+            umNotification.getBuilder().setSubText(title);
+            mNotificationManager.notify(umNotification.getNotificationId(),
+                    umNotification.getBuilder().build());
+        }
     }
 
 
@@ -520,26 +429,6 @@ public class DownloadNotificationService extends Service {
             stopForeground(true);
             stopSelf();
         }
-    }
-
-
-    /**
-     * Create bitmap from drawable resource
-     * @param resource resource id
-     * @return Constructed bitmap
-     */
-    private Bitmap getBitmap(int resource) {
-        Drawable drawable = getResources().getDrawable(resource);
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
     }
 
 

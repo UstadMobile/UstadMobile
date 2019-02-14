@@ -1669,10 +1669,10 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
                 }
                 codeBlock.add(");\n").endControlFlow();
             }catch(Exception je) {
-                messager.printMessage(Diagnostic.Kind.ERROR,
+                messager.printMessage(Diagnostic.Kind.WARNING,
                         formatMethodForErrorMessage(daoMethod, daoType) +
                     " exception parsing update/delete query: " + je.getClass().getSimpleName() +
-                    ": " + je.getMessage());
+                    ": live data will not update correctly when triggered by this query" + je.getMessage());
             }
 
 
