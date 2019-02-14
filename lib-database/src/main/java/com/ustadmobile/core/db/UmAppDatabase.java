@@ -199,7 +199,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
         return db;
     }
 
-
     private static AbstractDoorwayDbBuilder<UmAppDatabase> addMigrations(
             AbstractDoorwayDbBuilder<UmAppDatabase> builder) {
         builder.addMigration(new UmDbMigration(1, 2) {
@@ -536,36 +535,34 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     private static synchronized AbstractDoorwayDbBuilder<UmAppDatabase> addCallbacks(
             AbstractDoorwayDbBuilder<UmAppDatabase> builder) {
-        builder.addCallback(new DbCallback() {
-            @Override
-            public void onCreate(DoorDbAdapter dbHelper) {
-                if (dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
-                    dbHelper.execSql("CREATE TRIGGER upd_ce_status AFTER UPDATE ON ContentEntry " +
-                            "WHEN EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
-                            "BEGIN " +
-                            "UPDATE ContentEntryStatus SET invalidated = 1 WHERE cesUid = NEW.contentEntryUid; " +
-                            "END");
-                    String insertNewTriggerBody = "WHEN NOT EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
-                            "BEGIN " +
-                            "INSERT INTO ContentEntryStatus (cesUid, invalidated, cesLeaf) VALUES (NEW.contentEntryUid, 1, NEW.leaf);" +
-                            "END";
-                    dbHelper.execSql("CREATE TRIGGER upd_ce_ins_ces AFTER UPDATE ON ContentEntry " +
-                            insertNewTriggerBody);
-                    dbHelper.execSql("CREATE TRIGGER ins_ce_ins_ces AFTER INSERT ON ContentEntry " +
-                            insertNewTriggerBody);
-
-                }
-            }
-
-            @Override
-            public void onOpen(DoorDbAdapter dbHelper) {
-                if (dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
-                    dbHelper.execSql("PRAGMA recursive_triggers = ON");
-                }
-            }
-        });
+//        builder.addCallback(new DbCallback() {
+//            @Override
+//            public void onCreate(DoorDbAdapter dbHelper) {
+//                if (dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
+//                    String insertNewTriggerBody = "WHEN NOT EXISTS(SELECT cesUid FROM ContentEntryStatus WHERE cesUid = NEW.contentEntryUid) " +
+//                            "BEGIN " +
+//                            "INSERT INTO ContentEntryStatus (cesUid, totalSize, bytesDownloadedSoFar, " +
+//                            "downloadStatus, localAvailability, downloadSpeed, invalidated, cesLeaf) " +
+//                            "VALUES (NEW.contentEntryUid, 0, 0, 0, 0, 0, 1, NEW.leaf);" +
+//                            "END";
+//                    dbHelper.execSql("CREATE TRIGGER ins_ce_ins_ces AFTER INSERT ON ContentEntry " +
+//                            insertNewTriggerBody);
+//                }
+//            }
+//
+//            @Override
+//            public void onOpen(DoorDbAdapter dbHelper) {
+//                if (dbHelper.getDbType() == UmDbType.TYPE_SQLITE) {
+//                    dbHelper.execSql("PRAGMA recursive_triggers = ON");
+//                }
+//            }
+//        });
 
         return builder;
+    }
+
+    protected void onContentEntryStatusRefreshRequired(Long val) {
+        getContentEntryStatusDao().refresh();
     }
 
 

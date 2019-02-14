@@ -29,6 +29,16 @@ public class ContentEntryStatus {
 
     private boolean cesLeaf;
 
+    public ContentEntryStatus() {
+
+    }
+
+    public ContentEntryStatus(long contentEntryUid, boolean isLeaf, long totalSize) {
+        this.cesUid = contentEntryUid;
+        this.cesLeaf = isLeaf;
+        this.totalSize = totalSize;
+    }
+
     public long getCesUid() {
         return cesUid;
     }
