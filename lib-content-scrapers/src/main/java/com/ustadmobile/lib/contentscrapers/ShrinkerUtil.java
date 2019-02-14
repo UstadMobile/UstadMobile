@@ -84,23 +84,28 @@ public class ShrinkerUtil {
     }
 
     public static void shrinkEpub(File epub) throws IOException {
-
-        File parentFolder = epub.getParentFile();
-        File tmpFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(epub.getName()));
-        boolean isCreated = tmpFolder.mkdirs();
-        UMLogUtil.logTrace("Tmp folder for epub unzip is created " + isCreated);
-        UmZipUtils.unzip(epub, tmpFolder);
+        File tmpFolder = null;
         try {
+            tmpFolder = createTmpFolderForZipAndUnZip(epub);
             shrinkEpubFiles(tmpFolder);
             ContentScraperUtil.zipDirectory(tmpFolder, epub.getName(), epub.getParentFile());
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             throw e;
         } finally {
-            FileUtils.deleteDirectory(tmpFolder);
+            if (tmpFolder != null) {
+                FileUtils.deleteDirectory(tmpFolder);
+            }
         }
-
     }
+
+    private static File createTmpFolderForZipAndUnZip(File contentFile) throws IOException {
+        File parentFolder = contentFile.getParentFile();
+        File tmpFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(contentFile.getName()));
+        UmZipUtils.unzip(contentFile, tmpFolder);
+        return tmpFolder;
+    }
+
 
     public static void cleanXml(File xmlFile) throws IOException {
 
@@ -113,7 +118,7 @@ public class ShrinkerUtil {
     }
 
 
-    private static boolean shrinkEpubFiles(File directory) {
+    private static boolean shrinkEpubFiles(File directory) throws IOException {
         FileInputStream opfFileInputStream = null;
         FileInputStream ocfFileInputStream = null;
         FileOutputStream opfFileOutputStream = null;
@@ -150,7 +155,6 @@ public class ShrinkerUtil {
                     File inputFile = new File(opfDir, oldHrefValue);
                     File outputFile = new File(opfDir, newHref);
                     replacedFiles.put(inputFile, outputFile);
-
 
                     convertImageToWebp(inputFile, outputFile);
 
@@ -271,6 +275,7 @@ public class ShrinkerUtil {
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("IO Exception for directory " + directory.getPath());
+            throw e;
         } finally {
             UMIOUtils.closeQuietly(opfFileInputStream);
             UMIOUtils.closeQuietly(opfFileOutputStream);
@@ -300,6 +305,10 @@ public class ShrinkerUtil {
         try {
             Process process = runTime.exec(ScraperBuildConfig.WEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
             process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue != 0) {
+                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+            }
             process.destroy();
         } catch (IOException e) {
             e.printStackTrace();
