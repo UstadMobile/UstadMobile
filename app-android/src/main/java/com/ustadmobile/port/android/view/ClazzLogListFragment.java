@@ -224,7 +224,6 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
             barChart.setData(barData);
             barChart.setFitBars(true);
             barChart.invalidate();
-            //barChart.setDrawValueAboveBar(false);
         });
 
     }

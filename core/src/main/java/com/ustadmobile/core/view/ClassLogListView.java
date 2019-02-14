@@ -23,7 +23,8 @@ public interface ClassLogListView extends UstadView {
 
     //Attendance chart limits
     int ATTENDANCE_LINE_CHART_HEIGHT = 100;
-    int ATTENDANCE_BAR_CHART_HEIGHT = 78;
+    //int ATTENDANCE_BAR_CHART_HEIGHT = 78;
+    int ATTENDANCE_BAR_CHART_HEIGHT = 100;
     int ATTENDANCE_BAR_CHART_AXIS_MAXIMUM = 100;
     int ATTENDANCE_BAR_CHART_AXIS_MINIMUM = 0;
 
