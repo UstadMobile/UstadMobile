@@ -76,17 +76,12 @@ public class DownloadNotificationService extends Service {
         String getJobTitle() {
             return jobTitle;
         }
-
     }
 
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
 
-    public static final String ACTION_PAUSE_ALL_DOWNLOADS = "ACTION_PAUSE_ALL_DOWNLOADS";
-
     public static final String ACTION_PAUSE_DOWNLOAD = "ACTION_PAUSE_DOWNLOAD";
-
-    public static final String ACTION_CANCEL_ALL_DOWNLOADS = "ACTION_CANCEL_ALL_DOWNLOADS";
 
     public static final String ACTION_CANCEL_DOWNLOAD = "ACTION_CANCEL_DOWNLOAD";
 
@@ -164,30 +159,21 @@ public class DownloadNotificationService extends Service {
                             true);
                     startForeground(notificationIdRef.get(), groupSummary);
                     break;
-                case ACTION_CANCEL_ALL_DOWNLOADS:
-                    //TODO: pause all download task
-                    new Thread(() ->
-                            umAppDatabase.getDownloadJobDao().updateAllJobsAndItems(
-                                    JobStatus.CANCELLING)).start();
-                    break;
-                case ACTION_PAUSE_ALL_DOWNLOADS:
-                    //TODO: pause all download task
-                    new Thread(() ->
-                            umAppDatabase.getDownloadJobDao().updateAllJobsAndItems(
-                                    JobStatus.PAUSING)).start();
-                    break;
 
                 case ACTION_PAUSE_DOWNLOAD:
-                    new Thread(() ->
-                            umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobId,
-                                    JobStatus.PAUSED, JobStatus.PAUSING)).start();
+                    if(umNotification != null){
+                        new Thread(() -> umAppDatabase.getDownloadJobDao()
+                                .updateJobAndItems(downloadJobId, JobStatus.PAUSED,
+                                        JobStatus.PAUSING)).start();
+                    }
+
                     break;
 
                 case ACTION_CANCEL_DOWNLOAD:
                     if(umNotification != null){
-                        new Thread(() ->
-                                umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobId,
-                                JobStatus.CANCELED, JobStatus.CANCELLING)).start();
+                        new Thread(() -> umAppDatabase.getDownloadJobDao()
+                                .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
+                                        JobStatus.CANCELLING)).start();
                     }
                     break;
             }
@@ -304,10 +290,10 @@ public class DownloadNotificationService extends Service {
     private NotificationCompat.Action createAction(long downloadJobId, String actionTag,
                                                    String actionLabel){
         Intent actionIntent = new Intent(this, DownloadNotificationService.class);
-        actionIntent.setAction(actionTag);
         actionIntent.putExtra(JOB_ID_TAG,downloadJobId);
+        actionIntent.setAction(actionTag);
         PendingIntent actionPendingIntent = PendingIntent.getService(this,
-                0, actionIntent, 0);
+                0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         return new NotificationCompat.Action(0,actionLabel,actionPendingIntent);
     }
 
@@ -351,12 +337,6 @@ public class DownloadNotificationService extends Service {
                     .setSummaryText(contentSubText);
 
             builder.setGroupSummary(true)
-                    .addAction(createAction(downloadJobId,
-                    ACTION_CANCEL_ALL_DOWNLOADS, impl.getString(MessageID.download_cancel_all,
-                            getApplicationContext())))
-                    .addAction(createAction(downloadJobId,
-                    ACTION_PAUSE_ALL_DOWNLOADS, impl.getString(MessageID.download_pause_all,
-                            getApplicationContext())))
                     .setStyle(inboxStyle);
         }else{
             builder.setProgress(MAX_PROGRESS_VALUE,0,true)
