@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.PNG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class ShrinkerUtil {
@@ -273,7 +275,6 @@ public class ShrinkerUtil {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Failed to xmlpullparse for directory " + directory.getPath());
         } catch (IOException e) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("IO Exception for directory " + directory.getPath());
             throw e;
         } finally {
@@ -300,10 +301,57 @@ public class ShrinkerUtil {
         if (!webpExecutableFile.exists()) {
             throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
         }
-
+        File pngFile = null;
         Runtime runTime = Runtime.getRuntime();
         try {
             Process process = runTime.exec(ScraperBuildConfig.WEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
+            process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue != 0) {
+                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath() + "-fix" + PNG_EXT));
+                convertJpgToPng(src, pngFile);
+                convertImageToWebp(pngFile, dest);
+                pngFile.delete();
+            }
+            process.destroy();
+        } catch (IOException e) {
+            throw e;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (pngFile != null) {
+                pngFile.delete();
+            }
+        }
+
+        if (!dest.exists()) {
+            throw new IOException("convertImaegToWebP: source existed, but output does not " +
+                    dest.getPath());
+        }
+
+    }
+
+
+    /**
+     * Given a source file and a destination file, convert the jpg(src) to png(dest)
+     *
+     * @param src  file image path
+     * @param dest webp file path
+     */
+    private static void convertJpgToPng(File src, File dest) throws IOException {
+        if (!src.exists()) {
+            throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
+        }
+
+        File webpExecutableFile = new File(ScraperBuildConfig.WEBP_PATH);
+        if (!webpExecutableFile.exists()) {
+            throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
+        }
+
+        Runtime runTime = Runtime.getRuntime();
+        try {
+            Process process = runTime.exec("mogrify -format png " + src.getPath() + " " + dest.getPath());
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
