@@ -3,11 +3,14 @@ package com.ustadmobile.port.sharedse.util;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -31,6 +34,10 @@ public class LiveDataWorkQueue<T> {
     private UmObserver<List<T>> workObserver;
 
     private WorkQueueItemAdapter<T> adapter;
+
+    private AtomicReference<List<T>> currentQueue;
+
+    private Set<Long> completedItems;
 
     /**
      * The adapter must convert the item type into a WorkQueueItemHolder
@@ -60,7 +67,7 @@ public class LiveDataWorkQueue<T> {
         @Override
         public void run() {
             adapter.makeRunnable(item).run();
-            LiveDataWorkQueue.this.removeItemFromActiveItems(adapter.getUid(item));
+            LiveDataWorkQueue.this.handleItemFinished(adapter.getUid(item));
         }
     }
 
@@ -80,6 +87,8 @@ public class LiveDataWorkQueue<T> {
     public LiveDataWorkQueue(int maxThreads) {
         this.maxThreads = maxThreads;
         executor = Executors.newFixedThreadPool(maxThreads);
+        currentQueue = new AtomicReference<>();
+        completedItems = new HashSet<>();
     }
 
 
@@ -105,10 +114,26 @@ public class LiveDataWorkQueue<T> {
     private void handleWorkSourceChanged(List<T> sourceData) {
         try {
             lock.lock();
+            currentQueue.set(sourceData);
+            checkQueue();
+        }finally {
+            lock.unlock();
+        }
 
-            for(T sourceItem : sourceData) {
+    }
+
+    private void checkQueue() {
+        List<T> itemsToCheck = currentQueue.get();
+        if(itemsToCheck == null)
+            return;
+
+        try {
+            lock.lock();
+
+            for(T sourceItem : itemsToCheck) {
                 long uid = adapter.getUid(sourceItem);
-                if(activeItems.size() < maxThreads && !activeItems.containsKey(uid)) {
+                if(activeItems.size() < maxThreads && !activeItems.containsKey(uid)
+                        && !completedItems.contains(uid)) {
                     RunWrapper<T> wrapper = new RunWrapper<>(sourceItem, adapter);
                     activeItems.put(uid, wrapper);
                     executor.submit(wrapper);
@@ -119,10 +144,13 @@ public class LiveDataWorkQueue<T> {
         }
     }
 
-    private void removeItemFromActiveItems(long itemUid) {
+
+    private void handleItemFinished(long itemUid) {
         try {
             lock.lock();
             activeItems.remove(itemUid);
+            completedItems.add(itemUid);
+            checkQueue();
         }finally {
             lock.unlock();
         }
