@@ -6,10 +6,10 @@ import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.scorm.ScormManifest;
+import com.ustadmobile.core.contentformats.scorm.ScormManifest;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.UstadViewWithNotifications;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -43,8 +43,8 @@ public class ScormPackagePresenter extends UstadBaseController {
 
         @Override
         public void onFailure(Throwable exception) {
-            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                "ERROR: failed to open package file", AppView.LENGTH_LONG);
+            scormPackageView.showNotification("ERROR: failed to open package file",
+                    UstadViewWithNotifications.LENGTH_LONG);
         }
     };
 

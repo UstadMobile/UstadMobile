@@ -1,13 +1,8 @@
 package com.ustadmobile.test.core.catalog.contenttype;
 
-import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.test.core.UMTestUtil;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

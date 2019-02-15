@@ -38,16 +38,6 @@
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:layout_scrollFlags="scroll|enterAlways" />
 
-            <com.ustadmobile.port.android.view.OpdsFilterBar
-                android:visibility="gone"
-                android:id="@+id/activity_basepoint_filterbar"
-                app:layout_scrollFlags="scroll|enterAlways"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-            </com.ustadmobile.port.android.view.OpdsFilterBar>
-
             <android.support.design.widget.TabLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

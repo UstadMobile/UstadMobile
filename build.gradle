@@ -43,7 +43,6 @@ ext {
     version_qrcodelibfork = "1.0.3"
     version_okhttp = "3.9.0"
     version_commons_io = "2.5"
-    version_ascii85 = "1.1"
     version_gson = "2.8.2"
     version_apache_commons_cli = "1.4"
     version_apache_commons_lang = "3.8.1"

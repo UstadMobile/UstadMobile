@@ -237,16 +237,6 @@ public class ContainerActivity extends ZippedContentActivity implements
         return onpageSelectedJS;
     }
 
-    public void onStart() {
-        super.onStart();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-    }
-
-    public void onStop() {
-        super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
-    }
-
     public void handlePageTitleUpdated(int index, String title) {
         if(mPager != null && mPager.getCurrentItem() == index && mContainerController != null) {
             mContainerController.handlePageTitleUpdated(title);
