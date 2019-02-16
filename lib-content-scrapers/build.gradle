@@ -10,7 +10,12 @@ buildscript {
 }
 
 apply plugin: 'java-library'
+apply plugin: "jacoco"
 
+
+test {
+    ignoreFailures = true
+}
 
 task scrapeContent(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath

@@ -74,7 +74,7 @@ public class BleGattServerTest {
         for(int i = 0; i < MAX_ENTITIES_NUMBER; i++){
             long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
             ContentEntry contentEntry = new ContentEntry();
-            contentEntry.setLastUpdateTime(currentTimeStamp);
+            contentEntry.setLastModified(currentTimeStamp);
             contentEntry.setDescription("Content entry description");
             contentEntry.setTitle("Content entry title");
             contentEntryList.add(contentEntry);
