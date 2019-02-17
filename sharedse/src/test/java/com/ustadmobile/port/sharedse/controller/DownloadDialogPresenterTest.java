@@ -11,10 +11,10 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,22 +22,24 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_CONTENT_ENTRY_UID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+/**
+ * Test class which tests {@link DownloadDialogPresenter} to make sure it behaves as expected
+ * when creating and managing download set, set items, jobs and job items.
+ *
+ * @author kileha3
+ */
 
 public class DownloadDialogPresenterTest {
 
@@ -108,7 +110,6 @@ public class DownloadDialogPresenterTest {
         totalBytesToDownload = entry2File.getFileSize() + entry4File.getFileSize();
 
         when(mockedDialogView.getOptionIds()).thenReturn(new int[]{ 1,2,3});
-
     }
 
     private void insertDownloadSetAndSetItems(){
@@ -146,11 +147,8 @@ public class DownloadDialogPresenterTest {
         Thread.sleep(2);
 
         assertEquals("Total bytes to be downloaded was updated",
-                umAppDatabase.getDownloadJobDao().findById(
-                        presenter.getCurrentJobId()).getTotalBytesToDownload(),
-                totalBytesToDownload);
-
-
+                umAppDatabase.getDownloadJobDao().findById(presenter.getCurrentJobId())
+                        .getTotalBytesToDownload(), totalBytesToDownload);
     }
 
 
@@ -177,8 +175,8 @@ public class DownloadDialogPresenterTest {
         mLatch.await(5,TimeUnit.SECONDS);
 
         assertEquals("Job status was changed to Queued after clicking continue",
-                umAppDatabase.getDownloadJobDao().findById(
-                        presenter.getCurrentJobId()).getDjStatus(),JobStatus.QUEUED);
+                umAppDatabase.getDownloadJobDao().findById(presenter.getCurrentJobId())
+                        .getDjStatus(),JobStatus.QUEUED);
     }
 
     @Test
@@ -194,8 +192,6 @@ public class DownloadDialogPresenterTest {
         presenter.onStart();
 
         verify(mockedDialogView, timeout(2000)).setStackedOptions(any(),any());
-
-
     }
 
     @Test
@@ -229,8 +225,6 @@ public class DownloadDialogPresenterTest {
         assertEquals("Job status was changed to paused after clicking pause button",
                 umAppDatabase.getDownloadJobDao().findById(downloadJob.getDjUid())
                         .getDjStatus(),JobStatus.PAUSED);
-
-
     }
 
     @Test
