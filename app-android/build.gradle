@@ -124,16 +124,22 @@ android {
 
         /*
          * Our main application does not exceed 64K methods, but it does exceed this limit with
-         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled
+         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled.
+         *
+         * Min SDK version = 18 as this is required by ui-automator
          */
         vanillamultidex {
             dimension "config"
+            minSdkVersion 18
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
             }
         }
 
+        /**
+         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
+         */
         devMinApi21 {
             dimension "config"
             minSdkVersion 21
@@ -167,7 +173,9 @@ gradle.taskGraph.useFilter { task ->
     if(task.name.equals("connectedVanillaDebugAndroidTest")
         || task.name.equals("createVanillaDebugCoverageReport")
         || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")) {
+        || task.name.equals("testVanillaReleaseUnitTest")
+        || task.name.equals("processVanillaDebugAndroidTestManifest")
+        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 

@@ -588,7 +588,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public void onDestroy() {
         stopAdvertising();
         stopScanning();
-        mContext.unregisterReceiver(mReceiver);
+        if(wifiP2pManager != null)
+            mContext.unregisterReceiver(mReceiver);
+
         super.onDestroy();
     }
 }

@@ -187,8 +187,8 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public void handleDownloadStatusButtonClicked(ContentEntry entry) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
-        args.put("contentEntryUid", entry.getContentEntryUid());
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put("contentEntryUid", String.valueOf(entry.getContentEntryUid()));
         impl.go("DownloadDialog", args, getContext());
     }
 }
