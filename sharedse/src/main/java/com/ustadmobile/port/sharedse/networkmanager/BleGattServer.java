@@ -98,7 +98,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
         //TODO: Put the actual endpoint which will be used to serve peer request
-        group.setEndpoint(""+networkManager.getHttpd().getListeningPort());
+        group.setEndpoint(""+ networkManager.getHttpd().getListeningPort());
         this.message = new Gson().toJson(group);
         mLatch.countDown();
     }

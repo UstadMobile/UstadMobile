@@ -3,17 +3,21 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleGattServer.GROUP_CREATION_TIMEOUT;
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
@@ -27,8 +31,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -58,11 +64,15 @@ public class BleGattServerTest {
 
 
     @Before
-    public void setUp(){
+    public void setUp() throws IOException {
         Object context =  PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.onCreate();
         mockedNetworkManager.setContext(context);
+        EmbeddedHTTPD httpd = new EmbeddedHTTPD(0,context);
+        httpd.start();
+
+        when(mockedNetworkManager.getHttpd()).thenReturn(httpd);
 
         umAppDatabase =  UmAppDatabase.getInstance(context);
         umAppDatabase.clearAllTables();
