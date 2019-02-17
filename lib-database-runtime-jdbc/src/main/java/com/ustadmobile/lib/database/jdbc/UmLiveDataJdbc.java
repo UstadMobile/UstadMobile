@@ -98,7 +98,7 @@ public abstract class UmLiveDataJdbc<T> implements UmLiveData<T>, DbChangeListen
 
     @Override
     public void observeForever(UmObserver<T> observer) {
-        removeActiveObserver(observer);
+        addActiveObserver(observer);
     }
 
     @Override
