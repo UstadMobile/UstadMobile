@@ -48,8 +48,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private String destinationDir = null;
 
-    private boolean isSDCardAvailableAndSupported = false;
-
     private static final int stackedButtonPauseIndex = 0;
 
     private static final int stackedButtonCancelIndex = 1;
@@ -68,9 +66,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         impl = UstadMobileSystemImpl.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
-        isSDCardAvailableAndSupported = view.isSDCardAvailableAndSupported();
         view.runOnUiThread(() ->{
-            view.setSDCardOptionVisible(isSDCardAvailableAndSupported);
             view.setWifiOnlyOptionVisible(false);
         });
         new Thread(this::setup).start();
@@ -316,15 +312,22 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         }).start();
     }
 
-
     public void handleWiFiOnlyOption(boolean wifiOnly){
         new Thread(() -> umAppDatabase.getDownloadSetDao()
                 .setMeteredConnectionBySetUid(downloadSetUid,!wifiOnly)).start();
     }
 
-    public void handleSDCardSelection(boolean useSdcard){
-
+    public void handleStorageOptionSelection(String destinationDir){
+        this.destinationDir = destinationDir;
     }
+
+    /**
+     * Testing purpose
+     */
+    protected long getCurrentJobId(){
+        return downloadJobUid;
+    }
+
 
     @Override
     public void onDestroy() {

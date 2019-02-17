@@ -7,12 +7,10 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -139,7 +137,7 @@ public abstract class NetworkManagerBle {
      * Set platform specific context
      * @param context Platform's context to be set
      */
-    public void setContext(Object context){
+    protected void setContext(Object context){
         this.mContext = context;
     }
 
