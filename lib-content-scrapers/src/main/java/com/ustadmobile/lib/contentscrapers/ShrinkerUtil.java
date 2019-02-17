@@ -32,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,19 +60,7 @@ public class ShrinkerUtil {
         if ("db".equals(args[0])) {
             UmAppDatabase db = UmAppDatabase.getInstance(null);
             UmAppDatabase repository = db.getRepository("https://localhost", "");
-            ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-            List<ContentEntryFileWithFilePath> epubFileList = contentEntryFileDao.findEpubsFiles();
-            for (ContentEntryFileWithFilePath entryfile : epubFileList) {
-                try {
-                    File epubFile = new File(entryfile.getFilePath());
-                    ShrinkerUtil.shrinkEpub(epubFile);
-                    contentEntryFileDao.updateEpubFiles(epubFile.length(), ContentScraperUtil.getMd5(epubFile), entryfile.getContentEntryFileUid());
-
-                } catch (Exception e) {
-                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                    UMLogUtil.logError("Failed to shrink epub " + entryfile.getFilePath());
-                }
-            }
+            shrinkAllEpubInDatabase(repository);
         } else {
             try {
                 File epubFile = new File(args[1]);
@@ -85,6 +72,23 @@ public class ShrinkerUtil {
             }
         }
     }
+
+    public static void shrinkAllEpubInDatabase(UmAppDatabase repository) {
+        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
+        List<ContentEntryFileWithFilePath> epubFileList = contentEntryFileDao.findEpubsFiles();
+        for (ContentEntryFileWithFilePath entryfile : epubFileList) {
+            try {
+                File epubFile = new File(entryfile.getFilePath());
+                ShrinkerUtil.shrinkEpub(epubFile);
+                contentEntryFileDao.updateEpubFiles(epubFile.length(), ContentScraperUtil.getMd5(epubFile), entryfile.getContentEntryFileUid());
+
+            } catch (Exception e) {
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Failed to shrink epub " + entryfile.getFilePath());
+            }
+        }
+    }
+
 
     public static void shrinkEpub(File epub) throws IOException {
         File tmpFolder = null;

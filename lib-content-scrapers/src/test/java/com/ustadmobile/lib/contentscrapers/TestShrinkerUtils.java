@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryFileWithFilePath;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -20,13 +21,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -41,6 +42,7 @@ public class TestShrinkerUtils {
     private File secondepub;
     private ContentEntryFileDao contentFileDao;
     private File tmpFolder;
+    private UmAppDatabase repo;
 
     @Before
     public void before() {
@@ -76,7 +78,7 @@ public class TestShrinkerUtils {
     public void initDb() throws IOException {
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.clearAllTables();
-        UmAppDatabase repo = db.getRepository("https://localhost", "");
+        repo = db.getRepository("https://localhost", "");
         contentFileDao = repo.getContentEntryFileDao();
         ContentEntryFileStatusDao statusDao = db.getContentEntryFileStatusDao();
 
@@ -121,6 +123,20 @@ public class TestShrinkerUtils {
         statusDao.insert(secondStatus);
 
     }
+
+    @Test
+    public void givenDabaseEntries_whenShrunk_shouldUpdateAllEpubInDb() {
+
+        List<ContentEntryFileWithFilePath> epublist = contentFileDao.findEpubsFiles();
+
+        ShrinkerUtil.shrinkAllEpubInDatabase(repo);
+
+        List<ContentEntryFileWithFilePath> updatedEpubList = contentFileDao.findEpubsFiles();
+
+        Assert.assertTrue(updatedEpubList.get(0).getFileSize() < epublist.get(0).getFileSize());
+
+    }
+
 
     @Test
     public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException {
