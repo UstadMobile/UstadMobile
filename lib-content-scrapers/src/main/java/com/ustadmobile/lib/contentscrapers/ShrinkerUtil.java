@@ -156,9 +156,14 @@ public class ShrinkerUtil {
 
                     File inputFile = new File(opfDir, oldHrefValue);
                     File outputFile = new File(opfDir, newHref);
-                    replacedFiles.put(inputFile, outputFile);
 
-                    convertImageToWebp(inputFile, outputFile);
+                    try {
+                        convertImageToWebp(inputFile, outputFile);
+                    } catch (Exception e) {
+                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                        continue;
+                    }
+                    replacedFiles.put(inputFile, outputFile);
 
                     if (ContentScraperUtil.fileHasContent(outputFile)) {
                         itemValue.setHref(newHref);
