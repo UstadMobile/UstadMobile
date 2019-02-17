@@ -31,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -271,20 +273,24 @@ public class ShrinkerUtil {
 
             if (attr.getKey().contains("src")) {
 
-                String srcValue = attr.getValue();
-                File srcFile = new File(htmlFile.getParentFile(), srcValue);
-                srcFile = Paths.get(srcFile.getPath()).normalize().toFile();
+                try {
+                    String srcValue = attr.getValue();
+                    File srcFile = new File(htmlFile.getParentFile(), srcValue);
+                    srcFile = Paths.get(srcFile.getPath()).normalize().toFile();
 
-                File newFile = replacedFiles.get(srcFile);
-                if (newFile != null) {
-                    foundReplaced = true;
-                    String newHref = Paths.get(htmlFile.getParentFile().toURI())
-                            .relativize(Paths.get(newFile.toURI()))
-                            .toString().replaceAll(Pattern.quote("\\"), "/");
+                    File newFile = replacedFiles.get(srcFile);
+                    if (newFile != null) {
+                        foundReplaced = true;
+                        String newHref = Paths.get(htmlFile.getParentFile().toURI())
+                                .relativize(Paths.get(newFile.toURI()))
+                                .toString().replaceAll(Pattern.quote("\\"), "/");
 
-                    deleteAllAttributesWithSrc(element);
-                    element.attr("src", newHref);
-                    break;
+                        deleteAllAttributesWithSrc(element);
+                        element.attr("src", newHref);
+                        break;
+                    }
+                } catch (InvalidPathException ignored) {
+
                 }
             }
         }

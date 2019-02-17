@@ -124,13 +124,7 @@ public class TestShrinkerUtils {
     @Test
     public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException {
 
-        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
-
-        File epub = new File(tmpDir, "test.epub");
-        InputStream isepub = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/test.epub");
-        FileUtils.copyToFile(isepub, epub);
-
-        ShrinkerUtil.shrinkEpub(epub);
+        ShrinkerUtil.shrinkEpub(firstepub);
 
         Assert.assertEquals("Failed to delete the tmp Folder for epub test after shrinking", false, new File(tmpDir, "test").exists());
         Assert.assertEquals("Failed to delete the tmp Folder for epub 13232 after shrinking", false, new File(tmpFolder, "13232").exists());

@@ -74,7 +74,7 @@ public class TestContentScraperUtil {
 
         String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, resourceLocation, mockWebServer.url("/api").url());
 
-        File imageFile = new File(resourceLocation, "media_test1picture.webp");
+        File imageFile = new File(resourceLocation, "media_test1picture.png");
         //Assert that the image file is downloaded
         Assert.assertTrue("Image Downloaded Successfully", imageFile.exists());
 
