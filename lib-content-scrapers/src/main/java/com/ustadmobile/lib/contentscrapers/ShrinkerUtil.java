@@ -156,9 +156,16 @@ public class ShrinkerUtil {
 
                     File inputFile = new File(opfDir, oldHrefValue);
                     File outputFile = new File(opfDir, newHref);
-                    replacedFiles.put(inputFile, outputFile);
 
-                    convertImageToWebp(inputFile, outputFile);
+                    try {
+                        convertImageToWebp(inputFile, outputFile);
+                    } catch (Exception e) {
+                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                        // this is needed when changing the html src files attributes to remove all the unneeded attributes
+                        replacedFiles.put(inputFile, inputFile);
+                        continue;
+                    }
+                    replacedFiles.put(inputFile, outputFile);
 
                     if (ContentScraperUtil.fileHasContent(outputFile)) {
                         itemValue.setHref(newHref);
@@ -302,9 +309,10 @@ public class ShrinkerUtil {
             throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
         }
         File pngFile = null;
+        Process process = null;
         Runtime runTime = Runtime.getRuntime();
         try {
-            Process process = runTime.exec(ScraperBuildConfig.WEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
+            process = runTime.exec(ScraperBuildConfig.WEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
@@ -314,7 +322,6 @@ public class ShrinkerUtil {
                 convertImageToWebp(pngFile, dest);
                 pngFile.delete();
             }
-            process.destroy();
         } catch (IOException e) {
             throw e;
         } catch (InterruptedException e) {
@@ -322,6 +329,9 @@ public class ShrinkerUtil {
         } finally {
             if (pngFile != null) {
                 pngFile.delete();
+            }
+            if (process != null) {
+                process.destroy();
             }
         }
 
@@ -349,22 +359,27 @@ public class ShrinkerUtil {
             throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
         }
 
+        Process process = null;
         Runtime runTime = Runtime.getRuntime();
         try {
             String cmd = "/usr/bin/mogrify -format png " + src.getPath() + " " + dest.getPath();
             UMLogUtil.logInfo("Runng " + cmd + " to fix jpg");
-            Process process = runTime.exec(cmd);
+            process = runTime.exec(cmd);
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
                 UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                throw new IOException();
             }
-            process.destroy();
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
         }
 
         if (!dest.exists()) {

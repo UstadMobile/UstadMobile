@@ -5,9 +5,6 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
-import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.UMLog;
@@ -36,13 +33,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.concurrent.Executors;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -62,8 +58,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     private final OkHttpClient client = new OkHttpClient();
 
     private Properties appConfig;
-
-    private OpdsAtomFeedRepository atomFeedRepository;
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -191,11 +185,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     public abstract NetworkManagerBle getNetworkManagerBle();
 
     @Override
-    public String formatInteger(int integer) {
-        return NumberFormat.getIntegerInstance().format(integer);
-    }
-
-    @Override
     public UmHttpCall makeRequestAsync(UmHttpRequest request, final UmHttpResponseCallback callback) {
         Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
         if(request.getHeaders() != null) {
@@ -273,13 +262,4 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return appConfig.getProperty(key, defaultVal);
     }
 
-    @Override
-    public OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context) {
-        if(atomFeedRepository == null) {
-            atomFeedRepository = new OpdsAtomFeedRepositoryImpl(UmAppDatabase.getInstance(context),
-                    Executors.newCachedThreadPool());
-        }
-
-        return atomFeedRepository;
-    }
 }

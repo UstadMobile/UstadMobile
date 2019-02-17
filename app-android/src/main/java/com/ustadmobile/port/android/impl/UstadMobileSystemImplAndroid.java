@@ -32,10 +32,8 @@
 package com.ustadmobile.port.android.impl;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -44,7 +42,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -55,28 +52,21 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-import com.ustadmobile.core.catalog.contenttype.*;
-import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
-import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
-import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
-import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.impl.AppConfig;
-import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.H5PContentView;
-import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.VideoPlayerView;
@@ -85,10 +75,24 @@ import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.view.*;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
-import com.ustadmobile.port.sharedse.view.*;
+import com.ustadmobile.port.android.view.AboutActivity;
+import com.ustadmobile.port.android.view.BasePointActivity;
+import com.ustadmobile.port.android.view.ContainerActivity;
+import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
+import com.ustadmobile.port.android.view.ContentEntryListActivity;
+import com.ustadmobile.port.android.view.DownloadDialogFragment;
+import com.ustadmobile.port.android.view.DummyActivity;
+import com.ustadmobile.port.android.view.H5PContentActivity;
+import com.ustadmobile.port.android.view.Login2Activity;
+import com.ustadmobile.port.android.view.OnBoardingActivity;
+import com.ustadmobile.port.android.view.Register2Activity;
+import com.ustadmobile.port.android.view.ScormPackageActivity;
+import com.ustadmobile.port.android.view.VideoPlayerActivity;
+import com.ustadmobile.port.android.view.WebChunkActivity;
+import com.ustadmobile.port.android.view.XapiPackageActivity;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -101,9 +105,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
@@ -168,54 +169,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     private UMLogAndroid logger;
 
-    private WeakHashMap<Context, AppViewAndroid> appViews;
-
-    private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[]{
-            new EpubTypePluginFs(), new ScormTypePluginFs(), new XapiPackageTypePluginFs(),
-            new H5PContentTypeFs()};
-
     private ExecutorService bgExecutorService = Executors.newCachedThreadPool();
-
-    /**
-     * Base ServiceConnection class used to bind any given context to shared services: notably
-     * the HTTP service and the upcoming p2p service.
-     */
-    public static class BaseServiceConnection implements ServiceConnection {
-        private IBinder iBinder;
-
-        private Context context;
-
-        private Map<Context, ServiceConnection> contextToBinderMap;
-
-        public BaseServiceConnection(Context context, Map<Context, ServiceConnection> contextToBinderMap) {
-            this.context = context;
-            this.contextToBinderMap = contextToBinderMap;
-            contextToBinderMap.put(context, this);
-        }
-
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder iBinder) {
-            this.iBinder = iBinder;
-
-            if (context instanceof ServiceConnection) {
-                ((ServiceConnection) context).onServiceConnected(name, iBinder);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            iBinder = null;
-            if (context instanceof ServiceConnection)
-                ((ServiceConnection) context).onServiceDisconnected(name);
-
-            contextToBinderMap.remove(context);
-        }
-
-        public IBinder getBinder() {
-            return iBinder;
-        }
-    }
 
     private abstract static class UmCallbackAsyncTask<A, P, R> extends AsyncTask<A, P, R> {
 
@@ -305,14 +259,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
-    protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
-
-
     /**
      */
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
-        appViews = new WeakHashMap<>();
     }
 
     /**
@@ -347,11 +297,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
         if (context instanceof Activity) {
-            ((Activity) context).runOnUiThread(new Runnable() {
-                public void run() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        WebView.setWebContentsDebuggingEnabled(true);
-                    }
+            ((Activity) context).runOnUiThread(() -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    WebView.setWebContentsDebuggingEnabled(true);
                 }
             });
         }
@@ -401,22 +349,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         init(mContext);
     }
 
-    /**
-     * @param mContext
-     */
-    public void handleActivityStart(Activity mContext) {
-
-    }
-
-
-    public void handleActivityStop(Activity mContext) {
-
-    }
-
     public void handleActivityDestroy(Activity mContext) {
-        if (appViews.containsKey(mContext)) {
-            appViews.remove(mContext);
-        }
+
     }
 
 
@@ -610,18 +544,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public AppView getAppView(Object context) {
-        Context ctx = (Context) context;
-        AppViewAndroid view = appViews.get(ctx);
-        if (view == null) {
-            view = new AppViewAndroid(this, ctx);
-            appViews.put(ctx, view);
-        }
-
-        return view;
-    }
-
-    @Override
     public UMLog getLogger() {
         return logger;
     }
@@ -693,11 +615,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public ContentTypePlugin[] getSupportedContentTypePlugins() {
-        return SUPPORTED_CONTENT_TYPES;
-    }
-
-    @Override
     public String getManifestPreference(String key, Object context) {
         try {
             Context ctx = (Context) context;
@@ -712,57 +629,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
         return null;
-    }
-
-    @Override
-    public void mountContainer(final ContainerMountRequest request, final int id,
-                               final UmCallback callback) {
-
-//        TODO: this must be handled using zippcontentactivity
-//        final String scriptPath = UMFileUtil.joinPaths(new String[]{
-//                networkManagerAndroid.getHttpAndroidAssetsUrl(), "epub-paginate.js"});
-//        new AsyncTask<Void, Void, String>() {
-//            @Override
-//            protected String doInBackground(Void... voids) {
-//                String mountedPath = networkManagerAndroid.mountZipOnHttp(request.getContainerUri(),
-//                        null, request.isEpubMode(), scriptPath);
-//                return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
-//                        mountedPath});
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String mountedPath) {
-//                callback.onSuccess(mountedPath);
-//            }
-//        }.execute();
-    }
-
-    @Override
-    public void deleteEntries(Object context, List<String> entryIds, boolean recursive) {
-//        OpdsEntryStatusCacheDao entryStatusCacheDao = UmAppDatabase.getInstance(context).getOpdsEntryStatusCacheDao();
-//        List<String> entryIdsToDelete = entryIds;
-//        if(recursive) {
-//            entryIdsToDelete = new ArrayList<>();
-//            for(String entryId : entryIds) {
-//                entryIdsToDelete.add(entryId);
-//                entryIdsToDelete.addAll(entryStatusCacheDao.findAllKnownDescendantEntryIds(entryId));
-//            }
-//        }
-//
-//        for(String descendantEntryId: entryIdsToDelete) {
-//            ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
-//        }
-//
-//
-    }
-
-    @Override
-    public void deleteEntriesAsync(Object context, final List<String> entryIds, boolean recursive, UmCallback<Void> callback) {
-        bgExecutorService.execute(() -> {
-            deleteEntries(context, entryIds, recursive);
-            callback.onSuccess(null);
-        });
-
     }
 
 }

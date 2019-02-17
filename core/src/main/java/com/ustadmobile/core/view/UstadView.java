@@ -36,6 +36,8 @@ package com.ustadmobile.core.view;
  */
 public interface UstadView {
 
+
+
     /**
      * Return the system specific context for this view (e.g. Activity on Android
      * etc)
@@ -51,6 +53,5 @@ public interface UstadView {
      * @param r Runnable to run on system's UI thread
      */
     void runOnUiThread(Runnable r);
-
 
 }

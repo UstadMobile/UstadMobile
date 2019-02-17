@@ -31,8 +31,6 @@
 
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -41,7 +39,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.UMUtil;
-import com.ustadmobile.core.view.AppView;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -50,7 +47,6 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 
@@ -409,19 +405,6 @@ public abstract class UstadMobileSystemImpl {
 
 
     /**
-     * Mount a container (e.g. epub, xapi package, etc) so it can be accessed using makeRequest. This
-     * normally means making the contents of a zip file accessible over http , e.g.
-     * mount /path/file.zip will provide a base url, e.g. http://127.0.0.1:65000/file.zip and contents
-     * can be accessed (e.g. http://127.0.0.1:65000/file.zip/some/file.xhtml )
-     *
-     * @param request The request to make
-     * @param id The id used provided when the callback is called
-     * @param callback Callback to call when the mount is completed or failed
-     */
-    public abstract void mountContainer(ContainerMountRequest request, int id, UmCallback callback);
-
-
-    /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
      * method in the implementation instead of using the factory API because
      * it enables the J2ME version to use the minimal jar
@@ -464,14 +447,6 @@ public abstract class UstadMobileSystemImpl {
     public XmlPullParser newPullParser(InputStream in) throws XmlPullParserException {
         return newPullParser(in, UstadMobileConstants.UTF8);
     }
-
-    /**
-     * Get access to the App View to do common UI activities (e.g. show
-     * progress dialog, flash message, etc)
-     *
-     * @return Platform AppView
-     */
-    public abstract AppView getAppView(Object context);
 
     /**
      * Get access to the logger to use on this implementation
@@ -553,23 +528,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract void getAppSetupFile(Object context, boolean zip, UmCallback callback);
 
-
-
-    /**
-     * Provides a list of the content types which are supported on this platform.
-     *
-     * @return Array of Class objects representing the ContentTypePlugin
-     */
-    public abstract ContentTypePlugin[] getSupportedContentTypePlugins();
-
-    /**
-     * Format the given integer to use , seperators as per the locale in use
-     *
-     * @param integer
-     *
-     * @return
-     */
-    public abstract String formatInteger(int integer);
 
     /**
      * Wrapper to retrieve preference keys from the system Manifest.
@@ -681,20 +639,5 @@ public abstract class UstadMobileSystemImpl {
     protected final String getContentDirName(Object context) {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context);
     }
-
-    /**
-     * Delete a given set of entries from the system.
-     *
-     * @param context Context object
-     * @param entryId List of entry Ids that should be deleted
-     * @param recursive true if all children of the given entryIds should be deleted, false otherwise
-     * @param callback callback to be called when the operation is completed
-     */
-    public abstract void deleteEntriesAsync(Object context, List<String> entryId, boolean recursive,
-                                            UmCallback<Void> callback);
-
-    public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive);
-
-    public abstract OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context);
 
 }

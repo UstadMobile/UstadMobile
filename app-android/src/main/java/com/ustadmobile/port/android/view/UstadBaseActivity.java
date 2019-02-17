@@ -16,11 +16,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
@@ -35,7 +37,8 @@ import java.util.Locale;
  *
  * Created by mike on 10/15/15.
  */
-public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
+public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
+        UstadViewWithNotifications {
 
     private UstadBaseController baseController;
 
@@ -180,14 +183,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStart() {
         isStarted = true;
         super.onStart();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
     }
 
     public void onStop() {
         isStarted = false;
         super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
-
     }
 
     /**
@@ -278,5 +278,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }else {
             super.attachBaseContext(newBase);
         }
+    }
+
+
+    @Override
+    public void showNotification(String notification, int length) {
+        runOnUiThread(() ->Toast.makeText(this, notification, length).show());
     }
 }

@@ -1,6 +1,5 @@
-package com.ustadmobile.core.scorm;
+package com.ustadmobile.core.contentformats.scorm;
 
-import com.ustadmobile.core.scorm.ScormManifest;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 
 import org.junit.AfterClass;

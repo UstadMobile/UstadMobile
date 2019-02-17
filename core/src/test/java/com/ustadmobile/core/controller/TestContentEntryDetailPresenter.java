@@ -20,12 +20,12 @@ import static com.ustadmobile.core.impl.UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-public class TestNavigationController {
+public class TestContentEntryDetailPresenter {
 
     UstadMobileSystemImpl mainImpl;
     UstadMobileSystemImpl systemImplSpy;
 
-    private static final String REFERRER_FULL_PATH = "/DummyView?/ContentEntry?entryid=41/ContentEntry?entryid=42/ContentEntryDetail?entryid=43";
+    private static final String REFERRER_FULL_PATH = "/DummyView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43";
     private static final String REFERRER_NO_PATH = "";
     private ContentEntryDetailView mockView;
     private static final int flags = GO_FLAG_CLEAR_TOP | GO_FLAG_SINGLE_TOP;
@@ -58,7 +58,7 @@ public class TestNavigationController {
         presenter.onCreate(args);
 
         Hashtable argsresult = new Hashtable();
-        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(42L));
+        argsresult.put(ARG_CONTENT_ENTRY_UID, String.valueOf(42L));
 
         presenter.handleUpNavigation();
         verify(systemImplSpy, timeout(5000)).go(ContentEntryListView.VIEW_NAME, argsresult,

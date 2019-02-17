@@ -326,8 +326,7 @@ dependencies {
 
     implementation "com.google.android:flexbox:$version_android_flexbox"
 
-    //ASCII 85 used to encode
-    implementation "com.github.fzakaria:ascii85:$version_ascii85"
+    //SVG support for Android
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
     //Support for encrypted zips
