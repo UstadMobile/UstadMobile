@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:text=""
         android:textColor="@color/text_primary"
         android:textSize="12sp"
         android:visibility="invisible"
@@ -67,7 +67,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="16dp" />
 
-    <android.support.v7.widget.AppCompatCheckBox
+    <CheckBox
         android:id="@+id/item_studentlist_student_simple_student_checkbox"
         android:visibility="invisible"
         android:layout_width="wrap_content"
