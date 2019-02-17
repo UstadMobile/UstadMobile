@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class TestClazzLogDao extends AbstractDaoTest{
@@ -25,33 +26,22 @@ public class TestClazzLogDao extends AbstractDaoTest{
     }
 
     protected void addScheduleToMyClazz() {
-        //add scheduled occurences to myclazz
-        myClazz.getClazzUid();
-
         Schedule schedule1 = new Schedule();
-        schedule1.setSceduleStartTime(468 * 100000);    //13 hours - 1 pm ?
-        schedule1.setScheduleDay(Schedule.DAY_FRIDAY);
+        schedule1.setSceduleStartTime(13 * 60 * 60 * 1000);    //13 hours - 1 pm ?
+        schedule1.setScheduleDay(Calendar.getInstance().get(Calendar.DAY_OF_WEEK));
         schedule1.setScheduleActive(true);
         schedule1.setScheduleClazzUid(myClazz.getClazzUid());
-        schedule1.setScheduleEndTime(3600000);          //1 hour
+        schedule1.setScheduleEndTime(60 * 60 * 1000);          //1 hour
 
         UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
 
         ScheduleDao scheduleDao = serverDummyRepo.getScheduleDao();
         scheduleDao.insert(schedule1);
-
-
-
     }
 
-    @Test
-    public void givenClazzLogInsertedByAccountWithPermission_whenSynced_thenShouldBeOnServer() {
-        ClazzDao dao = UmAppDatabase.getInstance(null).getClazzDao();
-        Assert.assertNotNull(dao);
-
+    protected void grantTeacherRoleOnMyClazzToAccountPerson() {
         UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/",
                 "");
-
         long teacherPermissions =
                 Role.PERMISSION_CLAZZ_ADD_STUDENT |
                         Role.PERMISSION_CLAZZ_SELECT |                  //See Clazzes
@@ -72,6 +62,12 @@ public class TestClazzLogDao extends AbstractDaoTest{
                 accountPersonGroup.getGroupUid(), teacherRole.getRoleUid());
         serverDummyRepo.getEntityRoleDao().insert(entityRole);
 
+    }
+
+    @Test
+    public void givenClazzLogInsertedByAccountWithPermission_whenSynced_thenShouldBeOnServer() {
+        grantTeacherRoleOnMyClazzToAccountPerson();
+
         clientDb.syncWith(clientRepo, accountPerson.getPersonUid(),
                 100, 100);
 
@@ -88,7 +84,7 @@ public class TestClazzLogDao extends AbstractDaoTest{
 
     @Test
     public void givenScheduledClazzLogNotExisting_whenCreateClazzLogsCalled_thenClazzLogShouldExist() {
-
+        grantTeacherRoleOnMyClazzToAccountPerson();
         addScheduleToMyClazz();
 
         UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
@@ -100,8 +96,30 @@ public class TestClazzLogDao extends AbstractDaoTest{
 
         ClazzLogDao clazzLogDao = serverDummyRepo.getClazzLogDao();
         List<ClazzLog> allClazzLogs = clazzLogDao.findAll();
-        Assert.assertTrue(allClazzLogs.size() > 0);
+        Assert.assertEquals("One class log created", 1, allClazzLogs.size());
+    }
 
+    @Test
+    public void givenScheduledClazzLogExisting_whenCreateClazzLogsCalled_thenShouldNotCreateAnyMoreLogs() {
+        grantTeacherRoleOnMyClazzToAccountPerson();
+        addScheduleToMyClazz();
+
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/", "");
+        ScheduleDao scheduleDao = serverDummyRepo.getScheduleDao();
+        ClazzLogDao clazzLogDao = serverDummyRepo.getClazzLogDao();
+
+        scheduleDao.createClazzLogs(UMCalendarUtil.getDateInMilliPlusDays(0),
+                UMCalendarUtil.getDateInMilliPlusDays(1),accountPerson.getPersonUid(),
+                serverDummyRepo);
+
+        int numLogsBefore = clazzLogDao.findAll().size();
+
+        scheduleDao.createClazzLogs(UMCalendarUtil.getDateInMilliPlusDays(0),
+                UMCalendarUtil.getDateInMilliPlusDays(1),accountPerson.getPersonUid(),
+                serverDummyRepo);
+
+        Assert.assertEquals("No new logs created after log was already created", numLogsBefore,
+                clazzLogDao.findAll().size());
     }
 
 }
