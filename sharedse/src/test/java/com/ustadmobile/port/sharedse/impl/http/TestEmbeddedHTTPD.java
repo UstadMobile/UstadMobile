@@ -22,7 +22,7 @@ import java.util.zip.ZipFile;
 /**
  * Created by mike on 12/25/17.
  */
-public class TestMountedZipHandler {
+public class TestEmbeddedHTTPD {
 
     static File epubToMount;
 
@@ -40,9 +40,9 @@ public class TestMountedZipHandler {
         FileOutputStream fileOut = null;
         IOException ioe = null;
         try {
-            epubToMount = File.createTempFile("TestMountedZipHandler", ".epub");
-            in = TestMountedZipHandler.class.getResourceAsStream(
-                    "/com/ustadmobile/test/sharedse/thelittlechicks.epub");
+            epubToMount = File.createTempFile("TestEmbeddedHTTPD", ".epub");
+            in = TestEmbeddedHTTPD.class.getResourceAsStream(
+                    "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub");
             fileOut=  new FileOutputStream(epubToMount);
             UMIOUtils.readFully(in, fileOut, 8*1024);
 
@@ -68,12 +68,12 @@ public class TestMountedZipHandler {
     }
 
     @Test
-    public void testMountedZipDownload() throws IOException {
+    public void givenZipMounted_whenContentDownloadedOverHttp_shouldBeTheSameFile() throws IOException {
         String fileUrl = UMFileUtil.joinPaths(new String[]{
                 "http://localhost:" + httpd.getListeningPort(), mountedPath, TEST_ENTRY_PATH});
         HttpURLConnection urlConnection = (HttpURLConnection)new URL(fileUrl).openConnection();
         InputStream in = urlConnection.getInputStream();
-        File tmpSaveFile = File.createTempFile("TestMountedZipHandler-content-dl", "opf");
+        File tmpSaveFile = File.createTempFile("TestEmbeddedHTTPD-content-dl", "opf");
         FileOutputStream fileOut = new FileOutputStream(tmpSaveFile);
 
         UMIOUtils.readFully(in, fileOut, 8*1024);
