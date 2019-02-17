@@ -147,8 +147,8 @@ public class BleNetworkManagerTest {
         mockedNetworkManager.handleNodeDiscovered(networkNode);
 
         //Verify that entry status task was not created
-        verify(mockedNetworkManager.makeEntryStatusTask(context, contentEntryFileUidList,networkNode),
-                times(0));
+        verify(mockedNetworkManager, times(0))
+                .makeEntryStatusTask(context, contentEntryFileUidList,networkNode);
     }
 
     @Test
