@@ -10,10 +10,12 @@ import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -26,7 +28,8 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 import java.util.Objects;
 
 public class DownloadDialogFragment extends UstadDialogFragment implements DownloadDialogView,
-        DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+        DialogInterface.OnClickListener, View.OnClickListener,
+        CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
 
     private View rootView;
@@ -37,17 +40,18 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private RelativeLayout stackedOptionHolderView;
 
-    private RelativeLayout sdCardOptionHolderView;
-
     private RelativeLayout wifiOnlyHolder;
 
     private TextView statusTextView;
 
     private CheckBox wifiOnlyView;
 
-    private CheckBox useSDCardView;
-
     private RelativeLayout calculateHolder;
+
+
+    private Spinner mStorageOptions;
+
+    private UstadMobileSystemImpl impl;
 
 
     @NonNull
@@ -58,21 +62,17 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         rootView = inflater.inflate(R.layout.fragment_download_layout_view,null);
 
         stackedOptionHolderView  = rootView.findViewById(R.id.stacked_option_holder);
-        sdCardOptionHolderView  = rootView.findViewById(R.id.use_sdcard_option_holder);
         statusTextView = rootView.findViewById(R.id.download_option_status_text);
         wifiOnlyView = rootView.findViewById(R.id.wifi_only_option);
-        useSDCardView = rootView.findViewById(R.id.use_sdcard_option);
+        mStorageOptions = rootView.findViewById(R.id.storage_option);
         calculateHolder = rootView.findViewById(R.id.download_calculate_holder);
         TextView calculateTextView = rootView.findViewById(R.id.download_dialog_calculating);
         wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder);
 
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl = UstadMobileSystemImpl.getInstance();
 
         ((TextView)rootView.findViewById(R.id.wifi_only_option_label))
                 .setText(impl.getString(MessageID.download_wifi_only , getContext()));
-
-        ((TextView)rootView.findViewById(R.id.use_sdcard_option_label))
-                .setText(impl.getString(MessageID.download_sdcard_option, getContext()));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setPositiveButton(R.string.ok, this);
@@ -85,12 +85,16 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         wifiOnlyView.setOnCheckedChangeListener(this);
-        useSDCardView.setOnCheckedChangeListener(this);
         wifiOnlyHolder.setOnClickListener(this);
-        sdCardOptionHolderView.setOnClickListener(this);
         calculateTextView.setText(impl.getString(MessageID.download_calculating,getContext()));
 
+        setUpStorageOptions();
+
         return mDialog;
+    }
+
+    private void setUpStorageOptions(){
+
     }
 
     @Override
@@ -153,16 +157,6 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         mDialog.dismiss();
     }
 
-    @Override
-    public boolean isSDCardAvailableAndSupported() {
-       //TODO: make this using new logic and the choices should be dropdown not checkbox
-        return true;
-    }
-
-    @Override
-    public void setSDCardOptionVisible(boolean visible) {
-        sdCardOptionHolderView.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
 
     @Override
     public void setWifiOnlyOptionVisible(boolean visible) {
@@ -195,18 +189,12 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
             mPresenter.handleClickStackedButton(viewId);
         }else if(viewId == R.id.wifi_only_option_holder){
             mPresenter.handleWiFiOnlyOption(!wifiOnlyView.isChecked());
-        }else {
-            mPresenter.handleSDCardSelection(!useSDCardView.isChecked());
         }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(buttonView.getId() == R.id.wifi_only_option){
-            mPresenter.handleWiFiOnlyOption(isChecked);
-        }else if(buttonView.getId() == R.id.use_sdcard_option){
-            mPresenter.handleSDCardSelection(isChecked);
-        }
+        mPresenter.handleWiFiOnlyOption(isChecked);
     }
 
 
@@ -222,5 +210,15 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         if(mPresenter != null){
             mPresenter.onDestroy();
         }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
