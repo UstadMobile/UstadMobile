@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryFileWithFilePath;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -26,6 +27,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -40,6 +42,7 @@ public class TestShrinkerUtils {
     private File secondepub;
     private ContentEntryFileDao contentFileDao;
     private File tmpFolder;
+    private UmAppDatabase repo;
 
     @Before
     public void before() {
@@ -75,7 +78,7 @@ public class TestShrinkerUtils {
     public void initDb() throws IOException {
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.clearAllTables();
-        UmAppDatabase repo = db.getRepository("https://localhost", "");
+        repo = db.getRepository("https://localhost", "");
         contentFileDao = repo.getContentEntryFileDao();
         ContentEntryFileStatusDao statusDao = db.getContentEntryFileStatusDao();
 
@@ -120,6 +123,20 @@ public class TestShrinkerUtils {
         statusDao.insert(secondStatus);
 
     }
+
+    @Test
+    public void givenDabaseEntries_whenShrunk_shouldUpdateAllEpubInDb() {
+
+        List<ContentEntryFileWithFilePath> epublist = contentFileDao.findEpubsFiles();
+
+        ShrinkerUtil.shrinkAllEpubInDatabase(repo);
+
+        List<ContentEntryFileWithFilePath> updatedEpubList = contentFileDao.findEpubsFiles();
+
+        Assert.assertTrue(updatedEpubList.get(0).getFileSize() < epublist.get(0).getFileSize());
+
+    }
+
 
     @Test
     public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException {
@@ -313,16 +330,64 @@ public class TestShrinkerUtils {
 
     }
 
-    public void givenCorruptZip_whenShrunk_shouldThrowIOException() {
+    @Test(expected = IOException.class)
+    public void givenCorruptZip_whenShrunk_shouldThrowIOException() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "invalid-epub.epub");
+
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/files/correct.webp"),
+                epub);
+        ShrinkerUtil.shrinkEpub(epub);
+    }
+
+    @Test
+    public void givenOpfWithImagesThatDoNotExist_whenShrunk_shouldContinueAndOmitMissingFile() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "epub.epub");
+
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/missing-image.epub"),
+                epub);
+        ShrinkerUtil.shrinkEpub(epub);
+
+        ZipFile zipFile = new ZipFile(epub);
+        ZipEntry entry = zipFile.getEntry("META-INF/container.xml");
+        InputStream is = zipFile.getInputStream(entry);
+        Document document = Jsoup.parse(UMIOUtils.readStreamToString(is), "", Parser.xmlParser());
+        String path = document.selectFirst("rootfile").attr("full-path");
+
+        ZipEntry opfEntry = zipFile.getEntry(path);
+        InputStream opfis = zipFile.getInputStream(opfEntry);
+        Document opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser());
+        Element manifestitem = opfdoc.selectFirst("manifest item[href=images/images/logowhite.png]");
+
+        Assert.assertEquals("images/images/logowhite.png", manifestitem.attr("href"));
 
     }
 
-    public void givenOpfWithImagesThatDoNotExist_whenShrunk_shouldContinueAndOmitMissingFile() {
+    @Test
+    public void givenInvalidImageFile_whenShrunk_shouldContinueAndOmitInvalidFile() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
 
-    }
+        File epub = new File(tmpDir, "epub.epub");
 
-    public void givenInvalidImageFile_whenShrunk_shouldContinueAndOmitInvalidFile() {
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/missing-image.epub"),
+                epub);
+        ShrinkerUtil.shrinkEpub(epub);
 
+        ZipFile zipFile = new ZipFile(epub);
+        ZipEntry entry = zipFile.getEntry("META-INF/container.xml");
+        InputStream is = zipFile.getInputStream(entry);
+        Document document = Jsoup.parse(UMIOUtils.readStreamToString(is), "", Parser.xmlParser());
+        String path = document.selectFirst("rootfile").attr("full-path");
+
+        ZipEntry opfEntry = zipFile.getEntry(path);
+        InputStream opfis = zipFile.getInputStream(opfEntry);
+        Document opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser());
+        Element manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]");
+
+        Assert.assertEquals("images/cover.png", manifestitem.attr("href"));
     }
 
 
