@@ -5,7 +5,6 @@ Ustad Mobile enables learners to access and share content offline. It uses peer-
 powered by open standards:
 
 * [EPUB content](http://idpf.org/epub): Anything you can do with HTML5 can be in EPUB (video, interactive quizzes, etc).
-* [Open Publication Distribution System (OPDS)](https://opds-spec.org): An Atom RSS feed describing and index of content. Well explained at [discover-opds.org](http://discover-opds.org).
 * [Experience API](http://www.tincanapi.com): The open widely adopted standard to record learning experiences.
 
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
