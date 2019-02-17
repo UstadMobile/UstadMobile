@@ -69,7 +69,7 @@ public class ContentEntryListEspressoTest {
     public void launchActivity() {
         Intent launchActivityIntent = new Intent();
         launchActivityIntent.putExtra(ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID,
-                ROOT_CONTENT_ENTRY_UID);
+                String.valueOf(ROOT_CONTENT_ENTRY_UID));
         mActivityRule.launchActivity(launchActivityIntent);
     }
 
