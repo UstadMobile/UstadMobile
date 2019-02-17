@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -94,7 +94,7 @@ public class EdraakK12ContentScraper {
             response = new GsonBuilder().create().fromJson(IOUtils.toString(urlConnection.getInputStream(), UTF_ENCODING), ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID for url " + scrapUrl.toString(), e.getCause());
-        }finally {
+        } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -146,7 +146,7 @@ public class EdraakK12ContentScraper {
             anyContentUpdated = true;
         }
 
-        File tinCanFile = new File(courseDirectory, "tincan.xml");
+        File tinCanFile = new File(courseDirectory, TINCAN_FILENAME);
         if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
             try {
                 ContentScraperUtil.generateTinCanXMLFile(courseDirectory, response.title, "ar",

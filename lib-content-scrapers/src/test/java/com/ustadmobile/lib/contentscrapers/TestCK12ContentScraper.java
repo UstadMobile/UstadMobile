@@ -92,7 +92,13 @@ public class TestCK12ContentScraper {
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
 
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + VIDEO_LOCATION_FILE).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
                 } else if (request.getPath().contains("picture")) {
                     int length = "/media/".length();
                     String fileName = request.getPath().substring(length,
@@ -101,23 +107,39 @@ public class TestCK12ContentScraper {
                     BufferedSource source = Okio.buffer(Okio.source(pictureIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + RESOURCE_PATH).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+
                 } else if (request.getPath().contains("/plix/")) {
                     int length = "/plix/".length();
-                    String fileName = request.getPath().substring(length,
-                            request.getPath().length());
+                    String fileName = request.getPath().substring(length);
                     InputStream pictureIn = getClass().getResourceAsStream(PLIX_PATH + fileName);
                     BufferedSource source = Okio.buffer(Okio.source(pictureIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
-                } else if(request.getPath().contains("json")){
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + RESOURCE_PATH).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+                } else if (request.getPath().contains("json")) {
 
                     int start = request.getPath().indexOf("/", request.getPath().indexOf("/") + 1);
-                    String fileName = request.getPath().substring(start,
-                            request.getPath().length());
+                    String fileName = request.getPath().substring(start);
                     String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
-                    return new MockResponse().setBody(body);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(body);
+
+                    return response;
 
                 }
 
