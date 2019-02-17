@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
+import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
@@ -9,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
@@ -16,18 +19,18 @@ import org.jsoup.select.Elements;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class TestShrinkerUtils {
 
@@ -45,6 +48,27 @@ public class TestShrinkerUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static int countManifestItemsByMediaType(OpfDocument opf, String mimeType) {
+        int count = 0;
+        for (OpfItem item : opf.getManifestItems().values()) {
+            if (mimeType.equals(item.getMediaType()))
+                count++;
+        }
+
+        return count;
+    }
+
+    public static int countManifestItemsWithExtension(OpfDocument opf, String extension) {
+        int count = 0;
+        extension = extension.toLowerCase();
+        for (OpfItem item : opf.getManifestItems().values()) {
+            if (item.getHref().toLowerCase().endsWith(extension))
+                count++;
+        }
+
+        return count;
     }
 
 
@@ -100,7 +124,13 @@ public class TestShrinkerUtils {
     @Test
     public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException {
 
-        ShrinkerUtil.main(new String[]{"db"});
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "test.epub");
+        InputStream isepub = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/invalid-jpg.epub");
+        FileUtils.copyToFile(isepub, epub);
+
+        ShrinkerUtil.shrinkEpub(epub);
 
         Assert.assertEquals("Failed to delete the tmp Folder for epub test after shrinking", false, new File(tmpDir, "test").exists());
         Assert.assertEquals("Failed to delete the tmp Folder for epub 13232 after shrinking", false, new File(tmpFolder, "13232").exists());
@@ -121,7 +151,8 @@ public class TestShrinkerUtils {
         for (Element manifest : manifestitems) {
 
             String href = manifest.attr("href");
-            Assert.assertEquals("png file still exists in manifest", false, href.contains(".png"));
+            Assert.assertFalse("File does not have png extension",
+                    href.toLowerCase().endsWith(".png"));
 
             if (href.contains(".webp")) {
                 countWebp++;
@@ -160,5 +191,145 @@ public class TestShrinkerUtils {
 
 
     }
+
+
+    @Test
+    public void givenAnHTMLElementWithMultipleSrc_whenThereIsNoChangesToReplacedFiles_NoChangesShouldBeMade() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File folder = new File(tmpDir, "folder");
+        folder.mkdirs();
+        File images = new File(tmpDir, "images");
+        images.mkdirs();
+        File file = new File(folder, "shrinker.html");
+        File imageFile = new File(images, "test1picture.png");
+
+        InputStream is = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/files/test1picture.png");
+        FileUtils.copyToFile(is, imageFile);
+
+        InputStream testShrinker = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/html-with-multiple-image-img-srcs.html");
+        FileUtils.copyToFile(testShrinker, imageFile);
+
+        HashMap<File, File> replacedFiles = new HashMap<>();
+
+        Document doc = Jsoup.parse(file, UTF_ENCODING);
+        Element afterElement = doc.selectFirst("[src]");
+        Attributes beforeAttrList = afterElement.attributes();
+
+        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement, replacedFiles, file);
+
+        Assert.assertEquals(beforeAttrList, afterElement.attributes());
+    }
+
+
+    @Test
+    public void givenAnHTMLElementWithMultipleSrc_WhenRealWebpPathExistsInDataSrc2_thenOnlyOneSrcAttributeShouldExist() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File folder = new File(tmpDir, "folder");
+        folder.mkdirs();
+        File images = new File(tmpDir, "images");
+        images.mkdirs();
+        File file = new File(folder, "shrinker.html");
+        File imageFile = new File(images, "test1picture.png");
+        File webp = new File(images, "correct.webp");
+
+        String testPicture = "/com/ustadmobile/lib/contentscrapers/files/test1picture.png";
+        InputStream inputStream = getClass().getResourceAsStream(testPicture);
+        FileUtils.copyToFile(inputStream, imageFile);
+
+        String testShrinker = "/com/ustadmobile/lib/contentscrapers/shrinker/html-with-multiple-image-img-srcs.html";
+        InputStream htmlInput = getClass().getResourceAsStream(testShrinker);
+        FileUtils.copyToFile(htmlInput, imageFile);
+
+        String testWebp = "/com/ustadmobile/lib/contentscrapers/files/correct.webp";
+        InputStream webpInput = getClass().getResourceAsStream(testWebp);
+        FileUtils.copyToFile(webpInput, imageFile);
+
+        HashMap<File, File> replacedFiles = new HashMap<>();
+        replacedFiles.put(imageFile, webp);
+
+        Document doc = Jsoup.parse(file, UTF_ENCODING);
+        Element afterElement = doc.selectFirst("img.data-src2");
+
+        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement, replacedFiles, file);
+
+        Assert.assertEquals(2, afterElement.attributes().size());
+
+    }
+
+    @Test
+    public void givenAnHTMLElementWithMultipleSrc_WhenRealWebpPathIsInSrc_thenOnlyOneSrcAttributeShouldExist() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File folder = new File(tmpDir, "folder");
+        folder.mkdirs();
+        File images = new File(tmpDir, "images");
+        images.mkdirs();
+        File file = new File(folder, "shrinker.html");
+        File imageFile = new File(images, "test1picture.png");
+        File webp = new File(images, "correct.webp");
+
+        String testPicture = "/com/ustadmobile/lib/contentscrapers/files/test1picture.png";
+        InputStream inputStream = getClass().getResourceAsStream(testPicture);
+        FileUtils.copyToFile(inputStream, imageFile);
+
+
+        String testShrinker = "/com/ustadmobile/lib/contentscrapers/shrinker/html-with-multiple-image-img-srcs.html";
+        InputStream htmlInput = getClass().getResourceAsStream(testShrinker);
+        FileUtils.copyToFile(htmlInput, imageFile);
+
+
+        String testWebp = "/com/ustadmobile/lib/contentscrapers/files/correct.webp";
+        InputStream webpInput = getClass().getResourceAsStream(testWebp);
+        FileUtils.copyToFile(webpInput, imageFile);
+
+
+        HashMap<File, File> replacedFiles = new HashMap<>();
+        replacedFiles.put(imageFile, webp);
+
+        Document doc = Jsoup.parse(file, UTF_ENCODING);
+        Element afterElement = doc.selectFirst("img.src");
+
+        ShrinkerUtil.cleanUpAttributeListWithMultipleSrc(afterElement, replacedFiles, file);
+
+        Assert.assertEquals(2, afterElement.attributes().size());
+
+    }
+
+    /**
+     * Pratham have a jpeg with a color profile problem that prevents the normal webp
+     * conversion working on linux. This tests the workaround in shrinkUtils
+     */
+    @Test
+    public void givennCmykJpg_whenShrunk_shouldBeConvertedToWebP() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File invalidImage = new File(tmpDir, "invalid.jpg");
+        File image = new File(tmpDir, "invalid.webp");
+        InputStream is = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/invalid-jpg.jpg");
+        FileUtils.copyToFile(is, invalidImage);
+
+        ShrinkerUtil.convertImageToWebp(invalidImage, image);
+
+        Assert.assertEquals(true, ContentScraperUtil.fileHasContent(image));
+
+    }
+
+    public void givenCorruptZip_whenShrunk_shouldThrowIOException() {
+
+    }
+
+    public void givenOpfWithImagesThatDoNotExist_whenShrunk_shouldContinueAndOmitMissingFile() {
+
+    }
+
+    public void givenInvalidImageFile_whenShrunk_shouldContinueAndOmitInvalidFile() {
+
+    }
+
 
 }
