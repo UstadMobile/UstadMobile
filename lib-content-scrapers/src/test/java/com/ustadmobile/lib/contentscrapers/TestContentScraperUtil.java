@@ -82,7 +82,7 @@ public class TestContentScraperUtil {
 
         Document doc = Jsoup.parse(convertedHtml);
         Element image = doc.select("img").first();
-        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(resourceLocation.getName() + "/media_test1picture.webp"));
+        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(resourceLocation.getName() + "/media_test1picture.png"));
     }
 
 
