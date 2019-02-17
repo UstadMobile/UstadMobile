@@ -146,7 +146,9 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
 
             @Override
             public boolean onQueryTextChange(String query) {
+                currentValue = query;
                 // filter recycler view when text is changed
+                mPresenter.updateFilter(apl, aph, currentValue);
                 return false;
             }
         });
@@ -221,20 +223,5 @@ public class PersonListSearchActivity extends UstadBaseActivity implements Perso
             }
         };
 
-//    public float getAttendancePercentageLow() {
-//        return apl;
-//    }
-//
-//    public void setAttendancePercentageLow(float apl) {
-//        this.apl = apl;
-//    }
-//
-//    public float getAttendancePercentageHigh() {
-//        return aph;
-//    }
-//
-//    public void setAttendancePercentageHigh(float aph) {
-//        this.aph = aph;
-//    }
 
 }

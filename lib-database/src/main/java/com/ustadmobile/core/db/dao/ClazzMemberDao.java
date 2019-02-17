@@ -236,7 +236,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "   AND ClazzMember.clazzMemberActive = 1 " +
             ") " +
             " AND Person.active = 1 " +
-            " AND (Person.firstNames like :searchQuery AND Person.lastName like :searchQuery )" +
+            " AND (Person.firstNames like :searchQuery OR Person.lastName like :searchQuery )" +
             "ORDER BY clazzMemberRole ASC")
     public abstract UmProvider<PersonWithEnrollment>
             findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(long clazzUid,

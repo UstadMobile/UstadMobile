@@ -323,6 +323,22 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
+
+                // filter recycler view when query submitted
+                switch (mPager.getCurrentItem()){
+                    case VIEW_POSITION_POSITION_FEED:
+                        break;
+                    case VIEW_POSITION_POSITION_CLASSES:
+                        classesFragment.searchClasses(query);
+                        break;
+                    case VIEW_POSITION_POSITION_PEOPLE:
+                        peopleListFragment.searchPeople(query);
+                        break;
+                    case VIEW_POSITION_POSITION_REPORTS:
+                        break;
+                    default:
+                        break;
+                }
                 return false;
             }
         });
