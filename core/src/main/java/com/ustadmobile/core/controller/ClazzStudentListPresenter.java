@@ -107,7 +107,7 @@ public class ClazzStudentListPresenter extends
         //Find the Provider
         clazzPersonListProvider = repository.getClazzMemberDao()
                 .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
-        setProviderToView();
+            setProviderToView();
 
         //Initialise sort spinner data:
         idToOrderInteger = new Hashtable<>();
