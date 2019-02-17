@@ -127,7 +127,7 @@ public class TestShrinkerUtils {
         File tmpDir = Files.createTempDirectory("testShrinker").toFile();
 
         File epub = new File(tmpDir, "test.epub");
-        InputStream isepub = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/invalid-jpg.epub");
+        InputStream isepub = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/test.epub");
         FileUtils.copyToFile(isepub, epub);
 
         ShrinkerUtil.shrinkEpub(epub);
@@ -209,7 +209,7 @@ public class TestShrinkerUtils {
         FileUtils.copyToFile(is, imageFile);
 
         InputStream testShrinker = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/html-with-multiple-image-img-srcs.html");
-        FileUtils.copyToFile(testShrinker, imageFile);
+        FileUtils.copyToFile(testShrinker, file);
 
         HashMap<File, File> replacedFiles = new HashMap<>();
 
@@ -242,11 +242,11 @@ public class TestShrinkerUtils {
 
         String testShrinker = "/com/ustadmobile/lib/contentscrapers/shrinker/html-with-multiple-image-img-srcs.html";
         InputStream htmlInput = getClass().getResourceAsStream(testShrinker);
-        FileUtils.copyToFile(htmlInput, imageFile);
+        FileUtils.copyToFile(htmlInput, file);
 
         String testWebp = "/com/ustadmobile/lib/contentscrapers/files/correct.webp";
         InputStream webpInput = getClass().getResourceAsStream(testWebp);
-        FileUtils.copyToFile(webpInput, imageFile);
+        FileUtils.copyToFile(webpInput, webp);
 
         HashMap<File, File> replacedFiles = new HashMap<>();
         replacedFiles.put(imageFile, webp);
@@ -280,12 +280,12 @@ public class TestShrinkerUtils {
 
         String testShrinker = "/com/ustadmobile/lib/contentscrapers/shrinker/html-with-multiple-image-img-srcs.html";
         InputStream htmlInput = getClass().getResourceAsStream(testShrinker);
-        FileUtils.copyToFile(htmlInput, imageFile);
+        FileUtils.copyToFile(htmlInput, file);
 
 
         String testWebp = "/com/ustadmobile/lib/contentscrapers/files/correct.webp";
         InputStream webpInput = getClass().getResourceAsStream(testWebp);
-        FileUtils.copyToFile(webpInput, imageFile);
+        FileUtils.copyToFile(webpInput, webp);
 
 
         HashMap<File, File> replacedFiles = new HashMap<>();
