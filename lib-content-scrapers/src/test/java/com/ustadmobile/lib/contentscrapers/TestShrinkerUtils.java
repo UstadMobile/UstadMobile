@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -313,16 +314,64 @@ public class TestShrinkerUtils {
 
     }
 
-    public void givenCorruptZip_whenShrunk_shouldThrowIOException() {
+    @Test(expected = IOException.class)
+    public void givenCorruptZip_whenShrunk_shouldThrowIOException() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "invalid-epub.epub");
+
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/files/correct.webp"),
+                epub);
+        ShrinkerUtil.shrinkEpub(epub);
+    }
+
+    @Test
+    public void givenOpfWithImagesThatDoNotExist_whenShrunk_shouldContinueAndOmitMissingFile() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "epub.epub");
+
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/missing-image.epub"),
+                epub);
+        ShrinkerUtil.shrinkEpub(epub);
+
+        ZipFile zipFile = new ZipFile(epub);
+        ZipEntry entry = zipFile.getEntry("META-INF/container.xml");
+        InputStream is = zipFile.getInputStream(entry);
+        Document document = Jsoup.parse(UMIOUtils.readStreamToString(is), "", Parser.xmlParser());
+        String path = document.selectFirst("rootfile").attr("full-path");
+
+        ZipEntry opfEntry = zipFile.getEntry(path);
+        InputStream opfis = zipFile.getInputStream(opfEntry);
+        Document opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser());
+        Element manifestitem = opfdoc.selectFirst("manifest item[href=images/images/logowhite.png]");
+
+        Assert.assertEquals("images/images/logowhite.png", manifestitem.attr("href"));
 
     }
 
-    public void givenOpfWithImagesThatDoNotExist_whenShrunk_shouldContinueAndOmitMissingFile() {
+    @Test
+    public void givenInvalidImageFile_whenShrunk_shouldContinueAndOmitInvalidFile() throws IOException {
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
 
-    }
+        File epub = new File(tmpDir, "epub.epub");
 
-    public void givenInvalidImageFile_whenShrunk_shouldContinueAndOmitInvalidFile() {
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/missing-image.epub"),
+                epub);
+        ShrinkerUtil.shrinkEpub(epub);
 
+        ZipFile zipFile = new ZipFile(epub);
+        ZipEntry entry = zipFile.getEntry("META-INF/container.xml");
+        InputStream is = zipFile.getInputStream(entry);
+        Document document = Jsoup.parse(UMIOUtils.readStreamToString(is), "", Parser.xmlParser());
+        String path = document.selectFirst("rootfile").attr("full-path");
+
+        ZipEntry opfEntry = zipFile.getEntry(path);
+        InputStream opfis = zipFile.getInputStream(opfEntry);
+        Document opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser());
+        Element manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]");
+
+        Assert.assertEquals("images/cover.png", manifestitem.attr("href"));
     }
 
 
