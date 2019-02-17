@@ -161,6 +161,8 @@ public class ShrinkerUtil {
                         convertImageToWebp(inputFile, outputFile);
                     } catch (Exception e) {
                         UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                        // this is needed when changing the html src files attributes to remove all the unneeded attributes
+                        replacedFiles.put(inputFile, inputFile);
                         continue;
                     }
                     replacedFiles.put(inputFile, outputFile);
