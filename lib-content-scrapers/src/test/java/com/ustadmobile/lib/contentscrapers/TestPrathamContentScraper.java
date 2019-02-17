@@ -40,21 +40,30 @@ public class TestPrathamContentScraper {
 
                 if (request.getPath().contains("json")) {
 
-                    String fileName = request.getPath().substring(5,
-                            request.getPath().length());
+                    String fileName = request.getPath().substring(5);
                     String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
-                    return new MockResponse().setBody(body);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(body);
+
+                    return response;
 
                 } else if (request.getPath().contains("content")) {
 
-                    String fileLocation = request.getPath().substring(8,
-                            request.getPath().length());
+                    String fileLocation = request.getPath().substring(8);
                     InputStream videoIn = getClass().getResourceAsStream(fileLocation);
                     BufferedSource source = Okio.buffer(Okio.source(videoIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
 
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + UTF_ENCODING).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
                 }
 
             } catch (IOException e) {

@@ -59,34 +59,70 @@ public class TestPhetContentScraper {
 
                 if (request.getPath().startsWith("/en/api/simulation")) {
 
-                    return new MockResponse().setBody(readFile(HTML_FILE_LOCATION));
+                    Buffer buffer = readFile(HTML_FILE_LOCATION);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + HTML_FILE_LOCATION).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
 
                 } else if (request.getPath().contains(PHET_MAIN_CONTENT)) {
 
-                    return new MockResponse().setBody(readFile(PHET_MAIN_CONTENT));
+                    Buffer buffer = readFile(PHET_MAIN_CONTENT);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + HTML_FILE_LOCATION).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+
 
                 } else if (request.getPath().equals("/media/simulation_en.html?download")) {
 
-                    MockResponse mock = new MockResponse();
-                    mock.setBody(readFile(EN_LOCATION_FILE));
-                    mock.addHeader("ETag", "16adca-5717010854ac0");
-                    mock.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    Buffer buffer = readFile(EN_LOCATION_FILE);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
 
-                    return mock;
+                    return response;
+
                 } else if (request.getPath().contains("/media/simulation_es.html?download")) {
 
-                    MockResponse mock = new MockResponse();
-                    mock.setBody(readFile(ES_LOCATION_FILE));
-                    mock.addHeader("ETag", "16adca-5717010854ac0");
-                    mock.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    Buffer buffer = readFile(ES_LOCATION_FILE);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
 
-                    return mock;
+                    return response;
+
                 } else if (request.getPath().contains("flash")) {
 
-                    return new MockResponse().setBody(readFile(FLASH_FILE_LOCATION));
+                    Buffer buffer = readFile(FLASH_FILE_LOCATION);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+
                 } else if (request.getPath().contains("jar")) {
 
-                    return new MockResponse().setBody(readFile(JAR_FILE_LOCATION));
+                    Buffer buffer = readFile(JAR_FILE_LOCATION);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
                 }
 
             } catch (IOException e) {
@@ -307,7 +343,6 @@ public class TestPhetContentScraper {
             content.findContent(System.getProperty("findPhetUrl"), new File(System.getProperty("findPhetDir")));
         }
     }
-
 
 
 }

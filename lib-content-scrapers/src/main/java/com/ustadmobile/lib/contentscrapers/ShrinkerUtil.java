@@ -5,7 +5,6 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -32,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -161,8 +162,6 @@ public class ShrinkerUtil {
                         convertImageToWebp(inputFile, outputFile);
                     } catch (Exception e) {
                         UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                        // this is needed when changing the html src files attributes to remove all the unneeded attributes
-                        replacedFiles.put(inputFile, inputFile);
                         continue;
                     }
                     replacedFiles.put(inputFile, outputFile);
@@ -193,33 +192,7 @@ public class ShrinkerUtil {
                         if (replacedFiles.size() != 0) {
                             Elements elements = doc.select("[src]");
                             for (Element element : elements) {
-                                List<Attribute> attrList = element.attributes().asList();
-
-                                ArrayList<String> attrToDelete = new ArrayList<>();
-                                for (Attribute attr : attrList) {
-
-                                    if (attr.getKey().contains("src")) {
-
-                                        String srcValue = attr.getValue();
-                                        File srcFile = new File(htmlFile.getParentFile(), srcValue);
-
-                                        if (replacedFiles.containsKey(srcFile)) {
-                                            String newHref = Paths.get(htmlFile.getParentFile().toURI())
-                                                    .relativize(Paths.get(replacedFiles.get(srcFile).toURI()))
-                                                    .toString().replaceAll(Pattern.quote("\\"), "/");
-
-                                            element.attr("src", newHref);
-                                        } else {
-                                            attrToDelete.add(attr.getKey());
-                                        }
-                                    }
-                                }
-                                for (String attr : attrToDelete) {
-                                    if (!attr.equals("src")) {
-                                        element.removeAttr(attr);
-                                    }
-                                }
-
+                                cleanUpAttributeListWithMultipleSrc(element, replacedFiles, htmlFile);
                             }
                         }
                         Elements styleList = doc.select("style[type=text/css]");
@@ -291,6 +264,53 @@ public class ShrinkerUtil {
         }
 
         return false;
+    }
+
+    public static void cleanUpAttributeListWithMultipleSrc(Element element, Map<File, File> replacedFiles, File htmlFile) {
+        List<Attribute> attrList = element.attributes().asList();
+        boolean foundReplaced = false;
+        for (Attribute attr : attrList) {
+
+            if (attr.getKey().contains("src")) {
+
+                try {
+                    String srcValue = attr.getValue();
+                    File srcFile = new File(htmlFile.getParentFile(), srcValue);
+                    srcFile = Paths.get(srcFile.getPath()).normalize().toFile();
+
+                    File newFile = replacedFiles.get(srcFile);
+                    if (newFile != null) {
+                        foundReplaced = true;
+                        String newHref = Paths.get(htmlFile.getParentFile().toURI())
+                                .relativize(Paths.get(newFile.toURI()))
+                                .toString().replaceAll(Pattern.quote("\\"), "/");
+
+                        deleteAllAttributesWithSrc(element);
+                        element.attr("src", newHref);
+                        break;
+                    }
+                } catch (InvalidPathException ignored) {
+
+                }
+            }
+        }
+        if (!foundReplaced) {
+            UMLogUtil.logInfo("Did not find the replacement file for " + element.selectFirst("[src]").attr("src"));
+        }
+    }
+
+    private static void deleteAllAttributesWithSrc(Element element) {
+        List<Attribute> attrList = element.attributes().asList();
+        ArrayList<String> attrToDelete = new ArrayList<>();
+        for (Attribute attribute : attrList) {
+            if (attribute.getKey().contains("src")) {
+                attrToDelete.add(attribute.getKey());
+            }
+        }
+        for (String attr : attrToDelete) {
+            element.removeAttr(attr);
+        }
+
     }
 
     /**
