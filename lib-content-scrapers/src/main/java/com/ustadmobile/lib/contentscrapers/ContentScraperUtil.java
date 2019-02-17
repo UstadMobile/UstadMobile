@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData;
 import com.ustadmobile.lib.db.entities.ContentCategory;
@@ -34,6 +35,7 @@ import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -106,6 +108,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
@@ -391,7 +394,7 @@ public class ContentScraperUtil {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File(destinationDirectory, "tincan.xml"));
+        StreamResult result = new StreamResult(new File(destinationDirectory, TINCAN_FILENAME));
         transformer.transform(source, result);
 
     }

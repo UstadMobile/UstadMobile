@@ -31,35 +31,50 @@ public class TestVoaScraper {
 
                 if (request.getPath().contains("json")) {
 
-                    String fileName = request.getPath().substring(5,
-                            request.getPath().length());
+                    String fileName = request.getPath().substring(5);
                     String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
-                    return new MockResponse().setBody(body);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(body);
 
-                } else if(request.getPath().contains("post")){
+                    return response;
+
+                } else if (request.getPath().contains("post")) {
 
                     String data = IOUtils.toString(request.getBody().inputStream(), UTF_ENCODING);
-                    if(data.contains("SelectedAnswerId")){
+                    String body;
+                    if (data.contains("SelectedAnswerId")) {
                         String fileName = "/com/ustadmobile/lib/contentscrapers/voa/quizoneanswer.html";
-                        String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
-                        return new MockResponse().setBody(body);
-                    }else{
+                        body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
+                    } else {
                         String fileName = "/com/ustadmobile/lib/contentscrapers/voa/quizone.html";
-                        String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
-                        return new MockResponse().setBody(body);
+                        body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
                     }
 
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(body);
 
-                }else if (request.getPath().contains("content")) {
+                    return response;
 
-                    String fileLocation = request.getPath().substring(8,
-                            request.getPath().length());
+
+                } else if (request.getPath().contains("content")) {
+
+                    String fileLocation = request.getPath().substring(8);
                     InputStream videoIn = getClass().getResourceAsStream(fileLocation);
                     BufferedSource source = Okio.buffer(Okio.source(videoIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
 
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+
                 }
 
             } catch (Exception e) {
@@ -131,9 +146,6 @@ public class TestVoaScraper {
         Assert.assertEquals(firstDownloadTime, new File(tmpDir, "testquiz.zip").lastModified());
 
     }
-
-
-
 
 
 }

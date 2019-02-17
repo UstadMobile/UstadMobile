@@ -166,6 +166,7 @@ public class ScraperConstants {
     public static final String SVG_EXT = ".svg";
     public static final String JSON_EXT = ".json";
     public static final String WEBP_EXT = ".webp";
+    public static final String TINCAN_FILENAME = "tincan.xml";
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";
