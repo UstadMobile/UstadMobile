@@ -9,15 +9,20 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
-import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
+import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.verification.VerificationMode;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
@@ -30,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,18 +65,39 @@ public class DownloadDialogPresenterTest {
 
     private long totalBytesToDownload = 0L;
 
+    private static final int MAX_LATCH_WAITING_TIME = 5;
+
+    private static final int MAX_THREAD_SLEEP_TIME = 2;
+
+    private NetworkManagerBle mockedNetworkManager;
+
+    private DeleteJobTaskRunner mockedDeleteTaskRunner = null;
+
 
     @Before
-    public void setUp(){
+    public void setUp() throws IOException {
         context = PlatformTestUtil.getTargetContext();
         mockedDialogView = mock(DownloadDialogView.class);
+        mockedDeleteTaskRunner = spy(DeleteJobTaskRunner.class);
         doAnswer((invocationOnMock) -> {
             new Thread(((Runnable)invocationOnMock.getArgument(0))).start();
             return null;
         }).when(mockedDialogView).runOnUiThread(any());
 
+
         umAppDatabase = UmAppDatabase.getInstance(context);
         UmAppDatabase.getInstance(context).clearAllTables();
+
+        EmbeddedHTTPD httpd = new EmbeddedHTTPD(0,context);
+        httpd.start();
+        mockedNetworkManager = spy(NetworkManagerBle.class);
+        mockedNetworkManager.setContext(context);
+        mockedNetworkManager.onCreate();
+
+        when(mockedNetworkManager.getHttpd()).thenReturn(httpd);
+
+        when(mockedNetworkManager.makeDeleteJobTask(any(),any()))
+                .thenReturn(mockedDeleteTaskRunner);
 
 
         rootEntry = new ContentEntry("Lorem ipsum title",
@@ -120,8 +147,22 @@ public class DownloadDialogPresenterTest {
         downloadSetItem.setDsiUid(umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
 
         downloadJob = new DownloadJob(downloadSet);
-        downloadJob.setDjStatus(JobStatus.RUNNING);
         downloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(downloadJob));
+
+        ContentEntryFile entryFile = new ContentEntryFile();
+        entryFile.setLastModified(System.currentTimeMillis());
+        entryFile.setFileSize(2000);
+        entryFile.setContentEntryFileUid(umAppDatabase.getContentEntryFileDao().insert(entryFile));
+
+        for(int i = 0 ; i < 5; i++){
+            DownloadJobItem downloadJobItem = new DownloadJobItem(downloadJob,downloadSetItem,entryFile);
+            downloadJobItem.setDjiUid(i * 1000);
+            umAppDatabase.getDownloadJobItemDao().insert(downloadJobItem);
+        }
+
+        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
+                JobStatus.RUNNING,-1);
+
     }
 
     @Test
@@ -130,12 +171,11 @@ public class DownloadDialogPresenterTest {
         Hashtable args =  new Hashtable();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-
-        presenter = new DownloadDialogPresenter(context,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .findAllLive(), 5, TimeUnit.SECONDS, allItems -> allItems.size() == 4);
+                .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS, allItems -> allItems.size() == 4);
 
 
         assertTrue(umAppDatabase.getDownloadSetDao()
@@ -144,10 +184,10 @@ public class DownloadDialogPresenterTest {
         assertEquals("Four DownloadJobItems were created ",
                 umAppDatabase.getDownloadJobItemDao().findAll().size(),4);
 
-        Thread.sleep(2);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         assertEquals("Total bytes to be downloaded was updated",
-                umAppDatabase.getDownloadJobDao().findById(presenter.getCurrentJobId())
+                umAppDatabase.getDownloadJobDao().findByUid(presenter.getCurrentJobId())
                         .getTotalBytesToDownload(), totalBytesToDownload);
     }
 
@@ -155,27 +195,28 @@ public class DownloadDialogPresenterTest {
     @Test
     public void givenDownloadSetCreated_whenHandleClickCalled_shouldSetStatusToQueued() throws InterruptedException {
         Hashtable args =  new Hashtable();
-        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
         CountDownLatch mLatch = new CountDownLatch(1);
 
-        presenter = new DownloadDialogPresenter(context,args, mockedDialogView);
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
 
         //wait for calculating download to complete
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .findAllLive(), 5, TimeUnit.SECONDS, allItems -> allItems.size() == 4);
+                .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                allItems -> allItems.size() == 4);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
-                        .getJobLive(presenter.getCurrentJobId()),5,TimeUnit.SECONDS,
-                downloadJob -> downloadJob.getDjStatus() == JobStatus.PAUSED);
+                        .getJobLive(presenter.getCurrentJobId()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
+                downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.PAUSED);
 
         presenter.handleClickPositive();
 
-        mLatch.await(5,TimeUnit.SECONDS);
+        mLatch.await(MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS);
 
         assertEquals("Job status was changed to Queued after clicking continue",
-                umAppDatabase.getDownloadJobDao().findById(presenter.getCurrentJobId())
+                umAppDatabase.getDownloadJobDao().findByUid(presenter.getCurrentJobId())
                         .getDjStatus(),JobStatus.QUEUED);
     }
 
@@ -186,8 +227,7 @@ public class DownloadDialogPresenterTest {
 
         Hashtable args =  new Hashtable();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-
-        presenter = new DownloadDialogPresenter(context,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
         presenter.onStart();
 
@@ -200,30 +240,31 @@ public class DownloadDialogPresenterTest {
         insertDownloadSetAndSetItems();
 
         Hashtable args =  new Hashtable();
-        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
         CountDownLatch mLatch = new CountDownLatch(1);
 
         //wait for calculating download to complete
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .findAllLive(), 3, TimeUnit.SECONDS, allItems -> allItems.size() == 4);
+                .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                allItems -> allItems.size() == 4);
 
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
-                        .getJobLive(downloadJob.getDjUid()),5,TimeUnit.SECONDS,
-                downloadJob -> downloadJob.getDjStatus() == JobStatus.PAUSED);
+                        .getJobLive(downloadJob.getDjUid()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
+                downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.PAUSED);
 
-        presenter = new DownloadDialogPresenter(context,args, mockedDialogView);
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
 
-        Thread.sleep(1);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         presenter.handleClickStackedButton(1);
 
-        mLatch.await(3,TimeUnit.SECONDS);
+        mLatch.await(MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS);
 
         assertEquals("Job status was changed to paused after clicking pause button",
-                umAppDatabase.getDownloadJobDao().findById(downloadJob.getDjUid())
+                umAppDatabase.getDownloadJobDao().findByUid(downloadJob.getDjUid())
                         .getDjStatus(),JobStatus.PAUSED);
     }
 
@@ -233,31 +274,96 @@ public class DownloadDialogPresenterTest {
         insertDownloadSetAndSetItems();
 
         Hashtable args =  new Hashtable();
-        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
         CountDownLatch mLatch = new CountDownLatch(1);
 
         //wait for calculating download to complete
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .findAllLive(), 5, TimeUnit.SECONDS, allItems -> allItems.size() == 4);
+                .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                allItems -> allItems.size() == 4);
 
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
-                        .getJobLive(downloadJob.getDjUid()),5,TimeUnit.SECONDS,
-                downloadJob -> downloadJob.getDjStatus() == JobStatus.CANCELLING);
+                        .getJobLive(downloadJob.getDjUid()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
+                downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.CANCELLING);
 
-        presenter = new DownloadDialogPresenter(context,args, mockedDialogView);
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
 
-        Thread.sleep(1);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         presenter.handleClickStackedButton(2);
 
-        mLatch.await(3,TimeUnit.SECONDS);
+        mLatch.await(MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS);
 
         assertEquals("Job status was changed to cancelling after clicking cancel download",
-                umAppDatabase.getDownloadJobDao().findById(downloadJob.getDjUid())
+                umAppDatabase.getDownloadJobDao().findByUid(downloadJob.getDjUid())
                         .getDjStatus(),JobStatus.CANCELLING);
+    }
+
+    @Test
+    public void givenExistingDownloadSet_whenDialogDismissedWithoutSelection_shouldCleanUpUnQueuedJob() {
+
+        insertDownloadSetAndSetItems();
+
+        Hashtable args =  new Hashtable();
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter.onCreate(new Hashtable());
+        presenter.onStart();
+
+        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
+                JobStatus.NOT_QUEUED,-1);
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+                        .getJobLive(downloadJob.getDjUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                job -> job.getDjStatus() == JobStatus.NOT_QUEUED);
+
+        presenter.handleClickNegative();
+
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+                .findAllLive(), MAX_LATCH_WAITING_TIME * 4, TimeUnit.SECONDS,
+                allItems -> allItems.size() == 0);
+
+        assertEquals("All download items were deleted ",
+                umAppDatabase.getDownloadJobItemDao().findAll().size(),0);
+    }
+
+
+    @Test
+    public void givenDownloadRunning_whenCompletedAndUserOptToDelete_shouldDeleteDownloadJobSetAndAssociatedFiles() throws InterruptedException {
+
+        insertDownloadSetAndSetItems();
+
+        Hashtable args =  new Hashtable();
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+
+        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
+                JobStatus.COMPLETE,JobStatus.RUNNING_MIN);
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+                        .getJobLive(downloadJob.getDjUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                job -> job.getDjStatus() == JobStatus.COMPLETE);
+
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter.onCreate(new Hashtable());
+        presenter.onStart();
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
+
+        presenter.handleClickPositive();
+
+        VerificationMode mode = timeout(TimeUnit.SECONDS.toMillis(MAX_LATCH_WAITING_TIME));
+
+        //verify that DeleteJobTaskRunner was created
+        verify(mockedNetworkManager,mode)
+                .makeDeleteJobTask(any(),any());
+
+        //verify that run method was called to start DeleteJobTaskWorker
+        verify(mockedDeleteTaskRunner,mode).run();
+
     }
 
     @Test
@@ -266,13 +372,14 @@ public class DownloadDialogPresenterTest {
         insertDownloadSetAndSetItems();
 
         Hashtable args =  new Hashtable();
-        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
         //wait for calculating download to complete
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .findAllLive(), 3, TimeUnit.SECONDS, allItems -> allItems.size() == 4);
+                .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                allItems -> allItems.size() == 4);
 
-        presenter = new DownloadDialogPresenter(context,args, mockedDialogView);
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
         presenter.handleWiFiOnlyOption(true);
 

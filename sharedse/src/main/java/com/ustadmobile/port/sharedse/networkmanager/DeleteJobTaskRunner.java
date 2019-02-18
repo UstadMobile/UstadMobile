@@ -14,6 +14,11 @@ public abstract class DeleteJobTaskRunner implements Runnable {
     protected Object context;
 
     /**
+     * Constructor for testing purpose
+     */
+    public DeleteJobTaskRunner(){}
+
+    /**
      * Constructor used when creating new instance of a task runner
      * @param context Platform application context
      * @param args arguments to be passed.
