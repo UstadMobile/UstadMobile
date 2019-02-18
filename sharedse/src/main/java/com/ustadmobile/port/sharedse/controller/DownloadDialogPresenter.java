@@ -66,9 +66,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         impl = UstadMobileSystemImpl.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
-        view.runOnUiThread(() ->{
-            view.setWifiOnlyOptionVisible(false);
-        });
+        view.runOnUiThread(() -> view.setWifiOnlyOptionVisible(false));
         new Thread(this::setup).start();
     }
 
@@ -289,7 +287,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private void cancelDownload(){
         new Thread(() -> umAppDatabase.getDownloadJobDao()
-                .update(downloadSetUid,JobStatus.CANCELED)).start();
+                .update(downloadJobUid,JobStatus.CANCELLING)).start();
     }
 
 
@@ -327,6 +325,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     protected long getCurrentJobId(){
         return downloadJobUid;
     }
+
 
 
     @Override
