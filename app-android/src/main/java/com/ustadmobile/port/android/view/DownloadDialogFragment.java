@@ -23,6 +23,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
 import java.util.Objects;
@@ -53,6 +54,16 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private UstadMobileSystemImpl impl;
 
+    @Override
+    public void onAttach(Context context) {
+        if (context instanceof ContentEntryListActivity) {
+            NetworkManagerBle managerBle = ((ContentEntryListActivity)context).networkManagerBle;
+            mPresenter = new DownloadDialogPresenter(getContext(),managerBle,
+                    UMAndroidUtil.bundleToHashtable(getArguments()),this);
+        }
+
+        super.onAttach(context);
+    }
 
     @NonNull
     @Override
@@ -80,8 +91,6 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         builder.setView(rootView);
 
         mDialog = builder.create();
-        mPresenter = new DownloadDialogPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getArguments()),this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         wifiOnlyView.setOnCheckedChangeListener(this);

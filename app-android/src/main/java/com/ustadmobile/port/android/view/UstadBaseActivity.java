@@ -26,6 +26,7 @@ import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -43,6 +44,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private UstadBaseController baseController;
 
     protected Toolbar umToolbar;
+
+    /**
+     * Currently running instance of NetworkManagerBle
+     */
+    protected NetworkManagerBle networkManagerBle;
 
     private List<WeakReference<Fragment>> fragmentList;
 
@@ -70,6 +76,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private ServiceConnection bleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            networkManagerBle = ((NetworkManagerBleAndroidService.LocalServiceBinder)service)
+                    .getService().getNetworkManagerBle();
             bleServiceBound = true;
         }
 

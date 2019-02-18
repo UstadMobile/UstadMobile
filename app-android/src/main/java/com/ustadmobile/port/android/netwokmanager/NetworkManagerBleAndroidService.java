@@ -122,6 +122,13 @@ public class NetworkManagerBleAndroidService extends Service {
     }
 
     /**
+     * @return Running instance of the NetworkManagerBle
+     */
+    public NetworkManagerAndroidBle getNetworkManagerBle(){
+        return managerAndroidBleRef.get();
+    }
+
+    /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we won't be dealing with IPC.
      */

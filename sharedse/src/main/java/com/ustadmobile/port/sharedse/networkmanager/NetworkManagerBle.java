@@ -1,12 +1,15 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
@@ -14,6 +17,7 @@ import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +28,11 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
+
+import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -137,7 +144,7 @@ public abstract class NetworkManagerBle {
      * Set platform specific context
      * @param context Platform's context to be set
      */
-    protected void setContext(Object context){
+    public void setContext(Object context){
         this.mContext = context;
     }
 
@@ -467,6 +474,8 @@ public abstract class NetworkManagerBle {
                                                            NetworkNode peerToSendMessageTo,
                                                            BleMessageResponseListener responseListener);
 
+    public abstract DeleteJobTaskRunner makeDeleteJobTask(Object object, Hashtable args);
+
     /**
      * Send message to a specific device
      * @param context Platform specific context
@@ -484,6 +493,37 @@ public abstract class NetworkManagerBle {
      * @return Active RouterNanoHTTPD
      */
     public abstract RouterNanoHTTPD getHttpd();
+
+
+
+    /**
+     * Cancel all download set and set items
+     * @param args Arguments to be passed to the task runner.
+     */
+    public void cancelAndDeleteDownloadSet(Hashtable args) {
+        List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().
+                findBySetUid(Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID))));
+
+        int totalDownloadItems = 0;
+
+        UmObserver<Boolean> observer = cancelledJobItems ->{
+            if(cancelledJobItems != null && cancelledJobItems){
+                makeDeleteJobTask(mContext,args).run();
+            }
+        };
+
+
+        for(DownloadJob downloadJob : downloadJobs){
+            umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
+                    JobStatus.CANCELED, JobStatus.CANCELLING, JobStatus.CANCELED);
+            totalDownloadItems = totalDownloadItems + umAppDatabase.getDownloadJobItemDao()
+                    .findByJobUid(downloadJob.getDjUid()).size();
+        }
+
+        umAppDatabase.getDownloadJobItemDao()
+                .getLiveCancelledJobItems(totalDownloadItems).observeForever(observer);
+
+    }
 
 
     /**
