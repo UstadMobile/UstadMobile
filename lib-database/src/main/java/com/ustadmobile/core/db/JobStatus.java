@@ -53,6 +53,11 @@ public class JobStatus {
 
     public static final int RUNNING = 12;
 
+    public static final int CANCELLING = 13;
+
+    public static final int PAUSING = 14;
+
+    public static final int STOPPING = 15;
 
     //Complete statuses where the job is not part of the queue - 21-30
 
@@ -60,18 +65,14 @@ public class JobStatus {
 
     public static final int COMPLETE_MAX = 30;
 
-    public static final int PAUSING = 23;
-
     public static final int COMPLETE = 24;
 
     public static final int FAILED = 25;
-
-    public static final int STOPPING = 26;
 
     public static final int STOPPED = 27;
 
     public static final int CANCELED = 28;
 
-    public static final int CANCELLING = 29;
+
     
 }
