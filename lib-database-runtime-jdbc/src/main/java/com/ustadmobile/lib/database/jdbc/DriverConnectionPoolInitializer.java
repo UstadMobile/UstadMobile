@@ -1,6 +1,9 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import org.sqlite.SQLiteConfig;
 import org.sqlite.javax.SQLiteConnectionPoolDataSource;
+
+import java.util.Properties;
 
 import javax.naming.Binding;
 import javax.naming.InitialContext;
@@ -47,8 +50,14 @@ public class DriverConnectionPoolInitializer {
 
             if(dataSource == null){
                 if(jdbcUrl.startsWith("jdbc:sqlite")) {
-                    dataSource = new SQLiteConnectionPoolDataSource();
+                    Properties connectionProps = new Properties();
+                    connectionProps.setProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.pragmaName,
+                            "10000");
+                    dataSource = new SQLiteConnectionPoolDataSource(
+                            new SQLiteConfig(connectionProps));
+
                     ((SQLiteConnectionPoolDataSource) dataSource).setUrl(jdbcUrl);
+                    ((SQLiteConnectionPoolDataSource) dataSource).setJournalMode("WAL");
                     context.bind(dbJndiName, dataSource);
                 }
             }
