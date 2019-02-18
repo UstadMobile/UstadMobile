@@ -324,7 +324,7 @@ public class ShrinkerUtil {
      * @param dest webp file path
      */
     public static void convertImageToWebp(File src, File dest) throws IOException {
-        if (!src.exists()) {
+        if (!ContentScraperUtil.fileHasContent(src)) {
             throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
@@ -334,13 +334,13 @@ public class ShrinkerUtil {
         }
         File pngFile = null;
         Process process = null;
-        Runtime runTime = Runtime.getRuntime();
+        ProcessBuilder builder = new ProcessBuilder(ScraperBuildConfig.CWEBP_PATH, src.getPath(), "-o", dest.getPath());
         try {
-            process = runTime.exec(ScraperBuildConfig.CWEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
+            process = builder.start();
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                UMLogUtil.logError("Error Stream for src " + src.getPath() + UMIOUtils.readStreamToString(process.getErrorStream()));
                 pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath()) + PNG_EXT);
                 convertJpgToPng(src, pngFile);
                 convertImageToWebp(pngFile, dest);
@@ -359,7 +359,7 @@ public class ShrinkerUtil {
             }
         }
 
-        if (!dest.exists()) {
+        if (!ContentScraperUtil.fileHasContent(dest)) {
             throw new IOException("convertImaegToWebP: source existed, but output does not " +
                     dest.getPath());
         }
@@ -374,7 +374,7 @@ public class ShrinkerUtil {
      * @param dest webp file path
      */
     private static void convertJpgToPng(File src, File dest) throws IOException {
-        if (!src.exists()) {
+        if (!ContentScraperUtil.fileHasContent(src)) {
             throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
@@ -384,15 +384,13 @@ public class ShrinkerUtil {
         }
 
         Process process = null;
-        Runtime runTime = Runtime.getRuntime();
+        ProcessBuilder builder = new ProcessBuilder("/usr/bin/mogrify", "-format", "png", src.getPath(), dest.getPath());
         try {
-            String cmd = "/usr/bin/mogrify -format png " + src.getPath() + " " + dest.getPath();
-            UMLogUtil.logInfo("Runng " + cmd + " to fix jpg");
-            process = runTime.exec(cmd);
+            process = builder.start();
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                UMLogUtil.logError("Error Stream for src " + src.getPath() + UMIOUtils.readStreamToString(process.getErrorStream()));
                 throw new IOException();
             }
         } catch (IOException e) {
@@ -406,7 +404,7 @@ public class ShrinkerUtil {
             }
         }
 
-        if (!dest.exists()) {
+        if (!ContentScraperUtil.fileHasContent(dest)) {
             throw new IOException("convertJpegToPng: source existed, but output does not " +
                     dest.getPath());
         }
@@ -415,7 +413,7 @@ public class ShrinkerUtil {
 
 
     public static void convertVideoToWebM(File src, File dest) throws IOException {
-        if (!src.exists()) {
+        if (!ContentScraperUtil.fileHasContent(src)) {
             throw new FileNotFoundException("convertVideoToWebm: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
@@ -435,7 +433,7 @@ public class ShrinkerUtil {
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                UMLogUtil.logError("Error Stream for src " + src.getPath() + UMIOUtils.readStreamToString(process.getErrorStream()));
                 throw new IOException();
             }
             process.destroy();
@@ -449,11 +447,15 @@ public class ShrinkerUtil {
                 process.destroy();
             }
         }
+        if (!ContentScraperUtil.fileHasContent(dest)) {
+            throw new IOException("convertVideoToWebm: source existed, but output does not " +
+                    dest.getPath());
+        }
 
     }
 
     public static void convertAudioToOpos(File src, File dest) throws IOException {
-        if (!src.exists()) {
+        if (!ContentScraperUtil.fileHasContent(src)) {
             throw new FileNotFoundException("convertAudioToOpos: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
@@ -463,7 +465,7 @@ public class ShrinkerUtil {
         }
 
         ProcessBuilder builder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
-                , "libopus", "-b:a", "12000", "-vbr", "on", dest.getPath());
+                , "-c:a", "libopus", "-b:a", "12000", "-vbr", "on", dest.getPath());
         builder.redirectErrorStream(true);
         Process process = null;
         try {
@@ -472,7 +474,7 @@ public class ShrinkerUtil {
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                UMLogUtil.logError("Error Stream for src " + src.getPath() + UMIOUtils.readStreamToString(process.getErrorStream()));
             }
             process.destroy();
         } catch (IOException e) {
@@ -484,6 +486,10 @@ public class ShrinkerUtil {
             if (process != null) {
                 process.destroy();
             }
+        }
+        if (!ContentScraperUtil.fileHasContent(dest)) {
+            throw new IOException("convertAudioToOpos: source existed, but output does not " +
+                    dest.getPath());
         }
 
     }

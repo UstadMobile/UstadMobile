@@ -45,6 +45,18 @@ public class ScraperConstants {
     public static final String EDRAAK_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/edraak.min.css";
     public static final String EDRAAK_CSS_FILENAME = "edraak.min.css";
 
+    public static final String VOA_JS_LINK = "/com/ustadmobile/lib/contentscrapers/voa/voa.min.js";
+    public static final String VOA_JS_FILE_NAME = "voa.min.js";
+
+    public static final String VOA_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/voa/voa.min.css";
+    public static final String VOA_CSS_FILE_NAME = "voa.min.css";
+
+    public static final String VOA_QUIZ_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/voa/voaquiz.min.css";
+    public static final String VOA_QUIZ_CSS_FILE_NAME = "voaquiz.min.css";
+
+    public static final String VOA_QUIZ_JS_LINK = "/com/ustadmobile/lib/contentscrapers/voa/voaquiz.min.js";
+    public static final String VOA_QUIZ_JS_FILE_NAME = "voaquiz.min.js";
+
     public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
     public static final String CORRECT_FILE = "exercise-correct.svg";
 
@@ -177,7 +189,7 @@ public class ScraperConstants {
     public static final String MP4_EXT = ".mp4";
     public static final String MP3_EXT = ".mp3";
     public static final String WEBM_EXT = ".webm";
-    public static final String OPOS_EXT = ".opos";
+    public static final String OPUS_EXT = ".opus";
 
     public static final List<String> IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg");
     public static final List<String> VIDEO_EXTENSIONS = Arrays.asList("mp4");

@@ -2,6 +2,9 @@ package com.ustadmobile.lib.contentscrapers.voa;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
@@ -163,69 +166,83 @@ public class VoaScraper {
 
             for (int i = 1; i <= quizCount; i = i + 2) {
 
-                URL answersUrl = new URL(answerUrl);
-                File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(voaDirectory, answersUrl);
-                urlDirectory.mkdirs();
-
-                File questionPage = new File(urlDirectory, i + "question");
-
-                Map<String, String> params = createParams(quizId, i, null, "True");
-                StringBuffer requestParams = ContentScraperUtil.convertMapToStringBuffer(params);
-
-                HttpURLConnection conn = createConnectionForPost(answersUrl, requestParams);
-                conn.connect();
-
-                String questionData = IOUtils.toString(conn.getInputStream(), UTF_ENCODING);
-
-                Document questionDoc = Jsoup.parse(questionData);
-                removeAllAttributesFromVideoAudio(questionDoc);
-
-                String quizSize = questionDoc.select("span.caption").text();
-                quizSize = quizSize.substring(quizSize.length() - 1);
-                quizCount = Integer.valueOf(quizSize) * 2;
-
-                questionData = ContentScraperUtil.downloadAllResources(questionDoc.html(), assetDirectory, scrapUrl);
-                Element answerLabel = questionDoc.selectFirst("input[name=SelectedAnswerId]");
-                FileUtils.writeStringToFile(questionPage, questionData, UTF_ENCODING);
-
-                Document videoDoc = Jsoup.parse(questionData);
-
-                VoaQuiz.Questions question = new VoaQuiz.Questions();
-                question.questionText = questionDoc.selectFirst("h2.ta-l").text();
+                HttpURLConnection conn = null;
+                HttpURLConnection selectedConn = null;
                 try {
-                    Element mediaSource = videoDoc.selectFirst("div.quiz__answers-img video,div.quiz__answers-img img");
-                    question.videoHref = mediaSource.attr("src");
-                } catch (NoSuchElementException | NullPointerException ignored) {
+                    URL answersUrl = new URL(answerUrl);
+                    File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(voaDirectory, answersUrl);
+                    urlDirectory.mkdirs();
 
+                    File questionPage = new File(urlDirectory, i + "question");
+
+                    Map<String, String> params = createParams(quizId, i, null, "True");
+                    StringBuffer requestParams = ContentScraperUtil.convertMapToStringBuffer(params);
+
+                    conn = createConnectionForPost(answersUrl, requestParams);
+                    conn.connect();
+
+                    String questionData = IOUtils.toString(conn.getInputStream(), UTF_ENCODING);
+
+                    Document questionDoc = Jsoup.parse(questionData);
+                    removeAllAttributesFromVideoAudio(questionDoc);
+
+                    String quizSize = questionDoc.select("span.caption").text();
+                    quizSize = quizSize.substring(quizSize.length() - 1);
+                    quizCount = Integer.valueOf(quizSize) * 2;
+
+                    questionData = ContentScraperUtil.downloadAllResources(questionDoc.html(), assetDirectory, scrapUrl);
+                    Element answerLabel = questionDoc.selectFirst("input[name=SelectedAnswerId]");
+                    FileUtils.writeStringToFile(questionPage, questionData, UTF_ENCODING);
+
+                    Document videoDoc = Jsoup.parse(questionData);
+
+                    VoaQuiz.Questions question = new VoaQuiz.Questions();
+                    question.questionText = questionDoc.selectFirst("h2.ta-l").text();
+                    try {
+                        Element mediaSource = videoDoc.selectFirst("div.quiz__answers-img video,div.quiz__answers-img img");
+                        question.videoHref = mediaSource.attr("src");
+                    } catch (NoSuchElementException | NullPointerException ignored) {
+
+                    }
+
+                    List<VoaQuiz.Questions.Choices> choiceList = new ArrayList<>();
+                    Elements answerTextList = questionDoc.select("label.quiz__answers-label");
+                    for (Element answer : answerTextList) {
+                        VoaQuiz.Questions.Choices choices = new VoaQuiz.Questions.Choices();
+                        choices.id = answer.selectFirst("input").attr("value");
+                        choices.answerText = answer.selectFirst("span.quiz__answers-item-text").text();
+                        choiceList.add(choices);
+                    }
+                    question.choices = choiceList;
+
+                    String answerId = answerLabel.attr("value");
+
+                    Map<String, String> selectedParams = createParams(quizId, i + 1, answerId, "False");
+
+                    StringBuffer selectedRequestParams = ContentScraperUtil.convertMapToStringBuffer(selectedParams);
+
+                    selectedConn = createConnectionForPost(answersUrl, selectedRequestParams);
+
+                    File answerPage = new File(urlDirectory, answerId + "answersIndex");
+                    selectedConn.connect();
+                    FileUtils.copyInputStreamToFile(selectedConn.getInputStream(), answerPage);
+
+                    Document selectedAnswerDoc = Jsoup.parse(answerPage, UTF_ENCODING);
+                    question.answerId = selectedAnswerDoc.selectFirst("li.quiz__answers-item--correct input")
+                            .attr("value");
+                    question.answer = selectedAnswerDoc.selectFirst("p.p-t-md").text();
+                    questionList.add(question);
+                } catch (IOException e) {
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+                    if (selectedConn != null) {
+                        selectedConn.disconnect();
+                    }
                 }
 
-                List<VoaQuiz.Questions.Choices> choiceList = new ArrayList<>();
-                Elements answerTextList = questionDoc.select("label.quiz__answers-label");
-                for (Element answer : answerTextList) {
-                    VoaQuiz.Questions.Choices choices = new VoaQuiz.Questions.Choices();
-                    choices.id = answer.selectFirst("input").attr("value");
-                    choices.answerText = answer.selectFirst("span.quiz__answers-item-text").text();
-                    choiceList.add(choices);
-                }
-                question.choices = choiceList;
-
-                String answerId = answerLabel.attr("value");
-
-                Map<String, String> selectedParams = createParams(quizId, i + 1, answerId, "False");
-
-                StringBuffer selectedRequestParams = ContentScraperUtil.convertMapToStringBuffer(selectedParams);
-
-                HttpURLConnection selectedConn = createConnectionForPost(answersUrl, selectedRequestParams);
-
-                File answerPage = new File(urlDirectory, answerId + "answersIndex");
-                selectedConn.connect();
-                FileUtils.copyInputStreamToFile(selectedConn.getInputStream(), answerPage);
-
-                Document selectedAnswerDoc = Jsoup.parse(answerPage, UTF_ENCODING);
-                question.answerId = selectedAnswerDoc.selectFirst("li.quiz__answers-item--correct input")
-                        .attr("value");
-                question.answer = selectedAnswerDoc.selectFirst("p.p-t-md").text();
-                questionList.add(question);
 
             }
 
@@ -238,22 +255,10 @@ public class VoaScraper {
         finalDoc.head().append("<link rel=\"stylesheet\" href=\"asset/materialize.min.css\">");
         finalDoc.head().append("<meta charset=\"utf-8\" name=\"viewport\"\n" +
                 "          content=\"width=device-width, initial-scale=1, shrink-to-fit=no,user-scalable=no\">");
-        finalDoc.head().append("<style type=\"text/css\">\n" +
-                "     video {\n" +
-                "\t\t\twidth: 100%;\n" +
-                "\t\t\theight: auto;\n" +
-                "\t }\n" +
-                "\t \n" +
-                "\t img {\n" +
-                "\t\t\twidth: 100%;\n" +
-                "\t\t\theight: auto;\n" +
-                "\t }\n" +
-                "   \n" +
-                "   </style>");
+        finalDoc.head().append("<link rel=\"stylesheet\" href=\"asset/voa.min.css\">");
         finalDoc.body().append("<script type=\"text/javascript\" src=\"asset/iframeResizer.min.js\"></script>");
-        finalDoc.body().append(" <script type=\"text/javascript\">\n" +
-                "   iFrameResize({log:true});\n" +
-                "  </script>");
+        finalDoc.body().append("<script type=\"text/javascript\" src=\"asset/voa.min.js\"></script>");
+
         finalDoc.body().attr("style", "padding:2%");
         if (quizHref != null) {
             finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
@@ -270,9 +275,17 @@ public class VoaScraper {
                 new File(assetDirectory, MATERIAL_CSS));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.MATERIAL_JS_LINK),
                 new File(assetDirectory, ScraperConstants.MATERIAL_JS));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.VOA_CSS_LINK),
+                new File(assetDirectory, ScraperConstants.VOA_CSS_FILE_NAME));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.VOA_JS_LINK),
+                new File(assetDirectory, ScraperConstants.VOA_JS_FILE_NAME));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.VOA_QUIZ_JS_LINK),
+                new File(assetDirectory, ScraperConstants.VOA_QUIZ_JS_FILE_NAME));
+        FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.VOA_QUIZ_CSS_LINK),
+                new File(assetDirectory, ScraperConstants.VOA_QUIZ_CSS_FILE_NAME));
 
 
-        FileUtils.writeStringToFile(new File(voaDirectory, "index.html"), finalDoc.html(), ScraperConstants.UTF_ENCODING);
+        FileUtils.writeStringToFile(new File(voaDirectory, "index.html"), finalDoc.toString(), ScraperConstants.UTF_ENCODING);
 
         try {
             ContentScraperUtil.generateTinCanXMLFile(voaDirectory, FilenameUtils.getBaseName(scrapUrl.toString()), "en", "index.html",
@@ -298,17 +311,23 @@ public class VoaScraper {
     }
 
     private HttpURLConnection createConnectionForPost(URL answersUrl, StringBuffer requestParams) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) answersUrl.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
-        conn.setRequestProperty("Content-length", String.valueOf(requestParams.length()));
-        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        conn.setRequestProperty("Referer", scrapUrl.toString());
-        DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-        out.writeBytes(requestParams.toString());
-        out.flush();
-        out.close();
+        HttpURLConnection conn;
+        DataOutputStream out = null;
+        try {
+            conn = (HttpURLConnection) answersUrl.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestProperty("Content-length", String.valueOf(requestParams.length()));
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty("Referer", scrapUrl.toString());
+            out = new DataOutputStream(conn.getOutputStream());
+            out.writeBytes(requestParams.toString());
+            out.flush();
+            out.close();
+        } finally {
+            UMIOUtils.closeQuietly(out);
+        }
         return conn;
     }
 

@@ -35,7 +35,6 @@ import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.compress.compressors.FileNameUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -105,7 +104,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_LOGIN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.OPOS_EXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.OPUS_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
@@ -192,7 +191,7 @@ public class ContentScraperUtil {
                 } else if (ScraperConstants.VIDEO_EXTENSIONS.contains(ext)) {
                     destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBM_EXT);
                 } else if(ScraperConstants.AUDIO_EXTENSIONS.contains(ext)){
-                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + OPOS_EXT);
+                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + OPUS_EXT);
                 }
 
                 content.attr("src", destinationDir.getName() + "/" + destinationFile.getName());
@@ -207,7 +206,7 @@ public class ContentScraperUtil {
                 } else if (destinationFile.getName().endsWith(WEBM_EXT)) {
                     ShrinkerUtil.convertVideoToWebM(contentFile, destinationFile);
                     contentFile.delete();
-                }else if(destinationFile.getName().endsWith(OPOS_EXT)){
+                }else if(destinationFile.getName().endsWith(OPUS_EXT)){
                     ShrinkerUtil.convertAudioToOpos(contentFile, destinationFile);
                     contentFile.delete();
                 }
