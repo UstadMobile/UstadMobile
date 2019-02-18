@@ -292,6 +292,22 @@ public class ScraperConstants {
         }
     }
 
+    public enum VoaContentType {
+        LEVELS("Levels"),
+        LESSONS("Lessons");
+
+        private String type;
+
+        VoaContentType(String compType) {
+            this.type = compType;
+        }
+
+        public String getType() {
+            return type;
+        }
+        }
+
+
     public enum CK12ContentType {
         SUBJECTS("Subjects");
 

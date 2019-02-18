@@ -10,6 +10,8 @@ public abstract class ScrapeRunDao implements BaseDao<ScrapeRun> {
 
     public static final String SCRAPE_TYPE_KHAN = "khan";
 
+    public static final String SCRAPE_TYPE_VOA = "voa";
+
     @UmQuery("SELECT scrapeRunUid From ScrapeRun WHERE scrapeType = :scrapeType LIMIT 1")
     public abstract int findPendingRunIdByScraperType(String scrapeType);
 }

@@ -2,12 +2,18 @@ package com.ustadmobile.lib.contentscrapers.voa;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -63,11 +69,13 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
  * Store the quiz data, store the page data, add some css and tags to existing page to make it more mobile friendly
  * Write a tin can file for the html content and zip everything in the directory.
  */
-public class VoaScraper {
+public class VoaScraper implements Runnable {
 
-    private final URL scrapUrl;
-    private final File voaDirectory;
-    private final File destinationDir;
+    private int sqiUid;
+    private ContentEntry parentEntry;
+    private URL scrapUrl;
+    private File voaDirectory;
+    private File destinationDir;
     private boolean isContentUpdated = true;
 
     public String answerUrl = "https://learningenglish.voanews.com/Quiz/Answer";
@@ -77,6 +85,59 @@ public class VoaScraper {
         this.destinationDir = destinationDir;
         voaDirectory = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()));
         voaDirectory.mkdirs();
+    }
+
+    public VoaScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, int sqiUid) {
+        this.destinationDir = destinationDirectory;
+        this.scrapUrl = scrapeUrl;
+        this.parentEntry = parent;
+        this.sqiUid = sqiUid;
+        voaDirectory = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()));
+        voaDirectory.mkdirs();
+    }
+
+
+    @Override
+    public void run() {
+        System.gc();
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
+        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
+        ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
+
+
+        long startTime = System.currentTimeMillis();
+        UMLogUtil.logInfo("Started scraper url " + scrapUrl + " at start time: " + startTime);
+        queueDao.setTimeStarted(sqiUid, startTime);
+
+        boolean successful = false;
+        try {
+            scrapeContent();
+
+            File content = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()) + ScraperConstants.ZIP_EXT);
+            successful = true;
+            if (isContentUpdated()) {
+                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
+                        parentEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
+                        ScraperConstants.MIMETYPE_ZIP);
+            } else {
+                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
+                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
+        queueDao.setTimeFinished(sqiUid, System.currentTimeMillis());
+        long duration = System.currentTimeMillis() - startTime;
+        UMLogUtil.logInfo("Ended scrape for url " + scrapUrl + " in duration: " + duration);
+
+
     }
 
     public void scrapeContent() throws IOException {
@@ -96,6 +157,8 @@ public class VoaScraper {
         File voaDirectory = new File(destinationDir, lessonId);
         voaDirectory.mkdirs();
 
+        File zipFile = new File(FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
+
         try {
             WebElement element = driver.findElementByCssSelector("script[type*=json]");
             JavascriptExecutor js = driver;
@@ -108,6 +171,7 @@ public class VoaScraper {
             File modifiedFile = new File(voaDirectory, voaDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
             String text;
 
+
             boolean isUpdated = true;
             if (ContentScraperUtil.fileHasContent(modifiedFile)) {
                 text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
@@ -116,7 +180,7 @@ public class VoaScraper {
                 FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
             }
 
-            if (!isUpdated) {
+            if (!isUpdated && ContentScraperUtil.fileHasContent(zipFile)) {
                 isContentUpdated = false;
                 driver.close();
                 driver.quit();
@@ -295,7 +359,7 @@ public class VoaScraper {
             UMLogUtil.logError("VOA failed to create tin can file for url " + scrapUrl.toString());
         }
 
-        ContentScraperUtil.zipDirectory(voaDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT, destinationDir);
+        ContentScraperUtil.zipDirectory(voaDirectory, zipFile.getName(), destinationDir);
     }
 
     private Map<String, String> createParams(String quizId, int count, String selectedAnswer, String voted) {
@@ -365,7 +429,8 @@ public class VoaScraper {
         }
     }
 
-    public boolean isContentUpdated() {
+    boolean isContentUpdated() {
         return isContentUpdated;
     }
+
 }
