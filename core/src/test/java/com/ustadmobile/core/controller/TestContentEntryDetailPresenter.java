@@ -1,9 +1,11 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.CoreTestConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
+import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.After;
@@ -32,6 +34,8 @@ public class TestContentEntryDetailPresenter {
 
     @Before
     public void setUp() {
+        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+                CoreTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         mainImpl = UstadMobileSystemImpl.getInstance();
         systemImplSpy = Mockito.spy(mainImpl);
         UstadMobileSystemImpl.setMainInstance(systemImplSpy);

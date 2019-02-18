@@ -25,11 +25,12 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':lib-database-runtime')
     implementation project(":lib-room-annotations")
+    compileOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     api "org.apache.commons:commons-lang3:$version_apache_commons_lang"
 
     testAnnotationProcessor project(':lib-database-annotation-processor')
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_core_mockito"

@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -21,6 +22,7 @@ import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
+import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.After;
@@ -185,6 +187,8 @@ public class DownloadJobItemRunnerTest {
 
     @BeforeClass
     public static void setupTmpDir() throws IOException{
+        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         webServerTmpDir = File.createTempFile("downloadjobitemrunner", "tmpdir");
         if(!(webServerTmpDir.delete() && webServerTmpDir.mkdirs())) {
             throw new IOException("Could not make temporary directory");

@@ -2,8 +2,10 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
+import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Before;
@@ -65,6 +67,8 @@ public class BleGattServerTest {
 
     @Before
     public void setUp() throws IOException {
+        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         Object context =  PlatformTestUtil.getTargetContext();
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.onCreate();
