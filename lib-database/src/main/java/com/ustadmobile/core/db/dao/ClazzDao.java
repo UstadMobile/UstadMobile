@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
@@ -325,8 +326,12 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                 TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
     public abstract int countPendingLocalChanges(long accountPersonUid);
 
-    @UmQuery("SELECT Clazz.* FROM Clazz WHERE " + ENTITY_LEVEL_PERMISSION_CONDITION1
+    @UmQuery("SELECT Clazz.*," +
+            "Location.timeZone " +
+            " FROM Clazz " +
+            "LEFT JOIN ON Clazz.clazzLocationUid = Location.locationUid " +
+            "WHERE " + ENTITY_LEVEL_PERMISSION_CONDITION1
             + Role.PERMISSION_CLAZZ_SELECT + ENTITY_LEVEL_PERMISSION_CONDITION2)
-    public abstract List<Clazz> findAllClazzesWithSelectPermission(long accountPersonUid);
+    public abstract List<ClazzWithTimeZone> findAllClazzesWithSelectPermission(long accountPersonUid);
 
 }

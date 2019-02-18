@@ -343,8 +343,10 @@ public class UMCalendarUtil {
      *
      * @return A new calendar instance advanced to the next occurence of the given day of the week
      */
-    public static Calendar advanceCalendarToOccurenceOf(Calendar calendar, int dayOfWeek, boolean incToday) {
+    public static Calendar advanceCalendarToOccurenceOf(Calendar calendar, String timeZone,
+                                                         int dayOfWeek, boolean incToday) {
         Calendar result = Calendar.getInstance();
+        result.setTimeZone(TimeZone.getTimeZone(timeZone));
         result.setTimeInMillis(calendar.getTimeInMillis());
 
         int today = calendar.get(Calendar.DAY_OF_WEEK);
@@ -368,6 +370,12 @@ public class UMCalendarUtil {
         result.setTimeInMillis(calendar.getTimeInMillis() + (deltaDays * 1000 * 60 * 60 * 24));
 
         return result;
+    }
+
+    public static Calendar normalizeSecondsAndMillis(Calendar calendar) {
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
     }
 
 }

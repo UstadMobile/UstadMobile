@@ -30,6 +30,8 @@ public class ClazzLog{
 
     private int numPartial;
 
+    private long clazzLogScheduleUid;
+
     @UmSyncMasterChangeSeqNum
     private long clazzLogChangeMasterChangeSeqNum;
 
@@ -40,10 +42,11 @@ public class ClazzLog{
 
     }
 
-    public ClazzLog(long clazzLogUid, long clazzUid, long logDate) {
+    public ClazzLog(long clazzLogUid, long clazzUid, long logDate, long scheduleUid) {
         this.clazzLogUid = clazzLogUid;
         this.clazzLogClazzUid = clazzUid;
         this.logDate = logDate;
+        this.clazzLogScheduleUid = scheduleUid;
     }
 
     public int getClazzLogLastChangedBy() {
@@ -171,5 +174,13 @@ public class ClazzLog{
 
     public void setClazzLogChangeLocalChangeSeqNum(long clazzLogChangeLocalChangeSeqNum) {
         this.clazzLogChangeLocalChangeSeqNum = clazzLogChangeLocalChangeSeqNum;
+    }
+
+    public long getClazzLogScheduleUid() {
+        return clazzLogScheduleUid;
+    }
+
+    public void setClazzLogScheduleUid(long clazzLogScheduleUid) {
+        this.clazzLogScheduleUid = clazzLogScheduleUid;
     }
 }

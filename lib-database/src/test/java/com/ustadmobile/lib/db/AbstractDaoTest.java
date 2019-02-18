@@ -90,14 +90,16 @@ public class AbstractDaoTest {
         accountGroupMember.setGroupMemberPersonUid(accountPerson.getPersonUid());
         serverDummyRepo.getPersonGroupMemberDao().insert(accountGroupMember);
 
-        myClazzLocation = new Location("Test location", "test location desc");
+        myClazzLocation = new Location("Test location", "test location desc",
+                "Asia/Beirut");
         myClazzLocation.setLocationUid(serverDummyRepo.getLocationDao().insert(myClazzLocation));
 
         LocationAncestorJoin locationJoin = new LocationAncestorJoin(myClazzLocation.getLocationUid(),
                 myClazzLocation.getLocationUid());
         serverDb.getLocationAncestorJoinDao().insert(locationJoin);
 
-        otherClazzLocation = new Location("Other location", "test other location");
+        otherClazzLocation = new Location("Other location", "test other location",
+                "Asia/Beirut");
         otherClazzLocation.setLocationUid(serverDummyRepo.getLocationDao()
                 .insert(otherClazzLocation));
 

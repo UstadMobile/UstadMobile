@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -11,11 +12,13 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 @UmDao(inheritPermissionFrom = ClazzDao.class,
 inheritPermissionForeignKey = "scheduleClazzUid",
@@ -75,19 +78,22 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     public void createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTimeInMillis(startTime);
+        UMCalendarUtil.normalizeSecondsAndMillis(startCalendar);
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTimeInMillis(endTime);
+        UMCalendarUtil.normalizeSecondsAndMillis(endCalendar);
 
         long startMinOfDay = (startCalendar.get(Calendar.HOUR_OF_DAY) * 24) +
                 startCalendar.get(Calendar.MINUTE);
 
-        List<Clazz> clazzList = db.getClazzDao().findAllClazzesWithSelectPermission(accountPersonUid);
-        for(Clazz clazz : clazzList) {
+        List<ClazzWithTimeZone> clazzList = db.getClazzDao().findAllClazzesWithSelectPermission(
+                accountPersonUid);
+        for(ClazzWithTimeZone clazz : clazzList) {
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
                 boolean incToday = startMinOfDay <= schedule.getSceduleStartTime();
                 Calendar nextScheduleOccurence = UMCalendarUtil.advanceCalendarToOccurenceOf(
-                        startCalendar, schedule.getScheduleDay(), incToday);
+                        startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
 
                 if(nextScheduleOccurence.before(endCalendar)) {
                     //this represents an instance of this class that should take place and
@@ -98,12 +104,16 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
                     if(existingLog == null) {
                         ClazzLog newLog = new ClazzLog(logInstanceHash, clazz.getClazzUid(),
-                                nextScheduleOccurence.getTimeInMillis());
+                                nextScheduleOccurence.getTimeInMillis(), schedule.getScheduleUid());
                         db.getClazzLogDao().insert(newLog);
                     }
                 }
             }
         }
+
+    }
+
+    public void rescheduleClazz(long scheduleUid, long effectiveFrom) {
 
     }
 
