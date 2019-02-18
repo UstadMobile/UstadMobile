@@ -317,9 +317,8 @@ public class DownloadDialogPresenterTest {
         presenter.onCreate(new Hashtable());
         presenter.onStart();
 
-        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
-                JobStatus.NOT_QUEUED,-1);
-
+        //TODO: Fix this: this won't actually wait for very long, because it is waiting for the
+        // default status
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
                         .getJobLive(downloadJob.getDjUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 job -> job.getDjStatus() == JobStatus.NOT_QUEUED);
@@ -332,7 +331,7 @@ public class DownloadDialogPresenterTest {
                 allItems -> allItems.size() == 0);
 
         assertEquals("All download items were deleted ",
-                umAppDatabase.getDownloadJobItemDao().findAll().size(),0);
+                0, umAppDatabase.getDownloadJobItemDao().findAll().size());
     }
 
 

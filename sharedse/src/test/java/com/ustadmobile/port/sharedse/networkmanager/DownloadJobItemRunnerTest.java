@@ -483,6 +483,11 @@ public class DownloadJobItemRunnerTest {
                 JobStatus.STOPPED, item.getDjiStatus());
     }
 
+    /**
+     * TODO: This test is flaky both running local and on Jenkins. Not 100% sure why.
+     *
+     * @throws InterruptedException
+     */
     @Test
     public void givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus()
             throws InterruptedException {
@@ -501,12 +506,11 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        Thread.sleep(MAX_THREAD_SLEEP_TIME);
-
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
                 .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status >= JobStatus.RUNNING_MIN);
 
+        Thread.sleep(MAX_THREAD_SLEEP_TIME);
 
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),false);

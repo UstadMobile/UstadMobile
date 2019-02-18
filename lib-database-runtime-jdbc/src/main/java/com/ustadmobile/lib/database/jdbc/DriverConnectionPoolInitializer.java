@@ -52,12 +52,14 @@ public class DriverConnectionPoolInitializer {
                 if(jdbcUrl.startsWith("jdbc:sqlite")) {
                     Properties connectionProps = new Properties();
                     connectionProps.setProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.pragmaName,
-                            "10000");
+                            "30000");
                     dataSource = new SQLiteConnectionPoolDataSource(
                             new SQLiteConfig(connectionProps));
 
                     ((SQLiteConnectionPoolDataSource) dataSource).setUrl(jdbcUrl);
                     ((SQLiteConnectionPoolDataSource) dataSource).setJournalMode("WAL");
+                    ((SQLiteConnectionPoolDataSource) dataSource).setJournalSizeLimit(-1);
+                    ((SQLiteConnectionPoolDataSource) dataSource).setCacheSize(-8000);
                     context.bind(dbJndiName, dataSource);
                 }
             }
