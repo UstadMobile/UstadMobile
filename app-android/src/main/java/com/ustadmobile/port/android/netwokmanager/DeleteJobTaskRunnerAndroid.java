@@ -86,7 +86,7 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
                 if(destinationFile.exists()) destinationFile.delete();
             }
 
-            umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid, JobStatus.CANCELED);
+            umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
 
             return Result.success();
         }

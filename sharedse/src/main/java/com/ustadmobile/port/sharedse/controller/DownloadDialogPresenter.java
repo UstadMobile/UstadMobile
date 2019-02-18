@@ -259,7 +259,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
      */
     public void handleClickNegative(boolean dismissAfter) {
         //if the download has not been started
-        umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid,JobStatus.NOT_QUEUED);
+        umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
         if(dismissAfter)
             dismissDialog();
     }
@@ -313,15 +313,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     protected long getCurrentJobId(){
         return downloadJobUid;
     }
-
-    /**
-     * Testing purpose
-     */
-    protected void setDeleteFileOptions(boolean deleteFileOptions){
-        this.deleteFileOptions = deleteFileOptions;
-    }
-
-
 
     @Override
     public void onDestroy() {

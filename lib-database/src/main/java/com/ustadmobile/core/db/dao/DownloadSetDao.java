@@ -47,9 +47,9 @@ public abstract class DownloadSetDao {
 
 
     @UmTransaction
-    public void cleanupUnused(long downloadSetUid,int status){
-        deleteUnusedDownloadJobItems(downloadSetUid, status,null);
-        deleteUnusedDownloadJobs(downloadSetUid,status,null);
+    public void cleanupUnused(long downloadSetUid){
+        deleteUnusedDownloadJobItems(downloadSetUid,null);
+        deleteUnusedDownloadJobs(downloadSetUid,null);
         deleteUnusedDownloadSetItems(downloadSetUid,null);
         deleteUnusedDownloadSet(downloadSetUid,null);
     }
@@ -58,12 +58,11 @@ public abstract class DownloadSetDao {
 
     @UmQuery("DELETE FROM DownloadJobItem " +
             "WHERE " +
-            "djiStatus = :status AND " +
             "djiDsiUid IN (SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid)")
-    public abstract void deleteUnusedDownloadJobItems(long downloadSetUid,int status, UmCallback<Integer> callback);
+    public abstract void deleteUnusedDownloadJobItems(long downloadSetUid, UmCallback<Integer> callback);
 
-    @UmQuery("DELETE FROM DownloadJob WHERE djStatus = :status AND djDsUid = :downloadSetUid")
-    public abstract void deleteUnusedDownloadJobs(long downloadSetUid, int status ,UmCallback<Integer> callback);
+    @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :downloadSetUid")
+    public abstract void deleteUnusedDownloadJobs(long downloadSetUid, UmCallback<Integer> callback);
 
 
     @UmQuery("DELETE FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid " +
