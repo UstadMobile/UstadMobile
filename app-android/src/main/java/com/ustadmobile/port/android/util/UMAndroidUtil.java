@@ -5,8 +5,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -88,6 +90,39 @@ public class UMAndroidUtil {
         }
         return bundle;
 
+    }
+
+    /**
+     *
+     * @param map
+     * @return
+     */
+    public static Bundle mapToBundle(Map<String, String> map) {
+        if(map == null)
+            return null;
+
+        Bundle bundle = new Bundle();
+        for(Map.Entry<String, String> entry : map.entrySet()) {
+            bundle.putString(entry.getKey(), entry.getValue());
+        }
+
+        return bundle;
+    }
+
+    public static Map<String, String> bundleToMap(Bundle bundle) {
+        if(bundle == null)
+            return null;
+
+        Set<String> keys = bundle.keySet();
+        Map<String, String> map = new HashMap<>();
+        for(String key : keys) {
+            Object val = bundle.get(key);
+            if(val instanceof String) {
+                map.put(key, (String)val);
+            }
+        }
+
+        return map;
     }
 
 
