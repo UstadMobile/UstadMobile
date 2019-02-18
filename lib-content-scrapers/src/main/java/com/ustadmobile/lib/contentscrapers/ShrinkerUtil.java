@@ -328,15 +328,15 @@ public class ShrinkerUtil {
             throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
-        File webpExecutableFile = new File(ScraperBuildConfig.WEBP_PATH);
+        File webpExecutableFile = new File(ScraperBuildConfig.CWEBP_PATH);
         if (!webpExecutableFile.exists()) {
-            throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
+            throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.CWEBP_PATH);
         }
         File pngFile = null;
         Process process = null;
         Runtime runTime = Runtime.getRuntime();
         try {
-            process = runTime.exec(ScraperBuildConfig.WEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
+            process = runTime.exec(ScraperBuildConfig.CWEBP_PATH + " " + src.getPath() + " -o  " + dest.getPath());
             process.waitFor();
             int exitValue = process.exitValue();
             if (exitValue != 0) {
@@ -378,9 +378,9 @@ public class ShrinkerUtil {
             throw new FileNotFoundException("convertImageToWebp: Source file: " + src.getAbsolutePath() + " does not exist");
         }
 
-        File webpExecutableFile = new File(ScraperBuildConfig.WEBP_PATH);
+        File webpExecutableFile = new File(ScraperBuildConfig.CWEBP_PATH);
         if (!webpExecutableFile.exists()) {
-            throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.WEBP_PATH);
+            throw new IOException("Webp executable does not exist: " + ScraperBuildConfig.CWEBP_PATH);
         }
 
         Process process = null;
@@ -413,5 +413,79 @@ public class ShrinkerUtil {
 
     }
 
+
+    public static void convertVideoToWebM(File src, File dest) throws IOException {
+        if (!src.exists()) {
+            throw new FileNotFoundException("convertVideoToWebm: Source file: " + src.getAbsolutePath() + " does not exist");
+        }
+
+        File webpExecutableFile = new File(ScraperBuildConfig.FFMPEG_PATH);
+        if (!webpExecutableFile.exists()) {
+            throw new IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH);
+        }
+
+        ProcessBuilder builder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i",
+                src.getPath(), "-vf", "scale=480x270", "-r", "20", "-c:v", "vp9", "-crf", "40", "-b:v", "0", "-c:a"
+                , "libopus", "-b:a", "12000", "-vbr", "on", dest.getPath());
+        builder.redirectErrorStream(true);
+        Process process = null;
+        try {
+            process = builder.start();
+            UMIOUtils.readStreamToByteArray(process.getInputStream());
+            process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue != 0) {
+                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+                throw new IOException();
+            }
+            process.destroy();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+        }
+
+    }
+
+    public static void convertAudioToOpos(File src, File dest) throws IOException {
+        if (!src.exists()) {
+            throw new FileNotFoundException("convertAudioToOpos: Source file: " + src.getAbsolutePath() + " does not exist");
+        }
+
+        File webpExecutableFile = new File(ScraperBuildConfig.FFMPEG_PATH);
+        if (!webpExecutableFile.exists()) {
+            throw new IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH);
+        }
+
+        ProcessBuilder builder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
+                , "libopus", "-b:a", "12000", "-vbr", "on", dest.getPath());
+        builder.redirectErrorStream(true);
+        Process process = null;
+        try {
+            process = builder.start();
+            UMIOUtils.readStreamToByteArray(process.getInputStream());
+            process.waitFor();
+            int exitValue = process.exitValue();
+            if (exitValue != 0) {
+                UMLogUtil.logError("Error Stream " + UMIOUtils.readStreamToString(process.getErrorStream()));
+            }
+            process.destroy();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+        }
+
+    }
 
 }

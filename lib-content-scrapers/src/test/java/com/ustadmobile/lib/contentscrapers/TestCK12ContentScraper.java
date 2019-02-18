@@ -174,7 +174,7 @@ public class TestCK12ContentScraper {
         File thumbnail = new File(asset, folderName + "-video-thumbnail.jpg");
         Assert.assertEquals("thumbnail for content", true, ContentScraperUtil.fileHasContent(thumbnail));
 
-        File video = new File(asset, "media_video.mp4");
+        File video = new File(asset, "media_video.webm");
         Assert.assertEquals("video for content", true, ContentScraperUtil.fileHasContent(video));
     }
 

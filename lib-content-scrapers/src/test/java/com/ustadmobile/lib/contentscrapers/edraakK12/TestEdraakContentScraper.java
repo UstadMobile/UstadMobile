@@ -32,7 +32,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_MP4;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_WEBM;
 
 public class TestEdraakContentScraper {
 
@@ -120,31 +120,31 @@ public class TestEdraakContentScraper {
         courseDirectory.mkdirs();
         File jsonFile = new File(courseDirectory, CONTENT_JSON);
         Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.fileHasContent(jsonFile));
-        String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), "UTF-8");
+        String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), UTF_ENCODING);
         ContentResponse gsonContent = new GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr, ContentResponse.class);
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
-        Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.fileHasContent(new File( courseDirectory, QUESTIONS_JSON)));
-        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.fileHasContent(new File( courseDirectory.getParent(), gsonContent.id + ".zip")));
+        Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.fileHasContent(new File(courseDirectory, QUESTIONS_JSON)));
+        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.fileHasContent(new File(courseDirectory.getParent(), gsonContent.id + ".zip")));
 
         List<ContentResponse> questionSetList = scraper.getQuestionSet(gsonContent);
         Assert.assertNotNull("Has Questions Set", questionSetList);
         Assert.assertTrue("Has more than 1 question", questionSetList.size() > 0);
 
-        File video = new File( courseDirectory, VIDEO_MP4);
+        File video = new File(courseDirectory, VIDEO_FILENAME_WEBM);
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)) {
             Assert.assertEquals("Has Video", true, ContentScraperUtil.fileHasContent(video));
         } else {
             Assert.assertEquals("Should not have video", false, ContentScraperUtil.fileHasContent(video));
         }
 
-        Assert.assertTrue("tincan file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, "tincan.xml")));
-        Assert.assertTrue("index html file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, INDEX_HTML)));
-        Assert.assertTrue("jquery file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, JQUERY_JS)));
-        Assert.assertTrue("material js file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, MATERIAL_JS)));
-        Assert.assertTrue("material css file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, MATERIAL_CSS)));
-        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, ARABIC_FONT_REGULAR)));
-        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.fileHasContent(new File( courseDirectory, ARABIC_FONT_BOLD)));
+        Assert.assertTrue("tincan file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, TINCAN_FILENAME)));
+        Assert.assertTrue("index html file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, INDEX_HTML)));
+        Assert.assertTrue("jquery file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, JQUERY_JS)));
+        Assert.assertTrue("material js file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, MATERIAL_JS)));
+        Assert.assertTrue("material css file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, MATERIAL_CSS)));
+        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, ARABIC_FONT_REGULAR)));
+        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, ARABIC_FONT_BOLD)));
 
 
     }
@@ -204,26 +204,7 @@ public class TestEdraakContentScraper {
 
     }
 
-    @Test
-    public void givenEmptyQuestionSet_whenEdraakContentScraped_thenShouldThrowIOException() throws IOException {
-
-        File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(dispatcher);
-
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_QUESTIONS_FOUND, 41);
-        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapeContent();
-
-        File folder = new File(tmpDir, "5a60ac073d99e104fb62ce12");
-        File questions = new File(folder, "questions.json");
-        Assert.assertEquals(false, questions.exists());
-
-
-    }
-
-
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected =  IllegalArgumentException.class)
     public void givenMalformedContent_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
 
@@ -245,26 +226,6 @@ public class TestEdraakContentScraper {
         }
     }
 
-    @Test
-    public void givenContentNotModified_whenEdraakContentScrapedAgain_thenShouldNotDownloadComponents() throws IOException {
-        //run the initial scrapeContent
-        File tmpDir = Files.createTempDirectory("testmodifiededraak").toFile();
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.setDispatcher(dispatcher);
-
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
-        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapeContent();
-
-        long firstDownloadTime = new File(tmpDir, CONTENT_JSON).lastModified();
-        //now run scrapeContent again...
-        scraper.scrapeContent();
-
-        long lastModified = new File(tmpDir, CONTENT_JSON).lastModified();
-        //Assert that last modified dates are lower than firstDownloadCompleteTime
-        Assert.assertTrue(lastModified == firstDownloadTime);
-
-    }
 
     @Test
     public void givenVideoModified_whenEdraakContentScrapedAgain_thenShouldVideoOnlyAgain() throws IOException {
@@ -278,11 +239,11 @@ public class TestEdraakContentScraper {
 
         scraper.scrapeContent();
 
-        long firstDownloadTime = new File(tmpDir, VIDEO_MP4).lastModified();
+        long firstDownloadTime = new File(tmpDir, VIDEO_FILENAME_WEBM).lastModified();
         //now run scrapeContent again...
         scraper.scrapeContent();
 
-        long lastModified = new File(tmpDir, VIDEO_MP4).lastModified();
+        long lastModified = new File(tmpDir, VIDEO_FILENAME_WEBM).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 

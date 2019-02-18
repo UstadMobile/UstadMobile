@@ -10,7 +10,7 @@ public class ScraperConstants {
     public static final String ETAG_TXT = "etag.txt";
     public static final String LAST_MODIFIED_TXT = "last-modified.txt";
     public static final String ABOUT_HTML = "about.txt";
-    public static final String VIDEO_MP4 = "video.mp4";
+
     public static final String UTF_ENCODING = "UTF-8";
     public static final String EDRAAK_INDEX_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/edraak/index.html";
     public static final String CK12_INDEX_HTML_TAG = "/com/ustadmobile/lib/contentscrapers/ck12/index.html";
@@ -38,6 +38,12 @@ public class ScraperConstants {
     public static final String GRAPHIE = "+graphie";
     public static final String KHAN_GRAPHIE_PREFIX = "https://cdn.kastatic.org/ka-perseus-graphie/";
 
+
+    public static final String EDRAAK_JS_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/edraak.min.js";
+    public static final String EDRAAK_JS_FILENAME = "edraak.min.js";
+
+    public static final String EDRAAK_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/edraak.min.css";
+    public static final String EDRAAK_CSS_FILENAME = "edraak.min.css";
 
     public static final String CORRECT_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-correct.svg";
     public static final String CORRECT_FILE = "exercise-correct.svg";
@@ -139,9 +145,8 @@ public class ScraperConstants {
     public static final String REQUEST_HEAD = "HEAD";
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
-           ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
-           ComponentType.TEST.getType());
-
+            ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
+            ComponentType.TEST.getType());
 
 
     public static final String ARABIC_FONT_REGULAR = "DroidNaskh-Regular.woff2";
@@ -159,6 +164,7 @@ public class ScraperConstants {
     public static final String MIMETYPE_MP4 = "video/mp4";
     public static final String MIMETYPE_WEB_CHUNK = "application/webchunk+zip";
     public static final String MIMETYPE_TINCAN = "application/tincan+zip";
+    public static final String MIMETYPE_WEBM = "video/webm";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";
@@ -166,6 +172,20 @@ public class ScraperConstants {
     public static final String SVG_EXT = ".svg";
     public static final String JSON_EXT = ".json";
     public static final String WEBP_EXT = ".webp";
+    public static final String JPEG_EXT = ".jpeg";
+    public static final String JPG_EXT = ".jpg";
+    public static final String MP4_EXT = ".mp4";
+    public static final String MP3_EXT = ".mp3";
+    public static final String WEBM_EXT = ".webm";
+    public static final String OPOS_EXT = ".opos";
+
+    public static final List<String> IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg");
+    public static final List<String> VIDEO_EXTENSIONS = Arrays.asList("mp4");
+    public static final List<String> AUDIO_EXTENSIONS = Arrays.asList("mp3");
+
+
+    public static final String VIDEO_FILENAME_MP4 = "video.mp4";
+    public static final String VIDEO_FILENAME_WEBM = "video.webm";
     public static final String TINCAN_FILENAME = "tincan.xml";
 
     public static final String ARABIC_LANG_CODE = "ar";
@@ -180,7 +200,7 @@ public class ScraperConstants {
     public static final int TIME_OUT_SELENIUM = 500;
 
 
-    public enum QUESTION_TYPE{
+    public enum QUESTION_TYPE {
 
         MULTI_CHOICE("multiple-choice"),
         FILL_BLANKS("fill-in-the-blanks"),
@@ -199,7 +219,7 @@ public class ScraperConstants {
     }
 
 
-    public enum ComponentType{
+    public enum ComponentType {
         MAIN("MainContentTrack"),
         SECTION("Section"),
         SUBSECTION("SubSection"),
@@ -223,7 +243,7 @@ public class ScraperConstants {
         }
     }
 
-    public enum HtmlName{
+    public enum HtmlName {
         DESC("description"),
         FULL_DESC("full_description"),
         EXPLAIN("explaination"),
@@ -242,7 +262,7 @@ public class ScraperConstants {
 
     }
 
-    public enum KhanContentType{
+    public enum KhanContentType {
         TOPICS("Topics"),
         SUBJECT("Subjects"),
         VIDEO("Video"),
@@ -260,7 +280,7 @@ public class ScraperConstants {
         }
     }
 
-    public enum CK12ContentType{
+    public enum CK12ContentType {
         SUBJECTS("Subjects");
 
 

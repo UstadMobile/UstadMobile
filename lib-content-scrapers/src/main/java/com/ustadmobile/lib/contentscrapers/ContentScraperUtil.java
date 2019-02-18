@@ -105,12 +105,14 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_LOGIN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.OPOS_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT;
 
 
 public class ContentScraperUtil {
@@ -182,12 +184,33 @@ public class ContentScraperUtil {
                 conn.setRequestMethod(REQUEST_HEAD);
                 String fileName = getFileNameFromUrl(contentUrl);
                 File contentFile = new File(destinationDir, fileName);
-                content.attr("src", destinationDir.getName() + "/" + contentFile.getName());
 
-                if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName) && fileHasContent(contentFile)) {
+                File destinationFile = contentFile;
+                String ext = FilenameUtils.getExtension(fileName);
+                if (ScraperConstants.IMAGE_EXTENSIONS.contains(ext)) {
+                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBP_EXT);
+                } else if (ScraperConstants.VIDEO_EXTENSIONS.contains(ext)) {
+                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBM_EXT);
+                } else if(ScraperConstants.AUDIO_EXTENSIONS.contains(ext)){
+                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + OPOS_EXT);
+                }
+
+                content.attr("src", destinationDir.getName() + "/" + destinationFile.getName());
+
+                if (!ContentScraperUtil.isFileModified(conn, destinationDir, fileName) && fileHasContent(destinationFile)) {
                     continue;
                 }
                 FileUtils.copyURLToFile(contentUrl, contentFile);
+                if (destinationFile.getName().endsWith(WEBP_EXT)) {
+                    ShrinkerUtil.convertImageToWebp(contentFile, destinationFile);
+                    contentFile.delete();
+                } else if (destinationFile.getName().endsWith(WEBM_EXT)) {
+                    ShrinkerUtil.convertVideoToWebM(contentFile, destinationFile);
+                    contentFile.delete();
+                }else if(destinationFile.getName().endsWith(OPOS_EXT)){
+                    ShrinkerUtil.convertAudioToOpos(contentFile, destinationFile);
+                    contentFile.delete();
+                }
 
             } catch (IOException e) {
                 System.out.println("Url path " + url + " failed to download to file with base url " + baseUrl);
