@@ -440,7 +440,6 @@ public class DownloadJobItemRunnerTest {
 
         umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
 
-
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS,status-> status == JobStatus.WAITING_FOR_CONNECTION);
@@ -450,8 +449,8 @@ public class DownloadJobItemRunnerTest {
                 (int)testDownloadJobItemUid);
 
         assertEquals("File download task stopped after network status " +
-                        "change and set status to waiting", item.getDjiStatus(),
-                JobStatus.WAITING_FOR_CONNECTION);
+                        "change and set status to waiting",
+                JobStatus.WAITING_FOR_CONNECTION, item.getDjiStatus());
 
     }
 
@@ -481,7 +480,7 @@ public class DownloadJobItemRunnerTest {
                 (int)testDownloadJobItemUid);
 
         assertEquals("File download job was stopped and status was updated",
-                item.getDjiStatus(), JobStatus.STOPPED);
+                JobStatus.STOPPED, item.getDjiStatus());
     }
 
     @Test
@@ -505,21 +504,24 @@ public class DownloadJobItemRunnerTest {
         Thread.sleep(MAX_THREAD_SLEEP_TIME);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .getLiveStatus(item.getDjiUid()),MAX_LATCH_WAITING_TIME,
-                TimeUnit.SECONDS,status ->status == JobStatus.WAITING_FOR_CONNECTION);
+                .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS, status -> status >= JobStatus.RUNNING_MIN);
 
 
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),false);
 
-        Thread.sleep(MAX_THREAD_SLEEP_TIME);
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+                        .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS, status -> status == JobStatus.WAITING_FOR_CONNECTION);
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
 
+
         assertEquals("File download job is waiting for network after changing download" +
                         " set setting to use unmetered connection only",
-                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+                JobStatus.WAITING_FOR_CONNECTION, item.getDjiStatus());
 
     }
 
@@ -552,7 +554,7 @@ public class DownloadJobItemRunnerTest {
                 (int)testDownloadJobItemUid);
 
         assertEquals("File download job is waiting for network after the network goes off",
-                item.getDjiStatus(), JobStatus.WAITING_FOR_CONNECTION);
+                JobStatus.WAITING_FOR_CONNECTION, item.getDjiStatus());
     }
 
 
@@ -590,8 +592,8 @@ public class DownloadJobItemRunnerTest {
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                         (int)testDownloadJobItemUid);
-        assertEquals("File downloaded successfully",item.getDjiStatus(),
-                JobStatus.COMPLETE);
+        assertEquals("File downloaded successfully",JobStatus.COMPLETE,
+                item.getDjiStatus());
 
 
     }
