@@ -46,6 +46,7 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:visibility="gone"
         android:background="@android:color/white"
         android:id="@+id/use_sdcard_option_holder"
         android:layout_marginTop="@dimen/dimen_16dp"

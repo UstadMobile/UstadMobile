@@ -2,6 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -28,7 +29,6 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -506,7 +506,7 @@ public abstract class NetworkManagerBle {
 
         int totalDownloadItems = 0;
 
-        UmObserver<Boolean> observer = cancelledJobItems ->{
+        UmObserver<Boolean> statusChangeObserver = cancelledJobItems ->{
             if(cancelledJobItems != null && cancelledJobItems){
                 makeDeleteJobTask(mContext,args).run();
             }
@@ -520,8 +520,8 @@ public abstract class NetworkManagerBle {
                     .findByJobUid(downloadJob.getDjUid()).size();
         }
 
-        umAppDatabase.getDownloadJobItemDao()
-                .getLiveCancelledJobItems(totalDownloadItems).observeForever(observer);
+        umAppDatabase.getDownloadJobItemDao().getLiveCancelledJobItems(totalDownloadItems)
+                .observeForever(statusChangeObserver);
 
     }
 

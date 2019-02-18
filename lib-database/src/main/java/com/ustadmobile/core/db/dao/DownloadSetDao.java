@@ -8,6 +8,8 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 
+import java.util.List;
+
 /**
  * DAO for the DownloadSet entity.
  */
@@ -33,7 +35,6 @@ public abstract class DownloadSetDao {
     public abstract DownloadSet findByUid(int dsUid);
 
 
-
     @UmQuery("SELECT meteredNetworkAllowed FROM DownloadSet  WHERE dsUid = :dsUid")
     public abstract UmLiveData<Boolean> getLiveMeteredNetworkAllowed(long dsUid);
 
@@ -44,26 +45,26 @@ public abstract class DownloadSetDao {
     @UmQuery("SELECT dsUid FROM DownloadSet WHERE dsRootContentEntryUid = :contentEntryUid")
     public abstract long findDownloadSetUidByRootContentEntryUid(long contentEntryUid);
 
-    @UmQuery("DELETE FROM DownloadSet  WHERE dsUid = :dsUid")
-    public abstract int deleteByUid(long dsUid);
-
 
     @UmTransaction
-    public void cleanupUnused(long downloadSetUid) {
-        deleteUnusedDownloadJobItems(downloadSetUid, null);
-        deleteUnusedDownloadJobs(downloadSetUid,null);
+    public void cleanupUnused(long downloadSetUid,int status){
+        deleteUnusedDownloadJobItems(downloadSetUid, status,null);
+        deleteUnusedDownloadJobs(downloadSetUid,status,null);
         deleteUnusedDownloadSetItems(downloadSetUid,null);
         deleteUnusedDownloadSet(downloadSetUid,null);
     }
 
+
+
     @UmQuery("DELETE FROM DownloadJobItem " +
             "WHERE " +
-            "djiStatus = 0 AND " +
+            "djiStatus = :status AND " +
             "djiDsiUid IN (SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid)")
-    public abstract void deleteUnusedDownloadJobItems(long downloadSetUid, UmCallback<Integer> callback);
+    public abstract void deleteUnusedDownloadJobItems(long downloadSetUid,int status, UmCallback<Integer> callback);
 
-    @UmQuery("DELETE FROM DownloadJob WHERE djStatus = 0 AND djDsUid = :downloadSetUid")
-    public abstract void deleteUnusedDownloadJobs(long downloadSetUid, UmCallback<Integer> callback);
+    @UmQuery("DELETE FROM DownloadJob WHERE djStatus = :status AND djDsUid = :downloadSetUid")
+    public abstract void deleteUnusedDownloadJobs(long downloadSetUid, int status ,UmCallback<Integer> callback);
+
 
     @UmQuery("DELETE FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid " +
             "AND NOT EXISTS(SELECT djiUid FROM DownloadJobItem WHERE djiDsiUid = DownloadSetItem.dsiUid)")

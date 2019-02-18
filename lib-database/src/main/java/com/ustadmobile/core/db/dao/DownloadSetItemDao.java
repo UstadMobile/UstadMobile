@@ -13,10 +13,6 @@ import java.util.List;
 @UmDao
 public abstract class DownloadSetItemDao {
 
-
-    @UmQuery("SELECT * From DownloadSetItem WHERE dsiUid = :dsiUid")
-    public abstract DownloadSetItem findById(int dsiUid);
-
     /**
      * Insert a list of DownloadSetItem entities
      * @param jobItems List of DownloadSetItem entities to insert
@@ -37,9 +33,7 @@ public abstract class DownloadSetItemDao {
     @UmQuery("SELECT dsiDsUid FROM DownloadSetItem WHERE dsiContentEntryUid = :contentEntryUid")
     public abstract long findDownloadSetUidByContentEntryUid(long contentEntryUid);
 
-    @UmQuery("DELETE FROM DownloadSetItem WHERE dsiDsUid = :dsiDsUid")
-    public abstract int deleteByDownloadSetUid(long dsiDsUid);
-
-
+    @UmQuery("SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :dsiDsUid")
+    public abstract List<Long> findBySetUid(long dsiDsUid);
 
 }

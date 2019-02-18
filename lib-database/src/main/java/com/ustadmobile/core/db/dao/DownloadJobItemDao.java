@@ -178,6 +178,9 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT * FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
     public abstract List<DownloadJobItem> findByJobUid(long djiDjUid);
 
+    @UmQuery("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
+    public abstract List<String> getDestinationFiles(List<Long> djiDsiUids);
+
     @UmQuery("DELETE FROM DownloadJobItem WHERE djiDsiUid = :djiDsiUid")
     public abstract int deleteByDownloadSetUid(long djiDsiUid);
 
@@ -196,6 +199,7 @@ public abstract class DownloadJobItemDao {
     public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItems();
 
 
-
+    @UmQuery("SELECT count(CASE WHEN djiStatus = " + JobStatus.CANCELED +" then 1 ELSE 0 END) = :totalCount FROM DownloadJobItem")
+    public abstract UmLiveData<Boolean> getLiveCancelledJobItems(int totalCount);
 
 }

@@ -314,6 +314,13 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         return downloadJobUid;
     }
 
+    /**
+     * Testing purpose
+     */
+    protected void setDeleteFileOptions(boolean deleteFileOptions){
+        this.deleteFileOptions = deleteFileOptions;
+    }
+
 
 
     @Override

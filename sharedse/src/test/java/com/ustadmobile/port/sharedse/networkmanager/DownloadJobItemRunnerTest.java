@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -105,6 +106,10 @@ public class DownloadJobItemRunnerTest {
     private BleMessage wifiDirectGroupInfoMessage;
 
     private WiFiDirectGroupBle groupBle;
+
+    private static final int MAX_LATCH_WAITING_TIME = 5;
+
+    private static final int MAX_THREAD_SLEEP_TIME = 2;
 
 
     //Uid of the
@@ -427,23 +432,15 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
-            if(newStatus == JobStatus.WAITING_FOR_CONNECTION)
-                latch.countDown();
-        };
-        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
-                item.getDjiUid());
-        statusLiveData.observeForever(itemStatusObserver);
 
-        try { latch.await(3, TimeUnit.SECONDS); }
-        catch(InterruptedException e) {
-            //should not happen
-        }
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS,status-> status == JobStatus.WAITING_FOR_CONNECTION);
+
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -468,23 +465,13 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         umAppDatabase.getDownloadJobItemDao().updateStatus(item.getDjiUid(),JobStatus.STOPPING);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
-            if(newStatus == JobStatus.STOPPED)
-                latch.countDown();
-        };
-        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
-                item.getDjiUid());
-        statusLiveData.observeForever(itemStatusObserver);
-
-        try { latch.await(3, TimeUnit.SECONDS); }
-        catch(InterruptedException e) {
-            //should not happen
-        }
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS, status -> status == JobStatus.STOPPED);
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -511,27 +498,17 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        Thread.sleep(MAX_THREAD_SLEEP_TIME);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        UmObserver<Integer> statusObserver = (status) -> {
-            if(status == JobStatus.WAITING_FOR_CONNECTION)
-                latch.countDown();
-        };
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+                .getLiveStatus(item.getDjiUid()),MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS,status ->status == JobStatus.WAITING_FOR_CONNECTION);
 
-
-        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao()
-                .getLiveStatus(item.getDjiUid());
-
-        statusLiveData.observeForever(statusObserver);
 
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),false);
 
-        try { latch.await(3, TimeUnit.SECONDS); }
-        catch(InterruptedException e) {
-            //should not happen
-        }
+        Thread.sleep(MAX_THREAD_SLEEP_TIME);
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -556,23 +533,16 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
 
-        CountDownLatch latch = new CountDownLatch(1);
-        UmObserver<Integer> itemStatusObserver = (newStatus) -> {
-            if(newStatus == JobStatus.WAITING_FOR_CONNECTION)
-                latch.countDown();
-        };
-        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
-                item.getDjiUid());
-        statusLiveData.observeForever(itemStatusObserver);
 
-        try { latch.await(3, TimeUnit.SECONDS); }
-        catch(InterruptedException e) {
-            //should not happen
-        }
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                status->status == JobStatus.WAITING_FOR_CONNECTION);
+
+        Thread.sleep(MAX_THREAD_SLEEP_TIME);
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -678,8 +648,7 @@ public class DownloadJobItemRunnerTest {
     }
 
     @Test
-    public void givenDownloadLocallyAvailableFromBadNode_whenDownloadStarted_shouldDownloadFromCloud()
-            throws InterruptedException {
+    public void givenDownloadLocallyAvailableFromBadNode_whenDownloadStarted_shouldDownloadFromCloud() {
 
         when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
                 any(BleMessage.class),any(NetworkNode.class),
@@ -703,17 +672,9 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-
-        CountDownLatch latch = new CountDownLatch(1);
-        UmObserver<Integer> statusObserver = (status) -> {
-            if(status == JobStatus.COMPLETE)
-                latch.countDown();
-        };
-        UmLiveData<Integer> statusLiveData = umAppDatabase.getDownloadJobItemDao().getLiveStatus(
-                item.getDjiUid());
-        statusLiveData.observeForever(statusObserver);
-
-        latch.await(10, TimeUnit.SECONDS);
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao().getLiveStatus(
+                item.getDjiUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                status -> status == JobStatus.COMPLETE);
 
         assertTrue("File downloaded from cloud web server",
                 mockCloudWebServer.getRequestCount() >=1 && mockPeerWebServer == null);

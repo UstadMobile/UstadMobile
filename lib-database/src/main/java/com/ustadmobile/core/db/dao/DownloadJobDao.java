@@ -57,7 +57,10 @@ public abstract class DownloadJobDao {
      * @return The DownloadJob with the given id, or null if no such DownloadJob exists
      */
     @UmQuery("SELECT * From DownloadJob WHERE djUid = :djUid")
-    public abstract DownloadJob findById(long djUid);
+    public abstract DownloadJob findByUid(long djUid);
+
+    @UmQuery("SELECT * FROM DownloadJob WHERE djDsUid = :downloadSetUid")
+    public abstract List<DownloadJob> findBySetUid(long downloadSetUid);
 
 
     /**
@@ -85,15 +88,24 @@ public abstract class DownloadJobDao {
                                         int jobStatusTo);
 
     @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :djDsUid")
-    public abstract int deleteByDownloadSetUid(long djDsUid);
+    public abstract int deleteBySetUid(long djDsUid);
 
     @UmTransaction
-    public void updateJobAndItems(long djUid, int djStatus, int activeJobItemsStatus) {
-        update(djUid, djStatus);
+    public void updateJobAndItems(long djUid, int djStatus, int activeJobItemsStatus,
+                                  int completeJobItemStatus) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX);
 
         if(activeJobItemsStatus != -1)
             updateJobItems(djUid, activeJobItemsStatus, JobStatus.RUNNING_MIN, JobStatus.RUNNING_MAX);
+
+        if(completeJobItemStatus != -1)
+            updateJobItems(djUid, completeJobItemStatus, JobStatus.COMPLETE_MIN, JobStatus.COMPLETE_MAX);
+
+        update(djUid, djStatus);
+    }
+
+    public void updateJobAndItems(long djUid, int djStatus, int activeJobItemsStatus) {
+        updateJobAndItems(djUid, djStatus, activeJobItemsStatus, -1);
     }
 
     @UmQuery("SELECT * From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
@@ -130,6 +142,7 @@ public abstract class DownloadJobDao {
             "AND djiContentEntryFileUid != 0 " +
             "AND djiStatus >= " + JobStatus.COMPLETE_MIN + ") ")
     public abstract void updateJobStatusToCompleteIfAllItemsAreCompleted(long downloadJobUid);
+
 
 
 }

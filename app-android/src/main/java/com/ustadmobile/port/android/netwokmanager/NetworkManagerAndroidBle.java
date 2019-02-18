@@ -35,9 +35,11 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
+import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
@@ -517,6 +519,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             return task;
         }
         return null;
+    }
+
+    @Override
+    public DeleteJobTaskRunner makeDeleteJobTask(Object object, Hashtable args) {
+        return new DeleteJobTaskRunnerAndroid(object,args);
     }
 
 

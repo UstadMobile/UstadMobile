@@ -1,21 +1,25 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import java.util.HashMap;
+import java.util.Hashtable;
 
-public class DeleteTaskRunner implements Runnable {
+/**
+ * Abstract class which used to implement platform specific job delete task
+ *
+ * @author kileha3
+ */
+public abstract class DeleteJobTaskRunner implements Runnable {
 
-    protected long downloadSetUid;
+    protected Hashtable args;
 
-    protected HashMap<String,String> map;
+    protected Object context;
 
-    public DeleteTaskRunner(long downloadSetUid,HashMap<String,String> map){
-        this.downloadSetUid = downloadSetUid;
-        this.map = map;
-    }
-
-
-    @Override
-    public void run() {
-
+    /**
+     * Constructor used when creating new instance of a task runner
+     * @param context Platform application context
+     * @param args arguments to be passed.
+     */
+    public DeleteJobTaskRunner(Object context,Hashtable args){
+        this.args = args;
+        this.context = context;
     }
 }
