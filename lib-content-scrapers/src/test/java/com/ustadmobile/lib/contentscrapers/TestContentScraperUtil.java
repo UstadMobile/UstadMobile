@@ -74,7 +74,7 @@ public class TestContentScraperUtil {
 
         String convertedHtml = ContentScraperUtil.downloadAllResources(htmlWithImage, resourceLocation, mockWebServer.url("/api").url());
 
-        File imageFile = new File(resourceLocation, "media_test1picture.png");
+        File imageFile = new File(resourceLocation, "media_test1picture.webp");
         //Assert that the image file is downloaded
         Assert.assertTrue("Image Downloaded Successfully", imageFile.exists());
 
@@ -82,7 +82,7 @@ public class TestContentScraperUtil {
 
         Document doc = Jsoup.parse(convertedHtml);
         Element image = doc.select("img").first();
-        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(resourceLocation.getName() + "/media_test1picture.png"));
+        Assert.assertTrue("Img Src is pointing to relative path", image.attr("src").equalsIgnoreCase(resourceLocation.getName() + "/media_test1picture.webp"));
     }
 
 

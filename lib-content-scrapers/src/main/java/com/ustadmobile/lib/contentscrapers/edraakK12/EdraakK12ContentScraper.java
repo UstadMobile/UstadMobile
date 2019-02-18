@@ -3,6 +3,8 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
@@ -11,6 +13,8 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.File;
 import java.io.IOException;
@@ -158,14 +162,19 @@ public class EdraakK12ContentScraper {
             }
             anyContentUpdated = true;
         }
-
         try {
-            checkBeforeCopyToFile(ScraperConstants.EDRAAK_INDEX_HTML_TAG, new File(courseDirectory, INDEX_HTML));
+            String index = UMIOUtils.readToString(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), UTF_ENCODING);
+            Document doc = Jsoup.parse(index, UTF_ENCODING);
+            doc.head().selectFirst("title").text(response.title);
+            FileUtils.writeStringToFile(new File(courseDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING);
+            
             checkBeforeCopyToFile(ScraperConstants.JS_TAG, new File(courseDirectory, JQUERY_JS));
             checkBeforeCopyToFile(ScraperConstants.MATERIAL_CSS_LINK, new File(courseDirectory, MATERIAL_CSS));
             checkBeforeCopyToFile(ScraperConstants.MATERIAL_JS_LINK, new File(courseDirectory, MATERIAL_JS));
             checkBeforeCopyToFile(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_REGULAR));
             checkBeforeCopyToFile(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_BOLD));
+            checkBeforeCopyToFile(ScraperConstants.EDRAAK_CSS_LINK, new File(courseDirectory, EDRAAK_CSS_FILENAME));
+            checkBeforeCopyToFile(ScraperConstants.EDRAAK_JS_LINK, new File(courseDirectory, EDRAAK_JS_FILENAME));
         } catch (IOException ie) {
             UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
         }
@@ -190,10 +199,15 @@ public class EdraakK12ContentScraper {
         }
 
 
-        File videoFile = new File(courseDirectory, VIDEO_MP4);
-        if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(videoHref.modified), videoFile)) {
+        File videoFile = new File(courseDirectory, VIDEO_FILENAME_MP4);
+        File webmFile = new File(courseDirectory, VIDEO_FILENAME_WEBM);
+        if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(videoHref.modified), webmFile)) {
             try {
                 FileUtils.copyURLToFile(videoUrl, videoFile);
+                ShrinkerUtil.convertVideoToWebM(videoFile, webmFile);
+                if (!videoFile.delete()) {
+                    throw new IOException("Could not delete the video");
+                }
                 return true;
             } catch (IOException e) {
                 throw new IllegalArgumentException("Download Video Malformed url for response");
