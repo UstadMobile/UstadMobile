@@ -181,6 +181,10 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
     public abstract List<String> getDestinationFiles(List<Long> djiDsiUids);
 
+
+    @UmQuery("SELECT djiContentEntryFileUid FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
+    public abstract List<Long> getContentEntryFileUids(List<Long> djiDsiUids);
+
     @UmQuery("DELETE FROM DownloadJobItem WHERE djiDsiUid = :djiDsiUid")
     public abstract int deleteByDownloadSetUid(long djiDsiUid);
 

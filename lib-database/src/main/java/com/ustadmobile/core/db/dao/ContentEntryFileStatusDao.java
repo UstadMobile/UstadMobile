@@ -14,4 +14,7 @@ public abstract class ContentEntryFileStatusDao implements BaseDao<ContentEntryF
     @UmQuery("SELECT * FROM ContentEntryFileStatus WHERE cefsContentEntryFileUid = :cefsContentEntryFileUid")
     public abstract ContentEntryFileStatus findByContentEntryFileUid(long cefsContentEntryFileUid);
 
+    @UmQuery("DELETE FROM ContentEntryFileStatus WHERE cefsContentEntryFileUid IN(:cefsContentEntryFileUid)")
+    public abstract void deleteByFileUids(List<Long> cefsContentEntryFileUid);
+
 }
