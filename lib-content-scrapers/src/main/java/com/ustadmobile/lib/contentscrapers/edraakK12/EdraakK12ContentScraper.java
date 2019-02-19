@@ -3,12 +3,17 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -26,7 +31,21 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_BOLD;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_REGULAR;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ComponentType;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EDRAAK_CSS_FILENAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EDRAAK_JS_FILENAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_JS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_MP4;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_WEBM;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 
 /**
@@ -41,13 +60,13 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
  * <p>
  * The Test component type is the same as Exercise component type
  */
-public class EdraakK12ContentScraper {
+public class EdraakK12ContentScraper implements Runnable {
 
-    private final String url;
-    private final File destinationDirectory;
+    private int sqiUid;
+    private ContentEntry parentEntry;
+    private File destinationDirectory;
     boolean contentUpdated = false;
     private URL scrapUrl;
-    private File courseDirectory;
 
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -65,13 +84,60 @@ public class EdraakK12ContentScraper {
         }
     }
 
-    public EdraakK12ContentScraper(String url, File destinationDir) {
-        this.url = url;
+    public EdraakK12ContentScraper(String url, File destinationDir) throws MalformedURLException {
+        this.scrapUrl = new URL(url);
         this.destinationDirectory = destinationDir;
+    }
+
+    public EdraakK12ContentScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, int sqiUid) {
+        this.destinationDirectory = destinationDirectory;
+        this.scrapUrl = scrapeUrl;
+        this.parentEntry = parent;
+        this.sqiUid = sqiUid;
     }
 
     public static String generateUrl(String baseUrl, String contentId, int programId) {
         return baseUrl + "component/" + contentId + "/?states_program_id=" + programId;
+    }
+
+    @Override
+    public void run() {
+        System.gc();
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
+        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
+        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
+        ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
+
+
+        long startTime = System.currentTimeMillis();
+        UMLogUtil.logInfo("Started scraper url " + scrapUrl + " at start time: " + startTime);
+        queueDao.setTimeStarted(sqiUid, startTime);
+
+        boolean successful = false;
+        try {
+            scrapeContent();
+            successful = true;
+            File content = new File(destinationDirectory.getParentFile(), destinationDirectory.getName() + ZIP_EXT);
+            if (hasContentUpdated()) {
+                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, parentEntry,
+                        ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
+            } else {
+                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
+                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+
+            }
+
+        } catch (Exception e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+        }
+
+        queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
+        queueDao.setTimeFinished(sqiUid, System.currentTimeMillis());
+        long duration = System.currentTimeMillis() - startTime;
+        UMLogUtil.logInfo("Ended scrape for url " + scrapUrl + " in duration: " + duration);
+
     }
 
     /**
@@ -80,13 +146,6 @@ public class EdraakK12ContentScraper {
      * @throws IOException
      */
     public void scrapeContent() throws IOException {
-
-        try {
-            scrapUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            UMLogUtil.logError("Scrap Malformed url" + url);
-            throw new IllegalArgumentException("Malformed url" + url, e);
-        }
 
         destinationDirectory.mkdirs();
 
@@ -104,9 +163,6 @@ public class EdraakK12ContentScraper {
             }
         }
 
-        courseDirectory = new File(destinationDirectory, response.id);
-        courseDirectory.mkdirs();
-
         if (!ContentScraperUtil.isImportedComponent(response.component_type))
             throw new IllegalArgumentException("Not an imported content type! for id" + response.id);
 
@@ -117,7 +173,7 @@ public class EdraakK12ContentScraper {
 
         List<ContentResponse> questionsList = getQuestionSet(response);
         try {
-            anyContentUpdated = downloadQuestions(questionsList, courseDirectory, scrapUrl);
+            anyContentUpdated = downloadQuestions(questionsList, destinationDirectory, scrapUrl);
         } catch (IllegalArgumentException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("The question set was not available for response id " + response.id);
@@ -141,7 +197,7 @@ public class EdraakK12ContentScraper {
             }
         }
 
-        File contentJsonFile = new File(courseDirectory, ScraperConstants.CONTENT_JSON);
+        File contentJsonFile = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
         if (anyContentUpdated || !ContentScraperUtil.fileHasContent(contentJsonFile)) {
             // store the json in a file after modifying image links
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -150,12 +206,12 @@ public class EdraakK12ContentScraper {
             anyContentUpdated = true;
         }
 
-        File tinCanFile = new File(courseDirectory, TINCAN_FILENAME);
+        File tinCanFile = new File(destinationDirectory, TINCAN_FILENAME);
         if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
             try {
-                ContentScraperUtil.generateTinCanXMLFile(courseDirectory, response.title, "ar",
+                ContentScraperUtil.generateTinCanXMLFile(destinationDirectory, response.title, "ar",
                         ScraperConstants.INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
-                        url.substring(0, url.indexOf("component/")) + response.id,
+                        scrapUrl.toString().substring(0, scrapUrl.toString().indexOf("component/")) + response.id,
                         "", "en");
             } catch (ParserConfigurationException | TransformerException e) {
                 UMLogUtil.logError("Failed to created tin can file for response" + response.id);
@@ -166,22 +222,23 @@ public class EdraakK12ContentScraper {
             String index = UMIOUtils.readToString(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), UTF_ENCODING);
             Document doc = Jsoup.parse(index, UTF_ENCODING);
             doc.head().selectFirst("title").text(response.title);
-            FileUtils.writeStringToFile(new File(courseDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING);
-            
-            checkBeforeCopyToFile(ScraperConstants.JS_TAG, new File(courseDirectory, JQUERY_JS));
-            checkBeforeCopyToFile(ScraperConstants.MATERIAL_CSS_LINK, new File(courseDirectory, MATERIAL_CSS));
-            checkBeforeCopyToFile(ScraperConstants.MATERIAL_JS_LINK, new File(courseDirectory, MATERIAL_JS));
-            checkBeforeCopyToFile(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_REGULAR));
-            checkBeforeCopyToFile(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(courseDirectory, ARABIC_FONT_BOLD));
-            checkBeforeCopyToFile(ScraperConstants.EDRAAK_CSS_LINK, new File(courseDirectory, EDRAAK_CSS_FILENAME));
-            checkBeforeCopyToFile(ScraperConstants.EDRAAK_JS_LINK, new File(courseDirectory, EDRAAK_JS_FILENAME));
+            FileUtils.writeStringToFile(new File(destinationDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING);
+
+            checkBeforeCopyToFile(ScraperConstants.JS_TAG, new File(destinationDirectory, JQUERY_JS));
+            checkBeforeCopyToFile(ScraperConstants.MATERIAL_CSS_LINK, new File(destinationDirectory, MATERIAL_CSS));
+            checkBeforeCopyToFile(ScraperConstants.MATERIAL_JS_LINK, new File(destinationDirectory, MATERIAL_JS));
+            checkBeforeCopyToFile(ScraperConstants.REGULAR_ARABIC_FONT_LINK, new File(destinationDirectory, ARABIC_FONT_REGULAR));
+            checkBeforeCopyToFile(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ARABIC_FONT_BOLD));
+            checkBeforeCopyToFile(ScraperConstants.EDRAAK_CSS_LINK, new File(destinationDirectory, EDRAAK_CSS_FILENAME));
+            checkBeforeCopyToFile(ScraperConstants.EDRAAK_JS_LINK, new File(destinationDirectory, EDRAAK_JS_FILENAME));
         } catch (IOException ie) {
             UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
         }
         // nothing changed, keep same files
         if (anyContentUpdated) {
             // add these files into the directory
-            ContentScraperUtil.zipDirectory(courseDirectory, response.id + ZIP_EXT, destinationDirectory);
+            ContentScraperUtil.zipDirectory(destinationDirectory,
+                    response.id + ZIP_EXT, destinationDirectory.getParentFile());
         }
         contentUpdated = anyContentUpdated;
     }
@@ -199,8 +256,8 @@ public class EdraakK12ContentScraper {
         }
 
 
-        File videoFile = new File(courseDirectory, VIDEO_FILENAME_MP4);
-        File webmFile = new File(courseDirectory, VIDEO_FILENAME_WEBM);
+        File videoFile = new File(destinationDirectory, VIDEO_FILENAME_MP4);
+        File webmFile = new File(destinationDirectory, VIDEO_FILENAME_WEBM);
         if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(videoHref.modified), webmFile)) {
             try {
                 FileUtils.copyURLToFile(videoUrl, videoFile);
@@ -276,7 +333,6 @@ public class EdraakK12ContentScraper {
             if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(exercise.updated), exerciseDirectory)) {
 
                 exerciseDirectory.mkdirs();
-                exerciseUpdatedCount++;
 
                 exercise.full_description = ContentScraperUtil.downloadAllResources(exercise.full_description, exerciseDirectory, url);
                 exercise.explanation = ContentScraperUtil.downloadAllResources(exercise.explanation, exerciseDirectory, url);
@@ -291,6 +347,11 @@ public class EdraakK12ContentScraper {
                 for (ContentResponse.Hint hint : exercise.hints) {
                     hint.description = ContentScraperUtil.downloadAllResources(hint.description, exerciseDirectory, url);
                 }
+
+                if (exerciseDirectory.listFiles().length > 0) {
+                    exerciseUpdatedCount++;
+                }
+
             }
 
         }

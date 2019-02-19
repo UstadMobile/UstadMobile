@@ -157,7 +157,7 @@ public class VoaScraper implements Runnable {
         File voaDirectory = new File(destinationDir, lessonId);
         voaDirectory.mkdirs();
 
-        File zipFile = new File(FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
+        File zipFile = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
 
         try {
             WebElement element = driver.findElementByCssSelector("script[type*=json]");
