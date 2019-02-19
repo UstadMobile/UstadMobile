@@ -302,7 +302,7 @@ public class DownloadJobItemRunnerTest {
         doAnswer(invocation -> {
             BleMessageResponseListener bleResponseListener = invocation.getArgument(3);
             startPeerWebServer();
-            Thread.sleep(1);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
             groupBle.setEndpoint(localEndPoint);
             wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
                     new Gson().toJson(groupBle).getBytes());
@@ -317,7 +317,7 @@ public class DownloadJobItemRunnerTest {
         doAnswer((invocation -> {
             umAppDatabase.getConnectivityStatusDao()
                     .updateState(ConnectivityStatus.STATE_CONNECTING_LOCAL,groupBle.getSsid(), null);
-            Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
             umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_CONNECTED_LOCAL, groupBle.getSsid() , null);
             return null;
         })).when(mockedNetworkManager).connectToWiFi(eq(groupBle.getSsid()), eq(groupBle.getPassphrase()));
@@ -483,11 +483,7 @@ public class DownloadJobItemRunnerTest {
                 JobStatus.STOPPED, item.getDjiStatus());
     }
 
-    /**
-     * TODO: This test is flaky both running local and on Jenkins. Not 100% sure why.
-     *
-     * @throws InterruptedException
-     */
+
     @Test
     public void givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus()
             throws InterruptedException {
@@ -510,7 +506,7 @@ public class DownloadJobItemRunnerTest {
                 .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status >= JobStatus.RUNNING_MIN);
 
-        Thread.sleep(MAX_THREAD_SLEEP_TIME);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),false);
@@ -552,7 +548,7 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 status->status == JobStatus.WAITING_FOR_CONNECTION);
 
-        Thread.sleep(MAX_THREAD_SLEEP_TIME);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         item = umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 (int)testDownloadJobItemUid);
@@ -629,7 +625,7 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiUid());
         statusLiveData.observeForever(statusObserver);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         entryStatusResponse.setAvailable(true);
         umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
@@ -727,7 +723,7 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiUid());
         statusLiveData.observeForever(statusObserver);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         entryStatusResponse.setAvailable(true);
         umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
@@ -778,7 +774,7 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiUid());
         statusLiveData.observeForever(statusObserver);
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         entryStatusResponse.setAvailable(true);
         umAppDatabase.getEntryStatusResponseDao().insert(entryStatusResponse);
