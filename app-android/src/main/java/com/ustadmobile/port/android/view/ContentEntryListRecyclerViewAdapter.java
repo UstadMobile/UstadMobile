@@ -52,6 +52,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             holder.getView().setOnClickListener(null);
             holder.getDownloadView().setOnClickListener(null);
         } else {
+            holder.getView().setTag(entry.getContentEntryUid());
             holder.getEntryTitle().setText(entry.getTitle());
             holder.getEntryDescription().setText(entry.getDescription());
             if (entry.getThumbnailUrl() == null || entry.getThumbnailUrl().isEmpty()) {

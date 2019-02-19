@@ -50,10 +50,8 @@ afterEvaluate {
 }
 
 tasks.whenTaskAdded { task ->
- if (task.name == "installLocalconfigDebugAndroidTest") {
-        testEmulatorLocalconfigDebug.dependsOn task
-    } else if (task.name == "installLocalconfigDebug") {
-        testEmulatorLocalconfigDebug.dependsOn task
+    if (task.name.toLowerCase().endsWith("androidtest")) {
+        task.dependsOn(":lib-http-testserver:startDaemon")
     }
 }
 
@@ -104,6 +102,9 @@ android {
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
+        buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
+        buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
+
 
         manifestPlaceholders = [applicationClass: "android.app.Application"]
 
@@ -367,6 +368,9 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
 
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+
+    androidTestImplementation "commons-io:commons-io:$version_commons_io"
+
 
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

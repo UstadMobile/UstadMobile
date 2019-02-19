@@ -66,4 +66,7 @@ public abstract class ContentEntryParentChildJoinDao
             "LEFT JOIN ContentEntry childEntry ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid " +
             "WHERE parentEntry.publik AND childEntry.publik")
     public abstract List<ContentEntryParentChildJoin> getPublicContentEntryParentChildJoins();
+
+    @UmQuery("SELECT * FROM ContentEntryParentChildJoin")
+    public abstract List<ContentEntryParentChildJoin> getAll();
 }

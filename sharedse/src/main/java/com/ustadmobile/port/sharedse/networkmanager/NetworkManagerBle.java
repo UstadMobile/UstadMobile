@@ -29,6 +29,8 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -501,28 +503,28 @@ public abstract class NetworkManagerBle {
      * @param args Arguments to be passed to the task runner.
      */
     public void cancelAndDeleteDownloadSet(Hashtable args) {
+
+        long downloadSetUid = Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID)));
         List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().
-                findBySetUid(Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID))));
+                findBySetUid(downloadSetUid);
 
-        int totalDownloadItems = 0;
+        AtomicBoolean taskRunRef = new AtomicBoolean(false);
 
-        UmObserver<Boolean> statusChangeObserver = cancelledJobItems ->{
-            if(cancelledJobItems != null && cancelledJobItems){
+        UmObserver<List<DownloadJob>> statusChangeObserver = jobs ->{
+            if(!taskRunRef.get() && jobs.size() == downloadJobs.size()){
                 makeDeleteJobTask(mContext,args).run();
             }
+            taskRunRef.set(jobs.size() == downloadJobs.size());
         };
+
+        umAppDatabase.getDownloadJobDao().getJobsLive(JobStatus.CANCELED)
+                .observeForever(statusChangeObserver);
 
 
         for(DownloadJob downloadJob : downloadJobs){
             umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
                     JobStatus.CANCELED, JobStatus.CANCELLING, JobStatus.CANCELED);
-            totalDownloadItems = totalDownloadItems + umAppDatabase.getDownloadJobItemDao()
-                    .findByJobUid(downloadJob.getDjUid()).size();
         }
-
-        umAppDatabase.getDownloadJobItemDao().getLiveCancelledJobItems(totalDownloadItems)
-                .observeForever(statusChangeObserver);
-
     }
 
 

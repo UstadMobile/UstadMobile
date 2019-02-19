@@ -202,8 +202,4 @@ public abstract class DownloadJobItemDao {
             "LIMIT 1")
     public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItems();
 
-
-    @UmQuery("SELECT count(CASE WHEN djiStatus = " + JobStatus.CANCELED +" then 1 ELSE 0 END) = :totalCount FROM DownloadJobItem")
-    public abstract UmLiveData<Boolean> getLiveCancelledJobItems(int totalCount);
-
 }

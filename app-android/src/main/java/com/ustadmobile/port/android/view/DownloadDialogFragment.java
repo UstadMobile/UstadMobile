@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,8 +57,8 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     @Override
     public void onAttach(Context context) {
-        if (context instanceof ContentEntryListActivity) {
-            NetworkManagerBle managerBle = ((ContentEntryListActivity)context).networkManagerBle;
+        if (context instanceof UstadBaseActivity) {
+            NetworkManagerBle managerBle = ((UstadBaseActivity)context).networkManagerBle;
             mPresenter = new DownloadDialogPresenter(getContext(),managerBle,
                     UMAndroidUtil.bundleToHashtable(getArguments()),this);
         }

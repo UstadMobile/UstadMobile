@@ -74,6 +74,9 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT * FROM DownloadJob WHERE djUid = :djUid")
     public abstract UmLiveData<DownloadJob>  getJobLive(long djUid);
 
+    @UmQuery("SELECT * FROM DownloadJob WHERE djStatus = :jobStatus")
+    public abstract UmLiveData<List<DownloadJob>>  getJobsLive(int jobStatus);
+
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
 
