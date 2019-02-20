@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.netwokmanager;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
@@ -319,11 +320,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void stopAdvertising() {
-        if(bleServiceAdvertiser == null) return;
-        if (isBleDeviceSDKVersion() &&
-                ((BleGattServerAndroid)gattServerAndroid).getGattServer() != null) {
-            ((BleGattServerAndroid)gattServerAndroid).getGattServer().clearServices();
-            ((BleGattServerAndroid)gattServerAndroid).getGattServer().close();
+        if(bleServiceAdvertiser == null || ((BleGattServerAndroid)gattServerAndroid) == null)
+            return;
+
+        BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
+        if (isBleDeviceSDKVersion() && mGattServer != null) {
+            mGattServer.clearServices();
+            mGattServer.close();
             gattServerAndroid = null;
         }
     }
@@ -596,7 +599,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         stopAdvertising();
         stopScanning();
         if(wifiP2pManager != null)
-            mContext.unregisterReceiver(mReceiver);
+            try{ mContext.unregisterReceiver(mReceiver); }catch (Exception ignored){}
 
         super.onDestroy();
     }

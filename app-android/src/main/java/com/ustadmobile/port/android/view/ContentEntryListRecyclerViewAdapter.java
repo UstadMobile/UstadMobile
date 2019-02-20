@@ -63,22 +63,26 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                         .into(holder.getThumbnailView());
             }
 
-
+            String contentDescription = null;
             if (entry.getContentEntryStatus() != null) {
 
                 ContentEntryStatus status = entry.getContentEntryStatus();
                 int dlStatus = status.getDownloadStatus();
 
                 if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.getTotalSize() > 0) {
+                    contentDescription = "Downloading";
                     holder.getDownloadView().setProgress((int) ((status.getBytesDownloadSoFar() * 100) / status.getTotalSize()));
                 } else {
+                    contentDescription = "Queued";
                     holder.getDownloadView().setProgress(0);
                 }
 
                 if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
                     holder.getDownloadView().setImageResource(R.drawable.ic_pause_black_24dp);
+                    contentDescription = "Paused";
                 } else if (dlStatus == JobStatus.COMPLETE) {
                     holder.getDownloadView().setImageResource(R.drawable.ic_offline_pin_black_24dp);
+                    contentDescription = "Downloaded";
                 } else {
                     holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
                 }
@@ -87,7 +91,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                 holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
             }
 
-
+            holder.getDownloadView().getImageResource().setContentDescription(contentDescription);
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
         }
