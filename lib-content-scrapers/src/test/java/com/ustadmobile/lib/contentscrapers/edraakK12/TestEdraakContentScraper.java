@@ -114,10 +114,13 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
-        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
-        scraper.scrapeContent();
+
         File courseDirectory = new File(tmpDir, "5a60a25f0ed49f0498cb201d");
         courseDirectory.mkdirs();
+
+        EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, courseDirectory);
+        scraper.scrapeContent();
+
         File jsonFile = new File(courseDirectory, CONTENT_JSON);
         Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.fileHasContent(jsonFile));
         String jsonStr = new String(Files.readAllBytes(jsonFile.toPath()), UTF_ENCODING);
@@ -125,7 +128,7 @@ public class TestEdraakContentScraper {
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
         Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.fileHasContent(new File(courseDirectory, QUESTIONS_JSON)));
-        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.fileHasContent(new File(courseDirectory.getParent(), gsonContent.id + ".zip")));
+        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.fileHasContent(new File(tmpDir, gsonContent.id + ".zip")));
 
         List<ContentResponse> questionSetList = scraper.getQuestionSet(gsonContent);
         Assert.assertNotNull("Has Questions Set", questionSetList);
@@ -156,6 +159,7 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
         String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_CONTENT_CONTENT_FILE, 41);
+
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
     }
@@ -204,7 +208,7 @@ public class TestEdraakContentScraper {
 
     }
 
-    @Test(expected =  IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void givenMalformedContent_whenEdraakContentScraped_thenShouldThrowIllegalArgumentException() throws IOException {
 
 
