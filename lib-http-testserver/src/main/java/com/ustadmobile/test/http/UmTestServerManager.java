@@ -104,8 +104,10 @@ public class UmTestServerManager extends NanoHTTPD{
                 if(testServer != null) {
                     long bytesPerSecond = Long.parseLong(parameters.get("bytespersecond").get(0));
                     testServer.throttle(bytesPerSecond, 1, TimeUnit.SECONDS);
+                    JSONObject jsonResponse = new JSONObject();
+                    jsonResponse.put("port", testServer.getPort());
                     response = NanoHTTPD.newFixedLengthResponse(Response.Status.NO_CONTENT,
-                            "application/json", "");
+                            "application/json", jsonResponse.toString());
                 }else {
                     response = NanoHTTPD.newFixedLengthResponse(Response.Status.BAD_REQUEST,
                             "text/plain", "No such port in operation");
