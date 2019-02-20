@@ -81,6 +81,8 @@ public class DownloadNotificationService extends Service {
 
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
 
+    public static final String ACTION_STOP_FOREGROUND_SERVICE = "ACTION_STOP_FOREGROUND_SERVICE";
+
     public static final String ACTION_PAUSE_DOWNLOAD = "ACTION_PAUSE_DOWNLOAD";
 
     public static final String ACTION_CANCEL_DOWNLOAD = "ACTION_CANCEL_DOWNLOAD";
@@ -158,6 +160,9 @@ public class DownloadNotificationService extends Service {
                             notificationIdRef.get(), contentTitle, "", "",
                             true);
                     startForeground(notificationIdRef.get(), groupSummary);
+                    break;
+                case ACTION_STOP_FOREGROUND_SERVICE:
+                    stopForegroundService();
                     break;
 
                 case ACTION_PAUSE_DOWNLOAD:
@@ -416,6 +421,6 @@ public class DownloadNotificationService extends Service {
     public void onDestroy() {
         super.onDestroy();
         knownNotifications.clear();
-        activeDownloadJobData.removeObserver(activeDownloadJobObserver);
+        if(activeDownloadJobData != null)activeDownloadJobData.removeObserver(activeDownloadJobObserver);
     }
 }
