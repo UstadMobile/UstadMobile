@@ -77,6 +77,12 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT * FROM DownloadJob WHERE djStatus = :jobStatus")
     public abstract UmLiveData<List<DownloadJob>>  getJobsLive(int jobStatus);
 
+    @UmQuery("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
+    public abstract UmLiveData<DownloadJob> getLastJobLive();
+
+    @UmQuery("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
+    public abstract DownloadJob  getLastJob();
+
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
 
@@ -89,9 +95,6 @@ public abstract class DownloadJobDao {
             "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
     public abstract void updateJobItems(long djUid, int djiStatus, int jobStatusFrom,
                                         int jobStatusTo);
-
-    @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :djDsUid")
-    public abstract int deleteBySetUid(long djDsUid);
 
     @UmTransaction
     public void updateJobAndItems(long djUid, int djStatus, int activeJobItemsStatus,

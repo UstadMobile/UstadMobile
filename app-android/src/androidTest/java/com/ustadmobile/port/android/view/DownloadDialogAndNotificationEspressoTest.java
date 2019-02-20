@@ -3,8 +3,10 @@ package com.ustadmobile.port.android.view;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
 import android.support.test.filters.RequiresDevice;
 import android.support.test.rule.ActivityTestRule;
@@ -17,20 +19,24 @@ import android.support.test.uiautomator.Until;
 
 import com.toughra.ustadmobile.BuildConfig;
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.UmAccount;
+import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService;
+import com.ustadmobile.test.port.android.UmAndroidTestUtil;
 import com.ustadmobile.test.port.android.UmViewActions;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,15 +49,33 @@ import java.util.concurrent.TimeUnit;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
+import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.ACTION_STOP_FOREGROUND_SERVICE;
+import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.GROUP_SUMMARY_ID;
+import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.JOB_ID_TAG;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+
+/**
+ * Test class to make sure DownloadDialog and DownloadNotification behaves as expected on devices.
+ *
+ * <b>NOTE:</b>
+ *
+ * When doing RecyclerView based espresso checking
+ * {@link DownloadDialogAndNotificationEspressoTest#givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons() },
+ * you must to use {@link ViewMatchers#isDisplayed()} on view matcher,
+ * otherwise matcher will match match multiple view with the same Id and test will fail.
+ */
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -65,7 +89,11 @@ public class DownloadDialogAndNotificationEspressoTest {
     public GrantPermissionRule mPermissionRule = GrantPermissionRule.grant(
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION);
 
-    private static final  long MAX_WAIT_TIME = TimeUnit.SECONDS.toMillis(2);
+    private static final  long MIN_WAIT_TIME = TimeUnit.SECONDS.toMillis(1);
+
+    private static final  long MAX_WAIT_TIME = TimeUnit.SECONDS.toMillis(3);
+
+    private static final int MAX_THRESHOLD = 3;
 
     private ContentEntry rootEntry = null;
 
@@ -81,29 +109,73 @@ public class DownloadDialogAndNotificationEspressoTest {
 
     private static final String NOTIFICATION_ENTRY_PREFIX = "title";
 
+    private static final String DOWNLOADED_CONTENT_DESC = "Downloaded";
+
     private static final long TEST_CONTENT_ENTRY_FILE_UID = -4103245208651563007L;
+
+    private String testManagerUrl = null;
+
+    private int serverActivePort = 0;
+
+    public static final int THROTTLE_BYTES = 2000;
 
 
     @Before
     public void setEndpoint() throws IOException, JSONException {
-        String testManagerUrl =  "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/";
-        JSONObject testPortResponse = new JSONObject(
-                IOUtils.toString(new URL(testManagerUrl + "?cmd=new").openStream(),
-                        StandardCharsets.UTF_8));
+        mContext = InstrumentationRegistry.getTargetContext();
+
+        testManagerUrl =  "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/";
+
+        JSONObject response = sendCommand("new",0);
+        serverActivePort = Integer.parseInt(response.getString("port"));
+
         String testEndpoint =  "http://" + BuildConfig.TEST_HOST +
-                ":" + testPortResponse.getString("port") + "/";
+                ":" + serverActivePort + "/";
+
         UmAccount testAccount = new UmAccount(0, "test", "",
                 testEndpoint);
         UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
 
-        mContext = InstrumentationRegistry.getTargetContext();
         prepareContentEntriesAndFiles();
-        SystemClock.sleep(MAX_WAIT_TIME);
+        SystemClock.sleep(MIN_WAIT_TIME);
+
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         Intent mIntent = new Intent();
         mIntent.putExtra(ARG_CONTENT_ENTRY_UID, rootEntry.getContentEntryUid());
         mIntent.putExtra(ARG_DOWNLOADED_CONTENT, "");
         mActivityRule.launchActivity(mIntent);
+    }
+
+    private JSONObject sendCommand(String command,int bytespersecond) throws IOException, JSONException {
+        return new JSONObject(IOUtils.toString(new URL(testManagerUrl +  "?cmd=" +
+                (bytespersecond == 0 ? command : command + "&bytespersecond=" + bytespersecond
+                        + "&port=" + serverActivePort)).openStream(), StandardCharsets.UTF_8));
+    }
+
+
+    private void stopForeGroundService(){
+        Intent serviceIntent = new Intent(mContext, DownloadNotificationService.class);
+        serviceIntent.setAction(ACTION_STOP_FOREGROUND_SERVICE);
+        serviceIntent.putExtra(JOB_ID_TAG,GROUP_SUMMARY_ID);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mContext.startForegroundService(serviceIntent);
+        } else {
+            mContext.startService(serviceIntent);
+        }
+    }
+
+    private void startDownloading(boolean wifiOnly){
+        onView(allOf(
+                isDescendantOfA(withTagValue(equalTo(entry1.getContentEntryUid()))),
+                withId(R.id.content_entry_item_download)
+        )).perform(click());
+
+        SystemClock.sleep(MIN_WAIT_TIME);
+
+        onView(withId(R.id.wifi_only_option)).perform(
+                UmViewActions.setChecked(wifiOnly));
+
+        onView(withId(android.R.id.button1)).perform(click());
     }
 
 
@@ -134,8 +206,8 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         ContentEntryFile entryFile = new ContentEntryFile();
         entryFile.setLastModified(System.currentTimeMillis());
-        entryFile.setFileSize(2800000);
-        entryFile.setContentEntryFileUid(-3831212382533713414L);
+        entryFile.setFileSize(5100000);
+        entryFile.setContentEntryFileUid(TEST_CONTENT_ENTRY_FILE_UID);
         umAppDatabase.getContentEntryFileDao().insert(entryFile);
 
         ContentEntryContentEntryFileJoin fileJoin1 = new ContentEntryContentEntryFileJoin(entry1, entryFile);
@@ -153,15 +225,18 @@ public class DownloadDialogAndNotificationEspressoTest {
     }
 
     @Test
-    public void givenDownloadIconClickedOnEntryListItem_whenDownloading_shouldStartForegroundServiceAndShowNotification(){
-        SystemClock.sleep(MAX_WAIT_TIME);
-        startDownloading(true);
+    public void givenDownloadIconClickedOnEntryListItem_whenDownloading_shouldStartForegroundServiceAndShowNotification() throws IOException, JSONException {
+        SystemClock.sleep(MIN_WAIT_TIME);
+
+        sendCommand("throttle",THROTTLE_BYTES);
+
+        startDownloading(false);
+
+        SystemClock.sleep(MIN_WAIT_TIME);
 
         boolean openNotificationTray =  mDevice.openNotification();
 
-        SystemClock.sleep(MAX_WAIT_TIME);
-
-        mDevice.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MAX_WAIT_TIME);
+        mDevice.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MIN_WAIT_TIME);
 
         UiObject2 title = mDevice.findObject(By.textContains(NOTIFICATION_TITLE_PREFIX));
 
@@ -175,34 +250,100 @@ public class DownloadDialogAndNotificationEspressoTest {
         assertEquals("Notification shown was for  " + entry1.getTitle(),
                 entryName.getText(), entry1.getTitle());
 
+        stopForeGroundService();
+
+        SystemClock.sleep(MIN_WAIT_TIME);
+
 
     }
 
+    @Test
     public void givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons(){
-        SystemClock.sleep(MAX_WAIT_TIME);
+        SystemClock.sleep(MIN_WAIT_TIME);
+
         startDownloading(true);
 
-        SystemClock.sleep(MAX_WAIT_TIME * 3);
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+                MIN_WAIT_TIME * 2,TimeUnit.SECONDS, downloadJob -> downloadJob!=null
+                        && downloadJob.getDjStatus() == JobStatus.COMPLETE);
+        SystemClock.sleep(MIN_WAIT_TIME);
+
+        onView(allOf(isDisplayed(),
+                isDescendantOfA(withTagValue(equalTo(entry1.getContentEntryUid()))),
+                withId(R.id.view_download_status_button_img)
+        )).check(matches(withContentDescription(equalTo(DOWNLOADED_CONTENT_DESC))));
+
     }
 
     @RequiresDevice
-    public void givenDownloadIconClickedOnEntryListItem_whenDownloadingAndWiFiConnectionGoesOff_shouldStopDownloading(){
+    @Test
+    public void givenDownloadIconClickedOnEntryListItem_whenDownloadingAndWiFiConnectionGoesOff_shouldStopDownloading() throws IOException, JSONException, InterruptedException {
+        SystemClock.sleep(MIN_WAIT_TIME);
+
+        sendCommand("throttle",THROTTLE_BYTES);
+
+        startDownloading(true);
+
+        UmAndroidTestUtil.setAirplaneModeEnabled(true);
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+                MIN_WAIT_TIME,TimeUnit.SECONDS, downloadJob -> downloadJob != null
+                        && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
+
+        stopForeGroundService();
+
+        assertEquals("Download task was paused and waiting for connectivity",
+                umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),
+                JobStatus.WAITING_FOR_CONNECTION);
+
+        UmAndroidTestUtil.setAirplaneModeEnabled(false);
+
+
+        WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
+                MIN_WAIT_TIME,TimeUnit.SECONDS, status -> status != null
+                        && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
     }
 
-    private void startDownloading(boolean wifiOnly){
-        onView(allOf(
-                isDescendantOfA(withTagValue(equalTo(entry1.getContentEntryUid()))),
-                withId(R.id.content_entry_item_download)
-        )).perform(click());
+    @Test
+    public void givenDownloadStarted_whenConnectivityInterrupted_shouldResumeAndCompleteDownload()
+            throws IOException, JSONException {
+
+        SystemClock.sleep(MIN_WAIT_TIME);
+
+        sendCommand("throttle",THROTTLE_BYTES * MAX_THRESHOLD);
+
+        startDownloading(true);
+
+        UmAndroidTestUtil.setAirplaneModeEnabled(true);
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+                MAX_THRESHOLD,TimeUnit.SECONDS, downloadJob -> downloadJob != null
+                        && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
+
+        stopForeGroundService();
+
+        assertEquals("Download task was paused and waiting for connectivity",
+                umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),
+                JobStatus.WAITING_FOR_CONNECTION);
+
+        UmAndroidTestUtil.setAirplaneModeEnabled(false);
 
         SystemClock.sleep(MAX_WAIT_TIME);
 
-        onView(withId(R.id.wifi_only_option)).perform(
-                UmViewActions.setChecked(wifiOnly));
+        WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
+                MAX_THRESHOLD * MAX_THRESHOLD,TimeUnit.SECONDS, status -> status != null
+                        && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
-        onView(withId(android.R.id.button1)).perform(click());
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+                MAX_THRESHOLD * MAX_THRESHOLD,TimeUnit.SECONDS,
+                downloadJob -> downloadJob != null
+                        && downloadJob.getDjStatus() == JobStatus.COMPLETE);
 
-        SystemClock.sleep(MAX_WAIT_TIME);
+        assertEquals("Download task was completed successfully",
+                umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),JobStatus.COMPLETE);
+
+        SystemClock.sleep(MIN_WAIT_TIME);
     }
+
 }
