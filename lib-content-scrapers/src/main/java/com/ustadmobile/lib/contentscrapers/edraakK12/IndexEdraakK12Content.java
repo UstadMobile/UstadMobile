@@ -9,12 +9,18 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
+import com.ustadmobile.lib.contentscrapers.voa.VoaScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
+import com.ustadmobile.lib.db.entities.ScrapeRun;
+import com.ustadmobile.port.sharedse.util.WorkQueue;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -26,6 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
@@ -56,63 +63,67 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
  */
 public class IndexEdraakK12Content {
 
+    private static final String ROOT_URL = "https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41";
+
     public static final String EDRAAK = "Edraak";
-    private URL url;
-    private File destinationDirectory;
-    private ContentResponse response;
-    private ContentEntryDao contentEntryDao;
-    private ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private ContentEntryFileDao contentEntryFileDao;
-    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
-    private ContentEntryFileStatusDao contentFileStatusDao;
-    private LanguageDao languageDao;
-    private Language arabicLang;
+    private static URL url;
+    private static File destinationDirectory;
+    private static ContentResponse response;
+    private static ContentEntryDao contentEntryDao;
+    private static ContentEntryParentChildJoinDao contentParentChildJoinDao;
+    private static Language arabicLang;
+    private static ScrapeQueueItemDao queueDao;
+    private static WorkQueue scrapeWorkQueue;
+    private static int runId;
 
 
     public static void main(String[] args) throws IOException {
-        if (args.length < 2) {
-            System.err.println("Usage: <edraak k12 json url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 1) {
+            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
-        UMLogUtil.logInfo("main args url = " + args[0]);
-        UMLogUtil.logInfo("main args destination = " + args[1]);
-        try{
-            new IndexEdraakK12Content().findContent(args[0], new File(args[1]));
-        }catch (Exception e){
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+        UMLogUtil.logInfo(args[0]);
+
+        try {
+            ScrapeRunDao runDao = UmAppDatabase.getInstance(null).getScrapeRunDao();
+
+            runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_EDRAAK);
+            if (runId == 0) {
+                runId = (int) runDao.insert(new ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_EDRAAK,
+                        ScrapeQueueItemDao.STATUS_PENDING));
+            }
+
+            scrapeFromRoot(new File(args[0]), runId);
+        } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
-            UMLogUtil.logFatal("Exception running findContent Edraak");
+            UMLogUtil.logError("Main method exception catch khan");
         }
 
     }
 
+    public static void scrapeFromRoot(File dest, int runId) throws IOException {
+        startScrape(ROOT_URL, dest, runId);
+    }
 
-    /**
-     * Given a url and destination directory, look for importedcomponent in the response object of the url to save its content
-     *
-     * @param urlString      url for edraak content
-     * @param destinationDir directory the content will be saved
-     */
-    public void findContent(String urlString, File destinationDir) throws IOException {
-
+    public static void startScrape(String scrapeUrl, File destinationDir, int runIdscrape) throws IOException {
         try {
-            url = new URL(urlString);
+            url = new URL(scrapeUrl);
         } catch (MalformedURLException e) {
-            UMLogUtil.logError("url from main is Malformed = " + urlString);
-            throw new IllegalArgumentException("Malformed url" + urlString, e);
+            UMLogUtil.logError("url from main is Malformed = " + scrapeUrl);
+            throw new IllegalArgumentException("Malformed url" + scrapeUrl, e);
         }
 
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
+        runId = runIdscrape;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
-        languageDao = repository.getLanguageDao();
+        LanguageDao languageDao = repository.getLanguageDao();
+        queueDao = db.getScrapeQueueItemDao();
 
         new LanguageList().addAllLanguages();
 
@@ -124,12 +135,11 @@ public class IndexEdraakK12Content {
             response = new GsonBuilder().disableHtmlEscaping().create().fromJson(IOUtils.toString(connection.getInputStream(), UTF_ENCODING), ContentResponse.class);
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID", e.getCause());
-        }finally {
+        } finally {
             if (connection != null) {
                 connection.disconnect();
             }
         }
-
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, arabicLang.getLangUid(), null,
@@ -152,37 +162,57 @@ public class IndexEdraakK12Content {
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0);
 
 
+        WorkQueue.WorkQueueSource scraperSource = () -> {
+
+            ScrapeQueueItem item = queueDao.getNextItemAndSetStatus(runId,
+                    ScrapeQueueItem.ITEM_TYPE_SCRAPE);
+            if (item == null) {
+                return null;
+            }
+
+            ContentEntry parent = contentEntryDao.findByUid(item.getSqiContentEntryParentUid());
+
+            URL scrapeContentUrl;
+            try {
+                scrapeContentUrl = new URL(item.getScrapeUrl());
+                return new EdraakK12ContentScraper(scrapeContentUrl, new File(item.getDestDir()),
+                        parent, item.getSqiUid());
+            } catch (IOException ignored) {
+                throw new RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" +
+                        item.getScrapeUrl());
+            }
+        };
+
+        CountDownLatch scraperLatch = new CountDownLatch(1);
+        scrapeWorkQueue = new WorkQueue(scraperSource, 1);
+        scrapeWorkQueue.start();
+
         findImportedComponent(response, edraakParentEntry);
+
+        scrapeWorkQueue.addEmptyWorkQueueListener((scrapeQueu) ->
+                scraperLatch.countDown());
+        try {
+            scraperLatch.await();
+        } catch (InterruptedException ignored) {
+
+        }
 
     }
 
-    private void findImportedComponent(ContentResponse parentContent, ContentEntry parentEntry) {
+    private static void findImportedComponent(ContentResponse parentContent, ContentEntry parentEntry) throws MalformedURLException {
 
         if (ContentScraperUtil.isImportedComponent(parentContent.component_type)) {
 
             // found the last child
-            EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(
-                    EdraakK12ContentScraper.generateUrl(url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? (":" + url.getPort()) : "") + "/api/", parentContent.id, parentContent.program == 0 ? response.program : parentContent.program),
-                    destinationDirectory);
-            try {
-                scraper.scrapeContent();
+            String scrapeUrl = EdraakK12ContentScraper.generateUrl(
+                    url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ?
+                            (":" + url.getPort()) : "") + "/api/", parentContent.id,
+                    parentContent.program == 0 ? response.program : parentContent.program);
 
-                File content = new File(destinationDirectory, parentContent.id + ScraperConstants.ZIP_EXT);
-                if (scraper.hasContentUpdated()) {
-
-                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, parentEntry,
-                            ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
-
-                } else {
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
-                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
-                }
-
-
-            } catch (Exception e) {
-                UMLogUtil.logError("Unable to scrape content" + parentContent.id);
-            }
+            ContentScraperUtil.createQueueItem(queueDao, new URL(scrapeUrl), parentEntry,
+                    new File(destinationDirectory, parentContent.id), "", runId,
+                    ScrapeQueueItem.ITEM_TYPE_SCRAPE);
+            scrapeWorkQueue.checkQueue();
 
         } else {
 
@@ -206,7 +236,7 @@ public class IndexEdraakK12Content {
         }
     }
 
-    private int getLicenseType(String license) {
+    private static int getLicenseType(String license) {
         if (license.toLowerCase().contains("cc-by-nc-sa")) {
             return ContentEntry.LICESNE_TYPE_CC_BY_NC_SA;
         } else if (license.toLowerCase().contains("all_rights_reserved")) {
@@ -216,19 +246,5 @@ public class IndexEdraakK12Content {
             return ALL_RIGHTS_RESERVED;
         }
     }
-
-
-    /**
-     * Generate the url based on the different parameters
-     *
-     * @param contentId      unique id of the course
-     * @param baseUrl        baseurl for edraak
-     * @param programId      program id for the course
-     * @param destinationDir directory where the course will be saved
-     */
-    public void findContent(String contentId, String baseUrl, int programId, File destinationDir) throws IOException {
-        findContent(baseUrl + "component/" + contentId + "/?states_program_id=" + programId, destinationDir);
-    }
-
 
 }

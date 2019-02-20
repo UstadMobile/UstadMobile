@@ -307,27 +307,28 @@ public class DownloadDialogPresenterTest {
     }
 
     @Test
-    public void givenExistingDownloadSet_whenDialogDismissedWithoutSelection_shouldCleanUpUnQueuedJob() {
+    public void givenExistingDownloadSet_whenDialogDismissedWithoutSelection_shouldCleanUpUnQueuedJob() throws InterruptedException {
 
         insertDownloadSetAndSetItems();
 
         Hashtable args =  new Hashtable();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+                        .findAllLive(), MAX_LATCH_WAITING_TIME , TimeUnit.SECONDS,
+                allItems -> allItems.size() == 5);
+
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
         presenter.onCreate(new Hashtable());
         presenter.onStart();
 
-        //TODO: Fix this: this won't actually wait for very long, because it is waiting for the
-        // default status
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
-                        .getJobLive(downloadJob.getDjUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
-                job -> job.getDjStatus() == JobStatus.NOT_QUEUED);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
         presenter.handleClickNegative();
 
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
-                .findAllLive(), MAX_LATCH_WAITING_TIME * 4, TimeUnit.SECONDS,
+                .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 allItems -> allItems.size() == 0);
 
         assertEquals("All download items were deleted ",

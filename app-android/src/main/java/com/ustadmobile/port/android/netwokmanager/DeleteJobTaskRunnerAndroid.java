@@ -76,8 +76,10 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
         public Result doWork() {
 
             UmAppDatabase umAppDatabase = UmAppDatabase.getInstance(getApplicationContext());
+
             List<Long> downloadSetItemUids = umAppDatabase.getDownloadSetItemDao()
                     .findBySetUid(downloadSetUid);
+
             List<String> destinationFiles = umAppDatabase.getDownloadJobItemDao()
                     .getDestinationFiles(downloadSetItemUids);
 
@@ -87,6 +89,9 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
             }
 
             umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
+
+            umAppDatabase.getContentEntryFileStatusDao().deleteByFileUids(umAppDatabase
+                    .getDownloadJobItemDao().getContentEntryFileUids(downloadSetItemUids));
 
             return Result.success();
         }
