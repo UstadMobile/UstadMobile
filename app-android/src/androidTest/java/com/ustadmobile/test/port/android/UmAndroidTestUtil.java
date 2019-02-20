@@ -30,15 +30,21 @@ public class UmAndroidTestUtil {
             throw new IllegalStateException("Could not find flight mode button");
 
         String contentDesc = airplaneModeObject.getContentDescription();
-        boolean airplaneModeState = contentDesc.toLowerCase().matches("\\bon\\b");
 
-        if(airplaneModeState != enabled)
+        if(isAirPlaneModeOn(contentDesc)!= enabled)
             airplaneModeObject.click();
 
         SystemClock.sleep(100);
         uiDevice.pressBack();
         SystemClock.sleep(100);
         uiDevice.pressBack();
+    }
+
+    private static boolean isAirPlaneModeOn(String contentDesc){
+        for(String desc : contentDesc.split(",")){
+            if(desc.toLowerCase().startsWith("on")) return true;
+        }
+        return false;
     }
 
 
