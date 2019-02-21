@@ -329,7 +329,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmQuery("SELECT Clazz.*," +
             "Location.timeZone " +
             " FROM Clazz " +
-            "LEFT JOIN ON Clazz.clazzLocationUid = Location.locationUid " +
+            "LEFT JOIN Location ON Clazz.clazzLocationUid = Location.locationUid " +
             "WHERE " + ENTITY_LEVEL_PERMISSION_CONDITION1
             + Role.PERMISSION_CLAZZ_SELECT + ENTITY_LEVEL_PERMISSION_CONDITION2)
     public abstract List<ClazzWithTimeZone> findAllClazzesWithSelectPermission(long accountPersonUid);

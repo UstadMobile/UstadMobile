@@ -83,15 +83,22 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
         endCalendar.setTimeInMillis(endTime);
         UMCalendarUtil.normalizeSecondsAndMillis(endCalendar);
 
-        long startMinOfDay = (startCalendar.get(Calendar.HOUR_OF_DAY) * 24) +
-                startCalendar.get(Calendar.MINUTE);
+        long startMsOfDay = ((startCalendar.get(Calendar.HOUR_OF_DAY) * 24) +
+                startCalendar.get(Calendar.MINUTE)) * 60 * 1000;
 
         List<ClazzWithTimeZone> clazzList = db.getClazzDao().findAllClazzesWithSelectPermission(
                 accountPersonUid);
         for(ClazzWithTimeZone clazz : clazzList) {
+            if(clazz.getTimeZone() == null) {
+                System.err.println("Warning: cannot create schedules for clazz" +
+                        clazz.getClazzUid() + " as it has no timezone");
+                continue;
+            }
+
+
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
-                boolean incToday = startMinOfDay <= schedule.getSceduleStartTime();
+                boolean incToday = startMsOfDay <= schedule.getSceduleStartTime();
                 Calendar nextScheduleOccurence = UMCalendarUtil.advanceCalendarToOccurenceOf(
                         startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
 
@@ -110,8 +117,27 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                 }
             }
         }
-
     }
+
+    /**
+     *
+     */
+    public void createClazzLogsForToday(long accountPersonUid, UmAppDatabase db) {
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 0);
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
+        long startTime = dayCal.getTimeInMillis();
+
+        dayCal.set(Calendar.HOUR_OF_DAY, 23);
+        dayCal.set(Calendar.MINUTE, 59);
+        dayCal.set(Calendar.SECOND, 59);
+        dayCal.set(Calendar.MILLISECOND, 999);
+        long endTime = dayCal.getTimeInMillis();
+        createClazzLogs(startTime, endTime, accountPersonUid, db);
+    }
+
 
     public void rescheduleClazz(long scheduleUid, long effectiveFrom) {
 

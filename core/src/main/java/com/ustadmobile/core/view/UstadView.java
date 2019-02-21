@@ -36,6 +36,8 @@ package com.ustadmobile.core.view;
  */
 public interface UstadView {
 
+    String ARG_NEW = "new";
+
     /**
      * Return the system specific context for this view (e.g. Activity on Android
      * etc)

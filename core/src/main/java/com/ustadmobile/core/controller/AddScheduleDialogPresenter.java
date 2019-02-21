@@ -16,16 +16,21 @@ import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 
 public class AddScheduleDialogPresenter  extends UstadBaseController<AddScheduleDialogView> {
 
-    Schedule currentSchedule;
-    ScheduleDao scheduleDao;
+    private Schedule currentSchedule;
+
+    private ScheduleDao scheduleDao;
+
+    private UmAppDatabase appDatabaseRepo;
+
+
     long currentClazzUid = -1;
     private long currentScheduleUid = -1L;
 
     public AddScheduleDialogPresenter(Object context, Hashtable arguments, AddScheduleDialogView view) {
         super(context, arguments, view);
 
-        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
-        scheduleDao = repository.getScheduleDao();
+        appDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(context);
+        scheduleDao = appDatabaseRepo.getScheduleDao();
 
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
@@ -79,7 +84,8 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         scheduleDao.insertAsync(currentSchedule, new UmCallback<Long>() {
             @Override
             public void onSuccess(Long result) {
-                //sup
+                scheduleDao.createClazzLogsForToday(
+                        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
             }
 
             @Override

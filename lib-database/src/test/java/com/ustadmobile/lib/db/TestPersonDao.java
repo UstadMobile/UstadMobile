@@ -57,7 +57,7 @@ public class TestPersonDao extends AbstractDaoTest{
         otherStudent = new Person("someoneelse", "another", "stranger");
         otherStudent.setPersonUid(serverDummyRepo.getPersonDao().insert(otherStudent));
 
-        myLocation = new Location("No Mans Land", "Dont come here");
+        myLocation = new Location("No Mans Land", "Dont come here", "Asia/Beirut");
         myLocation.setLocationUid(serverDummyRepo.getLocationDao().insert(myLocation));
 
         LocationAncestorJoin locationAncestorJoin = new LocationAncestorJoin(

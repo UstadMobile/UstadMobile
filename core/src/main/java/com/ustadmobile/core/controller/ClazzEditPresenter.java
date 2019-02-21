@@ -10,13 +10,16 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.ClazzEditView;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.TimeZone;
 
 import static com.ustadmobile.core.view.ClazzEditView.ARG_SCHEDULE_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
@@ -43,12 +46,6 @@ public class ClazzEditPresenter
 
     public ClazzEditPresenter(Object context, Hashtable arguments, ClazzEditView view) {
         super(context, arguments, view);
-
-        //Get Clazz Uid and set them.
-        if(arguments.containsKey(ARG_CLAZZ_UID)){
-            currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
-        }
-
     }
 
     /**
@@ -64,6 +61,36 @@ public class ClazzEditPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        if(getArguments().containsKey(ARG_CLAZZ_UID)){
+            currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
+        }else if(getArguments().containsKey(UstadView.ARG_NEW)){
+            repository.getLocationDao().insertAsync(new Location("Clazz Location",
+                    "Clazz Location", TimeZone.getDefault().getID()), new UmCallback<Long>() {
+                @Override
+                public void onSuccess(Long newLocationUid) {
+                    clazzDao.insertAsync(new Clazz("", newLocationUid), new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long result) {
+                            view.runOnUiThread(() -> initFromClazz(result));
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+        }
+    }
+
+    private void initFromClazz(long clazzUid) {
+        this.currentClazzUid = clazzUid;
         //Handle Clazz info changed:
         //Get person live data and observe
         UmLiveData<Clazz> clazzLiveData = clazzDao.findByUidLive(currentClazzUid);
@@ -92,8 +119,8 @@ public class ClazzEditPresenter
         clazzScheduleLiveData = repository.getScheduleDao()
                 .findAllSchedulesByClazzUid(currentClazzUid);
         updateViewWithProvider();
-
     }
+
 
     /**
      * Common method to update the provider st on this Presenter to the view.
