@@ -31,7 +31,7 @@ public class UmAndroidTestUtil {
 
         String contentDesc = airplaneModeObject.getContentDescription();
 
-        if(isAirPlaneModeOn(contentDesc)!= enabled)
+        if(isAirPlaneModeOn(contentDesc)!= enabled || !isAirPlaneModeSupported(contentDesc))
             airplaneModeObject.click();
 
         SystemClock.sleep(100);
@@ -41,10 +41,23 @@ public class UmAndroidTestUtil {
     }
 
     private static boolean isAirPlaneModeOn(String contentDesc){
-        for(String desc : contentDesc.split(",")){
-            if(desc.toLowerCase().startsWith("on")) return true;
+        if(isAirPlaneModeSupported(contentDesc)){
+            for(String desc : contentDesc.split(",")){
+                if(desc.toLowerCase().startsWith("on")) return true;
+            }
         }
         return false;
+    }
+
+    private static boolean isAirPlaneModeSupported(String contentDesc){
+        String [] descs = contentDesc.split(",");
+        boolean supported = descs.length > 1;
+        for(String desc : descs){
+           if(desc.toLowerCase().startsWith("on") || desc.toLowerCase().startsWith("off")){
+               supported = true;
+           }
+        }
+        return supported;
     }
 
 
