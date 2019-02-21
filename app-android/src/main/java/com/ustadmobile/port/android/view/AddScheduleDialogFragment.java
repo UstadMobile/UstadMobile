@@ -86,7 +86,7 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
             myCalendar.set(Calendar.MINUTE, minute);
             String timeOnET = justTheTimeFormat.format(myCalendar.getTime());
 
-            mPresenter.handleScheduleFromTimeSelected(myCalendar.getTime().getTime());
+            mPresenter.handleScheduleFromTimeSelected(((hourOfDay * 60) + minute) * 60 * 1000);
             fromET.setText(timeOnET);
         };
         //Default view: not focusable.
@@ -102,7 +102,8 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
             myCalendar2.set(Calendar.HOUR_OF_DAY, hourOfDay);
             myCalendar2.set(Calendar.MINUTE, minute);
             String timeOnET = justTheTimeFormat.format(myCalendar2.getTime());
-            mPresenter.handleScheduleToTimeSelected(myCalendar2.getTime().getTime());
+
+            mPresenter.handleScheduleToTimeSelected(((hourOfDay * 60) + minute) * 60 * 1000);
             toET.setText(timeOnET);
         };
         //Default view: not focusable.

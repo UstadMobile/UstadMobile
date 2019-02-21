@@ -98,7 +98,8 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     }
 
     /**
-     * Sets the picked "from" time from the dialog to the schedule object in the presenter.
+     * Sets the picked "from" time from the dialog to the schedule object in the presenter. In ms
+     * since the start of the day.
      *
      * @param time  The "from" time.
      */

@@ -17,7 +17,6 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.lib.db.entities.Schedule;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.db;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.util.UMCalendarUtil;

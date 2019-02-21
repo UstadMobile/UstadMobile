@@ -91,14 +91,30 @@ public class Schedule {
         this.scheduleClazzUid = scheduleClazzUid;
     }
 
+    /**
+     * Get the time of day that this schedule is to begin. This should be in ms from the beginning of
+     * the day. E.g. 14:30 = (14.5 * 60 * 60 * 1000) ms
+     *
+     * @return time of the day that class is to begin for this scheduled instance
+     */
     public long getSceduleStartTime() {
         return sceduleStartTime;
     }
 
+    /**
+     * Set the time of day that this schedule is to begin. This should be in ms from the beginning of
+     * the day. E.g. 14:30 = (14.5 * 60 * 60 * 1000) ms
+     *
+     * @param sceduleStartTime time of the day that class is to begin for this scheduled instance
+     */
     public void setSceduleStartTime(long sceduleStartTime) {
         this.sceduleStartTime = sceduleStartTime;
     }
 
+    /**
+     *
+     * @return
+     */
     public long getScheduleEndTime() {
         return scheduleEndTime;
     }
