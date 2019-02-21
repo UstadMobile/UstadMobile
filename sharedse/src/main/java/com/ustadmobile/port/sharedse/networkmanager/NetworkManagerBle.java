@@ -169,7 +169,6 @@ public abstract class NetworkManagerBle {
      */
     public void onCreate() {
         umAppDatabase = UmAppDatabase.getInstance(mContext);
-        startAdvertising();
 
         //Starting scanning too soon after advertising will cause issues on Droid
         new Thread(() -> {

@@ -184,7 +184,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
 
     private void handleDownloadJobItemStatusChanged(Integer newDownloadStatus){
-        if(newDownloadStatus == JobStatus.STOPPING){
+        if(newDownloadStatus != null && newDownloadStatus == JobStatus.STOPPING){
             stopAsync(JobStatus.STOPPED);
         }
     }
