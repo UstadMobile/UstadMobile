@@ -3,12 +3,11 @@ package com.ustadmobile.port.android.view;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.net.wifi.WifiManager;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
-import android.support.test.filters.RequiresDevice;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -29,13 +28,14 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.UmAccount;
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService;
 import com.ustadmobile.test.port.android.UmAndroidTestUtil;
 import com.ustadmobile.test.port.android.UmViewActions;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,9 +57,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
-import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.ACTION_STOP_FOREGROUND_SERVICE;
-import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.GROUP_SUMMARY_ID;
-import static com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.JOB_ID_TAG;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertEquals;
@@ -87,7 +84,11 @@ public class DownloadDialogAndNotificationEspressoTest {
 
     @Rule
     public GrantPermissionRule mPermissionRule = GrantPermissionRule.grant(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION);
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CHANGE_NETWORK_STATE,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_COARSE_LOCATION);
 
     private static final  long MIN_WAIT_TIME = TimeUnit.SECONDS.toMillis(1);
 
@@ -117,12 +118,22 @@ public class DownloadDialogAndNotificationEspressoTest {
 
     private int serverActivePort = 0;
 
-    public static final int THROTTLE_BYTES = 2000;
+    private static final int THROTTLE_BYTES = 200000;
+
+    private boolean connectedToUnmeteredConnection = false;
 
 
     @Before
     public void setEndpoint() throws IOException, JSONException {
         mContext = InstrumentationRegistry.getTargetContext();
+
+        //check active network
+
+        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        if(wifiManager != null){
+            connectedToUnmeteredConnection = wifiManager.getConnectionInfo()
+                    .getSSID().toLowerCase().contains("androidwifi");
+        }
 
         testManagerUrl =  "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/";
 
@@ -139,29 +150,26 @@ public class DownloadDialogAndNotificationEspressoTest {
         prepareContentEntriesAndFiles();
         SystemClock.sleep(MIN_WAIT_TIME);
 
+
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         Intent mIntent = new Intent();
         mIntent.putExtra(ARG_CONTENT_ENTRY_UID, rootEntry.getContentEntryUid());
         mIntent.putExtra(ARG_DOWNLOADED_CONTENT, "");
         mActivityRule.launchActivity(mIntent);
+
+    }
+
+    @After
+    public void closeNotificationPanel(){
+        if(mDevice != null){
+            mDevice.pressBack();
+        }
     }
 
     private JSONObject sendCommand(String command,int bytespersecond) throws IOException, JSONException {
         return new JSONObject(IOUtils.toString(new URL(testManagerUrl +  "?cmd=" +
                 (bytespersecond == 0 ? command : command + "&bytespersecond=" + bytespersecond
                         + "&port=" + serverActivePort)).openStream(), StandardCharsets.UTF_8));
-    }
-
-
-    private void stopForeGroundService(){
-        Intent serviceIntent = new Intent(mContext, DownloadNotificationService.class);
-        serviceIntent.setAction(ACTION_STOP_FOREGROUND_SERVICE);
-        serviceIntent.putExtra(JOB_ID_TAG,GROUP_SUMMARY_ID);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mContext.startForegroundService(serviceIntent);
-        } else {
-            mContext.startService(serviceIntent);
-        }
     }
 
     private void startDownloading(boolean wifiOnly){
@@ -225,12 +233,13 @@ public class DownloadDialogAndNotificationEspressoTest {
     }
 
     @Test
-    public void givenDownloadIconClickedOnEntryListItem_whenDownloading_shouldStartForegroundServiceAndShowNotification() throws IOException, JSONException {
+    public void givenDownloadIconClickedOnEntryListItem_whenDownloading_shouldStartForegroundServiceAndShowNotification()
+            throws IOException, JSONException {
         SystemClock.sleep(MIN_WAIT_TIME);
 
         sendCommand("throttle",THROTTLE_BYTES);
 
-        startDownloading(false);
+        startDownloading(connectedToUnmeteredConnection);
 
         SystemClock.sleep(MIN_WAIT_TIME);
 
@@ -250,22 +259,24 @@ public class DownloadDialogAndNotificationEspressoTest {
         assertEquals("Notification shown was for  " + entry1.getTitle(),
                 entryName.getText(), entry1.getTitle());
 
-        stopForeGroundService();
-
         SystemClock.sleep(MIN_WAIT_TIME);
 
 
     }
 
     @Test
-    public void givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons(){
+    public void givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons()
+            throws IOException, JSONException {
         SystemClock.sleep(MIN_WAIT_TIME);
 
-        startDownloading(true);
+        sendCommand("throttle",THROTTLE_BYTES);
+
+        startDownloading(connectedToUnmeteredConnection);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
-                MIN_WAIT_TIME * 2,TimeUnit.SECONDS, downloadJob -> downloadJob!=null
+                MAX_THRESHOLD,TimeUnit.MINUTES, downloadJob -> downloadJob!=null
                         && downloadJob.getDjStatus() == JobStatus.COMPLETE);
+
         SystemClock.sleep(MIN_WAIT_TIME);
 
         onView(allOf(isDisplayed(),
@@ -275,37 +286,40 @@ public class DownloadDialogAndNotificationEspressoTest {
 
     }
 
-    @RequiresDevice
+
     @Test
-    public void givenDownloadIconClickedOnEntryListItem_whenDownloadingAndWiFiConnectionGoesOff_shouldStopDownloading() throws IOException, JSONException, InterruptedException {
-        SystemClock.sleep(MIN_WAIT_TIME);
+    public void givenDownloadIconClickedOnEntryListItem_whenDownloadingAndConnectionChangedToMetered_shouldStopDownloading()
+            throws IOException, JSONException {
+
+        Assume.assumeTrue("Device is connected on metered connection, can execute the test"
+                ,connectedToUnmeteredConnection);
 
         sendCommand("throttle",THROTTLE_BYTES);
 
-        startDownloading(true);
+        SystemClock.sleep(MIN_WAIT_TIME);
+
+        startDownloading(connectedToUnmeteredConnection);
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
-                MIN_WAIT_TIME,TimeUnit.SECONDS, downloadJob -> downloadJob != null
+                MAX_THRESHOLD * MAX_THRESHOLD,TimeUnit.SECONDS, downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
-
-        stopForeGroundService();
 
         assertEquals("Download task was paused and waiting for connectivity",
                 umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),
                 JobStatus.WAITING_FOR_CONNECTION);
 
+
+        //reset for next test
         UmAndroidTestUtil.setAirplaneModeEnabled(false);
-
-
         WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
-                MIN_WAIT_TIME,TimeUnit.SECONDS, status -> status != null
+                MAX_THRESHOLD,TimeUnit.SECONDS, status -> status != null
                         && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
     }
 
-    @Test
+
     public void givenDownloadStarted_whenConnectivityInterrupted_shouldResumeAndCompleteDownload()
             throws IOException, JSONException {
 
@@ -313,7 +327,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         sendCommand("throttle",THROTTLE_BYTES * MAX_THRESHOLD);
 
-        startDownloading(true);
+        startDownloading(connectedToUnmeteredConnection);
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
 
@@ -321,7 +335,6 @@ public class DownloadDialogAndNotificationEspressoTest {
                 MAX_THRESHOLD,TimeUnit.SECONDS, downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
 
-        stopForeGroundService();
 
         assertEquals("Download task was paused and waiting for connectivity",
                 umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),
@@ -342,7 +355,6 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         assertEquals("Download task was completed successfully",
                 umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),JobStatus.COMPLETE);
-
         SystemClock.sleep(MIN_WAIT_TIME);
     }
 
