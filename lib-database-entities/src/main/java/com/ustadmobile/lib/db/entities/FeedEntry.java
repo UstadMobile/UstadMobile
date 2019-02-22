@@ -37,6 +37,20 @@ public class FeedEntry {
     @UmSyncLastChangedBy
     private int feedEntryLastChangedBy;
 
+    public FeedEntry() {
+
+    }
+
+    public FeedEntry(long feedEntryUid, String title, String description, String link,
+                     String feedEntryClazzName, long personUid) {
+        this.feedEntryUid = feedEntryUid;
+        this.title = title;
+        this.description = description;
+        this.link = link;
+        this.feedEntryClazzName = feedEntryClazzName;
+        this.feedEntryPersonUid = personUid;
+    }
+
     public long getFeedEntryLocalChangeSeqNum() {
         return feedEntryLocalChangeSeqNum;
     }

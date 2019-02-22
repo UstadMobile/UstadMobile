@@ -334,4 +334,8 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             + Role.PERMISSION_CLAZZ_SELECT + ENTITY_LEVEL_PERMISSION_CONDITION2)
     public abstract List<ClazzWithTimeZone> findAllClazzesWithSelectPermission(long accountPersonUid);
 
+
+    @UmQuery("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
+    public abstract String getClazzName(long clazzUid);
+
 }

@@ -53,9 +53,12 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.port.android.impl.ClazzLogScheduleWorker;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.work.WorkManager;
 
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_DATE;
@@ -80,6 +83,10 @@ public class SplashScreenActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WorkManager.getInstance().cancelAllWorkByTag(ClazzLogScheduleWorker.TAG);
+        ClazzLogScheduleWorker.queueClazzLogScheduleWorker(
+                ClazzLogScheduleWorker.getNextClazzLogScheduleDueTime());
+
         setContentView(R.layout.activity_splash_screen);
         UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
 

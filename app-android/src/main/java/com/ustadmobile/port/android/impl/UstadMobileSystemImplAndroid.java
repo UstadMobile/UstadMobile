@@ -123,11 +123,13 @@ import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 import com.ustadmobile.core.view.SettingsView;
 import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
+import com.ustadmobile.port.android.scheduler.ScheduledCheckWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AddActivityChangeDialogFragment;
@@ -209,8 +211,14 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.Operation;
+import androidx.work.WorkManager;
 
 
 /**
@@ -929,4 +937,24 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     }
 
+    @Override
+    public void scheduleChecks(Object context) {
+        super.scheduleChecks(context);
+        UmAppDatabase db = UmAppDatabase.getInstance(context);
+        List<ScheduledCheck> checksToSchedule = db.getScheduledCheckDao()
+                .findAllChecksWhereCheckUuidIsNull();
+        for(ScheduledCheck check : checksToSchedule) {
+            Data workData = new Data.Builder()
+                    .putLong(ScheduledCheckWorker.ARG_SCHEDULE_CHECK_UID, check.getScheduledCheckId())
+                    .build();
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(ScheduledCheckWorker.class)
+                    .setInitialDelay(System.currentTimeMillis() - check.getCheckTime(),
+                            TimeUnit.MILLISECONDS)
+                    .setInputData(workData)
+                    .build();
+            WorkManager.getInstance().enqueue(request);
+            db.getScheduledCheckDao().updateCheckUuid(check.getScheduledCheckId(),
+                    request.getId().toString());
+        }
+    }
 }

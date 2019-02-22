@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzLog;
@@ -63,6 +64,9 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
 
     @UmInsert
     public abstract long insert(ClazzLog entity);
+
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    public abstract long replace(ClazzLog entity);
 
     @UmInsert
     public abstract void insertAsync(ClazzLog entity, UmCallback<Long> resultObject);
@@ -156,5 +160,8 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
             }
         });
     }
+
+    @UmQuery("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")
+    public abstract void cancelFutureInstances(long scheduleUid, long after, boolean canceled);
 
 }

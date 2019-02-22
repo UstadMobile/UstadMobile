@@ -12,6 +12,8 @@ public interface ClassLogDetailView extends UstadView {
     //The View name
     String VIEW_NAME = "ClassLogDetail";
 
+    String ARG_CLAZZ_LOG_UID = "clazzLogUid";
+
     /**
      * This method's purpose is to set the provider given to it to the view.
      * On Android it will be set ot the Recycler View.

@@ -17,8 +17,11 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.lib.db.entities.Schedule;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.ustadmobile.lib.db.entities.Schedule.DAY_FRIDAY;
 import static com.ustadmobile.lib.db.entities.Schedule.DAY_MONDAY;
@@ -100,15 +103,19 @@ public class ScheduleRecyclerAdapter extends
         int scheduleMonthCode = thisSchedule.getScheduleMonth();
         int scheduleFrequencyCode = thisSchedule.getScheduleFrequency();
 
+        DateFormat formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
         //start time
-        Date startTimeDate = new Date(startTimeLong);
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-        String startTime = formatter.format(startTimeDate);
+        long startMins = startTimeLong / (1000 * 60);
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, (int)(startMins / 60));
+        cal.set(Calendar.MINUTE, (int)(startMins % 60));
+        String startTime = formatter.format(cal.getTime());
 
         //end time
-        Date endTimeDate = new Date(endTimeLong);
-        String endTime = formatter.format(endTimeDate);
-
+        long endMins = endTimeLong / (1000 * 60);
+        cal.set(Calendar.HOUR_OF_DAY, (int)(endMins / 60));
+        cal.set(Calendar.MINUTE, (int)(endMins % 60));
+        String endTime = formatter.format(cal.getTime());
 
         String scheduleDay;
         String scheduleMonth;

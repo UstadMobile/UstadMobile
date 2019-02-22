@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -14,10 +15,13 @@ import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
 import com.ustadmobile.lib.db.entities.Schedule;
+import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 @UmDao(inheritPermissionFrom = ClazzDao.class,
@@ -109,15 +113,18 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                             nextScheduleOccurence.getTimeInMillis());
                     ClazzLog existingLog = db.getClazzLogDao().findByUid(logInstanceHash);
 
-                    if(existingLog == null) {
+                    if(existingLog == null || existingLog.isCanceled()) {
                         ClazzLog newLog = new ClazzLog(logInstanceHash, clazz.getClazzUid(),
                                 nextScheduleOccurence.getTimeInMillis(), schedule.getScheduleUid());
-                        db.getClazzLogDao().insert(newLog);
+                        db.getClazzLogDao().replace(newLog);
                     }
                 }
             }
         }
     }
+
+    @UmInsert
+    public abstract void insertScheduledCheck(ScheduledCheck check);
 
     /**
      *
@@ -136,11 +143,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
         dayCal.set(Calendar.MILLISECOND, 999);
         long endTime = dayCal.getTimeInMillis();
         createClazzLogs(startTime, endTime, accountPersonUid, db);
-    }
-
-
-    public void rescheduleClazz(long scheduleUid, long effectiveFrom) {
-
     }
 
 }

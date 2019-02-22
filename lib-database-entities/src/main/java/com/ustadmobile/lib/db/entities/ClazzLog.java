@@ -24,6 +24,8 @@ public class ClazzLog{
 
     private boolean done;
 
+    private boolean canceled;
+
     private int numPresent;
 
     private int numAbsent;
@@ -182,5 +184,13 @@ public class ClazzLog{
 
     public void setClazzLogScheduleUid(long clazzLogScheduleUid) {
         this.clazzLogScheduleUid = clazzLogScheduleUid;
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    public void setCanceled(boolean canceled) {
+        this.canceled = canceled;
     }
 }

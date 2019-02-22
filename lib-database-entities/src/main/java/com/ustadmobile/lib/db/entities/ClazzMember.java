@@ -62,6 +62,14 @@ public class ClazzMember {
     public ClazzMember(long clazzUid, long personUid) {
         this.clazzMemberClazzUid = clazzUid;
         this.clazzMemberPersonUid = personUid;
+        this.clazzMemberActive = true;
+    }
+
+    public ClazzMember(long clazzUid, long personUid, int role) {
+        this.clazzMemberClazzUid = clazzUid;
+        this.clazzMemberPersonUid = personUid;
+        this.role = role;
+        this.clazzMemberActive = true;
     }
 
     public long getClazzMemberUid() {

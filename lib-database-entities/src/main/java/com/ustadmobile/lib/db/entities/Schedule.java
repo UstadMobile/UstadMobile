@@ -75,6 +75,11 @@ public class Schedule {
     //active or removed
     private boolean scheduleActive;
 
+    public Schedule() {
+
+    }
+
+
     public boolean isScheduleActive() {
         return scheduleActive;
     }

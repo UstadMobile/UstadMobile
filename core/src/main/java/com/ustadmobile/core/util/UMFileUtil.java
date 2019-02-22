@@ -35,6 +35,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -341,9 +342,9 @@ public class UMFileUtil {
      * @param deliminator deliminator character 
      * @return Hashtable of parameters and values found
      */
-    public static Hashtable parseParams(String str, char deliminator) {
+    public static Hashtable<String, String> parseParams(String str, char deliminator) {
         String paramName = null;
-        Hashtable params = new Hashtable();
+        Hashtable<String, String> params = new Hashtable<>();
         boolean inQuotes = false;
         
         int strLen = str.length();
@@ -391,6 +392,26 @@ public class UMFileUtil {
         }
         
         return params;
+    }
+
+    /**
+     *
+     * @param params
+     * @param deliminator
+     * @return
+     */
+    public static String buildParamString(Map<String, String> params, char deliminator) {
+        StringBuilder result = new StringBuilder();
+        boolean isFirst = true;
+        for(String key : params.keySet()) {
+            if(!isFirst)
+                result.append(deliminator);
+
+            result.append(key).append("=").append(params.get(key));
+            isFirst = false;
+        }
+
+        return result.toString();
     }
     
     /**

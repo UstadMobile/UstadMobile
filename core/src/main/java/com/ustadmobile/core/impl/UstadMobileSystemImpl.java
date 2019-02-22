@@ -32,6 +32,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -699,5 +700,10 @@ public abstract class UstadMobileSystemImpl {
     public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive);
 
     public abstract OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context);
+
+
+    public void scheduleChecks(Object context) {
+        UmAppDatabase.getInstance(context).getScheduledCheckDao().createPendingScheduledChecks();
+    }
 
 }

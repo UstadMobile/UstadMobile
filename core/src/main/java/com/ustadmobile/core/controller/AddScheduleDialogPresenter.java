@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.lib.db.entities.Schedule;
 
@@ -22,6 +23,8 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
     private UmAppDatabase appDatabaseRepo;
 
+    private UmAppDatabase appDatabase;
+
 
     long currentClazzUid = -1;
     private long currentScheduleUid = -1L;
@@ -29,6 +32,7 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     public AddScheduleDialogPresenter(Object context, Hashtable arguments, AddScheduleDialogView view) {
         super(context, arguments, view);
 
+        appDatabase = UmAppDatabase.getInstance(context);
         appDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(context);
         scheduleDao = appDatabaseRepo.getScheduleDao();
 
@@ -45,6 +49,7 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
             scheduleDao.findByUidAsync(currentScheduleUid, new UmCallback<Schedule>() {
                 @Override
                 public void onSuccess(Schedule result) {
+                    currentSchedule = result;
                     view.updateFields(result);
                 }
 
@@ -81,19 +86,42 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     public void handleAddSchedule(){
         currentSchedule.setScheduleClazzUid(currentClazzUid);
         currentSchedule.setScheduleActive(true);
-        scheduleDao.insertAsync(currentSchedule, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                scheduleDao.createClazzLogsForToday(
-                        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
-            }
+        Runnable runAfterInsertOrUpdate = () -> {
+            scheduleDao.createClazzLogsForToday(
+                    UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
+            UstadMobileSystemImpl.getInstance().scheduleChecks(getContext());
+        };
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+        if(currentSchedule.getScheduleUid() == 0) {
+            scheduleDao.insertAsync(currentSchedule, new UmCallback<Long>() {
+                @Override
+                public void onSuccess(Long result) {
+                    runAfterInsertOrUpdate.run();
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }else {
+            scheduleDao.updateAsync(currentSchedule, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    appDatabaseRepo.getClazzLogDao().cancelFutureInstances(
+                            currentScheduleUid, System.currentTimeMillis(), true);
+                    runAfterInsertOrUpdate.run();
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+        }
+
     }
+
 
     /**
      * Cancels the schedule dialog

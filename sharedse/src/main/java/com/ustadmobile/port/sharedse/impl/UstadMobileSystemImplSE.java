@@ -292,4 +292,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
         return atomFeedRepository;
     }
+
+    @Override
+    public void scheduleChecks(Object context) {
+        //by default - do nothing
+    }
 }

@@ -52,6 +52,7 @@ import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
+import com.ustadmobile.core.db.dao.ScheduledCheckDao;
 import com.ustadmobile.core.db.dao.SelQuestionDao;
 import com.ustadmobile.core.db.dao.SelQuestionOptionDao;
 import com.ustadmobile.core.db.dao.SelQuestionResponseDao;
@@ -119,6 +120,7 @@ import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Schedule;
+import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.lib.db.entities.SelQuestion;
 import com.ustadmobile.lib.db.entities.SelQuestionResponse;
 import com.ustadmobile.lib.db.entities.SelQuestionOption;
@@ -161,7 +163,7 @@ import java.util.Hashtable;
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class,
-        SelQuestionOption.class
+        SelQuestionOption.class, ScheduledCheck.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -334,6 +336,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonPictureDao getPersonPictureDao();
 
     public abstract SelQuestionOptionDao getSELQuestionOptionDao();
+
+    public abstract ScheduledCheckDao getScheduledCheckDao();
 
     @UmDbContext
     public abstract Object getContext();
