@@ -6,30 +6,23 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
-import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
-import com.ustadmobile.core.view.ClazzListView;
-import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
-import com.ustadmobile.lib.db.entities.EntityRole;
-import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Role;
-import com.ustadmobile.lib.db.entities.UMCalendar;
+import com.ustadmobile.lib.db.entities.ScheduledCheck;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 
-import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_PARTIAL;
@@ -43,10 +36,17 @@ import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_PA
  */
 public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailView> {
 
-    private long currentClazzUid = -1L;
-    private long currentLogDate = -1L;
     private boolean hasEditPermissions = false;
+
     private long loggedInPersonUid = 0L;
+
+    private List<ClazzLogDao.ClazzLogUidAndDate> currentClazzLogs;
+
+    private ClazzLog currentClazzLog;
+
+    private int currentClazzLogIndex;
+
+    private String title;
 
     public boolean isHasEditPermissions() {
         return hasEditPermissions;
@@ -58,52 +58,54 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
-
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
-    private ClazzLog currentClazzLog;
-    public Clazz currentClazz;
+    private UmCallback<ClazzLog> setupFromClazzLogCallback = new UmCallback<ClazzLog>() {
+        @Override
+        public void onSuccess(ClazzLog clazzLog) {
+            if(clazzLog != null) {
+                currentClazzLog = clazzLog;
+                insertAllAndSetProvider(clazzLog);
+                loadClazzLogListForClazz();
+                checkPermissions();
+
+                if(title == null) {
+                    repository.getClazzDao().getClazzNameAsync(clazzLog.getClazzLogClazzUid(),
+                            setTitleCallback);
+                }
+
+                view.runOnUiThread(() -> updateViewDateHeading());
+            }else {
+                //TODO: show error message to user + record - should not happen
+            }
+
+        }
+
+        @Override
+        public void onFailure(Throwable exception) {
+
+        }
+    };
+
+    private UmCallback<String> setTitleCallback = new UmCallback<String>() {
+        @Override
+        public void onSuccess(String result) {
+            title = result + " " + UstadMobileSystemImpl.getInstance().getString(
+                    MessageID.attendance, getContext());
+            view.runOnUiThread(() -> view.updateToolbarTitle(title));
+        }
+
+        @Override
+        public void onFailure(Throwable exception) {
+
+        }
+    } ;
 
     public ClazzLogDetailPresenter(Object context,
                                    Hashtable arguments,
                                    ClassLogDetailView view) {
         super(context, arguments, view);
-
-        //Get clazz uid and set it
-        if(arguments.containsKey(ARG_CLAZZ_UID)){
-            currentClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
-        }
-
-        //Get log date and set it
-        if(arguments.containsKey(ClazzListView.ARG_LOGDATE)){
-            String thisLogDate = arguments.get(ClazzListView.ARG_LOGDATE).toString();
-            currentLogDate = Long.parseLong(thisLogDate);
-        }
-
-        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
-
-        checkPermissions();
     }
-
-    public void checkPermissions(){
-        ClazzDao clazzDao = repository.getClazzDao();
-
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
-                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                setHasEditPermissions(result);
-                view.showMarkAllButtons(result);
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        }));
-    }
-
 
     /**
      * The Presenter's onCreate. This populated the provider and sets it to the View.
@@ -123,68 +125,70 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
-        setUpLogDetail();
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        //Get clazz uid and set it
+        if(getArguments().containsKey(ClassLogDetailView.ARG_CLAZZ_LOG_UID)){
+            long clazzLogUid = Long.parseLong(getArguments().get(
+                    ClassLogDetailView.ARG_CLAZZ_LOG_UID).toString());
+            repository.getClazzLogDao().findByUidAsync(clazzLogUid, setupFromClazzLogCallback);
+        }else if(getArguments().containsKey(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID)) {
+            long clazzUid = Long.parseLong(getArguments().get(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID).toString());
+            repository.getClazzLogDao().findMostRecentByClazzUid(clazzUid, setupFromClazzLogCallback);
+        }
     }
 
-    /**
-     * Sets up Log Detail Attendance View.
-     */
-    private void setUpLogDetail(){
-        //Check for ClassLog
-        ClazzLogDao clazzLogDao = repository.getClazzLogDao();
+
+
+    public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        clazzLogDao.findByClazzIdAndDateAsync(currentClazzUid, currentLogDate,
-                new UmCallback<ClazzLog>() {
+        clazzDao.personHasPermission(loggedInPersonUid, currentClazzLog.getClazzLogClazzUid(),
+                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
                     @Override
-                    public void onSuccess(ClazzLog result) {
-
-                        currentClazz = clazzDao.findByUid(currentClazzUid);
-
-                        view.updateToolbarTitle(currentClazz.getClazzName() + " "
-                                + impl.getString(MessageID.attendance, context));
-
-                        updateViewDateHeading();
-
-                        if(result == null){
-                            //Create one anyway if not set
-                            clazzLogDao.createClazzLogForDate(currentClazzUid, currentLogDate,
-                                    new UmCallback<Long>() {
-                                        @Override
-                                        public void onSuccess(Long result) {
-
-                                            currentClazzLog = clazzLogDao.findByUid(result);
-                                            insertAllAndSetProvider(currentClazzLog);
-                                        }
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
-                        }else{
-                            currentClazzLog = result;
-                            insertAllAndSetProvider(currentClazzLog);
-                        }
+                    public void onSuccess(Boolean result) {
+                        setHasEditPermissions(result);
+                        view.showMarkAllButtons(result);
                     }
 
                     @Override
                     public void onFailure(Throwable exception) {
                         exception.printStackTrace();
                     }
-                });
+                }));
     }
+
+    private void loadClazzLogListForClazz() {
+        repository.getClazzLogDao().getListOfClazzLogUidsAndDatesForClazz(
+                currentClazzLog.getClazzLogClazzUid(),
+                new UmCallback<List<ClazzLogDao.ClazzLogUidAndDate>>() {
+            @Override
+            public void onSuccess(List<ClazzLogDao.ClazzLogUidAndDate> result) {
+                currentClazzLogs = result;
+                currentClazzLogIndex = currentClazzLogs.indexOf(
+                        new ClazzLogDao.ClazzLogUidAndDate(currentClazzLog));
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+    }
+
 
     public void updateViewDateHeading(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Date currentLogDateDate = new Date(currentLogDate);
+        Date currentLogDateDate = new Date(currentClazzLog.getLogDate());
         String prettyDate="";
         if(UMCalendarUtil.isToday(currentLogDateDate)){
             prettyDate = impl.getString(MessageID.today, context);
         }
         Locale currentLocale = Locale.getDefault();
         prettyDate += " (" +
-                UMCalendarUtil.getPrettyDateFromLong(currentLogDate, currentLocale) + ")";
+                UMCalendarUtil.getPrettyDateFromLong(currentClazzLog.getLogDate(), currentLocale) + ")";
 
         view.updateDateHeading(prettyDate);
     }
@@ -200,7 +204,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
 
-        clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzUid,
+        clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzLog.getClazzLogClazzUid(),
                 result.getClazzLogUid(), new UmCallback<Long[]>() {
                     @Override
                     public void onSuccess(Long[] result2) {
@@ -221,47 +225,20 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 });
     }
 
-    /**
-     * Re loads the attendance log detail view
-     *
-     * @param newDate The new date set
-     */
-    public void reloadLogDetailForDate(long newDate){
-        System.out.println("Reload for date: " + newDate);
-
-        //1. Set currentLogDate to newDate
-        currentLogDate = newDate;
-
-        //2. Re load view and recycler
-        setUpLogDetail();
-
-        //3. Update date heading
-        updateViewDateHeading();
-
+    public void handleClickGoBackDate(){
+        incrementLogInList(-1);
 
     }
 
-    public void handleClickGoBackDate(){
-        long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, -1);
-        System.out.println("Go back: " + newDate);
-
-        reloadLogDetailForDate(newDate);
-
+    private void incrementLogInList(int inc) {
+        int nextIndex = currentClazzLogIndex + inc;
+        if(nextIndex > 0 && nextIndex < currentClazzLogs.size())
+            repository.getClazzLogDao().findByUidAsync(currentClazzLogs.get(nextIndex).getClazzLogUid(),
+                setupFromClazzLogCallback);
     }
 
     public void handleClickGoForwardDate(){
-        Date currentLogDateDate = new Date(currentLogDate);
-
-        if(!UMCalendarUtil.isToday(currentLogDateDate)){
-            if(currentLogDate < System.currentTimeMillis()){
-                //Go to next day's
-                long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, 1);
-                System.out.println("go forawrd: " + newDate);
-                reloadLogDetailForDate(newDate);
-
-            }
-        }
-
+        incrementLogInList(1);
     }
 
     /**
@@ -280,9 +257,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
             @Override
             public void onSuccess(Integer result) {
                 //2. Update Attendance numbers for this clazzUid
-                clazzDao.updateAttendancePercentage(currentClazzUid);
+                clazzDao.updateAttendancePercentage(currentClazzLog.getClazzLogClazzUid());
                 //3. Update Attendance numbers for ClazzMember for this clazzUid.
-                clazzMemberDao.updateAttendancePercentages(currentClazzUid);
+                clazzMemberDao.updateAttendancePercentages(currentClazzLog.getClazzLogClazzUid());
 
                 int numPresent = clazzLogAttendanceRecordDao.getAttedanceStatusCount(
                         currentClazzLog.getClazzLogUid(), STATUS_ATTENDED);
@@ -294,18 +271,10 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 clazzLogDao.updateClazzAttendanceNumbersAsync(currentClazzLog.getClazzLogUid(),
                         numPresent, numAbsent, numPartial, null);
 
-                //4. Set any parent feed to done.
-                FeedEntryDao feedEntryDao =
-                        repository.getFeedEntryDao();
-                String possibleFeedLink = ClassLogDetailView.VIEW_NAME + "?" +
-                        ClazzListView.ARG_CLAZZ_UID + "=" + currentClazzUid +
-                        "&" + ClazzListView.ARG_LOGDATE + "=" + currentLogDate;
-                FeedEntry parentFeed =
-                        feedEntryDao.findByLink(loggedInPersonUid, possibleFeedLink);
-                if(parentFeed != null){
-                    parentFeed.setFeedEntryDone(false);
-                    feedEntryDao.updateDoneTrue(parentFeed.getFeedEntryUid());
-                }
+                //4. Set any FeedEntry to done
+                repository.getFeedEntryDao().markEntryAsDoneByClazzLogUidAndTaskType(
+                        currentClazzLog.getClazzLogUid(),
+                        ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, true);
 
                 //5. Close the activity.
                 view.finish();
@@ -319,14 +288,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     }
 
-//    /**
-//     * Method logic for what happens when we change the order of the student list.
-//     *
-//     * @param order The order flag. 0 to Sort by Name, 1 to Sort by Attendance, 2 to Sort by date.
-//     */
-//    public void handleChangeSortOrder(int order){
-//        //TODO: Change provider's sort order
-//    }
 
     /**
      * Handle when the user taps to mark all present, or mark all absent. This will update the
@@ -351,7 +312,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
      *                              ClazzLogAttendanceRecord
      */
     public void handleMarkStudent(long clazzLogAttendanceRecordUid, int attendanceStatus) {
-        repository  .getClazzLogAttendanceRecordDao()
+        repository.getClazzLogAttendanceRecordDao()
                 .updateAttendanceStatus(clazzLogAttendanceRecordUid,
                         attendanceStatus, null);
     }

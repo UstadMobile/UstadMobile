@@ -338,4 +338,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmQuery("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
     public abstract String getClazzName(long clazzUid);
 
+    @UmQuery("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
+    public abstract void getClazzNameAsync(long clazzUid, UmCallback<String> callback);
+
 }

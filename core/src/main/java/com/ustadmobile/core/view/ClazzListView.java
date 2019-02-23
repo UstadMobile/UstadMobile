@@ -11,8 +11,13 @@ public interface ClazzListView extends UstadView {
 
     String VIEW_NAME = "ClassList";
 
-    String ARGS_CLAZZLOG_UID = "clazzloguid";
+    String ARG_CLAZZLOG_UID = "clazzloguid";
+
+    String ARG_CLAZZ_MOST_RECENT = "clazzMostRecent";
+
+    @Deprecated
     String ARG_LOGDATE = "logdate";
+
     String ARG_CLAZZ_UID = "ClazzUid";
 
     int SORT_ORDER_NAME_ASC = 1;

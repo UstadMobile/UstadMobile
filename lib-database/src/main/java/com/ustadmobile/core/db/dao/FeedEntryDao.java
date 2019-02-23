@@ -49,4 +49,8 @@ public abstract class FeedEntryDao implements SyncableDao<FeedEntry, FeedEntryDa
 
     @UmQuery("UPDATE FeedEntry SET feedEntryDone = 0 WHERE feedEntryUid = :feedEntryUid")
     public abstract void updateDoneFalse(long feedEntryUid);
+
+    @UmQuery("UPDATE FeedEntry SET feedEntryDone = :done WHERE feedEntryClazzLogUid = :clazzLogUid " +
+            "AND feedEntryCheckType = :taskType")
+    public abstract void markEntryAsDoneByClazzLogUidAndTaskType(long clazzLogUid, int taskType, boolean done);
 }

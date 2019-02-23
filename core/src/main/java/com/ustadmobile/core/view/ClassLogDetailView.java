@@ -12,7 +12,15 @@ public interface ClassLogDetailView extends UstadView {
     //The View name
     String VIEW_NAME = "ClassLogDetail";
 
+    /**
+     * Used when starting to direct the view to show a particular clazz log
+     */
     String ARG_CLAZZ_LOG_UID = "clazzLogUid";
+
+    /**
+     * Used when starting to direct the view to show the most recent clazz log (if any)
+     */
+    String ARG_MOST_RECENT_BY_CLAZZ_UID = "mostRecentByClazzUid";
 
     /**
      * This method's purpose is to set the provider given to it to the view.

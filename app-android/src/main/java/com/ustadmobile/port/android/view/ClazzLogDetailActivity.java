@@ -10,15 +10,12 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageButton;
-import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -52,11 +49,10 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
 
     private ClazzLogDetailPresenter mPresenter;
 
-    public long clazzLogUid;
-    public long clazzUid;
-    public long logDate;
     private TextView dateHeading;
+
     private AppCompatImageButton backDate, forwardDate;
+
     private Button markAllPresent, markAllAbsent;
 
     @Override
@@ -89,20 +85,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-
-        //Get arguments
-        if (getIntent().hasExtra(ClazzListView.ARGS_CLAZZLOG_UID)){
-            clazzLogUid = getIntent().getLongExtra(ClazzListView.ARGS_CLAZZLOG_UID, -1L);
-        }
-
-        if(getIntent().hasExtra(ARG_CLAZZ_UID)){
-            clazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, -1L);
-        }
-
-        if(getIntent().hasExtra(ARG_LOGDATE)){
-            logDate = getIntent().getLongExtra(ARG_LOGDATE, -1L);
-        }
-
         mRecyclerView = findViewById(R.id.class_log_detail_container_recyclerview);
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
@@ -122,12 +104,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        if(mPresenter.currentClazz != null ){
-            String clazzName = mPresenter.currentClazz.getClazzName();
-            if (clazzName != null && clazzName.length() > 0) {
-                toolbar.setTitle(clazzName);
-            }
-        }
 
         //Change icon based on rtl in current language (eg: arabic)
         int isLeftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault());

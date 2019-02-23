@@ -15,10 +15,8 @@ import com.ustadmobile.core.view.ClazzActivityListView;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
-import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Role;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -26,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_UID;
-import static com.ustadmobile.core.view.ClazzListView.ARGS_CLAZZLOG_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;

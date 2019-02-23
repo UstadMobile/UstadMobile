@@ -13,16 +13,13 @@ import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
-import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_ASC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_ATTENDANCE_DESC;
 import static com.ustadmobile.core.view.ClazzListView.SORT_ORDER_NAME_ASC;
@@ -230,8 +227,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
         long clazzUid = clazz.getClazzUid();
-        args.put(ClazzListView.ARG_CLAZZ_UID, clazzUid);
-        args.put(ARG_LOGDATE, System.currentTimeMillis());
+        args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, String.valueOf(clazzUid));
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 

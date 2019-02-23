@@ -27,7 +27,6 @@ import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_YEAR;
-import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 /**
  * The Presenter/Controller for ClazzLogListFragment. This is responsible for the logic behind
@@ -100,7 +99,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         super.onCreate(savedState);
 
         clazzLogListProvider =
-                repository.getClazzLogDao().findByClazzUidThatAreDone(currentClazzUid);
+                repository.getClazzLogDao().findByClazzUidNotCanceled(currentClazzUid);
         setProviderToView();
 
         generateAttendanceBarChartDataTest();
@@ -126,8 +125,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
-        args.put(ARG_CLAZZ_UID, clazzLog.getClazzLogClazzUid());
-        args.put(ARG_LOGDATE, clazzLog.getLogDate());
+        args.put(ClassLogDetailView.ARG_CLAZZ_LOG_UID, String.valueOf(clazzLog.getClazzLogUid()));
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 
@@ -137,8 +135,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
     public void goToNewClazzLogDetailActivity(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
-        args.put(ARG_CLAZZ_UID, currentClazzUid);
-        args.put(ARG_LOGDATE, System.currentTimeMillis());
+        args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, String.valueOf(currentClazzUid));
         impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
     }
 

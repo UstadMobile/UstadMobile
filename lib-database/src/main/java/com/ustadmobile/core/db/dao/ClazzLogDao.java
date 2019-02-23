@@ -47,6 +47,61 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     }
 
     /**
+     * Small POJO used by the attendance screen to get a list of valid dates for the class (to show
+     * in a list) and their UID so they can be looked up.
+     */
+    public static class ClazzLogUidAndDate {
+
+        private long clazzLogUid;
+
+        private long logDate;
+
+        public ClazzLogUidAndDate() {
+
+        }
+
+        public ClazzLogUidAndDate(ClazzLog clazzLog) {
+            this.clazzLogUid = clazzLog.getClazzLogUid();
+            this.logDate = clazzLog.getLogDate();
+        }
+
+        public long getClazzLogUid() {
+            return clazzLogUid;
+        }
+
+        public void setClazzLogUid(long clazzLogUid) {
+            this.clazzLogUid = clazzLogUid;
+        }
+
+        public long getLogDate() {
+            return logDate;
+        }
+
+        public void setLogDate(long logDate) {
+            this.logDate = logDate;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ClazzLogUidAndDate that = (ClazzLogUidAndDate) o;
+
+            if (clazzLogUid != that.clazzLogUid) return false;
+            return logDate == that.logDate;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (clazzLogUid ^ (clazzLogUid >>> 32));
+            result = 31 * result + (int) (logDate ^ (logDate >>> 32));
+            return result;
+        }
+    }
+
+
+    /**
      * As the ClazzLog object is added using a timer, we need to ensure that the object created for
      * a specific time should come with the same primary key. For this purposes, we generate a
      * a hashcode using the clazzuid and startTime.
@@ -62,6 +117,8 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     }
 
 
+
+
     @UmInsert
     public abstract long insert(ClazzLog entity);
 
@@ -73,6 +130,12 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     public abstract ClazzLog findByUid(long uid);
+
+    @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<ClazzLog> callback);
+
+    @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate DESC LIMIT 1")
+    public abstract void findMostRecentByClazzUid(long clazzUid, UmCallback<ClazzLog> callback);
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzid AND logDate = :date")
     public abstract ClazzLog findByClazzIdAndDate(long clazzid, long date);
@@ -90,8 +153,8 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
     public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);
 
-    @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid AND done = 1 ORDER BY logDate DESC")
-    public abstract UmProvider<ClazzLog> findByClazzUidThatAreDone(long clazzUid);
+    @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT canceled")
+    public abstract UmProvider<ClazzLog> findByClazzUidNotCanceled(long clazzUid);
 
     @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " +
             "numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")
@@ -124,44 +187,11 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
         }
     }
 
-    public void createClazzLogForDate(long currentClazzUid, long currentLogDate,
-                                      UmCallback<Long> callback){
-
-        findByClazzIdAndDateAsync(currentClazzUid, currentLogDate, new UmCallback<ClazzLog>() {
-            @Override
-            public void onSuccess(ClazzLog result) {
-                if(result != null){
-                    callback.onSuccess(result.getClazzLogClazzUid());
-                }else{
-                    //Create one
-                    ClazzLog newClazzLog = new ClazzLog();
-                    newClazzLog.setLogDate(currentLogDate);
-                    newClazzLog.setTimeRecorded(System.currentTimeMillis());
-                    newClazzLog.setDone(false);
-                    newClazzLog.setClazzLogClazzUid(currentClazzUid);
-                    insertAsync(newClazzLog, new UmCallback<Long>() {
-                        @Override
-                        public void onSuccess(Long result) {
-                            newClazzLog.setClazzLogUid(result);
-                            callback.onSuccess(result);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
-    }
-
     @UmQuery("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")
     public abstract void cancelFutureInstances(long scheduleUid, long after, boolean canceled);
+
+    @UmQuery("SELECT ClazzLog.clazzLogUid, ClazzLog.logDate FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid")
+    public abstract void getListOfClazzLogUidsAndDatesForClazz(long clazzUid,
+                                                               UmCallback<List<ClazzLogUidAndDate>> callback);
 
 }

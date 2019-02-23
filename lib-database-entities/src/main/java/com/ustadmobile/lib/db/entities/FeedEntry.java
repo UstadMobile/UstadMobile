@@ -28,6 +28,13 @@ public class FeedEntry {
 
     private boolean feedEntryDone;
 
+    private long feedEntryClazzLogUid;
+
+    /**
+     * As per ScheduledCheck.TYPE_ constants
+     */
+    private int feedEntryCheckType;
+
     @UmSyncLocalChangeSeqNum
     private long feedEntryLocalChangeSeqNum;
 
@@ -169,5 +176,21 @@ public class FeedEntry {
 
     public void setFeedEntryLastChangedBy(int feedEntryLastChangedBy) {
         this.feedEntryLastChangedBy = feedEntryLastChangedBy;
+    }
+
+    public long getFeedEntryClazzLogUid() {
+        return feedEntryClazzLogUid;
+    }
+
+    public void setFeedEntryClazzLogUid(long feedEntryClazzLogUid) {
+        this.feedEntryClazzLogUid = feedEntryClazzLogUid;
+    }
+
+    public int getFeedEntryCheckType() {
+        return feedEntryCheckType;
+    }
+
+    public void setFeedEntryCheckType(int feedEntryCheckType) {
+        this.feedEntryCheckType = feedEntryCheckType;
     }
 }
