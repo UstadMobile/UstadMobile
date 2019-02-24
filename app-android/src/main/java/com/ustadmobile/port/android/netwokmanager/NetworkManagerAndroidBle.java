@@ -44,6 +44,7 @@ import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -185,9 +186,22 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                         break;
                 }
 
-                if(bluetoothEnabled.get() && !bluetoothP2pRunning.get()
-                        && wifiP2PCapable.get()){
-                    startAdvertising();
+                if(bluetoothEnabled.get() && wifiP2PCapable.get()){
+
+                    if(!bluetoothP2pRunning.get()){
+                        startAdvertising();
+                    }
+
+                    //Starting scanning too soon after advertising will cause issues on Droid
+                    new Thread(() -> {
+                        try{
+                            Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+                            startScanning();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+
                 }else{
                     stopAdvertising();
                 }
@@ -677,6 +691,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public void onDestroy() {
         stopAdvertising();
         stopScanning();
+        bluetoothP2pRunning.set(false);
+        bluetoothEnabled.set(false);
+        wifiP2PCapable.set(false);
         if(wifiP2pManager != null)
             try{ mContext.unregisterReceiver(mReceiver); }catch (Exception ignored){}
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(umBluetoothReceiver);

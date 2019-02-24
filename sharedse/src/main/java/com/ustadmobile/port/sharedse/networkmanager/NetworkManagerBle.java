@@ -169,18 +169,6 @@ public abstract class NetworkManagerBle {
      */
     public void onCreate() {
         umAppDatabase = UmAppDatabase.getInstance(mContext);
-
-        //Starting scanning too soon after advertising will cause issues on Droid
-        new Thread(() -> {
-            try{
-                Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-                startScanning();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-
         downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
