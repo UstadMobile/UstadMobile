@@ -343,8 +343,8 @@ public class UMCalendarUtil {
      *
      * @return A new calendar instance advanced to the next occurence of the given day of the week
      */
-    public static Calendar advanceCalendarToOccurenceOf(Calendar calendar, String timeZone,
-                                                         int dayOfWeek, boolean incToday) {
+    public static Calendar copyCalendarAndAdvanceTo(Calendar calendar, String timeZone,
+                                                    int dayOfWeek, boolean incToday) {
         Calendar result = Calendar.getInstance();
         result.setTimeZone(TimeZone.getTimeZone(timeZone));
         result.setTimeInMillis(calendar.getTimeInMillis());

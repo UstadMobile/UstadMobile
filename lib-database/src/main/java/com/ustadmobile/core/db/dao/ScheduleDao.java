@@ -3,15 +3,12 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
-import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
 import com.ustadmobile.lib.db.entities.Schedule;
@@ -19,10 +16,7 @@ import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 @UmDao(inheritPermissionFrom = ClazzDao.class,
 inheritPermissionForeignKey = "scheduleClazzUid",
@@ -103,8 +97,14 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
                 boolean incToday = startMsOfDay <= schedule.getSceduleStartTime();
-                Calendar nextScheduleOccurence = UMCalendarUtil.advanceCalendarToOccurenceOf(
+                Calendar nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                         startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
+
+                long startTimeMins = schedule.getSceduleStartTime() / (1000 * 60);
+                nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int)(startTimeMins / 60));
+                nextScheduleOccurence.set(Calendar.MINUTE, (int)(startTimeMins % 60));
+                nextScheduleOccurence.set(Calendar.SECOND, 0);
+                nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
 
                 if(nextScheduleOccurence.before(endCalendar)) {
                     //this represents an instance of this class that should take place and
