@@ -15,6 +15,10 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "jacoco"
 
 
+test {
+    ignoreFailures = true
+}
+
 task scrapeContent(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     if (project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {

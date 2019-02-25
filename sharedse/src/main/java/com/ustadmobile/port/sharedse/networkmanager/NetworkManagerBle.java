@@ -266,8 +266,7 @@ public abstract class NetworkManagerBle {
 
                                 }else{
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                            "Task couldn't be created, monitoring stopped",
-                                            null);
+                                            "Task couldn't be created, monitoring stopped");
                                 }
                             }else{
                                 UstadMobileSystemImpl.l(UMLog.DEBUG,694,

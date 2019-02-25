@@ -74,6 +74,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                 ContentEntryFileDao contentEntryDao =
                         UmAppDatabase.getInstance(context).getContentEntryFileDao();
                 List<Long> entryStatusResponse = new ArrayList<>();
+
                 for(long entryFileUid: bleMessageBytesToLong(requestReceived.getPayload())){
                     ContentEntryFile contentEntryFile = contentEntryDao.findByUid(entryFileUid);
                     entryStatusResponse.add(contentEntryFile == null ? 0L: 1L);
