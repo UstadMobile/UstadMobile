@@ -91,7 +91,7 @@ android {
 
         devMinApi21 {
             dimension "config"
-            minSdkVersion 21
+            minSdkVersion 23
             applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode

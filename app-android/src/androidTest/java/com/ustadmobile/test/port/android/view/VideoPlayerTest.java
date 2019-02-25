@@ -74,10 +74,10 @@ public class VideoPlayerTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testVideoPath = "/com/ustadmobile/app/android/video.mp4";
+        String testVideoPath = "/com/ustadmobile/app/android/video1.webm";
         InputStream inputStream = getClass().getResourceAsStream(testVideoPath);
         File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "video.mp4");
+        File targetFile = new File(path, "video1.webm");
         OutputStream outStream = new FileOutputStream(targetFile);
         byte[] buffer = new byte[1024];
         int read;
@@ -85,12 +85,25 @@ public class VideoPlayerTest {
             outStream.write(buffer, 0, read);
         }
 
+        String testAudioPath = "/com/ustadmobile/app/android/video1-codec2-version2.c2";
+        InputStream audioIs = getClass().getResourceAsStream(testAudioPath);
+        File audioPath = Environment.getExternalStorageDirectory();
+        File audioTargetFile = new File(audioPath, "video1-codec2-version2.c2");
+        OutputStream audiooutStream = new FileOutputStream(audioTargetFile);
+        byte[] audiobuffer = new byte[1024];
+        int audioread;
+        while ((audioread = audioIs.read(audiobuffer)) != -1) {
+            audiooutStream.write(audiobuffer, 0, audioread);
+        }
+
+
         b.putString(VideoPlayerView.ARG_VIDEO_PATH, targetFile.getPath());
+        b.putString(VideoPlayerView.ARG_AUDIO_PATH, audioTargetFile.getPath());
         b.putLong(VideoPlayerView.ARG_CONTENT_ENTRY_ID, 14L);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
-      //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // the webview looks for an element "questionController" which is the start button of plix.
         // This is only available once plix has fully loaded and displayed to the user
     }

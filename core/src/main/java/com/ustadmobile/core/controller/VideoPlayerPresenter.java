@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.VideoPlayerView.ARG_AUDIO_PATH;
 import static com.ustadmobile.core.view.VideoPlayerView.ARG_CONTENT_ENTRY_ID;
 import static com.ustadmobile.core.view.VideoPlayerView.ARG_VIDEO_PATH;
 
@@ -16,6 +17,7 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
 
     private String videoPath;
     private ContentEntryDao contentEntryDao;
+    private String audioPath;
 
     public VideoPlayerPresenter(Object context, Hashtable arguments, VideoPlayerView view) {
         super(context, arguments, view);
@@ -29,6 +31,7 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
 
 
         videoPath = (String) getArguments().get(ARG_VIDEO_PATH);
+        audioPath = (String) getArguments().get(ARG_AUDIO_PATH);
         long entryUuid = Long.parseLong(getArguments().get(ARG_CONTENT_ENTRY_ID).toString());
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
@@ -44,10 +47,13 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
 
     }
 
-    public String getVideoPath(){
+    public String getVideoPath() {
         return videoPath;
     }
-    
-    
-    
+
+    public String getAudioPath() {
+        return audioPath;
+    }
+
+
 }
