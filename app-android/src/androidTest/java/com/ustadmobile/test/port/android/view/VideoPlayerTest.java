@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,31 +75,22 @@ public class VideoPlayerTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testVideoPath = "/com/ustadmobile/app/android/video1.webm";
-        InputStream inputStream = getClass().getResourceAsStream(testVideoPath);
-        File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "video1.webm");
-        OutputStream outStream = new FileOutputStream(targetFile);
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = inputStream.read(buffer)) != -1) {
-            outStream.write(buffer, 0, read);
-        }
+        File targetFile = readFromTestResources(
+                "/com/ustadmobile/app/android/video1.webm",
+                "video1.webm");
 
-        String testAudioPath = "/com/ustadmobile/app/android/video1-codec2-version2.c2";
-        InputStream audioIs = getClass().getResourceAsStream(testAudioPath);
-        File audioPath = Environment.getExternalStorageDirectory();
-        File audioTargetFile = new File(audioPath, "video1-codec2-version2.c2");
-        OutputStream audiooutStream = new FileOutputStream(audioTargetFile);
-        byte[] audiobuffer = new byte[1024];
-        int audioread;
-        while ((audioread = audioIs.read(audiobuffer)) != -1) {
-            audiooutStream.write(audiobuffer, 0, audioread);
-        }
+        File audioFile = readFromTestResources(
+                "/com/ustadmobile/app/android/video1-codec2-version2.c2",
+                "video1-codec2-version2.c2");
+
+        File srtFile = readFromTestResources(
+                "/com/ustadmobile/app/android/srtfile.srt",
+                "srtfile.srt");
 
 
         b.putString(VideoPlayerView.ARG_VIDEO_PATH, targetFile.getPath());
-        b.putString(VideoPlayerView.ARG_AUDIO_PATH, audioTargetFile.getPath());
+        b.putString(VideoPlayerView.ARG_AUDIO_PATH, audioFile.getPath());
+        b.putString(VideoPlayerView.ARG_SRT_PATH, srtFile.getPath());
         b.putLong(VideoPlayerView.ARG_CONTENT_ENTRY_ID, 14L);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
@@ -106,6 +98,20 @@ public class VideoPlayerTest {
         //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // the webview looks for an element "questionController" which is the start button of plix.
         // This is only available once plix has fully loaded and displayed to the user
+    }
+
+
+    public static File readFromTestResources(String pathToFile, String nameOfFile) throws IOException {
+        InputStream inputStream = VideoPlayerTest.class.getResourceAsStream(pathToFile);
+        File path = Environment.getExternalStorageDirectory();
+        File targetFile = new File(path, nameOfFile);
+        OutputStream outStream = new FileOutputStream(targetFile);
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = inputStream.read(buffer)) != -1) {
+            outStream.write(buffer, 0, read);
+        }
+        return targetFile;
     }
 
 }

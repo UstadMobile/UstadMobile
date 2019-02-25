@@ -186,18 +186,18 @@ public class KhanContentIndexer implements Runnable {
 
             ScrapeQueueItem item = queueDao.getNextItemAndSetStatus(runId,
                     ScrapeQueueItem.ITEM_TYPE_SCRAPE);
-            if(item == null){
+            if (item == null) {
                 return null;
             }
 
             ContentEntry parent = contentEntryDao.findByUid(item.getSqiContentEntryParentUid());
 
             URL scrapeUrl;
-            try{
+            try {
                 scrapeUrl = new URL(item.getScrapeUrl());
                 return new KhanContentScraper(scrapeUrl, new File(item.getDestDir()), parent,
                         item.getContentType(), item.getSqiUid(), factory);
-            }catch(IOException ignored){
+            } catch (IOException ignored) {
                 throw new RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" +
                         item.getScrapeUrl());
             }
@@ -221,9 +221,9 @@ public class KhanContentIndexer implements Runnable {
 
         scrapeWorkQueue.addEmptyWorkQueueListener((scrapeQueu) ->
                 scraperLatch.countDown());
-        try{
+        try {
             scraperLatch.await();
-        }catch (InterruptedException ignored){
+        } catch (InterruptedException ignored) {
 
         }
         factory.close();
@@ -517,14 +517,14 @@ public class KhanContentIndexer implements Runnable {
                     , contentCount++);
 
             if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentItem.kind)) {
-                String videoUrl = contentItem.downloadUrls.mp4Low;
+                String videoUrl = contentItem.downloadUrls.mp4;
                 if (videoUrl == null || videoUrl.isEmpty()) {
-                    UMLogUtil.logTrace("Video was not available in mp4-low, found in mp4 at " + url);
-                    videoUrl = contentItem.downloadUrls.mp4;
-                    if(videoUrl == null){
-                        UMLogUtil.logTrace("Video was not available in any format for url: " + url);
+                    videoUrl = contentItem.downloadUrls.mp4Low;
+                    if (videoUrl == null) {
+                        UMLogUtil.logError("Video was not available in any format for url: " + url);
                         continue;
                     }
+                    UMLogUtil.logTrace("Video was not available in mp4, found in mp4-low at " + url);
                 }
                 url = new URL(url, videoUrl);
             }

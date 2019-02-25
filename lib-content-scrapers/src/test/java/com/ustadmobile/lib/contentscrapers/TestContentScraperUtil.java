@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
+
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -19,6 +24,8 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
+
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class TestContentScraperUtil {
 
@@ -51,7 +58,7 @@ public class TestContentScraperUtil {
                 }
 
                 return new MockResponse().setResponseCode(404);
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 System.err.println(request.getPath());
             }
@@ -105,6 +112,27 @@ public class TestContentScraperUtil {
         String unCommonEdraakDate = "2018-01-07T08:19:46.4100";
 
         ContentScraperUtil.parseServerDate(unCommonEdraakDate);
+    }
+
+    @Test
+    public void givenListOfSrtFormat_whenParsed_thenShouldSaveValidSrtFile() throws IOException {
+
+        List<SrtFormat> list = new ArrayList<>();
+        list.add(new SrtFormat("[Voiceover] Put seven\nsquirrels in the box.", 3350, 518));
+        list.add(new SrtFormat("All right, so that's", 4917, 3350));
+        list.add(new SrtFormat("one, two,", 7857, 4917));
+        list.add(new SrtFormat("three, four", 11407, 7857));
+        list.add(new SrtFormat("five, six,", 14890, 11407));
+
+        File tmpDir = Files.createTempDirectory("srtFileDirectory").toFile();
+        File srtFile = new File(tmpDir, "srtfile.srt");
+
+        ContentScraperUtil.createSrtFile(list, srtFile);
+
+        Assert.assertTrue("SRT file Exists", ContentScraperUtil.fileHasContent(srtFile));
+
+        String srt = FileUtils.readFileToString(srtFile, UTF_ENCODING);
+
     }
 
 

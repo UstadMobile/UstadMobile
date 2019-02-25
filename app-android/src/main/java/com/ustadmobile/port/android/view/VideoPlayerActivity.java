@@ -9,17 +9,23 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MergingMediaSource;
+import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.FileDataSourceFactory;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.codec2.Codec2Decoder;
@@ -121,7 +127,29 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
 
         Uri uri = Uri.parse(videoPath);
         MediaSource mediaSource = buildMediaSource(uri);
-        player.prepare(mediaSource, false, false);
+        String srtPath = mPresenter.getSrtPath();
+        MergingMediaSource mergedSource = null;
+
+        if (srtPath != null && !srtPath.isEmpty()) {
+
+            Format subtitleFormat = Format.createTextSampleFormat(
+                    null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
+                    C.SELECTION_FLAG_DEFAULT, null);
+
+            Uri subTitleUri = Uri.parse(srtPath);
+
+            DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
+                    Util.getUserAgent(this, "ustadmobile"));
+
+            MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
+                    createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
+
+            mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
+        }
+
+
+        player.prepare(mergedSource == null ? mediaSource : mergedSource, false, false);
+
 
     }
 
