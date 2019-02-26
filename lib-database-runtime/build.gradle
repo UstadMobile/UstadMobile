@@ -17,6 +17,13 @@ targetCompatibility = "1.8"
 
 compileJava {
     options.compilerArgs += ["-parameters"]
+
+    //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
+    // to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
+    if(JavaVersion.current() == JavaVersion.VERSION_1_8) {
+        options.fork = true
+        options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+    }
 }
 
 task sourceJar(type: Jar) {
