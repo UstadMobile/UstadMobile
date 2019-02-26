@@ -5,12 +5,14 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.Role;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TestClazzDao extends AbstractDaoTest{
@@ -176,6 +178,50 @@ public class TestClazzDao extends AbstractDaoTest{
 
         Assert.assertNull("After sync when account does not have insert permission, entity " +
                         "is not on server", serverDb.getClazzDao().findByUid(newClazz.getClazzUid()));
+    }
+
+
+    @Test
+    public void givenOtherRoleAssignedToPersonByClazz_whenFindpeopleWithRoleAssignedCalled_thenPersonIsReturned() {
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/",
+                "");
+        Role mAndERole = new Role("M+E Role", Role.PERMISSION_CLAZZ_UPDATE);
+        mAndERole.setRoleUid(serverDummyRepo.getRoleDao().insert(mAndERole));
+
+        EntityRole mAndEEntityRole = new EntityRole(Clazz.TABLE_ID,
+                myClazz.getClazzUid(), accountPersonGroup.getGroupUid(), mAndERole.getRoleUid());
+        serverDummyRepo.getEntityRoleDao().insert(mAndEEntityRole);
+
+        List<Person> clazzMandEPeople = serverDummyRepo.getClazzDao()
+                .findPeopleWithRoleAssignedToClazz(myClazz.getClazzUid(), mAndERole.getRoleUid());
+
+        Assert.assertEquals("Found one person with M+E Role for class", 1,
+                clazzMandEPeople.size());
+        Assert.assertEquals("Person UID matches expect person",
+                accountPerson.getPersonUid(),
+                clazzMandEPeople.get(0).getPersonUid());
+    }
+
+    @Test
+    public void givenOtherRoleAssignedToPersonByLocation_whenFindpeopleWithRoleAssignedCalled_thenPersonIsReturned() {
+        UmAppDatabase serverDummyRepo = serverDb.getRepository("http://localhost/dummy/",
+                "");
+        Role mAndERole = new Role("M+E Role", Role.PERMISSION_CLAZZ_UPDATE);
+        mAndERole.setRoleUid(serverDummyRepo.getRoleDao().insert(mAndERole));
+
+        EntityRole mAndEEntityRole = new EntityRole(Location.TABLE_ID,
+                myClazzLocation.getLocationUid(), accountPersonGroup.getGroupUid(), mAndERole.getRoleUid());
+        serverDummyRepo.getEntityRoleDao().insert(mAndEEntityRole);
+
+
+        List<Person> clazzMandEPeople = serverDummyRepo.getClazzDao()
+                .findPeopleWithRoleAssignedToClazz(myClazz.getClazzUid(), mAndERole.getRoleUid());
+
+        Assert.assertEquals("Found one person with M+E Role for class", 1,
+                clazzMandEPeople.size());
+        Assert.assertEquals("Person UID matches expect person",
+                accountPerson.getPersonUid(),
+                clazzMandEPeople.get(0).getPersonUid());
     }
 
 
