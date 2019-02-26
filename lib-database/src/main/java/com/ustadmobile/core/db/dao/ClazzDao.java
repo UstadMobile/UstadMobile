@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
 import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.UmSyncExistingEntity;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -340,5 +341,24 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     @UmQuery("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
     public abstract void getClazzNameAsync(long clazzUid, UmCallback<String> callback);
+
+
+    @UmQuery("SELECT Person.* " +
+            "FROM PersonGroupMember " +
+            "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
+            "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
+            "LEFT JOIN Person ON PersonGroupMember.groupMemberPersonUid = Person.personUid " +
+            "WHERE (" +
+            "(EntityRole.ertableId = " + Clazz.TABLE_ID +
+            " AND EntityRole.erEntityUid = :clazzUid) " +
+            "OR" +
+            "(EntityRole.ertableId = " + Location.TABLE_ID +
+            " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid " +
+            " FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = " +
+            " (SELECT clazzLocationUid FROM Clazz WHERE clazzUid = :clazzUid)))) " +
+            "AND Role.roleUid = :roleUid")
+    public abstract List<Person> findPeopleWithRoleAssignedToClazz(long clazzUid, long roleUid);
+
+
 
 }
