@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileWithContentEntryFileStatusAndContentEntryId;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithFilePath;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -44,10 +45,13 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
             "WHERE ContentEntry.publik")
     public abstract List<ContentEntryFile> getPublicContentEntryFiles();
 
-    @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.filePath  from ContentEntryFile " +
+    @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.filePath, ContentEntryFileStatus.cefsUid, " +
+            "ContentEntry.entryid, ContentEntry.contentEntryUid from ContentEntryFile " +
             "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
-            "WHERE ContentEntryFileStatus.filePath LIKE '%/khan/en/%'")
-    public abstract List<ContentEntryFileWithFilePath> findKhanFiles();
+            "LEFT JOIN ContentEntryContentEntryFileJoin ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
+            "LEFT JOIN ContentEntry ON ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryFileStatus.filePath LIKE '%/khan/en/%' AND ContentEntryFile.mimeType = 'video/mp4'")
+    public abstract List<ContentEntryFileWithContentEntryFileStatusAndContentEntryId> findKhanFiles();
 
     @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.filePath from ContentEntryFile " +
             "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
@@ -72,5 +76,8 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
             "ORDER BY lastModified DESC LIMIT 1")
     public abstract void findLatestCompletedFileForEntry(long contentEntryUid,
                                                          UmCallback<ContentEntryFileWithStatus> callback);
+
+    @UmQuery("DELETE FROM ContentEntryFile WHERE contentEntryFileUid = :statusUid")
+    public abstract void deleteByUid(long statusUid);
 
 }

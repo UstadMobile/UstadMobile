@@ -494,4 +494,68 @@ public class ShrinkerUtil {
 
     }
 
+
+    public static void convertKhanVideoToWebMAndCodec2(File src, File dest) throws IOException {
+
+        if (!ContentScraperUtil.fileHasContent(src)) {
+            throw new FileNotFoundException("convertKhanToWebmAndCodec2: Source file: " + src.getAbsolutePath() + " does not exist");
+        }
+
+        File webpExecutableFile = new File(ScraperBuildConfig.FFMPEG_PATH);
+        if (!webpExecutableFile.exists()) {
+            throw new IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH);
+        }
+
+        ProcessBuilder videoBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
+                , "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", dest.getPath());
+
+        File rawFile = new File(dest, "audio.raw");
+        ProcessBuilder rawBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
+                , "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", rawFile.getPath());
+
+        File audioFile = new File(dest, "audio.c2");
+        ProcessBuilder audioBuilder = new ProcessBuilder(ScraperBuildConfig.CODEC2_PATH, "3200", rawFile.getPath(), audioFile.getPath());
+        videoBuilder.redirectErrorStream(true);
+        Process process = null;
+        try {
+            process = videoBuilder.start();
+            startProcess(process);
+
+            process = rawBuilder.start();
+            startProcess(process);
+
+            process = audioBuilder.start();
+            startProcess(process);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+            audioFile.delete();
+        }
+        if (!ContentScraperUtil.fileHasContent(dest)) {
+            throw new IOException("convertVideoToWebMAndCodec: source existed, but output does not " +
+                    dest.getPath());
+        }
+
+
+
+    }
+
+    private static void startProcess(Process process) throws IOException, InterruptedException {
+        UMIOUtils.readStreamToByteArray(process.getInputStream());
+        process.waitFor();
+        int exitValue = process.exitValue();
+        if (exitValue != 0) {
+            UMLogUtil.logError("Error Stream for src " + UMIOUtils.readStreamToString(process.getErrorStream()));
+        }
+        process.destroy();
+    }
+
+
 }

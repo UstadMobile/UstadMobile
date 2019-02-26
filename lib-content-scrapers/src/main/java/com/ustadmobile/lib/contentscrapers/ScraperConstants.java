@@ -177,6 +177,7 @@ public class ScraperConstants {
     public static final String MIMETYPE_WEB_CHUNK = "application/webchunk+zip";
     public static final String MIMETYPE_TINCAN = "application/tincan+zip";
     public static final String MIMETYPE_WEBM = "video/webm";
+    public static final String MIMETYPE_KHAN = "application/khan-video+zip";
 
     public static final String ZIP_EXT = ".zip";
     public static final String PNG_EXT = ".png";
@@ -199,6 +200,7 @@ public class ScraperConstants {
     public static final String VIDEO_FILENAME_MP4 = "video.mp4";
     public static final String VIDEO_FILENAME_WEBM = "video.webm";
     public static final String TINCAN_FILENAME = "tincan.xml";
+    public static final String SUBTITLE_FILENAME = "subtitle.srt";
 
     public static final String ARABIC_LANG_CODE = "ar";
     public static final String ENGLISH_LANG_CODE = "en";
@@ -305,7 +307,7 @@ public class ScraperConstants {
         public String getType() {
             return type;
         }
-        }
+    }
 
 
     public enum CK12ContentType {
