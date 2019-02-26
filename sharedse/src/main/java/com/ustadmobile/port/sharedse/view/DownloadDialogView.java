@@ -23,6 +23,7 @@ public interface DownloadDialogView extends UstadView {
 
     void setStackOptionsVisible(boolean visible);
 
+    @Deprecated
     int [] getOptionIds();
 
     void dismissDialog();
