@@ -140,8 +140,6 @@ public class DownloadDialogPresenterTest {
                 new ContentEntryContentEntryFileJoin(entry4, entry4File));
 
         totalBytesToDownload = entry2File.getFileSize() + entry4File.getFileSize();
-
-        when(mockedDialogView.getOptionIds()).thenReturn(new int[]{ 1,2,3});
     }
 
     private void insertDownloadSetAndSetItems(boolean meteredNetworkAllowed){
