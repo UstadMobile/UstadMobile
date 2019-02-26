@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +11,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -21,12 +21,17 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class DownloadDialogFragment extends UstadDialogFragment implements DownloadDialogView,
@@ -50,10 +55,13 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private RelativeLayout calculateHolder;
 
-
     private Spinner mStorageOptions;
 
     private UstadMobileSystemImpl impl;
+
+    private List<UMStorageDir> storageDirs = null;
+
+
 
     @Override
     public void onAttach(Context context) {
@@ -98,13 +106,29 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         wifiOnlyHolder.setOnClickListener(this);
         calculateTextView.setText(impl.getString(MessageID.download_calculating,getContext()));
 
-        setUpStorageOptions();
-
         return mDialog;
     }
 
-    private void setUpStorageOptions(){
 
+    @Override
+    public void setUpStorageOptions(List<UMStorageDir> storageDirs) {
+        List<String> storageOptions = new ArrayList<>();
+
+        for(UMStorageDir umStorageDir : storageDirs){
+            String deviceStorageLabel = String.format(impl.getString(
+                    MessageID.download_storage_option_device,getContext()),umStorageDir.getName(),
+                    UMFileUtil.formatFileSize(new File(umStorageDir.getDirURI()).getUsableSpace()));
+            storageOptions.add(deviceStorageLabel);
+        }
+
+        ArrayAdapter<String> storageOptionAdapter = new ArrayAdapter<>(
+                Objects.requireNonNull(getContext()),
+                android.R.layout.simple_spinner_item, storageOptions);
+        storageOptionAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+
+        mStorageOptions.setAdapter(storageOptionAdapter);
+        mStorageOptions.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -179,6 +203,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         calculateHolder.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+
     @Override
     public void onClick(DialogInterface dialog, int which) {
         switch(which){
@@ -224,11 +249,11 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+        mPresenter.handleStorageOptionSelection(storageDirs.get(position).getDirURI());
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+        mPresenter.handleStorageOptionSelection(storageDirs.get(0).getDirURI());
     }
 }

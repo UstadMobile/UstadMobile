@@ -47,6 +47,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 
@@ -300,8 +301,12 @@ public abstract class UstadMobileSystemImpl {
      *
      * @param mode bitmask flag of USER_RESOURCE or SHARED_RESOURCE
      * @return Array of storage
+     *
      */
+    @Deprecated
     public abstract UMStorageDir[] getStorageDirs(int mode, Object context);
+
+    public abstract void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback);
 
     /**
      * Provides the path to the shared content directory

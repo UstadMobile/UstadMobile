@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.util;
 
-import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;

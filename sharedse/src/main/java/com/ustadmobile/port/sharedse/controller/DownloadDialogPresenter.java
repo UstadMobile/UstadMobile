@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
@@ -76,7 +75,13 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
         view.runOnUiThread(() -> view.setWifiOnlyOptionVisible(false));
-        new Thread(this::setup).start();
+
+        impl.getStorageDirs(context, result -> {
+            destinationDir = result.get(0).getDirURI();
+            view.runOnUiThread(() -> view.setUpStorageOptions(result));
+            new Thread(this::setup).start();
+        });
+
     }
 
 
@@ -171,9 +176,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private void createDownloadSet() {
         DownloadSet downloadSet = new DownloadSet();
-        UMStorageDir[] storageDir = UstadMobileSystemImpl.getInstance()
-                .getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE, getContext());
-        destinationDir = storageDir[0].getDirURI();
         downloadSet.setDestinationDir(destinationDir);
         downloadSet.setDsRootContentEntryUid(contentEntryUid);
 
@@ -303,8 +305,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 .setMeteredConnectionBySetUid(downloadSetUid,!wifiOnly)).start();
     }
 
-    public void handleStorageOptionSelection(String destinationDir){
-        this.destinationDir = destinationDir;
+    public void handleStorageOptionSelection(String selectedDir){
+        new Thread(() -> umAppDatabase.getDownloadSetDao().updateDestinationDirectory(
+                downloadSetUid, selectedDir,null)).start();
     }
 
     /**
