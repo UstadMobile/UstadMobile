@@ -31,6 +31,7 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,7 +62,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
 
     private List<UMStorageDir> storageDirs = null;
 
-
+    HashMap<Integer,Integer> viewIdMap = new HashMap<>();
 
     @Override
     public void onAttach(Context context) {
@@ -106,6 +107,14 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         wifiOnlyHolder.setOnClickListener(this);
         calculateTextView.setText(impl.getString(MessageID.download_calculating,getContext()));
 
+        //mapping presenter constants to view ids
+        viewIdMap.put(DownloadDialogPresenter.STACKED_BUTTON_PAUSE,
+                R.id.action_btn_pause_download);
+        viewIdMap.put(DownloadDialogPresenter.STACKED_BUTTON_CANCEL,
+                R.id.action_btn_cancel_download);
+        viewIdMap.put(DownloadDialogPresenter.STACKED_BUTTON_CONTINUE,
+                R.id.action_btn_continue_download);
+
         return mDialog;
     }
 
@@ -113,7 +122,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     @Override
     public void setUpStorageOptions(List<UMStorageDir> storageDirs) {
         List<String> storageOptions = new ArrayList<>();
-
+        this.storageDirs = storageDirs;
         for(UMStorageDir umStorageDir : storageDirs){
             String deviceStorageLabel = String.format(impl.getString(
                     MessageID.download_storage_option_device,getContext()),umStorageDir.getName(),
@@ -166,7 +175,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
     @Override
     public void setStackedOptions(int[] optionIds, String[] optionTexts) {
         for(int i = 0; i < optionIds.length; i++){
-            Button mStackedButton = rootView.findViewById(optionIds[i]);
+            Button mStackedButton = rootView.findViewById(viewIdMap.get(optionIds[i]));
             mStackedButton.setText(optionTexts[i]);
             mStackedButton.setOnClickListener(this);
         }
@@ -177,14 +186,6 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         stackedOptionHolderView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    @Override
-    public int[] getOptionIds() {
-        return new int[]{
-                R.id.action_btn_pause_download,
-                R.id.action_btn_cancel_download,
-                R.id.action_btn_continue_download
-        };
-    }
 
     @Override
     public void dismissDialog() {

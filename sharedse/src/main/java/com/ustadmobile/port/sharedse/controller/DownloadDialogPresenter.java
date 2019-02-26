@@ -79,8 +79,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         impl.getStorageDirs(context, result -> {
             destinationDir = result.get(0).getDirURI();
             view.runOnUiThread(() -> view.setUpStorageOptions(result));
+            new Thread(this::setup).start();
         });
-        new Thread(this::setup).start();
 
     }
 
