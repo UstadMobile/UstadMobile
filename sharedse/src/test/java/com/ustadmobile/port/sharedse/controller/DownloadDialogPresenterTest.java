@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_CONTENT_ENTRY_UID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -145,7 +146,8 @@ public class DownloadDialogPresenterTest {
 
     private void insertDownloadSetAndSetItems(){
         downloadSet = new DownloadSet();
-        downloadSet.setDsUid((int) umAppDatabase.getDownloadSetDao().insert(downloadSet));
+        downloadSet.setDsUid(89);
+        umAppDatabase.getDownloadSetDao().insert(downloadSet);
 
         DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet,rootEntry);
         downloadSetItem.setDsiUid(umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
@@ -390,6 +392,36 @@ public class DownloadDialogPresenterTest {
         assertFalse("Job is allowed to run on un metered connection only",
                 umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
                         .isMeteredNetworkAllowed());
+    }
+
+    @Test
+    public void givenDownloadOptionsAreShown_whenStorageLocationChanged_shouldUpdateDestinationDirOnDownloadSet() throws InterruptedException {
+        insertDownloadSetAndSetItems();
+
+        String destDir = "/sample/dir/public/ustadmobileContent/";
+
+
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+                        .findAllLive(), MAX_LATCH_WAITING_TIME , TimeUnit.SECONDS,
+                allItems -> allItems.size() == 5);
+
+        Hashtable args =  new Hashtable();
+        args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter.onCreate(new Hashtable());
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
+
+        presenter.handleStorageOptionSelection(destDir);
+
+        //wait for calculating download to complete
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadSetDao()
+                        .getLiveDownloadSet(downloadSet.getDsUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS, downloadSet -> downloadSet.getDestinationDir().equals(destDir));
+
+        assertEquals("DownloadSet destination directory changed successfully",
+                umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
+                .getDestinationDir(), destDir);
     }
 
 
