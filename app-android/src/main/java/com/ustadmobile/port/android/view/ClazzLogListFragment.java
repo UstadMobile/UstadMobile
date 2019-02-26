@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -12,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -32,6 +31,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogListPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -272,12 +272,11 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
-        //Separated out Chart initialisation
-        setUpCharts();
-
         //Record attendance FAB
         fab = rootContainer.findViewById(R.id.fragment_class_log_record_attendance_fab);
-        fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
+
+        //Separated out Chart initialisation
+        setUpCharts();
 
         //Create the presenter and call its onCreate
         mPresenter = new ClazzLogListPresenter(this,
@@ -314,14 +313,22 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         //Default start to Last Week's data:
         lastWeekButton.callOnClick();
 
+        //Take attendance fab click listener
+        fab.setOnClickListener(v -> mPresenter.goToNewClazzLogDetailActivity());
+
         return rootContainer;
     }
 
-    public Drawable getTintedDrawable(Drawable drawable, int color) {
+    /**
+     * Tints the drawable to the color. This method supports the Context compat tinting on drawables.
+     *
+     * @param drawable  The drawable to be tinted
+     * @param color     The color of the tint
+     */
+    public void getTintedDrawable(Drawable drawable, int color) {
         drawable = DrawableCompat.wrap(drawable);
-        int tintColor = ContextCompat.getColor(getContext(), color);
+        int tintColor = ContextCompat.getColor(Objects.requireNonNull(getContext()), color);
         DrawableCompat.setTint(drawable, tintColor);
-        return drawable;
     }
 
     /**
@@ -331,18 +338,10 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     public void resetReportButtons() {
         runOnUiThread(() -> {
 
-            lastWeekButton.setBackground(getTintedDrawable(lastWeekButton.getBackground(), R.color.color_gray));
-            lastMonthButton.setBackground(getTintedDrawable(lastMonthButton.getBackground(), R.color.color_gray));
-            lastYearButton.setBackground(getTintedDrawable(lastYearButton.getBackground(), R.color.color_gray));
-
             getTintedDrawable(lastWeekButton.getBackground(), R.color.color_gray);
             getTintedDrawable(lastMonthButton.getBackground(), R.color.color_gray);
             getTintedDrawable(lastYearButton.getBackground(), R.color.color_gray);
 
-
-//            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-//            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-//            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
         });
 
     }
@@ -356,20 +355,33 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         }
     }
 
+    @Override
+    public void showMessage(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String message = impl.getString(messageId, getContext());
+
+        runOnUiThread(() -> Toast.makeText(
+                getContext(),
+                message,
+                Toast.LENGTH_SHORT
+        ).show());
+
+    }
+
     // ClassLogList's DIFF callback
     public static final DiffUtil.ItemCallback<ClazzLog> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzLog>(){
+        new DiffUtil.ItemCallback<ClazzLog>(){
 
-                @Override
-                public boolean areItemsTheSame(ClazzLog oldItem, ClazzLog newItem) {
-                    return oldItem.getClazzLogUid() == newItem.getClazzLogUid();
-                }
+            @Override
+            public boolean areItemsTheSame(ClazzLog oldItem, ClazzLog newItem) {
+                return oldItem.getClazzLogUid() == newItem.getClazzLogUid();
+            }
 
-                @Override
-                public boolean areContentsTheSame(ClazzLog oldItem, ClazzLog newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
+            @Override
+            public boolean areContentsTheSame(ClazzLog oldItem, ClazzLog newItem) {
+                return oldItem.equals(newItem);
+            }
+        };
 
     @Override
     public void setClazzLogListProvider(UmProvider<ClazzLog> clazzLogListProvider) {

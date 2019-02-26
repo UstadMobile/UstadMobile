@@ -60,16 +60,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/item_clazzlog_log_calendar_image" />
 
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="368dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_clazzlog_log_calendar_image"
-        android:layout_marginLeft="8dp" />
+
 
     <TextView
         android:id="@+id/item_clazzlog_log_day"

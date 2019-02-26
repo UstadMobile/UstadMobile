@@ -532,6 +532,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="number_of_absent_days">Number of absent days in a row: </string>
     <string name="over">over</string>
     <string name="select_timezone">Select the time zone for these locations</string>
+    <string name="no_schedule_message">You have to create a schedule to be able to take attendance</string>
 
 
 

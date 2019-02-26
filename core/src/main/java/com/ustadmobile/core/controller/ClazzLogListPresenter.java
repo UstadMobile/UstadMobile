@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
@@ -35,21 +36,12 @@ import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_YEA
  */
 public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>{
 
-    private long currentClazzUid = -1L;
+    private long currentClazzUid = 0L;
 
     private UmProvider<ClazzLog> clazzLogListProvider;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
-    private Long loggedInPersonUid = 0L;
-    private Boolean hasEditPermissions = false;
-
-    public Boolean getHasEditPermissions() {
-        return hasEditPermissions;
-    }
-
-    public void setHasEditPermissions(Boolean hasEditPermissions) {
-        this.hasEditPermissions = hasEditPermissions;
-    }
+    private Long loggedInPersonUid;
 
     public ClazzLogListPresenter(Object context, Hashtable arguments, ClassLogListView view) {
         super(context, arguments, view);
@@ -72,7 +64,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                 new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
-                setHasEditPermissions(result);
                 view.setFABVisibility(result);
             }
 
@@ -133,10 +124,27 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
      *Method logic that goes to ClazzLogDetail view (take attendance) for the class we're in.
      */
     public void goToNewClazzLogDetailActivity(){
+
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable<String, Object> args = new Hashtable<>();
-        args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, String.valueOf(currentClazzUid));
-        impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
+        repository.getClazzLogDao().findMostRecentByClazzUid(currentClazzUid, new UmCallback<ClazzLog>() {
+            @Override
+            public void onSuccess(ClazzLog result) {
+                if(result == null){
+                    view.showMessage(MessageID.no_schedule_message);
+                }else{
+                    Hashtable<String, Object> args = new Hashtable<>();
+                    args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID,
+                            String.valueOf(currentClazzUid));
+                    impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
     }
 
     /**

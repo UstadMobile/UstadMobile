@@ -59,7 +59,16 @@ public interface ClassLogListView extends UstadView {
      */
     void resetReportButtons();
 
-
+    /**
+     * Sets visibility of the "Take Attendance" button
+     * @param visible   true if the FAB is to bw shown
+     */
     void setFABVisibility(boolean visible);
+
+    /**
+     * Shows a message to view. Can be as simple as toast on Android
+     * @param messageID   The message ID we want to show.
+     */
+    void showMessage(int messageID);
 
 }
