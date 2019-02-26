@@ -11,8 +11,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.TimeZone;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -41,6 +45,7 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
     private ProgressBar mProgressBar;
     private FloatingTextButton fab;
     private Button selectFileButton;
+    private Spinner timeZoneSpinner;
 
     private static final int FILE_PERMISSION_REQUEST = 400;
     private static final int FILE_CAPUTURE_REQUEST = 401;
@@ -59,6 +64,20 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         toolbar.setTitle(R.string.bulk_upload_master);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        //Timezone spinner
+        timeZoneSpinner = findViewById(R.id.activity_bulk_upload_master_timezone_spinner);
+        timeZoneSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.setTimeZoneSelected(position, id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         //Call the presenter
         mPresenter = new BulkUploadMasterPresenter(this,
@@ -128,6 +147,20 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
             }
         }
     }
+
+    @Override
+    public void setTimeZonesList(List<String> timeZoneIds) {
+
+        ArrayAdapter<String> timeZoneAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, timeZoneIds);
+        timeZoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        timeZoneSpinner.setAdapter(timeZoneAdapter);
+
+        int index = timeZoneIds.indexOf(TimeZone.getDefault().getID());
+        timeZoneSpinner.setSelection(index);
+
+    }
+
     @Override
     public void chooseFileFromDevice() {
 

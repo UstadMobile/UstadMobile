@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.annotations.NonNull;
 
@@ -63,10 +64,6 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
 
         assert inflater != null;
 
-        if(getArguments().containsKey(ARG_SCHEDULE_UID)) {
-            long currentScheduleUid = getArguments().getLong(ARG_SCHEDULE_UID);
-        }
-
         rootView = inflater.inflate(R.layout.fragment_add_schedule_dialog, null);
 
         errorMessageTextView = rootView.findViewById(R.id.fragment_add_schedule_dialog_error_message);
@@ -75,10 +72,14 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         scheduleSpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_schedule_spinner);
         daySpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_day_spinner);
 
-
-
         //Date format to show in the Date picker
-        SimpleDateFormat justTheTimeFormat = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat justTheTimeFormat;
+
+        if(DateFormat.is24HourFormat(getContext())) {
+            justTheTimeFormat = new SimpleDateFormat("HH:mm");
+        }else {
+            justTheTimeFormat = new SimpleDateFormat("hh:mm a");
+        }
 
         //A Time picker listener that sets the from time.
         TimePickerDialog.OnTimeSetListener timeF = (view, hourOfDay, minute) -> {
@@ -110,7 +111,6 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
         toET.setFocusable(false);
 
 
-
         //To time on click -> opens a time picker.
         toET.setOnClickListener(v -> new TimePickerDialog(
                 getContext(), timeT, myCalendar2.get(Calendar.HOUR),
@@ -118,17 +118,17 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
 
         //Schedule spinner's on click listener
         scheduleSpinner.setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        mPresenter.handleScheduleSelected(position, id);
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
+            new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    mPresenter.handleScheduleSelected(position, id);
                 }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            }
         );
 
         daySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -218,6 +218,10 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
                 android.R.layout.simple_spinner_item, schedulePresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         scheduleSpinner.setAdapter(adapter);
+
+        //Set the schedule spinner to have the last item always selected by default (in this case
+        // it is "Weekly" option).
+        scheduleSpinner.setSelection(presets.length -1);
     }
 
     /**
@@ -253,12 +257,32 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
     public void updateFields(Schedule schedule) {
 
         runOnUiThread(() -> {
-            SimpleDateFormat justTheTimeFormat = new SimpleDateFormat("HH:mm");
+            SimpleDateFormat justTheTimeFormat;
+            if(DateFormat.is24HourFormat(getContext())) {
+                justTheTimeFormat = new SimpleDateFormat("HH:mm");
+            }else {
+                justTheTimeFormat = new SimpleDateFormat("hh:mm a");
+            }
+
+            //Get hour and schedule properly TODO
+            Calendar fromCal = Calendar.getInstance();
+            Calendar toCal = Calendar.getInstance();
+
+            fromCal.set(Calendar.HOUR_OF_DAY, (int) TimeUnit.MILLISECONDS.toHours(schedule.getSceduleStartTime()));
+            fromCal.set(Calendar.MINUTE, (int) TimeUnit.MILLISECONDS.toMinutes(schedule.getSceduleStartTime()));
+
+            toCal.set(Calendar.HOUR_OF_DAY, (int) TimeUnit.MILLISECONDS.toHours(schedule.getScheduleEndTime()));
+            toCal.set(Calendar.MINUTE, (int) TimeUnit.MILLISECONDS.toMinutes(schedule.getScheduleEndTime()));
+
             String timeOnET = justTheTimeFormat.format(schedule.getSceduleStartTime());
+            //String timeOnET = justTheTimeFormat.format(fromCal.getTime());
             String timeOnToET = justTheTimeFormat.format(schedule.getScheduleEndTime());
+            //String timeOnToET = justTheTimeFormat.format(toCal.getTime());
 
             fromET.setText(timeOnET);
             toET.setText(timeOnToET);
+
+
 
             scheduleSpinner.setSelection(schedule.getScheduleFrequency() -1);
             daySpinner.setSelection(schedule.getScheduleDay() -1);

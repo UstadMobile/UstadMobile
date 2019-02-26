@@ -24,9 +24,12 @@ import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.Role;
 
+import java.sql.Time;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMasterView> {
 
@@ -35,13 +38,22 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         super(context, arguments, view);
     }
 
+    @Override
+    public void onCreate(Hashtable savedState) {
+        super.onCreate(savedState);
+
+        allTZ = Arrays.asList(TimeZone.getAvailableIDs());
+        view.setTimeZonesList(allTZ);
+        choozenTZ = TimeZone.getDefault().getID();
+
+    }
+
     private int currentPosition = 0;
     private List<String> lines;
     private long teacherRoleUid = 0L;
+    private String choozenTZ;
+    private List<String> allTZ;
 
-    public int getCurrentPosition() {
-        return currentPosition;
-    }
 
     public void setCurrentPosition(int currentPosition) {
         this.currentPosition = currentPosition;
@@ -57,6 +69,10 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
+
+    public void setTimeZoneSelected(int position, long id){
+        choozenTZ = allTZ.get(position);
+    }
 
     public void processNextLine(){
         currentPosition ++;
@@ -81,15 +97,19 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
         Location location1 = new Location();
         location1.setTitle(location1Title);
+        location1.setTimeZone(choozenTZ);
 
         Location location2 = new Location();
         location2.setTitle(location2Title);
+        location2.setTimeZone(choozenTZ);
 
         Location location3 = new Location();
         location3.setTitle(location3Title);
+        location3.setTimeZone(choozenTZ);
 
         Location locationLeaf = new Location();
         locationLeaf.setTitle(locationLeafTitle);
+        locationLeaf.setTimeZone(choozenTZ);
 
         LocationDao locationDao = repository.getLocationDao();
 
@@ -216,7 +236,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 new UmCallback<List<Clazz>>() {
                     @Override
                     public void onSuccess(List<Clazz> clazzes) {
-                        boolean move = false;
                         Clazz thisClazz;
                         if(clazzes.size() == 0){   //No clazzes with that name.
                             //Create clazz
@@ -233,14 +252,12 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                             .findByTitleAsync(clazzLocation, new UmCallback<List<Location>>() {
                                                 @Override
                                                 public void onSuccess(List<Location> result) {
-                                                    boolean move = false;
                                                     if (result.size() == 1) {
                                                         //Location exists and is unique
                                                         Location clazzLocation = result.get(0);
                                                         thisClazz.setClazzLocationUid(clazzLocation.getLocationUid());
                                                         thisClazz.setClazzActive(true);
                                                         thisClazz.setClazzLocationUid(locationLeaf.getLocationUid());
-                                                        move = true;
 
                                                         repository.getClazzDao().updateAsync(thisClazz, new UmCallback<Integer>() {
                                                             @Override
@@ -338,8 +355,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 dateString,"dd/MM/yyyy", currentLocale);
     }
 
-
-
     public void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid,
                                  int role){
 
@@ -405,8 +420,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                                    BulkUploadLine bulkLine){
         if(role == ClazzMember.ROLE_TEACHER){
 
-            PersonDao personDao = repository.getPersonDao();
-            PersonGroupDao personGroupDao = repository.getPersonGroupDao();
             PersonGroupMemberDao personGroupMemberDao = repository.getPersonGroupMemberDao();
             personGroupMemberDao.findAllGroupWherePersonIsIn(personPersonUid, new UmCallback<List<PersonGroupMember>>() {
                 @Override
@@ -486,7 +499,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                 }
                         );
 
-
                     }
                 }
 
@@ -499,7 +511,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         }else{
             checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
         }
-
 
     }
 
@@ -773,13 +784,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
             teacher_password = data[INDEX_TEACHER_PASSWORD];
 
         }
-
-
-
-
-
-
-
 
     }
 

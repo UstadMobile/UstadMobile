@@ -162,10 +162,6 @@ public class UMCalendarUtil {
 
     }
 
-    public static long getLongDateFromPrettyString(String dateString){
-        return getLongDateFromPrettyString(dateString, null);
-    }
-
 
     /**
      *
@@ -194,11 +190,6 @@ public class UMCalendarUtil {
         return -1;
 
     }
-
-    public static long getLongDateFromStringAndFormat(String dateString, String format){
-        return getLongDateFromStringAndFormat(dateString, format, null);
-    }
-
 
 
     /**
@@ -372,10 +363,9 @@ public class UMCalendarUtil {
         return result;
     }
 
-    public static Calendar normalizeSecondsAndMillis(Calendar calendar) {
+    public static void normalizeSecondsAndMillis(Calendar calendar) {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        return calendar;
     }
 
 }
