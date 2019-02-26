@@ -6,22 +6,34 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.FeedEntryDao;
+import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
+import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
+import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonNameWithClazzName;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.ScheduledCheck;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ABSENT;
 import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
@@ -48,11 +60,17 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private String title;
 
+    private float feedAlertPerentage = 0.5f;
+    private List<ClazzMember> teachers;
+    private String clazzName;
+    private int tardyFrequency = 3;
+    private int absentFrequency = 2;
+
     public boolean isHasEditPermissions() {
         return hasEditPermissions;
     }
 
-    public void setHasEditPermissions(boolean hasEditPermissions) {
+    private void setHasEditPermissions(boolean hasEditPermissions) {
         this.hasEditPermissions = hasEditPermissions;
     }
 
@@ -74,6 +92,14 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                             setTitleCallback);
                 }
 
+                //Get all teachers
+                ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+                teachers = clazzMemberDao.findByClazzUid(currentClazzLog.getClazzLogClazzUid(),
+                        ClazzMember.ROLE_TEACHER);
+
+                ClazzDao clazzDao = repository.getClazzDao();
+                clazzName = clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid()).getClazzName();
+
                 view.runOnUiThread(() -> updateViewDateHeading());
             }else {
                 //TODO: show error message to user + record - should not happen
@@ -83,7 +109,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
         @Override
         public void onFailure(Throwable exception) {
-
+            exception.printStackTrace();
         }
     };
 
@@ -97,7 +123,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
         @Override
         public void onFailure(Throwable exception) {
-
+            exception.printStackTrace();
         }
     } ;
 
@@ -134,30 +160,33 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     ClassLogDetailView.ARG_CLAZZ_LOG_UID).toString());
             repository.getClazzLogDao().findByUidAsync(clazzLogUid, setupFromClazzLogCallback);
         }else if(getArguments().containsKey(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID)) {
-            long clazzUid = Long.parseLong(getArguments().get(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID).toString());
+            long clazzUid = Long.parseLong(getArguments().get(
+                    ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID).toString());
             repository.getClazzLogDao().findMostRecentByClazzUid(clazzUid, setupFromClazzLogCallback);
         }
+
     }
 
-
-
+    /**
+     * Checks permission to enable and show/hide features on ClazzLogDetail screen.
+     */
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
 
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzLog.getClazzLogClazzUid(),
-                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
-                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        setHasEditPermissions(result);
-                        view.showMarkAllButtons(result);
-                    }
+            Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    setHasEditPermissions(result);
+                    view.showMarkAllButtons(result);
+                }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                }));
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            }));
     }
 
     private void loadClazzLogListForClazz() {
@@ -173,13 +202,13 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
     }
 
 
-    public void updateViewDateHeading(){
+    private void updateViewDateHeading(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Date currentLogDateDate = new Date(currentClazzLog.getLogDate());
         String prettyDate="";
@@ -205,24 +234,24 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 repository.getClazzLogAttendanceRecordDao();
 
         clazzLogAttendanceRecordDao.insertAllAttendanceRecords(currentClazzLog.getClazzLogClazzUid(),
-                result.getClazzLogUid(), new UmCallback<Long[]>() {
-                    @Override
-                    public void onSuccess(Long[] result2) {
-                        //Get provider
-                        clazzLogAttendanceRecordUmProvider = repository
-                                .getClazzLogAttendanceRecordDao()
-                                .findAttendanceRecordsWithPersonByClassLogId(result.getClazzLogUid());
-                        //Set to view
-                        view.runOnUiThread(() ->
-                                view.setClazzLogAttendanceRecordProvider(
-                                        clazzLogAttendanceRecordUmProvider));
-                    }
+            result.getClazzLogUid(), new UmCallback<Long[]>() {
+                @Override
+                public void onSuccess(Long[] result2) {
+                    //Get provider
+                    clazzLogAttendanceRecordUmProvider = repository
+                            .getClazzLogAttendanceRecordDao()
+                            .findAttendanceRecordsWithPersonByClassLogId(result.getClazzLogUid());
+                    //Set to view
+                    view.runOnUiThread(() ->
+                            view.setClazzLogAttendanceRecordProvider(
+                                    clazzLogAttendanceRecordUmProvider));
+                }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                });
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
     }
 
     public void handleClickGoBackDate(){
@@ -256,8 +285,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 new UmCallback<Integer>() {
             @Override
             public void onSuccess(Integer result) {
-                //2. Update Attendance numbers for this clazzUid
+                List<ClazzMember> beforeList = clazzMemberDao.findByClazzUid(
+                        currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_STUDENT);
+                Map<Long, ClazzMember> beforeMap = new HashMap<>();
+                for(ClazzMember member : beforeList) {
+                    beforeMap.put(member.getClazzMemberUid(), member);
+                }
+
+                //2. Update Attendance numbers for this Clazz:
                 clazzDao.updateAttendancePercentage(currentClazzLog.getClazzLogClazzUid());
+
                 //3. Update Attendance numbers for ClazzMember for this clazzUid.
                 clazzMemberDao.updateAttendancePercentages(currentClazzLog.getClazzLogClazzUid());
 
@@ -271,12 +308,135 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 clazzLogDao.updateClazzAttendanceNumbersAsync(currentClazzLog.getClazzLogUid(),
                         numPresent, numAbsent, numPartial, null);
 
-                //4. Set any FeedEntry to done
+                //4. Create feedEntries for the ones that have dropped values.
+                List<ClazzMember> afterList = clazzMemberDao.findByClazzUid(
+                        currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_STUDENT);
+                for(ClazzMember after : afterList) {
+                    ClazzMember before = beforeMap.get(after.getClazzMemberUid());
+                    if(before != null
+                        && before.getAttendancePercentage() >= feedAlertPerentage
+                        && after.getAttendancePercentage() < feedAlertPerentage) {
+                        //this ClazzMember has fallen below the threshold
+
+                        PersonDao personDao = repository.getPersonDao();
+                        Person thisPerson = personDao.findByUid(before.getClazzMemberPersonUid());
+                        //Create feed entries for this user for every teacher
+                        List<FeedEntry> newFeedEntries = new ArrayList<>();
+
+                        for(ClazzMember teacher: teachers){
+                            long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                    after.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION);
+
+                            newFeedEntries.add(
+                                new FeedEntry(
+                                    feedEntryUid,
+                                    "Attendance dropped",
+                                    "Attendance dropped from " + String.valueOf(feedAlertPerentage * 100)  +"%"
+                                        + " for student " + thisPerson.getFirstNames() + " " +
+                                        thisPerson.getLastName() + " in Class " + clazzName,
+                                    ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
+                                            "=" + currentClazzLog.getClazzLogClazzUid(),
+                                    clazzName,
+                                    teacher.getClazzMemberPersonUid()
+                                )
+                            );
+                        }
+
+                        repository.getFeedEntryDao().insertList(newFeedEntries);
+
+                    }
+                }
+
+                //6. Create feedEntries for student not partial more than 3 times.
+                clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
+                        ClazzLogAttendanceRecord.STATUS_PARTIAL, tardyFrequency,
+                        currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
+                            @Override
+                            public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+                                //Create feed entries for this user for every teacher
+                                List<FeedEntry> newFeedEntries = new ArrayList<>();
+                                for(PersonNameWithClazzName each:theseGuys){
+                                    for(ClazzMember teacher:teachers){
+                                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                                each.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                                ScheduledCheck.TYPE_CHECK_PARTIAL_REPETITION);
+
+                                        newFeedEntries.add(
+                                            new FeedEntry(
+                                                feedEntryUid,
+                                                "Tardy behaviour",
+                                                "Student partial attended for over " + tardyFrequency + " times"
+                                                        + " for student " + each.getFirstNames() + " " +
+                                                        each.getLastName() + " in Class " + clazzName,
+                                                ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID + "=" +
+                                                        currentClazzLog.getClazzLogClazzUid(),
+                                                clazzName,
+                                                teacher.getClazzMemberPersonUid()
+                                            )
+                                        );
+                                    }
+                                }
+
+                                repository.getFeedEntryDao().insertList(newFeedEntries);
+
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+
+                //7. Crate feedEntries for student not attended two classes in a row.
+                clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
+                    ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequency,
+                    currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
+                        @Override
+                        public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+                            if(theseGuys != null && theseGuys.size() > 0){
+                                //Create feed entries for this user for every teacher
+                                List<FeedEntry> newFeedEntries = new ArrayList<>();
+                                for(PersonNameWithClazzName each:theseGuys){
+                                    for(ClazzMember teacher:teachers){
+                                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                                each.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                                ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION);
+
+                                        newFeedEntries.add(
+                                            new FeedEntry(
+                                                feedEntryUid,
+                                                "Absent behaviour",
+                                                "Student absent for over " + tardyFrequency + " times"
+                                                        + " for student " + each.getFirstNames() + " " +
+                                                        each.getLastName() + " in Class " + clazzName,
+                                                ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID + "=" +
+                                                        currentClazzLog.getClazzLogClazzUid(),
+                                                clazzName,
+                                                teacher.getClazzMemberPersonUid()
+                                            )
+                                        );
+                                    }
+                                }
+
+                                repository.getFeedEntryDao().insertList(newFeedEntries);
+
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+
+
+                //8. Set any FeedEntry to done
                 repository.getFeedEntryDao().markEntryAsDoneByClazzLogUidAndTaskType(
                         currentClazzLog.getClazzLogUid(),
                         ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, true);
 
-                //5. Close the activity.
+                //9. Close the activity.
                 view.finish();
             }
 
@@ -285,7 +445,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 exception.printStackTrace();
             }
         });
-
     }
 
 

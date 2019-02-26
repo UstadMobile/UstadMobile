@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonNameWithClazzName;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -85,13 +86,33 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
     public abstract void updateAttendancePercentages(long clazzUid);
 
+    @UmQuery("SELECT ClazzMember.*, Person.* FROM ClazzMember " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
+            " WHERE ClazzMember.clazzMemberClazzUid = :uid AND ClazzMember.clazzMemberActive = 1 " +
+            "AND ClazzMember.role = :role")
+    public abstract List<ClazzMember> findByClazzUid(long uid, int role);
+
+    @UmQuery("SELECT ClazzMember.clazzMemberUid, Clazz.clazzName, Person.firstNames, " +
+            "   Person.lastName, Person.personUid, " +
+            "   (SELECT SUM(CASE attendanceStatus WHEN :type THEN 1 ELSE 0 END) FROM ClazzLogAttendanceRecord " +
+            "    LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "    WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            "    ORDER BY ClazzLog.logDate DESC LIMIT :days) AS num " +
+            " FROM ClazzMember " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
+            " WHERE clazzMemberClazzUid = :clazzUid" +
+            " AND num = :days")
+    public abstract void findAllMembersForAttendanceOverConsecutiveDays(
+            int type, int days, long clazzUid, UmCallback<List<PersonNameWithClazzName>> resultList);
+
     @UmQuery("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +
             " LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             "AND ClazzMember.clazzMemberActive = 1 " +
             " AND ClazzMember.role = 1) AND Person.active = 1 ")
-    public abstract UmProvider<Person> findAllPeopleInClassUid(long clazzUid);
+    public abstract UmProvider<Person> findAllActivePeopleInClassUid(long clazzUid);
 
 
     @UmQuery("SELECT Person.*, " +
@@ -138,21 +159,6 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "AND Person.active = 1 ")
     public abstract UmProvider<Person> findAllPeopleNotInClassUid(long clazzUid);
 
-
-    @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
-            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
-            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
-            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
-            " (SELECT attendancePercentage FROM ClazzMember " +
-            "WHERE clazzMemberPersonUid = Person.personUid " +
-            " AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
-            " (SELECT role FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            " AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole, " +
-            " (SELECT clazzMemberActive FROM ClazzMember " +
-            "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-            " AND clazzMemberPersonUid = Person.personUid) AS enrolled FROM Person WHERE Person.active = 1 ")
-    public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentForClassUid(long clazzUid);
-
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
@@ -187,36 +193,6 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " FROM Person WHERE Person.active = 1 " +
             " AND isClazzStudent = 0")
     public abstract UmProvider<PersonWithEnrollment> findAllEligibleTeachersWithEnrollmentForClassUid(long clazzUid);
-
-
-//    @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +
-//            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
-//            "   PersonPicture.personPicturePersonUid = Person.personUid ORDER BY " +
-//            "   picTimestamp DESC LIMIT 1) AS personPictureUid , " +
-//            " (SELECT attendancePercentage FROM ClazzMember " +
-//            "   WHERE clazzMemberPersonUid = Person.personUid " +
-//            "   AND clazzMemberClazzUid = :clazzUid) AS attendancePercentage, " +
-//            " (SELECT clazzMemberActive FROM ClazzMember " +
-//            "   WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-//            "   AND clazzMemberPersonUid = Person.personUid) AS enrolled, " +
-//            " (SELECT role FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-//            "   AND clazzMemberPersonUid = Person.personUid) as clazzMemberRole " +
-//            " FROM Person " +
-//            " WHERE " +
-//            " attendancePercentage > :apl AND attendancePercentage < :aph " +
-//            " AND Person.firstNames like :searchQuery OR Person.lastName like :searchQuery " +
-//            " AND personUid IN ( " +
-//            "   SELECT Person.personUid FROM ClazzMember " +
-//            "   LEFT  JOIN Person On ClazzMember.clazzMemberPersonUid = Person.personUid " +
-//            "   WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
-//            "   AND ClazzMember.clazzMemberActive = 1 " +
-//            " ) " +
-//            " AND Person.active = 1 " +
-//            "ORDER BY clazzMemberRole ASC")
-//    public abstract UmProvider<PersonWithEnrollment>
-//            findAllPersonWithEnrollmentInClazzByClazzUidWithSearchFilter(long clazzUid,
-//                             float apl, float aph, String searchQuery);
-//
 
     @UmQuery("SELECT " +
             "  Person.* , " +
@@ -338,8 +314,6 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "   AND Person.active = 1 ORDER BY clazzUid, attendancePercentage DESC")
     public abstract UmProvider<PersonWithEnrollment> findAllStudentsAtRiskForClazzListAsync(List<Long> clazzes,
                                                                                             float riskThreshold);
-
-
 
 
     @UmQuery("SELECT Person.* , (:clazzUid) AS clazzUid, " +

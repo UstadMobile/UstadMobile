@@ -15,6 +15,11 @@ public class ScheduledCheck {
 
     public static final int TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER = 2;
 
+    public static final int TYPE_CHECK_ATTENDANCE_VARIATION = 3;
+
+    public static final int TYPE_CHECK_PARTIAL_REPETITION = 4;
+    public static final int TYPE_CHECK_ABSENT_REPETITION = 5;
+
     public static final String PARAM_CLAZZ_UID = "clazzuid";
 
     public static final String PARAM_CLAZZ_LOG_UID = "clazzloguid";
@@ -32,9 +37,7 @@ public class ScheduledCheck {
 
     private long scClazzLogUid;
 
-    public ScheduledCheck() {
-        
-    }
+    public ScheduledCheck() {}
 
     public ScheduledCheck(long checkTime, int checkType, String checkParameters) {
         this.checkTime = checkTime;

@@ -23,8 +23,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
     private UmAppDatabase appDatabaseRepo;
 
-    private UmAppDatabase appDatabase;
-
 
     long currentClazzUid = -1;
     private long currentScheduleUid = -1L;
@@ -32,7 +30,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     public AddScheduleDialogPresenter(Object context, Hashtable arguments, AddScheduleDialogView view) {
         super(context, arguments, view);
 
-        appDatabase = UmAppDatabase.getInstance(context);
         appDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(context);
         scheduleDao = appDatabaseRepo.getScheduleDao();
 
@@ -64,12 +61,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     }
 
 
-    /**
-     * In Order:
-     *          1. Just creates a new Schedule to be worked/edited in.
-     *
-     * @param savedState
-     */
     @Override
     public void onCreate(Hashtable savedState){
         super.onCreate(savedState);
@@ -86,9 +77,13 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     public void handleAddSchedule(){
         currentSchedule.setScheduleClazzUid(currentClazzUid);
         currentSchedule.setScheduleActive(true);
+
+        //Creates ClazzLogs for today (since ClazzLogs are automatically only created for tomorrow)
         Runnable runAfterInsertOrUpdate = () -> {
             scheduleDao.createClazzLogsForToday(
                     UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
+            //scheduleDao.createClazzLogsForEveryDayFromDays(5,
+            //        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
             UstadMobileSystemImpl.getInstance().scheduleChecks(getContext());
         };
 
@@ -119,7 +114,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
                 }
             });
         }
-
     }
 
 
@@ -162,7 +156,7 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
     }
 
-    public void handleDaySelected(int position, long id){
+    public void handleDaySelected(int position){
         currentSchedule.setScheduleDay(position + 1);
     }
 

@@ -126,8 +126,29 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     @UmInsert
     public abstract void insertScheduledCheck(ScheduledCheck check);
 
+
+    public void createClazzLogsForEveryDayFromDays(int days, long accountPersonUid,
+                                                   UmAppDatabase db){
+        for(int i=1;i<=days;i++){
+            Calendar dayCal = Calendar.getInstance();
+            dayCal.add(Calendar.DATE, -i);
+            dayCal.set(Calendar.HOUR_OF_DAY,0);
+            dayCal.set(Calendar.MINUTE, 0);
+            dayCal.set(Calendar.SECOND, 0);
+            dayCal.set(Calendar.MILLISECOND, 0);
+            long startTime = dayCal.getTimeInMillis();
+
+            dayCal.set(Calendar.HOUR_OF_DAY, 23);
+            dayCal.set(Calendar.MINUTE, 59);
+            dayCal.set(Calendar.SECOND, 59);
+            dayCal.set(Calendar.MILLISECOND, 999);
+            long endTime = dayCal.getTimeInMillis();
+            createClazzLogs(startTime, endTime, accountPersonUid, db);
+        }
+    }
     /**
-     *
+     *  Creates clazzLog for today since clazzlogs are generated for the next day
+     *  automatically.
      */
     public void createClazzLogsForToday(long accountPersonUid, UmAppDatabase db) {
         Calendar dayCal = Calendar.getInstance();

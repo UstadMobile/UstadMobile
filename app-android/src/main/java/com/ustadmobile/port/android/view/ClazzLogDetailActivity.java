@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.content.res.AppCompatResources;
@@ -22,7 +23,6 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClassLogDetailView;
-import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -31,9 +31,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
-
-import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
-import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 /**
  * The ClassLogDetail activity.
@@ -50,8 +47,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     private ClazzLogDetailPresenter mPresenter;
 
     private TextView dateHeading;
-
-    private AppCompatImageButton backDate, forwardDate;
 
     private Button markAllPresent, markAllAbsent;
 
@@ -89,8 +84,8 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
-        backDate = findViewById(R.id.activity_class_log_detail_date_go_back);
-        forwardDate = findViewById(R.id.activity_class_log_detail_date_go_forward);
+        AppCompatImageButton backDate = findViewById(R.id.activity_class_log_detail_date_go_back);
+        AppCompatImageButton forwardDate = findViewById(R.id.activity_class_log_detail_date_go_forward);
 
         markAllPresent = findViewById(R.id.activity_class_log_detail_mark_all_present_text);
         markAllAbsent = findViewById(R.id.activity_class_log_detail_mark_all_absent_text);
@@ -144,7 +139,7 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
 
             @Override
             public boolean areContentsTheSame(ClazzLogAttendanceRecordWithPerson oldItem,
-                                              ClazzLogAttendanceRecordWithPerson newItem) {
+                                              @NonNull ClazzLogAttendanceRecordWithPerson newItem) {
                 return oldItem.equals(newItem);
             }
         };

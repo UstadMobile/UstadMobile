@@ -116,9 +116,6 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
         return hash;
     }
 
-
-
-
     @UmInsert
     public abstract long insert(ClazzLog entity);
 
@@ -152,6 +149,9 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
 
     @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
     public abstract UmProvider<ClazzLog> findByClazzUid(long clazzUid);
+
+    @UmQuery("SELECT * FROM ClazzLog where clazzLogClazzUid = :clazzUid ORDER BY logDate DESC")
+    public abstract List<ClazzLog> findByClazzUidAsList(long clazzUid);
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT canceled")
     public abstract UmProvider<ClazzLog> findByClazzUidNotCanceled(long clazzUid);
