@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -79,7 +80,7 @@ public class PersonDetailEnrollClazzActivity extends UstadBaseActivity
 
             @Override
             public boolean areContentsTheSame(ClazzWithEnrollment oldItem,
-                                              ClazzWithEnrollment newItem) {
+                                              @NonNull ClazzWithEnrollment newItem) {
                 return oldItem.equals(newItem);
             }
         };

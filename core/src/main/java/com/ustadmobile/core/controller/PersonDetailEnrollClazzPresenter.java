@@ -3,8 +3,11 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
+import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 
 import java.util.Hashtable;
@@ -68,5 +71,42 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
         //does nothing
     }
 
+    /**
+     * Toggles the person being enrolled in the clazz.
+     *
+     * @param clazzUid      The clazz Uid
+     * @param personUid     The person Uid
+     */
+    public void handleToggleClazzChecked(long clazzUid, long personUid, boolean checked){
+        //TODO: check this
+        int x;
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+        clazzMemberDao.findByPersonUidAndClazzUidAsync(personUid, clazzUid, new UmCallback<ClazzMember>() {
+            @Override
+            public void onSuccess(ClazzMember result) {
+                if(result != null){
+                    result.setClazzMemberActive(checked);
+                    clazzMemberDao.update(result);
+
+                }else{
+                    if(checked){
+                        //Create new
+                        ClazzMember newClazzMember  = new ClazzMember();
+                        newClazzMember.setClazzMemberClazzUid(clazzUid);
+                        newClazzMember.setClazzMemberPersonUid(personUid);
+                        newClazzMember.setClazzMemberActive(true);
+                        clazzMemberDao.insert(newClazzMember);
+                    }else{
+                        //Don't create. false anyway
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
 
 }

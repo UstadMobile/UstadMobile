@@ -44,6 +44,7 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
         List<ClazzLog> logsWithoutChecks = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER);
         List<ScheduledCheck> newCheckList = new ArrayList<>();
+
         for(ClazzLog clazzLog : logsWithoutChecks) {
             ScheduledCheck recordReminderCheck = new ScheduledCheck(
                     clazzLog.getLogDate(),
@@ -54,6 +55,18 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
         }
 
         insertList(newCheckList);
+
+
+        List<ClazzLog> logsWithoutNextDayCheck = findPendingLogsWithoutScheduledCheck(
+                ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER);
+        for(ClazzLog clazzLog : logsWithoutNextDayCheck) {
+            long checkTime = clazzLog.getLogDate();
+            //TODO: Advance to the next morning. Create a Calendar, add one day of ms
+            ScheduledCheck nextDayCheck = new ScheduledCheck(
+                    checkTime,
+                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER,
+                    clazzLog.getClazzLogUid());
+        }
     }
 
 

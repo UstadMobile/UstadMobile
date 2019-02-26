@@ -7,7 +7,13 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity(indices = {@UmIndex(name = "clazzUid_type_index", value = {"scClazzLogUid", "checkType"})})
 public class ScheduledCheck {
 
+    /**
+     * Generate a FeedEntry for the teacher if attendance has not yet been recorded (generated at
+     * the time class is due to start)
+     */
     public static final int TYPE_RECORD_ATTENDANCE_REMINDER = 1;
+
+    public static final int TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER = 2;
 
     public static final String PARAM_CLAZZ_UID = "clazzuid";
 
@@ -34,6 +40,12 @@ public class ScheduledCheck {
         this.checkTime = checkTime;
         this.checkType = checkType;
         this.checkParameters = checkParameters;
+    }
+
+    public ScheduledCheck(long checkTime, int checkType, long clazzLogUid) {
+        this.checkTime = checkTime;
+        this.checkType = checkType;
+        this.scClazzLogUid = clazzLogUid;
     }
 
     public long getScheduledCheckId() {

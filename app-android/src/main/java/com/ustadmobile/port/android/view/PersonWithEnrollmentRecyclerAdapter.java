@@ -299,7 +299,7 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         //PICTURE : Add picture to person
         String imagePath = "";
-        Long personPictureUid = personWithEnrollment.getPersonPictureUid();
+        long personPictureUid = personWithEnrollment.getPersonPictureUid();
         if (personPictureUid != 0) {
             imagePath = UmAppDatabase.getInstance(theContext).getPersonPictureDao()
                     .getAttachmentPath(personPictureUid);

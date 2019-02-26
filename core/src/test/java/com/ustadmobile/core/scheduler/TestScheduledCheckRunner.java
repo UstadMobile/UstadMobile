@@ -75,4 +75,8 @@ public class TestScheduledCheckRunner {
                 feedEntry.getFeedEntryUid());
     }
 
+    public void givenNextDayRecordAttendanceCheck_whenRun_thenShouldCreateFeedEntriesFor() {
+
+    }
+
 }

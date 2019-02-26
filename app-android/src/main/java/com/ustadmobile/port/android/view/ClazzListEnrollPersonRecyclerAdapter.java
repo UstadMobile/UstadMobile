@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
@@ -16,6 +17,8 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PersonDetailEnrollClazzPresenter;
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment;
 
+import java.util.HashMap;
+
 /**
  * The ClazzList Recycler Adapter used here.
  */
@@ -26,6 +29,9 @@ public class ClazzListEnrollPersonRecyclerAdapter extends
     Context theContext;
     private Activity theActivity;
     private PersonDetailEnrollClazzPresenter thePresenter;
+
+    @SuppressLint("UseSparseArrays")
+    private HashMap<Long, Boolean> checkBoxHM = new HashMap<>();
 
     class ClazzViewHolder extends RecyclerView.ViewHolder {
 
@@ -70,8 +76,24 @@ public class ClazzListEnrollPersonRecyclerAdapter extends
         ((TextView)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_numstudents_text))
                 .setText(numStudentsText);
 
-        ((CheckBox)holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox))
-                .setChecked(clazz.getEnrolled());
+        CheckBox checkBox = holder.itemView.findViewById(
+                R.id.item_clazz_list_enroll_person_checkbox);
+
+        //To preserve checkboxes, add this enrollment to the Map.
+        checkBoxHM.put(clazz.getClazzUid(), clazz.getEnrolled());
+
+        checkBox.setChecked(checkBoxHM.get(clazz.getClazzUid()));
+
+        //Add a change listener to the checkbox
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
+                checkBox.setChecked(isChecked));
+
+        checkBox.setOnClickListener(v -> {
+            final boolean isChecked = checkBox.isChecked();
+            thePresenter.handleToggleClazzChecked(clazz.getClazzUid(), clazz.getPersonUid(),
+                    isChecked);
+        });
+
 
         holder.itemView.setOnClickListener((view) -> thePresenter.handleClickClazz());
 

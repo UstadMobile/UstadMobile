@@ -264,9 +264,14 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                     //Add a recycler view of classes
                     mRecyclerView = new RecyclerView(this);
-
                     RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    LinearLayout.LayoutParams wrapParams =
+                            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT);
                     mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
+                    mRecyclerView.setLayoutParams(wrapParams);
+
+
 
                     //Add the layout
                     mLinearLayout.addView(mRecyclerView);

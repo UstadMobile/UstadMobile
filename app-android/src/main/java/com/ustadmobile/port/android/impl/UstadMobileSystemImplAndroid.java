@@ -948,7 +948,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                     .putLong(ScheduledCheckWorker.ARG_SCHEDULE_CHECK_UID, check.getScheduledCheckId())
                     .build();
             OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(ScheduledCheckWorker.class)
-                    .setInitialDelay(System.currentTimeMillis() - check.getCheckTime(),
+                    .setInitialDelay(check.getCheckTime() - System.currentTimeMillis(),
                             TimeUnit.MILLISECONDS)
                     .setInputData(workData)
                     .build();
