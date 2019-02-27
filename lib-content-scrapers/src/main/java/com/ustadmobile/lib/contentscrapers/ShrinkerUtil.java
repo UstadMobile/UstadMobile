@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -521,11 +522,17 @@ public class ShrinkerUtil {
             process = videoBuilder.start();
             startProcess(process);
 
+            UMLogUtil.logTrace("got the webm file");
+
             process = rawBuilder.start();
             startProcess(process);
 
+            UMLogUtil.logTrace("got the raw file");
+
             process = audioBuilder.start();
             startProcess(process);
+            
+            UMLogUtil.logTrace("got the c2 file");
 
         } catch (IOException e) {
             e.printStackTrace();
