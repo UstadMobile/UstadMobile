@@ -53,6 +53,7 @@ public class Codec2KhanWork {
         for (ContentEntryFileWithContentEntryFileStatusAndContentEntryId khanFile : khanFileList) {
             try {
 
+                UMLogUtil.logTrace("Started with khan file at " + khanFile.getFilePath());
                 File mp4VideoFile = null;
                 File contentFolder;
                 if (khanFile.getFilePath().endsWith(".mp4")) {
@@ -102,7 +103,7 @@ public class Codec2KhanWork {
                         FileUtils.copyURLToFile(new URL(videoUrl), content);
                         UMLogUtil.logTrace("Got the video mp4");
                     }else{
-                        UMLogUtil.logTrace("Did not get the video mp4 for " + khanFile.getFilePath());
+                        UMLogUtil.logError("Did not get the video mp4 for " + khanFile.getFilePath());
                     }
                 }
 
