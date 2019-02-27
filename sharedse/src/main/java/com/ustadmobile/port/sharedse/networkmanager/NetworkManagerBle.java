@@ -160,7 +160,7 @@ public abstract class NetworkManagerBle {
 
         @Override
         public long getUid(DownloadJobItemWithDownloadSetItem item) {
-            return item.getDjiUid();
+            return ((long)(Long.valueOf(item.getDjiUid()).hashCode()) << 32) | item.getNumAttempts();
         }
     };
 
