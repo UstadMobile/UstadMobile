@@ -55,6 +55,8 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
 
     private Hashtable arguments;
 
+    private volatile int lifecycleState;
+
     /**
      * Create a new controller with the given context
      *
@@ -109,6 +111,8 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleCreate(this);
             }
         }
+
+        lifecycleState  = UmLifecycleOwner.STATUS_CREATED;
     }
 
     /**
@@ -120,6 +124,8 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleStart(this);
             }
         }
+
+        lifecycleState  = UmLifecycleOwner.STATUS_STARTED;
     }
 
     /**
@@ -131,6 +137,8 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleResume(this);
             }
         }
+
+        lifecycleState = UmLifecycleOwner.STATUS_RESUMED;
     }
 
     /**
@@ -142,6 +150,8 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleStop(this);
             }
         }
+
+        lifecycleState  = UmLifecycleOwner.STATUS_STOPPED;
     }
 
     /**
@@ -153,6 +163,8 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
                 listener.onLifecycleDestroy(this);
             }
         }
+
+        lifecycleState = UmLifecycleOwner.STATUS_DESTROYED;
     }
 
 
@@ -172,5 +184,10 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     @Override
     public void removeLifecycleListener(UmLifecycleListener listener) {
         lifecycleListeners.remove(listener);
+    }
+
+    @Override
+    public int getCurrentStatus() {
+        return lifecycleState;
     }
 }

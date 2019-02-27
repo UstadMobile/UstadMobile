@@ -100,9 +100,6 @@ android {
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
-        buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
-        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
 
         manifestPlaceholders = [applicationClass: "android.app.Application"]
 
@@ -330,10 +327,6 @@ dependencies {
 
     //Support for encrypted zips
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-    //Crash reporting
-    implementation "ch.acra:acra-http:$version_android_acra"
-    implementation "ch.acra:acra-dialog:$version_android_acra"
 
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"

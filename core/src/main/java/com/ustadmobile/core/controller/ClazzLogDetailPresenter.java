@@ -332,9 +332,10 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 new FeedEntry(
                                     feedEntryUid,
                                     "Attendance dropped",
-                                    "Attendance dropped from " + String.valueOf(feedAlertPerentage * 100)  +"%"
-                                        + " for student " + thisPerson.getFirstNames() + " " +
-                                        thisPerson.getLastName() + " in Class " + clazzName,
+                                    "Student " + thisPerson.getFirstNames() + " " +
+                                            thisPerson.getLastName() + " of Class " +
+                                            clazzName + " attendance dropped "+
+                                            String.valueOf(feedAlertPerentage * 100)  +"%",
                                     ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
                                             "=" + currentClazzLog.getClazzLogClazzUid(),
                                     clazzName,
@@ -365,10 +366,11 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                         newFeedEntries.add(
                                             new FeedEntry(
                                                 feedEntryUid,
-                                                "Tardy behaviour",
-                                                "Student partial attended for over " + tardyFrequency + " times"
-                                                        + " for student " + each.getFirstNames() + " " +
-                                                        each.getLastName() + " in Class " + clazzName,
+                                                "Tardy behaviour" ,
+                                                    "Student " + each.getFirstNames() + " " +
+                                                            each.getLastName() + " partially attended Class "
+                                                             + clazzName + " over 3 times"
+                                                    ,
                                                 ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID + "=" +
                                                         currentClazzLog.getClazzLogClazzUid(),
                                                 clazzName,
@@ -407,9 +409,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                             new FeedEntry(
                                                 feedEntryUid,
                                                 "Absent behaviour",
-                                                "Student absent for over " + tardyFrequency + " times"
-                                                        + " for student " + each.getFirstNames() + " " +
-                                                        each.getLastName() + " in Class " + clazzName,
+                                                "Student " + each.getFirstNames() + " " +
+                                                        each.getLastName() + " absent in Class " + clazzName
+                                                    + " over " + tardyFrequency + " times",
                                                 ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID + "=" +
                                                         currentClazzLog.getClazzLogClazzUid(),
                                                 clazzName,

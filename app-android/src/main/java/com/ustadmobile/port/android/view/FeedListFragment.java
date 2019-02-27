@@ -104,15 +104,15 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
 
             assert feedEntry != null;
 
-            feedText.setText(feedEntry.getTitle());
-            feedTitle.setText(feedEntry.getFeedEntryClazzName());
+            feedText.setText(feedEntry.getDescription());
+            feedTitle.setText(feedEntry.getTitle());
 
             String feedTextString = feedEntry.getTitle();
             if (UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
                 //TODO : Apply more complex deadline with scheduling in the future ie Check schedule
                 feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),
                         R.color.accent));
-                feedText.setText(feedTextString);
+                feedText.setText(feedEntry.getDescription());
             }
 
             if(feedEntry.getLink().startsWith(ClassDetailView.VIEW_NAME)){
@@ -274,8 +274,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
                 reportImageView.setVisibility(View.VISIBLE);
                 reportButton.setVisibility(View.VISIBLE);
             }else{
-                reportImageView.setVisibility(View.INVISIBLE);
-                reportButton.setVisibility(View.INVISIBLE);
+                reportImageView.setVisibility(View.GONE);
+                reportButton.setVisibility(View.GONE);
             }
         });
 
@@ -284,7 +284,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     @Override
     public void showSummaryCard(boolean visible) {
         runOnUiThread(() -> {
-            summaryCard.setVisibility(visible?View.VISIBLE:View.INVISIBLE);
+            summaryCard.setVisibility(visible?View.VISIBLE:View.GONE);
             summaryCard.setEnabled(visible);
         });
     }

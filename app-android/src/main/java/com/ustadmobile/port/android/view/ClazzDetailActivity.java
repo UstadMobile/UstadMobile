@@ -95,7 +95,11 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         //Setting layout:
         setContentView(R.layout.activity_clazz_detail);
 
-        currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0L);
+        if(getIntent().getExtras().get(ARG_CLAZZ_UID) instanceof  String){
+            currentClazzUid = Long.valueOf(getIntent().getStringExtra(ARG_CLAZZ_UID));
+        }else {
+            currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0L);
+        }
 
         toolbar = findViewById(R.id.class_detail_toolbar);
         //Set title as Class name
@@ -108,8 +112,6 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        //set up view pager
-        //setupViewPager();
     }
 
     @Override

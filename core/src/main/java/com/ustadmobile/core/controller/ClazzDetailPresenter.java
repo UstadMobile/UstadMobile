@@ -38,7 +38,12 @@ public class ClazzDetailPresenter
 
         //Get Clazz Uid and set them.
         if(arguments.containsKey(ARG_CLAZZ_UID)){
-            currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
+            if(arguments.get(ARG_CLAZZ_UID) instanceof String){
+                currentClazzUid = Long.valueOf((String) arguments.get(ARG_CLAZZ_UID));
+            }else{
+                currentClazzUid = (Long) arguments.get(ARG_CLAZZ_UID);
+            }
+
         }
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
