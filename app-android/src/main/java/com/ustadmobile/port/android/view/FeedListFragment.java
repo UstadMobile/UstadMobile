@@ -26,6 +26,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.FeedListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -106,14 +107,17 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
             feedText.setText(feedEntry.getTitle());
             feedTitle.setText(feedEntry.getFeedEntryClazzName());
 
-            String feedTextString = feedEntry.getTitle() + " (" + getText(R.string.overdue)+ ")";
+            String feedTextString = feedEntry.getTitle();
             if (UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
-                //Apply more complex deadline with scheduling in the future ie Check schedule
+                //TODO : Apply more complex deadline with scheduling in the future ie Check schedule
                 feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),
                         R.color.accent));
                 feedText.setText(feedTextString);
             }
 
+            if(feedEntry.getLink().startsWith(ClassDetailView.VIEW_NAME)){
+                recordAttendanceButton.setText(R.string.view_class);
+            }
             recordAttendanceButton.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
             holder.itemView.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
 
@@ -133,7 +137,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
 
             @Override
             public boolean areContentsTheSame(FeedEntry oldItem,
-                                              FeedEntry newItem) {
+                                              @NonNull FeedEntry newItem) {
                 return oldItem.equals(newItem);
             }
         };

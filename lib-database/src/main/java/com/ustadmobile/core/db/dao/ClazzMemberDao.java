@@ -37,6 +37,9 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
     @UmUpdate
     public abstract void updateAsync(ClazzMember entity, UmCallback<Integer> resultObject);
 
+    @UmQuery("SELECT * FROM ClazzMember")
+    public abstract List<ClazzMember> findAllAsList();
+
     @UmQuery("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     public abstract ClazzMember findByUid(long uid);
 

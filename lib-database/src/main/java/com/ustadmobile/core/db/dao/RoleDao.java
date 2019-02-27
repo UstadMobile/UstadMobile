@@ -19,4 +19,7 @@ public abstract class RoleDao implements SyncableDao<Role, RoleDao> {
     @UmQuery("SELECT * FROM Role WHERE roleName=:roleName")
     public abstract void findByName(String roleName, UmCallback<Role> callback);
 
+    @UmQuery("SELECT * FROM Role WHERE roleName = :roleName")
+    public abstract Role findByNameSync(String roleName);
+
 }

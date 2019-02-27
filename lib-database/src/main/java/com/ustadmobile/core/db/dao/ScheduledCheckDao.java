@@ -57,6 +57,7 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
         insertList(newCheckList);
 
 
+        //TODO: For other rols. WIP
         List<ClazzLog> logsWithoutNextDayCheck = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER);
         for(ClazzLog clazzLog : logsWithoutNextDayCheck) {

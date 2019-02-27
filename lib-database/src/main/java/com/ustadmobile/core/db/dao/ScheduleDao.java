@@ -36,6 +36,9 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     @UmQuery("SELECT * FROM Schedule")
     public abstract UmProvider<Schedule> findAllSchedules();
 
+    @UmQuery("SELECT * FROM SCHEDULE")
+    public abstract List<Schedule> findAllSchedulesAsList();
+
     @UmUpdate
     public abstract void updateAsync(Schedule entity, UmCallback<Integer> resultObject);
 

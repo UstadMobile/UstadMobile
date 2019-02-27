@@ -558,4 +558,12 @@ public abstract class ClazzLogAttendanceRecordDao implements
             "AND attendanceStatus = :attendanceStatus")
     public abstract int getAttedanceStatusCount(long clazzLogUid, int attendanceStatus);
 
+
+    @UmQuery("UPDATE ClazzLogAttendanceRecord SET attendanceStatus = :newValue " +
+            " WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid " +
+            " AND clazzLogAttendanceRecordClazzMemberUid = :clazzMemberUid")
+    public abstract void updateAttendanceStatusByClazzMemberAndClazzLog(long clazzMemberUid,
+                                                                        long clazzLogUid,
+                                                                        int newValue);
+
 }
