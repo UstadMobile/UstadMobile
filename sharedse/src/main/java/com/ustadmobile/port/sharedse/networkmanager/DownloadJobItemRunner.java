@@ -398,7 +398,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * @see JobStatus
      */
     private void updateItemStatus(int itemStatus) {
-        appDb.getDownloadJobDao().update(downloadItem.getDjiDjUid(),itemStatus);
         appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
         appDb.getContentEntryStatusDao().updateDownloadStatus(
                 downloadItem.getDownloadSetItem().getDsiContentEntryUid(), itemStatus);
