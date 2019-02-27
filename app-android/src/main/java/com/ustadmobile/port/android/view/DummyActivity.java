@@ -65,11 +65,13 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
     public void onStart() {
         super.onStart();
         new Handler().postDelayed(() -> {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    () -> networkManagerBle.sendP2PStateChangeBroadcast(),
-                    impl.getString(MessageID.location_permission_title,getContext()),
-                    impl.getString(MessageID.location_permission_message,getContext()));
+            if(networkManagerBle != null){
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                        () -> networkManagerBle.sendP2PStateChangeBroadcast(),
+                        impl.getString(MessageID.location_permission_title,getContext()),
+                        impl.getString(MessageID.location_permission_message,getContext()));
+            }
         }, TimeUnit.SECONDS.toMillis(2));
     }
 
