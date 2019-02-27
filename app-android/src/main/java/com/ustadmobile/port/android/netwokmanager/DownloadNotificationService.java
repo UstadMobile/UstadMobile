@@ -161,6 +161,7 @@ public class DownloadNotificationService extends Service {
                             true);
                     startForeground(notificationIdRef.get(), groupSummary);
                     break;
+
                 case ACTION_STOP_FOREGROUND_SERVICE:
                     stopForegroundService();
                     break;
@@ -281,6 +282,7 @@ public class DownloadNotificationService extends Service {
                 NOTIFICATION_CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH);
         mNotificationChannel.setVibrationPattern(new long[]{0});
         mNotificationChannel.enableVibration(true);
+        mNotificationChannel.setSound(null,null);
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
                 .createNotificationChannel(mNotificationChannel);
     }
@@ -361,7 +363,14 @@ public class DownloadNotificationService extends Service {
             knownNotifications.put(downloadJobId,umNotification);
         }
 
-        return builder.build();
+        Notification notification = builder.build();
+
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
+            notification.defaults = 0;
+            notification.sound = null;
+        }
+
+        return notification;
     }
 
 
