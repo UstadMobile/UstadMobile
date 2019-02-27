@@ -52,9 +52,21 @@ public class Codec2KhanWork {
 
         for (ContentEntryFileWithContentEntryFileStatusAndContentEntryId khanFile : khanFileList) {
             try {
-                File mp4VideoFile = new File(khanFile.getFilePath());
-                File contentFolder = mp4VideoFile.getParentFile();
+
+                File mp4VideoFile = null;
+                File contentFolder;
+                if (khanFile.getFilePath().endsWith(".mp4")) {
+                    mp4VideoFile = new File(khanFile.getFilePath());
+                    contentFolder = mp4VideoFile.getParentFile();
+                } else if (khanFile.getFilePath().endsWith(".zip")) {
+                    File zip = new File(khanFile.getFilePath());
+                    contentFolder = zip.getParentFile();
+                } else {
+                    UMLogUtil.logError("Found a file path that was not zip or mp4");
+                    continue;
+                }
                 File parentFolder = contentFolder.getParentFile();
+
 
                 // delete if greater than 420mb - go to next entry
                 if (khanFile.getFileSize() > 440401920) {
@@ -67,7 +79,10 @@ public class Codec2KhanWork {
                 }
 
                 String entryId = khanFile.getEntryId();
-                File content = new File(mp4VideoFile.getPath());
+                File content = null;
+                if (mp4VideoFile != null) {
+                    content = new File(mp4VideoFile.getPath());
+                }
                 URL videoApiUrl = new URL("http://www.khanacademy.org/api/v1/videos/" + entryId);
                 VideoApi videoApi = gson.fromJson(IOUtils.toString(videoApiUrl, UTF_ENCODING), VideoApi.class);
                 String youtubeId = videoApi.youtube_id;
@@ -105,6 +120,7 @@ public class Codec2KhanWork {
 
                 ContentScraperUtil.deleteFile(content);
                 ContentScraperUtil.deleteFile(mp4VideoFile);
+
 
                 File zipFile = new File(parentFolder, contentFolder.getName() + ZIP_EXT);
                 ContentScraperUtil.zipDirectory(contentFolder,
