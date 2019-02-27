@@ -28,6 +28,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.FeedListView;
+import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -117,6 +118,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
 
             if(feedEntry.getLink().startsWith(ClassDetailView.VIEW_NAME)){
                 recordAttendanceButton.setText(R.string.view_class);
+            }else if(feedEntry.getLink().startsWith(PersonDetailView.VIEW_NAME)){
+                recordAttendanceButton.setText(R.string.view_student);
             }
             recordAttendanceButton.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
             holder.itemView.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));

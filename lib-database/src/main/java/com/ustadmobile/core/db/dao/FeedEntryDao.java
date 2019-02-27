@@ -15,10 +15,12 @@ import java.util.List;
 @UmRepository
 public abstract class FeedEntryDao implements SyncableDao<FeedEntry, FeedEntryDao> {
 
-    public static int generateFeedEntryHash(long personUid, long clazzLogUid, int alertType) {
+    public static int generateFeedEntryHash(long personUid, long clazzLogUid, int alertType,
+                                            String link) {
         int hash = Long.valueOf(clazzLogUid).hashCode();
         hash = (31 * hash) + Long.valueOf(personUid).hashCode();
         hash = (31 * hash) + alertType;
+        hash = (31 * hash) + link.hashCode();
         return hash;
     }
 

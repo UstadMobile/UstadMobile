@@ -13,14 +13,30 @@ public class ScheduledCheck {
      */
     public static final int TYPE_RECORD_ATTENDANCE_REMINDER = 1;
 
+    //eg: An alert if a teacher did not take attendance by the next day.
     public static final int TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER = 2;
 
     public static final int TYPE_CHECK_ATTENDANCE_VARIATION_HIGH = 3;
     public static final int TYPE_CHECK_ATTENDANCE_VARIATION_MED = 6;
     public static final int TYPE_CHECK_ATTENDANCE_VARIATION_LOW = 7;
 
-    public static final int TYPE_CHECK_PARTIAL_REPETITION = 4;
-    public static final int TYPE_CHECK_ABSENT_REPETITION = 5;
+    public static final int TYPE_CHECK_PARTIAL_REPETITION_MED = 4;
+    public static final int TYPE_CHECK_ABSENT_REPETITION_LOW = 5;
+    //eg: An alert for a student that has been absent 2 or more days in a row
+    public static final int TYPE_CHECK_ABSENT_REPETITION_MED = 9;
+
+    //eg: An alert for classrooms with an average of 6% attendance or less.
+    public static final int TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH = 8;
+
+
+
+    //eg: An alert to show which student or teacher profiles were created or updated.
+    public static final int TYPE_CHECK_PERSON_PROFILE_UPDATED = 10;
+
+    //eg: An alert when a student has not attended in a single day in a month(drop-out)
+    public static final int TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH = 11;
+
+
 
     public static final String PARAM_CLAZZ_UID = "clazzuid";
 

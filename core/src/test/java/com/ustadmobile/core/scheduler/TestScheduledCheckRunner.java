@@ -61,13 +61,16 @@ public class TestScheduledCheckRunner {
         ScheduledCheckRunner runner = new ScheduledCheckRunner(check, db, repo);
         runner.run();
 
+        String feedLink = ClassLogDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
+                "=" + clazzLog.getClazzLogClazzUid();
+
         String expectedLink = ClassLogDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
                 "=" + clazzLog.getClazzLogClazzUid();
         FeedEntry feedEntry = db.getFeedEntryDao().findByLink(clazzTeacher.getPersonUid(),
                 expectedLink);
 
         long expectedUid = FeedEntryDao.generateFeedEntryHash(clazzTeacher.getPersonUid(),
-                clazzLog.getClazzLogUid(), ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER);
+                clazzLog.getClazzLogUid(), ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, feedLink);
 
         Assert.assertNotNull("Feed entry with correct link for teacher has been created",
                 feedEntry);

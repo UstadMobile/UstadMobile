@@ -293,6 +293,8 @@ public class ServletContextClass implements ServletContextListener
                                         //Create entity roles for all clazzes
                                         //Assign Role for all clazzes
 
+                                        System.out.println("entity group uid: " + personWithGroup.getPersonGroupUid());
+
                                         System.out.println("Looping over classes..");
                                         List<Clazz> allClazzes = personDao.findAllClazzes();
                                         for (Clazz thisClazz : allClazzes) {

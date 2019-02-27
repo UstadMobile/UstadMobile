@@ -45,14 +45,17 @@ public class ScheduledCheckRunner implements Runnable{
                                 clazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_TEACHER);
                 List<FeedEntry> newFeedEntries = new ArrayList<>();
                 for(ClazzMemberWithPerson teacher : teachers) {
+                    String feedLink = ClassLogDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
+                            "=" + clazzLog.getClazzLogClazzUid();
+
                     long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                             teacher.getClazzMemberPersonUid(), clazzLogUid,
-                            ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER);
+                            ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, feedLink);
                     newFeedEntries.add(new FeedEntry(feedEntryUid, "Record attendance",
                             "Record attendance for class",
-                            ClassLogDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
-                                    "=" + clazzLog.getClazzLogClazzUid(), clazzName,
-                                    teacher.getClazzMemberPersonUid()));
+                            feedLink,
+                            clazzName,
+                            teacher.getClazzMemberPersonUid()));
                 }
                 dbRepository.getFeedEntryDao().insertList(newFeedEntries);
             }

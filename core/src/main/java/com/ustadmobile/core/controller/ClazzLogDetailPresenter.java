@@ -17,6 +17,8 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzListView;
+import com.ustadmobile.core.view.PersonDetailView;
+import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
@@ -67,7 +69,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private List<ClazzMember> teachers;
     private String clazzName;
     private int tardyFrequency = 3;
-    private int absentFrequency = 2;
+    private int absentFrequencyLow = 2;
+    private int absentFrequencyHigh = 30;
+
 
     public boolean isHasEditPermissions() {
         return hasEditPermissions;
@@ -284,6 +288,17 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         ClazzLogAttendanceRecordDao clazzLogAttendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
         currentClazzLog.setDone(true);
+
+        Clazz clazzBeforeAttendanceUpdate = clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid());
+
+        Role officerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
+        List<Person> officers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+        Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+        List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
+
+
         clazzLogDao.updateDoneForClazzLogAsync(currentClazzLog.getClazzLogUid(),
                 new UmCallback<Integer>() {
             @Override
@@ -326,10 +341,18 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         //Create feed entries for this user for every teacher
                         List<FeedEntry> newFeedEntries = new ArrayList<>();
 
+                        String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                PersonDetailView.ARG_PERSON_UID + "=" +
+                                String.valueOf(after.getClazzMemberPersonUid());
+                        String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                ClazzListView.ARG_CLAZZ_UID + "=" +
+                                currentClazzLog.getClazzLogClazzUid();
+
                         for(ClazzMember teacher: teachers){
+
                             long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                    after.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
-                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_HIGH);
+                                    teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_HIGH, feedLinkViewPerson);
 
                             newFeedEntries.add(
                                 new FeedEntry(
@@ -339,8 +362,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                             thisPerson.getLastName() + " of Class " +
                                             clazzName + " attendance dropped "+
                                             String.valueOf(feedAlertPerentageHigh * 100)  +"%",
-                                    ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
-                                            "=" + currentClazzLog.getClazzLogClazzUid(),
+                                        feedLinkViewPerson,
                                     clazzName,
                                     teacher.getClazzMemberPersonUid()
                                 )
@@ -361,10 +383,17 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         //Create feed entries for this user for every teacher
                         List<FeedEntry> newFeedEntries = new ArrayList<>();
 
+                        String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                PersonDetailView.ARG_PERSON_UID + "=" +
+                                String.valueOf(after.getClazzMemberPersonUid());
+                        String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                ClazzListView.ARG_CLAZZ_UID + "=" +
+                                currentClazzLog.getClazzLogClazzUid();
+
                         for(ClazzMember teacher: teachers){
                             long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                    after.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
-                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_MED);
+                                    teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_MED, feedLinkViewPerson);
 
                             newFeedEntries.add(
                                     new FeedEntry(
@@ -374,8 +403,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                                     thisPerson.getLastName() + " of Class " +
                                                     clazzName + " attendance dropped "+
                                                     String.valueOf(feedAlertPerentageMed * 100)  +"%",
-                                            ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
-                                                    "=" + currentClazzLog.getClazzLogClazzUid(),
+                                            feedLinkViewPerson,
                                             clazzName,
                                             teacher.getClazzMemberPersonUid()
                                     )
@@ -398,10 +426,18 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 //Create feed entries for this user for every teacher
                                 List<FeedEntry> newFeedEntries = new ArrayList<>();
                                 for(PersonNameWithClazzName each:theseGuys){
+
+                                    String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                            PersonDetailView.ARG_PERSON_UID + "=" +
+                                            String.valueOf(each.getPersonUid());
+                                    String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                            ClazzListView.ARG_CLAZZ_UID + "=" +
+                                            currentClazzLog.getClazzLogClazzUid();
+
                                     for(ClazzMember teacher:teachers){
                                         long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                                each.getPersonUid(), currentClazzLog.getClazzLogUid(),
-                                                ScheduledCheck.TYPE_CHECK_PARTIAL_REPETITION);
+                                                teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                                ScheduledCheck.TYPE_CHECK_PARTIAL_REPETITION_MED, feedLinkViewPerson);
 
                                         newFeedEntries.add(
                                             new FeedEntry(
@@ -411,8 +447,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                                             each.getLastName() + " partially attended Class "
                                                              + clazzName + " over 3 times"
                                                     ,
-                                                ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID + "=" +
-                                                        currentClazzLog.getClazzLogClazzUid(),
+                                                feedLinkViewPerson,
                                                 clazzName,
                                                 teacher.getClazzMemberPersonUid()
                                             )
@@ -432,38 +467,69 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                 //7. Crate feedEntries for student not attended two classes in a row.
                 clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
-                    ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequency,
+                    ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyLow,
                     currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
                         @Override
                         public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
-                            if(theseGuys != null && theseGuys.size() > 0){
-                                //Create feed entries for this user for every teacher
-                                List<FeedEntry> newFeedEntries = new ArrayList<>();
-                                for(PersonNameWithClazzName each:theseGuys){
-                                    for(ClazzMember teacher:teachers){
-                                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                                each.getPersonUid(), currentClazzLog.getClazzLogUid(),
-                                                ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION);
+                            //Create feed entries for this user for every teacher
+                            List<FeedEntry> newFeedEntries = new ArrayList<>();
+                            for(PersonNameWithClazzName each:theseGuys){
 
-                                        newFeedEntries.add(
-                                            new FeedEntry(
-                                                feedEntryUid,
-                                                "Absent behaviour",
-                                                "Student " + each.getFirstNames() + " " +
-                                                        each.getLastName() + " absent in Class " + clazzName
-                                                    + " over " + tardyFrequency + " times",
-                                                ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID + "=" +
-                                                        currentClazzLog.getClazzLogClazzUid(),
-                                                clazzName,
-                                                teacher.getClazzMemberPersonUid()
-                                            )
-                                        );
-                                    }
+                                String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                        PersonDetailView.ARG_PERSON_UID + "=" +
+                                        String.valueOf(each.getPersonUid());
+                                String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                        ClazzListView.ARG_CLAZZ_UID + "=" +
+                                        currentClazzLog.getClazzLogClazzUid();
+
+                                //a. Send to teachers
+                                for(ClazzMember teacher:teachers){
+                                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                            teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                            ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW, feedLinkViewPerson);
+
+                                    newFeedEntries.add(
+                                        new FeedEntry(
+                                            feedEntryUid,
+                                            "Absent behaviour",
+                                            "Student " + each.getFirstNames() + " " +
+                                                    each.getLastName() + " absent in Class " + clazzName
+                                                + " over " + tardyFrequency + " times",
+                                            feedLinkViewPerson,
+                                            clazzName,
+                                            teacher.getClazzMemberPersonUid()
+                                        )
+                                    );
                                 }
 
-                                repository.getFeedEntryDao().insertList(newFeedEntries);
+                                //b. Send to Officer as well.
+
+                                for(Person officer:officers){
+
+
+                                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                        officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                            ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW, feedLinkViewPerson);
+
+                                    newFeedEntries.add(
+                                        new FeedEntry(
+                                            feedEntryUid,
+                                            "Absent behaviour",
+                                            "Student " + each.getFirstNames() + " " +
+                                                    each.getLastName() + " absent in Class " + clazzName
+                                                    + " over " + tardyFrequency + " times",
+                                            feedLinkViewPerson,
+                                            clazzName,
+                                            officer.getPersonUid()
+                                        )
+                                    );
+                                }
 
                             }
+
+                            repository.getFeedEntryDao().insertList(newFeedEntries);
+
+
                         }
 
                         @Override
@@ -472,8 +538,92 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         }
                     });
 
+                //8. Officer to get an alert when student has been absent 2 or more days in a row
+                Clazz clazzAfterAttendanceUpdate = clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid());
+                if(clazzBeforeAttendanceUpdate.getAttendanceAverage() >=  feedAlertPerentageHigh &&
+                    clazzAfterAttendanceUpdate.getAttendanceAverage() < feedAlertPerentageHigh){
 
-                //8. Set any FeedEntry to done
+                    List<FeedEntry> newFeedEntries = new ArrayList<>();
+
+                    String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                            ClazzListView.ARG_CLAZZ_UID + "=" +
+                            currentClazzLog.getClazzLogClazzUid();
+
+                    for(Person officer:officers){
+                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+
+                        newFeedEntries.add(
+                            new FeedEntry(
+                                feedEntryUid,
+                                "Class average dropped",
+                                "Class " + clazzName + " dropped attendance  " +
+                                String.valueOf(feedAlertPerentageHigh * 100)  +"%"
+                                ,
+                                feedLinkViewClass,
+                                clazzName,
+                                officer.getPersonUid()
+                            )
+                        );
+                    }
+
+                    repository.getFeedEntryDao().insertList(newFeedEntries);
+                }
+
+
+                //9. MNE An alert when a student has not attended a single day in a month(dropout)
+                clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
+                        ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyHigh,
+                        currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
+                            @Override
+                            public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+
+                                //Create feed entries for this user for every teacher
+                                List<FeedEntry> newFeedEntries = new ArrayList<>();
+                                for(PersonNameWithClazzName each:theseGuys){
+
+                                    String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                            PersonDetailView.ARG_PERSON_UID + "=" +
+                                            String.valueOf(each.getPersonUid());
+                                    String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                            ClazzListView.ARG_CLAZZ_UID + "=" +
+                                            currentClazzLog.getClazzLogClazzUid();
+
+
+                                    for( Person mne: mneofficers){
+                                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                                mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                                ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH, feedLinkViewPerson);
+
+                                        newFeedEntries.add(
+                                                new FeedEntry(
+                                                        feedEntryUid,
+                                                        "Student dropout" ,
+                                                        "Student " + each.getFirstNames() + " " +
+                                                                each.getLastName() + " absent in Class "
+                                                                + clazzName + " over 30 days"
+                                                        ,
+                                                        feedLinkViewPerson,
+                                                        clazzName,
+                                                        mne.getPersonUid()
+                                                )
+                                        );
+                                    }
+                                }
+
+                                repository.getFeedEntryDao().insertList(newFeedEntries);
+
+
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+
+                //10. Set any FeedEntry to done
                 repository.getFeedEntryDao().markEntryAsDoneByClazzLogUidAndTaskType(
                         currentClazzLog.getClazzLogUid(),
                         ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, true);

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
@@ -51,6 +52,14 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     private int currentPosition = 0;
     private List<String> lines;
     private long teacherRoleUid = 0L;
+    private long officerRoleUid = 0L;
+    private long selRoleUid = 0L;
+    private long mneRoleUid = 0L;
+
+    private long officerPersonGroupUid = 0L;
+    private long selPersonGroupUid = 0L;
+    private long mnePersonGroupUid = 0L;
+
     private String choozenTZ;
     private List<String> allTZ;
 
@@ -265,6 +274,33 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                                                 if(result != null) {
                                                                     //thisClazz already has uid set
 
+//                                                                    EntityRoleDao entityRoleDao = repository.getEntityRoleDao();
+//
+//                                                                    //Automatically set officer to this clazz
+//
+//                                                                    EntityRole entityRole = new EntityRole();
+//                                                                    entityRole.setErRoleUid(officerRoleUid);
+//                                                                    entityRole.setErTableId(Clazz.TABLE_ID);
+//                                                                    entityRole.setErGroupUid(officerPersonGroupUid);
+//                                                                    entityRole.setErEntityUid(thisClazz.getClazzUid());
+//                                                                    entityRoleDao.insert(entityRole);
+//
+//                                                                    //Mne
+//                                                                    entityRole = new EntityRole();
+//                                                                    entityRole.setErRoleUid(mneRoleUid);
+//                                                                    entityRole.setErTableId(Clazz.TABLE_ID);
+//                                                                    entityRole.setErGroupUid(mnePersonGroupUid);
+//                                                                    entityRole.setErEntityUid(thisClazz.getClazzUid());
+//                                                                    entityRoleDao.insert(entityRole);
+//
+//                                                                    //Sel
+//                                                                    entityRole = new EntityRole();
+//                                                                    entityRole.setErRoleUid(selRoleUid);
+//                                                                    entityRole.setErTableId(Clazz.TABLE_ID);
+//                                                                    entityRole.setErGroupUid(selPersonGroupUid);
+//                                                                    entityRole.setErEntityUid(thisClazz.getClazzUid());
+//                                                                    entityRoleDao.insert(entityRole);
+
                                                                     //Move on
                                                                     checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
                                                                 }
@@ -336,7 +372,75 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
             public void onSuccess(Role teacherRole) {
                 if(teacherRole != null){
                     teacherRoleUid = teacherRole.getRoleUid();
+
                     processLocations(bulkLine);
+
+//                    roleDao.findByName(Role.ROLE_NAME_OFFICER, new UmCallback<Role>() {
+//                        @Override
+//                        public void onSuccess(Role officerRole) {
+//                            if(officerRole != null){
+//                                officerRoleUid = officerRole.getRoleUid();
+//                            }
+//
+//                            repository.getPersonDao().findByUsernameAsync("officer",
+//                                    new UmCallback<Person>() {
+//                                @Override
+//                                public void onSuccess(Person result) {
+//                                    repository.getPersonGroupMemberDao()
+//                                            .findAllGroupWherePersonIsIn(result.getPersonUid(),
+//                                                    new UmCallback<List<PersonGroupMember>>() {
+//                                        @Override
+//                                        public void onSuccess(List<PersonGroupMember> result) {
+//                                            officerPersonGroupUid = result.get(0).getGroupMemberGroupUid();
+//                                        }
+//
+//                                        @Override
+//                                        public void onFailure(Throwable exception) {
+//
+//                                        }
+//                                    });
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Throwable exception) {}
+//                            });
+//
+//
+//                            roleDao.findByName(Role.ROLE_NAME_MNE, new UmCallback<Role>() {
+//                                @Override
+//                                public void onSuccess(Role result) {
+//                                    if(result!= null){
+//                                        mneRoleUid = result.getRoleUid();
+//                                    }
+//
+//                                    roleDao.findByName(Role.ROLE_NAME_SEL, new UmCallback<Role>() {
+//                                        @Override
+//                                        public void onSuccess(Role result) {
+//                                            if(result!= null){
+//                                                selRoleUid = result.getRoleUid();
+//                                            }
+//
+//
+//                                        }
+//
+//                                        @Override
+//                                        public void onFailure(Throwable exception) {}
+//                                    });
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Throwable exception) {}
+//                            });
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Throwable exception) {
+//
+//                        }
+//                    });
+
+
+
                 }else{
                     view.showMessage("Please wait until the app syncs and try again.");
                 }
