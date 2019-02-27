@@ -84,7 +84,6 @@ public class Codec2KhanWork {
                     if (videoUrl != null) {
                         content = new File(contentFolder, FilenameUtils.getName(videoUrl));
                         FileUtils.copyURLToFile(new URL(videoUrl), content);
-                        ContentScraperUtil.deleteFile(mp4VideoFile);
                     }
                 }
 
@@ -105,6 +104,7 @@ public class Codec2KhanWork {
                 ShrinkerUtil.convertKhanVideoToWebMAndCodec2(content, webMFile);
 
                 ContentScraperUtil.deleteFile(content);
+                ContentScraperUtil.deleteFile(mp4VideoFile);
 
                 File zipFile = new File(parentFolder, contentFolder.getName() + ZIP_EXT);
                 ContentScraperUtil.zipDirectory(contentFolder,

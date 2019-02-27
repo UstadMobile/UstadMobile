@@ -50,7 +50,7 @@ public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFil
             "LEFT JOIN ContentEntryFileStatus ON ContentEntryFile.contentEntryFileUid = ContentEntryFileStatus.cefsContentEntryFileUid " +
             "LEFT JOIN ContentEntryContentEntryFileJoin ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
             "LEFT JOIN ContentEntry ON ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntryFileStatus.filePath LIKE '%/khan/en/%' AND ContentEntryFile.mimeType = 'video/mp4'")
+            "WHERE ContentEntryFileStatus.filePath LIKE '%/khan/en/%' AND (ContentEntryFile.mimeType = 'video/mp4' OR ContentEntryFile.mimeType = 'application/khan-video+zip')")
     public abstract List<ContentEntryFileWithContentEntryFileStatusAndContentEntryId> findKhanFiles();
 
     @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.filePath from ContentEntryFile " +
