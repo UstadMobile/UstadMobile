@@ -61,13 +61,13 @@ public class Codec2KhanWork {
                     contentFolder = mp4VideoFile.getParentFile();
                 } else if (khanFile.getFilePath().endsWith(".zip")) {
                     File zip = new File(khanFile.getFilePath());
-                    contentFolder = zip.getParentFile();
+                    contentFolder = new File(UMFileUtil.stripExtensionIfPresent(zip.getPath()));
                 } else {
                     UMLogUtil.logError("Found a file path that was not zip or mp4");
                     continue;
                 }
                 File parentFolder = contentFolder.getParentFile();
-                UMLogUtil.logTrace("Got the parent folder");
+                UMLogUtil.logTrace("Got the parent folder " + parentFolder.getPath());
 
 
                 // delete if greater than 420mb - go to next entry
