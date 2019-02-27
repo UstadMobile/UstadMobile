@@ -246,7 +246,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         umAppDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
         umAppDatabase.getDownloadJobItemDao().insert(jobItems);
-        umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobUid,null);
+        umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobUid);
     }
 
 

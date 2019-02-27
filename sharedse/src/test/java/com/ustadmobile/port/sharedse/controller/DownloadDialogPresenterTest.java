@@ -196,10 +196,6 @@ public class DownloadDialogPresenterTest {
         assertEquals("Four DownloadJobItems were created ",
                 4, umAppDatabase.getDownloadJobItemDao().findAll().size());
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
-                .getJobLive(presenter.getCurrentJobId()),MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
-                job -> job != null && job.getTotalBytesToDownload() == totalBytesToDownload);
-
         assertEquals("Total bytes to be downloaded was updated",
                 totalBytesToDownload,
                 umAppDatabase.getDownloadJobDao().findByUid(presenter.getCurrentJobId())
