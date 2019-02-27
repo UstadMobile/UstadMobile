@@ -60,7 +60,10 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private String title;
 
-    private float feedAlertPerentage = 0.5f;
+    private float feedAlertPerentageHigh = 0.69f;
+    private float feedAlertPerentageMed = 0.5f;
+
+
     private List<ClazzMember> teachers;
     private String clazzName;
     private int tardyFrequency = 3;
@@ -314,8 +317,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 for(ClazzMember after : afterList) {
                     ClazzMember before = beforeMap.get(after.getClazzMemberUid());
                     if(before != null
-                        && before.getAttendancePercentage() >= feedAlertPerentage
-                        && after.getAttendancePercentage() < feedAlertPerentage) {
+                        && before.getAttendancePercentage() >= feedAlertPerentageHigh
+                        && after.getAttendancePercentage() < feedAlertPerentageHigh) {
                         //this ClazzMember has fallen below the threshold
 
                         PersonDao personDao = repository.getPersonDao();
@@ -326,7 +329,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         for(ClazzMember teacher: teachers){
                             long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                                     after.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
-                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION);
+                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_HIGH);
 
                             newFeedEntries.add(
                                 new FeedEntry(
@@ -335,7 +338,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     "Student " + thisPerson.getFirstNames() + " " +
                                             thisPerson.getLastName() + " of Class " +
                                             clazzName + " attendance dropped "+
-                                            String.valueOf(feedAlertPerentage * 100)  +"%",
+                                            String.valueOf(feedAlertPerentageHigh * 100)  +"%",
                                     ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
                                             "=" + currentClazzLog.getClazzLogClazzUid(),
                                     clazzName,
@@ -347,6 +350,43 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         repository.getFeedEntryDao().insertList(newFeedEntries);
 
                     }
+
+                    if(before != null
+                            && before.getAttendancePercentage() >= feedAlertPerentageMed
+                            && after.getAttendancePercentage() < feedAlertPerentageMed) {
+                        //this ClazzMember has fallen below the threshold
+
+                        PersonDao personDao = repository.getPersonDao();
+                        Person thisPerson = personDao.findByUid(before.getClazzMemberPersonUid());
+                        //Create feed entries for this user for every teacher
+                        List<FeedEntry> newFeedEntries = new ArrayList<>();
+
+                        for(ClazzMember teacher: teachers){
+                            long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                    after.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                    ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_MED);
+
+                            newFeedEntries.add(
+                                    new FeedEntry(
+                                            feedEntryUid,
+                                            "Attendance dropped",
+                                            "Student " + thisPerson.getFirstNames() + " " +
+                                                    thisPerson.getLastName() + " of Class " +
+                                                    clazzName + " attendance dropped "+
+                                                    String.valueOf(feedAlertPerentageMed * 100)  +"%",
+                                            ClassDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
+                                                    "=" + currentClazzLog.getClazzLogClazzUid(),
+                                            clazzName,
+                                            teacher.getClazzMemberPersonUid()
+                                    )
+                            );
+                        }
+
+                        repository.getFeedEntryDao().insertList(newFeedEntries);
+
+                    }
+
+
                 }
 
                 //6. Create feedEntries for student not partial more than 3 times.

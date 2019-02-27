@@ -15,7 +15,9 @@ public class ScheduledCheck {
 
     public static final int TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER = 2;
 
-    public static final int TYPE_CHECK_ATTENDANCE_VARIATION = 3;
+    public static final int TYPE_CHECK_ATTENDANCE_VARIATION_HIGH = 3;
+    public static final int TYPE_CHECK_ATTENDANCE_VARIATION_MED = 6;
+    public static final int TYPE_CHECK_ATTENDANCE_VARIATION_LOW = 7;
 
     public static final int TYPE_CHECK_PARTIAL_REPETITION = 4;
     public static final int TYPE_CHECK_ABSENT_REPETITION = 5;
