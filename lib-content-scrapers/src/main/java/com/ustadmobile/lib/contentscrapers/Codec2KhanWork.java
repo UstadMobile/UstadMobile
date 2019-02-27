@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithContentEntryFileStatusAndContentEntryId;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
@@ -55,7 +56,6 @@ public class Codec2KhanWork {
                 File contentFolder = mp4VideoFile.getParentFile();
                 File parentFolder = contentFolder.getParentFile();
 
-
                 // delete if greater than 420mb - go to next entry
                 if (khanFile.getFileSize() > 440401920) {
 
@@ -67,7 +67,7 @@ public class Codec2KhanWork {
                 }
 
                 String entryId = khanFile.getEntryId();
-
+                File content = new File(mp4VideoFile.getPath());
                 URL videoApiUrl = new URL("http://www.khanacademy.org/api/v1/videos/" + entryId);
                 VideoApi videoApi = gson.fromJson(IOUtils.toString(videoApiUrl, UTF_ENCODING), VideoApi.class);
                 String youtubeId = videoApi.youtube_id;
@@ -82,7 +82,9 @@ public class Codec2KhanWork {
                         }
                     }
                     if (videoUrl != null) {
-                        FileUtils.copyURLToFile(new URL(videoUrl), mp4VideoFile);
+                        content = new File(contentFolder, FilenameUtils.getName(videoUrl));
+                        FileUtils.copyURLToFile(new URL(videoUrl), content);
+                        ContentScraperUtil.deleteFile(mp4VideoFile);
                     }
                 }
 
@@ -99,10 +101,10 @@ public class Codec2KhanWork {
                     UMLogUtil.logInfo("No subtitle for youtube link " + youtubeId + " and fileUid " + khanFile.getContentEntryFileUid());
                 }
 
-                File webMFile = new File(mp4VideoFile, UMFileUtil.stripExtensionIfPresent(mp4VideoFile.getName()) + WEBM_EXT);
-                ShrinkerUtil.convertKhanVideoToWebMAndCodec2(mp4VideoFile, webMFile);
+                File webMFile = new File(mp4VideoFile, UMFileUtil.stripExtensionIfPresent(content.getName()) + WEBM_EXT);
+                ShrinkerUtil.convertKhanVideoToWebMAndCodec2(content, webMFile);
 
-                mp4VideoFile.delete();
+                ContentScraperUtil.deleteFile(content);
 
                 File zipFile = new File(parentFolder, contentFolder.getName() + ZIP_EXT);
                 ContentScraperUtil.zipDirectory(contentFolder,

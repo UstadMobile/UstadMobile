@@ -536,13 +536,18 @@ public class ShrinkerUtil {
             if (process != null) {
                 process.destroy();
             }
-            audioFile.delete();
+            ContentScraperUtil.deleteFile(rawFile);
         }
+
         if (!ContentScraperUtil.fileHasContent(dest)) {
-            throw new IOException("convertVideoToWebMAndCodec: source existed, but output does not " +
+            throw new IOException("convertVideoToWebMAndCodec: source existed, but webm output does not " +
                     dest.getPath());
         }
 
+        if (!ContentScraperUtil.fileHasContent(audioFile)) {
+            throw new IOException("convertVideoToWebMAndCodec: source existed, but audio output does not " +
+                    dest.getPath());
+        }
 
 
     }
