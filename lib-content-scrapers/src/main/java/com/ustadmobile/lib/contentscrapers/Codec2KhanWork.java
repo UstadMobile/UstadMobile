@@ -66,6 +66,7 @@ public class Codec2KhanWork {
                     continue;
                 }
                 File parentFolder = contentFolder.getParentFile();
+                UMLogUtil.logTrace("Got the parent folder");
 
 
                 // delete if greater than 420mb - go to next entry
@@ -74,7 +75,7 @@ public class Codec2KhanWork {
                     statusDao.deleteByUid(khanFile.getCefsUid());
                     contentEntryFileDao.deleteByUid(khanFile.getContentEntryFileUid());
                     fileJoinDao.deleteByUid(khanFile.getContentEntryFileUid(), khanFile.getContentEntryUid());
-
+                    UMLogUtil.logTrace("found a file that was larger than 420mb at  " + khanFile.getFilePath());
                     continue;
                 }
 
@@ -99,6 +100,9 @@ public class Codec2KhanWork {
                     if (videoUrl != null) {
                         content = new File(contentFolder, FilenameUtils.getName(videoUrl));
                         FileUtils.copyURLToFile(new URL(videoUrl), content);
+                        UMLogUtil.logTrace("Got the video mp4");
+                    }else{
+                        UMLogUtil.logTrace("Did not get the video mp4 for " + khanFile.getFilePath());
                     }
                 }
 
@@ -109,6 +113,7 @@ public class Codec2KhanWork {
                     List<SrtFormat> subTitleList = gson.fromJson(subtitleScript, type);
                     File srtFile = new File(contentFolder, SUBTITLE_FILENAME);
                     ContentScraperUtil.createSrtFile(subTitleList, srtFile);
+                    UMLogUtil.logTrace("Created the subtitle file");
 
                 } catch (Exception e) {
                     UMLogUtil.logInfo(ExceptionUtils.getStackTrace(e));
@@ -117,6 +122,8 @@ public class Codec2KhanWork {
 
                 File webMFile = new File(contentFolder, UMFileUtil.stripExtensionIfPresent(content.getName()) + WEBM_EXT);
                 ShrinkerUtil.convertKhanVideoToWebMAndCodec2(content, webMFile);
+
+                UMLogUtil.logTrace("Converted Coddec2");
 
                 ContentScraperUtil.deleteFile(content);
                 ContentScraperUtil.deleteFile(mp4VideoFile);
@@ -132,13 +139,15 @@ public class Codec2KhanWork {
                         ScraperConstants.MIMETYPE_KHAN,
                         khanFile.getContentEntryFileUid());
 
+                UMLogUtil.logTrace("Zipped");
+
                 ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
                 fileStatus.setCefsUid(khanFile.getCefsUid());
                 fileStatus.setFilePath(zipFile.getPath());
                 fileStatus.setCefsContentEntryFileUid(khanFile.getContentEntryFileUid());
                 statusDao.update(fileStatus);
 
-                UMLogUtil.logTrace("Completed conversion of " + khanFile.getFilePath());
+                UMLogUtil.logDebug("Completed conversion of " + khanFile.getFilePath());
 
             } catch (Exception e) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
