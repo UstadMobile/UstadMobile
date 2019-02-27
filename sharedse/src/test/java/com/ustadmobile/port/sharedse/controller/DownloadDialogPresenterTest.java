@@ -142,7 +142,7 @@ public class DownloadDialogPresenterTest {
         totalBytesToDownload = entry2File.getFileSize() + entry4File.getFileSize();
     }
 
-    private void insertDownloadSetAndSetItems(boolean meteredNetworkAllowed){
+    private void insertDownloadSetAndSetItems(boolean meteredNetworkAllowed, int status){
         downloadSet = new DownloadSet();
         downloadSet.setMeteredNetworkAllowed(meteredNetworkAllowed);
         downloadSet.setDsUid(89);
@@ -166,11 +166,11 @@ public class DownloadDialogPresenterTest {
         }
 
         umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
-                JobStatus.RUNNING,-1);
+                status,-1);
     }
 
     private void insertDownloadSetAndSetItems() {
-        insertDownloadSetAndSetItems(false);
+        insertDownloadSetAndSetItems(false, JobStatus.RUNNING);
     }
 
     @Test
@@ -313,7 +313,7 @@ public class DownloadDialogPresenterTest {
     @Test
     public void givenExistingDownloadSet_whenDialogDismissedWithoutSelection_shouldCleanUpUnQueuedJob() throws InterruptedException {
 
-        insertDownloadSetAndSetItems();
+        insertDownloadSetAndSetItems(true, JobStatus.NOT_QUEUED);
 
         Hashtable args =  new Hashtable();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
@@ -380,7 +380,7 @@ public class DownloadDialogPresenterTest {
     public void givenDownloadRunning_whenUserChangesWifiOnlyOption_shouldBeChangedInDb()
         throws InterruptedException{
 
-        insertDownloadSetAndSetItems(true);
+        insertDownloadSetAndSetItems(true,JobStatus.RUNNING);
 
         Hashtable args =  new Hashtable();
 
