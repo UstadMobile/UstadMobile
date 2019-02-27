@@ -1,15 +1,13 @@
 package com.ustadmobile.port.android.view;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -21,9 +19,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.DummyView;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle.ACTION_UM_P2P_SERVICE_STATE_CHANGED;
 
 public class DummyActivity extends UstadBaseActivity implements DummyView {
 
@@ -65,11 +64,13 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
     @Override
     public void onStart() {
         super.onStart();
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                () -> networkManagerBle.sendP2PStateChangeBroadcast(),
-                impl.getString(MessageID.location_permission_title,getContext()),
-                impl.getString(MessageID.location_permission_message,getContext()));
+        new Handler().postDelayed(() -> {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                    () -> networkManagerBle.sendP2PStateChangeBroadcast(),
+                    impl.getString(MessageID.location_permission_title,getContext()),
+                    impl.getString(MessageID.location_permission_message,getContext()));
+        }, TimeUnit.SECONDS.toMillis(2));
     }
 
 
