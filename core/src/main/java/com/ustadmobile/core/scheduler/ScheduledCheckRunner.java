@@ -32,25 +32,35 @@ public class ScheduledCheckRunner implements Runnable{
 
     @Override
     public void run() {
+        Map<String, String> params = UMFileUtil.parseParams(scheduledCheck.getCheckParameters(),
+                ';');
+
+
         if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER) {
-            Map<String, String> params = UMFileUtil.parseParams(scheduledCheck.getCheckParameters(),
-                    ';');
+
             long clazzLogUid = Long.parseLong(params.get(ScheduledCheck.PARAM_CLAZZ_LOG_UID));
             ClazzLog clazzLog = dbRepository.getClazzLogDao().findByUid(clazzLogUid);
+            String clazzName = dbRepository.getClazzDao().getClazzName(
+                    clazzLog.getClazzLogClazzUid());
+
+
             if(!clazzLog.isDone() || clazzLog.isCanceled()) {
-                String clazzName = dbRepository.getClazzDao().getClazzName(
-                        clazzLog.getClazzLogClazzUid());
+
                 List<ClazzMemberWithPerson> teachers = dbRepository.getClazzMemberDao()
                         .findClazzMemberWithPersonByRoleForClazzUidSync(
                                 clazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_TEACHER);
+
                 List<FeedEntry> newFeedEntries = new ArrayList<>();
+
                 for(ClazzMemberWithPerson teacher : teachers) {
+
                     String feedLink = ClassLogDetailView.VIEW_NAME + "?" + ClazzListView.ARG_CLAZZ_UID +
                             "=" + clazzLog.getClazzLogClazzUid();
 
                     long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                             teacher.getClazzMemberPersonUid(), clazzLogUid,
                             ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, feedLink);
+
                     newFeedEntries.add(new FeedEntry(feedEntryUid, "Record attendance",
                             "Record attendance for class",
                             feedLink,
@@ -60,6 +70,10 @@ public class ScheduledCheckRunner implements Runnable{
                 dbRepository.getFeedEntryDao().insertList(newFeedEntries);
             }
         }
+
+
+
+
 
         //delete this item from database - no longer needed
         database.getScheduledCheckDao().deleteCheck(scheduledCheck);

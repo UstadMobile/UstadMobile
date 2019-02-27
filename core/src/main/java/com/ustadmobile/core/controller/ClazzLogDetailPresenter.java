@@ -289,20 +289,24 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 repository.getClazzLogAttendanceRecordDao();
         currentClazzLog.setDone(true);
 
-        Clazz clazzBeforeAttendanceUpdate = clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid());
 
-        Role officerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
-        List<Person> officers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
-        Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
-        List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
 
 
         clazzLogDao.updateDoneForClazzLogAsync(currentClazzLog.getClazzLogUid(),
                 new UmCallback<Integer>() {
             @Override
             public void onSuccess(Integer result) {
+
+                Clazz clazzBeforeAttendanceUpdate = clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid());
+
+                Role officerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
+                List<Person> officers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                        currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+                Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+                List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                        currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
+
+
                 List<ClazzMember> beforeList = clazzMemberDao.findByClazzUid(
                         currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_STUDENT);
                 Map<Long, ClazzMember> beforeMap = new HashMap<>();

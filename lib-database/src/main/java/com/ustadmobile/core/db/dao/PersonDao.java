@@ -99,7 +99,8 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             " AND Person.firstNames like :searchQuery OR Person.lastName like :searchQuery")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentBySearch(String searchQuery);
 
-
+    @UmQuery("SELECT * FROM Person WHERE admin = 1")
+    public abstract List<Person> findAllAdminsAsList();
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
 

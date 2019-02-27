@@ -80,10 +80,10 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
         //Creates ClazzLogs for today (since ClazzLogs are automatically only created for tomorrow)
         Runnable runAfterInsertOrUpdate = () -> {
-            //scheduleDao.createClazzLogsForToday(
-            //        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
-            scheduleDao.createClazzLogsForEveryDayFromDays(5,
+            scheduleDao.createClazzLogsForToday(
                     UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
+            //scheduleDao.createClazzLogsForEveryDayFromDays(5,
+            //        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
             UstadMobileSystemImpl.getInstance().scheduleChecks(getContext());
         };
 

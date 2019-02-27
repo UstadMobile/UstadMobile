@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -15,15 +16,19 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
+import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonPicture;
+import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.ScheduledCheck;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -208,9 +213,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                 }
 
                                 @Override
-                                public void onFailure(Throwable exception) {
-
-                                }
+                                public void onFailure(Throwable exception) {exception.printStackTrace();}
                         });
 
                     }
@@ -224,9 +227,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
 
     }
@@ -255,11 +256,10 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                     }
 
                     @Override
-                    public void onFailure(Throwable exception) {
-
-                    }
+                    public void onFailure(Throwable exception) {exception.printStackTrace();}
                 });
 
+                //TODO: Check do we even need to update personWithPic if that object didnt change?
                 //Update personWithpic
                 personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
 
@@ -310,9 +310,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
     }
 
@@ -580,11 +578,78 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             @Override
             public void onSuccess(Integer result) {
 
+
+
                 //Update the custom fields
                 personCustomFieldValueDao.updateListAsync(customFieldsToUpdate,
                         new UmCallback<Integer>() {
                     @Override
                     public void onSuccess(Integer result) {
+
+                        //Start of feed generation
+                        //All edits trigger a feed
+                        List<ClazzWithNumStudents> personClazzes = repository.getClazzDao()
+                                .findAllClazzesByPersonUidAsList(mUpdatedPerson.getPersonUid());
+
+                        List<FeedEntry> newFeedEntries = new ArrayList<>();
+                        String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                PersonDetailView.ARG_PERSON_UID + "=" +
+                                String.valueOf(mUpdatedPerson.getPersonUid());
+
+                        for(ClazzWithNumStudents everyClazz:personClazzes){
+                            Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+                            List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                                    everyClazz.getClazzUid(), mneOfficerRole.getRoleUid());
+
+                            List<Person> admins = repository.getPersonDao().findAllAdminsAsList();
+
+                            for(Person mne:mneofficers){
+                                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                    mne.getPersonUid(), everyClazz.getClazzUid(),
+                                    ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
+                                        feedLinkViewPerson);
+
+                                newFeedEntries.add(
+                                    new FeedEntry(
+                                            feedEntryUid,
+                                            "Student details updated" ,
+                                            "Student " + mUpdatedPerson.getFirstNames()
+                                                + " " + mUpdatedPerson.getLastName()
+                                                    + " details updated"
+                                            ,
+                                            feedLinkViewPerson,
+                                            everyClazz.getClazzName(),
+                                            mne.getPersonUid()
+                                    )
+                                );
+                            }
+
+                            for(Person admin:admins){
+                                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                        admin.getPersonUid(), everyClazz.getClazzUid(),
+                                        ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
+                                        feedLinkViewPerson);
+
+                                newFeedEntries.add(
+                                    new FeedEntry(
+                                            feedEntryUid,
+                                            "Student details updated" ,
+                                            "Student " + mUpdatedPerson.getFirstNames()
+                                                    + " " + mUpdatedPerson.getLastName()
+                                                    + " details updated"
+                                            ,
+                                            feedLinkViewPerson,
+                                            everyClazz.getClazzName(),
+                                            admin.getPersonUid()
+                                    )
+                                );
+                            }
+                        }
+
+                        repository.getFeedEntryDao().insertList(newFeedEntries);
+                        //End of feed Generation
+
+
                         //Close the activity.
                         view.finish();
                     }
