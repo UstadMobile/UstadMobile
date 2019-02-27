@@ -6,6 +6,8 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
@@ -109,7 +111,7 @@ public class DownloadJobItemRunnerTest {
 
     private WiFiDirectGroupBle groupBle;
 
-    private static final int MAX_LATCH_WAITING_TIME = 5;
+    private static final int MAX_LATCH_WAITING_TIME = 15;
 
     private static final int MAX_THREAD_SLEEP_TIME = 2;
 
@@ -360,7 +362,7 @@ public class DownloadJobItemRunnerTest {
                         (int)testDownloadJobItemUid);
 
         assertEquals("File download task completed successfully",
-                item.getDjiStatus(), JobStatus.COMPLETE);
+                JobStatus.COMPLETE, item.getDjiStatus());
 
         assertEquals("Same file size", webServerTmpContentEntryFile.length(),
                 new File(item.getDestinationFile()).length());
@@ -391,7 +393,7 @@ public class DownloadJobItemRunnerTest {
                 (int)testDownloadJobItemUid);
 
         assertEquals("File download task retried and completed successfully",
-                item.getDjiStatus(),JobStatus.COMPLETE);
+                JobStatus.COMPLETE, item.getDjiStatus());
 
         assertEquals("Same file size", webServerTmpContentEntryFile.length(),
                 new File(item.getDestinationFile()).length());
@@ -419,7 +421,7 @@ public class DownloadJobItemRunnerTest {
                 (int)testDownloadJobItemUid);
 
         assertEquals("File download task retried and completed with failure status",
-                item.getDjiStatus(),JobStatus.FAILED);
+                JobStatus.FAILED, item.getDjiStatus());
     }
 
     @Test
@@ -488,7 +490,7 @@ public class DownloadJobItemRunnerTest {
     public void givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus()
             throws InterruptedException {
 
-        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+        cloudServerDispatcher.setThrottle(512, 3,TimeUnit.SECONDS);
 
         DownloadJobItemWithDownloadSetItem item =
                 umAppDatabase.getDownloadJobItemDao().findWithDownloadSetItemByUid(
@@ -497,8 +499,12 @@ public class DownloadJobItemRunnerTest {
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, umAppDatabase, cloudEndPoint);
 
         umAppDatabase.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
+
         umAppDatabase.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),true);
+
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 699,
+                " Running DownloadJobItemRunner for "+item.getDjiUid());
 
         new Thread(jobItemRunner).start();
 
