@@ -56,8 +56,6 @@ import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
-import com.ustadmobile.lib.db.entities.ContainerFile;
-import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -103,8 +101,8 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 8, entities = {
-        ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
+@UmDatabase(version = 10, entities = {
+        DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
