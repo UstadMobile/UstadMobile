@@ -3,7 +3,6 @@ import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -46,7 +45,7 @@ import java.util.Locale;
  * Created by mike on 10/15/15.
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
-        UstadViewWithNotifications, DialogInterface.OnClickListener {
+        UstadViewWithNotifications {
 
     private UstadBaseController baseController;
 
@@ -139,12 +138,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         super.onResume();
         if(localeChanged) {
             if(UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        recreate();
-                    }
-                }, 200);
+                new Handler().postDelayed(this::recreate, 200);
             }
         }
     }
@@ -251,7 +245,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         switch(item.getItemId()) {
             case android.R.id.home:
                 UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, this), this);
+                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
+                        this), this);
                 return true;
 
 
@@ -333,19 +328,21 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         this.permissionDialogTitle = dialogTitle;
         this.permission = permission;
 
-
         if(ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, permission)
-                    && !permissionRequestRationalesShown) {
+            if(!permissionRequestRationalesShown){
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(dialogTitle)
-                        .setMessage(dialogMessage)
-                        .setPositiveButton("OK", this);
+                builder.setTitle(permissionDialogTitle)
+                        .setMessage(permissionDialogMessage)
+                        .setNegativeButton(getString(android.R.string.cancel),
+                                (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton(getString(android.R.string.ok), (dialog, which) ->
+                                runAfterGrantingPermission(permission,afterPermissionMethodRunner,
+                                permissionDialogTitle,permissionDialogMessage));
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 permissionRequestRationalesShown = true;
-            }else {
+            }else{
                 permissionRequestRationalesShown = false;
                 ActivityCompat.requestPermissions(this, new String[]{permission}, RUN_TIME_REQUEST_CODE);
             }
@@ -353,15 +350,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             afterPermissionMethodRunner.run();
             afterPermissionMethodRunner = null;
         }
-
-
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-        runAfterGrantingPermission(permission,afterPermissionMethodRunner,
-                permissionDialogTitle,permissionDialogMessage);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -384,10 +374,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                     afterPermissionMethodRunner = null;
                     return;
                 }
-
-
-
-
                 break;
 
         }
