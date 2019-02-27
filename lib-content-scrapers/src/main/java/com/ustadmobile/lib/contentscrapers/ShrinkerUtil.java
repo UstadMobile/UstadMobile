@@ -509,11 +509,11 @@ public class ShrinkerUtil {
         ProcessBuilder videoBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
                 , "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", dest.getPath());
 
-        File rawFile = new File(dest, "audio.raw");
+        File rawFile = new File(dest.getParentFile(), "audio.raw");
         ProcessBuilder rawBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
                 , "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", rawFile.getPath());
 
-        File audioFile = new File(dest, "audio.c2");
+        File audioFile = new File(dest.getParentFile(), "audio.c2");
         ProcessBuilder audioBuilder = new ProcessBuilder(ScraperBuildConfig.CODEC2_PATH, "3200", rawFile.getPath(), audioFile.getPath());
         videoBuilder.redirectErrorStream(true);
         Process process = null;
