@@ -508,15 +508,18 @@ public class ShrinkerUtil {
         }
 
         ProcessBuilder videoBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
-                , "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", dest.getPath());
+                , "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", "-y", dest.getPath());
+        videoBuilder.redirectErrorStream(true);
 
         File rawFile = new File(dest.getParentFile(), "audio.raw");
         ProcessBuilder rawBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
-                , "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", rawFile.getPath());
+                , "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", "-y", rawFile.getPath());
+        rawBuilder.redirectErrorStream(true);
 
         File audioFile = new File(dest.getParentFile(), "audio.c2");
         ProcessBuilder audioBuilder = new ProcessBuilder(ScraperBuildConfig.CODEC2_PATH, "3200", rawFile.getPath(), audioFile.getPath());
-        videoBuilder.redirectErrorStream(true);
+        audioBuilder.redirectErrorStream(true);
+
         Process process = null;
         try {
             process = videoBuilder.start();
@@ -531,7 +534,7 @@ public class ShrinkerUtil {
 
             process = audioBuilder.start();
             startProcess(process);
-            
+
             UMLogUtil.logTrace("got the c2 file");
 
         } catch (IOException e) {
