@@ -125,7 +125,7 @@ public abstract class DownloadJobDao {
     @UmQuery("UPDATE DownloadJob SET totalBytesToDownload = " +
             "(SELECT SUM(downloadLength) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +
             "WHERE djUid = :downloadJobId")
-    public abstract void updateTotalBytesToDownload(long downloadJobId, UmCallback<Integer> callback);
+    public abstract void updateTotalBytesToDownload(long downloadJobId);
 
     @UmQuery("UPDATE DownloadJob SET bytesDownloadedSoFar = " +
             "(SELECT SUM(downloadedSoFar) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +
