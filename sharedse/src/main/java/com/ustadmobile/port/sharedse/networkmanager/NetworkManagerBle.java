@@ -513,6 +513,11 @@ public abstract class NetworkManagerBle {
         }
     }
 
+    /**
+     * Send p2p state changes to either stop or start p2p service advertising & broadcasting
+     */
+    public abstract void sendP2PStateChangeBroadcast();
+
 
     /**
      * Clean up the network manager for shutdown

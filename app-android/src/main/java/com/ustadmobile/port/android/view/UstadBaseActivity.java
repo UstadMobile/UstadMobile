@@ -1,18 +1,25 @@
 package com.ustadmobile.port.android.view;
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -39,7 +46,7 @@ import java.util.Locale;
  * Created by mike on 10/15/15.
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
-        UstadViewWithNotifications {
+        UstadViewWithNotifications, DialogInterface.OnClickListener {
 
     private UstadBaseController baseController;
 
@@ -57,6 +64,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private String localeOnCreate = null;
 
     private boolean isStarted = false;
+
+    private static final int RUN_TIME_REQUEST_CODE = 111;
+
+    private boolean permissionRequestRationalesShown = false;
+
+    private Runnable afterPermissionMethodRunner;
+
+    private String permissionDialogTitle;
+
+    private String permissionDialogMessage;
+
+    private String permission;
+
 
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
@@ -292,5 +312,84 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     public void showNotification(String notification, int length) {
         runOnUiThread(() ->Toast.makeText(this, notification, length).show());
+    }
+
+    /**
+     * Responsible for running task after checking permissions
+     * @param permission Permission to be checked
+     * @param runnable Future task to be executed
+     * @param dialogTitle Permission dialog title
+     * @param dialogMessage Permission dialog message
+     */
+    protected void runAfterGrantingPermission(String permission, Runnable runnable,
+                                           String dialogTitle,String dialogMessage){
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+            afterPermissionMethodRunner.run();
+            return;
+        }
+
+        this.afterPermissionMethodRunner = runnable;
+        this.permissionDialogMessage = dialogMessage;
+        this.permissionDialogTitle = dialogTitle;
+        this.permission = permission;
+
+
+        if(ContextCompat.checkSelfPermission(this, permission)
+                != PackageManager.PERMISSION_GRANTED){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, permission)
+                    && !permissionRequestRationalesShown) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(dialogTitle)
+                        .setMessage(dialogMessage)
+                        .setPositiveButton("OK", this);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                permissionRequestRationalesShown = true;
+            }else {
+                permissionRequestRationalesShown = false;
+                ActivityCompat.requestPermissions(this, new String[]{permission}, RUN_TIME_REQUEST_CODE);
+            }
+        }else{
+            afterPermissionMethodRunner.run();
+            afterPermissionMethodRunner = null;
+        }
+
+
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        runAfterGrantingPermission(permission,afterPermissionMethodRunner,
+                permissionDialogTitle,permissionDialogMessage);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode){
+            case RUN_TIME_REQUEST_CODE:
+                boolean allPermissionGranted = grantResults.length == permissions.length;
+                for(int result : grantResults) {
+                    allPermissionGranted &= result == PackageManager.PERMISSION_GRANTED;
+                }
+
+                if(!allPermissionGranted &&
+                        permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                    afterPermissionMethodRunner.run();
+                    afterPermissionMethodRunner = null;
+                }
+
+                if(allPermissionGranted){
+                    afterPermissionMethodRunner.run();
+                    afterPermissionMethodRunner = null;
+                    return;
+                }
+
+
+
+
+                break;
+
+        }
     }
 }
