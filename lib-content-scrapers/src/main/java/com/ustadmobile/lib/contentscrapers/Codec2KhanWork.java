@@ -67,6 +67,11 @@ public class Codec2KhanWork {
                     continue;
                 }
                 File parentFolder = contentFolder.getParentFile();
+                if (parentFolder.getPath().endsWith("/en")) {
+                    UMLogUtil.logTrace("Got folder with parent en");
+                    parentFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(contentFolder.getName()));
+                    contentFolder = new File(parentFolder, parentFolder.getName());
+                }
                 UMLogUtil.logTrace("Got the parent folder " + parentFolder.getPath());
 
 
@@ -102,7 +107,7 @@ public class Codec2KhanWork {
                         content = new File(contentFolder, FilenameUtils.getName(videoUrl));
                         FileUtils.copyURLToFile(new URL(videoUrl), content);
                         UMLogUtil.logTrace("Got the video mp4");
-                    }else{
+                    } else {
                         UMLogUtil.logError("Did not get the video mp4 for " + khanFile.getFilePath());
                     }
                 }
