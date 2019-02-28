@@ -72,7 +72,6 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
 
     public static final int DESTROYED = 6;
 
-
     /**
      * Create a new controller with the given context
      *

@@ -1,6 +1,9 @@
 package com.ustadmobile.port.sharedse.view;
 
+import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.view.UstadView;
+
+import java.util.List;
 
 public interface DownloadDialogView extends UstadView {
 
@@ -20,13 +23,11 @@ public interface DownloadDialogView extends UstadView {
 
     void setStackOptionsVisible(boolean visible);
 
-    int [] getOptionIds();
-
     void dismissDialog();
 
     void setWifiOnlyOptionVisible(boolean visible);
 
     void setCalculatingViewVisible(boolean visible);
 
-
+    void setUpStorageOptions(List<UMStorageDir> storageOptions);
 }

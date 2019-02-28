@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
@@ -147,11 +148,16 @@ public abstract class UmLiveDataJdbc<T> implements UmLiveData<T>, DbChangeListen
         lastUpdated = System.currentTimeMillis();
         value = fetchValue();
         database.getExecutor().execute(() -> {
-            synchronized (UmLiveDataJdbc.this) {
-                for(UmObserver<T> observer : activeObservers) {
-                    observer.onChanged(value);
-                }
+            List<UmObserver<T>> observersToNotify;
+            synchronized (activeObservers) {
+                observersToNotify = new ArrayList<>(activeObservers.size());
+                observersToNotify.addAll(activeObservers);
             }
+
+            for(UmObserver<T> observer : observersToNotify) {
+                observer.onChanged(value);
+            }
+
         });
     }
 

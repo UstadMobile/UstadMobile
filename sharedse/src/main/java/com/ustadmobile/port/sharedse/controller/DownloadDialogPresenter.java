@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
@@ -40,9 +39,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private UmLiveData<Boolean> allowedMeteredLive;
 
-    private long downloadSetUid;
+    private volatile long downloadSetUid;
 
-    private long downloadJobUid = 0L;
+    private volatile long downloadJobUid = 0L;
 
     private UstadMobileSystemImpl impl;
 
@@ -50,11 +49,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private String destinationDir = null;
 
-    private static final int stackedButtonPauseIndex = 0;
+    public static final int STACKED_BUTTON_PAUSE = 0;
 
-    private static final int stackedButtonCancelIndex = 1;
+    public static final int STACKED_BUTTON_CANCEL = 1;
 
-    private static final int stackedButtonContinueIndex = 2;
+    public static final int STACKED_BUTTON_CONTINUE = 2;
 
     private NetworkManagerBle networkManagerBle;
 
@@ -75,8 +74,14 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         impl = UstadMobileSystemImpl.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
-        view.runOnUiThread(() -> view.setWifiOnlyOptionVisible(false));
-        new Thread(this::setup).start();
+        view.setWifiOnlyOptionVisible(false);
+
+        impl.getStorageDirs(context, result -> {
+            destinationDir = result.get(0).getDirURI();
+            view.runOnUiThread(() -> view.setUpStorageOptions(result));
+            new Thread(this::setup).start();
+        });
+
     }
 
 
@@ -117,6 +122,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 view.setBottomButtonNegativeText(impl.getString(
                         MessageID.download_cancel_label,getContext()));
             }else if(downloadStatus >= JobStatus.RUNNING_MIN){
+                deleteFileOptions = false;
                 view.setStackOptionsVisible(true);
                 view.setBottomButtonsVisible(false);
                 String [] optionTexts = new String[]{
@@ -126,8 +132,12 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 };
                 statusMessage = impl.getString(MessageID.download_state_downloading,
                         getContext());
-                view.setStackedOptions(view.getOptionIds(), optionTexts);
+                view.setStackedOptions(
+                        new int[]{STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
+                                STACKED_BUTTON_CONTINUE},
+                        optionTexts);
             }else{
+                deleteFileOptions = false;
                 statusMessage = impl.getString(MessageID.download_state_download,
                         getContext());
                 view.setStackOptionsVisible(false);
@@ -171,9 +181,6 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private void createDownloadSet() {
         DownloadSet downloadSet = new DownloadSet();
-        UMStorageDir[] storageDir = UstadMobileSystemImpl.getInstance()
-                .getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE, getContext());
-        destinationDir = storageDir[0].getDirURI();
         downloadSet.setDestinationDir(destinationDir);
         downloadSet.setDsRootContentEntryUid(contentEntryUid);
 
@@ -212,9 +219,10 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         DownloadJob downloadJob = new DownloadJob();
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setTimeCreated(System.currentTimeMillis());
+        downloadJob.setDjStatus(JobStatus.NOT_QUEUED);
         downloadJob.setDjDsUid(downloadSetUid);
 
-        long downloadJobId = umAppDatabase.getDownloadJobDao().insert(downloadJob);
+        downloadJobUid = umAppDatabase.getDownloadJobDao().insert(downloadJob);
 
         List<DownloadJobItemDao.DownloadJobItemToBeCreated> itemToBeCreated =
                 umAppDatabase.getDownloadJobItemDao()
@@ -226,7 +234,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         for(DownloadJobItemDao.DownloadJobItemToBeCreated item: itemToBeCreated){
             DownloadJobItem jobItem = new DownloadJobItem();
             jobItem.setDjiContentEntryFileUid(item.getContentEntryFileUid());
-            jobItem.setDjiDjUid(downloadJobId);
+            jobItem.setDjiDjUid(downloadJobUid);
+            jobItem.setDjiStatus(JobStatus.NOT_QUEUED);
             jobItem.setDownloadLength(item.getFileSize());
             jobItem.setDjiDsiUid(item.getDownloadSetItemUid());
             jobItem.setDestinationFile(UMFileUtil.joinPaths(destinationDir,
@@ -239,7 +248,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         umAppDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
         umAppDatabase.getDownloadJobItemDao().insert(jobItems);
-        umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobId,null);
+        umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobUid);
     }
 
 
@@ -269,17 +278,22 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     public void handleClickStackedButton(int idClicked) {
-        if (idClicked == view.getOptionIds()[stackedButtonPauseIndex]) {
-            new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
-                    JobStatus.PAUSED, JobStatus.PAUSING)).start();
-            dismissDialog();
-        }else if(idClicked == view.getOptionIds()[stackedButtonCancelIndex]){
-            cancelDownload();
-            dismissDialog();
-        }else if(idClicked == view.getOptionIds()[stackedButtonContinueIndex]){
-            continueDownloading();
-            dismissDialog();
+        switch (idClicked) {
+            case STACKED_BUTTON_PAUSE:
+                new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+                        JobStatus.PAUSED, JobStatus.PAUSING)).start();
+                break;
+
+            case STACKED_BUTTON_CONTINUE:
+                continueDownloading();
+                break;
+
+            case STACKED_BUTTON_CANCEL:
+                cancelDownload();
+                break;
         }
+
+        dismissDialog();
     }
 
 
@@ -295,7 +309,8 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private void cancelDownload(){
         new Thread(() -> umAppDatabase.getDownloadJobDao()
-                .update(downloadJobUid,JobStatus.CANCELLING)).start();
+                .updateJobAndItems(downloadJobUid, JobStatus.CANCELED,
+                        JobStatus.CANCELLING)).start();
     }
 
     public void handleWiFiOnlyOption(boolean wifiOnly){
@@ -303,8 +318,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 .setMeteredConnectionBySetUid(downloadSetUid,!wifiOnly)).start();
     }
 
-    public void handleStorageOptionSelection(String destinationDir){
-        this.destinationDir = destinationDir;
+    public void handleStorageOptionSelection(String selectedDir){
+        new Thread(() -> umAppDatabase.getDownloadSetDao().updateDestinationDirectory(
+                downloadSetUid, selectedDir,null)).start();
     }
 
     /**

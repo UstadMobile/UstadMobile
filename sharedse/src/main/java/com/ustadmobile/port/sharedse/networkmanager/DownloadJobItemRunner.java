@@ -173,6 +173,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             meteredConnectionAllowed.set(meteredConnection ? 1 : 0);
             if(meteredConnectionAllowed.get() == 0 && connectivityStatus != null
                     && connectivityStatus.getConnectivityState() == STATE_METERED) {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() +
+                        " : no longer allowed to run on metered network - stopping");
                 stopAsync(JobStatus.WAITING_FOR_CONNECTION);
             }
         }
@@ -376,13 +378,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     httpDownload.getTotalSize(),httpDownload.getCurrentDownloadSpeed());
         }
 
-
-        if(wiFiDirectGroupBle != null && !downloaded){
-            checkWhereToDownloadAFileFrom();
-
-        }else{
-            stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
-        }
+        stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
 
     }
 
@@ -402,7 +398,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * @see JobStatus
      */
     private void updateItemStatus(int itemStatus) {
-        appDb.getDownloadJobDao().update(downloadItem.getDjiDjUid(),itemStatus);
         appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
         appDb.getContentEntryStatusDao().updateDownloadStatus(
                 downloadItem.getDownloadSetItem().getDsiContentEntryUid(), itemStatus);

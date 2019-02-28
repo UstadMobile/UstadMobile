@@ -160,7 +160,7 @@ public abstract class NetworkManagerBle {
 
         @Override
         public long getUid(DownloadJobItemWithDownloadSetItem item) {
-            return item.getDjiUid();
+            return ((long)(Long.valueOf(item.getDjiUid()).hashCode()) << 32) | item.getNumAttempts();
         }
     };
 
@@ -169,18 +169,6 @@ public abstract class NetworkManagerBle {
      */
     public void onCreate() {
         umAppDatabase = UmAppDatabase.getInstance(mContext);
-
-        //Starting scanning too soon after advertising will cause issues on Droid
-        new Thread(() -> {
-            try{
-                Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-                startScanning();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-
         downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
@@ -524,6 +512,11 @@ public abstract class NetworkManagerBle {
                     JobStatus.CANCELED, JobStatus.CANCELLING, JobStatus.CANCELED);
         }
     }
+
+    /**
+     * Send p2p state changes to either stop or start p2p service advertising & broadcasting
+     */
+    public abstract void sendP2PStateChangeBroadcast();
 
 
     /**

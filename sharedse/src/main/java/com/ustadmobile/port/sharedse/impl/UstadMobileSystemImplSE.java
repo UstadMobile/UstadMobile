@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
@@ -99,6 +100,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return UMFileUtil.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
     }
 
+
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
@@ -135,6 +137,29 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
         dirList.toArray(retVal);
         return retVal;
+    }
+
+    @Override
+    public void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback) {
+
+        List<UMStorageDir> dirList = new ArrayList<>();
+        String systemBaseDir = getSystemBaseDir(context);
+        final String contentDirName = getContentDirName(context);
+
+        dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
+                false, true, false));
+
+        //Find external directories
+        String[] externalDirs = findRemovableStorage();
+        for(String extDir : externalDirs) {
+            dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+                    contentDirName}),
+                    getString(MessageID.memory_card, context),
+                    true, true, false, false));
+        }
+
+        callback.onDone(dirList);
+
     }
 
     /**

@@ -44,6 +44,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Xml;
@@ -52,9 +53,13 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -72,6 +77,7 @@ import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -92,19 +98,24 @@ import com.ustadmobile.port.android.view.WebChunkActivity;
 import com.ustadmobile.port.android.view.XapiPackageActivity;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
@@ -120,11 +131,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String APP_PREFERENCES_NAME = "UMAPP-PREFERENCES";
 
+
     public static final String TAG_DIALOG_FRAGMENT = "UMDialogFrag";
 
     public static final String ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change";
 
     public static final String PREFKEY_LANG = "lang";
+
+    private static final int deviceStorageIndex = 0;
+
+    private static final int sdCardStorageIndex = 1;
 
     /**
      * Map of view names to the activity class that is implementing them on Android
@@ -631,4 +647,30 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return null;
     }
 
+
+    @Override
+    public void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback) {
+        new Thread(() -> {
+            List<UMStorageDir> dirList = new ArrayList<>();
+            File [] storageOptions = ContextCompat.getExternalFilesDirs((Context) context,null);
+            String contentDirName = getContentDirName(context);
+
+            File umDir = new File(storageOptions[deviceStorageIndex],contentDirName);
+            if(!umDir.exists())umDir.mkdirs();
+            dirList.add(new UMStorageDir(umDir.getAbsolutePath(),
+                    getString(MessageID.phone_memory, context), true,
+                    true,false, UmFileUtilSe.canWriteFileInDir(umDir)));
+
+            if(storageOptions.length > 1){
+                File sdCardStorage = storageOptions[sdCardStorageIndex];
+                umDir = new File(sdCardStorage,contentDirName);
+                if(!umDir.exists())umDir.mkdirs();
+                dirList.add(new UMStorageDir(umDir.getAbsolutePath(),
+                        getString(MessageID.memory_card, context), true,
+                        true,false,UmFileUtilSe.canWriteFileInDir(umDir)));
+            }
+
+            callback.onDone(dirList);
+        }).start();
+    }
 }

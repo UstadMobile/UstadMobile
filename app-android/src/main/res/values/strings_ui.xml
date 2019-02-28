@@ -258,6 +258,8 @@
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
     <string name="onboarding_offline_sharing">Share offline</string>
     <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
+    <string name="location_permission_title">Location permissions required</string>
+    <string name="location_permission_message">This app requires location permissions to enable you to download and share content offline.</string>
 
     <string name="download_pause_stacked_label">Pause download</string>
     <string name="download_delete_btn_label">Delete</string>
@@ -274,7 +276,8 @@
     <string name="download_cancel_all">CANCEL ALL</string>
     <string name="download_pause_all">PAUSE ALL</string>
     <string name="download_pause_download">Pause</string>
-    <string name="download_storage_option_device">Use device storage - %1$s free</string>
-    <string name="download_storage_option__sdcard">Use SD Card storage - %1$s free</string>
+    <string name="download_storage_option_device">Use %1$s - %2$s free</string>
+    <string name="download_storage_permission_title">File permissions required</string>
+    <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
 
 </resources>
