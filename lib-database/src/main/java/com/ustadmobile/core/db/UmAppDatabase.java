@@ -103,7 +103,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 8, entities = {
+@UmDatabase(version = 10, entities = {
         ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -521,6 +521,20 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                 db.execSql("DROP TABLE IF EXISTS OpdsEntryStatusCache");
                 db.execSql("DROP TABLE IF EXISTS OpdsEntryStatusCacheAncestor");
                 db.execSql("DROP TABLE IF EXISTS OpdsLink");
+            }
+        });
+        builder.addMigration(new UmDbMigration(8, 10) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE ContentEntry ADD COLUMN contentTypeFlag INTEGER DEFAULT 0");
+
+                }
             }
         });
 

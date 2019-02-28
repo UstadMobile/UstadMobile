@@ -134,12 +134,15 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
 
         runOnUiThread(() -> {
+            TextView label = findViewById(R.id.entry_detail_available_label);
             RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
 
             if (result.size() == 0) {
                 flexBox.setVisibility(View.GONE);
+                label.setVisibility(View.GONE);
             } else {
                 flexBox.setVisibility(View.VISIBLE);
+                label.setVisibility(View.VISIBLE);
 
                 FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
                 flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
