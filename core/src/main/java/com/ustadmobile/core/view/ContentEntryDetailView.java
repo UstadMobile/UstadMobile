@@ -17,7 +17,9 @@ public interface ContentEntryDetailView extends UstadView {
 
     void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
 
-    void setDownloadProgress(ContentEntryStatus status);
+    void showProgress(float progressValue);
+
+    void showButton(boolean isDownloaded);
 
     void handleFileOpenError();
 

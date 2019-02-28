@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
@@ -9,6 +10,7 @@ import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
@@ -25,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.zip.ZipEntry;
 
 import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
@@ -103,9 +106,21 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void onEntryStatusChanged(ContentEntryStatus status) {
-        viewContract.setDownloadProgress(status);
+        if (status != null) {
+            if (status.getDownloadStatus() == 0 || status.getDownloadStatus() == JobStatus.COMPLETE) {
+                viewContract.showButton(status.getDownloadStatus() == JobStatus.COMPLETE);
+            } else {
+                viewContract.showProgress(status.getTotalSize() > 0 ? (float) status.getBytesDownloadSoFar() /
+                        (float) status.getTotalSize() : 0);
+            }
+        } else {
+            viewContract.showButton(false);
+        }
     }
 
+    public Long getEntryUuid() {
+        return entryUuid;
+    }
 
     public void handleClickTranslatedEntry(long uid) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -128,59 +143,32 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         }
     }
 
-    public void handleDownloadButtonClick(boolean isDownloadComplete) {
+    public void handleDownloadButtonClick(boolean isDownloadComplete, Long entryUuid) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         if (isDownloadComplete) {
 
-            contentFileDao.findLatestCompletedFileForEntry(entryUuid, new UmCallback<ContentEntryFileWithStatus>() {
-                @Override
-                public void onSuccess(ContentEntryFileWithStatus result) {
+            ContentEntryUtil.goToContentEntry(entryUuid,
+                    repoAppDatabase, impl,
+                    isDownloadComplete,
+                    getContext(), new UmCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
 
-                    if (result.getEntryStatus().getFilePath() == null) {
-                        viewContract.handleFileOpenError();
-                    } else {
-
-                        Hashtable args = new Hashtable();
-                        String path = result.getEntryStatus().getFilePath();
-                        if (result.getMimeType().equals("application/zip")) {
-
-                            args.put(ARG_CONTAINERURI, path);
-                            impl.go(XapiPackageView.VIEW_NAME, args, getContext());
-                        } else if (result.getMimeType().equals("video/mp4")) {
-
-                            args.put(VideoPlayerView.ARG_VIDEO_PATH, path);
-                            args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryUuid));
-                            impl.go(VideoPlayerView.VIEW_NAME, args, getContext());
-                        } else if (result.getMimeType().equals("application/webchunk+zip")) {
-
-                            args.put(WebChunkView.ARG_CHUNK_PATH, path);
-                            impl.go(WebChunkView.VIEW_NAME, args, getContext());
-                        } else if (result.getMimeType().equals("application/epub+zip")) {
-
-                            args.put(ARG_CONTAINERURI, path);
-                            impl.go(ContainerView.VIEW_NAME, args, getContext());
-                        } else if (result.getMimeType().equals("application/webm-codec2+zip")) {
-
-                            // TODO unzip and give the path to both
-                            args.put(VideoPlayerView.ARG_VIDEO_PATH, path);
-                            args.put(VideoPlayerView.ARG_AUDIO_PATH, path);
-                            args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryUuid));
-                            impl.go(VideoPlayerView.VIEW_NAME, args, getContext());
                         }
 
-                    }
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            viewContract.handleFileOpenError();
+                        }
+                    });
 
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-
-                }
-            });
 
         } else {
             Hashtable args = new Hashtable();
-            args.put("contentEntryUid", String.valueOf(entryUuid));
+
+            //hard coded strings because these are actually in sharedse
+            args.put("contentEntryUid", String.valueOf(this.entryUuid));
             impl.go("DownloadDialog", args, getContext());
         }
 

@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources;
+
 @RunWith(AndroidJUnit4.class)
 public class VideoPlayerTest {
 
@@ -101,17 +103,6 @@ public class VideoPlayerTest {
     }
 
 
-    public static File readFromTestResources(String pathToFile, String nameOfFile) throws IOException {
-        InputStream inputStream = VideoPlayerTest.class.getResourceAsStream(pathToFile);
-        File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, nameOfFile);
-        OutputStream outStream = new FileOutputStream(targetFile);
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = inputStream.read(buffer)) != -1) {
-            outStream.write(buffer, 0, read);
-        }
-        return targetFile;
-    }
+
 
 }
