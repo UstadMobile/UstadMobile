@@ -91,7 +91,7 @@ public class VideoPlayerTest {
         b.putString(VideoPlayerView.ARG_VIDEO_PATH, targetFile.getPath());
         b.putString(VideoPlayerView.ARG_AUDIO_PATH, audioFile.getPath());
         b.putString(VideoPlayerView.ARG_SRT_PATH, srtFile.getPath());
-        b.putLong(VideoPlayerView.ARG_CONTENT_ENTRY_ID, 14L);
+        b.putString(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(14L));
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
