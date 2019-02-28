@@ -6,6 +6,7 @@ import android.media.AudioTrack;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -82,6 +83,29 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
     }
+
+    private void clickUpNavigation() {
+        runOnUiThread(() -> {
+            if (mPresenter != null) {
+                mPresenter.handleUpNavigation();
+            }
+        });
+
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                clickUpNavigation();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
