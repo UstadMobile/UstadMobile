@@ -17,6 +17,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.MAXIMUM_MTU_SIZE;
@@ -59,6 +60,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private final CountDownLatch mLatch = new CountDownLatch(1);
 
+    private final AtomicBoolean mtuChangedRef = new AtomicBoolean(false);
+
 
     /**
      * Constructor to be called when creating new callback
@@ -84,8 +87,12 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
         super.onMtuChanged(gatt, mtu, status);
         //Successfully changed the MTU, updateState message and notify to start discovering service
-        this.defaultMtuSize = mtu;
-        mLatch.countDown();
+        //This will be called multiple times, to avoid IllegalstateException check if it was already called.
+        if(!mtuChangedRef.get()){
+            this.defaultMtuSize = mtu;
+            mLatch.countDown();
+        }
+        mtuChangedRef.set(defaultMtuSize == mtu);
     }
 
     /**
@@ -109,7 +116,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
                     try {
-                        mLatch.wait(TimeUnit.SECONDS.toMillis(2));
+                        mLatch.await(10,TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         mLatch.countDown();
                         e.printStackTrace();

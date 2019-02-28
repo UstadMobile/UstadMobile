@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
@@ -16,6 +17,7 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -99,6 +101,11 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     private static final int BAD_PEER_FAILURE_THRESHOLD = 3;
 
     /**
+     *
+     */
+    private static final int CONNECTION_TIMEOUT = 60;
+
+    /**
      * Timer task to keep track of the download status
      */
     private class StatusCheckTask extends TimerTask{
@@ -154,12 +161,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     stopAsync(JobStatus.WAITING_FOR_CONNECTION);
                     break;
 
-                case STATE_CONNECTING_LOCAL:
-                    if(newStatus.getWifiSsid().equals(wiFiDirectGroupBle.getSsid())){
-                        localConnectLatch.countDown();
-                    }
-                    break;
-
+                //TODO: check CONNECTING_LOCAL - if the status changed, but we are not the job that asked for that
             }
         }
     }
@@ -198,10 +200,11 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
         if(entryStatusResponse != null){
             availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
-            if(availableLocally.get() == 1 && !currentContentEntryFileStatus.isAvailable()){
+            if(availableLocally.get() == 1 && currentContentEntryFileStatus!= null
+                    && !currentContentEntryFileStatus.isAvailable()){
                 this.currentNetworkNode =
                         appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
-                startLocalConnectionHandShake();
+                connectToLocalNodeNetwork();
             }
         }
     }
@@ -285,41 +288,9 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * Decide where to get the file, on cloud or from peer devices.
      */
     private void checkWhereToDownloadAFileFrom(){
-        long currentTimeStamp = System.currentTimeMillis();
-        long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
-        long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(5);
-
-        currentNetworkNode = appDb.getNetworkNodeDao()
-                .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
-                        minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
-
-        if(currentContentEntryFileStatus == null || currentNetworkNode == null){
-            startDownload();
-        }else{
-            isFromCloud = false;
-            startLocalConnectionHandShake();
-        }
     }
 
 
-    /**
-     * Start local peers connection handshake
-     */
-    private void startLocalConnectionHandShake(){
-        BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,new byte[0]);
-        networkManager.sendMessage(context,requestGroupCreation,
-                currentNetworkNode,this);
-        try {
-            localConnectLatch.await(10,TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if(connectivityStatus != null &&
-                connectivityStatus.getConnectivityState() == STATE_CONNECTING_LOCAL){
-            stopAsync(JobStatus.WAITING_FOR_CONNECTION);
-        }
-    }
 
     /**
      * Start downloading a file
@@ -331,17 +302,59 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         StatusCheckTask statusCheckTask = new StatusCheckTask();
         statusCheckTimer.scheduleAtFixedRate(statusCheckTask,
                 0, TimeUnit.SECONDS.toMillis(1));
-        DownloadJobItemHistory history = new DownloadJobItemHistory();
-        history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
-        history.setDownloadJobItemId(downloadItem.getDjiUid());
-        history.setNetworkNode(isFromCloud ? 0L: currentNetworkNode.getNodeId());
-        history.setUrl(getFileUrl());
-        history.setId((int) appDb.getDownloadJobItemHistoryDao().insert(history));
+
         do {
+            long currentTimeStamp = System.currentTimeMillis();
+            long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
+            long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(5);
+
+            //TODO: if the content is available on the node we already connected to, take that one
+            currentNetworkNode = appDb.getNetworkNodeDao()
+                    .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
+                            minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
+
+            isFromCloud = currentContentEntryFileStatus == null || currentNetworkNode == null;
+            DownloadJobItemHistory history = new DownloadJobItemHistory();
+            history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
+            history.setDownloadJobItemId(downloadItem.getDjiUid());
+            history.setNetworkNode(isFromCloud ? 0L: currentNetworkNode.getNodeId());
+            history.setUrl(getFileUrl());
+            history.setId((int) appDb.getDownloadJobItemHistoryDao().insert(history));
+
+            String downloadEndpoint;
+            URLConnectionOpener connectionOpener = null;
+            if(isFromCloud){
+                if(connectivityStatus.getWifiSsid() != null
+                        && connectivityStatus.getWifiSsid().toUpperCase().startsWith("DIRECT-")){
+                    //we are connected to a local peer, but need the normal wifi
+                    //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
+                    // set status to waiting for connection and stop
+                    if(!connectToCloudNetwork()) {
+                        //connection has failed
+                        attemptsRemaining--;
+                        recordHistoryFinished(history, false);
+                        continue;
+                    }
+                }
+                downloadEndpoint = endpointUrl;
+            }else{
+                if(!connectToLocalNodeNetwork()) {
+                    attemptsRemaining--;
+                    recordHistoryFinished(history, false);
+                    continue;
+                }
+                downloadEndpoint = wiFiDirectGroupBle.getEndpoint();
+                connectionOpener = networkManager.getLocalConnectionOpener();
+            }
+
+            String downloadUrl = downloadEndpoint + CONTENT_ENTRY_FILE_PATH +
+                    downloadItem.getDjiContentEntryFileUid();
+
             try {
                 appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
-                httpDownload = new ResumableHttpDownload(getFileUrl(),
+                httpDownload = new ResumableHttpDownload(downloadUrl,
                         downloadItem.getDestinationFile());
+                httpDownload.setConnectionOpener(connectionOpener);
                 httpDownloadRef.set(httpDownload);
                 history.setStartTime(System.currentTimeMillis());
                 downloaded = httpDownload.download();
@@ -355,12 +368,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 try { Thread.sleep(3000); }
                 catch(InterruptedException ignored) {}
             }
-
-            history.setEndTime(System.currentTimeMillis());
-            history.setSuccessful(downloaded);
-            appDb.getDownloadJobItemHistoryDao().update(history);
-
             attemptsRemaining--;
+            recordHistoryFinished(history, downloaded);
         }while(runnerStatus.get() == JobStatus.RUNNING && !downloaded && attemptsRemaining > 0);
 
         //httpdownloadref usage is finished
@@ -381,6 +390,66 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
 
     }
+
+    private void recordHistoryFinished(DownloadJobItemHistory history, boolean successful){
+        history.setEndTime(System.currentTimeMillis());
+        history.setSuccessful(successful);
+        appDb.getDownloadJobItemHistoryDao().update(history);
+    }
+
+    /**
+     * Try to connect to the 'normal' wifi
+     *
+     * @return
+     */
+    private boolean connectToCloudNetwork() {
+        //TODO: call restoreWifi on networkmanager to connect to the normal wifi
+        WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
+                (connectivityStatus) -> {
+                    if(connectivityStatus == null)
+                        return false;
+
+                    if(connectivityStatus.getConnectivityState()
+                            == ConnectivityStatus.STATE_UNMETERED)
+                        return true;
+
+                    return connectivityStatus.getConnectivityState()
+                            == ConnectivityStatus.STATE_METERED
+                            && meteredConnectionAllowed.get() == 1;
+
+                });
+
+        return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_UNMETERED
+                || (meteredConnectionAllowed.get() == 1
+                && connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_METERED);
+    }
+
+    /**
+     * Start local peers connection handshake
+     */
+    private boolean connectToLocalNodeNetwork(){
+        BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,
+                BleMessageUtil.bleMessageLongToBytes(Collections.singletonList(1L)));
+        UstadMobileSystemImpl.l(UMLog.DEBUG,699, mkLogPrefix() +
+                "Requesting group credentials ", null);
+        networkManager.sendMessage(context,requestGroupCreation, currentNetworkNode,
+                this);
+        AtomicReference<ConnectivityStatus> statusRef = new AtomicReference<>();
+        WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
+                (connectivityStatus) -> {
+                    statusRef.set(connectivityStatus);
+                    if(connectivityStatus == null)
+                        return false;
+
+                    if(isExpectedWifiDirectGroup(connectivityStatus))
+                        return true; //connected OK and ready to go
+
+                    return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_DISCONNECTED
+                            || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
+                });
+        return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get());
+    }
+
 
 
     /**
@@ -403,12 +472,21 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 downloadItem.getDownloadSetItem().getDsiContentEntryUid(), itemStatus);
     }
 
+    private boolean isExpectedWifiDirectGroup(ConnectivityStatus status){
+        return status.getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL
+                && status.getWifiSsid() != null
+                && wiFiDirectGroupBle != null
+                && status.getWifiSsid().equals(wiFiDirectGroupBle.getSsid());
+    }
 
     @Override
     public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
         if(response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
             this.wiFiDirectGroupBle = new Gson().fromJson(new String(response.getPayload()),
                             WiFiDirectGroupBle.class);
+            UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
+                    "Connecting to P2P group network with SSID "+wiFiDirectGroupBle.getSsid(),
+                    null);
             networkManager.connectToWiFi(wiFiDirectGroupBle.getSsid(),
                     wiFiDirectGroupBle.getPassphrase());
         }

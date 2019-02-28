@@ -98,11 +98,13 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             networkManagerBle = ((NetworkManagerBleAndroidService.LocalServiceBinder)service)
                     .getService().getNetworkManagerBle();
             bleServiceBound = true;
+            onBleNetworkServiceBound(networkManagerBle);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             bleServiceBound = false;
+            onBleNetworkServiceUnbound();
         }
     };
 
@@ -131,6 +133,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         Intent bleServiceIntent = new Intent(this, NetworkManagerBleAndroidService.class);
         bindService(bleServiceIntent,bleServiceConnection,
                 Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
+    }
+
+    /**
+     * All activities descending from UstadBaseActivity bind to the network manager. This method
+     * can be overriden when presenters need to use a reference to the networkmanager.
+     *
+     * @param networkManagerBle
+     */
+    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
+
+    }
+
+    protected void onBleNetworkServiceUnbound() {
+
     }
 
     @Override

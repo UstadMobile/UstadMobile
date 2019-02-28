@@ -27,26 +27,31 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
     /**
      * Message object which carries list of entry Ids to be checked for availability.
      */
-    public BleMessage message;
+    protected BleMessage message;
 
-    private NetworkNode networkNode;
+    protected NetworkNode networkNode;
 
-    private Object context;
+    protected Object context;
 
     private List<Long> entryUidsToCheck;
 
     private BleMessageResponseListener responseListener;
+
+    private NetworkManagerBle managerBle;
 
     /**
      * Constructor which will be used when creating new instance of a task
      * @param context Application context.
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
+     *
      */
-    public BleEntryStatusTask(Object context,List<Long> entryUidsToCheck, NetworkNode peerToCheck) {
+    public BleEntryStatusTask(Object context, NetworkManagerBle managerBle, List<Long> entryUidsToCheck,
+                              NetworkNode peerToCheck) {
         this.networkNode = peerToCheck;
         this.context = context;
         this.entryUidsToCheck = entryUidsToCheck;
+        this.managerBle = managerBle;
     }
 
     /**
@@ -56,11 +61,12 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      * @param peerToSendMessageTo Peer to send message to
      * @param responseListener Message response listener object
      */
-    public BleEntryStatusTask(Object context , BleMessage message, NetworkNode peerToSendMessageTo,
+    public BleEntryStatusTask(Object context , NetworkManagerBle managerBle, BleMessage message, NetworkNode peerToSendMessageTo,
                               BleMessageResponseListener responseListener){
         this.networkNode = peerToSendMessageTo;
         this.context = context;
         this.message = message;
+        this.managerBle = managerBle;
         this.responseListener = responseListener;
     }
 
@@ -75,6 +81,14 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      */
     protected void setContext(Object context){
         this.context = context;
+    }
+
+    /**
+     * Set networkManagerBle for testing purpose.
+     * @param managerBle NetworkManagerBle object
+     */
+    void setManagerBle(NetworkManagerBle managerBle){
+        this.managerBle = managerBle;
     }
 
     /**
@@ -106,13 +120,14 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
                 List<EntryStatusResponse> entryFileStatusResponseList = new ArrayList<>();
                 List<Long> statusCheckResponse = bleMessageBytesToLong(response.getPayload());
 
+                long time = System.currentTimeMillis();
                 for(int entryCounter = 0 ; entryCounter < entryUidsToCheck.size(); entryCounter++){
                     long fileEntryUid = entryUidsToCheck.get(entryCounter);
                     boolean isAvailable = statusCheckResponse.get(entryCounter) != 0;
 
                     EntryStatusResponse entryResponse = new EntryStatusResponse();
                     entryResponse.setErNodeId(networkNodeId);
-                    entryResponse.setResponseTime(Calendar.getInstance().getTimeInMillis());
+                    entryResponse.setResponseTime(time);
                     entryResponse.setAvailable(isAvailable);
                     entryResponse.setErContentEntryFileUid(fileEntryUid);
 
@@ -122,9 +137,10 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
                 Long [] rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList);
                 if(rowCount.length == entryFileStatusResponseList.size()){
                     UstadMobileSystemImpl.l(UMLog.DEBUG,697,
-                            rowCount.length+" responses saved to the db");
+                            rowCount.length+" responses saved to the db from "+ sourceDeviceAddress);
                 }
 
+                managerBle.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList);
                 break;
         }
 

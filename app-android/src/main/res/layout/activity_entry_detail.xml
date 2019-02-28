@@ -123,6 +123,35 @@
             app:layout_constraintTop_toBottomOf="@id/image_content_size"
             tools:text="50 mb" />
 
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/content_status_icon"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:layout_constraintEnd_toEndOf="@id/content_status_text"
+            app:layout_constraintStart_toStartOf="@id/content_status_text"
+            app:layout_constraintTop_toBottomOf="@id/library_size_divider"
+            app:srcCompat="@drawable/ic_cloud_download_black_24dp" />
+
+
+        <TextView
+            android:visibility="gone"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:id="@+id/content_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.973"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/image_content_size"
+            tools:text="Locally Available" />
+
         <View
             android:id="@+id/description_divider"
             android:layout_width="0dp"

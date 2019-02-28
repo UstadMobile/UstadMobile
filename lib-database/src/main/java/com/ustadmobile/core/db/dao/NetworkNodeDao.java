@@ -45,8 +45,12 @@ public abstract class NetworkNodeDao {
     @UmUpdate
     public abstract void update(NetworkNode node);
 
-    @UmQuery("Select * From NetworkNode")
-    public abstract List<NetworkNode> findAllActiveNodes();
+    @UmQuery("UPDATE NetworkNode SET numFailureCount = numFailureCount + 1 WHERE nodeId = :nodeId")
+    public abstract void updateRetryCount(long nodeId, UmCallback<Void> callback);
+
+    @UmQuery("Select * From NetworkNode WHERE lastUpdateTimeStamp >= :lastUpdatedTime" +
+            " AND numFailureCount <= :maxNumFailure")
+    public abstract List<NetworkNode> findAllActiveNodes(long lastUpdatedTime, int maxNumFailure);
 
     @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp WHERE bluetoothMacAddress = :bluetoothAddress")
     public abstract void updateLastSeen(String bluetoothAddress,long lastUpdateTimeStamp, UmCallback<Integer> numChanged);

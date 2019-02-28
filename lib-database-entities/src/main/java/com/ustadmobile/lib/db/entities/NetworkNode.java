@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
@@ -12,6 +13,7 @@ public class NetworkNode {
     @UmPrimaryKey(autoIncrement = true)
     private long nodeId;
 
+    @UmIndexField
     private String bluetoothMacAddress;
 
     private String ipAddress;
@@ -20,6 +22,7 @@ public class NetworkNode {
 
     private String deviceWifiDirectName;
 
+    @UmIndexField
     private long lastUpdateTimeStamp;
 
     private long networkServiceLastUpdated;
@@ -27,6 +30,8 @@ public class NetworkNode {
     private String nsdServiceName;
 
     private int port;
+
+    private int numFailureCount;
 
     private int wifiDirectDeviceStatus;
 
@@ -171,6 +176,15 @@ public class NetworkNode {
      */
     public void setLastUpdateTimeStamp(long lastUpdateTimeStamp) {
         this.lastUpdateTimeStamp = lastUpdateTimeStamp;
+    }
+
+
+    public int getNumFailureCount() {
+        return numFailureCount;
+    }
+
+    public void setNumFailureCount(int numFailureCount) {
+        this.numFailureCount = numFailureCount;
     }
 
     /**

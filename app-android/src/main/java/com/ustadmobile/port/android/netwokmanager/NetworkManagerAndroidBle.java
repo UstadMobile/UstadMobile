@@ -227,18 +227,21 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             if(!isMeteredConnection){
                 WifiManager wifiManager = (WifiManager) mContext.getApplicationContext()
                         .getSystemService (Context.WIFI_SERVICE);
+
                 WiFiSSID = wifiManager.getConnectionInfo()
                         .getSSID().replace("\"", "");
+                localConnectionOpener = network::openConnection;
             }
             int state = isMeteredConnection ?
                     ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
             umAppDatabase.getConnectivityStatusDao()
-                    .update( state, WiFiSSID,true,null);
+                    .addConnectivityStatusRecord(state, WiFiSSID,true,null);
         }
 
         @Override
         public void onLost(Network network) {
             super.onLost(network);
+            localConnectionOpener = null;
             umAppDatabase.getConnectivityStatusDao()
                     .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
         }
@@ -302,8 +305,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
     }
 
-
-
     @Override
     public void sendP2PStateChangeBroadcast() {
         Intent intent = new Intent(ACTION_UM_P2P_SERVICE_STATE_CHANGED);
@@ -311,8 +312,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 ? EXTRA_UM_P2P_STATE_ON : EXTRA_UM_P2P_STATE_OFF));
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
-
-
 
     /**
      * {@inheritDoc}
@@ -586,8 +585,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     public BleEntryStatusTask makeEntryStatusTask(Object context, List<Long> entryUidsToCheck,
                                                      NetworkNode peerToCheck) {
         if(isBleDeviceSDKVersion()){
-            BleEntryStatusTaskAndroid entryStatusTask =
-                    new BleEntryStatusTaskAndroid((Context)context,entryUidsToCheck,peerToCheck);
+            BleEntryStatusTaskAndroid entryStatusTask = new BleEntryStatusTaskAndroid(
+                    (Context)context,this, entryUidsToCheck,peerToCheck);
             entryStatusTask.setBluetoothManager((BluetoothManager)bluetoothManager);
             return entryStatusTask;
         }
@@ -602,9 +601,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                                                   NetworkNode peerToSendMessageTo,
                                                   BleMessageResponseListener responseListener) {
         if(isBleDeviceSDKVersion()){
-            BleEntryStatusTaskAndroid task =
-                    new BleEntryStatusTaskAndroid((Context)context,message,
-                            peerToSendMessageTo, responseListener);
+            BleEntryStatusTaskAndroid task = new BleEntryStatusTaskAndroid((
+                    Context)context,this,message, peerToSendMessageTo, responseListener);
             task.setBluetoothManager((BluetoothManager)bluetoothManager);
             return task;
         }

@@ -83,7 +83,6 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                         bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_REQUEST:
-
                 networkManager.handleWiFiDirectGroupChangeRequest(this);
                 networkManager.createWifiDirectGroup();
                 try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
@@ -98,8 +97,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        //TODO: Put the actual endpoint which will be used to serve peer request
-        group.setEndpoint(""+ networkManager.getHttpd().getListeningPort());
+        group.setEndpoint("http://192.168.49.1/"+ networkManager.getHttpd().getListeningPort()+"/");
         this.message = new Gson().toJson(group);
         mLatch.countDown();
     }

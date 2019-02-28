@@ -21,4 +21,6 @@ public interface ContentEntryDetailView extends UstadView {
 
     void handleFileOpenError();
 
+    void updateStatusIconAndText(int icon, String status);
+
 }

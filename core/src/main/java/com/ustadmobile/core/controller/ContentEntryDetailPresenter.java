@@ -6,9 +6,11 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
@@ -23,12 +25,13 @@ import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
-import static com.ustadmobile.core.view.VideoPlayerView.ARG_VIDEO_PATH;
 
 public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
 
@@ -40,16 +43,26 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     private ContentEntryRelatedEntryJoinDao contentRelatedEntryDao;
     private String navigation;
     private Long entryUuid;
+    private Long contentEntryFileUid = 0L;
     private ContentEntryStatusDao contentEntryStatusDao;
 
     private UmLiveData<ContentEntryStatus> statusUmLiveData;
 
-    public ContentEntryDetailPresenter(Object context, Hashtable arguments, ContentEntryDetailView viewContract) {
+    private LocalAvailabilityMonitor monitor;
+
+    public static final int LOCALLY_AVAILABLE_ICON = 1;
+
+    public static final int LOCALLY_NOT_AVAILABLE_ICON = 2;
+
+    public ContentEntryDetailPresenter(Object context, Hashtable arguments,
+                                       ContentEntryDetailView viewContract, LocalAvailabilityMonitor monitor) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
+        this.monitor = monitor;
 
     }
 
+    @Override
     public void onCreate(Hashtable hashtable) {
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
@@ -100,6 +113,26 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid);
         statusUmLiveData.observe(this, this::onEntryStatusChanged);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        contentFileDao.findFilesByContentEntryUid(entryUuid,
+                new UmCallback<List<ContentEntryFile>>() {
+            @Override
+            public void onSuccess(List<ContentEntryFile> result) {
+                contentEntryFileUid = result.get(0).getContentEntryFileUid();
+                monitor.startMonitoringAvailability(this,
+                        Collections.singletonList(contentEntryFileUid));
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
     }
 
     public void onEntryStatusChanged(ContentEntryStatus status) {
@@ -174,5 +207,21 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             impl.go("DownloadDialog", args, getContext());
         }
 
+    }
+
+    public void handleUpdateStatusIconAndText(Set<Long> locallyAvailableEntries){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        int icon = locallyAvailableEntries.contains(contentEntryFileUid) ?
+                LOCALLY_AVAILABLE_ICON : LOCALLY_NOT_AVAILABLE_ICON;
+        String status = impl.getString((icon == LOCALLY_AVAILABLE_ICON
+                ? MessageID.download_locally_availability: MessageID.download_cloud_availability)
+                ,getContext());
+       viewContract.runOnUiThread(() -> viewContract.updateStatusIconAndText(icon,status));
+    }
+
+    @Override
+    public void onDestroy() {
+        monitor.stopMonitoringAvailability(this);
+        super.onDestroy();
     }
 }

@@ -54,6 +54,7 @@ public class BleEntryStatusTaskTest {
 
         mockedEntryStatusTask = spy(BleEntryStatusTask.class);
         mockedEntryStatusTask.setContext(context);
+        mockedEntryStatusTask.setManagerBle(spy(NetworkManagerBle.class));
         mockedEntryStatusTask.setEntryUidsToCheck(entries);
     }
     @Test

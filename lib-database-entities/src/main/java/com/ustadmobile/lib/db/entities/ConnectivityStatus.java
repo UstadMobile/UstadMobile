@@ -17,7 +17,7 @@ public class ConnectivityStatus {
     public static final int STATE_UNMETERED = 4;
 
     @UmPrimaryKey
-    private int csUid;
+    private int csUid = 1;
 
     private int connectivityState;
 
