@@ -924,12 +924,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         for(String descendantEntryId: entryIdsToDelete) {
             ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(context, descendantEntryId);
         }
-
-
     }
 
     @Override
-    public void deleteEntriesAsync(Object context, final List<String> entryIds, boolean recursive, UmCallback<Void> callback) {
+    public void deleteEntriesAsync(Object context, final List<String> entryIds, boolean recursive,
+                                   UmCallback<Void> callback) {
         bgExecutorService.execute(() -> {
             deleteEntries(context, entryIds, recursive);
             callback.onSuccess(null);

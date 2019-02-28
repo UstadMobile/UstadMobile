@@ -22,6 +22,7 @@ public class ScheduledCheck {
 
     public static final int TYPE_CHECK_PARTIAL_REPETITION_MED = 4;
     public static final int TYPE_CHECK_ABSENT_REPETITION_LOW = 5;
+    public static final int TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER = 5;
     //eg: An alert for a student that has been absent 2 or more days in a row
     public static final int TYPE_CHECK_ABSENT_REPETITION_MED = 9;
 

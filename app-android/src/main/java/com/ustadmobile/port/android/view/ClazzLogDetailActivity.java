@@ -81,11 +81,13 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView = findViewById(R.id.class_log_detail_container_recyclerview);
-        RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mRecyclerLayoutManager =
+                new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         AppCompatImageButton backDate = findViewById(R.id.activity_class_log_detail_date_go_back);
-        AppCompatImageButton forwardDate = findViewById(R.id.activity_class_log_detail_date_go_forward);
+        AppCompatImageButton forwardDate =
+                findViewById(R.id.activity_class_log_detail_date_go_forward);
 
         markAllPresent = findViewById(R.id.activity_class_log_detail_mark_all_present_text);
         markAllAbsent = findViewById(R.id.activity_class_log_detail_mark_all_absent_text);
@@ -169,7 +171,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
             setSupportActionBar(toolbar);
             Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         });
-
     }
 
     /**
@@ -180,7 +181,6 @@ public class ClazzLogDetailActivity extends UstadBaseActivity
     @Override
     public void updateDateHeading(String dateString) {
         //Since its called from the presenter, need to run on ui thread.
-
         runOnUiThread(() -> dateHeading.setText(dateString));
     }
 

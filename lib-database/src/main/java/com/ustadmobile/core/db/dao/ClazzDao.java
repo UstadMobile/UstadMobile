@@ -301,6 +301,37 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "Where Clazz.clazzUid = :clazzUid")
     public abstract void updateAttendancePercentage(long clazzUid);
 
+    @UmQuery("SELECT " +
+            "   (" +
+            "       SELECT COUNT(*) " +
+            "       FROM ClazzLogAttendanceRecord  " +
+            "       LEFT JOIN ClazzLog " +
+            "           ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "       WHERE ClazzLog.done = 1 " +
+            "           AND ClazzLog.clazzLogClazzUid = :clazzUid " +
+            "           AND ClazzLogAttendanceRecord.attendanceStatus = 1   " +
+            "           AND ClazzLog.clazzLogUid " +
+            "               NOT IN " +
+            "               (SELECT clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid " +
+            "           ORDER BY logDate DESC LIMIT 1)" +
+            "   ) * 1.0" +
+            "   /  " +
+            "   MAX(1, " +
+            "       (SELECT COUNT(*) " +
+            "           FROM ClazzLogAttendanceRecord  " +
+            "            LEFT JOIN ClazzLog " +
+            "             ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "            WHERE ClazzLog.done = 1 " +
+            "             AND ClazzLog.clazzLogClazzUid = :clazzUid " +
+            "             AND ClazzLog.clazzLogUid " +
+            "               NOT IN " +
+            "               (SELECT clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid " +
+            "               ORDER BY logDate DESC LIMIT 1)" +
+            "       )" +
+            "   ) * 1.0 " +
+            "   AS percentage")
+    public abstract float findClazzAttendancePercentageWithoutLatestClazzLog(long clazzUid);
+    
     /** Check if a permission is present on a specific entity e.g. update/modify etc*/
     @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")

@@ -82,8 +82,10 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         Runnable runAfterInsertOrUpdate = () -> {
             scheduleDao.createClazzLogsForToday(
                     UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
+            //If you want it to create ClazzLogs for every day of schedule (useful for testing):
             //scheduleDao.createClazzLogsForEveryDayFromDays(5,
             //        UmAccountManager.getActivePersonUid(getContext()), appDatabaseRepo);
+
             UstadMobileSystemImpl.getInstance().scheduleChecks(getContext());
         };
 
@@ -110,12 +112,11 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             });
         }
     }
-
 
     /**
      * Cancels the schedule dialog
@@ -143,7 +144,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
     public void handleScheduleToTimeSelected(long time){
         currentSchedule.setScheduleEndTime(time);
     }
-
 
     public void handleScheduleSelected(int position, long id){
         if(id == EVERY_DAY_SCHEDULE_POSITION){

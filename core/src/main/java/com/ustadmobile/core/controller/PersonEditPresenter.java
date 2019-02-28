@@ -606,7 +606,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                             for(Person mne:mneofficers){
                                 long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                                     mne.getPersonUid(), everyClazz.getClazzUid(),
-                                    ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
+                                    ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
                                         feedLinkViewPerson);
 
                                 newFeedEntries.add(
@@ -627,7 +627,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                             for(Person admin:admins){
                                 long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                                         admin.getPersonUid(), everyClazz.getClazzUid(),
-                                        ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
+                                        ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
                                         feedLinkViewPerson);
 
                                 newFeedEntries.add(

@@ -2,18 +2,32 @@ package com.ustadmobile.core.scheduler;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzListView;
+import com.ustadmobile.core.view.PersonDetailView;
+import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
 import com.ustadmobile.lib.db.entities.FeedEntry;
+import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonNameWithClazzName;
+import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.ScheduledCheck;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.absentFrequencyHigh;
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.absentFrequencyLow;
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.feedAlertPerentageHigh;
+import static com.ustadmobile.core.controller.ClazzLogDetailPresenter.tardyFrequency;
 
 public class ScheduledCheckRunner implements Runnable{
 
@@ -44,6 +58,7 @@ public class ScheduledCheckRunner implements Runnable{
                     clazzLog.getClazzLogClazzUid());
 
 
+            //We want to send this feed (reminder) when its not done or cancelled (ie not done)
             if(!clazzLog.isDone() || clazzLog.isCanceled()) {
 
                 List<ClazzMemberWithPerson> teachers = dbRepository.getClazzMemberDao()
@@ -70,6 +85,180 @@ public class ScheduledCheckRunner implements Runnable{
                 dbRepository.getFeedEntryDao().insertList(newFeedEntries);
             }
         }
+
+        //If absent repetition for officer.
+        if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER){
+            long clazzLogUid = Long.parseLong(params.get(ScheduledCheck.PARAM_CLAZZ_LOG_UID));
+            ClazzLog currentClazzLog = dbRepository.getClazzLogDao().findByUid(clazzLogUid);
+            String clazzName = dbRepository.getClazzDao().getClazzName(
+                    currentClazzLog.getClazzLogClazzUid());
+
+            //Get officers
+            Role officerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
+            List<Person> officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                    currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+
+            //If condition meets:
+            dbRepository.getClazzMemberDao().findAllMembersForAttendanceOverConsecutiveDays(
+                ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyLow,
+                currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
+                    @Override
+                    public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+                        //Create feed entries for this user for every teacher
+                        List<FeedEntry> newFeedEntries = new ArrayList<>();
+                        for(PersonNameWithClazzName each:theseGuys){
+
+                            String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                    PersonDetailView.ARG_PERSON_UID + "=" +
+                                    String.valueOf(each.getPersonUid());
+
+                            //Send to Officer as well.
+                            for(Person officer:officers){
+
+                                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                        officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                        ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER, feedLinkViewPerson);
+
+                                newFeedEntries.add(
+                                    new FeedEntry(
+                                        feedEntryUid,
+                                        "Absent behaviour",
+                                        "Student " + each.getFirstNames() + " " +
+                                                each.getLastName() + " absent in Class " + clazzName
+                                                + " over " + tardyFrequency + " times",
+                                        feedLinkViewPerson,
+                                        clazzName,
+                                        officer.getPersonUid()
+                                    )
+                                );
+                            }
+
+                        }
+
+                        dbRepository.getFeedEntryDao().insertList(newFeedEntries);
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+        }
+
+        if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH){
+
+            long clazzLogUid = Long.parseLong(params.get(ScheduledCheck.PARAM_CLAZZ_LOG_UID));
+            ClazzLog currentClazzLog = dbRepository.getClazzLogDao().findByUid(clazzLogUid);
+            String clazzName = dbRepository.getClazzDao().getClazzName(
+                    currentClazzLog.getClazzLogClazzUid());
+
+            Role mneOfficerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+            List<Person> mneofficers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                    currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
+
+
+            //9. MNE An alert when a student has not attended a single day in a month(dropout)
+            dbRepository.getClazzMemberDao().findAllMembersForAttendanceOverConsecutiveDays(
+                ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyHigh,
+                currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
+                    @Override
+                    public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+
+                        //Create feed entries for this user for every teacher
+                        List<FeedEntry> newFeedEntries = new ArrayList<>();
+                        for(PersonNameWithClazzName each:theseGuys){
+
+                            String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                    PersonDetailView.ARG_PERSON_UID + "=" +
+                                    String.valueOf(each.getPersonUid());
+                            String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                                    ClazzListView.ARG_CLAZZ_UID + "=" +
+                                    currentClazzLog.getClazzLogClazzUid();
+
+
+                            for( Person mne: mneofficers){
+                                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                        mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                        ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
+                                        feedLinkViewPerson);
+
+                                newFeedEntries.add(
+                                    new FeedEntry(
+                                        feedEntryUid,
+                                        "Student dropout" ,
+                                        "Student " + each.getFirstNames() + " " +
+                                                each.getLastName() + " absent in Class "
+                                                + clazzName + " over 30 days"
+                                        ,
+                                        feedLinkViewPerson,
+                                        clazzName,
+                                        mne.getPersonUid()
+                                    )
+                                );
+                            }
+                        }
+                        dbRepository.getFeedEntryDao().insertList(newFeedEntries);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+        }
+
+
+        if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH){
+
+            long clazzLogUid = Long.parseLong(params.get(ScheduledCheck.PARAM_CLAZZ_LOG_UID));
+            ClazzLog currentClazzLog = dbRepository.getClazzLogDao().findByUid(clazzLogUid);
+            Clazz currentClazz = dbRepository.getClazzDao().findByUid(currentClazzLog.getClazzLogClazzUid());
+            String clazzName = currentClazz.getClazzName();
+
+            //Get officers
+            Role officerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
+            List<Person> officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                    currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+
+            //Officer to get an alert when student has been absent 2 or more days in a row
+            float clazzBeforeAttendance = dbRepository.getClazzDao().findClazzAttendancePercentageWithoutLatestClazzLog(
+                    currentClazz.getClazzUid());
+            float clazzAttendance = currentClazz.getAttendanceAverage();
+
+            if(clazzBeforeAttendance >=  feedAlertPerentageHigh &&
+                    clazzAttendance < feedAlertPerentageHigh){
+
+
+                List<FeedEntry> newFeedEntries = new ArrayList<>();
+
+                String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                        ClazzListView.ARG_CLAZZ_UID + "=" +
+                        currentClazzLog.getClazzLogClazzUid();
+
+                for(Person officer:officers){
+                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                            officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                            ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+
+                    newFeedEntries.add(
+                        new FeedEntry(
+                            feedEntryUid,
+                            "Class average dropped",
+                            "Class " + clazzName + " dropped attendance  " +
+                                    String.valueOf(feedAlertPerentageHigh * 100)  +"%"
+                            ,
+                            feedLinkViewClass,
+                            clazzName,
+                            officer.getPersonUid()
+                        )
+                    );
+                }
+
+                dbRepository.getFeedEntryDao().insertList(newFeedEntries);
+            }
+        }
+
 
 
 
