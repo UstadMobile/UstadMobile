@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
@@ -34,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -105,6 +107,9 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
     public static final UUID USTADMOBILE_BLE_SERVICE_UUID =
             UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
 
+    public static final String WIFI_DIRECT_GROUP_SSID_PREFIX="DIRECT-";
+
+
     private final Object knownNodesLock = new Object();
 
     private Object mContext;
@@ -137,6 +142,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
 
     private Set<Long> locallyAvailableContainerUids = new HashSet<>();
 
+    protected AtomicReference<ConnectivityStatus> connectivityStatusRef = new AtomicReference<>();
+
     /**
      * Constructor to be used when creating new instance
      * @param context Platform specific application context
@@ -167,7 +174,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
         @Override
         public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
             return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
-                    umAppDatabase, UmAccountManager.getActiveEndpoint(mContext));
+                    umAppDatabase, UmAccountManager.getActiveEndpoint(mContext),
+                    connectivityStatusRef.get());
         }
 
         @Override
@@ -404,7 +412,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
             entryStatusTaskExecutorService.execute(entryStatusTask);
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                     "Started to monitor "+nodeToCheckEntryList.get(nodeId).size()
-                            + "items from "+networkNode.getBluetoothMacAddress(), null);
+                            + "items from "+networkNode.getBluetoothMacAddress());
         }
     }
 
@@ -449,6 +457,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
      * @param passphrase Group network passphrase
      */
     public abstract void connectToWiFi(String ssid, String passphrase);
+
+    /**
+     * Restore the 'normal' WiFi connection
+     */
+    public abstract void restoreWifi();
+
 
     /**
      * Create entry status task for a specific peer device,

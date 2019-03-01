@@ -22,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -60,9 +61,10 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private UmObserver<ConnectivityStatus> statusObserver;
 
-    private UmObserver<EntryStatusResponse> entryStatusObserver;
+    //TODO: enable switching to local download when available after basic p2p cases complete
+    //private UmObserver<EntryStatusResponse> entryStatusObserver;
 
-    private UmLiveData<EntryStatusResponse> entryStatusLiveData;
+    //private UmLiveData<EntryStatusResponse> entryStatusLiveData;
 
     private UmObserver<Integer> downloadJobItemObserver;
 
@@ -98,7 +100,12 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private boolean isFromCloud = true;
 
-    private static final int BAD_PEER_FAILURE_THRESHOLD = 3;
+    /**
+     * Boolean to indicate if we are waiting for a local connection.
+     */
+    private AtomicBoolean waitingForLocalConnection = new AtomicBoolean(false);
+
+    private static final int BAD_PEER_FAILURE_THRESHOLD = 2;
 
     /**
      *
@@ -134,13 +141,14 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
     public DownloadJobItemRunner(Object context,DownloadJobItemWithDownloadSetItem downloadItem,
                                  NetworkManagerBle networkManager, UmAppDatabase appDb,
-                                 String endpointUrl) {
+                                 String endpointUrl, ConnectivityStatus initialConnectivityStatus) {
         this.networkManager = networkManager;
         this.downloadItem = downloadItem;
         this.appDb = appDb;
         this.endpointUrl = endpointUrl;
         this.context = context;
         this.httpDownloadRef = new AtomicReference<>();
+        this.connectivityStatus = initialConnectivityStatus;
     }
 
     /**
@@ -149,6 +157,11 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      */
     private void handleConnectivityStatusChanged(ConnectivityStatus newStatus) {
         this.connectivityStatus = newStatus;
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() +
+                " Connectivity state changed: " + newStatus);
+        if(waitingForLocalConnection.get())
+            return;
+
         if(connectivityStatus != null ){
             switch(newStatus.getConnectivityState()) {
                 case STATE_METERED:
@@ -236,7 +249,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             statusLiveData.removeObserver(statusObserver);
             downloadJobItemLiveData.removeObserver(downloadJobItemObserver);
             downloadSetConnectivityData.removeObserver(downloadSetConnectivityObserver);
-            entryStatusLiveData.removeObserver(entryStatusObserver);
+            //entryStatusLiveData.removeObserver(entryStatusObserver);
 
             statusCheckTimer.cancel();
 
@@ -266,29 +279,25 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 appDb.getDownloadSetDao().getLiveMeteredNetworkAllowed(downloadItem
                         .getDownloadSetItem().getDsiDsUid());
 
-        entryStatusLiveData = appDb.getEntryStatusResponseDao()
-                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
+        //TODO: re-enable after basic p2p cases run
+//        entryStatusLiveData = appDb.getEntryStatusResponseDao()
+//                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
         downloadSetConnectivityObserver = this::handleDownloadSetMeteredConnectionAllowedChanged;
         statusObserver = this::handleConnectivityStatusChanged;
         downloadJobItemObserver = this::handleDownloadJobItemStatusChanged;
-        entryStatusObserver = this::handleContentEntryFileStatus;
+        //entryStatusObserver = this::handleContentEntryFileStatus;
         statusLiveData.observeForever(statusObserver);
         downloadJobItemLiveData.observeForever(downloadJobItemObserver);
         downloadSetConnectivityData.observeForever(downloadSetConnectivityObserver);
-        entryStatusLiveData.observeForever(entryStatusObserver);
+        //entryStatusLiveData.observeForever(entryStatusObserver);
 
         currentContentEntryFileStatus = appDb.getEntryStatusResponseDao()
                 .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
 
-        checkWhereToDownloadAFileFrom();
+        startDownload();
     }
 
-    /**
-     * Decide where to get the file, on cloud or from peer devices.
-     */
-    private void checkWhereToDownloadAFileFrom(){
-    }
 
 
 
@@ -318,7 +327,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
             history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
             history.setDownloadJobItemId(downloadItem.getDjiUid());
             history.setNetworkNode(isFromCloud ? 0L: currentNetworkNode.getNodeId());
-            history.setUrl(getFileUrl());
             history.setId((int) appDb.getDownloadJobItemHistoryDao().insert(history));
 
             String downloadEndpoint;
@@ -338,17 +346,28 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 }
                 downloadEndpoint = endpointUrl;
             }else{
-                if(!connectToLocalNodeNetwork()) {
-                    attemptsRemaining--;
-                    recordHistoryFinished(history, false);
-                    continue;
+                if(currentNetworkNode.getGroupSsid() == null
+                    || !currentNetworkNode.getGroupSsid().equals(connectivityStatus.getWifiSsid())) {
+
+                    if(!connectToLocalNodeNetwork()) {
+                        //recording failure will push the node towards the bad threshold, after which
+                        // the download will be attempted from the cloud
+                        recordHistoryFinished(history, false);
+                        continue;
+                    }
                 }
+
                 downloadEndpoint = wiFiDirectGroupBle.getEndpoint();
                 connectionOpener = networkManager.getLocalConnectionOpener();
             }
 
             String downloadUrl = downloadEndpoint + CONTENT_ENTRY_FILE_PATH +
                     downloadItem.getDjiContentEntryFileUid();
+            history.setUrl(downloadUrl);//TODO: update end of download update to inc. url
+
+            UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+                    " starting download from" + downloadUrl + " FromCloud=" + isFromCloud +
+                    " Attempts remaining= " + attemptsRemaining);
 
             try {
                 appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
@@ -403,7 +422,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * @return
      */
     private boolean connectToCloudNetwork() {
-        //TODO: call restoreWifi on networkmanager to connect to the normal wifi
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 699, "Reconnecting cloud network");
+        networkManager.restoreWifi();
         WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
                     if(connectivityStatus == null)
@@ -428,10 +448,11 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
      * Start local peers connection handshake
      */
     private boolean connectToLocalNodeNetwork(){
+        waitingForLocalConnection.set(true);
         BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,
                 BleMessageUtil.bleMessageLongToBytes(Collections.singletonList(1L)));
         UstadMobileSystemImpl.l(UMLog.DEBUG,699, mkLogPrefix() +
-                "Requesting group credentials ", null);
+                " connecting local network: requesting group credentials ");
         networkManager.sendMessage(context,requestGroupCreation, currentNetworkNode,
                 this);
         AtomicReference<ConnectivityStatus> statusRef = new AtomicReference<>();
@@ -447,6 +468,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_DISCONNECTED
                             || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
                 });
+        waitingForLocalConnection.set(false);
         return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get());
     }
 
@@ -484,9 +506,10 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         if(response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
             this.wiFiDirectGroupBle = new Gson().fromJson(new String(response.getPayload()),
                             WiFiDirectGroupBle.class);
-            UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
-                    "Connecting to P2P group network with SSID "+wiFiDirectGroupBle.getSsid(),
-                    null);
+            appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
+                    wiFiDirectGroupBle.getSsid());
+            UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
+                    "Connecting to P2P group network with SSID "+wiFiDirectGroupBle.getSsid());
             networkManager.connectToWiFi(wiFiDirectGroupBle.getSsid(),
                     wiFiDirectGroupBle.getPassphrase());
         }

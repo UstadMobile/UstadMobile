@@ -36,7 +36,7 @@ public abstract class EntryStatusResponseDao {
     public abstract EntryStatusResponse findByContentEntryFileUid(long erContentEntryFileUid);
 
     @UmQuery("SELECT * FROM EntryStatusResponse WHERE erContentEntryFileUid = :erContentEntryFileUid")
-    public abstract UmLiveData<EntryStatusResponse> getLiveEntryStatus(long erContentEntryFileUid);
+    public abstract UmLiveData<List<EntryStatusResponse>> getLiveEntryStatus(long erContentEntryFileUid);
 
 
     public static class EntryWithoutRecentResponse {

@@ -24,6 +24,9 @@ public abstract class DownloadJobItemHistoryDao {
     @UmUpdate
     public abstract void update(DownloadJobItemHistory downloadJobItemHistory);
 
+    @UmInsert
+    public abstract void insertList(List<DownloadJobItemHistory> historyList);
+
 
     @UmQuery("SELECT * From DownloadJobItemHistory WHERE downloadJobItemId = :downloadJobItemId")
     public abstract List<DownloadJobItemHistory> findHistoryItemsByDownloadJobItem(long downloadJobItemId);

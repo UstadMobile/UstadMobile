@@ -15,6 +15,9 @@ public abstract class ConnectivityStatusDao{
     @UmInsert (onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insert(ConnectivityStatus connectivityStatus, UmCallback<Long> callback);
 
+    @UmInsert(onConflict =  UmOnConflictStrategy.REPLACE)
+    public abstract void insert(ConnectivityStatus connectivityStatus);
+
     @UmQuery("UPDATE ConnectivityStatus SET connectivityState = :connectivityState")
     public abstract void updateState(int connectivityState, UmCallback<Void> callback);
 

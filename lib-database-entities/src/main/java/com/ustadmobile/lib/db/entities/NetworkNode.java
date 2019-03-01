@@ -35,6 +35,8 @@ public class NetworkNode {
 
     private int wifiDirectDeviceStatus;
 
+    private String groupSsid;
+
     public static final int STATUS_CONNECTED = 0;
 
     public static final int STATUS_INVITED = 1;
@@ -44,6 +46,7 @@ public class NetworkNode {
     public static final int STATUS_AVAILABLE = 3;
 
     public static final int STATUS_UNAVAILABLE = 4;
+
 
     /**
      * The timeout after which if we have heard nothing we consider a wifi direct node inactive.
@@ -246,46 +249,13 @@ public class NetworkNode {
                         || ( ipAddress !=null && getIpAddress().equals(ipAddress)));
     }
 
-//    /**
-//     * Add the given acqusition history entry to the list of entries acquired from this node.
-//     *
-//     * @param entry
-//     */
-//    public void addAcquisitionHistoryEntry(AcquisitionTaskHistoryEntry entry) {
-//        if(acquisitionTaskHistory == null)
-//            acquisitionTaskHistory = new ArrayList<>();
-//
-//        acquisitionTaskHistory.add(entry);
-//    }
-//
-//    /**
-//     * Returns the history of acquisition entries downloaded from this node. If no entries have
-//     * been dowonloaded this will be null.
-//     *
-//     * @return List of AcquisitionTaskHistoryEntry downloaded from this node, null if no entries exist
-//     */
-//
-//    public List<AcquisitionTaskHistoryEntry> getAcquisitionHistory() {
-//        return acquisitionTaskHistory;
-//    }
+    public String getGroupSsid() {
+        return groupSsid;
+    }
 
-
-//    public int getNumFailures() {
-//        if(acquisitionTaskHistory == null)
-//            return 0;
-//
-//        int numFailures = 0;
-//        Iterator<AcquisitionTaskHistoryEntry> historyIterator = acquisitionTaskHistory.iterator();
-//        AcquisitionTaskHistoryEntry entry;
-//        while(historyIterator.hasNext()) {
-//            entry = historyIterator.next();
-//            if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED)
-//                numFailures++;
-//
-//        }
-//
-//        return numFailures;
-//    }
+    public void setGroupSsid(String groupSsid) {
+        this.groupSsid = groupSsid;
+    }
 
     public int getWifiDirectDeviceStatus() {
         return wifiDirectDeviceStatus;

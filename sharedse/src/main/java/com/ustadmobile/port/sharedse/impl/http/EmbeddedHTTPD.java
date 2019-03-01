@@ -4,6 +4,7 @@ package com.ustadmobile.port.sharedse.impl.http;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.ContentEntryFile;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -108,6 +109,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
+        addRoute("/ContentEntryFile/(.*)+", ContentEntryFileResponder.class, context);
         //TODO: Setup 404 handling
     }
 

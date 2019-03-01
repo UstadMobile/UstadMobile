@@ -44,6 +44,7 @@ import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
@@ -126,6 +127,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private AtomicBoolean wifiP2PCapable = new AtomicBoolean(false);
 
     private AtomicBoolean bluetoothP2pRunning = new AtomicBoolean(false);
+
+    /**
+     * A list of wifi direct ssids that are connected to using connectToWifiDirectGroup, the
+     * WiFI configuration for these items should be deleted once we are done so they do not appear
+     * on the user's list of remembered networks
+     */
+    private List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
     /**
      * Listeners for the WiFi-Direct group connections / states,
@@ -234,23 +242,30 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             }
             int state = isMeteredConnection ?
                     ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
+            ConnectivityStatus status = new ConnectivityStatus(state, true,
+                    WiFiSSID);
+            connectivityStatusRef.set(status);
+            umAppDatabase.getConnectivityStatusDao().insert(status, null);
+        }
+
+        private void handleDisconnected() {
+            localConnectionOpener = null;
+            connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+                    false, null));
             umAppDatabase.getConnectivityStatusDao()
-                    .addConnectivityStatusRecord(state, WiFiSSID,true,null);
+                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
         }
 
         @Override
         public void onLost(Network network) {
             super.onLost(network);
-            localConnectionOpener = null;
-            umAppDatabase.getConnectivityStatusDao()
-                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+            handleDisconnected();
         }
 
         @Override
         public void onUnavailable(){
             super.onUnavailable();
-            umAppDatabase.getConnectivityStatusDao()
-                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+            handleDisconnected();
         }
     }
 
@@ -563,6 +578,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void connectToWiFi(String ssid, String passphrase) {
+        deleteTemporaryWifiDirectSsids();
+
+        if(ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
+            temporaryWifiDirectSsids.add(ssid);
+        }
+
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority = (getMaxWiFiConfigurationPriority(wifiManager)+1);
@@ -577,6 +598,51 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 +  " priority = " + wifiConfig.priority);
     }
 
+    @Override
+    public void restoreWifi() {
+        UstadMobileSystemImpl.l(UMLog.INFO, 339, "NetworkManager: restore wifi");
+        wifiManager.disconnect();
+        deleteTemporaryWifiDirectSsids();
+        wifiManager.reconnect();
+    }
+
+    /**
+     * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
+     * This method simply removes the quotes, if they are there. Will also handle null safely.
+     *
+     * @param ssid
+     * @return
+     */
+    public static String normalizeAndroidWifiSsid(String ssid) {
+        if(ssid == null)
+            return ssid;
+        else
+            return ssid.replace("\"", "");
+    }
+
+    private void deleteTemporaryWifiDirectSsids() {
+        if(temporaryWifiDirectSsids.isEmpty())
+            return;
+
+        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
+
+        String ssid;
+        for(WifiConfiguration config : configuredNetworks) {
+            if(config.SSID == null)
+                continue;
+
+            ssid = normalizeAndroidWifiSsid(config.SSID);
+            if(temporaryWifiDirectSsids.contains(ssid)){
+                boolean removedOk = wifiManager.removeNetwork(config.networkId);
+                if(removedOk) {
+                    temporaryWifiDirectSsids.remove(ssid);
+                    if(temporaryWifiDirectSsids.isEmpty())
+                        return;
+                }
+
+            }
+        }
+    }
 
     /**
      * {@inheritDoc}

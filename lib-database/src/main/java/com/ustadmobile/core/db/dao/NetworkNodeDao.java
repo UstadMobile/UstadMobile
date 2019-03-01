@@ -37,7 +37,7 @@ public abstract class NetworkNodeDao {
     public abstract NetworkNode findNodeByBluetoothAddress(String bluetoothAddress);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
-    public abstract Long insert(NetworkNode node);
+    public abstract long insert(NetworkNode node);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract Long [] insert(List<NetworkNode> nodeList);
@@ -69,6 +69,9 @@ public abstract class NetworkNodeDao {
                                                              long minLastSeenTimestamp,
                                                              int maxFailuresInPeriod,
                                                              long maxFailuresFromTimestamp);
+
+    @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid WHERE nodeId = :nodeId")
+    public abstract void updateNetworkNodeGroupSsid(long nodeId, String groupSsid);
 
     @UmTransaction
     public void insertInTransaction(Hashtable<NetworkNode,Long> networkNodeTrackList){

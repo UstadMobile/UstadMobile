@@ -25,6 +25,15 @@ public class ConnectivityStatus {
 
     private boolean connectedOrConnecting;
 
+    public ConnectivityStatus(){
+
+    }
+
+    public ConnectivityStatus(int connectivityState, boolean connectedOrConnecting, String wifiSsid) {
+        this.connectivityState = connectivityState;
+        this.connectedOrConnecting = connectedOrConnecting;
+        this.wifiSsid = wifiSsid;
+    }
 
     public int getCsUid() {
         return csUid;
@@ -56,5 +65,36 @@ public class ConnectivityStatus {
 
     public void setConnectedOrConnecting(boolean connectedOrConnecting) {
         this.connectedOrConnecting = connectedOrConnecting;
+    }
+
+    @Override
+    public String toString() {
+        String val = "";
+        switch(connectivityState) {
+            case STATE_METERED:
+                val += "METERED";
+                break;
+            case STATE_UNMETERED:
+                val += "UNMETERED";
+                break;
+            case STATE_DISCONNECTED:
+                val += "DISCONNECTED";
+                break;
+            case STATE_CONNECTED_LOCAL:
+                val += "CONNECTED_LOCAL";
+                break;
+            case STATE_CONNECTING_LOCAL:
+                val += "CONNECTING_LOCAL";
+                break;
+
+        }
+
+        if(wifiSsid != null){
+            val += " SSID = \"" + wifiSsid + "\"";
+        }
+
+        val += " connectedOrConnecting = " + connectedOrConnecting;
+
+        return val;
     }
 }

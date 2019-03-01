@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -27,6 +28,8 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.ustadmobile.sharedse.SharedSeTestConfig;
+
 
 /**
  * Test class which tests {@link NetworkManagerBle}
@@ -62,9 +65,12 @@ public class BleNetworkManagerTest {
 
     @Before
     public void setUp(){
+        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         context =  PlatformTestUtil.getTargetContext();
         mockedEntryStatusTask = mock(BleEntryStatusTask.class);
         networkNode = new NetworkNode();
+        networkNode.setNetworkNodeLastUpdated(System.currentTimeMillis());
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedResponseListener = mock(BleMessageResponseListener.class);
         mockedNetworkManager.setContext(context);
@@ -77,9 +83,9 @@ public class BleNetworkManagerTest {
                         eq(networkNode),any(BleMessageResponseListener.class)))
                 .thenReturn(mockedEntryStatusTask);
 
-
-        UmAppDatabase.getInstance(context).clearAllTables();
         umAppDatabase = UmAppDatabase.getInstance(context);
+        umAppDatabase.clearAllTables();
+
 
         for(int i = 0; i < MAX_ENTITIES_NUMBER; i++){
             long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
