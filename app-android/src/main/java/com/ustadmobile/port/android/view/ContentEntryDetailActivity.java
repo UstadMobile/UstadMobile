@@ -76,7 +76,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this,this);
         entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
         entryDetailPresenter.onStart();
-        managerAndroidBle.addLocalAvailabilityListener(this::onLocalAvailabilityChanged);
+        managerAndroidBle.addLocalAvailabilityListener(this);
     }
 
     @Override
@@ -258,7 +258,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     public void onDestroy() {
         entryDetailPresenter.onDestroy();
-        networkManagerBle.removeLocalAvailabilityListener(this::onLocalAvailabilityChanged);
+        networkManagerBle.removeLocalAvailabilityListener(this);
         super.onDestroy();
     }
 

@@ -311,7 +311,7 @@ public class DownloadJobItemRunnerTest {
                     new Gson().toJson(groupBle).getBytes());
 
             bleResponseListener.onResponseReceived(networkNode.getBluetoothMacAddress(),
-                    wifiDirectGroupInfoMessage);
+                    wifiDirectGroupInfoMessage, null);
 
             return null;
         }).when(mockedNetworkManager).sendMessage(any(Object.class), any(BleMessage.class),

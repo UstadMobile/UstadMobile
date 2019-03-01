@@ -45,7 +45,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  *
  * @author kileha3
  */
-public class DownloadJobItemRunner implements Runnable, BleMessageResponseListener{
+public class DownloadJobItemRunner implements Runnable {
 
     private NetworkManagerBle networkManager;
 
@@ -74,8 +74,6 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private UmObserver<Boolean> downloadSetConnectivityObserver;
 
-    private CountDownLatch localConnectLatch = new CountDownLatch(1);
-
     private volatile ResumableHttpDownload httpDownload;
 
     private AtomicReference<ResumableHttpDownload> httpDownloadRef;
@@ -92,7 +90,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     private Object context;
 
-    private WiFiDirectGroupBle wiFiDirectGroupBle;
+    private AtomicReference<WiFiDirectGroupBle> wiFiDirectGroupBle = new AtomicReference<>();
 
     private NetworkNode currentNetworkNode;
 
@@ -206,21 +204,22 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
         }
     }
 
-    /**
-     * Handle changes triggered when file which wasn't available locally changes
-     * @param entryStatusResponse new file entry status
-     */
-    private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
-        if(entryStatusResponse != null){
-            availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
-            if(availableLocally.get() == 1 && currentContentEntryFileStatus!= null
-                    && !currentContentEntryFileStatus.isAvailable()){
-                this.currentNetworkNode =
-                        appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
-                connectToLocalNodeNetwork();
-            }
-        }
-    }
+    //TODO: re-enable when we add support for switching dynamically
+//    /**
+//     * Handle changes triggered when file which wasn't available locally changes
+//     * @param entryStatusResponse new file entry status
+//     */
+//    private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
+//        if(entryStatusResponse != null){
+//            availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
+//            if(availableLocally.get() == 1 && currentContentEntryFileStatus!= null
+//                    && !currentContentEntryFileStatus.isAvailable()){
+//                this.currentNetworkNode =
+//                        appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
+//                connectToLocalNodeNetwork();
+//            }
+//        }
+//    }
 
 
     /**
@@ -357,7 +356,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     }
                 }
 
-                downloadEndpoint = wiFiDirectGroupBle.getEndpoint();
+                downloadEndpoint = wiFiDirectGroupBle.get().getEndpoint();
                 connectionOpener = networkManager.getLocalConnectionOpener();
             }
 
@@ -379,7 +378,7 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 downloaded = httpDownload.download();
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
-                        "Failed to download a file from "+getFileUrl(),e);
+                        "Failed to download a file from " + downloadUrl,e);
             }
 
             if(!downloaded) {
@@ -446,6 +445,8 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
 
     /**
      * Start local peers connection handshake
+     *
+     * @return true if successful, false otherwise
      */
     private boolean connectToLocalNodeNetwork(){
         waitingForLocalConnection.set(true);
@@ -453,8 +454,39 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                 BleMessageUtil.bleMessageLongToBytes(Collections.singletonList(1L)));
         UstadMobileSystemImpl.l(UMLog.DEBUG,699, mkLogPrefix() +
                 " connecting local network: requesting group credentials ");
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean connectionRequestActive = new AtomicBoolean(true);
         networkManager.sendMessage(context,requestGroupCreation, currentNetworkNode,
-                this);
+                ((sourceDeviceAddress, response, error) ->  {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+                            " BLE response received: from " + sourceDeviceAddress + ":" + response +
+                            " error: " + error);
+                    if(latch.getCount() > 0 && connectionRequestActive.get()
+                            && response != null
+                            && response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
+                        connectionRequestActive.set(false);
+                        WiFiDirectGroupBle lWifiDirectGroup = new Gson().fromJson(new String(response.getPayload()),
+                                WiFiDirectGroupBle.class);
+                        wiFiDirectGroupBle.set(lWifiDirectGroup);
+                        appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
+                                lWifiDirectGroup.getSsid());
+                        UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
+                                "Connecting to P2P group network with SSID "+lWifiDirectGroup.getSsid());
+                        networkManager.connectToWiFi(lWifiDirectGroup.getSsid(),
+                                lWifiDirectGroup.getPassphrase());
+                    }
+                    latch.countDown();
+                }));
+        try { latch.await(20, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {}
+        connectionRequestActive.set(false);
+
+
+        //There was an exception trying to communicate with the peer to get the wifi direct group network
+        if(wiFiDirectGroupBle.get() == null) {
+            return false;
+        }
+
         AtomicReference<ConnectivityStatus> statusRef = new AtomicReference<>();
         WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
@@ -465,23 +497,15 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
                     if(isExpectedWifiDirectGroup(connectivityStatus))
                         return true; //connected OK and ready to go
 
-                    return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_DISCONNECTED
-                            || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
+                    //TODO: pin down what status messages to expect to know that the attempt has failed
+//                    return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_DISCONNECTED
+//                            || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
+                    return false;
                 });
         waitingForLocalConnection.set(false);
         return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get());
     }
 
-
-
-    /**
-     * Create URL where the runner will get the file from
-     * @return constructed file URL
-     */
-    private String getFileUrl(){
-        return (isFromCloud ? this.endpointUrl :  wiFiDirectGroupBle.getEndpoint())
-                + CONTENT_ENTRY_FILE_PATH + downloadItem.getDjiContentEntryFileUid();
-    }
 
     /**
      * Update status of the currently downloading job item.
@@ -495,25 +519,13 @@ public class DownloadJobItemRunner implements Runnable, BleMessageResponseListen
     }
 
     private boolean isExpectedWifiDirectGroup(ConnectivityStatus status){
+        WiFiDirectGroupBle lWifiDirectGroupBle = wiFiDirectGroupBle.get();
         return status.getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL
                 && status.getWifiSsid() != null
-                && wiFiDirectGroupBle != null
-                && status.getWifiSsid().equals(wiFiDirectGroupBle.getSsid());
+                && lWifiDirectGroupBle != null
+                && status.getWifiSsid().equals(lWifiDirectGroupBle.getSsid());
     }
 
-    @Override
-    public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
-        if(response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
-            this.wiFiDirectGroupBle = new Gson().fromJson(new String(response.getPayload()),
-                            WiFiDirectGroupBle.class);
-            appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
-                    wiFiDirectGroupBle.getSsid());
-            UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
-                    "Connecting to P2P group network with SSID "+wiFiDirectGroupBle.getSsid());
-            networkManager.connectToWiFi(wiFiDirectGroupBle.getSsid(),
-                    wiFiDirectGroupBle.getPassphrase());
-        }
-    }
 
     private String mkLogPrefix() {
         return "DownloadJobItem #" + downloadItem.getDjiUid() + ":";

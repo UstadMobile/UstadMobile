@@ -17,6 +17,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
@@ -100,13 +101,16 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mCallback.setOnResponseReceived(this);
            BluetoothDevice destinationPeer = bluetoothManager.getAdapter()
                    .getRemoteDevice(networkNode.getBluetoothMacAddress());
-            mGattClient = destinationPeer.connectGatt(
-                    (Context) context,false,mCallback);
-            if(mCallback == null){
+           mGattClient = destinationPeer.connectGatt(
+                    (Context) context,false, mCallback);
+           if(mGattClient == null){
                 UstadMobileSystemImpl.l(UMLog.ERROR,695,
                         "Failed to connect to " + destinationPeer.getAddress());
                 UmAppDatabase.getInstance(context).getNetworkNodeDao()
                         .updateRetryCount(networkNode.getNodeId(),null);
+                onResponseReceived(networkNode.getBluetoothMacAddress(), null,
+                        new IOException("BLE failed on connectGatt to " +
+                                networkNode.getBluetoothMacAddress()));
             }else{
                 UstadMobileSystemImpl.l(UMLog.DEBUG,695,
                         "Connecting to " + destinationPeer.getAddress());
@@ -118,10 +122,11 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
     }
 
     @Override
-    public void onResponseReceived(String sourceDeviceAddress, BleMessage response) {
-        super.onResponseReceived(sourceDeviceAddress, response);
+    public void onResponseReceived(String sourceDeviceAddress, BleMessage response, Exception error) {
+        super.onResponseReceived(sourceDeviceAddress, response, error);
         //disconnect after finishing the task
-        mGattClient.disconnect();
+        if(mGattClient != null)
+            mGattClient.disconnect();
     }
 
     /**

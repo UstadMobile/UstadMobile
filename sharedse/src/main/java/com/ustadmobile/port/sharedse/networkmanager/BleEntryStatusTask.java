@@ -105,9 +105,9 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      * @param response Message received as a response from the server device.
      */
     @Override
-    public void onResponseReceived(String sourceDeviceAddress,BleMessage response) {
+    public void onResponseReceived(String sourceDeviceAddress,BleMessage response, Exception error) {
 
-        byte responseRequestType = response.getRequestType();
+        byte responseRequestType = response != null ? response.getRequestType() : -1;
 
         switch (responseRequestType){
 
@@ -145,7 +145,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
         }
 
         if(responseListener != null){
-            responseListener.onResponseReceived(sourceDeviceAddress,response);
+            responseListener.onResponseReceived(sourceDeviceAddress, response, error);
         }
 
     }

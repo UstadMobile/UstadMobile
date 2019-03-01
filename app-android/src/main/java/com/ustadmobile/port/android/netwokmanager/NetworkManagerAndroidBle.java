@@ -227,29 +227,34 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         @Override
         public void onAvailable(Network network) {
             super.onAvailable(network);
-            String WiFiSSID = null;
+
             boolean isMeteredConnection =
                     ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager);
-
-            //get network SSID
-            if(!isMeteredConnection){
-                WifiManager wifiManager = (WifiManager) mContext.getApplicationContext()
-                        .getSystemService (Context.WIFI_SERVICE);
-
-                WiFiSSID = wifiManager.getConnectionInfo()
-                        .getSSID().replace("\"", "");
-                localConnectionOpener = network::openConnection;
-            }
             int state = isMeteredConnection ?
                     ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
+
+            NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
+                    prettyPrintNetwork(network, networkInfo));
+
+            String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
             ConnectivityStatus status = new ConnectivityStatus(state, true,
-                    WiFiSSID);
+                    ssid);
             connectivityStatusRef.set(status);
+
+            //get network SSID
+            if(ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)){
+                status.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
+                localConnectionOpener = network::openConnection;
+            }
+
+
             umAppDatabase.getConnectivityStatusDao().insert(status, null);
         }
 
         private void handleDisconnected() {
             localConnectionOpener = null;
+            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected");
             connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                     false, null));
             umAppDatabase.getConnectivityStatusDao()
@@ -259,14 +264,30 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         @Override
         public void onLost(Network network) {
             super.onLost(network);
+            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
+                    prettyPrintNetwork(network, connectivityManager.getNetworkInfo(network)));
             handleDisconnected();
         }
 
         @Override
         public void onUnavailable(){
+            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onUnavailable");
             super.onUnavailable();
             handleDisconnected();
         }
+    }
+
+
+    private String prettyPrintNetwork(Network network, NetworkInfo networkInfo){
+        String val = "Network : ";
+        if(networkInfo != null) {
+            val += " type: " + networkInfo.getTypeName();
+            val += " extraInfo: " + networkInfo.getExtraInfo();
+        }else {
+            val += " (null network info)";
+        }
+
+        return val;
     }
 
     /**

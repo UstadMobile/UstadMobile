@@ -3,7 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,8 +76,10 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                 List<Long> entryStatusResponse = new ArrayList<>();
 
                 for(long entryFileUid: bleMessageBytesToLong(requestReceived.getPayload())){
-                    ContentEntryFile contentEntryFile = contentEntryDao.findByUid(entryFileUid);
-                    entryStatusResponse.add(contentEntryFile == null ? 0L: 1L);
+                    ContentEntryFileWithStatus contentEntryFile =
+                            contentEntryDao.findByUidWithStatus(entryFileUid);
+                    entryStatusResponse.add(contentEntryFile != null
+                            && contentEntryFile.getEntryStatus() != null ? 1L: 0L);
                 }
                 return new BleMessage(ENTRY_STATUS_RESPONSE,
                         bleMessageLongToBytes(entryStatusResponse));
@@ -97,7 +99,7 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
 
     @Override
     public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        group.setEndpoint("http://192.168.49.1/"+ networkManager.getHttpd().getListeningPort()+"/");
+        group.setEndpoint("http://192.168.49.1:"+ networkManager.getHttpd().getListeningPort()+"/");
         this.message = new Gson().toJson(group);
         mLatch.countDown();
     }

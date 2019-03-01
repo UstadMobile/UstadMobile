@@ -379,6 +379,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
         availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
+        UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Registered a monitor with "
+                + entryUidsToMonitor.size() + " entry(s) to be monitored");
 
         NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
         EntryStatusResponseDao responseDao =
@@ -389,6 +391,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
         List<Long> uniqueEntryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
         List<Long> knownNetworkNodes =
                 getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime,1));
+
+        UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                "Found total of   " + uniqueEntryUidsToMonitor +
+                        " to check from entry status availability");
 
         List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
                 responseDao.findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes);
@@ -403,6 +409,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
             nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryFileUid());
         }
 
+        UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                "Created total of  "+nodeToCheckEntryList.entrySet().size()
+                        + "entry(s) to be checked from");
+
         //Make entryStatusTask as per node list and entryUuids found
         for(int nodeId : nodeToCheckEntryList.keySet()){
             NetworkNode networkNode = networkNodeDao.findNodeById(nodeId);
@@ -411,8 +421,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
             entryStatusTasks.add(entryStatusTask);
             entryStatusTaskExecutorService.execute(entryStatusTask);
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Started to monitor "+nodeToCheckEntryList.get(nodeId).size()
-                            + "items from "+networkNode.getBluetoothMacAddress());
+                    "Status check started for "+nodeToCheckEntryList.get(nodeId).size()
+                            + "entry(s) from "+networkNode.getBluetoothMacAddress());
         }
     }
 

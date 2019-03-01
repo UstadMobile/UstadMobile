@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -107,6 +108,12 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             gatt.disconnect();
             UstadMobileSystemImpl.l(UMLog.DEBUG,698,
                     "Connection failed with error code "+status);
+            if(responseListener != null) {
+                responseListener.onResponseReceived(gatt.getDevice().getAddress(), null,
+                        new IOException("BLE onConnectionStateChange not successful." +
+                                "Status = " + status));
+            }
+
             return;
         }
 
@@ -199,9 +206,9 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
      */
     private void readCharacteristics(String sourceDeviceAddress,
                                      BluetoothGattCharacteristic characteristic){
-        boolean isReceived = receivedMessage.onPackageReceived(characteristic.getValue());
-        if(isReceived){
-            responseListener.onResponseReceived(sourceDeviceAddress,receivedMessage);
+        boolean messageComplete = receivedMessage.onPackageReceived(characteristic.getValue());
+        if(messageComplete){
+            responseListener.onResponseReceived(sourceDeviceAddress, receivedMessage, null);
         }
     }
 
