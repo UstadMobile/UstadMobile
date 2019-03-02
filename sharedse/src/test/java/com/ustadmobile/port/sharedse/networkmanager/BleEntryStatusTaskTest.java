@@ -62,7 +62,7 @@ public class BleEntryStatusTaskTest {
 
         BleMessage responseMessage = new BleMessage(ENTRY_STATUS_RESPONSE,
                 bleMessageLongToBytes(entriesResponse));
-        mockedEntryStatusTask.onResponseReceived(networkNode.getBluetoothMacAddress(),responseMessage);
+        mockedEntryStatusTask.onResponseReceived(networkNode.getBluetoothMacAddress(),responseMessage, null);
 
         assertNotNull("entry check status response will be saved to the database",
                 entryStatusResponseDao.findByEntryIdAndNetworkNode(entries.get(0),

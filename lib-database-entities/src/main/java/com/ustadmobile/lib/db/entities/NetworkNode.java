@@ -22,6 +22,8 @@ public class NetworkNode {
 
     private String deviceWifiDirectName;
 
+    private String endpointUrl;
+
     @UmIndexField
     private long lastUpdateTimeStamp;
 
@@ -81,6 +83,14 @@ public class NetworkNode {
 
     public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
+    }
+
+    public void setEndpointUrl(String endpointUrl) {
+        this.endpointUrl = endpointUrl;
     }
 
     /**

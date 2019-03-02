@@ -26,8 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTED_LOCAL;
-import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_CONNECTING_LOCAL;
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_DISCONNECTED;
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_METERED;
 import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_CLOUD;
@@ -86,7 +84,7 @@ public class DownloadJobItemRunner implements Runnable {
 
     private AtomicInteger meteredConnectionAllowed = new AtomicInteger(-1);
 
-    private AtomicInteger availableLocally = new AtomicInteger(-1);
+    private int lWiFiConnectionTimeout = 60;
 
     private Object context;
 
@@ -105,9 +103,6 @@ public class DownloadJobItemRunner implements Runnable {
 
     private static final int BAD_PEER_FAILURE_THRESHOLD = 2;
 
-    /**
-     *
-     */
     private static final int CONNECTION_TIMEOUT = 60;
 
     /**
@@ -148,6 +143,12 @@ public class DownloadJobItemRunner implements Runnable {
         this.httpDownloadRef = new AtomicReference<>();
         this.connectivityStatus = initialConnectivityStatus;
     }
+
+
+    public void setWiFiConnectionTimeout(int lWiFiConnectionTimeout) {
+        this.lWiFiConnectionTimeout = lWiFiConnectionTimeout;
+    }
+
 
     /**
      * Handle changes triggered when connectivity status changes.
@@ -324,6 +325,7 @@ public class DownloadJobItemRunner implements Runnable {
             isFromCloud = currentContentEntryFileStatus == null || currentNetworkNode == null;
             DownloadJobItemHistory history = new DownloadJobItemHistory();
             history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
+            history.setStartTime(System.currentTimeMillis());
             history.setDownloadJobItemId(downloadItem.getDjiUid());
             history.setNetworkNode(isFromCloud ? 0L: currentNetworkNode.getNodeId());
             history.setId((int) appDb.getDownloadJobItemHistoryDao().insert(history));
@@ -356,7 +358,7 @@ public class DownloadJobItemRunner implements Runnable {
                     }
                 }
 
-                downloadEndpoint = wiFiDirectGroupBle.get().getEndpoint();
+                downloadEndpoint = currentNetworkNode.getEndpointUrl();
                 connectionOpener = networkManager.getLocalConnectionOpener();
             }
 
@@ -456,6 +458,7 @@ public class DownloadJobItemRunner implements Runnable {
                 " connecting local network: requesting group credentials ");
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean connectionRequestActive = new AtomicBoolean(true);
+
         networkManager.sendMessage(context,requestGroupCreation, currentNetworkNode,
                 ((sourceDeviceAddress, response, error) ->  {
                     UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
@@ -468,12 +471,11 @@ public class DownloadJobItemRunner implements Runnable {
                         WiFiDirectGroupBle lWifiDirectGroup = new Gson().fromJson(new String(response.getPayload()),
                                 WiFiDirectGroupBle.class);
                         wiFiDirectGroupBle.set(lWifiDirectGroup);
+                        currentNetworkNode.setEndpointUrl(lWifiDirectGroup.getEndpoint());
                         appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
-                                lWifiDirectGroup.getSsid());
+                                lWifiDirectGroup.getSsid(), lWifiDirectGroup.getEndpoint());
                         UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
                                 "Connecting to P2P group network with SSID "+lWifiDirectGroup.getSsid());
-                        networkManager.connectToWiFi(lWifiDirectGroup.getSsid(),
-                                lWifiDirectGroup.getPassphrase());
                     }
                     latch.countDown();
                 }));
@@ -487,8 +489,22 @@ public class DownloadJobItemRunner implements Runnable {
             return false;
         }
 
+        //disconnect first
+        if(connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED
+            && connectivityStatus.getWifiSsid() != null) {
+            networkManager.disconnectWifi();
+            WaitForLiveData.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
+                    (connectivityStatus) -> connectivityStatus != null
+                            && connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_UNMETERED);
+            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Disconnected existing wifi network");
+        }
+
+
+        networkManager.connectToWiFi(wiFiDirectGroupBle.get().getSsid(),
+                wiFiDirectGroupBle.get().getPassphrase());
+
         AtomicReference<ConnectivityStatus> statusRef = new AtomicReference<>();
-        WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
+        WaitForLiveData.observeUntil(statusLiveData, lWiFiConnectionTimeout, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
                     statusRef.set(connectivityStatus);
                     if(connectivityStatus == null)
@@ -502,6 +518,7 @@ public class DownloadJobItemRunner implements Runnable {
 //                            || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
                     return false;
                 });
+
         waitingForLocalConnection.set(false);
         return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get());
     }

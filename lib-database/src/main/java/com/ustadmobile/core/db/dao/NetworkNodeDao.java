@@ -45,6 +45,9 @@ public abstract class NetworkNodeDao {
     @UmUpdate
     public abstract void update(NetworkNode node);
 
+    @UmQuery("DELETE FROM NetworkNode")
+    public abstract void deleteAll();
+
     @UmQuery("UPDATE NetworkNode SET numFailureCount = numFailureCount + 1 WHERE nodeId = :nodeId")
     public abstract void updateRetryCount(long nodeId, UmCallback<Void> callback);
 
@@ -70,20 +73,10 @@ public abstract class NetworkNodeDao {
                                                              int maxFailuresInPeriod,
                                                              long maxFailuresFromTimestamp);
 
-    @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid WHERE nodeId = :nodeId")
-    public abstract void updateNetworkNodeGroupSsid(long nodeId, String groupSsid);
+    @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid, endpointUrl = :endpointUrl  WHERE nodeId = :nodeId")
+    public abstract void updateNetworkNodeGroupSsid(long nodeId, String groupSsid, String endpointUrl);
 
-    @UmTransaction
-    public void insertInTransaction(Hashtable<NetworkNode,Long> networkNodeTrackList){
-        Iterator<Map.Entry<NetworkNode, Long>> iterator = networkNodeTrackList.entrySet().iterator();
-        List<NetworkNode> nodeList = new ArrayList<>();
-        while (iterator.hasNext()){
-            Map.Entry<NetworkNode, Long> entry = iterator.next();
-            NetworkNode networkNode = entry.getKey();
-            networkNode.setLastUpdateTimeStamp(entry.getValue());
-            nodeList.add(networkNode);
-        }
-        insert(nodeList);
-    }
+    @UmQuery("SELECT endpointUrl FROM NetworkNode WHERE groupSsid = :ssid")
+    public abstract String getEndpointUrlByGroupSsid(String ssid);
 
 }
