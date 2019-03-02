@@ -4,6 +4,9 @@ import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ConnectivityStatusDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
+import com.ustadmobile.core.db.dao.ContainerEntryDao;
+import com.ustadmobile.core.db.dao.ContainerEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
@@ -56,6 +59,9 @@ import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerEntry;
+import com.ustadmobile.lib.db.entities.ContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -117,7 +123,8 @@ import java.util.Random;
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
-        ContentEntryStatus.class, ConnectivityStatus.class
+        ContentEntryStatus.class, ConnectivityStatus.class,
+        Container.class, ContainerEntry.class, ContainerEntryFile.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -609,6 +616,12 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract ContentEntryStatusDao getContentEntryStatusDao();
 
     public abstract ConnectivityStatusDao getConnectivityStatusDao();
+
+    public abstract ContainerDao getContainerDao();
+
+    public abstract ContainerEntryDao getContainerEntryDao();
+
+    public abstract ContainerEntryFileDao getContainerEntryFileDao();
 
     @UmDbContext
     public abstract Object getContext();
