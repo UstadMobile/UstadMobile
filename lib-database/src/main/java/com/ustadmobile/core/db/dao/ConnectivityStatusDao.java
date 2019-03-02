@@ -24,6 +24,9 @@ public abstract class ConnectivityStatusDao{
     @UmQuery("UPDATE ConnectivityStatus SET connectivityState = :connectivityState , wifiSsid = :wifiSsid")
     public abstract void updateState(int connectivityState, String wifiSsid, UmCallback<Void> callback);
 
+    @UmQuery("UPDATE ConnectivityStatus SET connectivityState = :connectivityState , wifiSsid = :wifiSsid")
+    public abstract void updateStateSync(int connectivityState, String wifiSsid);
+
     public void addConnectivityStatusRecord(int state, String wifiSsid, boolean connectedOrConnecting,
                                             UmCallback<Void> callback){
         ConnectivityStatus connectivityStatus = new ConnectivityStatus();

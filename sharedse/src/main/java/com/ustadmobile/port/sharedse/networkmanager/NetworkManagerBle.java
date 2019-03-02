@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
 
 import java.util.ArrayList;
@@ -48,7 +49,8 @@ import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.A
  *
  */
 
-public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
+public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
+        LiveDataWorkQueue.OnQueueEmptyListener, EmbeddedHTTPD.ClientActivityListener {
 
     /**
      * Flag to indicate wifi direct group is inactive and it is not under creation
@@ -194,6 +196,22 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
     }
 
+    @Override
+    public void onQueueEmpty() {
+        if(connectivityStatusRef.get() != null
+                && connectivityStatusRef.get().getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
+            new Thread(this::restoreWifi).start();
+        }
+    }
+
+    @Override
+    public void OnClientListChanged(Map<String, Long> clientIpToLastActiveMap) {
+        if(clientIpToLastActiveMap.isEmpty() && getWifiDirectGroup() != null){
+            UstadMobileSystemImpl.l(UMLog.INFO, 699,
+                    "No more clients, removing wifi direct group");
+            removeWifiDirectGroup();
+        }
+    }
 
     /**
      * Check if WiFi is enabled / disabled on the device
@@ -472,6 +490,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor {
      * Restore the 'normal' WiFi connection
      */
     public abstract void restoreWifi();
+
+    public abstract void disconnectWifi();
 
 
     /**

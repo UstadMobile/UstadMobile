@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -45,6 +46,15 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
     public static int idCounter = 0;
 
     public static final String PREFIX_MOUNT = "/mount/";
+
+    private Map<String, Long> clientIpToLastActiveMap = new Hashtable<>();
+
+    public interface ClientActivityListener {
+        void OnClientListChanged(Map<String, Long> clientIpToLastActiveMap);
+    }
+
+    private ClientActivityListener mClientActivityListener;
+
 
     public interface ResponseListener {
 
@@ -111,6 +121,22 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         idCounter++;
         addRoute("/ContentEntryFile/(.*)+", ContentEntryFileResponder.class, context);
         //TODO: Setup 404 handling
+    }
+
+    @Override
+    public Response serve(IHTTPSession session) {
+        String clientIp = session.getRemoteIpAddress();
+        if(session.getUri().endsWith("/endsession")) {
+            clientIpToLastActiveMap.remove(clientIp);
+            return newFixedLengthResponse("OK");
+        }else{
+            clientIpToLastActiveMap.put(clientIp, System.currentTimeMillis());
+        }
+
+        if(mClientActivityListener != null)
+            mClientActivityListener.OnClientListChanged(clientIpToLastActiveMap);
+
+        return super.serve(session);
     }
 
     @Override

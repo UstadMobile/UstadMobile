@@ -22,6 +22,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Handler;
@@ -34,6 +35,8 @@ import android.support.v4.net.ConnectivityManagerCompat;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -44,9 +47,16 @@ import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -224,6 +234,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * Callback for the network connectivity changes
      */
     private class UmNetworkCallback extends ConnectivityManager.NetworkCallback {
+
         @Override
         public void onAvailable(Network network) {
             super.onAvailable(network);
@@ -260,6 +271,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             umAppDatabase.getConnectivityStatusDao()
                     .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
         }
+
+
 
         @Override
         public void onLost(Network network) {
@@ -600,6 +613,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public void connectToWiFi(String ssid, String passphrase) {
         deleteTemporaryWifiDirectSsids();
+        endAnyLocalSession();
 
         if(ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             temporaryWifiDirectSsids.add(ssid);
@@ -612,6 +626,40 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         wifiConfig.priority = getMaxWiFiConfigurationPriority(wifiManager);
 
+//        try {
+//            setIpAssignment("STATIC", wifiConfig);
+//            setIpAddress(InetAddress.getByName("192.168.49.42"), 24, wifiConfig);
+//            setGateway(InetAddress.getByName("192.168.49.1"), wifiConfig);
+//            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Set static IP address");
+//        }catch(Exception e) {
+//            e.printStackTrace();
+//        }
+
+        //See https://stackoverflow.com/questions/40155591/set-static-ip-and-gateway-programmatically-in-android-6-x-marshmallow/45385404
+        try {
+            Object ipAssignment = getEnumValue("android.net.IpConfiguration$IpAssignment", "STATIC");
+            callMethod(wifiConfig, "setIpAssignment", new String[]{"android.net.IpConfiguration$IpAssignment"}, new Object[]{ipAssignment});
+
+            // Then set properties in StaticIpConfiguration.
+            Object staticIpConfig = newInstance("android.net.StaticIpConfiguration");
+            Object linkAddress = newInstance("android.net.LinkAddress", new Class<?>[]{InetAddress.class, int.class},
+                    new Object[]{InetAddress.getByName("192.168.49.42"), 24});
+
+            setField(staticIpConfig, "ipAddress", linkAddress);
+            setField(staticIpConfig, "gateway", InetAddress.getByName("192.168.49.1"));
+//            getField(staticIpConfig, "dnsS/ervers", ArrayList.class).clear();
+//            for (int i = 0; i < dns.length; i++)
+//                getField(staticIpConfig, "dnsServers", ArrayList.class).add(dns[i]);
+
+            callMethod(wifiConfig, "setStaticIpConfiguration", new String[]{"android.net.StaticIpConfiguration"}, new Object[]{staticIpConfig});
+            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Set static IP");
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
         int netId = wifiManager.addNetwork(wifiConfig);
         boolean isConnected = wifiManager.enableNetwork(netId, true);
         UstadMobileSystemImpl.l(UMLog.INFO, 648, "Network: Connecting to wifi: "
@@ -619,13 +667,183 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 +  " priority = " + wifiConfig.priority);
     }
 
+    //Start static methods
+
+    @SuppressWarnings("unchecked")
+    public static void setStaticIpConfiguration(WifiManager manager, WifiConfiguration config, InetAddress ipAddress, int prefixLength, InetAddress gateway, InetAddress[] dns) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException {
+        // First set up IpAssignment to STATIC.
+        Object ipAssignment = getEnumValue("android.net.IpConfiguration$IpAssignment", "STATIC");
+        callMethod(config, "setIpAssignment", new String[]{"android.net.IpConfiguration$IpAssignment"}, new Object[]{ipAssignment});
+
+        // Then set properties in StaticIpConfiguration.
+        Object staticIpConfig = newInstance("android.net.StaticIpConfiguration");
+        Object linkAddress = newInstance("android.net.LinkAddress", new Class<?>[]{InetAddress.class, int.class}, new Object[]{ipAddress, prefixLength});
+
+        setField(staticIpConfig, "ipAddress", linkAddress);
+        setField(staticIpConfig, "gateway", gateway);
+        getField(staticIpConfig, "dnsServers", ArrayList.class).clear();
+        for (int i = 0; i < dns.length; i++)
+            getField(staticIpConfig, "dnsServers", ArrayList.class).add(dns[i]);
+
+        callMethod(config, "setStaticIpConfiguration", new String[]{"android.net.StaticIpConfiguration"}, new Object[]{staticIpConfig});
+
+        int netId = manager.updateNetwork(config);
+        boolean result = netId != -1;
+        if (result) {
+            boolean isDisconnected = manager.disconnect();
+            boolean configSaved = manager.saveConfiguration();
+            boolean isEnabled = manager.enableNetwork(config.networkId, true);
+            boolean isReconnected = manager.reconnect();
+        }
+    }
+
+
+
+    private static Object newInstance(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+        return newInstance(className, new Class<?>[0], new Object[0]);
+    }
+
+    private static Object newInstance(String className, Class<?>[] parameterClasses, Object[] parameterValues) throws NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+        Class<?> clz = Class.forName(className);
+        Constructor<?> constructor = clz.getConstructor(parameterClasses);
+        return constructor.newInstance(parameterValues);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Object getEnumValue(String enumClassName, String enumValue) throws ClassNotFoundException {
+        Class<Enum> enumClz = (Class<Enum>) Class.forName(enumClassName);
+        return Enum.valueOf(enumClz, enumValue);
+    }
+
+    private static void setField(Object object, String fieldName, Object value) throws IllegalAccessException, IllegalArgumentException, NoSuchFieldException {
+        Field field = object.getClass().getDeclaredField(fieldName);
+        field.set(object, value);
+    }
+
+    private static <T> T getField(Object object, String fieldName, Class<T> type) throws IllegalAccessException, IllegalArgumentException, NoSuchFieldException {
+        Field field = object.getClass().getDeclaredField(fieldName);
+        return type.cast(field.get(object));
+    }
+
+    private static void callMethod(Object object, String methodName, String[] parameterTypes, Object[] parameterValues) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+        Class<?>[] parameterClasses = new Class<?>[parameterTypes.length];
+        for (int i = 0; i < parameterTypes.length; i++)
+            parameterClasses[i] = Class.forName(parameterTypes[i]);
+
+        Method method = object.getClass().getDeclaredMethod(methodName, parameterClasses);
+        method.invoke(object, parameterValues);
+    }
+
+    public static void setIpAssignment(String assign , WifiConfiguration wifiConf)
+            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException{
+        setEnumField(wifiConf, assign, "ipAssignment");
+    }
+
+    public static void setIpAddress(InetAddress addr, int prefixLength, WifiConfiguration wifiConf)
+            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException,
+            NoSuchMethodException, ClassNotFoundException, InstantiationException, InvocationTargetException{
+        Object linkProperties = getField(wifiConf, "linkProperties");
+        if(linkProperties == null)return;
+        Class laClass = Class.forName("android.net.LinkAddress");
+        Constructor laConstructor = laClass.getConstructor(new Class[]{InetAddress.class, int.class});
+        Object linkAddress = laConstructor.newInstance(addr, prefixLength);
+
+        ArrayList mLinkAddresses = (ArrayList)getDeclaredField(linkProperties, "mLinkAddresses");
+        mLinkAddresses.clear();
+        mLinkAddresses.add(linkAddress);
+    }
+
+    public static void setGateway(InetAddress gateway, WifiConfiguration wifiConf)
+            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException,
+            ClassNotFoundException, NoSuchMethodException, InstantiationException, InvocationTargetException {
+        Object linkProperties = getField(wifiConf, "linkProperties");
+        if(linkProperties == null)return;
+        Class routeInfoClass = Class.forName("android.net.RouteInfo");
+        Constructor routeInfoConstructor = routeInfoClass.getConstructor(new Class[]{InetAddress.class});
+        Object routeInfo = routeInfoConstructor.newInstance(gateway);
+
+        ArrayList mRoutes = (ArrayList)getDeclaredField(linkProperties, "mRoutes");
+        mRoutes.clear();
+        mRoutes.add(routeInfo);
+    }
+
+    public static void setDNS(InetAddress dns, WifiConfiguration wifiConf)
+            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException{
+        Object linkProperties = getField(wifiConf, "linkProperties");
+        if(linkProperties == null)return;
+
+        ArrayList<InetAddress> mDnses = (ArrayList<InetAddress>)getDeclaredField(linkProperties, "mDnses");
+        mDnses.clear(); //or add a new dns address , here I just want to replace DNS1
+        mDnses.add(dns);
+    }
+
+    public static Object getField(Object obj, String name)
+            throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
+        Field f = obj.getClass().getField(name);
+        Object out = f.get(obj);
+        return out;
+    }
+
+    public static Object getDeclaredField(Object obj, String name)
+            throws SecurityException, NoSuchFieldException,
+            IllegalArgumentException, IllegalAccessException {
+        Field f = obj.getClass().getDeclaredField(name);
+        f.setAccessible(true);
+        Object out = f.get(obj);
+        return out;
+    }
+
+    private static void setEnumField(Object obj, String value, String name)
+            throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
+        Field f = obj.getClass().getField(name);
+        f.set(obj, Enum.valueOf((Class<Enum>) f.getType(), value));
+    }
+
+    //end static methods
+
+    @Override
+    public void disconnectWifi() {
+        wifiManager.disconnect();
+    }
+
     @Override
     public void restoreWifi() {
         UstadMobileSystemImpl.l(UMLog.INFO, 339, "NetworkManager: restore wifi");
+        endAnyLocalSession();
         wifiManager.disconnect();
         deleteTemporaryWifiDirectSsids();
         wifiManager.reconnect();
     }
+
+    /**
+     * Send an http request to the server so it knows we are done
+     */
+    private void endAnyLocalSession() {
+        if(connectivityStatusRef.get() == null
+                || connectivityStatusRef.get().getWifiSsid() == null
+                || !connectivityStatusRef.get().getWifiSsid().startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
+            return;
+
+        String endpoint = umAppDatabase.getNetworkNodeDao().getEndpointUrlByGroupSsid(
+                connectivityStatusRef.get().getWifiSsid());
+        if(endpoint == null){
+            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+                    "ERROR: No endpoint url for ssid" +
+                            connectivityStatusRef.get().getWifiSsid());
+            return;
+        }
+
+        try {
+            String endSessionUrl = endpoint + "endsession";
+            UmHttpResponse response = UstadMobileSystemImpl.getInstance().makeRequestSync(new UmHttpRequest(mContext,
+                    endSessionUrl));
+            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Send end of session request " +
+                    endSessionUrl);
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
