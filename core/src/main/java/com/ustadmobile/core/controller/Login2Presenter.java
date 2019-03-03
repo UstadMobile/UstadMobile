@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 
 public class Login2Presenter extends UstadBaseController<Login2View> {
 
@@ -56,6 +57,10 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
                     view.runOnUiThread(() -> view.setInProgress(false));
                     view.setFinishAfficinityOnView();
                     UmAccountManager.setActiveAccount(result, getContext());
+
+                    //TODO: force sync here.
+                    view.forceSync();
+
                     systemImpl.go(mNextDest, getContext());
                 }else {
                     view.runOnUiThread(() -> {

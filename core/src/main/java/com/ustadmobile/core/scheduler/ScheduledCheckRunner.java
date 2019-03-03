@@ -283,8 +283,6 @@ public class ScheduledCheckRunner implements Runnable{
                         clazzName,
                         admin.getPersonUid()));
             }
-
-
         }
 
         if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH){

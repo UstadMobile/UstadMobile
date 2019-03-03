@@ -38,9 +38,7 @@ public class AboutController extends UstadBaseController<AboutView>  {
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
 
 

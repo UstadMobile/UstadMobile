@@ -9,7 +9,12 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.Login2Presenter;
 import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.WorkManager;
 
 public class Login2Activity extends UstadBaseActivity implements Login2View {
 
@@ -80,5 +85,11 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
     @Override
     public void setFinishAfficinityOnView() {
         runOnUiThread(() -> finishAffinity());
+    }
+
+    @Override
+    public void forceSync() {
+        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
+        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
     }
 }

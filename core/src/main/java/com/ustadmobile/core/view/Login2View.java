@@ -16,4 +16,6 @@ public interface Login2View extends UstadView{
 
     void setFinishAfficinityOnView();
 
+    void forceSync();
+
 }
