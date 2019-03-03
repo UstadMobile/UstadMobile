@@ -41,12 +41,12 @@ public class AboutController extends UstadBaseController<AboutView>  {
             public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
 
+        String currentApiUrl = UstadMobileSystemImpl.getInstance().getAppConfigString("apiUrl",
+                "http://localhost", context);
 
         view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)));
-
-        view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)));
+                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)) + "\n" +
+                "API:" + currentApiUrl);
         view.setAboutHTML(aboutHTMLStr);
     }
 
