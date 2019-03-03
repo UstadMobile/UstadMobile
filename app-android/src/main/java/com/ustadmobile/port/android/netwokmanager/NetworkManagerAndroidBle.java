@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.netwokmanager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattServer;
@@ -16,17 +17,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -48,15 +50,10 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -246,7 +243,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
             NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
-                    prettyPrintNetwork(network, networkInfo));
+                    prettyPrintNetwork(networkInfo));
 
             String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
             ConnectivityStatus status = new ConnectivityStatus(state, true,
@@ -278,7 +275,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         public void onLost(Network network) {
             super.onLost(network);
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
-                    prettyPrintNetwork(network, connectivityManager.getNetworkInfo(network)));
+                    prettyPrintNetwork(connectivityManager.getNetworkInfo(network)));
             handleDisconnected();
         }
 
@@ -291,7 +288,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     }
 
 
-    private String prettyPrintNetwork(Network network, NetworkInfo networkInfo){
+    private String prettyPrintNetwork(NetworkInfo networkInfo){
         String val = "Network : ";
         if(networkInfo != null) {
             val += " type: " + networkInfo.getTypeName();
@@ -611,7 +608,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * {@inheritDoc}
      */
     @Override
-    public void connectToWiFi(String ssid, String passphrase) {
+    public void connectToWiFi(String ssid, String passphrase, int timeout) {
         deleteTemporaryWifiDirectSsids();
         endAnyLocalSession();
 
@@ -619,192 +616,116 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             temporaryWifiDirectSsids.add(ssid);
         }
 
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.SSID = "\""+ ssid +"\"";
-        wifiConfig.priority = (getMaxWiFiConfigurationPriority(wifiManager)+1);
-        wifiConfig.preSharedKey = "\""+ passphrase +"\"";
-        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        wifiConfig.priority = getMaxWiFiConfigurationPriority(wifiManager);
+        long connectionDeadline = System.currentTimeMillis() + timeout;
 
-//        try {
-//            setIpAssignment("STATIC", wifiConfig);
-//            setIpAddress(InetAddress.getByName("192.168.49.42"), 24, wifiConfig);
-//            setGateway(InetAddress.getByName("192.168.49.1"), wifiConfig);
-//            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Set static IP address");
-//        }catch(Exception e) {
-//            e.printStackTrace();
-//        }
+        boolean connectedOrFailed = false;
 
-        //See https://stackoverflow.com/questions/40155591/set-static-ip-and-gateway-programmatically-in-android-6-x-marshmallow/45385404
+        boolean networkEnabled = false;
+
+        do{
+            UstadMobileSystemImpl.l(UMLog.INFO, 693, "Trying to connect to " + ssid);
+            if(!networkEnabled){
+                enableWifiNetwork(ssid,passphrase);
+                UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                        "Network changed  to "+ssid);
+                networkEnabled = true;
+            }else {
+                DhcpInfo routeInfo = wifiManager.getDhcpInfo();
+                if (routeInfo != null && routeInfo.gateway > 0) {
+                    @SuppressLint("DefaultLocale")
+                    String gatewayIp = String.format("%d.%d.%d.%d",
+                            (routeInfo.gateway & 0xff),
+                            (routeInfo.gateway >> 8 & 0xff),
+                            (routeInfo.gateway >> 16 & 0xff),
+                            (routeInfo.gateway >> 24 & 0xff));
+                    UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                            "Trying to ping gateway IP address " + gatewayIp);
+                    if(ping(gatewayIp, 1000)){
+                        UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                                "Ping successful!" + ssid);
+                        connectedOrFailed = true;
+                    }else {
+                        UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                                "ConnectToWifi: ping to " + gatewayIp + " failed on " + ssid);
+                    }
+                }else{
+                    UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                            "ConnectToWifi: No DHCP gateway yet on " + ssid);
+                }
+            }
+
+
+            if(!connectedOrFailed && System.currentTimeMillis() > connectionDeadline){
+                UstadMobileSystemImpl.l(UMLog.INFO, 693, " TIMEOUT: failed to connect " + ssid);
+                break;
+            }
+            SystemClock.sleep(1000);
+
+        } while (!connectedOrFailed);
+    }
+
+    private boolean isConnectedToWifi() {
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+
+        return info != null
+                && info.getType() == ConnectivityManager.TYPE_WIFI
+                && info.isConnected();
+    }
+
+    private boolean ping(String ipAddress, long timeout) {
         try {
-            Object ipAssignment = getEnumValue("android.net.IpConfiguration$IpAssignment", "STATIC");
-            callMethod(wifiConfig, "setIpAssignment", new String[]{"android.net.IpConfiguration$IpAssignment"}, new Object[]{ipAssignment});
-
-            // Then set properties in StaticIpConfiguration.
-            Object staticIpConfig = newInstance("android.net.StaticIpConfiguration");
-            Object linkAddress = newInstance("android.net.LinkAddress", new Class<?>[]{InetAddress.class, int.class},
-                    new Object[]{InetAddress.getByName("192.168.49.42"), 24});
-
-            setField(staticIpConfig, "ipAddress", linkAddress);
-            setField(staticIpConfig, "gateway", InetAddress.getByName("192.168.49.1"));
-//            getField(staticIpConfig, "dnsS/ervers", ArrayList.class).clear();
-//            for (int i = 0; i < dns.length; i++)
-//                getField(staticIpConfig, "dnsServers", ArrayList.class).add(dns[i]);
-
-            callMethod(wifiConfig, "setStaticIpConfiguration", new String[]{"android.net.StaticIpConfiguration"}, new Object[]{staticIpConfig});
-            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Set static IP");
-        }catch(Exception e) {
-            e.printStackTrace();
+            return InetAddress.getByName(ipAddress).isReachable((int) timeout);
+        } catch (IOException e) {
+            //ping did not succeed
         }
-
-
-
-
-        int netId = wifiManager.addNetwork(wifiConfig);
-        boolean isConnected = wifiManager.enableNetwork(netId, true);
-        UstadMobileSystemImpl.l(UMLog.INFO, 648, "Network: Connecting to wifi: "
-                + ssid + " passphrase: '" + passphrase +"', " + "successful?"  + isConnected
-                +  " priority = " + wifiConfig.priority);
+        return false;
     }
 
-    //Start static methods
+    private void disableCurrentWifiNetwork() {
+        //This may or may not be allowed depending on the version of android we are using.
+        //Sometimes Android will feel like reconnecting to the last network, even though we told
+        //it what network to connect with.
 
-    @SuppressWarnings("unchecked")
-    public static void setStaticIpConfiguration(WifiManager manager, WifiConfiguration config, InetAddress ipAddress, int prefixLength, InetAddress gateway, InetAddress[] dns) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, NoSuchFieldException, InstantiationException {
-        // First set up IpAssignment to STATIC.
-        Object ipAssignment = getEnumValue("android.net.IpConfiguration$IpAssignment", "STATIC");
-        callMethod(config, "setIpAssignment", new String[]{"android.net.IpConfiguration$IpAssignment"}, new Object[]{ipAssignment});
-
-        // Then set properties in StaticIpConfiguration.
-        Object staticIpConfig = newInstance("android.net.StaticIpConfiguration");
-        Object linkAddress = newInstance("android.net.LinkAddress", new Class<?>[]{InetAddress.class, int.class}, new Object[]{ipAddress, prefixLength});
-
-        setField(staticIpConfig, "ipAddress", linkAddress);
-        setField(staticIpConfig, "gateway", gateway);
-        getField(staticIpConfig, "dnsServers", ArrayList.class).clear();
-        for (int i = 0; i < dns.length; i++)
-            getField(staticIpConfig, "dnsServers", ArrayList.class).add(dns[i]);
-
-        callMethod(config, "setStaticIpConfiguration", new String[]{"android.net.StaticIpConfiguration"}, new Object[]{staticIpConfig});
-
-        int netId = manager.updateNetwork(config);
-        boolean result = netId != -1;
-        if (result) {
-            boolean isDisconnected = manager.disconnect();
-            boolean configSaved = manager.saveConfiguration();
-            boolean isEnabled = manager.enableNetwork(config.networkId, true);
-            boolean isReconnected = manager.reconnect();
+        //TODO: we must track any networks we successfully disable, so that we can reenable them
+        if(isConnectedToWifi() && wifiManager.disconnect()) {
+            wifiManager.disableNetwork(wifiManager.getConnectionInfo().getNetworkId());
         }
     }
 
 
+    /**
+     * Connect to a given WiFi network. Here we are assuming that the security is WPA2 PSK as
+     * per the WiFi Direct spec. In theory, it should be possible to leave these settings to
+     * autodetect. In reality, we should specify these to reduce the chance of the connection
+     * timing out.
+     *
+     * @param ssid ssid to use
+     * @param passphrase network passphrase
+     */
+    private void enableWifiNetwork(String ssid, String passphrase){
+        if(isConnectedToWifi()) {
+            disableCurrentWifiNetwork();
+        }
 
-    private static Object newInstance(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-        return newInstance(className, new Class<?>[0], new Object[0]);
-    }
+        WifiConfiguration config = new WifiConfiguration();
+        config.SSID = "\""+ ssid +"\"";
+        config.preSharedKey = "\""+ passphrase +"\"";
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 
-    private static Object newInstance(String className, Class<?>[] parameterClasses, Object[] parameterValues) throws NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
-        Class<?> clz = Class.forName(className);
-        Constructor<?> constructor = clz.getConstructor(parameterClasses);
-        return constructor.newInstance(parameterValues);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object getEnumValue(String enumClassName, String enumValue) throws ClassNotFoundException {
-        Class<Enum> enumClz = (Class<Enum>) Class.forName(enumClassName);
-        return Enum.valueOf(enumClz, enumValue);
-    }
-
-    private static void setField(Object object, String fieldName, Object value) throws IllegalAccessException, IllegalArgumentException, NoSuchFieldException {
-        Field field = object.getClass().getDeclaredField(fieldName);
-        field.set(object, value);
-    }
-
-    private static <T> T getField(Object object, String fieldName, Class<T> type) throws IllegalAccessException, IllegalArgumentException, NoSuchFieldException {
-        Field field = object.getClass().getDeclaredField(fieldName);
-        return type.cast(field.get(object));
-    }
-
-    private static void callMethod(Object object, String methodName, String[] parameterTypes, Object[] parameterValues) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
-        Class<?>[] parameterClasses = new Class<?>[parameterTypes.length];
-        for (int i = 0; i < parameterTypes.length; i++)
-            parameterClasses[i] = Class.forName(parameterTypes[i]);
-
-        Method method = object.getClass().getDeclaredMethod(methodName, parameterClasses);
-        method.invoke(object, parameterValues);
-    }
-
-    public static void setIpAssignment(String assign , WifiConfiguration wifiConf)
-            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException{
-        setEnumField(wifiConf, assign, "ipAssignment");
-    }
-
-    public static void setIpAddress(InetAddress addr, int prefixLength, WifiConfiguration wifiConf)
-            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException,
-            NoSuchMethodException, ClassNotFoundException, InstantiationException, InvocationTargetException{
-        Object linkProperties = getField(wifiConf, "linkProperties");
-        if(linkProperties == null)return;
-        Class laClass = Class.forName("android.net.LinkAddress");
-        Constructor laConstructor = laClass.getConstructor(new Class[]{InetAddress.class, int.class});
-        Object linkAddress = laConstructor.newInstance(addr, prefixLength);
-
-        ArrayList mLinkAddresses = (ArrayList)getDeclaredField(linkProperties, "mLinkAddresses");
-        mLinkAddresses.clear();
-        mLinkAddresses.add(linkAddress);
-    }
-
-    public static void setGateway(InetAddress gateway, WifiConfiguration wifiConf)
-            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException,
-            ClassNotFoundException, NoSuchMethodException, InstantiationException, InvocationTargetException {
-        Object linkProperties = getField(wifiConf, "linkProperties");
-        if(linkProperties == null)return;
-        Class routeInfoClass = Class.forName("android.net.RouteInfo");
-        Constructor routeInfoConstructor = routeInfoClass.getConstructor(new Class[]{InetAddress.class});
-        Object routeInfo = routeInfoConstructor.newInstance(gateway);
-
-        ArrayList mRoutes = (ArrayList)getDeclaredField(linkProperties, "mRoutes");
-        mRoutes.clear();
-        mRoutes.add(routeInfo);
-    }
-
-    public static void setDNS(InetAddress dns, WifiConfiguration wifiConf)
-            throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException{
-        Object linkProperties = getField(wifiConf, "linkProperties");
-        if(linkProperties == null)return;
-
-        ArrayList<InetAddress> mDnses = (ArrayList<InetAddress>)getDeclaredField(linkProperties, "mDnses");
-        mDnses.clear(); //or add a new dns address , here I just want to replace DNS1
-        mDnses.add(dns);
-    }
-
-    public static Object getField(Object obj, String name)
-            throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
-        Field f = obj.getClass().getField(name);
-        Object out = f.get(obj);
-        return out;
-    }
-
-    public static Object getDeclaredField(Object obj, String name)
-            throws SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
-        Field f = obj.getClass().getDeclaredField(name);
-        f.setAccessible(true);
-        Object out = f.get(obj);
-        return out;
-    }
-
-    private static void setEnumField(Object obj, String value, String name)
-            throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
-        Field f = obj.getClass().getField(name);
-        f.set(obj, Enum.valueOf((Class<Enum>) f.getType(), value));
-    }
-
-    //end static methods
-
-    @Override
-    public void disconnectWifi() {
+        int netId = wifiManager.addNetwork(config);
         wifiManager.disconnect();
+        boolean requestAccepted = wifiManager.enableNetwork(netId, true);
+        UstadMobileSystemImpl.l(UMLog.INFO, 693, "Network: Connecting to wifi: "
+                + ssid + " passphrase: '" + passphrase +"', " + "request submitted ?"
+                + requestAccepted);
+        wifiManager.reconnect();
     }
+
 
     @Override
     public void restoreWifi() {
@@ -849,10 +770,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
      * This method simply removes the quotes, if they are there. Will also handle null safely.
      *
-     * @param ssid
-     * @return
+     * @param ssid network ssid to be normalized
+     * @return normalized network ssid
      */
-    public static String normalizeAndroidWifiSsid(String ssid) {
+    private static String normalizeAndroidWifiSsid(String ssid) {
         if(ssid == null)
             return ssid;
         else
@@ -951,23 +872,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 
-    /**
-     * Get maximum priority assigned to a network configuration.
-     * This helps to prioritize which network to connect to.
-     *
-     * @param wifiManager WifiManager instance
-     * @return Maximum configuration priority number.
-     */
-    private int getMaxWiFiConfigurationPriority(final WifiManager wifiManager) {
-        final List<WifiConfiguration> configurations = wifiManager.getConfiguredNetworks();
-        int maxPriority = 0;
-        for(final WifiConfiguration config : configurations) {
-            if(config.priority > maxPriority)
-                maxPriority = config.priority;
-        }
-
-        return maxPriority;
-    }
 
     @Override
     public RouterNanoHTTPD getHttpd() {
