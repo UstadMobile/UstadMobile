@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.Container;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryWithFileJoinStatus;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
@@ -13,10 +12,9 @@ import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.io.File;
 import java.util.Map;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
@@ -33,12 +31,12 @@ public class DeDupeUtil {
         UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
         UMLogUtil.logInfo(args[0]);
 
-        new DeDupeUtil(new File(args[0]));
+        new DeDupeUtil().dedup(new File(args[0]));
 
     }
 
 
-    public DeDupeUtil(File containerDirectory) {
+    public void dedup(File containerDirectory) {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
