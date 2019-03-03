@@ -46,7 +46,7 @@ public class AboutController extends UstadBaseController<AboutView>  {
 
         view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)) + "\n" +
-                "API:" + currentApiUrl);
+                "API: " + currentApiUrl + "\n");
         view.setAboutHTML(aboutHTMLStr);
     }
 

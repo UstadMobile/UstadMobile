@@ -77,9 +77,12 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      * @param db
      */
     public void createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
+        //This method will usually be called from the Workmanager in Android every day. Making the
+        // start time 00:00 and end tim 23:59
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTimeInMillis(startTime);
         UMCalendarUtil.normalizeSecondsAndMillis(startCalendar);
+
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTimeInMillis(endTime);
         UMCalendarUtil.normalizeSecondsAndMillis(endCalendar);
@@ -96,32 +99,51 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                 continue;
             }
 
-
+            //TODOne: Check if this works for Scheduling for everyday
+            //TODO: Check/Test it 
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
+
                 boolean incToday = startMsOfDay <= schedule.getSceduleStartTime();
-                Calendar nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                        startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
-
                 long startTimeMins = schedule.getSceduleStartTime() / (1000 * 60);
-                nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int)(startTimeMins / 60));
-                nextScheduleOccurence.set(Calendar.MINUTE, (int)(startTimeMins % 60));
-                nextScheduleOccurence.set(Calendar.SECOND, 0);
-                nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
 
-                if(nextScheduleOccurence.before(endCalendar)) {
+                Calendar nextScheduleOccurence = null;
+
+                if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_DAILY){
+
+                    //TODO: Skip if its a weekend. TODO: Add weekend feature.
+                    //Everyday- so today.
+                    nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                            startCalendar, clazz.getTimeZone(), Calendar.DAY_OF_WEEK, incToday);
+                    nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
+                    nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
+                    nextScheduleOccurence.set(Calendar.SECOND, 0);
+                    nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+
+                }else if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
+
+                    nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                            startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
+                    nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
+                    nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
+                    nextScheduleOccurence.set(Calendar.SECOND, 0);
+                    nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+                }
+
+                if (nextScheduleOccurence != null && nextScheduleOccurence.before(endCalendar)) {
                     //this represents an instance of this class that should take place and
                     //according to the arguments provided, we should check that this instance exists
                     int logInstanceHash = ClazzLogDao.generateClazzLogUid(clazz.getClazzUid(),
                             nextScheduleOccurence.getTimeInMillis());
                     ClazzLog existingLog = db.getClazzLogDao().findByUid(logInstanceHash);
 
-                    if(existingLog == null || existingLog.isCanceled()) {
+                    if (existingLog == null || existingLog.isCanceled()) {
                         ClazzLog newLog = new ClazzLog(logInstanceHash, clazz.getClazzUid(),
                                 nextScheduleOccurence.getTimeInMillis(), schedule.getScheduleUid());
                         db.getClazzLogDao().replace(newLog);
                     }
                 }
+
             }
         }
     }
