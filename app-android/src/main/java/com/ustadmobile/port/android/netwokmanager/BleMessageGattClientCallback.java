@@ -107,7 +107,8 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         if (status != BluetoothGatt.GATT_SUCCESS) {
             gatt.disconnect();
             UstadMobileSystemImpl.l(UMLog.DEBUG,698,
-                    "Connection failed with error code "+status);
+                    "Connection failed with error code " + status + "from "
+                            + gatt.getDevice().getAddress());
             if(responseListener != null) {
                 responseListener.onResponseReceived(gatt.getDevice().getAddress(), null,
                         new IOException("BLE onConnectionStateChange not successful." +

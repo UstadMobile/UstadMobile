@@ -146,6 +146,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     protected AtomicReference<ConnectivityStatus> connectivityStatusRef = new AtomicReference<>();
 
+    public static final int DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000;
+
     /**
      * Constructor to be used when creating new instance
      * @param context Platform specific application context
@@ -484,14 +486,16 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * @param ssid Group network SSID
      * @param passphrase Group network passphrase
      */
-    public abstract void connectToWiFi(String ssid, String passphrase);
+    public abstract void connectToWiFi(String ssid, String passphrase, int timeout);
+
+    public void connectToWiFi(String ssid, String passphrase) {
+        connectToWiFi(ssid, passphrase, DEFAULT_WIFI_CONNECTION_TIMEOUT);
+    }
 
     /**
      * Restore the 'normal' WiFi connection
      */
     public abstract void restoreWifi();
-
-    public abstract void disconnectWifi();
 
 
     /**

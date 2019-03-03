@@ -492,7 +492,6 @@ public class DownloadJobItemRunner implements Runnable {
         //disconnect first
         if(connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED
             && connectivityStatus.getWifiSsid() != null) {
-            networkManager.disconnectWifi();
             WaitForLiveData.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
                     (connectivityStatus) -> connectivityStatus != null
                             && connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_UNMETERED);
