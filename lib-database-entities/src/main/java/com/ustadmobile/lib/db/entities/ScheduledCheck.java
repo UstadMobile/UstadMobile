@@ -29,15 +29,11 @@ public class ScheduledCheck {
     //eg: An alert for classrooms with an average of 6% attendance or less.
     public static final int TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH = 8;
 
-
-
     //eg: An alert to show which student or teacher profiles were created or updated.
     public static final int TYPE_CHECK_PERSON_PROFILE_UPDATED = 10;
 
     //eg: An alert when a student has not attended in a single day in a month(drop-out)
     public static final int TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH = 11;
-
-
 
     public static final String PARAM_CLAZZ_UID = "clazzuid";
 

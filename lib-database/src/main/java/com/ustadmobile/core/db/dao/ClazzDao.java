@@ -145,9 +145,6 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             ENTITY_LEVEL_PERMISSION_CONDITION2)
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPermission(long accountPersonUid);
 
-
-
-
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz ")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzes();
@@ -159,11 +156,12 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE clazzLocationUid in (:locations)")
     public abstract void findAllClazzesInLocationListAsync(List<Long> locations,
-                                                   UmCallback<List<ClazzWithNumStudents>> resultList);
+                                               UmCallback<List<ClazzWithNumStudents>> resultList);
 
 
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid in (:clazzUidList) AND clazzActive = 1")
-    public abstract void findClazzesByUidListAsync(List<Long> clazzUidList, UmCallback<List<Clazz>> resultList);
+    public abstract void findClazzesByUidListAsync(List<Long> clazzUidList,
+                                                   UmCallback<List<Clazz>> resultList);
 
     @UmQuery("SELECT * FROM Clazz WHERE clazzActive = 1")
     public abstract void findAllActiveClazzesAsync(UmCallback<List<Clazz>> resultList);
@@ -331,7 +329,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "   ) * 1.0 " +
             "   AS percentage")
     public abstract float findClazzAttendancePercentageWithoutLatestClazzLog(long clazzUid);
-    
+
     /** Check if a permission is present on a specific entity e.g. update/modify etc*/
     @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")
@@ -344,7 +342,8 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
                                              UmCallback<Boolean> callback);
 
     @UmQuery("SELECT Clazz.clazzUid as primaryKey, " +
-            "(" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
+            "(" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
+                Role.PERMISSION_CLAZZ_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
                 " AS userCanUpdate " +
             " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
     @UmSyncCheckIncomingCanUpdate
@@ -355,9 +354,11 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "WHERE " +
             "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
             "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
-            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can update it
+            "AND ((" +
+                ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can update it
                 ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
-            " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_INSERT + //can insert on table
+            " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 +
+                Role.PERMISSION_CLAZZ_INSERT + //can insert on table
                 TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
     public abstract int countPendingLocalChanges(long accountPersonUid);
 
@@ -369,13 +370,11 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             + Role.PERMISSION_CLAZZ_SELECT + ENTITY_LEVEL_PERMISSION_CONDITION2)
     public abstract List<ClazzWithTimeZone> findAllClazzesWithSelectPermission(long accountPersonUid);
 
-
     @UmQuery("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
     public abstract String getClazzName(long clazzUid);
 
     @UmQuery("SELECT clazzName FROM Clazz WHERE clazzUid = :clazzUid")
     public abstract void getClazzNameAsync(long clazzUid, UmCallback<String> callback);
-
 
     @UmQuery("SELECT Person.* " +
             "FROM PersonGroupMember " +

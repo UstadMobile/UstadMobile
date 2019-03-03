@@ -65,7 +65,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     public static final float feedAlertPerentageHigh = 0.69f;
     public static final float feedAlertPerentageMed = 0.5f;
 
-
     private List<ClazzMember> teachers;
     private String clazzName;
     public static final int  tardyFrequency = 3;
@@ -263,7 +262,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     public void handleClickGoBackDate(){
         incrementLogInList(-1);
-
     }
 
     private void incrementLogInList(int inc) {
@@ -332,7 +330,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                 /*FEED ENTRIES*/
 
-                //4. Create feedEntries for the ones that have dropped values.
+                //5. Create feedEntries for the ones that have dropped values.
                 List<ClazzMember> afterList = clazzMemberDao.findByClazzUid(
                         currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_STUDENT);
                 for(ClazzMember after : afterList) {
@@ -371,9 +369,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 )
                             );
                         }
-
                         repository.getFeedEntryDao().insertList(newFeedEntries);
-
                     }
 
                     if(before != null
@@ -397,74 +393,72 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                             newFeedEntries.add(
                                 new FeedEntry(
-                                        feedEntryUid,
-                                        "Attendance dropped",
-                                        "Student " + thisPerson.getFirstNames() + " " +
-                                                thisPerson.getLastName() + " of Class " +
-                                                clazzName + " attendance dropped "+
-                                                String.valueOf(feedAlertPerentageMed * 100)  +"%",
-                                        feedLinkViewPerson,
-                                        clazzName,
-                                        teacher.getClazzMemberPersonUid()
+                                    feedEntryUid,
+                                    "Attendance dropped",
+                                    "Student " + thisPerson.getFirstNames() + " " +
+                                            thisPerson.getLastName() + " of Class " +
+                                            clazzName + " attendance dropped "+
+                                            String.valueOf(feedAlertPerentageMed * 100)  +"%",
+                                    feedLinkViewPerson,
+                                    clazzName,
+                                    teacher.getClazzMemberPersonUid()
                                 )
                             );
                         }
-
                         repository.getFeedEntryDao().insertList(newFeedEntries);
-
                     }
-
                 }
 
                 //6. Create feedEntries for student not partial more than 3 times.
                 clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
-                        ClazzLogAttendanceRecord.STATUS_PARTIAL, tardyFrequency,
-                        currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
-                            @Override
-                            public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
-                                //Create feed entries for this user for every teacher
-                                List<FeedEntry> newFeedEntries = new ArrayList<>();
-                                for(PersonNameWithClazzName each:theseGuys){
+                    ClazzLogAttendanceRecord.STATUS_PARTIAL, tardyFrequency,
+                    currentClazzLog.getClazzLogClazzUid(),
+                    new UmCallback<List<PersonNameWithClazzName>>() {
+                        @Override
+                        public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+                            //Create feed entries for this user for every teacher
+                            List<FeedEntry> newFeedEntries = new ArrayList<>();
+                            for(PersonNameWithClazzName each:theseGuys){
 
-                                    String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
-                                            PersonDetailView.ARG_PERSON_UID + "=" +
-                                            String.valueOf(each.getPersonUid());
+                                String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                                        PersonDetailView.ARG_PERSON_UID + "=" +
+                                        String.valueOf(each.getPersonUid());
 
-                                    for(ClazzMember teacher:teachers){
-                                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                                teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
-                                                ScheduledCheck.TYPE_CHECK_PARTIAL_REPETITION_MED, feedLinkViewPerson);
+                                for(ClazzMember teacher:teachers){
+                                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                        teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
+                                        ScheduledCheck.TYPE_CHECK_PARTIAL_REPETITION_MED, feedLinkViewPerson);
 
-                                        newFeedEntries.add(
-                                            new FeedEntry(
-                                                feedEntryUid,
-                                                "Tardy behaviour" ,
-                                                    "Student " + each.getFirstNames() + " " +
-                                                            each.getLastName() + " partially attended Class "
-                                                             + clazzName + " over 3 times"
-                                                    ,
-                                                feedLinkViewPerson,
-                                                clazzName,
-                                                teacher.getClazzMemberPersonUid()
-                                            )
-                                        );
-                                    }
+                                    newFeedEntries.add(
+                                        new FeedEntry(
+                                            feedEntryUid,
+                                            "Tardy behaviour" ,
+                                                "Student " + each.getFirstNames() + " " +
+                                                        each.getLastName() + " partially attended Class "
+                                                         + clazzName + " over 3 times"
+                                                ,
+                                            feedLinkViewPerson,
+                                            clazzName,
+                                            teacher.getClazzMemberPersonUid()
+                                        )
+                                    );
                                 }
-
-                                repository.getFeedEntryDao().insertList(newFeedEntries);
-
                             }
 
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                exception.printStackTrace();
-                            }
-                        });
+                            repository.getFeedEntryDao().insertList(newFeedEntries);
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {exception.printStackTrace();}
+                    }
+                );
 
                 //7. Crate feedEntries for student not attended two classes in a row.
                 clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
                     ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyLow,
-                    currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
+                    currentClazzLog.getClazzLogClazzUid(),
+                    new UmCallback<List<PersonNameWithClazzName>>() {
                         @Override
                         public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
                             //Create feed entries for this user for every teacher
@@ -495,10 +489,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     );
                                 }
                             }
-
                             repository.getFeedEntryDao().insertList(newFeedEntries);
-
-
                         }
 
                         @Override
@@ -507,13 +498,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         }
                     });
 
-
-
-
-
-
-
-                //10. Set any FeedEntry to done
+                //8. Set any FeedEntry to done
                 repository.getFeedEntryDao().markEntryAsDoneByClazzLogUidAndTaskType(
                         currentClazzLog.getClazzLogUid(),
                         ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER, true);

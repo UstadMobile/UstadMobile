@@ -20,7 +20,7 @@ public class AboutActivity extends UstadBaseActivity implements AboutView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        setUMToolbar(R.id.um_toolbar);
+        setUMToolbar(R.id.activity_about_toolbar);
         setTitle(R.string.about);
         mAboutController = new AboutController(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),

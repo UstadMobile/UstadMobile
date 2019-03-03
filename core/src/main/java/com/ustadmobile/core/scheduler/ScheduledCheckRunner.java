@@ -208,6 +208,84 @@ public class ScheduledCheckRunner implements Runnable{
                 });
         }
 
+        //Check attendance not taken the next day.
+        if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER){
+            long clazzLogUid = Long.parseLong(params.get(ScheduledCheck.PARAM_CLAZZ_LOG_UID));
+            ClazzLog currentClazzLog = dbRepository.getClazzLogDao().findByUid(clazzLogUid);
+            Clazz currentClazz = dbRepository.getClazzDao().findByUid(currentClazzLog.getClazzLogClazzUid());
+            String clazzName = currentClazz.getClazzName();
+
+            //Get officers
+            Role officerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
+            List<Person> officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                    currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+
+            List<ClazzMemberWithPerson> teachers = dbRepository.getClazzMemberDao()
+                    .findClazzMemberWithPersonByRoleForClazzUidSync(
+                            currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_TEACHER);
+
+            Role mneOfficerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+            List<Person> mneofficers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                    currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
+
+            List<Person> admins = dbRepository.getPersonDao().findAllAdminsAsList();
+
+            List<FeedEntry> newFeedEntries = new ArrayList<>();
+
+            String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
+                    ClazzListView.ARG_CLAZZ_UID + "=" +
+                    currentClazzLog.getClazzLogClazzUid();
+
+            for(ClazzMemberWithPerson teacher:teachers){
+                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                        teacher.getPerson().getPersonUid(), currentClazzLog.getClazzLogUid(),
+                        ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+
+                newFeedEntries.add(new FeedEntry(feedEntryUid, "Record attendance (overdue)",
+                        "No attendance recorded for class. ",
+                        feedLinkViewClass,
+                        clazzName,
+                        teacher.getClazzMemberPersonUid()));
+            }
+
+            for(Person officer:officers){
+                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                        officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                        ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+
+                newFeedEntries.add(new FeedEntry(feedEntryUid, "Record attendance (overdue)",
+                        "No attendance recorded for class. ",
+                        feedLinkViewClass,
+                        clazzName,
+                        officer.getPersonUid()));
+            }
+
+            for(Person mne:mneofficers){
+                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                        mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                        ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+
+                newFeedEntries.add(new FeedEntry(feedEntryUid, "Record attendance (overdue)",
+                        "No attendance recorded for class. ",
+                        feedLinkViewClass,
+                        clazzName,
+                        mne.getPersonUid()));
+            }
+
+            for(Person admin:admins){
+                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                        admin.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                        ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+
+                newFeedEntries.add(new FeedEntry(feedEntryUid, "Record attendance (overdue)",
+                        "No attendance recorded for class. ",
+                        feedLinkViewClass,
+                        clazzName,
+                        admin.getPersonUid()));
+            }
+
+
+        }
 
         if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH){
 

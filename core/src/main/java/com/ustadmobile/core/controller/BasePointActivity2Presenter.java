@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.core.view.Login2View;
@@ -90,15 +91,20 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
 
     /**
      * Goes to Search activity.
-     * TODO: Account for which fragment called it (which search to show)
      */
     public void handleClickSearchIcon(){
 
+        //Update: This method will not do anything the Search will figure out where it it
+        // has been clicked.
+    }
 
+    /**
+     * About menu clicked.
+     */
+    public void handleClickAbout(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        //Disabling going anywhere but just text search in BasePoint
-        //impl.go(PersonListSearchView.VIEW_NAME, args, context);
+        impl.go(AboutView.VIEW_NAME, args, getContext());
     }
 
     /**

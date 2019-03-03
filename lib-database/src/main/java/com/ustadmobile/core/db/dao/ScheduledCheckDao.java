@@ -107,13 +107,13 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
         insertList(clazzAttendanceHighSCs);
 
 
+        //Next day attendance taken or not checks. - Teachers get
         List<ClazzLog> logsWithoutNextDayCheck = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER);
         List<ScheduledCheck> addThese = new ArrayList<>();
         for(ClazzLog clazzLog : logsWithoutNextDayCheck) {
-            long checkTime = clazzLog.getLogDate() ;
-            checkTime = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(clazzLog.getLogDate(), 1);
-            //TODO: Advance to the next morning. Create a Calendar, add one day of ms
+            //TODO: Advance to the next morning. Create a Calendar, add one day of ms - CHECK below
+            long checkTime = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(clazzLog.getLogDate(), 1);
             ScheduledCheck nextDayCheck = new ScheduledCheck(
                     checkTime,
                     ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER,

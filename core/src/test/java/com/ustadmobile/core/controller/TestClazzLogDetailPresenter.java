@@ -281,7 +281,8 @@ public class TestClazzLogDetailPresenter {
      * Result:      Should create alert of absence over 2 days
      */
     @Test
-    public void givenWhenAttendanceForOneStudentMarkedTwiceAbsentConsecutively_whenDoneClicked_thenShouldCreateFeedEntry(){
+    public void givenWhenAttendanceForOneStudentMarkedTwiceAbsentConsecutively_whenDoneClicked_thenShouldCreateFeedEntry()
+    throws InterruptedException{
 
 
         logTeacherIn();
@@ -311,23 +312,16 @@ public class TestClazzLogDetailPresenter {
                 args, mockView);
 
         presenter.onCreate(args);
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(2000);
         presenter.handleClickDone();
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(3000);
 
         //Now check database.
-
         FeedEntryDao feedEntryDao = repo.getFeedEntryDao();
         List<FeedEntry> allFeeds = feedEntryDao.findAll();
         Assert.assertNotNull(allFeeds);
+
+        //TODO: assert that that particular feed entry is there.
 
     }
 }

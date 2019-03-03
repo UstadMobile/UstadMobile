@@ -19,7 +19,7 @@
         android:icon="@drawable/ic_dropout_bcd4_24dp"
         android:title="@string/logout"
         android:visible="false"
-        android:iconTint="@color/just_black"
+        android:iconTint="@color/icons"
         app:showAsAction="always"/>
 
     <item android:id="@+id/menu_settings_gear"
@@ -36,5 +36,12 @@
         android:iconTint="@color/icons"
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"/>
+
+    <item android:id="@+id/menu_basepoint_about"
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/about"
+        android:visible="true"
+        />
+
 
 </menu>

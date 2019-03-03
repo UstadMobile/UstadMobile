@@ -9,6 +9,21 @@
 
     <include android:id="@+id/um_toolbar" layout="@layout/toolbar"/>
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_about_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/activity_about_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/primary"
+        />
+    </android.support.design.widget.AppBarLayout>
+
     <TextView
         android:layout_below="@+id/um_toolbar"
         android:layout_width="match_parent"
