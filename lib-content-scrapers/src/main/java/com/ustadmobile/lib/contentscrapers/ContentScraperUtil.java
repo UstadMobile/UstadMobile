@@ -332,6 +332,23 @@ public class ContentScraperUtil {
 
     }
 
+    public static Map<File, String> createContainerFromDirectory(File directory, Map<File, String> filemap){
+        Path sourceDirPath = Paths.get(directory.toURI());
+        try {
+            Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        String relativePath = sourceDirPath.relativize(path).toString()
+                                                            .replaceAll(Pattern.quote("\\"), "/");
+                        filemap.put(path.toFile(), relativePath);
+
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return filemap;
+    }
+
     /**
      * Once Selenium is setup and you load a page, use this method to wait for the page to load completely
      *

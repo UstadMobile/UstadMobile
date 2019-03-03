@@ -1,7 +1,10 @@
 package com.ustadmobile.lib.db.entities;
 
+import com.ustadmobile.lib.database.annotation.UmEmbedded;
+
 public class ContainerEntryWithContainerEntryFile extends ContainerEntry {
 
+    @UmEmbedded
     private ContainerEntryFile containerEntryFile;
 
     public ContainerEntryWithContainerEntryFile(String cePath, ContainerEntryFile entryFile){

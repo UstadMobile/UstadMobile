@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
 
 import java.util.List;
 
+import com.ustadmobile.lib.db.entities.ContentEntryWithFileJoinStatus;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
@@ -30,4 +31,15 @@ public abstract class ContentEntryContentEntryFileJoinDao
     @UmQuery("DELETE FROM ContentEntryContentEntryFileJoin WHERE cecefjContentEntryFileUid = :fileUid " +
             "and cecefjContentEntryUid = :contentUid")
     public abstract void deleteByUid(long fileUid, long contentUid);
+
+
+    @UmQuery("SELECT ContentEntryFile.*, ContentEntryFileStatus.*, ContentEntryContentEntryFileJoin.* FROM ContentEntryContentEntryFileJoin " +
+            "LEFT JOIN ContentEntryFile ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
+            "LEFT JOIN ContentEntryFileStatus ON ContentEntryFileStatus.cefsContentEntryFileUid = ContentEntryFile.contentEntryFileUid " +
+            "WHERE ContentEntryContentEntryFileJoin.cecefjContainerUid IS NULL OR ContentEntryContentEntryFileJoin.cecefjContainerUid = 0")
+    public abstract List<ContentEntryWithFileJoinStatus> findAllFiles();
+
+
+    @UmQuery("UPDATE ContentEntryContentEntryFileJoin SET cecefjContainerUid = :containerUid WHERE cecefjUid = :joinUid")
+    public abstract void updateContainerId(long containerUid, long joinUid);
 }
