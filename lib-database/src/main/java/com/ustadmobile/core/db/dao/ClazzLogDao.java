@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -155,6 +156,12 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT canceled")
     public abstract UmProvider<ClazzLog> findByClazzUidNotCanceled(long clazzUid);
+
+    @UmQuery("SELECT ClazzLog.*, Schedule.sceduleStartTime, Schedule.scheduleEndTime FROM ClazzLog " +
+            "LEFT JOIN Schedule ON Schedule.scheduleUid = ClazzLog.clazzLogScheduleUid " +
+            "WHERE clazzLogClazzUid = :clazzUid AND NOT canceled")
+    public abstract UmProvider<ClazzLogWithScheduleStartEndTimes>
+                                            findByClazzUidNotCancelledWithSchedule(long clazzUid);
 
     @UmQuery("UPDATE ClazzLog SET numPresent = :numPresent,  numAbsent = :numAbsent, " +
             "numPartial = :numPartial WHERE clazzLogUid = :clazzLogUid")

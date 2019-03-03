@@ -18,14 +18,18 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogListPresenter;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 
 /**
  * The ClazzLogList's recycler adapter.
  */
 public class ClazzLogListRecyclerAdapter extends
-        PagedListAdapter<ClazzLog, ClazzLogListRecyclerAdapter.ClazzLogViewHolder> {
+        PagedListAdapter<ClazzLogWithScheduleStartEndTimes, ClazzLogListRecyclerAdapter.ClazzLogViewHolder> {
 
     Context theContext;
     private Fragment theFragment;
@@ -38,7 +42,7 @@ public class ClazzLogListRecyclerAdapter extends
         }
     }
 
-    ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLog>
+    ClazzLogListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzLogWithScheduleStartEndTimes>
               diffCallback, Context context, Fragment fragment, ClazzLogListPresenter mPresenter,
                                           boolean imageShow){
         super(diffCallback);
@@ -67,12 +71,32 @@ public class ClazzLogListRecyclerAdapter extends
      */
     @Override
     public void onBindViewHolder(@NonNull ClazzLogViewHolder holder, int position){
-        ClazzLog clazzLog = getItem(position);
+        ClazzLogWithScheduleStartEndTimes clazzLog = getItem(position);
         assert clazzLog != null;
 
         Locale currentLocale = theFragment.getResources().getConfiguration().locale;
         String prettyDate =
                 UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate(), currentLocale);
+        //Add time to ClazzLog's date
+        long startTimeLong = clazzLog.getSceduleStartTime();
+        long endTimeLong = clazzLog.getScheduleEndTime();
+        DateFormat formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+
+        //start time
+        long startMins = startTimeLong / (1000 * 60);
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, (int)(startMins / 60));
+        cal.set(Calendar.MINUTE, (int)(startMins % 60));
+        String startTime = formatter.format(cal.getTime());
+
+        //end time
+        long endMins = endTimeLong / (1000 * 60);
+        cal.set(Calendar.HOUR_OF_DAY, (int)(endMins / 60));
+        cal.set(Calendar.MINUTE, (int)(endMins % 60));
+        String endTime = formatter.format(cal.getTime());
+
+        prettyDate = prettyDate + " (" + startTime + " - " + endTime + ")";
+
         String prettyShortDay =
                 UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate(), currentLocale);
 

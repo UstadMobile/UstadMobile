@@ -100,7 +100,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
             }
 
             //TODOne: Check if this works for Scheduling for everyday
-            //TODO: Check/Test it 
+            //TODO: Check/Test it
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
 
@@ -114,7 +114,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                     //TODO: Skip if its a weekend. TODO: Add weekend feature.
                     //Everyday- so today.
                     nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                            startCalendar, clazz.getTimeZone(), Calendar.DAY_OF_WEEK, incToday);
+                            startCalendar, clazz.getTimeZone(),
+                            Calendar.getInstance().get(Calendar.DAY_OF_WEEK), incToday);
                     nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
                     nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
                     nextScheduleOccurence.set(Calendar.SECOND, 0);

@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
 
 import java.util.LinkedHashMap;
 
@@ -40,7 +41,7 @@ public interface ClassLogListView extends UstadView {
      *
      * @param clazzLogListProvider The provider data
      */
-    void setClazzLogListProvider(UmProvider<ClazzLog> clazzLogListProvider);
+    void setClazzLogListProvider(UmProvider<ClazzLogWithScheduleStartEndTimes> clazzLogListProvider);
 
     /**
      * Takes a map of x, y values for the chart and updates the Line chart on the View.

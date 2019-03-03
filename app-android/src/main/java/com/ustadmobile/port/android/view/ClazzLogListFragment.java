@@ -34,6 +34,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -369,32 +370,34 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     }
 
     // ClassLogList's DIFF callback
-    public static final DiffUtil.ItemCallback<ClazzLog> DIFF_CALLBACK =
-        new DiffUtil.ItemCallback<ClazzLog>(){
+    public static final DiffUtil.ItemCallback<ClazzLogWithScheduleStartEndTimes> DIFF_CALLBACK =
+        new DiffUtil.ItemCallback<ClazzLogWithScheduleStartEndTimes>(){
 
             @Override
-            public boolean areItemsTheSame(ClazzLog oldItem, ClazzLog newItem) {
+            public boolean areItemsTheSame(ClazzLogWithScheduleStartEndTimes oldItem,
+                                           ClazzLogWithScheduleStartEndTimes newItem) {
                 return oldItem.getClazzLogUid() == newItem.getClazzLogUid();
             }
 
             @Override
-            public boolean areContentsTheSame(ClazzLog oldItem, ClazzLog newItem) {
+            public boolean areContentsTheSame(ClazzLogWithScheduleStartEndTimes oldItem,
+                                              ClazzLogWithScheduleStartEndTimes newItem) {
                 return oldItem.equals(newItem);
             }
         };
 
     @Override
-    public void setClazzLogListProvider(UmProvider<ClazzLog> clazzLogListProvider) {
+    public void setClazzLogListProvider(UmProvider<ClazzLogWithScheduleStartEndTimes> clazzLogListProvider) {
 
         //Create a recycler adapter to set on the Recycler View.
         ClazzLogListRecyclerAdapter recyclerAdapter =
             new ClazzLogListRecyclerAdapter(DIFF_CALLBACK, getContext(), this, mPresenter, false);
 
         //warning is expected
-        DataSource.Factory<Integer, ClazzLog> factory =
-                (DataSource.Factory<Integer, ClazzLog>) clazzLogListProvider.getProvider();
+        DataSource.Factory<Integer, ClazzLogWithScheduleStartEndTimes> factory =
+                (DataSource.Factory<Integer, ClazzLogWithScheduleStartEndTimes>) clazzLogListProvider.getProvider();
 
-        LiveData<PagedList<ClazzLog>> data =
+        LiveData<PagedList<ClazzLogWithScheduleStartEndTimes>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
 
         data.observe(this, recyclerAdapter::submitList);

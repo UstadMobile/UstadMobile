@@ -21,8 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/primary"
-            android:theme="@style/Theme.AppCompat"
-            android:titleTextColor="#fff"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_scrollFlags="scroll|enterAlways"
             tools:layout_editor_absoluteY="0dp" />

@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClassLogListView;
 import com.ustadmobile.lib.db.entities.ClazzLog;
+import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 import com.ustadmobile.lib.db.entities.Role;
 
@@ -38,7 +39,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
     private long currentClazzUid = 0L;
 
-    private UmProvider<ClazzLog> clazzLogListProvider;
+    private UmProvider<ClazzLogWithScheduleStartEndTimes> clazzLogListProvider;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private Long loggedInPersonUid;
@@ -90,7 +91,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         super.onCreate(savedState);
 
         clazzLogListProvider =
-                repository.getClazzLogDao().findByClazzUidNotCanceled(currentClazzUid);
+                repository.getClazzLogDao().findByClazzUidNotCancelledWithSchedule(currentClazzUid);
         setProviderToView();
 
         generateAttendanceBarChartDataTest();
