@@ -76,6 +76,18 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQueryFindByPrimaryKey
     public abstract void findByUid(Long entryUid, UmCallback<ContentEntry> umCallback);
 
+    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+            "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    public abstract void findByUidWithContentEntryStatus(long contentEntryUid,
+                                                         UmCallback<ContentEntryWithContentEntryStatus> callback);
+
+    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+            "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntry.sourceUrl = :sourceUrl")
+    public abstract void findBySourceUrlWithContentEntryStatus(String sourceUrl,
+                                                               UmCallback<ContentEntryWithContentEntryStatus> callback);
+
     @UmQuery("SELECT * FROM ContentEntry WHERE publik")
     public abstract List<ContentEntry> getPublicContentEntries();
 
@@ -96,7 +108,6 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
             "LEFT JOIN ContentEntry on  DownloadSet.dsRootContentEntryUid = ContentEntry.contentEntryUid\n" +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid \n ")
     public abstract UmProvider<ContentEntryWithContentEntryStatus> getDownloadedRootItems();
-
 
 
 }

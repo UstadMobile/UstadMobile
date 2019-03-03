@@ -91,6 +91,33 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                 holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
             }
 
+            ImageView iconView = holder.getIconView();
+            int iconFlag = entry.getContentTypeFlag();
+            if (iconFlag == ContentEntry.EBOOK_TYPE) {
+                iconView.setImageResource(R.drawable.ic_book_black_24dp);
+            } else if (iconFlag == ContentEntry.AUDIO_TYPE) {
+                iconView.setImageResource(R.drawable.ic_audiotrack_24px);
+            } else if (iconFlag == ContentEntry.VIDEO_TYPE) {
+                iconView.setImageResource(R.drawable.ic_video_library_24px);
+            } else if (iconFlag == ContentEntry.COLLECTION_TYPE) {
+                iconView.setImageResource(R.drawable.ic_collections_24px);
+            } else if (iconFlag == ContentEntry.DOCUMENT_TYPE) {
+                iconView.setImageResource(R.drawable.ic_file_24px);
+            } else if (iconFlag == ContentEntry.INTERACTIVE_EXERICSE_TYPE) {
+                iconView.setImageResource(R.drawable.ic_assignment_24px);
+            } else if (iconFlag == ContentEntry.ARTICLE_TYPE){
+                iconView.setImageResource(R.drawable.ic_newspaper);
+            } else{
+                iconView.setImageResource(R.drawable.ic_book_black_24dp);
+            }
+
+            if (iconFlag == ContentEntry.UNDEFINED_TYPE) {
+                iconView.setVisibility(View.GONE);
+            } else {
+                iconView.setVisibility(View.VISIBLE);
+            }
+
+
             holder.getDownloadView().getImageResource().setContentDescription(contentDescription);
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
@@ -104,6 +131,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
         final TextView entrySize;
         final ImageView thumbnailView;
         final DownloadStatusButton downloadView;
+        final ImageView iconView;
 
         ViewHolder(View view) {
             super(view);
@@ -113,6 +141,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             entrySize = view.findViewById(R.id.content_entry_item_library_size);
             thumbnailView = view.findViewById(R.id.content_entry_item_thumbnail);
             downloadView = view.findViewById(R.id.content_entry_item_download);
+            iconView = view.findViewById(R.id.content_entry_item_imageview);
         }
 
         @Override
@@ -142,6 +171,10 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
 
         public DownloadStatusButton getDownloadView() {
             return downloadView;
+        }
+
+        public ImageView getIconView() {
+            return iconView;
         }
     }
 

@@ -528,6 +528,20 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                 db.execSql("DROP TABLE IF EXISTS OpdsLink");
             }
         });
+        builder.addMigration(new UmDbMigration(8, 10) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE ContentEntry ADD COLUMN contentTypeFlag INTEGER DEFAULT 0");
+
+                }
+            }
+        });
 
         return builder;
     }

@@ -6,7 +6,11 @@ public interface VideoPlayerView extends UstadView {
 
     String ARG_VIDEO_PATH = "videopath";
 
-    String ARG_CONTENT_ENTRY_ID  = "entryid";
+    String ARG_AUDIO_PATH = "audiopath";
+
+    String ARG_SRT_PATH = "srtpath";
+
+    String ARG_CONTENT_ENTRY_ID = "entryid";
 
     String VIEW_NAME = "VideoPlayer";
 

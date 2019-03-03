@@ -132,6 +132,7 @@ task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateB
     buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
     buildConfigField "String", "CWEBP_PATH", rootProject.ext.buildConfigProperties["shrinker.webp"]
     buildConfigField "String", "FFMPEG_PATH", rootProject.ext.buildConfigProperties["ffmpeg.webm"]
+    buildConfigField "String", "CODEC2_PATH", rootProject.ext.buildConfigProperties["shrinker.codec2"]
 
 }
 compileJava.dependsOn(generateScraperBuildConfig)

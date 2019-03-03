@@ -23,10 +23,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources;
 
 @RunWith(AndroidJUnit4.class)
 public class VideoPlayerTest {
@@ -74,25 +77,32 @@ public class VideoPlayerTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        String testVideoPath = "/com/ustadmobile/app/android/video.mp4";
-        InputStream inputStream = getClass().getResourceAsStream(testVideoPath);
-        File path = Environment.getExternalStorageDirectory();
-        File targetFile = new File(path, "video.mp4");
-        OutputStream outStream = new FileOutputStream(targetFile);
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = inputStream.read(buffer)) != -1) {
-            outStream.write(buffer, 0, read);
-        }
+        File targetFile = readFromTestResources(
+                "/com/ustadmobile/app/android/video1.webm",
+                "video1.webm");
+
+        File audioFile = readFromTestResources(
+                "/com/ustadmobile/app/android/video1-codec2-version2.c2",
+                "video1-codec2-version2.c2");
+
+        File srtFile = readFromTestResources(
+                "/com/ustadmobile/app/android/srtfile.srt",
+                "srtfile.srt");
+
 
         b.putString(VideoPlayerView.ARG_VIDEO_PATH, targetFile.getPath());
-        b.putLong(VideoPlayerView.ARG_CONTENT_ENTRY_ID, 14L);
+        b.putString(VideoPlayerView.ARG_AUDIO_PATH, audioFile.getPath());
+        b.putString(VideoPlayerView.ARG_SRT_PATH, srtFile.getPath());
+        b.putString(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(14L));
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
-      //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // the webview looks for an element "questionController" which is the start button of plix.
         // This is only available once plix has fully loaded and displayed to the user
     }
+
+
+
 
 }

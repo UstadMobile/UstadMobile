@@ -26,4 +26,8 @@ public abstract class ContentEntryContentEntryFileJoinDao
             "LEFT JOIN ContentEntry ON ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.publik")
     public abstract List<ContentEntryContentEntryFileJoin> getPublicContentEntryContentEntryFileJoins();
+
+    @UmQuery("DELETE FROM ContentEntryContentEntryFileJoin WHERE cecefjContentEntryFileUid = :fileUid " +
+            "and cecefjContentEntryUid = :contentUid")
+    public abstract void deleteByUid(long fileUid, long contentUid);
 }

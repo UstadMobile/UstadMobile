@@ -1,18 +1,25 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.DummyView;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
@@ -37,6 +44,37 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         tabLayout.setupWithViewPager(viewPager);
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_dummy_activity,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_open_about){
+            UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME,getContext());
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        new Handler().postDelayed(() -> {
+            if(networkManagerBle != null){
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                        () -> networkManagerBle.sendP2PStateChangeBroadcast(),
+                        impl.getString(MessageID.location_permission_title,getContext()),
+                        impl.getString(MessageID.location_permission_message,getContext()));
+            }
+        }, TimeUnit.SECONDS.toMillis(2));
+    }
+
 
     public static class LibraryPagerAdapter extends FragmentPagerAdapter {
         private static int NUM_ITEMS = 2;
@@ -88,6 +126,4 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         }
 
     }
-
-
 }

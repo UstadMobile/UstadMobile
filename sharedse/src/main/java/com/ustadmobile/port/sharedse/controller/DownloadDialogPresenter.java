@@ -219,6 +219,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         DownloadJob downloadJob = new DownloadJob();
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setTimeCreated(System.currentTimeMillis());
+        downloadJob.setDjStatus(JobStatus.NOT_QUEUED);
         downloadJob.setDjDsUid(downloadSetUid);
 
         downloadJobUid = umAppDatabase.getDownloadJobDao().insert(downloadJob);
@@ -234,6 +235,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             DownloadJobItem jobItem = new DownloadJobItem();
             jobItem.setDjiContentEntryFileUid(item.getContentEntryFileUid());
             jobItem.setDjiDjUid(downloadJobUid);
+            jobItem.setDjiStatus(JobStatus.NOT_QUEUED);
             jobItem.setDownloadLength(item.getFileSize());
             jobItem.setDjiDsiUid(item.getDownloadSetItemUid());
             jobItem.setDestinationFile(UMFileUtil.joinPaths(destinationDir,

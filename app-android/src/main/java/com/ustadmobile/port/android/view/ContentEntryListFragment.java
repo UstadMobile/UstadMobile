@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
@@ -17,6 +18,8 @@ import android.widget.Toast;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
@@ -33,12 +36,18 @@ import java.util.Map;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView, ContentEntryListRecyclerViewAdapter.AdapterViewListener {
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView,
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener {
 
 
     private ContentEntryListPresenter entryListPresenter;
+
     private RecyclerView recyclerView;
+
     private ContentEntryListener contentEntryListener;
+
+    private UstadBaseActivity ustadBaseActivity;
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -75,6 +84,8 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         return fragment;
     }
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +115,10 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void onAttach(Context context) {
+        if(context instanceof UstadBaseActivity){
+            this.ustadBaseActivity = ((UstadBaseActivity)context);
+        }
+
         if (context instanceof ContentEntryListener) {
             this.contentEntryListener = (ContentEntryListener) context;
         }
@@ -172,11 +187,12 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void downloadStatusClicked(ContentEntry entry) {
-        runOnUiThread(() -> {
-            if(entryListPresenter != null){
-                entryListPresenter.handleDownloadStatusButtonClicked(entry);
-            }
-        });
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        ustadBaseActivity.runAfterGrantingPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                () -> entryListPresenter.handleDownloadStatusButtonClicked(entry),
+                impl.getString(MessageID.download_storage_permission_title,getContext()),
+                impl.getString(MessageID.download_storage_permission_message,getContext()));
     }
 
 }

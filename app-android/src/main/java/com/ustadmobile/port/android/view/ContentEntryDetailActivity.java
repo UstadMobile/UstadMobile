@@ -134,12 +134,15 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
 
         runOnUiThread(() -> {
+            TextView label = findViewById(R.id.entry_detail_available_label);
             RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
 
             if (result.size() == 0) {
                 flexBox.setVisibility(View.GONE);
+                label.setVisibility(View.GONE);
             } else {
                 flexBox.setVisibility(View.VISIBLE);
+                label.setVisibility(View.VISIBLE);
 
                 FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
                 flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
@@ -153,41 +156,37 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     }
 
     @Override
-    public void setDownloadProgress(ContentEntryStatus status) {
+    public void showProgress(float progressValue) {
+
+        runOnUiThread(() -> {
+
+            Button button = findViewById(R.id.entry_detail_button);
+            DownloadProgressView downloadProgressView = findViewById(R.id.entry_detail_progress);
+            button.setVisibility(View.GONE);
+            downloadProgressView.setVisibility(View.VISIBLE);
+            downloadProgressView.setProgress(progressValue);
+            downloadProgressView.setStatusText("Downloading");
+
+
+        });
+    }
+
+    @Override
+    public void showButton(boolean isDownloaded) {
         runOnUiThread(() -> {
 
             Button button = findViewById(R.id.entry_detail_button);
             DownloadProgressView downloadProgressView = findViewById(R.id.entry_detail_progress);
 
-            if (status != null) {
-                if (status.getDownloadStatus() == 0 || status.getDownloadStatus() == JobStatus.COMPLETE) {
-                    button.setVisibility(View.VISIBLE);
-                    downloadProgressView.setVisibility(View.GONE);
+            button.setVisibility(View.VISIBLE);
+            downloadProgressView.setVisibility(View.GONE);
 
-                    boolean isDownloadComplete = status.getDownloadStatus() == JobStatus.COMPLETE;
-                    button.setText(status.getDownloadStatus() == JobStatus.COMPLETE ? R.string.open : R.string.download);
+            button.setText(isDownloaded ? R.string.open : R.string.download);
 
-                    button.setOnClickListener(view ->
-                            entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete));
-
-                } else {
-                    button.setVisibility(View.GONE);
-                    downloadProgressView.setVisibility(View.VISIBLE);
-                    if (status.getTotalSize() > 0) {
-                        downloadProgressView.setProgress((float) status.getBytesDownloadSoFar() /
-                                (float) status.getTotalSize());
-                    }
-                    downloadProgressView.setStatusText("Downloading");
-                }
-            } else {
-                button.setVisibility(View.VISIBLE);
-                downloadProgressView.setVisibility(View.GONE);
-                button.setText(R.string.download);
-                button.setOnClickListener(view ->
-                        entryDetailPresenter.handleDownloadButtonClick(false));
-            }
-
+            button.setOnClickListener(view ->
+                    entryDetailPresenter.handleDownloadButtonClick(isDownloaded, entryDetailPresenter.getEntryUuid()));
         });
+
     }
 
     @Override

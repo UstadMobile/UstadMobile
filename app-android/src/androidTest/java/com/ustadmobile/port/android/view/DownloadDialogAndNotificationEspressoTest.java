@@ -90,11 +90,13 @@ public class DownloadDialogAndNotificationEspressoTest {
             Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.ACCESS_COARSE_LOCATION);
 
-    private static final  long MIN_WAIT_TIME = TimeUnit.SECONDS.toMillis(1);
+    private static final  long MIN_SLEEP_TIME = TimeUnit.SECONDS.toMillis(1);
 
-    private static final  long MAX_WAIT_TIME = TimeUnit.SECONDS.toMillis(3);
+    private static final  long MAX_SLEEP_TIME = TimeUnit.SECONDS.toMillis(3);
 
     private static final int MAX_THRESHOLD = 3;
+
+    private static final int MAX_LATCH_TIME = 15;
 
     private ContentEntry rootEntry = null;
 
@@ -148,7 +150,7 @@ public class DownloadDialogAndNotificationEspressoTest {
         UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
 
         prepareContentEntriesAndFiles();
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
 
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
@@ -178,7 +180,7 @@ public class DownloadDialogAndNotificationEspressoTest {
                 withId(R.id.content_entry_item_download)
         )).perform(click());
 
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         onView(withId(R.id.wifi_only_option)).perform(
                 UmViewActions.setChecked(wifiOnly));
@@ -235,17 +237,17 @@ public class DownloadDialogAndNotificationEspressoTest {
     @Test
     public void givenDownloadIconClickedOnEntryListItem_whenDownloading_shouldStartForegroundServiceAndShowNotification()
             throws IOException, JSONException {
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         sendCommand("throttle",THROTTLE_BYTES);
 
         startDownloading(connectedToUnmeteredConnection);
 
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         boolean openNotificationTray =  mDevice.openNotification();
 
-        mDevice.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MIN_WAIT_TIME);
+        mDevice.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MIN_SLEEP_TIME);
 
         UiObject2 title = mDevice.findObject(By.textContains(NOTIFICATION_TITLE_PREFIX));
 
@@ -259,7 +261,7 @@ public class DownloadDialogAndNotificationEspressoTest {
         assertEquals("Notification shown was for  " + entry1.getTitle(),
                 entryName.getText(), entry1.getTitle());
 
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
 
     }
@@ -267,7 +269,7 @@ public class DownloadDialogAndNotificationEspressoTest {
     @Test
     public void givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons()
             throws IOException, JSONException {
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         sendCommand("throttle",THROTTLE_BYTES);
 
@@ -277,7 +279,7 @@ public class DownloadDialogAndNotificationEspressoTest {
                 MAX_THRESHOLD,TimeUnit.MINUTES, downloadJob -> downloadJob!=null
                         && downloadJob.getDjStatus() == JobStatus.COMPLETE);
 
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         onView(allOf(isDisplayed(),
                 isDescendantOfA(withTagValue(equalTo(entry1.getContentEntryUid()))),
@@ -296,14 +298,14 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         sendCommand("throttle",THROTTLE_BYTES);
 
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         startDownloading(connectedToUnmeteredConnection);
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
-                MAX_THRESHOLD * MAX_THRESHOLD,TimeUnit.SECONDS, downloadJob -> downloadJob != null
+                MAX_LATCH_TIME,TimeUnit.SECONDS, downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
 
         assertEquals("Download task was paused and waiting for connectivity",
@@ -314,16 +316,17 @@ public class DownloadDialogAndNotificationEspressoTest {
         //reset for next test
         UmAndroidTestUtil.setAirplaneModeEnabled(false);
         WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
-                MAX_THRESHOLD,TimeUnit.SECONDS, status -> status != null
+                MAX_LATCH_TIME,TimeUnit.SECONDS, status -> status != null
                         && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
     }
 
 
+    @Test
     public void givenDownloadStarted_whenConnectivityInterrupted_shouldResumeAndCompleteDownload()
             throws IOException, JSONException {
 
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
 
         sendCommand("throttle",THROTTLE_BYTES * MAX_THRESHOLD);
 
@@ -332,30 +335,25 @@ public class DownloadDialogAndNotificationEspressoTest {
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
-                MAX_THRESHOLD,TimeUnit.SECONDS, downloadJob -> downloadJob != null
+                MAX_LATCH_TIME, TimeUnit.SECONDS, downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
-
-
-        assertEquals("Download task was paused and waiting for connectivity",
-                umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),
-                JobStatus.WAITING_FOR_CONNECTION);
 
         UmAndroidTestUtil.setAirplaneModeEnabled(false);
 
-        SystemClock.sleep(MAX_WAIT_TIME);
+        SystemClock.sleep(MAX_SLEEP_TIME);
 
         WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
-                MAX_THRESHOLD * MAX_THRESHOLD,TimeUnit.SECONDS, status -> status != null
+                MAX_LATCH_TIME ,TimeUnit.SECONDS, status -> status != null
                         && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
-                MAX_THRESHOLD * MAX_THRESHOLD,TimeUnit.SECONDS,
+                MAX_LATCH_TIME, TimeUnit.SECONDS,
                 downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.COMPLETE);
 
         assertEquals("Download task was completed successfully",
                 umAppDatabase.getDownloadJobDao().getLastJob().getDjStatus(),JobStatus.COMPLETE);
-        SystemClock.sleep(MIN_WAIT_TIME);
+        SystemClock.sleep(MIN_SLEEP_TIME);
     }
 
 }

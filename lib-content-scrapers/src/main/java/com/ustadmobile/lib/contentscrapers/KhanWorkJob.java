@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryFileWithContentEntryFileStatusAndContentEntryId;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithFilePath;
 
 import org.apache.commons.io.FilenameUtils;
@@ -76,11 +77,11 @@ public class KhanWorkJob {
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        List<ContentEntryFileWithFilePath> khanFileList = contentEntryFileDao.findKhanFiles();
+        List<ContentEntryFileWithContentEntryFileStatusAndContentEntryId> khanFileList = contentEntryFileDao.findKhanFiles();
 
         int countzip = 0;
         int countvideo = 0;
-        for (ContentEntryFileWithFilePath khanFile : khanFileList) {
+        for (ContentEntryFileWithContentEntryFileStatusAndContentEntryId khanFile : khanFileList) {
 
             if (khanFile.getFilePath().contains(".zip")) {
 
