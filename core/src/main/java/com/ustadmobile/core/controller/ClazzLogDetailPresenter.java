@@ -266,7 +266,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     private void incrementLogInList(int inc) {
         int nextIndex = currentClazzLogIndex + inc;
-        if(nextIndex > 0 && nextIndex < currentClazzLogs.size())
+        if(nextIndex >= 0 && nextIndex < currentClazzLogs.size())
             repository.getClazzLogDao().findByUidAsync(currentClazzLogs.get(nextIndex).getClazzLogUid(),
                 setupFromClazzLogCallback);
     }

@@ -190,7 +190,8 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     @UmQuery("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")
     public abstract void cancelFutureInstances(long scheduleUid, long after, boolean canceled);
 
-    @UmQuery("SELECT ClazzLog.clazzLogUid, ClazzLog.logDate FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid")
+    @UmQuery("SELECT ClazzLog.clazzLogUid, ClazzLog.logDate FROM ClazzLog " +
+            " WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate ASC")
     public abstract void getListOfClazzLogUidsAndDatesForClazz(long clazzUid,
                                                                UmCallback<List<ClazzLogUidAndDate>> callback);
 
