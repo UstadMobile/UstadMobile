@@ -23,6 +23,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
@@ -632,7 +633,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 UstadMobileSystemImpl.l(UMLog.INFO, 693,
                         "Network changed  to "+ssid);
                 networkEnabled = true;
-            }else {
+            }else if(isConnectedToRequiredWiFi(ssid)){
+                UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                        "ConnectToWifi: Already connected to WiFi with ssid =" + ssid);
+                break;
+            } else {
                 DhcpInfo routeInfo = wifiManager.getDhcpInfo();
                 if (routeInfo != null && routeInfo.gateway > 0) {
                     @SuppressLint("DefaultLocale")
@@ -693,6 +698,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         if(isConnectedToWifi() && wifiManager.disconnect()) {
             wifiManager.disableNetwork(wifiManager.getConnectionInfo().getNetworkId());
         }
+    }
+
+    private boolean isConnectedToRequiredWiFi(String ssid){
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        return wifiInfo != null && normalizeAndroidWifiSsid(wifiInfo.getSSID())
+                .equals(normalizeAndroidWifiSsid(ssid));
     }
 
 
