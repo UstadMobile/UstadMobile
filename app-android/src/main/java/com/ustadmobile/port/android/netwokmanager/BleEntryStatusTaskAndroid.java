@@ -103,8 +103,9 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
                    .getRemoteDevice(networkNode.getBluetoothMacAddress());
            mGattClient = destinationPeer.connectGatt(
                     (Context) context,false, mCallback);
+           mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
            if(mGattClient == null){
-                UstadMobileSystemImpl.l(UMLog.ERROR,695,
+                UstadMobileSystemImpl.l(UMLog.ERROR,698,
                         "Failed to connect to " + destinationPeer.getAddress());
                 UmAppDatabase.getInstance(context).getNetworkNodeDao()
                         .updateRetryCount(networkNode.getNodeId(),null);
@@ -112,11 +113,11 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
                         new IOException("BLE failed on connectGatt to " +
                                 networkNode.getBluetoothMacAddress()));
             }else{
-                UstadMobileSystemImpl.l(UMLog.DEBUG,695,
+                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
                         "Connecting to " + destinationPeer.getAddress());
             }
        }catch (IllegalArgumentException e){
-           UstadMobileSystemImpl.l(UMLog.ERROR,695,
+           UstadMobileSystemImpl.l(UMLog.ERROR,698,
                    "Wrong address format provided",e);
        }
     }

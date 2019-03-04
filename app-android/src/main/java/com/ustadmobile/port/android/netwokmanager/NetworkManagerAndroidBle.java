@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -134,6 +135,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private AtomicBoolean wifiP2PCapable = new AtomicBoolean(false);
 
     private AtomicBoolean bluetoothP2pRunning = new AtomicBoolean(false);
+
+    private AtomicReference<WifiManager.WifiLock> wifiLockReference = new AtomicReference<>();
 
     /**
      * A list of wifi direct ssids that are connected to using connectToWifiDirectGroup, the
@@ -542,7 +545,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                UstadMobileSystemImpl.l(UMLog.INFO,692,
                         "Group created successfully");
                 wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
             }
@@ -886,6 +889,32 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     BluetoothManager getBluetoothManager(){
         return  ((BluetoothManager)bluetoothManager);
+    }
+
+    @Override
+    public void lockWifi(Object lockHolder) {
+        super.lockWifi(lockHolder);
+
+        if(wifiLockReference.get() == null) {
+            wifiLockReference.set(wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                    "UstadMobile-Wifi-Lock-Tag"));
+            UstadMobileSystemImpl.l(UMLog.INFO, 699, "WiFi lock acquired for "
+                    + lockHolder);
+        }
+    }
+
+    @Override
+    public void releaseWifiLock(Object lockHolder) {
+        super.releaseWifiLock(lockHolder);
+
+        WifiManager.WifiLock lock = wifiLockReference.get();
+        if(wifiLockHolders.isEmpty() && lock != null){
+            wifiLockReference.set(null);
+            lock.release();
+            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+                    "WiFi lock released from object "+lockHolder);
+        }
+
     }
 
     /**
