@@ -21,6 +21,7 @@ import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData;
+import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -190,7 +191,7 @@ public class ContentScraperUtil {
                     destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBP_EXT);
                 } else if (ScraperConstants.VIDEO_EXTENSIONS.contains(ext)) {
                     destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBM_EXT);
-                } else if(ScraperConstants.AUDIO_EXTENSIONS.contains(ext)){
+                } else if (ScraperConstants.AUDIO_EXTENSIONS.contains(ext)) {
                     destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + OPUS_EXT);
                 }
 
@@ -206,7 +207,7 @@ public class ContentScraperUtil {
                 } else if (destinationFile.getName().endsWith(WEBM_EXT)) {
                     ShrinkerUtil.convertVideoToWebM(contentFile, destinationFile);
                     contentFile.delete();
-                }else if(destinationFile.getName().endsWith(OPUS_EXT)){
+                } else if (destinationFile.getName().endsWith(OPUS_EXT)) {
                     ShrinkerUtil.convertAudioToOpos(contentFile, destinationFile);
                     contentFile.delete();
                 }
@@ -329,6 +330,23 @@ public class ContentScraperUtil {
         }
 
 
+    }
+
+    public static Map<File, String> createContainerFromDirectory(File directory, Map<File, String> filemap){
+        Path sourceDirPath = Paths.get(directory.toURI());
+        try {
+            Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        String relativePath = sourceDirPath.relativize(path).toString()
+                                                            .replaceAll(Pattern.quote("\\"), "/");
+                        filemap.put(path.toFile(), relativePath);
+
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return filemap;
     }
 
     /**
@@ -1269,5 +1287,49 @@ public class ContentScraperUtil {
             logs.addAll(newLogs);
         } while (hasMore);
         return logs;
+    }
+
+    public static void createSrtFile(List<SrtFormat> srtFormatList, File srtFile) throws IOException {
+
+        if (srtFormatList == null || srtFormatList.isEmpty()) {
+            return;
+        }
+
+        StringBuilder buffer = new StringBuilder();
+        int count = 1;
+        for (SrtFormat format : srtFormatList) {
+
+            buffer.append(count++);
+            buffer.append(System.lineSeparator());
+            buffer.append(formatTimeInMs(format.getStartTime()));
+            buffer.append(" --> ");
+            buffer.append(formatTimeInMs(format.getEndTime()));
+            buffer.append(System.lineSeparator());
+            buffer.append(format.getText());
+            buffer.append(System.lineSeparator());
+            buffer.append(System.lineSeparator());
+
+        }
+
+        FileUtils.writeStringToFile(srtFile, buffer.toString(), UTF_ENCODING);
+    }
+
+    public static String formatTimeInMs(long timeMs) {
+
+        long millis = timeMs % 1000;
+        long second = (timeMs / 1000) % 60;
+        long minute = (timeMs / (1000 * 60)) % 60;
+        long hour = (timeMs / (1000 * 60 * 60)) % 24;
+
+        return String.format("%02d:%02d:%02d,%03d", hour, minute, second, millis);
+    }
+
+
+    public static void deleteFile(File content) {
+        if (content != null) {
+            if (!content.delete()) {
+                UMLogUtil.logError("Could not delete: " + content.getPath());
+            }
+        }
     }
 }

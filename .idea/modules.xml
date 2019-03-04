@@ -25,6 +25,7 @@
       <module fileurl="file://$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" filepath="$PROJECT_DIR$/lib-http-testserver/lib-http-testserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-room-annotations/lib-room-annotations.iml" filepath="$PROJECT_DIR$/lib-room-annotations/lib-room-annotations.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-util/lib-util.iml" filepath="$PROJECT_DIR$/lib-util/lib-util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libcodec2-android/libcodec2-android.iml" filepath="$PROJECT_DIR$/libcodec2-android/libcodec2-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse/sharedse.iml" filepath="$PROJECT_DIR$/sharedse/sharedse.iml" />
     </modules>
   </component>

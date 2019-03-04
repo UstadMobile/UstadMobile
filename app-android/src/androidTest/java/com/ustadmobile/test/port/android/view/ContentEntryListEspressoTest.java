@@ -510,15 +510,13 @@ public class ContentEntryListEspressoTest {
         categoryJoinDao.insert(category4join);
 
 
-
-
     }
 
     @Test
     public void givenContentEntryPresent_whenOpened_entryIsDisplayed() {
 
         onView(allOf(withId(R.id.content_entry_list), isDisplayed()))
-                .check(matches(hasDescendant(withText("Ck-12 Foundation"))));
+                .check(matches(hasDescendant(withText("Khan Academy"))));
 
     }
 
@@ -531,7 +529,7 @@ public class ContentEntryListEspressoTest {
         intended(allOf(
                 hasComponent(ContentEntryListActivity.class.getCanonicalName()),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
-                        equalTo(2l)
+                        equalTo(String.valueOf(2l))
                 )));
     }
 
@@ -555,7 +553,7 @@ public class ContentEntryListEspressoTest {
         intended(allOf(
                 hasComponent(ContentEntryDetailActivity.class.getCanonicalName()),
                 hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
-                        equalTo(6l)
+                        equalTo(String.valueOf(6l))
                 )));
 
     }

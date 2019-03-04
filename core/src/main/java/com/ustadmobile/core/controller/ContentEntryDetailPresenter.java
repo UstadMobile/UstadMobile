@@ -3,8 +3,8 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -13,17 +13,13 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
-import com.ustadmobile.core.view.VideoPlayerView;
-import com.ustadmobile.core.view.WebChunkView;
-import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -36,7 +32,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 
 public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
@@ -44,10 +39,14 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
     private final ContentEntryDetailView viewContract;
-    private ContentEntryFileDao contentFileDao;
-    private NetworkNodeDao networkNodeDao;
+    private ContentEntryDao contentEntryDao;
+    private ContentEntryRelatedEntryJoinDao contentRelatedEntryDao;
     private String navigation;
     private Long entryUuid;
+    private ContentEntryStatusDao contentEntryStatusDao;
+
+    private UmLiveData<ContentEntryStatus> statusUmLiveData;
+
     private Long contentEntryFileUid = 0L;
 
     private LocalAvailabilityMonitor monitor;
@@ -70,15 +69,13 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     }
 
-    @Override
     public void onCreate(Hashtable hashtable) {
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
-        contentFileDao = repoAppDatabase.getContentEntryFileDao();
-        networkNodeDao = appdb.getNetworkNodeDao();
-        ContentEntryRelatedEntryJoinDao contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
-        ContentEntryDao contentEntryDao = repoAppDatabase.getContentEntryDao();
-        ContentEntryStatusDao contentEntryStatusDao = appdb.getContentEntryStatusDao();
+        contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
+        contentEntryDao = repoAppDatabase.getContentEntryDao();
+        contentEntryStatusDao = appdb.getContentEntryStatusDao();
+        ContainerDao containerDao = repoAppDatabase.getContainerDao();
 
         entryUuid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
         navigation = (String) getArguments().get(ARG_REFERRER);
@@ -86,7 +83,8 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
-                viewContract.setContentInfo(result);
+                String licenseType = getLicenseType(result);
+                viewContract.setContentInfo(result, licenseType);
             }
 
             @Override
@@ -95,9 +93,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             }
         });
 
-        contentFileDao.findFilesByContentEntryUid(entryUuid, new UmCallback<List<ContentEntryFile>>() {
+        containerDao.findFilesByContentEntryUid(entryUuid, new UmCallback<List<Container>>() {
             @Override
-            public void onSuccess(List<ContentEntryFile> result) {
+            public void onSuccess(List<Container> result) {
                 viewContract.setFileInfo(result);
             }
 
@@ -120,44 +118,45 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             }
         });
 
-        UmLiveData<ContentEntryStatus> statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid);
+        statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid);
         statusUmLiveData.observe(this, this::onEntryStatusChanged);
     }
 
-
-    private void onEntryStatusChanged(ContentEntryStatus status) {
-        viewContract.setDownloadProgress(status);
-
-        if(status == null || status.getDownloadStatus() != JobStatus.COMPLETE){
-
-            long currentTimeStamp = System.currentTimeMillis();
-            long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
-            long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
-                    TIME_INTERVAL_FROM_LAST_FAILURE);
-            viewContract.setStatusViewsVisible(true);
-
-           new Thread(() -> {
-               contentEntryFileUid = contentFileDao.findFilesByContentEntryUid(entryUuid)
-                       .get(0).getContentEntryFileUid();
-               NetworkNode localNetworkNode = networkNodeDao.findNodeWithContentFileEntry(
-                       contentEntryFileUid, minLastSeen,BAD_NODE_FAILURE_THRESHOLD
-                       ,maxFailureFromTimeStamp);
-
-               if(localNetworkNode == null && !monitorStatus.get()){
-                   monitorStatus.set(true);
-                   monitor.startMonitoringAvailability(this,
-                           Collections.singletonList(contentEntryFileUid));
-               }
-
-               Set<Long> monitorSet = new HashSet<>();
-               monitorSet.add(localNetworkNode != null ? contentEntryFileUid : 0L);
-               handleUpdateStatusIconAndText(monitorSet);
-           }).start();
-        }else{
-            viewContract.setStatusViewsVisible(false);
+    private String getLicenseType(ContentEntry result) {
+        switch (result.getLicenseType()){
+            case ContentEntry.LICENSE_TYPE_CC_BY:
+                return "CC BY";
+            case ContentEntry.LICENSE_TYPE_CC_BY_SA:
+                return "CC BY SA";
+            case ContentEntry.LICESNE_TYPE_CC_BY_NC_SA:
+                return "CC BY NC SA";
+            case ContentEntry.LICENSE_TYPE_CC_BY_SA_NC:
+                return "CC BY SA NC";
+            case ContentEntry.PUBLIC_DOMAIN:
+                return "Public Domain";
+            case ContentEntry.ALL_RIGHTS_RESERVED:
+                return "All Rights Reserved";
         }
+        return "";
     }
 
+    public void onEntryStatusChanged(ContentEntryStatus status) {
+        if (status != null) {
+            if (status.getDownloadStatus() == 0 || status.getDownloadStatus() == JobStatus.COMPLETE) {
+                viewContract.showButton(status.getDownloadStatus() == JobStatus.COMPLETE);
+            } else {
+                viewContract.showProgress(status.getTotalSize() > 0 ? (float) status.getBytesDownloadSoFar() /
+                        (float) status.getTotalSize() : 0);
+            }
+        } else {
+            viewContract.showButton(false);
+        }
+
+    }
+
+    public Long getEntryUuid() {
+        return entryUuid;
+    }
 
     public void handleClickTranslatedEntry(long uid) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -180,49 +179,32 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         }
     }
 
-    public void handleDownloadButtonClick(boolean isDownloadComplete) {
+    public void handleDownloadButtonClick(boolean isDownloadComplete, Long entryUuid) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         if (isDownloadComplete) {
 
-            contentFileDao.findLatestCompletedFileForEntry(entryUuid, new UmCallback<ContentEntryFileWithStatus>() {
-                @Override
-                public void onSuccess(ContentEntryFileWithStatus result) {
+            ContentEntryUtil.goToContentEntry(entryUuid,
+                    repoAppDatabase, impl,
+                    isDownloadComplete,
+                    getContext(), new UmCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
 
-                    if (result.getEntryStatus().getFilePath() == null) {
-                        viewContract.handleFileOpenError();
-                    } else {
-
-                        Hashtable args = new Hashtable();
-                        String path = result.getEntryStatus().getFilePath();
-                        if (result.getMimeType().equals("application/zip")) {
-
-                            args.put(ARG_CONTAINERURI, path);
-                            impl.go(XapiPackageView.VIEW_NAME, args, getContext());
-                        } else if (result.getMimeType().equals("video/mp4")) {
-                            args.put(VideoPlayerView.ARG_VIDEO_PATH, path);
-                            args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryUuid));
-                            impl.go(VideoPlayerView.VIEW_NAME, args, getContext());
-                        } else if(result.getMimeType().equals("application/webchunk+zip")){
-                            args.put(WebChunkView.ARG_CHUNK_PATH, path);
-                            impl.go(WebChunkView.VIEW_NAME, args, getContext());
-                        } else if(result.getMimeType().equals("application/epub+zip")){
-                            args.put(ARG_CONTAINERURI, path);
-                            impl.go(ContainerView.VIEW_NAME, args, getContext());
                         }
 
-                    }
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            viewContract.handleFileOpenError();
+                        }
+                    });
 
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-
-                }
-            });
 
         } else {
             Hashtable args = new Hashtable();
-            args.put("contentEntryUid", String.valueOf(entryUuid));
+
+            //hard coded strings because these are actually in sharedse
+            args.put("contentEntryUid", String.valueOf(this.entryUuid));
             impl.go("DownloadDialog", args, getContext());
         }
 
@@ -233,9 +215,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         int icon = locallyAvailableEntries.contains(contentEntryFileUid) ?
                 LOCALLY_AVAILABLE_ICON : LOCALLY_NOT_AVAILABLE_ICON;
         String status = impl.getString((icon == LOCALLY_AVAILABLE_ICON
-                ? MessageID.download_locally_availability: MessageID.download_cloud_availability)
+                        ? MessageID.download_locally_availability: MessageID.download_cloud_availability)
                 ,getContext());
-       viewContract.runOnUiThread(() -> viewContract.updateStatusIconAndText(icon,status));
+        viewContract.runOnUiThread(() -> viewContract.updateStatusIconAndText(icon,status));
     }
 
     @Override
@@ -246,4 +228,5 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         }
         super.onDestroy();
     }
+
 }

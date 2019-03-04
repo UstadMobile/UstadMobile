@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.impl;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -7,7 +9,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.google.gson.Gson;
+import com.ustadmobile.core.controller.WebChunkPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,36 +25,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 
 public class WebChunkWebViewClient extends WebViewClient {
 
 
+    private ContainerManager containerManager;
+    private WebChunkPresenter presenter;
     private Map<String, IndexLog.IndexEntry> indexMap = new HashMap<>();
     private Map<Pattern, String> linkPatterns = new HashMap<>();
-    private ZipFile zipFile;
     private String url;
 
-
-
-    public WebChunkWebViewClient(String pathToZip) {
+    public WebChunkWebViewClient(Container pathToZip, WebChunkPresenter mPresenter, Object context) {
         try {
-            zipFile = new ZipFile(pathToZip);
-            ZipEntry index = zipFile.getEntry("index.json");
-            InputStream inputIndex = zipFile.getInputStream(index);
+            this.presenter = mPresenter;
+            UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context);
+            UmAppDatabase appDatabase = UmAppDatabase.getInstance(context);
 
-            IndexLog indexLog = new Gson().fromJson(UMIOUtils.readStreamToString(inputIndex), IndexLog.class);
+            containerManager = new ContainerManager(pathToZip, appDatabase, repoAppDatabase);
+
+            ContainerEntryWithContainerEntryFile index = containerManager.getEntry("index.json");
+
+            IndexLog indexLog = new Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index)), IndexLog.class);
             List<IndexLog.IndexEntry> indexList = indexLog.entries;
             IndexLog.IndexEntry firstUrlToOpen = indexList.get(0);
             setUrl(firstUrlToOpen.url);
+
+
             for (IndexLog.IndexEntry log : indexList) {
                 indexMap.put(log.url, log);
             }
             Map<String, String> linksMap = indexLog.links;
-            if(linksMap != null && !linksMap.isEmpty()){
-                for(String link: linksMap.keySet()) {
+            if (linksMap != null && !linksMap.isEmpty()) {
+                for (String link : linksMap.keySet()) {
                     linkPatterns.put(Pattern.compile(link), linksMap.get(link));
                 }
             }
@@ -57,15 +69,26 @@ public class WebChunkWebViewClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        checkWithPattern(request.getUrl().toString());
+        String requestUrl = checkWithPattern(request.getUrl().toString());
+        if (requestUrl != null) {
+            presenter.handleUrlLinkToContentEntry(requestUrl);
+            return true;
+        }
         return super.shouldOverrideUrlLoading(view, request);
     }
+
 
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
         StringBuilder requestUrl = new StringBuilder(request.getUrl().toString());
-        checkWithPattern(requestUrl.toString());
+        String sourceUrl = checkWithPattern(requestUrl.toString());
+        if (sourceUrl != null) {
+            presenter.handleUrlLinkToContentEntry(sourceUrl);
+            new Handler(Looper.getMainLooper()).post(() -> view.loadUrl(getUrl()));
+            return new WebResourceResponse("text/html", "utf-8", null);
+        }
+
         if (requestUrl.toString().contains("/Take-a-hint")) {
             return new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("true".getBytes(StandardCharsets.UTF_8)));
         }
@@ -140,8 +163,7 @@ public class WebChunkWebViewClient extends WebViewClient {
             return new WebResourceResponse("", "utf-8", 200, "OK", null, null);
         }
         try {
-            ZipEntry entry = zipFile.getEntry(log.path);
-            InputStream data = zipFile.getInputStream(entry);
+            InputStream data = containerManager.getInputStream(containerManager.getEntry(log.path));
 
             return new WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data);
         } catch (IOException e) {
@@ -151,12 +173,13 @@ public class WebChunkWebViewClient extends WebViewClient {
         return super.shouldInterceptRequest(view, request);
     }
 
-    private void checkWithPattern(String requestUrl) {
-        for(Pattern linkPattern : linkPatterns.keySet()) {
-            if(linkPattern.matcher(requestUrl).lookingAt()){
-                System.out.println("Found match" + requestUrl);
+    private String checkWithPattern(String requestUrl) {
+        for (Pattern linkPattern : linkPatterns.keySet()) {
+            if (linkPattern.matcher(requestUrl).lookingAt()) {
+                return linkPatterns.get(linkPattern);
             }
         }
+        return null;
     }
 
 
@@ -166,10 +189,6 @@ public class WebChunkWebViewClient extends WebViewClient {
 
     public String getUrl() {
         return url;
-    }
-
-    public void close() {
-        zipFile = null;
     }
 
     public class IndexLog {

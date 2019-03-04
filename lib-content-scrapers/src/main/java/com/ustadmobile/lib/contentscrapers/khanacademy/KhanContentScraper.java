@@ -55,9 +55,9 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_FILE
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_CSS_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JSON;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_MP4;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_SVG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_ZIP;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
@@ -171,8 +171,9 @@ public class KhanContentScraper implements Runnable {
             if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentType)) {//all calls to scraper... replaced with insert
                 scrapeVideoContent(url.toString());
                 File parentFolder = new File(destinationDirectory, destinationDirectory.getName());
-                content = new File(parentFolder,  FilenameUtils.getName(url.toString()));
+                content = new File(parentFolder, FilenameUtils.getName(url.toString()));
                 successful = true;
+                mimetype = MIMETYPE_MP4;
             } else if (ScraperConstants.KhanContentType.EXERCISE.getType().equals(contentType)) {
                 scrapeExerciseContent(url.toString());
                 content = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.ZIP_EXT);
@@ -214,7 +215,7 @@ public class KhanContentScraper implements Runnable {
 
     }
 
-    public String getMimeType(){
+    public String getMimeType() {
         return mimeType;
     }
 
@@ -233,7 +234,7 @@ public class KhanContentScraper implements Runnable {
 
         HttpURLConnection conn = null;
         try {
-            conn = (HttpURLConnection)scrapUrl.openConnection();
+            conn = (HttpURLConnection) scrapUrl.openConnection();
             conn.setRequestMethod("HEAD");
             mimeType = conn.getContentType();
             if (!ContentScraperUtil.isFileModified(conn, folder, FilenameUtils.getBaseName(url)) && ContentScraperUtil.fileHasContent(content)) {
@@ -242,10 +243,10 @@ public class KhanContentScraper implements Runnable {
             }
 
             FileUtils.copyURLToFile(scrapUrl, content);
-        }catch(IOException e) {
+        } catch (IOException e) {
             throw e;
-        }finally {
-            if(conn != null) {
+        } finally {
+            if (conn != null) {
                 conn.disconnect();
             }
         }

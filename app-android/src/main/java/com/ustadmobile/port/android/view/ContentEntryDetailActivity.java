@@ -17,57 +17,27 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter;
-import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
-import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
-import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
-
-public class ContentEntryDetailActivity extends UstadBaseActivity implements
+public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
-        LocalAvailabilityMonitor , LocalAvailabilityListener {
+        LocalAvailabilityMonitor, LocalAvailabilityListener {
 
     private ContentEntryDetailPresenter entryDetailPresenter;
 
     private NetworkManagerAndroidBle managerAndroidBle;
-
-    HashMap<Integer,Integer> fileStatusIcon = new HashMap<>();
-
-    private TextView statusText;
-
-    private ImageView statusIcon;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_entry_detail);
-
-
-        setUMToolbar(R.id.entry_detail_toolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        statusText = findViewById(R.id.content_status_text);
-        statusIcon = findViewById(R.id.content_status_icon);
-
-        fileStatusIcon.put(LOCALLY_AVAILABLE_ICON,R.drawable.ic_nearby_black_24px);
-        fileStatusIcon.put(LOCALLY_NOT_AVAILABLE_ICON,R.drawable.ic_cloud_download_black_24dp);
-    }
-
 
     @Override
     protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
@@ -78,6 +48,17 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
         entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
         entryDetailPresenter.onStart();
         managerAndroidBle.addLocalAvailabilityListener(this);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_entry_detail);
+
+
+        setUMToolbar(R.id.entry_detail_toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -102,7 +83,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void setContentInfo(ContentEntry contentEntry) {
+    public void setContentInfo(ContentEntry contentEntry, String licenseType) {
 
         runOnUiThread(() -> {
             TextView title = findViewById(R.id.entry_detail_title);
@@ -122,17 +103,19 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
             getSupportActionBar().setTitle(contentEntry.getTitle());
 
             TextView license = findViewById(R.id.entry_detail_license);
-            license.setText(contentEntry.getLicenseName());
+            license.setText(licenseType);
 
             TextView author = findViewById(R.id.entry_detail_author);
             author.setText(contentEntry.getAuthor());
+
+
         });
 
 
     }
 
     @Override
-    public void setFileInfo(List<ContentEntryFile> contentEntryFileList) {
+    public void setFileInfo(List<Container> contentEntryFileList) {
         runOnUiThread(() -> {
             Button button = findViewById(R.id.entry_detail_button);
 
@@ -144,7 +127,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
             button.setEnabled(true);
             if (contentEntryFileList.size() == 1) {
 
-                ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
+                Container contentEntryFile = contentEntryFileList.get(0);
 
 
                 TextView downloadSize = findViewById(R.id.entry_detail_content_size);
@@ -154,7 +137,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
                 // TODO manage multiple files
 
-                ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
+                Container contentEntryFile = contentEntryFileList.get(0);
 
                 TextView downloadSize = findViewById(R.id.entry_detail_content_size);
                 downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));
@@ -167,12 +150,15 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
 
         runOnUiThread(() -> {
+            TextView label = findViewById(R.id.entry_detail_available_label);
             RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
 
             if (result.size() == 0) {
                 flexBox.setVisibility(View.GONE);
+                label.setVisibility(View.GONE);
             } else {
                 flexBox.setVisibility(View.VISIBLE);
+                label.setVisibility(View.VISIBLE);
 
                 FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
                 flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
@@ -186,51 +172,37 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void setDownloadProgress(ContentEntryStatus status) {
+    public void showProgress(float progressValue) {
+
+        runOnUiThread(() -> {
+
+            Button button = findViewById(R.id.entry_detail_button);
+            DownloadProgressView downloadProgressView = findViewById(R.id.entry_detail_progress);
+            button.setVisibility(View.GONE);
+            downloadProgressView.setVisibility(View.VISIBLE);
+            downloadProgressView.setProgress(progressValue);
+            downloadProgressView.setStatusText("Downloading");
+
+
+        });
+    }
+
+    @Override
+    public void showButton(boolean isDownloaded) {
         runOnUiThread(() -> {
 
             Button button = findViewById(R.id.entry_detail_button);
             DownloadProgressView downloadProgressView = findViewById(R.id.entry_detail_progress);
 
-            if (status != null) {
+            button.setVisibility(View.VISIBLE);
+            downloadProgressView.setVisibility(View.GONE);
 
-                String buttonText = getString(status.getDownloadStatus() == JobStatus.COMPLETE
-                        ? R.string.open : R.string.download);
-                boolean isDownloadComplete = status.getDownloadStatus() == JobStatus.COMPLETE;
+            button.setText(isDownloaded ? R.string.open : R.string.download);
 
-                if (status.getDownloadStatus() == 0 || status.getDownloadStatus() == JobStatus.COMPLETE) {
-                    button.setVisibility(View.VISIBLE);
-                    downloadProgressView.setVisibility(View.GONE);
-
-                    button.setText(buttonText);
-
-                } else {
-                    button.setVisibility(status.getDownloadStatus() == JobStatus.FAILED
-                            ? View.VISIBLE : View.GONE);
-
-                    downloadProgressView.setVisibility(status.getDownloadStatus() == JobStatus.FAILED
-                            ? View.GONE : View.VISIBLE);
-                    button.setText(buttonText);
-                    if (status.getTotalSize() > 0) {
-                        downloadProgressView.setProgress((float) status.getBytesDownloadSoFar() /
-                                (float) status.getTotalSize());
-                    }
-                    downloadProgressView.setStatusText("Downloading");
-                }
-
-                button.setOnClickListener(view ->
-                        entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete));
-
-            } else {
-                button.setVisibility(View.VISIBLE);
-                downloadProgressView.setVisibility(View.GONE);
-                button.setText(R.string.download);
-                button.setOnClickListener(view ->
-                        entryDetailPresenter.handleDownloadButtonClick(false));
-            }
-
-
+            button.setOnClickListener(view ->
+                    entryDetailPresenter.handleDownloadButtonClick(isDownloaded, entryDetailPresenter.getEntryUuid()));
         });
+
     }
 
     @Override
@@ -240,19 +212,13 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void updateStatusIconAndText(int icon, String status) {
-        statusText.setVisibility(View.VISIBLE);
-        statusIcon.setVisibility(View.VISIBLE);
 
-        statusIcon.setImageResource(fileStatusIcon.get(icon));
-        statusText.setText(status);
     }
 
     @Override
     public void setStatusViewsVisible(boolean visible) {
-        statusIcon.setVisibility(visible ? View.VISIBLE : View.GONE);
-        statusText.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
 
+    }
 
     @Override
     public void selectContentEntryOfLanguage(long uid) {

@@ -142,7 +142,7 @@ android {
          */
         devMinApi21 {
             dimension "config"
-            minSdkVersion 21
+            minSdkVersion 23
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
@@ -276,6 +276,7 @@ dependencies {
     api project(':core')
     api project(':sharedse')
     api project(":lib-core-fs")
+    api project(":libcodec2-android")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')

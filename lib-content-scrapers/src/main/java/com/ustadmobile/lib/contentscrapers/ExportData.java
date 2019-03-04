@@ -13,6 +13,9 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerEntry;
+import com.ustadmobile.lib.db.entities.ContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -83,9 +86,6 @@ public class ExportData {
         ContentCategoryDao categoryDao = repository.getContentCategoryDao();
         ContentEntryContentCategoryJoinDao categoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
 
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-
         LanguageDao languageDao = repository.getLanguageDao();
         LanguageVariantDao variantDao = repository.getLanguageVariantDao();
 
@@ -111,11 +111,13 @@ public class ExportData {
         UMLogUtil.logDebug("size of langList is " + langList.size());
         UMLogUtil.logDebug("size of langVariantList is " + langVariantList.size());
 
-        List<ContentEntryFile> fileList = contentEntryFileDao.getPublicContentEntryFiles();
-        List<ContentEntryContentEntryFileJoin> fileJoinList = contentEntryFileJoin.getPublicContentEntryContentEntryFileJoins();
+        List<Container> containerList = repository.getContainerDao().findAllPublikContainers();
+        List<ContainerEntry> containerEntryList = db.getContainerEntryDao().findAllPublikContainerEntries();
+        List<ContainerEntryFile> containerEntryFileList = db.getContainerEntryFileDao().findAllPublikContainerEntryFiles();
 
-        UMLogUtil.logDebug("size of fileList is " + fileList.size());
-        UMLogUtil.logDebug("size of fileJoinList is " + fileJoinList.size());
+        UMLogUtil.logDebug("size of container is " + containerList.size());
+        UMLogUtil.logDebug("size of ContainerEntry is " + containerEntryList.size());
+        UMLogUtil.logDebug("size of ContainerEntryFile is " + containerEntryFileList.size());
 
         saveListToJson(split(contentEntryList, size), "contentEntry.", destinationDirectory);
         saveListToJson(split(parentChildJoinList, size), "contentEntryParentChildJoin.", destinationDirectory);
@@ -128,8 +130,9 @@ public class ExportData {
         saveListToJson(split(langList, size), "language.", destinationDirectory);
         saveListToJson(split(langVariantList, size), "languageVariant.", destinationDirectory);
 
-        saveListToJson(split(fileList, size), "contentEntryFile.", destinationDirectory);
-        saveListToJson(split(fileJoinList, size), "contentEntryContentEntryFileJoin.", destinationDirectory);
+        saveListToJson(split(containerList, size), "container.", destinationDirectory);
+        saveListToJson(split(containerEntryList, size), "containerEntry.", destinationDirectory);
+        saveListToJson(split(containerEntryFileList, size), "containerEntryFile.", destinationDirectory);
 
         FileUtils.writeStringToFile(new File(destination, "index.json"), gson.toJson(pathList), UTF_ENCODING);
 

@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -493,5 +494,83 @@ public class ShrinkerUtil {
         }
 
     }
+
+
+    public static void convertKhanVideoToWebMAndCodec2(File src, File dest) throws IOException {
+
+        if (!ContentScraperUtil.fileHasContent(src)) {
+            throw new FileNotFoundException("convertKhanToWebmAndCodec2: Source file: " + src.getAbsolutePath() + " does not exist");
+        }
+
+        File webpExecutableFile = new File(ScraperBuildConfig.FFMPEG_PATH);
+        if (!webpExecutableFile.exists()) {
+            throw new IOException("ffmpeg executable does not exist: " + ScraperBuildConfig.FFMPEG_PATH);
+        }
+
+        ProcessBuilder videoBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
+                , "-vf", "scale=480x270", "-r", "5", "-c:v", "vp9", "-b:v", "0", "-crf", "40", "-an", "-y", dest.getPath());
+        videoBuilder.redirectErrorStream(true);
+
+        File rawFile = new File(dest.getParentFile(), "audio.raw");
+        ProcessBuilder rawBuilder = new ProcessBuilder(ScraperBuildConfig.FFMPEG_PATH, "-i", src.getPath()
+                , "-vn", "-c:a", "pcm_s16le", "-ar", "8000", "-ac", "1", "-f", "s16le", "-y", rawFile.getPath());
+        rawBuilder.redirectErrorStream(true);
+
+        File audioFile = new File(dest.getParentFile(), "audio.c2");
+        ProcessBuilder audioBuilder = new ProcessBuilder(ScraperBuildConfig.CODEC2_PATH, "3200", rawFile.getPath(), audioFile.getPath());
+        audioBuilder.redirectErrorStream(true);
+
+        Process process = null;
+        try {
+            process = videoBuilder.start();
+            startProcess(process);
+
+            UMLogUtil.logTrace("got the webm file");
+
+            process = rawBuilder.start();
+            startProcess(process);
+
+            UMLogUtil.logTrace("got the raw file");
+
+            process = audioBuilder.start();
+            startProcess(process);
+
+            UMLogUtil.logTrace("got the c2 file");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+            ContentScraperUtil.deleteFile(rawFile);
+        }
+
+        if (!ContentScraperUtil.fileHasContent(dest)) {
+            throw new IOException("convertVideoToWebMAndCodec: source existed, but webm output does not " +
+                    dest.getPath());
+        }
+
+        if (!ContentScraperUtil.fileHasContent(audioFile)) {
+            throw new IOException("convertVideoToWebMAndCodec: source existed, but audio output does not " +
+                    dest.getPath());
+        }
+
+
+    }
+
+    private static void startProcess(Process process) throws IOException, InterruptedException {
+        UMIOUtils.readStreamToByteArray(process.getInputStream());
+        process.waitFor();
+        int exitValue = process.exitValue();
+        if (exitValue != 0) {
+            UMLogUtil.logError("Error Stream for src " + UMIOUtils.readStreamToString(process.getErrorStream()));
+        }
+        process.destroy();
+    }
+
 
 }

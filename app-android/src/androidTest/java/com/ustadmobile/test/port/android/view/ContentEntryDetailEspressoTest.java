@@ -59,6 +59,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVi
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -250,22 +251,17 @@ public class ContentEntryDetailEspressoTest {
         join.setCecefjUid(3435);
         contentEntryFileJoinDao.insert(join);
 
-        String testScrapedPlixPath = "/com/ustadmobile/app/android/counting-out-1-20-objects.zip";
-        InputStream inputStream = getClass().getResourceAsStream(testScrapedPlixPath);
-        File path = Environment.getExternalStorageDirectory();
-        targetFile = new File(path, "counting-out-1-20-objects.zip");
-        OutputStream outStream = new FileOutputStream(targetFile);
-        byte[] buffer = new byte[1024];
-        int read;
-        while((read = inputStream.read(buffer)) != -1){
-            outStream.write(buffer, 0, read);
-        }
+        targetFile = readFromTestResources(
+                "/com/ustadmobile/app/android/counting-out-1-20-objects.zip",
+                "counting-out-1-20-objects.zip");
+
 
         ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
         fileStatus.setCefsUid(16);
         fileStatus.setCefsContentEntryFileUid(18);
         fileStatus.setFilePath(targetFile.getPath());
         fileStatusDao.insert(fileStatus);
+
 
     }
 
