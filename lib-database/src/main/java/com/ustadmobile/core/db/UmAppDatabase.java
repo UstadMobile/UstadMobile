@@ -107,7 +107,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 12, entities = {
+@UmDatabase(version = 14, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -575,6 +575,22 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContainerEntryFile
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContainerEntryFile  ( cefUid  SERIAL PRIMARY KEY  NOT NULL ,  cefMd5  TEXT,  cefPath  TEXT,  ceTotalSize  BIGINT,  ceCompressedSize  BIGINT,  compression  INTEGER)");
                         //END Create ContainerEntryFile
+
+                }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(12, 14) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE ContainerEntry ADD COLUMN ceContainerUid BIGINT");
+                        db.execSql("CREATE INDEX  index_ContainerEntry_ceContainerUid  ON  ContainerEntry  ( ceContainerUid  )");
+
 
                 }
             }
