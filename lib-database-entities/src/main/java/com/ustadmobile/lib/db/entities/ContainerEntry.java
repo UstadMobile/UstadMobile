@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 @UmEntity
@@ -9,6 +10,7 @@ public class ContainerEntry {
     @UmPrimaryKey(autoIncrement = true)
     private long ceUid;
 
+    @UmIndexField
     private long ceContainerUid;
 
     private String cePath;
