@@ -29,7 +29,8 @@ dependencies {
     implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
     compile project(path: ':core')
     implementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
-
+    // https://mvnrepository.com/artifact/org.quartz-scheduler/quartz
+    compile group: 'org.quartz-scheduler', name: 'quartz', version: "$version_quartz"
 
 }
 

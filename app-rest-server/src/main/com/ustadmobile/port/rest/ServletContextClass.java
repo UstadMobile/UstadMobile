@@ -64,11 +64,10 @@ public class ServletContextClass implements ServletContextListener
     //Run this before web application is started
     @Override
     public void contextInitialized(ServletContextEvent evt) {
-        System.out.println("ServletContextListener started");
+        System.out.println("\nServletContextListener started");
 
         appDb = UmAppDatabase.getInstance(evt.getServletContext());
         appDb.setAttachmentsDir(evt.getServletContext().getRealPath("/WEB-INF/attachments/"));
-        System.out.println("Set db attachments path to: " + appDb.getAttachmentsDir());
 
         UmAppDatabase appDbRepository = appDb.getRepository(dummyBaseUrl, dummyAuth);
 
@@ -159,7 +158,7 @@ public class ServletContextClass implements ServletContextListener
                                 //Create entity roles for all clazzes
                                 //Assign Role for all clazzes
 
-                                System.out.println("Looping over classes..");
+                                System.out.println("SEL created. Updating permissions over all classes");
                                 List<Clazz> allClazzes = personDao.findAllClazzes();
                                 for (Clazz thisClazz : allClazzes) {
                                     EntityRole entityRole = new EntityRole();
@@ -293,9 +292,8 @@ public class ServletContextClass implements ServletContextListener
                                         //Create entity roles for all clazzes
                                         //Assign Role for all clazzes
 
-                                        System.out.println("entity group uid: " + personWithGroup.getPersonGroupUid());
+                                        System.out.println("Officer created. Assigning permission over classes");
 
-                                        System.out.println("Looping over classes..");
                                         List<Clazz> allClazzes = personDao.findAllClazzes();
                                         for (Clazz thisClazz : allClazzes) {
                                             EntityRole entityRole = new EntityRole();
@@ -388,9 +386,6 @@ public class ServletContextClass implements ServletContextListener
 
     private void addRolesAndPermissions(){
 
-        System.out.println("Adding roles and permissions");
-
-
         //TEACHER
         roleDao.findByName(ROLE_NAME_TEACHER, new UmCallback<Role>() {
             @Override
@@ -417,10 +412,7 @@ public class ServletContextClass implements ServletContextListener
                             ;
                     newRole.setRolePermissions(teacherPermissions);
                     newRole.setRoleUid(roleDao.insert(newRole));
-                }else{
-                    System.out.println("Role already created for teacher");
                 }
-
 
                 //Officer
                 roleDao.findByName(ROLE_NAME_OFFICER, new UmCallback<Role>() {
@@ -451,7 +443,6 @@ public class ServletContextClass implements ServletContextListener
 
                         }else{
                             officerRole = result;
-                            System.out.println("Role already created for officer");
                         }
 
                         //SEL
@@ -475,7 +466,6 @@ public class ServletContextClass implements ServletContextListener
                                     selRole = newRole;
                                 }else{
                                     selRole = result;
-                                    System.out.println("Role already created for SEL");
                                 }
 
                                 //MNE
@@ -505,8 +495,6 @@ public class ServletContextClass implements ServletContextListener
                                                     ;
                                             newRole.setRolePermissions(mnePermissions);
                                             roleDao.insert(newRole);
-                                        }else{
-                                            System.out.println("Role already created for MNE");
                                         }
 
                                         //SITE STAFF
@@ -522,12 +510,8 @@ public class ServletContextClass implements ServletContextListener
                                                             ;
                                                     newRole.setRolePermissions(siteStaffPermissions);
                                                     roleDao.insert(newRole);
-                                                }else{
-                                                    System.out.println("Role already created for Site Staff");
                                                 }
 
-                                                System.out.println("ServletContextClass: " +
-                                                        "Checked all Rols and Permissions. Continuing..");
                                                 createOfficer();
                                             }
 
@@ -565,7 +549,6 @@ public class ServletContextClass implements ServletContextListener
             }
         });
 
-
     }
 
     private void addNextField(){
@@ -574,9 +557,6 @@ public class ServletContextClass implements ServletContextListener
             //addSELQuestions();
             return;
         }
-
-        System.out.println("Checking field..");
-
         HeadersAndFields field = allFields.get(fieldIndex);
 
         boolean isHeader = false;
@@ -621,9 +601,6 @@ public class ServletContextClass implements ServletContextListener
                                     personField.setPersonCustomFieldUid(field.fieldUid);   //Field's uid
                                 }
 
-                                System.out.println("Field: " + field.fieldName +
-                                        " Field uid: " + field.fieldUid);
-
                                 //Persist
                                 personCustomFieldDao.insertAsync(personField, new UmCallback<Long>() {
                                     @Override
@@ -647,7 +624,6 @@ public class ServletContextClass implements ServletContextListener
 
                         } else {
 
-                            System.out.println("Already created 1 (" + field.fieldName + "). skipping..");
                             //Persist 2
                             createPersonDetailPresenterField(field, finalIsHeader, personField,
                                     personDetailPresenterFieldDao, true);
@@ -670,9 +646,9 @@ public class ServletContextClass implements ServletContextListener
      * the server.
      */
     private void addFieldData(){
-        System.out.println("ServletContextClass: Adding Field Data<<<<<<<<<<<<");
         allFields = getAllFields();
 
+        System.out.println("Adding PersonFields and PersonDetailPresenter entities. \n");
         //Start with next field (1st field really)
         addNextField();
 
@@ -717,9 +693,6 @@ public class ServletContextClass implements ServletContextListener
 
                             //persist:
                             personDetailPresenterFieldDao.insert(pdpf1);
-                        } else {
-                            System.out.println("Already created 2 (" + field.fieldIndex + ":" +
-                                    field.fieldLabel + "). skipping..");
                         }
 
                         if(gotoNext){

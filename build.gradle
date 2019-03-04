@@ -102,6 +102,8 @@ ext {
 
     version_picasso = "2.71828"
     version_crystalrangeseekbar = "1.1.3"
+
+    version_quartz = "2.3.0"
 }
 
 ext.buildConfigProperties = new Properties()
