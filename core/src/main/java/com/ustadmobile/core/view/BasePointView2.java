@@ -26,4 +26,6 @@ public interface BasePointView2 extends UstadView {
     void showSettings(boolean show);
 
     void updatePermissionCheck();
+
+    void forceSync()
 }

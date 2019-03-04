@@ -27,10 +27,14 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointActivity2Presenter;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.WorkManager;
 
 
 /**
@@ -236,8 +240,17 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         else if( i == R.id.menu_basepoint_about){
             mPresenter.handleClickAbout();
         }
+        else if(i == R.id.menu_basepoint_sync){
+            forceSync();
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void forceSync() {
+        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
+        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
     }
 
     /**

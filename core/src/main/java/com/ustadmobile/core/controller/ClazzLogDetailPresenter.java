@@ -317,6 +317,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                         numPresent, numAbsent, numPartial, null);
 
                 /*FEED ENTRIES*/
+                //Create feed entries for this user
+                List<FeedEntry> newFeedEntries = new ArrayList<>();
+                List<FeedEntry> updateFeedEntries = new ArrayList<>();
 
                 //5. Create feedEntries for the ones that have dropped values.
                 List<ClazzMember> afterList = clazzMemberDao.findByClazzUid(
@@ -330,8 +333,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                         PersonDao personDao = repository.getPersonDao();
                         Person thisPerson = personDao.findByUid(before.getClazzMemberPersonUid());
-                        //Create feed entries for this user for every teacher
-                        List<FeedEntry> newFeedEntries = new ArrayList<>();
+
 
                         String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                 PersonDetailView.ARG_PERSON_UID + "=" +
@@ -343,21 +345,26 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
                                     ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_HIGH, feedLinkViewPerson);
 
-                            newFeedEntries.add(
-                                new FeedEntry(
+                            FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
+                            FeedEntry thisEntry = new FeedEntry(
                                     feedEntryUid,
                                     "Attendance dropped",
                                     "Student " + thisPerson.getFirstNames() + " " +
                                             thisPerson.getLastName() + " of Class " +
                                             clazzName + " attendance dropped "+
                                             String.valueOf(feedAlertPerentageHigh * 100)  +"%",
-                                        feedLinkViewPerson,
+                                    feedLinkViewPerson,
                                     clazzName,
                                     teacher.getClazzMemberPersonUid()
-                                )
                             );
+
+                            if(existingEntry == null){
+                                newFeedEntries.add(thisEntry);
+                            }else{
+                                updateFeedEntries.add(thisEntry);
+                            }
                         }
-                        repository.getFeedEntryDao().updateList(newFeedEntries);
+                        //repository.getFeedEntryDao().updateList(newFeedEntries);
                     }
 
                     if(before != null
@@ -367,8 +374,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                         PersonDao personDao = repository.getPersonDao();
                         Person thisPerson = personDao.findByUid(before.getClazzMemberPersonUid());
-                        //Create feed entries for this user for every teacher
-                        List<FeedEntry> newFeedEntries = new ArrayList<>();
 
                         String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                 PersonDetailView.ARG_PERSON_UID + "=" +
@@ -379,8 +384,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
                                     ScheduledCheck.TYPE_CHECK_ATTENDANCE_VARIATION_MED, feedLinkViewPerson);
 
-                            newFeedEntries.add(
-                                new FeedEntry(
+                            FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
+                            FeedEntry thisEntry = new FeedEntry(
                                     feedEntryUid,
                                     "Attendance dropped",
                                     "Student " + thisPerson.getFirstNames() + " " +
@@ -390,10 +395,14 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     feedLinkViewPerson,
                                     clazzName,
                                     teacher.getClazzMemberPersonUid()
-                                )
                             );
+                            if(existingEntry == null){
+                                newFeedEntries.add(thisEntry);
+                            }else{
+                                updateFeedEntries.add(thisEntry);
+                            }
                         }
-                        repository.getFeedEntryDao().updateList(newFeedEntries);
+                        //repository.getFeedEntryDao().updateList(newFeedEntries);
                     }
                 }
 
@@ -404,8 +413,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     new UmCallback<List<PersonNameWithClazzName>>() {
                         @Override
                         public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
-                            //Create feed entries for this user for every teacher
-                            List<FeedEntry> newFeedEntries = new ArrayList<>();
                             for(PersonNameWithClazzName each:theseGuys){
 
                                 String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
@@ -417,23 +424,28 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                         teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
                                         ScheduledCheck.TYPE_CHECK_PARTIAL_REPETITION_MED, feedLinkViewPerson);
 
-                                    newFeedEntries.add(
-                                        new FeedEntry(
+                                    FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
+                                    FeedEntry thisEntry = new FeedEntry(
                                             feedEntryUid,
                                             "Tardy behaviour" ,
-                                                "Student " + each.getFirstNames() + " " +
-                                                        each.getLastName() + " partially attended Class "
-                                                         + clazzName + " over 3 times"
-                                                ,
+                                            "Student " + each.getFirstNames() + " " +
+                                                    each.getLastName() + " partially attended Class "
+                                                    + clazzName + " over 3 times"
+                                            ,
                                             feedLinkViewPerson,
                                             clazzName,
                                             teacher.getClazzMemberPersonUid()
-                                        )
                                     );
+
+                                    if(existingEntry == null){
+                                        newFeedEntries.add(thisEntry);
+                                    }else{
+                                        updateFeedEntries.add(thisEntry);
+                                    }
                                 }
                             }
 
-                            repository.getFeedEntryDao().updateList(newFeedEntries);
+                            //repository.getFeedEntryDao().updateList(newFeedEntries);
 
                         }
 
@@ -449,8 +461,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     new UmCallback<List<PersonNameWithClazzName>>() {
                         @Override
                         public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
-                            //Create feed entries for this user for every teacher
-                            List<FeedEntry> newFeedEntries = new ArrayList<>();
                             for(PersonNameWithClazzName each:theseGuys){
 
                                 String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
@@ -463,21 +473,27 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                             teacher.getClazzMemberPersonUid(), currentClazzLog.getClazzLogUid(),
                                             ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW, feedLinkViewPerson);
 
-                                    newFeedEntries.add(
-                                        new FeedEntry(
+                                    FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
+                                    FeedEntry thisEntry = new FeedEntry(
                                             feedEntryUid,
                                             "Absent behaviour",
                                             "Student " + each.getFirstNames() + " " +
                                                     each.getLastName() + " absent in Class " + clazzName
-                                                + " over " + tardyFrequency + " times",
+                                                    + " over " + tardyFrequency + " times",
                                             feedLinkViewPerson,
                                             clazzName,
                                             teacher.getClazzMemberPersonUid()
-                                        )
                                     );
+
+                                    if(existingEntry == null){
+                                        newFeedEntries.add(thisEntry);
+                                    }else{
+                                        updateFeedEntries.add(thisEntry);
+                                    }
+
                                 }
                             }
-                            repository.getFeedEntryDao().updateList(newFeedEntries);
+                            //repository.getFeedEntryDao().updateList(newFeedEntries);
                         }
 
                         @Override
@@ -485,6 +501,11 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                             exception.printStackTrace();
                         }
                     });
+
+
+                repository.getFeedEntryDao().insertList(newFeedEntries);
+                repository.getFeedEntryDao().updateList(updateFeedEntries);
+
 
                 //8. Set any FeedEntry to done
                 repository.getFeedEntryDao().markEntryAsDoneByClazzLogUidAndTaskType(

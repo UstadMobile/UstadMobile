@@ -535,6 +535,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="no_schedule_message">You have to create a schedule to be able to take attendance</string>
     <string name="view_class">View class</string>
     <string name="view_student">View student</string>
+    <string name="sync">Sync</string>
 
 
     <string name="onboarding_get_started_label">Get Started</string>

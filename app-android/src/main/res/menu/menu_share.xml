@@ -43,5 +43,10 @@
         android:visible="true"
         />
 
+    <item android:id="@+id/menu_basepoint_sync"
+        android:icon="@drawable/ic_sync_black_24dp"
+        android:title="@string/sync"
+        android:visible="true"/>
+
 
 </menu>
