@@ -48,4 +48,10 @@ public interface ClazzListView extends UstadView {
 
     void forceCheckPermissions();
 
+    /**
+     * Shows a message to view. Can be as simple as toast on Android
+     * @param messageID   The message ID we want to show.
+     */
+    void showMessage(int messageID);
+
 }

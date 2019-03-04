@@ -18,10 +18,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -198,5 +200,17 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         showSettings();
     }
 
+    @Override
+    public void showMessage(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String message = impl.getString(messageId, getContext());
+
+        runOnUiThread(() -> Toast.makeText(
+                getContext(),
+                message,
+                Toast.LENGTH_SHORT
+        ).show());
+
+    }
 
 }

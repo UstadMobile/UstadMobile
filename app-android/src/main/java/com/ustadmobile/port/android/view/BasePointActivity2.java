@@ -68,7 +68,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private void setupViewPager() {
         mPager = findViewById(R.id.container_feedlist);
         mPagerAdapter = new BasePointViewPagerAdapter(getSupportFragmentManager());
-        mPagerAdapter.getItem(0);
         mPager.setAdapter(mPagerAdapter);
     }
 
@@ -125,9 +124,6 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.addItem(classes_item);
         bottomNavigation.addItem(people_item);
 
-        // Setting the very 1st item as default home screen.
-        bottomNavigation.setCurrentItem(0);
-
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
@@ -136,9 +132,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
 
             if (!wasSelected) {
-                mPagerAdapter.notifyDataSetChanged();
+                //mPagerAdapter.notifyDataSetChanged();
                 mPagerAdapter.getItem(position);
-                mPagerAdapter.notifyDataSetChanged();
+                //mPagerAdapter.notifyDataSetChanged();
                 mPager.setCurrentItem(position);
             }
 
@@ -157,6 +153,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
             }
             return true;
         });
+
+        // Setting the very 1st item as default home screen.
+        bottomNavigation.setCurrentItem(0);
 
     }
 

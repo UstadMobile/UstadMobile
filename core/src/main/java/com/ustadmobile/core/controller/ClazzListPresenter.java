@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Role;
 
@@ -89,11 +90,10 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
         if(loggedInPersonUid != null){
 
-            clazzListProvider = clazzDao.findAllClazzesByPermission(loggedInPersonUid);
-            updateProviderToView();
-
             idToOrderInteger = new Hashtable<>();
 
+            //Update Sorting options drop down options. This will also trigger the default
+            // sort hence attaching the provider to the view.
             updateSortSpinnerPreset();
 
             //Check permissions
@@ -224,11 +224,30 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
      * @param clazz The class the user wants to record attendance for.
      */
     public void handleClickClazzRecordAttendance(Clazz clazz) {
+
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable<String, Object> args = new Hashtable<>();
-        long clazzUid = clazz.getClazzUid();
-        args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, String.valueOf(clazzUid));
-        impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
+        repository.getClazzLogDao().findMostRecentByClazzUid(clazz.getClazzUid(),
+                new UmCallback<ClazzLog>() {
+            @Override
+            public void onSuccess(ClazzLog result) {
+                if(result == null){
+                    view.showMessage(MessageID.no_schedule_message);
+                }else{
+                    Hashtable<String, Object> args = new Hashtable<>();
+                    long clazzUid = clazz.getClazzUid();
+                    args.put(ClassLogDetailView.ARG_MOST_RECENT_BY_CLAZZ_UID, String.valueOf(clazzUid));
+                    impl.go(ClassLogDetailView.VIEW_NAME, args, view.getContext());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
+
+
     }
 
     /**
