@@ -11,10 +11,12 @@ import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 
@@ -52,54 +54,41 @@ public class ContentEntryUtil {
         if (entryStatus.getContentEntryStatus() != null
                 && entryStatus.getContentEntryStatus().getDownloadStatus() == JobStatus.COMPLETE) {
 
-            dbRepo.getContentEntryFileDao().findLatestCompletedFileForEntry(entryStatus.getContentEntryUid(), new UmCallback<ContentEntryFileWithStatus>() {
+            dbRepo.getContainerDao().getMostRecentContainerForContentEntry(entryStatus.getContentEntryUid(), new UmCallback<Container>() {
                 @Override
-                public void onSuccess(ContentEntryFileWithStatus result) {
+                public void onSuccess(Container result) {
+                    Hashtable args = new Hashtable();
+                    switch (result.getMimeType()) {
+                        case "application/zip":
 
+                            args.put(ARG_CONTAINERURI, String.valueOf(result.getContainerUid()));
+                            impl.go(XapiPackageView.VIEW_NAME, args, context);
+                            break;
+                        case "video/mp4":
 
-                    if (result.getEntryStatus().getFilePath() == null) {
-                        UmCallbackUtil.onFailIfNotNull(callback, new IllegalArgumentException(
-                                "No file found for " + entryStatus.getContentEntryStatus()));
-                    } else {
+                            args.put(VideoPlayerView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
+                            args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(result.getContainerContentEntryUid()));
+                            impl.go(VideoPlayerView.VIEW_NAME, args, context);
+                            break;
+                        case "application/webchunk+zip":
 
-                        Hashtable args = new Hashtable();
-                        String path = result.getEntryStatus().getFilePath();
-                        switch (result.getMimeType()) {
-                            case "application/zip":
+                            args.put(WebChunkView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
+                            args.put(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(result.getContainerContentEntryUid()));
+                            impl.go(WebChunkView.VIEW_NAME, args, context);
+                            break;
+                        case "application/epub+zip":
 
-                                args.put(ARG_CONTAINERURI, path);
-                                impl.go(XapiPackageView.VIEW_NAME, args, context);
-                                break;
-                            case "video/mp4":
+                            args.put(ARG_CONTAINERURI, String.valueOf(result.getContainerUid()));
+                            impl.go(ContainerView.VIEW_NAME, args, context);
+                            break;
+                        case "application/khan-video+zip":
 
-                                args.put(VideoPlayerView.ARG_VIDEO_PATH, path);
-                                args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryStatus.getContentEntryUid()));
-                                impl.go(VideoPlayerView.VIEW_NAME, args, context);
-                                break;
-                            case "application/webchunk+zip":
-
-                                args.put(WebChunkView.ARG_CHUNK_PATH, path);
-                                args.put(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryStatus.getContentEntryUid()));
-                                impl.go(WebChunkView.VIEW_NAME, args, context);
-                                break;
-                            case "application/epub+zip":
-
-                                args.put(ARG_CONTAINERURI, path);
-                                impl.go(ContainerView.VIEW_NAME, args, context);
-                                break;
-                            case "application/khan-video+zip":
-
-                                // TODO unzip and give the path to both
-                                args.put(VideoPlayerView.ARG_VIDEO_PATH, path);
-                                args.put(VideoPlayerView.ARG_AUDIO_PATH, path);
-                                args.put(VideoPlayerView.ARG_SRT_PATH, path);
-                                args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(entryStatus.getContentEntryUid()));
-                                impl.go(VideoPlayerView.VIEW_NAME, args, context);
-                                break;
-                        }
+                            args.put(VideoPlayerView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
+                            args.put(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(result.getContainerContentEntryUid()));
+                            impl.go(VideoPlayerView.VIEW_NAME, args, context);
+                            break;
 
                     }
-
                 }
 
                 @Override
@@ -107,7 +96,6 @@ public class ContentEntryUtil {
                     UmCallbackUtil.onFailIfNotNull(callback, exception);
                 }
             });
-
 
         } else if (openEntryIfNotDownloaded) {
             Hashtable<String, String> args = new Hashtable<>();

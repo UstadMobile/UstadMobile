@@ -3,8 +3,8 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -12,33 +12,24 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
-import com.ustadmobile.core.view.VideoPlayerView;
-import com.ustadmobile.core.view.WebChunkView;
-import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 
 import java.util.Hashtable;
 import java.util.List;
-import java.util.zip.ZipEntry;
 
-import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
-import static com.ustadmobile.core.view.VideoPlayerView.ARG_VIDEO_PATH;
 
 public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
 
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
     private final ContentEntryDetailView viewContract;
-    private ContentEntryFileDao contentFileDao;
     private ContentEntryDao contentEntryDao;
     private ContentEntryRelatedEntryJoinDao contentRelatedEntryDao;
     private String navigation;
@@ -56,10 +47,10 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     public void onCreate(Hashtable hashtable) {
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
-        contentFileDao = repoAppDatabase.getContentEntryFileDao();
         contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
         contentEntryDao = repoAppDatabase.getContentEntryDao();
         contentEntryStatusDao = appdb.getContentEntryStatusDao();
+        ContainerDao containerDao = repoAppDatabase.getContainerDao();
 
         entryUuid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
         navigation = (String) getArguments().get(ARG_REFERRER);
@@ -67,7 +58,8 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
-                viewContract.setContentInfo(result);
+                String licenseType = getLicenseType(result);
+                viewContract.setContentInfo(result, licenseType);
             }
 
             @Override
@@ -76,9 +68,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             }
         });
 
-        contentFileDao.findFilesByContentEntryUid(entryUuid, new UmCallback<List<ContentEntryFile>>() {
+        containerDao.findFilesByContentEntryUid(entryUuid, new UmCallback<List<Container>>() {
             @Override
-            public void onSuccess(List<ContentEntryFile> result) {
+            public void onSuccess(List<Container> result) {
                 viewContract.setFileInfo(result);
             }
 
@@ -103,6 +95,24 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid);
         statusUmLiveData.observe(this, this::onEntryStatusChanged);
+    }
+
+    private String getLicenseType(ContentEntry result) {
+        switch (result.getLicenseType()){
+            case ContentEntry.LICENSE_TYPE_CC_BY:
+                return "CC BY";
+            case ContentEntry.LICENSE_TYPE_CC_BY_SA:
+                return "CC BY SA";
+            case ContentEntry.LICESNE_TYPE_CC_BY_NC_SA:
+                return "CC BY NC SA";
+            case ContentEntry.LICENSE_TYPE_CC_BY_SA_NC:
+                return "CC BY SA NC";
+            case ContentEntry.PUBLIC_DOMAIN:
+                return "Public Domain";
+            case ContentEntry.ALL_RIGHTS_RESERVED:
+                return "All Rights Reserved";
+        }
+        return "";
     }
 
     public void onEntryStatusChanged(ContentEntryStatus status) {

@@ -17,13 +17,11 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter;
-import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
-import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;
@@ -69,7 +67,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
     }
 
     @Override
-    public void setContentInfo(ContentEntry contentEntry) {
+    public void setContentInfo(ContentEntry contentEntry, String licenseType) {
 
         runOnUiThread(() -> {
             TextView title = findViewById(R.id.entry_detail_title);
@@ -89,17 +87,19 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
             getSupportActionBar().setTitle(contentEntry.getTitle());
 
             TextView license = findViewById(R.id.entry_detail_license);
-            license.setText(contentEntry.getLicenseName());
+            license.setText(licenseType);
 
             TextView author = findViewById(R.id.entry_detail_author);
             author.setText(contentEntry.getAuthor());
+
+
         });
 
 
     }
 
     @Override
-    public void setFileInfo(List<ContentEntryFile> contentEntryFileList) {
+    public void setFileInfo(List<Container> contentEntryFileList) {
         runOnUiThread(() -> {
             Button button = findViewById(R.id.entry_detail_button);
 
@@ -111,7 +111,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
             button.setEnabled(true);
             if (contentEntryFileList.size() == 1) {
 
-                ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
+                Container contentEntryFile = contentEntryFileList.get(0);
 
 
                 TextView downloadSize = findViewById(R.id.entry_detail_content_size);
@@ -121,7 +121,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
                 // TODO manage multiple files
 
-                ContentEntryFile contentEntryFile = contentEntryFileList.get(0);
+                Container contentEntryFile = contentEntryFileList.get(0);
 
                 TextView downloadSize = findViewById(R.id.entry_detail_content_size);
                 downloadSize.setText(UMFileUtil.formatFileSize(contentEntryFile.getFileSize()));

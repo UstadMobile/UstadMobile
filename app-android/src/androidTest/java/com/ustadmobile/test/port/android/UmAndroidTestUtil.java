@@ -15,6 +15,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public class UmAndroidTestUtil {
 
@@ -83,6 +88,21 @@ public class UmAndroidTestUtil {
         outStream.close();
 
         return targetFile;
+    }
+
+    public static void readAllFilesInDirectory(File directory, HashMap<File, String> filemap) {
+        Path sourceDirPath = Paths.get(directory.toURI());
+        try {
+            Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        String relativePath = sourceDirPath.relativize(path).toString()
+                                .replaceAll(Pattern.quote("\\"), "/");
+                        filemap.put(path.toFile(), relativePath);
+
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

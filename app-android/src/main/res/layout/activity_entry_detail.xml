@@ -17,8 +17,8 @@
 
             <ImageView
                 android:id="@+id/entry_detail_thumbnail"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
                 android:layout_margin="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -41,13 +41,38 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:layout_marginStart="116dp"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_title"
                 tools:text="Author" />
+
+            <TextView
+                android:id="@+id/entry_detail_publisher"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_marginStart="116dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                app:layout_constraintTop_toBottomOf="@id/entry_detail_author"
+                tools:text="Publisher" />
+
+            <TextView
+                android:id="@+id/entry_detail_license_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:text="License: "
+                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
+                tools:text="BY_SA" />
+
 
             <TextView
                 android:id="@+id/entry_detail_license"
@@ -57,9 +82,16 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_author"
+                app:layout_constraintStart_toEndOf="@id/entry_detail_license_label"
+                app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
                 tools:text="BY_SA" />
+
+            <android.support.constraint.Barrier
+                android:id="@+id/labelBarrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="entry_detail_license,entry_detail_thumbnail" />
 
             <LinearLayout
                 android:id="@+id/entry_detail_anchor_download"
@@ -69,7 +101,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail">
+                app:layout_constraintTop_toBottomOf="@id/labelBarrier">
 
                 <Button
                     android:id="@+id/entry_detail_button"

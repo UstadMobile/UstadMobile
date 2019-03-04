@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -9,23 +10,23 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.VideoPlayerView;
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
-import static com.ustadmobile.core.view.VideoPlayerView.ARG_AUDIO_PATH;
+import static com.ustadmobile.core.view.VideoPlayerView.ARG_CONTAINER_UID;
 import static com.ustadmobile.core.view.VideoPlayerView.ARG_CONTENT_ENTRY_ID;
-import static com.ustadmobile.core.view.VideoPlayerView.ARG_SRT_PATH;
-import static com.ustadmobile.core.view.VideoPlayerView.ARG_VIDEO_PATH;
 
 public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
 
-    private String videoPath;
     private ContentEntryDao contentEntryDao;
+    private String navigation;
     private String audioPath;
     private String srtPath;
-    private String navigation;
+    private String videoPath;
 
     public VideoPlayerPresenter(Object context, Hashtable arguments, VideoPlayerView view) {
         super(context, arguments, view);
@@ -34,15 +35,15 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
-        UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
-        contentEntryDao = appDatabase.getContentEntryDao();
+        UmAppDatabase db = UmAppDatabase.getInstance(getContext());
+        UmAppDatabase dbRepo = UmAccountManager.getRepositoryForActiveAccount(getContext());
+        contentEntryDao = dbRepo.getContentEntryDao();
+        ContainerEntryDao containerEntryDao = db.getContainerEntryDao();
 
-
-        videoPath = (String) getArguments().get(ARG_VIDEO_PATH);
-        audioPath = (String) getArguments().get(ARG_AUDIO_PATH);
-        srtPath = (String) getArguments().get(ARG_SRT_PATH);
         navigation = (String) getArguments().get(ARG_REFERRER);
         long entryUuid = Long.parseLong((String) getArguments().get(ARG_CONTENT_ENTRY_ID));
+        long containerUid = Long.parseLong((String) getArguments().get(ARG_CONTAINER_UID));
+
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
@@ -54,6 +55,33 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
 
             }
         });
+
+
+        containerEntryDao.findByContainer(containerUid, new UmCallback<List<ContainerEntryWithContainerEntryFile>>() {
+            @Override
+            public void onSuccess(List<ContainerEntryWithContainerEntryFile> result) {
+
+                for (ContainerEntryWithContainerEntryFile entry : result) {
+
+                    String fileInContainer = entry.getCePath();
+                    if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
+                        videoPath = entry.getContainerEntryFile().getCefPath();
+                    } else if (fileInContainer.equals("audio.c2")) {
+                        audioPath = entry.getContainerEntryFile().getCefPath();
+                    } else if (fileInContainer.equals("subtitle.srt")) {
+                        srtPath = entry.getContainerEntryFile().getCefPath();
+                    }
+                }
+
+                view.setVideoParams(videoPath, audioPath, srtPath);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
 
     }
 

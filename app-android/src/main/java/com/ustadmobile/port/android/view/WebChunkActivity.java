@@ -10,6 +10,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.WebChunkPresenter;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.WebChunkView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -43,16 +44,17 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView 
     }
 
     @Override
-    public void mountChunk(String webChunkPath, UmCallback<String> callback) {
-        webClient = new WebChunkWebViewClient(webChunkPath, mPresenter);
-        mWebView.setWebViewClient(webClient);
-        callback.onSuccess(webClient.getUrl());
+    public void mountChunk(Container container, UmCallback<String> callback) {
+        webClient = new WebChunkWebViewClient(container, mPresenter, getContext());
+        runOnUiThread(() -> {
+            mWebView.setWebViewClient(webClient);
+            callback.onSuccess(webClient.getUrl());
+        });
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        webClient.close();
     }
 
     private void clickUpNavigation() {

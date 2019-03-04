@@ -1,9 +1,8 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
-import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 
 import java.util.List;
 
@@ -11,9 +10,9 @@ public interface ContentEntryDetailView extends UstadView {
 
     String VIEW_NAME = "ContentEntryDetail";
 
-    void setContentInfo(ContentEntry contentEntry);
+    void setContentInfo(ContentEntry contentEntry, String licenseType);
 
-    void setFileInfo(List<ContentEntryFile> filesByContentEntryUid);
+    void setFileInfo(List<Container> filesByContentEntryUid);
 
     void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
 

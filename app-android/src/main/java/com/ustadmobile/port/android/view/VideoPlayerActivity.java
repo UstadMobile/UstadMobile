@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
-import android.media.AudioTrack;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -11,7 +10,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultControlDispatcher;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -29,7 +27,6 @@ import com.google.android.exoplayer2.upstream.FileDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.codec2.Codec2Decoder;
 import com.ustadmobile.core.controller.VideoPlayerPresenter;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -106,7 +103,6 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
     }
 
 
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -146,36 +142,57 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
 
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
-
-        String videoPath = mPresenter.getVideoPath();
-
-        Uri uri = Uri.parse(videoPath);
-        MediaSource mediaSource = buildMediaSource(uri);
-        String srtPath = mPresenter.getSrtPath();
-        MergingMediaSource mergedSource = null;
-
-        if (srtPath != null && !srtPath.isEmpty()) {
-
-            Format subtitleFormat = Format.createTextSampleFormat(
-                    null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
-                    C.SELECTION_FLAG_DEFAULT, null);
-
-            Uri subTitleUri = Uri.parse(srtPath);
-
-            DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
-                    Util.getUserAgent(this, "ustadmobile"));
-
-            MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
-                    createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
-
-            mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
-        }
-
-
-        player.prepare(mergedSource == null ? mediaSource : mergedSource, false, false);
-
-
+        setVideoParams(mPresenter.getVideoPath(), mPresenter.getAudioPath(), mPresenter.getSrtPath());
     }
+
+    @Override
+    public void setVideoParams(String videoPath, String audioPath, String srtPath) {
+        runOnUiThread(() -> {
+            if (audioPath != null && !audioPath.isEmpty()) {
+
+                player.addListener(new Player.DefaultEventListener() {
+                    @Override
+                    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                        if (playbackState == (Player.STATE_READY) && playWhenReady) {
+                            playbackPosition = player.getContentPosition();
+                            releaseAudio();
+                            playAudio(playbackPosition);
+                        } else {
+                            releaseAudio();
+                        }
+                        super.onPlayerStateChanged(playWhenReady, playbackState);
+                    }
+                });
+            }
+
+            if (videoPath != null && !videoPath.isEmpty()) {
+                Uri uri = Uri.parse(videoPath);
+                MediaSource mediaSource = buildMediaSource(uri);
+                MergingMediaSource mergedSource = null;
+
+                if (srtPath != null && !srtPath.isEmpty()) {
+
+                    Format subtitleFormat = Format.createTextSampleFormat(
+                            null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
+                            C.SELECTION_FLAG_DEFAULT, null);
+
+                    Uri subTitleUri = Uri.parse(srtPath);
+
+                    DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
+                            Util.getUserAgent(this, "ustadmobile"));
+
+                    MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
+                            createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
+
+                    mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
+                }
+
+
+                player.prepare(mergedSource == null ? mediaSource : mergedSource, false, false);
+            }
+        });
+    }
+
 
     public void playAudio(long fromMs) {
         audioPlayer = new Codec2Player(mPresenter.getAudioPath(), fromMs);

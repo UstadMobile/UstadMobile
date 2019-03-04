@@ -42,21 +42,28 @@ public class ContainerManager {
         loadFromDb();
     }
 
+    public ContainerManager(Container container, UmAppDatabase db, UmAppDatabase dbRepo) {
+        this.container = container;
+        this.db = db;
+        this.dbRepo = dbRepo;
+        loadFromDb();
+    }
+
     private void loadFromDb() {
         List<ContainerEntryWithContainerEntryFile> entryList = db.getContainerEntryDao()
                 .findByContainer(container.getContainerUid());
-        for(ContainerEntryWithContainerEntryFile entry : entryList){
+        for (ContainerEntryWithContainerEntryFile entry : entryList) {
             pathToEntryMap.put(entry.getCePath(), entry);
         }
     }
 
 
-    public void addEntries(Map<File, String> fileToPathInContainerMap, boolean copy) throws IOException{
+    public void addEntries(Map<File, String> fileToPathInContainerMap, boolean copy) throws IOException {
         Map<File, String> fileToMd5Map = new HashMap<>();
 
         byte[] buf = new byte[8 * 1024];
 
-        for(File inFile : fileToPathInContainerMap.keySet()) {
+        for (File inFile : fileToPathInContainerMap.keySet()) {
             fileToMd5Map.put(inFile, new String(
                     Base64Coder.encode(UmFileUtilSe.getMd5Sum(inFile, buf))));
         }
@@ -65,27 +72,27 @@ public class ContainerManager {
         List<ContainerEntryFile> existingFiles = db.getContainerEntryFileDao()
                 .findEntriesByMd5Sums(new ArrayList<>(fileToMd5Map.values()));
         Map<String, ContainerEntryFile> md5ToExistingFileMap = new HashMap<>();
-        for(ContainerEntryFile entryFile : existingFiles){
+        for (ContainerEntryFile entryFile : existingFiles) {
             md5ToExistingFileMap.put(entryFile.getCefMd5(), entryFile);
         }
 
         List<ContainerEntryWithContainerEntryFile> newContainerEntries = new ArrayList<>();
-        for(Map.Entry<File, String> entry : fileToMd5Map.entrySet()) {
+        for (Map.Entry<File, String> entry : fileToMd5Map.entrySet()) {
             String fileMd5 = entry.getValue();
 
             ContainerEntryFile containerEntryFile = md5ToExistingFileMap.get(fileMd5);
-            if(containerEntryFile == null) {
+            if (containerEntryFile == null) {
                 //this is not a duplicate - we need to add it
                 File srcFile = entry.getKey();
                 containerEntryFile = new ContainerEntryFile(fileMd5, srcFile.length(),
                         srcFile.length(), ContainerEntryFile.COMPRESSION_NONE);
-                if(!copy) {
+                if (!copy) {
                     containerEntryFile.setCefPath(srcFile.getPath());
                 }
 
                 containerEntryFile.setCefUid(db.getContainerEntryFileDao().insert(containerEntryFile));
 
-                if(copy) {
+                if (copy) {
                     File dstFile = new File(newFileDir, String.valueOf(containerEntryFile.getCefUid()));
                     UmFileUtilSe.copyFile(srcFile, dstFile);
                     containerEntryFile.setCefPath(dstFile.getAbsolutePath());
@@ -97,14 +104,14 @@ public class ContainerManager {
 
             ContainerEntryWithContainerEntryFile containerEntry =
                     new ContainerEntryWithContainerEntryFile(
-                        fileToPathInContainerMap.get(entry.getKey()),
-                        container, containerEntryFile);
+                            fileToPathInContainerMap.get(entry.getKey()),
+                            container, containerEntryFile);
             newContainerEntries.add(containerEntry);
         }
 
 
         db.getContainerEntryDao().insertList(new ArrayList<>(newContainerEntries));
-        for(ContainerEntryWithContainerEntryFile file : newContainerEntries) {
+        for (ContainerEntryWithContainerEntryFile file : newContainerEntries) {
             pathToEntryMap.put(file.getCePath(), file);
         }
     }
@@ -113,9 +120,13 @@ public class ContainerManager {
         return pathToEntryMap.get(pathInContainer);
     }
 
+    public List<ContainerEntryWithContainerEntryFile> getAllEntries() {
+        return new ArrayList<>(pathToEntryMap.values());
+    }
+
     public InputStream getInputStream(ContainerEntry containerEntry) throws IOException {
         ContainerEntryWithContainerEntryFile entryWithFile = pathToEntryMap.get(containerEntry.getCePath());
-        if(entryWithFile == null)
+        if (entryWithFile == null)
             throw new FileNotFoundException("Container UID #" + container.getContainerUid() +
                     " has no entry with path " + containerEntry.getCePath());
 
