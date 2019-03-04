@@ -45,7 +45,7 @@
 
     <item android:id="@+id/menu_basepoint_sync"
         android:icon="@drawable/ic_sync_black_24dp"
-        android:title="@string/sync"
+        android:title="@string/force_sync"
         android:visible="true"/>
 
 

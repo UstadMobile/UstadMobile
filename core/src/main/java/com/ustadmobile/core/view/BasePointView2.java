@@ -27,5 +27,5 @@ public interface BasePointView2 extends UstadView {
 
     void updatePermissionCheck();
 
-    void forceSync()
+    void forceSync();
 }
