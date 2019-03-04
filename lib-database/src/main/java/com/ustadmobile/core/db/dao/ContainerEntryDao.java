@@ -14,7 +14,7 @@ public abstract class ContainerEntryDao implements BaseDao<ContainerEntry> {
     @UmQuery("SELECT ContainerEntry.*, ContainerEntryFile.* " +
             "FROM ContainerEntry " +
             "LEFT JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
-            "WHERE ContainerEntry.ceCefUid = :containerUid")
+            "WHERE ContainerEntry.ceContainerUid = :containerUid")
     public abstract List<ContainerEntryWithContainerEntryFile> findByContainer(long containerUid);
 
 }

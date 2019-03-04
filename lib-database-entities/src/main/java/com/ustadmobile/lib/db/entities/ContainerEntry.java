@@ -9,6 +9,8 @@ public class ContainerEntry {
     @UmPrimaryKey(autoIncrement = true)
     private long ceUid;
 
+    private long ceContainerUid;
+
     private String cePath;
 
     private long ceCefUid;
@@ -17,9 +19,10 @@ public class ContainerEntry {
 
     }
 
-    public ContainerEntry(String cePath, ContainerEntryFile entryFile) {
+    public ContainerEntry(String cePath, Container container, ContainerEntryFile entryFile) {
         this.cePath = cePath;
         this.ceCefUid = entryFile.getCefUid();
+        this.ceContainerUid = container.getContainerUid();
     }
 
 
@@ -45,5 +48,13 @@ public class ContainerEntry {
 
     public void setCeCefUid(long ceCefUid) {
         this.ceCefUid = ceCefUid;
+    }
+
+    public long getCeContainerUid() {
+        return ceContainerUid;
+    }
+
+    public void setCeContainerUid(long ceContainerUid) {
+        this.ceContainerUid = ceContainerUid;
     }
 }

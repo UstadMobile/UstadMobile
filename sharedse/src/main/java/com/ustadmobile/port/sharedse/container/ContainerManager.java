@@ -98,7 +98,7 @@ public class ContainerManager {
             ContainerEntryWithContainerEntryFile containerEntry =
                     new ContainerEntryWithContainerEntryFile(
                         fileToPathInContainerMap.get(entry.getKey()),
-                        containerEntryFile);
+                        container, containerEntryFile);
             newContainerEntries.add(containerEntry);
         }
 

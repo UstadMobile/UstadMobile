@@ -7,8 +7,8 @@ public class ContainerEntryWithContainerEntryFile extends ContainerEntry {
     @UmEmbedded
     private ContainerEntryFile containerEntryFile;
 
-    public ContainerEntryWithContainerEntryFile(String cePath, ContainerEntryFile entryFile){
-        super(cePath, entryFile);
+    public ContainerEntryWithContainerEntryFile(String cePath, Container container, ContainerEntryFile entryFile){
+        super(cePath, container, entryFile);
         this.containerEntryFile = entryFile;
     }
 
