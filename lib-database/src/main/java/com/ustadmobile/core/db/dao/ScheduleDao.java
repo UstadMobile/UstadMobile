@@ -110,15 +110,27 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
                 if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_DAILY){
 
-                    //TODO: Associate with weekend feature in the future
+                    Calendar tomorrow = Calendar.getInstance();
+                    tomorrow.add(Calendar.DATE, 1);
+                    int tomorrowDay = tomorrow.get(Calendar.DAY_OF_WEEK);
                     int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-                    if(today == Calendar.SATURDAY || today == Calendar.SUNDAY){
+
+                    int dayOfWeek;
+                    if(incToday){
+                        dayOfWeek = tomorrowDay;
+                    }else{
+                        dayOfWeek = today;
+                    }
+                    //TODO: Associate with weekend feature in the future
+                    if(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY){
                         //skip
+                        System.out.println("Skipping");
 
                     }else {
+
                         //Everyday- so today.
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                                startCalendar, clazz.getTimeZone(),today, incToday);
+                                startCalendar, clazz.getTimeZone(),dayOfWeek, incToday);
                         nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
                         nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
                         nextScheduleOccurence.set(Calendar.SECOND, 0);
