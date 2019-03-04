@@ -292,18 +292,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
             @Override
             public void onSuccess(Integer result) {
 
-                //Get Clazz (and its attendance) before update:
-                Clazz clazzBeforeAttendanceUpdate =
-                        clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid());
-
-                //Get officers and M&E officers
-                Role officerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
-                List<Person> officers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                        currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
-                Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
-                List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                        currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
-
                 //Get clazzMembers (with their attendance percentages) before update:
                 List<ClazzMember> beforeList = clazzMemberDao.findByClazzUid(
                         currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_STUDENT);
@@ -369,7 +357,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 )
                             );
                         }
-                        repository.getFeedEntryDao().insertList(newFeedEntries);
+                        repository.getFeedEntryDao().updateList(newFeedEntries);
                     }
 
                     if(before != null
@@ -405,7 +393,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 )
                             );
                         }
-                        repository.getFeedEntryDao().insertList(newFeedEntries);
+                        repository.getFeedEntryDao().updateList(newFeedEntries);
                     }
                 }
 
@@ -445,7 +433,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 }
                             }
 
-                            repository.getFeedEntryDao().insertList(newFeedEntries);
+                            repository.getFeedEntryDao().updateList(newFeedEntries);
 
                         }
 
@@ -489,7 +477,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     );
                                 }
                             }
-                            repository.getFeedEntryDao().insertList(newFeedEntries);
+                            repository.getFeedEntryDao().updateList(newFeedEntries);
                         }
 
                         @Override
