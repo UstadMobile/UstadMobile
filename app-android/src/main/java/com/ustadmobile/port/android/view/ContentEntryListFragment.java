@@ -130,6 +130,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void onDetach() {
         super.onDetach();
         this.contentEntryListener = null;
+        this.ustadBaseActivity = null;
     }
 
     @Override

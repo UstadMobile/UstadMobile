@@ -1,11 +1,13 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
+import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -24,11 +26,15 @@ import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
@@ -39,20 +45,22 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
     private final ContentEntryDetailView viewContract;
     private ContentEntryFileDao contentFileDao;
-    private ContentEntryDao contentEntryDao;
-    private ContentEntryRelatedEntryJoinDao contentRelatedEntryDao;
+    private NetworkNodeDao networkNodeDao;
     private String navigation;
     private Long entryUuid;
     private Long contentEntryFileUid = 0L;
-    private ContentEntryStatusDao contentEntryStatusDao;
-
-    private UmLiveData<ContentEntryStatus> statusUmLiveData;
 
     private LocalAvailabilityMonitor monitor;
+
+    private AtomicBoolean monitorStatus = new AtomicBoolean(false);
 
     public static final int LOCALLY_AVAILABLE_ICON = 1;
 
     public static final int LOCALLY_NOT_AVAILABLE_ICON = 2;
+
+    private static final int BAD_NODE_FAILURE_THRESHOLD = 3;
+
+    private static final int TIME_INTERVAL_FROM_LAST_FAILURE = 5;
 
     public ContentEntryDetailPresenter(Object context, Hashtable arguments,
                                        ContentEntryDetailView viewContract, LocalAvailabilityMonitor monitor) {
@@ -67,9 +75,10 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
         contentFileDao = repoAppDatabase.getContentEntryFileDao();
-        contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
-        contentEntryDao = repoAppDatabase.getContentEntryDao();
-        contentEntryStatusDao = appdb.getContentEntryStatusDao();
+        networkNodeDao = appdb.getNetworkNodeDao();
+        ContentEntryRelatedEntryJoinDao contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
+        ContentEntryDao contentEntryDao = repoAppDatabase.getContentEntryDao();
+        ContentEntryStatusDao contentEntryStatusDao = appdb.getContentEntryStatusDao();
 
         entryUuid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
         navigation = (String) getArguments().get(ARG_REFERRER);
@@ -111,32 +120,42 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             }
         });
 
-        statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid);
+        UmLiveData<ContentEntryStatus> statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid);
         statusUmLiveData.observe(this, this::onEntryStatusChanged);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
 
-        contentFileDao.findFilesByContentEntryUid(entryUuid,
-                new UmCallback<List<ContentEntryFile>>() {
-            @Override
-            public void onSuccess(List<ContentEntryFile> result) {
-                contentEntryFileUid = result.get(0).getContentEntryFileUid();
-                monitor.startMonitoringAvailability(this,
-                        Collections.singletonList(contentEntryFileUid));
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
-    }
-
-    public void onEntryStatusChanged(ContentEntryStatus status) {
+    private void onEntryStatusChanged(ContentEntryStatus status) {
         viewContract.setDownloadProgress(status);
+
+        if(status == null || status.getDownloadStatus() != JobStatus.COMPLETE){
+
+            long currentTimeStamp = System.currentTimeMillis();
+            long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
+            long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
+                    TIME_INTERVAL_FROM_LAST_FAILURE);
+            viewContract.setStatusViewsVisible(true);
+
+           new Thread(() -> {
+               contentEntryFileUid = contentFileDao.findFilesByContentEntryUid(entryUuid)
+                       .get(0).getContentEntryFileUid();
+               NetworkNode localNetworkNode = networkNodeDao.findNodeWithContentFileEntry(
+                       contentEntryFileUid, minLastSeen,BAD_NODE_FAILURE_THRESHOLD
+                       ,maxFailureFromTimeStamp);
+
+               if(localNetworkNode == null && !monitorStatus.get()){
+                   monitorStatus.set(true);
+                   monitor.startMonitoringAvailability(this,
+                           Collections.singletonList(contentEntryFileUid));
+               }
+
+               Set<Long> monitorSet = new HashSet<>();
+               monitorSet.add(localNetworkNode != null ? contentEntryFileUid : 0L);
+               handleUpdateStatusIconAndText(monitorSet);
+           }).start();
+        }else{
+            viewContract.setStatusViewsVisible(false);
+        }
     }
 
 
@@ -221,7 +240,10 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     @Override
     public void onDestroy() {
-        monitor.stopMonitoringAvailability(this);
+        if(monitorStatus.get()){
+            monitorStatus.set(false);
+            monitor.stopMonitoringAvailability(this);
+        }
         super.onDestroy();
     }
 }

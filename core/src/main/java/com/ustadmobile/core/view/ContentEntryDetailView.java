@@ -23,4 +23,6 @@ public interface ContentEntryDetailView extends UstadView {
 
     void updateStatusIconAndText(int icon, String status);
 
+    void setStatusViewsVisible(boolean visible);
+
 }

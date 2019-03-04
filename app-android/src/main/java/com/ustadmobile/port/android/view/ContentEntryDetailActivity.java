@@ -31,10 +31,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
@@ -49,6 +47,10 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     HashMap<Integer,Integer> fileStatusIcon = new HashMap<>();
 
+    private TextView statusText;
+
+    private ImageView statusIcon;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,12 +61,11 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        statusText = findViewById(R.id.content_status_text);
+        statusIcon = findViewById(R.id.content_status_icon);
+
         fileStatusIcon.put(LOCALLY_AVAILABLE_ICON,R.drawable.ic_nearby_black_24px);
         fileStatusIcon.put(LOCALLY_NOT_AVAILABLE_ICON,R.drawable.ic_cloud_download_black_24dp);
-
-        new Handler().postDelayed(() ->
-                entryDetailPresenter.handleUpdateStatusIconAndText(new HashSet<>()),
-                TimeUnit.SECONDS.toMillis(1));
     }
 
 
@@ -192,25 +193,34 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
             DownloadProgressView downloadProgressView = findViewById(R.id.entry_detail_progress);
 
             if (status != null) {
+
+                String buttonText = getString(status.getDownloadStatus() == JobStatus.COMPLETE
+                        ? R.string.open : R.string.download);
+                boolean isDownloadComplete = status.getDownloadStatus() == JobStatus.COMPLETE;
+
                 if (status.getDownloadStatus() == 0 || status.getDownloadStatus() == JobStatus.COMPLETE) {
                     button.setVisibility(View.VISIBLE);
                     downloadProgressView.setVisibility(View.GONE);
 
-                    boolean isDownloadComplete = status.getDownloadStatus() == JobStatus.COMPLETE;
-                    button.setText(status.getDownloadStatus() == JobStatus.COMPLETE ? R.string.open : R.string.download);
-
-                    button.setOnClickListener(view ->
-                            entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete));
+                    button.setText(buttonText);
 
                 } else {
-                    button.setVisibility(View.GONE);
-                    downloadProgressView.setVisibility(View.VISIBLE);
+                    button.setVisibility(status.getDownloadStatus() == JobStatus.FAILED
+                            ? View.VISIBLE : View.GONE);
+
+                    downloadProgressView.setVisibility(status.getDownloadStatus() == JobStatus.FAILED
+                            ? View.GONE : View.VISIBLE);
+                    button.setText(buttonText);
                     if (status.getTotalSize() > 0) {
                         downloadProgressView.setProgress((float) status.getBytesDownloadSoFar() /
                                 (float) status.getTotalSize());
                     }
                     downloadProgressView.setStatusText("Downloading");
                 }
+
+                button.setOnClickListener(view ->
+                        entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete));
+
             } else {
                 button.setVisibility(View.VISIBLE);
                 downloadProgressView.setVisibility(View.GONE);
@@ -218,6 +228,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
                 button.setOnClickListener(view ->
                         entryDetailPresenter.handleDownloadButtonClick(false));
             }
+
 
         });
     }
@@ -229,14 +240,17 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void updateStatusIconAndText(int icon, String status) {
-        TextView statusText = findViewById(R.id.content_status_text);
-        ImageView statusIcon = findViewById(R.id.content_status_icon);
-
         statusText.setVisibility(View.VISIBLE);
         statusIcon.setVisibility(View.VISIBLE);
 
         statusIcon.setImageResource(fileStatusIcon.get(icon));
         statusText.setText(status);
+    }
+
+    @Override
+    public void setStatusViewsVisible(boolean visible) {
+        statusIcon.setVisibility(visible ? View.VISIBLE : View.GONE);
+        statusText.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
 
