@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
@@ -37,7 +36,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
     private BleMessageResponseListener responseListener;
 
-    private NetworkManagerBle managerBle;
+    protected NetworkManagerBle managerBle;
 
     /**
      * Constructor which will be used when creating new instance of a task
@@ -123,12 +122,10 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
                 long time = System.currentTimeMillis();
                 for(int entryCounter = 0 ; entryCounter < entryUidsToCheck.size(); entryCounter++){
                     long fileEntryUid = entryUidsToCheck.get(entryCounter);
-                    boolean isAvailable = statusCheckResponse.get(entryCounter) != 0;
-
                     EntryStatusResponse entryResponse = new EntryStatusResponse();
                     entryResponse.setErNodeId(networkNodeId);
                     entryResponse.setResponseTime(time);
-                    entryResponse.setAvailable(isAvailable);
+                    entryResponse.setAvailable(statusCheckResponse.get(entryCounter) != 0);
                     entryResponse.setErContentEntryFileUid(fileEntryUid);
 
                     entryFileStatusResponseList.add(entryResponse);
@@ -136,8 +133,8 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
                 }
                 Long [] rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList);
                 if(rowCount.length == entryFileStatusResponseList.size()){
-                    UstadMobileSystemImpl.l(UMLog.DEBUG,697,
-                            rowCount.length+" responses saved to the db from "+ sourceDeviceAddress);
+                    UstadMobileSystemImpl.l(UMLog.DEBUG,698, rowCount.length
+                            + " response(s) logged from "+ sourceDeviceAddress);
                 }
 
                 managerBle.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList);

@@ -53,7 +53,7 @@ public class DownloadJobItemRunner implements Runnable {
 
     private String endpointUrl;
 
-    public static final String CONTENT_ENTRY_FILE_PATH = "ContentEntryFile/";
+    static final String CONTENT_ENTRY_FILE_PATH = "ContentEntryFile/";
 
     private UmLiveData<ConnectivityStatus> statusLiveData;
 
@@ -84,7 +84,7 @@ public class DownloadJobItemRunner implements Runnable {
 
     private AtomicInteger meteredConnectionAllowed = new AtomicInteger(-1);
 
-    private int lWiFiConnectionTimeout = 60;
+    private int lWiFiConnectionTimeout = 30;
 
     private Object context;
 
@@ -94,8 +94,6 @@ public class DownloadJobItemRunner implements Runnable {
 
     private EntryStatusResponse currentContentEntryFileStatus;
 
-    private boolean isFromCloud = true;
-
     /**
      * Boolean to indicate if we are waiting for a local connection.
      */
@@ -104,6 +102,8 @@ public class DownloadJobItemRunner implements Runnable {
     private static final int BAD_PEER_FAILURE_THRESHOLD = 2;
 
     private static final int CONNECTION_TIMEOUT = 60;
+
+    private final Object downloadWiFiLock = new Object();
 
     /**
      * Timer task to keep track of the download status
@@ -256,6 +256,7 @@ public class DownloadJobItemRunner implements Runnable {
             updateItemStatus(newStatus);
             appDb.getDownloadJobDao().updateJobStatusToCompleteIfAllItemsAreCompleted(
                     downloadItem.getDjiDjUid());
+            networkManager.releaseWifiLock(this);
         }
     }
 
@@ -322,7 +323,7 @@ public class DownloadJobItemRunner implements Runnable {
                     .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
                             minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
 
-            isFromCloud = currentContentEntryFileStatus == null || currentNetworkNode == null;
+            boolean isFromCloud = currentContentEntryFileStatus == null || currentNetworkNode == null;
             DownloadJobItemHistory history = new DownloadJobItemHistory();
             history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
             history.setStartTime(System.currentTimeMillis());
@@ -420,7 +421,7 @@ public class DownloadJobItemRunner implements Runnable {
     /**
      * Try to connect to the 'normal' wifi
      *
-     * @return
+     * @return true if file should be do downloaded from the cloud otherwise false.
      */
     private boolean connectToCloudNetwork() {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 699, "Reconnecting cloud network");
@@ -431,8 +432,10 @@ public class DownloadJobItemRunner implements Runnable {
                         return false;
 
                     if(connectivityStatus.getConnectivityState()
-                            == ConnectivityStatus.STATE_UNMETERED)
+                            == ConnectivityStatus.STATE_UNMETERED){
+                        networkManager.lockWifi(downloadWiFiLock);
                         return true;
+                    }
 
                     return connectivityStatus.getConnectivityState()
                             == ConnectivityStatus.STATE_METERED
@@ -458,6 +461,7 @@ public class DownloadJobItemRunner implements Runnable {
                 " connecting local network: requesting group credentials ");
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean connectionRequestActive = new AtomicBoolean(true);
+        networkManager.lockWifi(downloadWiFiLock);
 
         networkManager.sendMessage(context,requestGroupCreation, currentNetworkNode,
                 ((sourceDeviceAddress, response, error) ->  {
@@ -480,12 +484,16 @@ public class DownloadJobItemRunner implements Runnable {
                     latch.countDown();
                 }));
         try { latch.await(20, TimeUnit.SECONDS); }
-        catch(InterruptedException e) {}
+        catch(InterruptedException ignored) {}
         connectionRequestActive.set(false);
 
 
         //There was an exception trying to communicate with the peer to get the wifi direct group network
         if(wiFiDirectGroupBle.get() == null) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 699, mkLogPrefix() +
+                    "Requested group network" +
+                    "from bluetooth address " + currentNetworkNode.getBluetoothMacAddress() +
+                    "but did not receive group network credentials");
             return false;
         }
 
@@ -498,7 +506,6 @@ public class DownloadJobItemRunner implements Runnable {
             UstadMobileSystemImpl.l(UMLog.INFO, 699, "Disconnected existing wifi network");
         }
 
-
         networkManager.connectToWiFi(wiFiDirectGroupBle.get().getSsid(),
                 wiFiDirectGroupBle.get().getPassphrase());
 
@@ -509,13 +516,12 @@ public class DownloadJobItemRunner implements Runnable {
                     if(connectivityStatus == null)
                         return false;
 
-                    if(isExpectedWifiDirectGroup(connectivityStatus))
-                        return true; //connected OK and ready to go
+                    //connected OK and ready to go
+                    return isExpectedWifiDirectGroup(connectivityStatus);
 
                     //TODO: pin down what status messages to expect to know that the attempt has failed
 //                    return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_DISCONNECTED
 //                            || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
-                    return false;
                 });
 
         waitingForLocalConnection.set(false);

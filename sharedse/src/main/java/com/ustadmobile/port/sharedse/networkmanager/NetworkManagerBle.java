@@ -146,6 +146,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     protected AtomicReference<ConnectivityStatus> connectivityStatusRef = new AtomicReference<>();
 
+    protected List<Object> wifiLockHolders = new Vector<>();
+
     public static final int DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000;
 
     /**
@@ -289,12 +291,11 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                                     node.setNetworkNodeLastUpdated(updateTime);
                                     networkNodeDao.insert(node);
                                     UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                            "Node added to the db and task created",
-                                            null);
+                                "New node added to the database , address = "
+                                        +node.getBluetoothMacAddress()
+                                        + (entryUidsToMonitor.size() > 0 ? " monitor task created"
+                                        : " no entriries to be monitored"));
 
-                                }else{
-                                    UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                            "Task couldn't be created, monitoring stopped");
                                 }
                             }
                         }
@@ -391,6 +392,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     }
 
+
     /**
      * Start monitoring availability of specific entries from peer devices
      * @param monitor Object to monitor e.g Presenter
@@ -417,7 +419,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                         " to check from entry status availability");
 
         List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
-                responseDao.findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes);
+                responseDao.findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes,
+                        System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2));
 
         //Group entryUUid by node where their status will be checked from
         LinkedHashMap<Integer,List<Long>> nodeToCheckEntryList = new LinkedHashMap<>();
@@ -442,7 +445,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
             entryStatusTaskExecutorService.execute(entryStatusTask);
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                     "Status check started for "+nodeToCheckEntryList.get(nodeId).size()
-                            + "entry(s) from "+networkNode.getBluetoothMacAddress());
+                            + " entry(s) task from "+networkNode.getBluetoothMacAddress());
         }
     }
 
@@ -596,6 +599,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     }
 
+
     public void handleLocalAvailabilityResponsesReceived(List<EntryStatusResponse> responses) {
         if(responses.isEmpty())
             return;
@@ -617,9 +621,21 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         fireLocalAvailabilityChanged();
     }
 
+    /**
+     * @return Active URLConnectionOpener
+     */
     public URLConnectionOpener getLocalConnectionOpener() {
         return localConnectionOpener;
     }
+
+    public void lockWifi(Object lockHolder) {
+        wifiLockHolders.add(lockHolder);
+    }
+
+    public void releaseWifiLock(Object lockHolder) {
+        wifiLockHolders.remove(lockHolder);
+    }
+
 
     /**
      * Clean up the network manager for shutdown
