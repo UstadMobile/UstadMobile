@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
@@ -21,6 +22,9 @@ public abstract class EntryStatusResponseDao {
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract long insert(EntryStatusResponse response);
+
+    @UmQuery("DELETE FROM EntryStatusResponse")
+    public abstract void deleteAll(UmCallback<Void> callback);
 
 
 
@@ -65,6 +69,7 @@ public abstract class EntryStatusResponseDao {
             " WHERE ContentEntryFile.contentEntryFileUid IN (:contentUids) " +
             " AND NetworkNode.nodeId IN (:nodeIds)  " +
             " AND NOT EXISTS(Select erId FROM EntryStatusResponse WHERE erContentEntryFileUid = ContentEntryFile.contentEntryFileUid" +
-            " AND erNodeId = NetworkNode.nodeId) ORDER BY NetworkNode.nodeId")
-    public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(List<Long> contentUids, List<Long> nodeIds);
+            " AND erNodeId = NetworkNode.nodeId AND responseTime > :sinceTime) ORDER BY NetworkNode.nodeId")
+    public abstract List<EntryWithoutRecentResponse> findEntriesWithoutRecentResponse(
+            List<Long> contentUids, List<Long> nodeIds, long sinceTime);
 }

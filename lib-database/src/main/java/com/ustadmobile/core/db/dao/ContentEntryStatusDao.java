@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
@@ -37,6 +38,9 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
             "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1)\n" +
             "WHERE cesUid = :contentEntryUid")
     public abstract void updateLeaf(long contentEntryUid);
+
+    @UmQuery("DELETE FROM ContentEntryStatus")
+    public abstract void deleteAll(UmCallback<Void> callback);
 
     @UmQuery("UPDATE ContentEntryStatus SET bytesDownloadSoFar = :bytesDownloadSoFar " +
             "WHERE cesUid = :contentEntryUid")

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -23,6 +24,9 @@ public abstract class DownloadJobItemHistoryDao {
 
     @UmUpdate
     public abstract void update(DownloadJobItemHistory downloadJobItemHistory);
+
+    @UmQuery("DELETE FROM DownloadJobItemHistory")
+    public abstract void deleteAll(UmCallback<Void> callback);
 
     @UmInsert
     public abstract void insertList(List<DownloadJobItemHistory> historyList);

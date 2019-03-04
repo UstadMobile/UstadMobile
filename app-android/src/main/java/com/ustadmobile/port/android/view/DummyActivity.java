@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
@@ -54,8 +55,20 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_open_about){
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.action_open_about){
             UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME,getContext());
+        }else if(itemId == R.id.action_clear_history){
+            UmAppDatabase database = UmAppDatabase.getInstance(this);
+            database.getNetworkNodeDao().deleteAll(null);
+            database.getEntryStatusResponseDao().deleteAll(null);
+            database.getDownloadJobItemHistoryDao().deleteAll(null);
+            database.getDownloadSetDao().deleteAll(null);
+            database.getDownloadSetItemDao().deleteAll(null);
+            database.getDownloadJobDao().deleteAll(null);
+            database.getDownloadJobItemDao().deleteAll(null);
+            database.getContentEntryStatusDao().deleteAll(null);
         }
 
         return super.onOptionsItemSelected(item);

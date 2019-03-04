@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -98,6 +99,9 @@ public abstract class DownloadJobItemDao {
      */
     @UmInsert
     public abstract long insert(DownloadJobItem jobRunItem);
+
+    @UmQuery("DELETE FROM DownloadJobItem")
+    public abstract void deleteAll(UmCallback<Void> callback);
 
     /**
      * Update the main status fields for the given DownloadJobitem

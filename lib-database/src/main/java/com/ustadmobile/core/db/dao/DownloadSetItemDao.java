@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -19,6 +20,9 @@ public abstract class DownloadSetItemDao {
      */
     @UmInsert
     public abstract void insert(List<DownloadSetItem> jobItems);
+
+    @UmQuery("DELETE FROM DownloadSetItem")
+    public abstract void deleteAll(UmCallback<Void> callback);
 
     /**
      * Insert a single DownloadSetItem

@@ -46,7 +46,7 @@ public abstract class NetworkNodeDao {
     public abstract void update(NetworkNode node);
 
     @UmQuery("DELETE FROM NetworkNode")
-    public abstract void deleteAll();
+    public abstract void deleteAll(UmCallback<Void> callback);
 
     @UmQuery("UPDATE NetworkNode SET numFailureCount = numFailureCount + 1 WHERE nodeId = :nodeId")
     public abstract void updateRetryCount(long nodeId, UmCallback<Void> callback);

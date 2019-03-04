@@ -28,6 +28,9 @@ public abstract class DownloadJobDao {
     @UmInsert
     public abstract long insert(DownloadJob job);
 
+    @UmQuery("DELETE FROM DownloadJob")
+    public abstract void deleteAll(UmCallback<Void> callback);
+
     /**
      * Mark the status in bulk of DownloadJob, useful for testing purposes to cancel other downloads
      *
