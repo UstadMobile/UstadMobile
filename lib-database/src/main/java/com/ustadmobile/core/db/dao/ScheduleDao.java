@@ -99,7 +99,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                 continue;
             }
 
-            //TODOne: Check if this works for Scheduling for everyday
             //TODO: Check/Test it
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
@@ -111,15 +110,20 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
                 if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_DAILY){
 
-                    //TODO: Skip if its a weekend. TODO: Add weekend feature.
-                    //Everyday- so today.
-                    nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                            startCalendar, clazz.getTimeZone(),
-                            Calendar.getInstance().get(Calendar.DAY_OF_WEEK), incToday);
-                    nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
-                    nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
-                    nextScheduleOccurence.set(Calendar.SECOND, 0);
-                    nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+                    //TODO: Associate with weekend feature in the future
+                    int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+                    if(today == Calendar.SATURDAY || today == Calendar.SUNDAY){
+                        //skip
+
+                    }else {
+                        //Everyday- so today.
+                        nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                                startCalendar, clazz.getTimeZone(),today, incToday);
+                        nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
+                        nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
+                        nextScheduleOccurence.set(Calendar.SECOND, 0);
+                        nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+                    }
 
                 }else if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
 
@@ -153,6 +157,13 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     public abstract void insertScheduledCheck(ScheduledCheck check);
 
 
+    /**
+     * Used in testing.
+     *
+     * @param days
+     * @param accountPersonUid
+     * @param db
+     */
     public void createClazzLogsForEveryDayFromDays(int days, long accountPersonUid,
                                                    UmAppDatabase db){
         for(int i=1;i<=days;i++){
@@ -175,6 +186,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     /**
      *  Creates clazzLog for today since clazzlogs are generated for the next day
      *  automatically.
+     *  Called when a new Schedule is created in AddScheduleDialogPresenter , AND
+     *  Called by ClazzLogScheduleWorker work manager to be run everyday 00:00
      */
     public void createClazzLogsForToday(long accountPersonUid, UmAppDatabase db) {
         Calendar dayCal = Calendar.getInstance();

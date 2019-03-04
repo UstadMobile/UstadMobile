@@ -96,7 +96,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
             " DESC LIMIT 1) AS personPictureUid, " +
             " (0) AS enrolled FROM Person WHERE Person.active = 1 " +
-            " AND Person.firstNames like :searchQuery OR Person.lastName like :searchQuery")
+            " AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery " )
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentBySearch(String searchQuery);
 
     @UmQuery("SELECT * FROM Person WHERE admin = 1")

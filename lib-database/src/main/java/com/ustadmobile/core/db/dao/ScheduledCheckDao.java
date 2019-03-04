@@ -28,9 +28,8 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
     public abstract void updateCheckUuid(long scheduledCheckId, String checkUuid);
 
     @UmQuery("SELECT ClazzLog.* FROM ClazzLog " +
-            "LEFT JOIN ScheduledCheck ON ClazzLog.clazzLogUid = ScheduledCheck.scClazzLogUid AND " +
-            "ScheduledCheck.checkType = :checkType " +
-            "WHERE ScheduledCheck.scClazzLogUid IS NULL")
+            " WHERE NOT EXISTS(SELECT scClazzLogUid FROM ScheduledCheck WHERE " +
+            " scClazzLogUid = ClazzLog.clazzLogUid AND ScheduledCheck.checkType = :checkType)")
     public abstract List<ClazzLog> findPendingLogsWithoutScheduledCheck(int checkType);
 
     /**
@@ -112,7 +111,8 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
                 ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER);
         List<ScheduledCheck> addThese = new ArrayList<>();
         for(ClazzLog clazzLog : logsWithoutNextDayCheck) {
-            //TODO: Advance to the next morning. Create a Calendar, add one day of ms - CHECK below
+            //TODOne: Advance to the next morning. Create a Calendar, add one day of ms -
+            // TODO: Test/CHECK below
             long checkTime = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(clazzLog.getLogDate(), 1);
             ScheduledCheck nextDayCheck = new ScheduledCheck(
                     checkTime,
