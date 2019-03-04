@@ -13,8 +13,12 @@ import static com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin.T
 /**
  * Join Entry to link a ContentEntry to a ContentEntryFile that actually contains the content. That
  * file can then be downloaded using an endpoint.
+ *
+ * Deprecated: this is being replaced with Container which support de-duplicating entries
+ *
  */
 //short code cecefj
+@Deprecated
 @UmEntity(tableId = TABLE_ID)
 public class ContentEntryContentEntryFileJoin {
 

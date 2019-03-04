@@ -6,7 +6,10 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 /**
  * This entity represents a downloaded ContentEntryFile. This entity is not synced, and represents
  * the status of a file on the local device.
+ *
+ * Deprecated: this is being replaced with Container which support de-duplicating entries
  */
+@Deprecated
 @UmEntity
 public class ContentEntryFileStatus {
 

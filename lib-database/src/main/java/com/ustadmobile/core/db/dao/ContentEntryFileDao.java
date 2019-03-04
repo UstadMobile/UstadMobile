@@ -13,8 +13,12 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
+/**
+ * Deprecated: this is being replaced with Container which support de-duplicating entries
+ */
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
+@Deprecated
 public abstract class ContentEntryFileDao implements SyncableDao<ContentEntryFile, ContentEntryFileDao> {
 
     @UmInsert

@@ -8,7 +8,12 @@ import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.util.List;
 
+
+/**
+ * Deprecated: this si being replaced with Container which support de-duplicating entries
+ */
 @UmDao
+@Deprecated
 public abstract class ContentEntryFileStatusDao implements BaseDao<ContentEntryFileStatus> {
 
     @UmQuery("SELECT * FROM ContentEntryFileStatus WHERE cefsContentEntryFileUid = :cefsContentEntryFileUid")
