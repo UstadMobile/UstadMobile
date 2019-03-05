@@ -49,6 +49,8 @@ public class DownloadJobItemRunner implements Runnable {
 
     private UmAppDatabase appDb;
 
+    private UmAppDatabase appDbRepo;
+
     private DownloadJobItemWithDownloadSetItem downloadItem;
 
     private String endpointUrl;
@@ -134,10 +136,12 @@ public class DownloadJobItemRunner implements Runnable {
      */
     public DownloadJobItemRunner(Object context,DownloadJobItemWithDownloadSetItem downloadItem,
                                  NetworkManagerBle networkManager, UmAppDatabase appDb,
+                                 UmAppDatabase appDbRepo,
                                  String endpointUrl, ConnectivityStatus initialConnectivityStatus) {
         this.networkManager = networkManager;
         this.downloadItem = downloadItem;
         this.appDb = appDb;
+        this.appDbRepo = appDbRepo;
         this.endpointUrl = endpointUrl;
         this.context = context;
         this.httpDownloadRef = new AtomicReference<>();

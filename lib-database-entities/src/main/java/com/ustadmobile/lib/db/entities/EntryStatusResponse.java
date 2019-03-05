@@ -14,7 +14,10 @@ public class EntryStatusResponse {
     @UmPrimaryKey(autoIncrement = true)
     private int erId;
 
+    @Deprecated
     private long erContentEntryFileUid;
+
+    private long erContainerUid;
 
     private long responseTime;
 
@@ -22,13 +25,15 @@ public class EntryStatusResponse {
 
     private boolean available;
 
-    public EntryStatusResponse(long erContentEntryFileUid, long responseTime, long erNodeId,
+    public EntryStatusResponse(long erContainerUid, long responseTime, long erNodeId,
                                boolean available) {
-        this.erContentEntryFileUid = erContentEntryFileUid;
+        this.erContainerUid = erContainerUid;
         this.responseTime = responseTime;
         this.erNodeId = erNodeId;
         this.available = available;
     }
+
+
 
     public EntryStatusResponse() {
 
@@ -72,5 +77,13 @@ public class EntryStatusResponse {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public long getErContainerUid() {
+        return erContainerUid;
+    }
+
+    public void setErContainerUid(long erContainerUid) {
+        this.erContainerUid = erContainerUid;
     }
 }

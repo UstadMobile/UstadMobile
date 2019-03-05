@@ -1,13 +1,16 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndex;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity(tableId = 51)
+@UmEntity(tableId = 51 , indices = {@UmIndex(
+                name="cnt_uid_to_most_recent",
+                value = {"containerContentEntryUid", "lastModified"})})
 public class Container {
 
     @UmPrimaryKey(autoGenerateSyncable = true)

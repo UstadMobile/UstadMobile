@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.lib.db.entities.Container;
-import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 
 import java.util.List;
@@ -10,20 +8,37 @@ public interface ContentEntryDetailView extends UstadView {
 
     String VIEW_NAME = "ContentEntryDetail";
 
-    void setContentInfo(ContentEntry contentEntry, String licenseType);
 
-    void setFileInfo(List<Container> filesByContentEntryUid);
+    void setContentEntryTitle(String title);
 
-    void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
+    void setContentEntryDesc(String desc);
 
-    void showProgress(float progressValue);
+    void setContentEntryLicense(String license);
 
-    void showButton(boolean isDownloaded);
+    void setContentEntryAuthor(String author);
 
-    void handleFileOpenError();
+    void setDetailsButtonEnabled(boolean enabled);
 
-    void updateStatusIconAndText(int icon, String status);
+    void setDownloadSize(long fileSize);
 
-    void setStatusViewsVisible(boolean visible);
+    void loadEntryDetailsThumbnail(String thumbnailUrl);
+
+    void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
+
+    void updateDownloadProgress(float progressValue);
+
+    void setDownloadButtonVisible(boolean visible);
+
+    void setButtonTextLabel(String textLabel);
+
+    void showFileOpenError();
+
+    void updateLocalAvailabilityViews(int icon, String status);
+
+    void setLocalAvailabilityStatusViewVisible(boolean visible);
+
+    void setTranslationLabelVisible(boolean visible);
+
+    void setFlexBoxVisible(boolean visible);
 
 }

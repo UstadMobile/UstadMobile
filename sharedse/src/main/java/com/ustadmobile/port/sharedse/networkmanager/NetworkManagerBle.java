@@ -180,7 +180,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         @Override
         public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
             return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
-                    umAppDatabase, UmAccountManager.getActiveEndpoint(mContext),
+                    umAppDatabase, UmAccountManager.getRepositoryForActiveAccount(mContext),
+                    UmAccountManager.getActiveEndpoint(mContext),
                     connectivityStatusRef.get());
         }
 

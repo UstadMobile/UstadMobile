@@ -76,14 +76,14 @@ public class DeDupeUtil {
                 container.setRemarks(fileEntry.getRemarks());
                 container.setMobileOptimized(fileEntry.isMobileOptimized());
                 container.setContainerContentEntryUid(entry.getCecefjContentEntryUid());
-                long containerId = containerDao.insert(container);
+                container.setContainerUid(containerDao.insert(container));
 
                 ContainerManager manager = new ContainerManager(container, db,
                         repository, containerDirectory.getAbsolutePath());
 
                 manager.addEntries(filemap, true);
 
-                fileJoinDao.updateContainerId(containerId, entry.getCecefjUid());
+                fileJoinDao.updateContainerId(container.getContainerUid(), entry.getCecefjUid());
 
                 if (file.getPath().endsWith(ZIP_EXT) || file.getPath().endsWith(EPUB_EXT)) {
 

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.CoreTestConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
@@ -19,6 +20,7 @@ import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONT
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -30,6 +32,7 @@ public class TestContentEntryDetailPresenter {
     private static final String REFERRER_FULL_PATH = "/DummyView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43";
     private static final String REFERRER_NO_PATH = "";
     private ContentEntryDetailView mockView;
+    private LocalAvailabilityMonitor monitor;
     private static final int flags = GO_FLAG_CLEAR_TOP | GO_FLAG_SINGLE_TOP;
 
     @Before
@@ -41,6 +44,7 @@ public class TestContentEntryDetailPresenter {
         UstadMobileSystemImpl.setMainInstance(systemImplSpy);
 
         mockView = Mockito.mock(ContentEntryDetailView.class);
+        monitor = spy(LocalAvailabilityMonitor.class);
     }
 
     @After
@@ -58,7 +62,7 @@ public class TestContentEntryDetailPresenter {
         args.put(ARG_REFERRER, REFERRER_FULL_PATH);
 
         ContentEntryDetailPresenter presenter = new ContentEntryDetailPresenter(PlatformTestUtil.getTargetContext(),
-                args, mockView);
+                args, mockView,monitor);
         presenter.onCreate(args);
 
         Hashtable argsresult = new Hashtable();
@@ -78,7 +82,7 @@ public class TestContentEntryDetailPresenter {
         args.put(ARG_REFERRER, REFERRER_NO_PATH);
 
         ContentEntryDetailPresenter presenter = new ContentEntryDetailPresenter(PlatformTestUtil.getTargetContext(),
-                args, mockView);
+                args, mockView , monitor);
         presenter.onCreate(args);
 
         args.remove(ARG_REFERRER);

@@ -12,11 +12,9 @@ import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.lib.db.entities.Container;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 
 import java.util.Hashtable;
-import java.util.List;
 
 import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
 
@@ -54,7 +52,7 @@ public class ContentEntryUtil {
         if (entryStatus.getContentEntryStatus() != null
                 && entryStatus.getContentEntryStatus().getDownloadStatus() == JobStatus.COMPLETE) {
 
-            dbRepo.getContainerDao().getMostRecentContainerForContentEntry(entryStatus.getContentEntryUid(), new UmCallback<Container>() {
+            dbRepo.getContainerDao().getMostRecentContainerForContentEntryAsync(entryStatus.getContentEntryUid(), new UmCallback<Container>() {
                 @Override
                 public void onSuccess(Container result) {
                     Hashtable args = new Hashtable();

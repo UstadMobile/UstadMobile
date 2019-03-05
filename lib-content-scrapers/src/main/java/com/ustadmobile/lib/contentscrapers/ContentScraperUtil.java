@@ -1328,7 +1328,7 @@ public class ContentScraperUtil {
     public static void deleteFile(File content) {
         if (content != null) {
             if (!content.delete()) {
-                UMLogUtil.logError("Could not delete: " + content.getPath());
+                UMLogUtil.logTrace("Could not delete: " + content.getPath());
             }
         }
     }

@@ -13,17 +13,32 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
+import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 
-public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<ContentEntryWithContentEntryStatus, ContentEntryListRecyclerViewAdapter.ViewHolder> {
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<ContentEntryWithContentEntryStatus,
+        ContentEntryListRecyclerViewAdapter.ViewHolder> {
 
     private final AdapterViewListener listener;
 
-    ContentEntryListRecyclerViewAdapter(AdapterViewListener listener) {
+    private LocalAvailabilityMonitor monitor;
+
+    private Set<Long> containerUidsToMonitor = new HashSet<>();
+
+    private static final Object monitorObject  = new Object();
+
+    ContentEntryListRecyclerViewAdapter(AdapterViewListener listener,
+                                        LocalAvailabilityMonitor monitor) {
         super(DIFF_CALLBACK);
         this.listener = listener;
+        this.monitor = monitor;
     }
 
     protected interface AdapterViewListener {
@@ -34,15 +49,30 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
 
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_content_entry, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        if(monitor != null){
+            containerUidsToMonitor.clear();
+            monitor.stopMonitoringAvailability(monitorObject);
+        }
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         ContentEntryWithContentEntryStatus entry = getItem(position);
+
+        List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
+        if(!containerUidList.isEmpty()){
+            monitor.startMonitoringAvailability(monitorObject,containerUidList);
+        }
+
         if (entry == null) {
             holder.getEntryTitle().setText("");
             holder.getEntryDescription().setText("");
@@ -122,6 +152,23 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
         }
+    }
+
+    /**
+     * @return List of container uids that can be monitored (Requires status).
+     */
+    private List<Long> getUniqueContainerUidsListTobeMonitored(){
+        List<ContentEntryWithContentEntryStatus> currentDisplayedEntryList =
+                getCurrentList() == null ? new ArrayList<>(): getCurrentList();
+        List<Long> uidsToMonitor = new ArrayList<>();
+        for(ContentEntryWithContentEntryStatus entry : currentDisplayedEntryList){
+            boolean canBeMonitored = entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE
+                    && !containerUidsToMonitor.contains(entry.getMostRecentContainer());
+            if(canBeMonitored){
+               uidsToMonitor.add(entry.getMostRecentContainer());
+            }
+        }
+        return uidsToMonitor;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

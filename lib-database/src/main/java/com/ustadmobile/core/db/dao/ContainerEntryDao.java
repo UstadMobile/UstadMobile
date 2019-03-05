@@ -44,5 +44,4 @@ public abstract class ContainerEntryDao implements BaseDao<ContainerEntry> {
             "WHERE ContentEntry.publik")
     public abstract List<ContainerEntry> findAllPublikContainerEntries();
 
-
 }
