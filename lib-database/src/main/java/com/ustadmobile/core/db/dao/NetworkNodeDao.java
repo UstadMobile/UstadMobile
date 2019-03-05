@@ -59,6 +59,7 @@ public abstract class NetworkNodeDao {
     public abstract void updateLastSeen(String bluetoothAddress,long lastUpdateTimeStamp, UmCallback<Integer> numChanged);
 
 
+    @Deprecated
     @UmQuery("SELECT NetworkNode.* FROM NetworkNode " +
             "LEFT JOIN EntryStatusResponse ON NetworkNode.nodeId = EntryStatusResponse.erNodeId " +
             "WHERE EntryStatusResponse.erContentEntryFileUid = :contentEntryFileUid " +
@@ -72,6 +73,22 @@ public abstract class NetworkNodeDao {
                                                              long minLastSeenTimestamp,
                                                              int maxFailuresInPeriod,
                                                              long maxFailuresFromTimestamp);
+
+
+    @UmQuery("SELECT NetworkNode.* FROM NetworkNode " +
+            "LEFT JOIN EntryStatusResponse ON NetworkNode.nodeId = EntryStatusResponse.erNodeId " +
+            "WHERE EntryStatusResponse.erContainerUid = :containerUid " +
+            "AND EntryStatusResponse.available " +
+            "AND NetworkNode.lastUpdateTimeStamp > :minLastSeenTimestamp " +
+            "AND (Select COUNT(*) FROM DownloadJobItemHistory " +
+            "WHERE DownloadJobItemHistory.networkNode = NetworkNode.nodeId " +
+            "AND NOT successful AND startTime > :maxFailuresFromTimestamp) < :maxFailuresInPeriod " +
+            "LIMIT 1")
+    public abstract NetworkNode findLocalActiveNodeByContainerUid(long containerUid,
+                                                                  long minLastSeenTimestamp,
+                                                                  int maxFailuresInPeriod,
+                                                                  long maxFailuresFromTimestamp);
+
 
     @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid, endpointUrl = :endpointUrl  WHERE nodeId = :nodeId")
     public abstract void updateNetworkNodeGroupSsid(long nodeId, String groupSsid, String endpointUrl);

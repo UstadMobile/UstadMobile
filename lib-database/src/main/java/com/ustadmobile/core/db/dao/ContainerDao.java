@@ -18,7 +18,12 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
-    public abstract void getMostRecentContainerForContentEntry(long contentEntry, UmCallback<Container> callback);
+    public abstract void getMostRecentContainerForContentEntryAsync(long contentEntry, UmCallback<Container> callback);
+
+    @UmQuery("Select Container.* FROM Container " +
+            "WHERE Container.containerContentEntryUid = :contentEntry " +
+            "ORDER BY Container.lastModified DESC LIMIT 1")
+    public abstract Container getMostRecentContainerForContentEntry(long contentEntry);
 
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +

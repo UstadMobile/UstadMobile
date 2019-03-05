@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntry;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
@@ -30,6 +31,5 @@ public abstract class ContainerEntryDao implements BaseDao<ContainerEntry> {
             "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = Container.containerContentEntryUid " +
             "WHERE ContentEntry.publik")
     public abstract List<ContainerEntry> findAllPublikContainerEntries();
-
 
 }
