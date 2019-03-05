@@ -49,9 +49,13 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
 
     private TextView entryDetailsAuthor;
 
+    private TextView translationAvailableLabel;
+
     private TextView downloadSize;
 
     private ImageView localAvailabilityStatusIcon;
+
+    private RecyclerView flexBox;
 
     private Button downloadButton;
 
@@ -85,6 +89,8 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         entryDetailsLicense = findViewById(R.id.entry_detail_license);
         entryDetailsAuthor = findViewById(R.id.entry_detail_author);
         downloadSize = findViewById(R.id.entry_detail_content_size);
+        translationAvailableLabel = findViewById(R.id.entry_detail_available_label);
+        flexBox = findViewById(R.id.entry_detail_flex);
 
         fileStatusIcon.put(LOCALLY_AVAILABLE_ICON,R.drawable.ic_nearby_black_24px);
         fileStatusIcon.put(LOCALLY_NOT_AVAILABLE_ICON,R.drawable.ic_cloud_download_black_24dp);
@@ -155,27 +161,16 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     }
 
     @Override
-    public void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result,
+    public void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result,
                                          long entryUuid) {
 
-        TextView label = findViewById(R.id.entry_detail_available_label);
-        RecyclerView flexBox = findViewById(R.id.entry_detail_flex);
+        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
+        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+        flexBox.setLayoutManager(flexboxLayoutManager);
 
-        if (result.size() == 0) {
-            flexBox.setVisibility(View.GONE);
-            label.setVisibility(View.GONE);
-        } else {
-            flexBox.setVisibility(View.VISIBLE);
-            label.setVisibility(View.VISIBLE);
-
-            FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
-            flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
-            flexBox.setLayoutManager(flexboxLayoutManager);
-
-            ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result,
-                    this, entryUuid);
-            flexBox.setAdapter(adapter);
-        }
+        ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result,
+                this, entryUuid);
+        flexBox.setAdapter(adapter);
 
     }
 
@@ -216,6 +211,17 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         localAvailabilityStatusIcon.setVisibility(visible ? View.VISIBLE : View.GONE);
         localAvailabilityStatusText.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
+
+    @Override
+    public void setTranslationLabelVisible(boolean visible) {
+        translationAvailableLabel.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setFlexBoxVisible(boolean visible) {
+        flexBox.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
 
     @Override
     public void selectContentEntryOfLanguage(long uid) {

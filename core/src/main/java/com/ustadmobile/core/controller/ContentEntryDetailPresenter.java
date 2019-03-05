@@ -132,7 +132,11 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
             @Override
             public void onSuccess(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
-                view.runOnUiThread(() -> view.setTranslationsAvailable(result, entryUuid));
+                view.runOnUiThread(() -> {
+                    view.setTranslationLabelVisible(!result.isEmpty());
+                    view.setFlexBoxVisible(!result.isEmpty());
+                    view.setAvailableTranslations(result, entryUuid);
+                });
             }
 
             @Override

@@ -23,7 +23,7 @@ public interface ContentEntryDetailView extends UstadView {
 
     void loadEntryDetailsThumbnail(String thumbnailUrl);
 
-    void setTranslationsAvailable(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
+    void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid);
 
     void updateDownloadProgress(float progressValue);
 
@@ -36,5 +36,9 @@ public interface ContentEntryDetailView extends UstadView {
     void updateLocalAvailabilityViews(int icon, String status);
 
     void setLocalAvailabilityStatusViewVisible(boolean visible);
+
+    void setTranslationLabelVisible(boolean visible);
+
+    void setFlexBoxVisible(boolean visible);
 
 }
