@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('libcodec2-android-release.aar'))

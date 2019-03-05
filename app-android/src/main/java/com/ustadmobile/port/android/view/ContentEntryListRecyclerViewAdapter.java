@@ -17,13 +17,14 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<ContentEntryWithContentEntryStatus,
+public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid,
         ContentEntryListRecyclerViewAdapter.ViewHolder> {
 
     private final AdapterViewListener listener;
@@ -158,10 +159,10 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
      * @return List of container uids that can be monitored (Requires status).
      */
     private List<Long> getUniqueContainerUidsListTobeMonitored(){
-        List<ContentEntryWithContentEntryStatus> currentDisplayedEntryList =
+        List<ContentEntryWithStatusAndMostRecentContainerUid> currentDisplayedEntryList =
                 getCurrentList() == null ? new ArrayList<>(): getCurrentList();
         List<Long> uidsToMonitor = new ArrayList<>();
-        for(ContentEntryWithContentEntryStatus entry : currentDisplayedEntryList){
+        for(ContentEntryWithStatusAndMostRecentContainerUid entry : currentDisplayedEntryList){
             boolean canBeMonitored = entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE
                     && !containerUidsToMonitor.contains(entry.getMostRecentContainer());
             if(canBeMonitored){
@@ -225,14 +226,16 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
         }
     }
 
-    private static final DiffUtil.ItemCallback<ContentEntryWithContentEntryStatus> DIFF_CALLBACK = new DiffUtil.ItemCallback<ContentEntryWithContentEntryStatus>() {
+    private static final DiffUtil.ItemCallback<ContentEntryWithStatusAndMostRecentContainerUid> DIFF_CALLBACK = new DiffUtil.ItemCallback<ContentEntryWithStatusAndMostRecentContainerUid>() {
         @Override
-        public boolean areItemsTheSame(@NonNull ContentEntryWithContentEntryStatus oldItem, @NonNull ContentEntryWithContentEntryStatus newItem) {
+        public boolean areItemsTheSame(@NonNull ContentEntryWithStatusAndMostRecentContainerUid oldItem,
+                                       @NonNull ContentEntryWithStatusAndMostRecentContainerUid newItem) {
             return oldItem.getContentEntryUid() == newItem.getContentEntryUid();
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull ContentEntryWithContentEntryStatus oldItem, @NonNull ContentEntryWithContentEntryStatus newItem) {
+        public boolean areContentsTheSame(@NonNull ContentEntryWithStatusAndMostRecentContainerUid oldItem,
+                                          @NonNull ContentEntryWithStatusAndMostRecentContainerUid newItem) {
             if (oldItem.getTitle() != null ? !oldItem.getTitle().equals(newItem.getTitle()) : newItem.getTitle() != null) {
                 return false;
             }

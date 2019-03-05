@@ -80,6 +80,12 @@ public class TestContainerManager {
                 Arrays.equals(UmFileUtilSe.getMd5Sum(testFiles.get(0)), UmFileUtilSe.getMd5Sum(fin)));
         Assert.assertEquals("File size is recorded correctly", testFiles.get(0).length(),
                 entry.getContainerEntryFile().getCeTotalSize());
+
+        Container updatedContainer = dbRepo.getContainerDao().findByUid(container.getContainerUid());
+        Assert.assertEquals("Container has 1 file", 1,
+                updatedContainer.getCntNumEntries());
+        Assert.assertEquals("Container 1 totalSize = size of file added",
+                testFiles.get(0).length(), updatedContainer.getFileSize());
     }
 
     @Test
@@ -108,6 +114,9 @@ public class TestContainerManager {
 
         Assert.assertNull("Manager2 does not return a container entry if given a name from manager1",
                 manager2.getEntry("testfile1.png"));
+
+        Assert.assertEquals("Cotnainer2 num entries = 2", 2,
+                dbRepo.getContainerDao().findByUid(container2.getContainerUid()).getCntNumEntries());
     }
 
 }

@@ -24,7 +24,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
@@ -142,11 +142,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public void setContentEntryProvider(UmProvider<ContentEntryWithContentEntryStatus> entryProvider) {
+    public void setContentEntryProvider(UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> entryProvider) {
         ContentEntryListRecyclerViewAdapter recyclerAdapter = new ContentEntryListRecyclerViewAdapter(this, this);
-        DataSource.Factory<Integer, ContentEntryWithContentEntryStatus> factory =
-                (DataSource.Factory<Integer, ContentEntryWithContentEntryStatus>) entryProvider.getProvider();
-        LiveData<PagedList<ContentEntryWithContentEntryStatus>> data =
+        DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid> factory =
+                (DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid>) entryProvider.getProvider();
+        LiveData<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
 

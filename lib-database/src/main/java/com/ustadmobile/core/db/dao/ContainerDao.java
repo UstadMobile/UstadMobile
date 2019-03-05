@@ -47,6 +47,12 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
     @UmQuery("SELECT * From Container WHERE Container.containerUid = :containerUid")
     public abstract void findByUid(long containerUid, UmCallback<Container> containerUmCallback);
 
+    @UmQuery("UPDATE Container " +
+            "SET cntNumEntries = (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = :containerUid)," +
+            "fileSize = (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize FROM ContainerEntry " +
+            "JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
+            "WHERE ContainerEntry.ceContainerUid = :containerUid)")
+    public abstract void updateContainerSizeAndNumEntries(long containerUid);
 
 
 

@@ -34,6 +34,7 @@ buildConfig {
             packageName = "com.ustadmobile.sharedse"
             clsName = "SharedSeTestConfig"
             buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
+            buildConfigField 'String', 'TESTDB_JDBCURL_CLIENTUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.clientdb.url']
         }
     }
 }
