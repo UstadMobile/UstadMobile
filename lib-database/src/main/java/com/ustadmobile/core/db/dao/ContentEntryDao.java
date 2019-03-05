@@ -83,7 +83,7 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     public abstract void findByUidWithContentEntryStatus(long contentEntryUid,
                                                          UmCallback<ContentEntryWithContentEntryStatus> callback);
 
-    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+    @UmQuery("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.sourceUrl = :sourceUrl")
     public abstract void findBySourceUrlWithContentEntryStatus(String sourceUrl,
