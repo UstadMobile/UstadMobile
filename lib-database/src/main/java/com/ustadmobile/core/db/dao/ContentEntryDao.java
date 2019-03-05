@@ -92,6 +92,8 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     public abstract List<ContentEntry> getPublicContentEntries();
 
     @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+            "(SELECT containerUid FROM Container " +
+            "WHERE cntContentEntryUid =  ContentEntry.contentEntryUid ORDER BY lastModified LIMIT 1) as mostRecentContainer, "+
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +

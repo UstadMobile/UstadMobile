@@ -394,4 +394,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         }
     }
+
+    public NetworkManagerBle getNetworkManagerBle() {
+        return networkManagerBle;
+    }
 }

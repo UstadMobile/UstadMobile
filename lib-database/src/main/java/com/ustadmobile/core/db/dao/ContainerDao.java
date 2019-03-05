@@ -13,7 +13,6 @@ import java.util.List;
 @UmRepository
 public abstract class ContainerDao implements SyncableDao<Container, ContainerDao> {
 
-    //public abstract List<Container> getContainersForContentEntry(long contentEntryUid);
 
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
@@ -24,6 +23,15 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     public abstract Container getMostRecentContainerForContentEntry(long contentEntry);
+
+
+    @UmQuery("SELECT recent.* " +
+            "FROM Container recent LEFT JOIN Container old " +
+            "ON (recent.containerContentEntryUid = old.containerContentEntryUid " +
+            "AND recent.lastModified < old.lastModified) " +
+            "WHERE old.containerUid IS NULL " +
+            "AND recent.containerContentEntryUid IN (:contentEntries)")
+    public abstract void findRecentContainerToBeMonitoredWithEntriesUid(List<Long> contentEntries, UmCallback<List<Container>> callback);
 
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +
