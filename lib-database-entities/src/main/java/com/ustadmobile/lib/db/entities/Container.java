@@ -35,6 +35,11 @@ public class Container {
 
     private boolean mobileOptimized;
 
+    /**
+     * Total number of entries in this container
+     */
+    private int cntNumEntries;
+
     public long getContainerUid() {
         return containerUid;
     }
@@ -114,5 +119,13 @@ public class Container {
 
     public void setCntLastModBy(int cntLastModBy) {
         this.cntLastModBy = cntLastModBy;
+    }
+
+    public int getCntNumEntries() {
+        return cntNumEntries;
+    }
+
+    public void setCntNumEntries(int cntNumEntries) {
+        this.cntNumEntries = cntNumEntries;
     }
 }
