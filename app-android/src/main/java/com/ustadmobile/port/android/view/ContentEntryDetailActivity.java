@@ -180,13 +180,12 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     }
 
     @Override
-    public void setDownloadButtonVisible(boolean isDownloaded) {
-        downloadButton.setOnClickListener(view ->
-                entryDetailPresenter.handleDownloadButtonClick(isDownloaded,
-                        entryDetailPresenter.getEntryUuid()));
-        downloadButton.setVisibility(isDownloaded ? View.GONE : View.VISIBLE);
+    public void setDownloadButtonVisible(boolean visible) {
+        downloadButton.setVisibility(visible ? View.VISIBLE : View.GONE);
 
     }
+
+
 
     @Override
     public void setButtonTextLabel(String textLabel) {
@@ -220,6 +219,23 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     @Override
     public void setFlexBoxVisible(boolean visible) {
         flexBox.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setDownloadProgressVisible(boolean visible) {
+        downloadProgress.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setDownloadProgressLabel(String progressLabel) {
+        downloadProgress.setStatusText(progressLabel);
+    }
+
+    @Override
+    public void setDownloadButtonClickableListener(boolean isDownloadComplete) {
+        downloadButton.setOnClickListener(view ->
+                entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete,
+                        entryDetailPresenter.getEntryUuid()));
     }
 
 

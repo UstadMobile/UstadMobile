@@ -163,7 +163,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                 getCurrentList() == null ? new ArrayList<>() : getCurrentList();
         List<Long> uidsToMonitor = new ArrayList<>();
         for (ContentEntryWithStatusAndMostRecentContainerUid entry : currentDisplayedEntryList) {
-            if (entry.getContentEntryStatus() != null) {
+            if (entry !=null && entry.getContentEntryStatus() != null) {
                 boolean canBeMonitored = entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE
                         && !containerUidsToMonitor.contains(entry.getMostRecentContainer());
                 if (canBeMonitored) {

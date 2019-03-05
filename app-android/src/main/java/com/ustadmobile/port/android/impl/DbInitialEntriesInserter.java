@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -56,7 +57,7 @@ public class DbInitialEntriesInserter {
             Log.d("Db", "Inserting");
             UmAppDatabase appDatabase = UmAppDatabase.getInstance(context);
 
-            if (appDatabase.getLanguageDao().totalLanguageCount() > 0) {
+            if (appDatabase.getContainerDao().findAllPublikContainers().size() > 0) {
                 return ListenableWorker.Result.success();
             }
 
@@ -91,14 +92,10 @@ public class DbInitialEntriesInserter {
                     List<ContentCategory> resultList = gson.fromJson(contentData, new TypeToken<List<ContentCategory>>() {
                     }.getType());
                     appDatabase.getContentCategoryDao().insertList(resultList);
-                } else if (entryData.startsWith("contentEntryContentEntryFileJoin.")) {
-                    List<ContentEntryContentEntryFileJoin> resultList = gson.fromJson(contentData, new TypeToken<List<ContentEntryContentEntryFileJoin>>() {
+                } else if (entryData.startsWith("container.")) {
+                    List<Container> resultList = gson.fromJson(contentData, new TypeToken<List<Container>>() {
                     }.getType());
-                    appDatabase.getContentEntryContentEntryFileJoinDao().insertList(resultList);
-                } else if (entryData.startsWith("contentEntryFile.")) {
-                    List<ContentEntryFile> resultList = gson.fromJson(contentData, new TypeToken<List<ContentEntryFile>>() {
-                    }.getType());
-                    appDatabase.getContentEntryFileDao().insertList(resultList);
+                    appDatabase.getContainerDao().insertList(resultList);
                 } else if (entryData.startsWith("contentEntryRelatedEntryJoin.")) {
                     List<ContentEntryRelatedEntryJoin> resultList = gson.fromJson(contentData, new TypeToken<List<ContentEntryRelatedEntryJoin>>() {
                     }.getType());

@@ -41,4 +41,10 @@ public interface ContentEntryDetailView extends UstadView {
 
     void setFlexBoxVisible(boolean visible);
 
+    void setDownloadProgressVisible(boolean visible);
+
+    void setDownloadProgressLabel(String progressLabel);
+
+    void setDownloadButtonClickableListener(boolean isDownloadComplete);
+
 }
