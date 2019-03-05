@@ -38,19 +38,27 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
         setContentView(R.layout.activity_login2);
         setSupportActionBar(findViewById(R.id.um_toolbar));
 
+        mErrorTextView = findViewById(R.id.activity_login_errormessage);
+
         mPresenter = new Login2Presenter(this, UMAndroidUtil.bundleToHashtable(
                 getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
         mUsernameTextView = findViewById(R.id.activity_login_username);
         mPasswordTextView = findViewById(R.id.activity_login_password);
         mLoginButton = findViewById(R.id.activity_login_button_login);
-        mErrorTextView = findViewById(R.id.activity_login_errormessage);
         mProgressBar = findViewById(R.id.progressBar);
         mProgressBar.setIndeterminate(true);
         mProgressBar.setScaleY(3f);
         findViewById(R.id.activity_login_button_login).setOnClickListener(
                 (evt) -> mPresenter.handleClickLogin(mUsernameTextView.getText().toString(),
                         mPasswordTextView.getText().toString(), mServerUrl));
+
+
+    }
+
+    @Override
+    public void updateVersionOnLogin(String version){
+        mErrorTextView.setText(version);
     }
 
     @Override

@@ -18,4 +18,6 @@ public interface Login2View extends UstadView{
 
     void forceSync();
 
+    void updateVersionOnLogin(String version);
+
 }

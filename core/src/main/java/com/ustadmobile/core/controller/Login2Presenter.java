@@ -41,6 +41,10 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
             view.setServerUrl(UstadMobileSystemImpl.getInstance().getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", getContext()));
         }
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String version = impl.getVersion(context);
+        view.updateVersionOnLogin(version);
     }
 
     public void handleClickLogin(String username, String password, String serverUrl) {
