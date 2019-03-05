@@ -114,6 +114,8 @@ public class ContainerManager {
         for (ContainerEntryWithContainerEntryFile file : newContainerEntries) {
             pathToEntryMap.put(file.getCePath(), file);
         }
+
+        dbRepo.getContainerDao().updateContainerSizeAndNumEntries(container.getContainerUid());
     }
 
     public ContainerEntryWithContainerEntryFile getEntry(String pathInContainer) {
