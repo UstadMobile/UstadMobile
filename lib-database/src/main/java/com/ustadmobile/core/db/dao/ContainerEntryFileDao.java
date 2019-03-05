@@ -16,12 +16,5 @@ public abstract class ContainerEntryFileDao implements BaseDao<ContainerEntryFil
     @UmQuery("UPDATE ContainerEntryFile SET cefPath = :path WHERE cefUid = :cefUid")
     public abstract void updateFilePath(long cefUid, String path);
 
-    @UmQuery("SELECT ContainerEntryFile.* FROM ContainerEntryFile " +
-            "LEFT JOIN ContainerEntry ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
-            "LEFT JOIN Container ON Container.containerUid = ContainerEntry.ceContainerUid " +
-            "LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = Container.containerContentEntryUid " +
-            "WHERE ContentEntry.publik")
-    public abstract List<ContainerEntryFile> findAllPublikContainerEntryFiles();
-
 
 }
