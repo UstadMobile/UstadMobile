@@ -34,8 +34,10 @@ public class ContainerEntryListResponder implements RouterNanoHTTPD.UriResponder
             if(containerUid != null) {
                 List<ContainerEntryWithMd5> entryList = appDatabase.getContainerEntryDao()
                         .findByContainerWithMd5(containerUid);
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                        "application/json", new Gson().toJson(entryList));
+                NanoHTTPD.Response.Status status = entryList.isEmpty() ?
+                        NanoHTTPD.Response.Status.NOT_FOUND : NanoHTTPD.Response.Status.OK;
+                return NanoHTTPD.newFixedLengthResponse(status, "application/json",
+                        new Gson().toJson(entryList));
             }
         }catch(NumberFormatException e) {
             UstadMobileSystemImpl.l(UMLog.WARN, 700,

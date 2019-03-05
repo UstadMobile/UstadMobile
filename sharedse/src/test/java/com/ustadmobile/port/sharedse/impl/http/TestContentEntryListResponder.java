@@ -102,5 +102,26 @@ public class TestContentEntryListResponder {
         Assert.assertEquals("List has two entries", 2, containerEntryList.size());
     }
 
+    @Test
+    public void givenContainerUidWithNoFiles_whenGetRequestMade_thenShouldReturn404NotFound() {
+        ContainerEntryListResponder responder = new ContainerEntryListResponder();
+
+        NanoHTTPD.IHTTPSession mockSession = mock(NanoHTTPD.IHTTPSession.class);
+
+        Map<String, List<String>> mockParamMap = new HashMap<>();
+        mockParamMap.put(ContainerEntryListResponder.PARAM_CONTAINER_UID,
+                Arrays.asList(String.valueOf(0)));
+        when(mockSession.getParameters()).thenReturn(mockParamMap);
+
+        RouterNanoHTTPD.UriResource mockUriResource = mock(RouterNanoHTTPD.UriResource.class);
+        when(mockUriResource.initParameter(0, UmAppDatabase.class)).thenReturn(appDatabase);
+
+        NanoHTTPD.Response response = responder.get(mockUriResource, null, mockSession);
+        Assert.assertEquals("When making a request for a container that has no entries, 404 status " +
+                "is returns", NanoHTTPD.Response.Status.NOT_FOUND, response.getStatus());
+
+    }
+
+
 
 }
