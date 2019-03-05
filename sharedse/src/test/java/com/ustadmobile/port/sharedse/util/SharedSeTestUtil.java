@@ -19,4 +19,13 @@ public class SharedSeTestUtil {
         }
     }
 
+    public static File makeTempDir(String prefix, String postfix) throws IOException{
+        File tmpDir = File.createTempFile(prefix, postfix);
+        if(tmpDir.delete() && tmpDir.mkdirs())
+            return tmpDir;
+        else
+            throw new IOException("Could not delete / create tmp dir");
+    }
+
+
 }

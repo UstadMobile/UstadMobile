@@ -30,7 +30,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestContentEntryListResponder {
+public class TestContainerEntryListResponder {
 
     private static final String RES_FOLDER = "/com/ustadmobile/port/sharedse/container/";
 
@@ -50,6 +50,7 @@ public class TestContentEntryListResponder {
                 SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
 
         appDatabase = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        appDatabase.clearAllTables();
         appRepo = appDatabase.getRepository("http://localhost/dummy/", "");
 
         File tmpDir = File.createTempFile("testresponder", "tmpdir");
