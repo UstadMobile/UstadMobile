@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
@@ -91,7 +90,7 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
             umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
 
             umAppDatabase.getContentEntryFileStatusDao().deleteByFileUids(umAppDatabase
-                    .getDownloadJobItemDao().getContentEntryFileUids(downloadSetItemUids));
+                    .getDownloadJobItemDao().getContainerUids(downloadSetItemUids));
 
             return Result.success();
         }

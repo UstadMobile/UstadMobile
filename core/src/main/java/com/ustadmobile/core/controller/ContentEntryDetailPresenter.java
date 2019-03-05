@@ -192,8 +192,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             view.runOnUiThread(() ->
                     view.updateDownloadProgress(status.getTotalSize() > 0 ?
                     (float) status.getBytesDownloadSoFar() / (float) status.getTotalSize() : 0));
-        }else{
+        }
 
+        if(!isDownloadComplete){
             long currentTimeStamp = System.currentTimeMillis();
             long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
             long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(

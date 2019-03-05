@@ -226,20 +226,20 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         List<DownloadJobItemDao.DownloadJobItemToBeCreated> itemToBeCreated =
                 umAppDatabase.getDownloadJobItemDao()
-                        .findJobItemsToBeCreatedForDownloadSet(downloadSetUid);
+                        .findJobItemsToBeCreatedDownloadSet(downloadSetUid);
 
         List<DownloadJobItem> jobItems = new ArrayList<>();
         List<ContentEntryStatus> statusList = new ArrayList<>();
 
         for(DownloadJobItemDao.DownloadJobItemToBeCreated item: itemToBeCreated){
             DownloadJobItem jobItem = new DownloadJobItem();
-            jobItem.setDjiContentEntryFileUid(item.getContentEntryFileUid());
+            jobItem.setDjiContainerUid(item.getContainerUid());
             jobItem.setDjiDjUid(downloadJobUid);
             jobItem.setDjiStatus(JobStatus.NOT_QUEUED);
             jobItem.setDownloadLength(item.getFileSize());
             jobItem.setDjiDsiUid(item.getDownloadSetItemUid());
             jobItem.setDestinationFile(UMFileUtil.joinPaths(destinationDir,
-                    String.valueOf(item.getContentEntryFileUid())));
+                    String.valueOf(item.getContainerUid())));
             jobItems.add(jobItem);
 
             statusList.add(new ContentEntryStatus(item.getContentEntryUid(),

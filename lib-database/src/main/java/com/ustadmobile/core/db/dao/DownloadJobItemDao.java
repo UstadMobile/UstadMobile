@@ -18,23 +18,15 @@ import java.util.List;
 @UmDao
 public abstract class DownloadJobItemDao {
 
-    public static class DownloadJobItemToBeCreated {
+    public static class DownloadJobItemToBeCreated{
 
         long downloadSetItemUid;
 
-        long contentEntryFileUid;
+        long containerUid;
 
         long fileSize;
 
         long contentEntryUid;
-
-        public long getFileSize() {
-            return fileSize;
-        }
-
-        public void setFileSize(long fileSize) {
-            this.fileSize = fileSize;
-        }
 
         public long getDownloadSetItemUid() {
             return downloadSetItemUid;
@@ -44,12 +36,20 @@ public abstract class DownloadJobItemDao {
             this.downloadSetItemUid = downloadSetItemUid;
         }
 
-        public long getContentEntryFileUid() {
-            return contentEntryFileUid;
+        public long getContainerUid() {
+            return containerUid;
         }
 
-        public void setContentEntryFileUid(long contentEntryFileUid) {
-            this.contentEntryFileUid = contentEntryFileUid;
+        public void setContainerUid(long containerUid) {
+            this.containerUid = containerUid;
+        }
+
+        public long getFileSize() {
+            return fileSize;
+        }
+
+        public void setFileSize(long fileSize) {
+            this.fileSize = fileSize;
         }
 
         public long getContentEntryUid() {
@@ -165,39 +165,27 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT COUNT(*) as totalDownloadItems, SUM(downloadLength) as totalSize FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
     public abstract DownloadJobInfo getDownloadJobInfoByJobUid(long djiDjUid);
 
-    @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid,\n" +
-            "ContentEntryFile.contentEntryFileUid,\n" +
-            "ContentEntryFile.fileSize, \n" +
-            "DownloadSetItem.dsiContentEntryUid AS contentEntryUid \n" +
-            "FROM DownloadSetItem\n" +
-            "LEFT JOIN ContentEntryContentEntryFileJoin ON DownloadSetItem.dsiContentEntryUid = ContentEntryContentEntryFileJoin.cecefjContentEntryUid\n" +
-            "LEFT JOIN ContentEntryFile ON ContentEntryFile.contentEntryFileUid = ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid " +
-            "AND ContentEntryFile.lastModified = \n" +
-            "\t(SELECT MAX(lastModified) FROM ContentEntryContentEntryFileJoin AS InnerCEFJ\n" +
-            "\t\tLEFT JOIN ContentEntryFile ON InnerCEFJ.cecefjContentEntryFileUid = ContentEntryFile.contentEntryFileUid\n" +
-            "\t    WHERE InnerCEFJ.cecefjContentEntryUid = DownloadSetItem.dsiContentEntryUid)\n" +
+    @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid, Container.fileSize, " +
+            "Container.containerContentEntryUid as contentEntryUid , Container.containerUid " +
+            "FROM DownloadSetItem LEFT JOIN Container " +
+            "ON Container.containerContentEntryUid = (SELECT containerContentEntryUid FROM Container " +
+            "WHERE containerContentEntryUid =  DownloadSetItem.dsiContentEntryUid ORDER BY lastModified  DESC LIMIT 1) " +
             "WHERE DownloadSetItem.dsiDsUid = :downloadSetUid")
-    public abstract List<DownloadJobItemToBeCreated> findJobItemsToBeCreatedForDownloadSet(long downloadSetUid);
-
-    @UmQuery("SELECT * FROM DownloadJobItem WHERE djiDjUid = :djiDjUid")
-    public abstract List<DownloadJobItem> findByJobUid(long djiDjUid);
+    public abstract List<DownloadJobItemToBeCreated> findJobItemsToBeCreatedDownloadSet(long downloadSetUid);
 
     @UmQuery("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
     public abstract List<String> getDestinationFiles(List<Long> djiDsiUids);
 
 
-    @UmQuery("SELECT djiContentEntryFileUid FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
-    public abstract List<Long> getContentEntryFileUids(List<Long> djiDsiUids);
-
-    @UmQuery("DELETE FROM DownloadJobItem WHERE djiDsiUid = :djiDsiUid")
-    public abstract int deleteByDownloadSetUid(long djiDsiUid);
+    @UmQuery("SELECT djiContainerUid FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
+    public abstract List<Long> getContainerUids(List<Long> djiDsiUids);
 
 
     @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
             "LEFT JOIN DownloadSet on DownloadSetItem.dsiDsUid = DownloadSet.dsUid " +
             "WHERE " +
-            " DownloadJobItem.djiContentEntryFileUid != 0 " +
+            " DownloadJobItem.djiContainerUid != 0 " +
             " AND DownloadJobItem.djiStatus >= " + JobStatus.WAITING_MIN +
             " AND DownloadJobItem.djiStatus < " + JobStatus.RUNNING_MIN +
             " AND (((SELECT connectivityState FROM ConnectivityStatus) =  " + ConnectivityStatus.STATE_UNMETERED + ") " +
