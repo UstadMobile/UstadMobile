@@ -30,7 +30,6 @@
             <option value="$PROJECT_DIR$/lib-http-testserver" />
             <option value="$PROJECT_DIR$/lib-room-annotations" />
             <option value="$PROJECT_DIR$/lib-util" />
-            <option value="$PROJECT_DIR$/libcodec2-android" />
             <option value="$PROJECT_DIR$/sharedse" />
           </set>
         </option>

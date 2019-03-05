@@ -18,7 +18,7 @@ allprojects {
         jcenter()
         google()
         maven {
-            url "http://devserver2.ustadmobile.com/repo-mvn"
+            url "https://devserver2.ustadmobile.com/repo-mvn"
         }
     }
 }
