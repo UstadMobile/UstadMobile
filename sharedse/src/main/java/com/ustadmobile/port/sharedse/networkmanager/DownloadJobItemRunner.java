@@ -298,7 +298,7 @@ public class DownloadJobItemRunner implements Runnable {
         //entryStatusLiveData.observeForever(entryStatusObserver);
 
         currentContentEntryFileStatus = appDb.getEntryStatusResponseDao()
-                .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
+                .findByContainerUid(downloadItem.getDjiContentEntryFileUid());
 
         startDownload();
     }
@@ -324,7 +324,7 @@ public class DownloadJobItemRunner implements Runnable {
 
             //TODO: if the content is available on the node we already connected to, take that one
             currentNetworkNode = appDb.getNetworkNodeDao()
-                    .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
+                    .findLocalActiveNodeByContainerUid(downloadItem.getDjiContainerUid(),
                             minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
 
             boolean isFromCloud = currentContentEntryFileStatus == null || currentNetworkNode == null;

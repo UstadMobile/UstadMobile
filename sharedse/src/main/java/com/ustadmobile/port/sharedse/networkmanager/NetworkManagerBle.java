@@ -111,19 +111,17 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     public static final String WIFI_DIRECT_GROUP_SSID_PREFIX="DIRECT-";
 
-
     private final Object knownNodesLock = new Object();
 
     private Object mContext;
 
     private boolean isStopMonitoring = false;
 
-    private ExecutorService entryStatusTaskExecutorService = Executors.newCachedThreadPool();
+    private ExecutorService entryStatusTaskExecutorService = Executors.newFixedThreadPool(5);
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
     private static final int MAX_THREAD_COUNT = 1;
-
 
     protected URLConnectionOpener localConnectionOpener;
 
@@ -136,7 +134,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * Lis of all objects that will be listening for the Wifi direct group change
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
-
 
     private LiveDataWorkQueue<DownloadJobItemWithDownloadSetItem> downloadJobItemWorkQueue;
 
@@ -430,7 +427,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
             if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
                 nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
 
-            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContentEntryFileUid());
+            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContainerUid());
         }
 
         UstadMobileSystemImpl.l(UMLog.DEBUG,694,
@@ -615,7 +612,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         for(List<EntryStatusResponse> responseList : entryStatusResponses.values()) {
             for(EntryStatusResponse response : responseList) {
                 if(response.isAvailable())
-                    locallyAvailableContainerUids.add(response.getErContentEntryFileUid());
+                    locallyAvailableContainerUids.add(response.getErContainerUid());
             }
         }
 

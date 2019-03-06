@@ -121,14 +121,10 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
                 long time = System.currentTimeMillis();
                 for(int entryCounter = 0 ; entryCounter < entryUidsToCheck.size(); entryCounter++){
-                    long fileEntryUid = entryUidsToCheck.get(entryCounter);
-                    EntryStatusResponse entryResponse = new EntryStatusResponse();
-                    entryResponse.setErNodeId(networkNodeId);
-                    entryResponse.setResponseTime(time);
-                    entryResponse.setAvailable(statusCheckResponse.get(entryCounter) != 0);
-                    entryResponse.setErContentEntryFileUid(fileEntryUid);
+                    long containerUid = entryUidsToCheck.get(entryCounter);
 
-                    entryFileStatusResponseList.add(entryResponse);
+                    entryFileStatusResponseList.add(new EntryStatusResponse(containerUid,time ,
+                            networkNodeId , statusCheckResponse.get(entryCounter) != 0));
 
                 }
                 Long [] rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList);

@@ -288,7 +288,7 @@ public class DownloadJobItemRunnerTest {
         downloadJobItem.setDownloadedSoFar(0);
         downloadJobItem.setDestinationFile(new File(downloadTmpDir,
                 String.valueOf(TEST_CONTENT_ENTRY_FILE_UID)).getAbsolutePath());
-        downloadJobItem.setDjiContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
+        downloadJobItem.setDjiContainerUid(contentEntryFile.getContentEntryFileUid());
         downloadJobItem.setDjiUid(clientDb.getDownloadJobItemDao().insert(downloadJobItem));
 
 
@@ -299,7 +299,7 @@ public class DownloadJobItemRunnerTest {
         clientDb.getConnectivityStatusDao().insert(connectivityStatus);
 
         entryStatusResponse = new EntryStatusResponse();
-        entryStatusResponse.setErContentEntryFileUid(downloadJobItem.getDjiContentEntryFileUid());
+        entryStatusResponse.setErContainerUid(downloadJobItem.getDjiContentEntryFileUid());
         entryStatusResponse.setErNodeId(networkNode.getNodeId());
         entryStatusResponse.setAvailable(true);
         entryStatusResponse.setResponseTime(System.currentTimeMillis());

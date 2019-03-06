@@ -48,6 +48,9 @@ public abstract class NetworkNodeDao {
     @UmQuery("DELETE FROM NetworkNode")
     public abstract void deleteAll(UmCallback<Void> callback);
 
+    @UmQuery("SELECT * FROM NetworkNode")
+    public abstract List<NetworkNode> getAll();
+
     @UmQuery("UPDATE NetworkNode SET numFailureCount = numFailureCount + 1 WHERE nodeId = :nodeId")
     public abstract void updateRetryCount(long nodeId, UmCallback<Void> callback);
 
@@ -57,23 +60,6 @@ public abstract class NetworkNodeDao {
 
     @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp WHERE bluetoothMacAddress = :bluetoothAddress")
     public abstract void updateLastSeen(String bluetoothAddress,long lastUpdateTimeStamp, UmCallback<Integer> numChanged);
-
-
-    @Deprecated
-    @UmQuery("SELECT NetworkNode.* FROM NetworkNode " +
-            "LEFT JOIN EntryStatusResponse ON NetworkNode.nodeId = EntryStatusResponse.erNodeId " +
-            "WHERE EntryStatusResponse.erContentEntryFileUid = :contentEntryFileUid " +
-            "AND EntryStatusResponse.available " +
-            "AND NetworkNode.lastUpdateTimeStamp > :minLastSeenTimestamp " +
-            "AND (Select COUNT(*) FROM DownloadJobItemHistory " +
-            "WHERE DownloadJobItemHistory.networkNode = NetworkNode.nodeId " +
-            "AND NOT successful AND startTime > :maxFailuresFromTimestamp) < :maxFailuresInPeriod " +
-            "LIMIT 1")
-    public abstract NetworkNode findNodeWithContentFileEntry(long contentEntryFileUid,
-                                                             long minLastSeenTimestamp,
-                                                             int maxFailuresInPeriod,
-                                                             long maxFailuresFromTimestamp);
-
 
     @UmQuery("SELECT NetworkNode.* FROM NetworkNode " +
             "LEFT JOIN EntryStatusResponse ON NetworkNode.nodeId = EntryStatusResponse.erNodeId " +
