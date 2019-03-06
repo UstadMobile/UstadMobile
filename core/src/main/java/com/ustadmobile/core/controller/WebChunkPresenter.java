@@ -24,12 +24,10 @@ import static com.ustadmobile.core.view.WebChunkView.ARG_CONTENT_ENTRY_ID;
 
 public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
 
-    private final WebChunkView viewContract;
     private String navigation;
 
     public WebChunkPresenter(Object context, Hashtable arguments, WebChunkView view) {
         super(context, arguments, view);
-        this.viewContract = view;
     }
 
     @Override
@@ -49,7 +47,7 @@ public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
             public void onSuccess(ContentEntry result) {
-                viewContract.setToolbarTitle(result.getTitle());
+                view.runOnUiThread(() -> view.setToolbarTitle(result.getTitle()));
             }
 
             @Override
@@ -98,7 +96,7 @@ public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
 
                     @Override
                     public void onFailure(Throwable exception) {
-                        viewContract.showError(exception.getMessage());
+                        view.runOnUiThread(() -> view.showError(exception.getMessage()));
                     }
                 });
     }

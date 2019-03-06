@@ -73,7 +73,9 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
                     }
                 }
 
-                view.setVideoParams(videoPath, audioPath, srtPath);
+                view.runOnUiThread(() -> {
+                    view.setVideoParams(videoPath, audioPath, srtPath);
+                });
             }
 
             @Override
