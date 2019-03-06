@@ -18,4 +18,10 @@ public abstract class ContainerEntryFileDao implements BaseDao<ContainerEntryFil
     public abstract void updateFilePath(long cefUid, String path);
 
 
+    @UmQuery("SELECT SUM(ContainerEntryFile.ceCompressedSize) FROM " +
+            "ContainerEntry " +
+            "JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
+            "WHERE ContainerEntry.ceContainerUid = :containerUid")
+    public abstract long sumContainerFileEntrySizes(long containerUid);
+
 }

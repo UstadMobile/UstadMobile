@@ -29,6 +29,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Call;
@@ -91,6 +92,8 @@ public class DownloadJobItemRunner implements Runnable {
 
     private AtomicReference<ResumableHttpDownload> httpDownloadRef;
 
+    private AtomicLong completedEntriesBytesDownloaded = new AtomicLong();
+
     private Timer statusCheckTimer = new Timer();
 
     private AtomicInteger runnerStatus = new AtomicInteger(JobStatus.NOT_QUEUED);
@@ -131,8 +134,10 @@ public class DownloadJobItemRunner implements Runnable {
         public void run() {
             ResumableHttpDownload httpDownload  = httpDownloadRef.get();
             if(httpDownload != null && runnerStatus.get() == JobStatus.RUNNING) {
+                long bytesSoFar = completedEntriesBytesDownloaded.get() +
+                        httpDownload.getDownloadedSoFar();
                 appDb.getDownloadJobItemDao().updateDownloadJobItemProgress(
-                        downloadItem.getDjiUid(), httpDownload.getDownloadedSoFar(),
+                        downloadItem.getDjiUid(), bytesSoFar,
                         httpDownload.getCurrentDownloadSpeed());
                 appDb.getDownloadJobDao().updateBytesDownloadedSoFar
                         (downloadItem.getDjiDjUid(),
@@ -416,6 +421,8 @@ public class DownloadJobItemRunner implements Runnable {
                     List<ContainerEntryWithMd5> containerEntryList =response.body();
                     Collection<ContainerEntryWithMd5> entriesToDownload = containerManager
                             .linkExistingItems(containerEntryList);//returns items we don't have yet
+                    completedEntriesBytesDownloaded.set(appDb.getContainerEntryFileDao()
+                            .sumContainerFileEntrySizes(container.getContainerUid()));
                     history.setStartTime(System.currentTimeMillis());
 
                     int downloadedCount = 0;
@@ -430,6 +437,7 @@ public class DownloadJobItemRunner implements Runnable {
                         httpDownload.setConnectionOpener(connectionOpener);
                         httpDownloadRef.set(httpDownload);
                         if(httpDownload.download()) {
+                            completedEntriesBytesDownloaded.addAndGet(destFile.length());
                             containerManager.addEntry(destFile, entry.getCePath(),
                                     ContainerManager.OPTION_COPY);
                             downloadedCount++;
