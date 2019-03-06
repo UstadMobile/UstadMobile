@@ -1,7 +1,7 @@
 package com.ustadmobile.port.rest.endpoints;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
+import com.ustadmobile.lib.db.entities.ContainerEntryFile;
 
 import java.io.File;
 import java.util.List;
@@ -9,26 +9,25 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-@Deprecated
-@Path("ContentEntryFile")
-public class ContentEntryFileDownloadResource {
 
+@Path("ContainerEntryFile")
+public class ContainerEntryFileDownloadResource {
 
-
-    @Path("{contentEntryFileUid}")
+    @Path("{containerEntryFileUid}")
     @GET
     public Response getFile(@Context HttpHeaders headers,
-                            @PathParam("contentEntryFileUid") long contentEntryFileUid) {
+                            @PathParam("containerEntryFileUid") long containerEntryFileUid) {
         UmAppDatabase db = UmAppDatabase.getInstance(null);
-        ContentEntryFileWithStatus file = db.getContentEntryFileDao().findByUidWithStatus(
-                contentEntryFileUid);
 
-        if(file == null || file.getEntryStatus() == null)
-            return Response.status(Response.Status.NOT_FOUND).build();
+        ContainerEntryFile file = db.getContainerEntryFileDao().findByUid(containerEntryFileUid);
+        if(file == null){
+            throw new WebApplicationException("File not found", 404);
+        }
 
         Response.ResponseBuilder responseBuilder;
         List<String> rangeRequestHeaders = headers.getRequestHeader("range");
@@ -39,12 +38,10 @@ public class ContentEntryFileDownloadResource {
             responseBuilder = Response.ok();
         }
 
-        responseBuilder.header("Content-Length", file.getFileSize());
-        responseBuilder.header("Content-Type", file.getMimeType());
-        responseBuilder.entity(new File(file.getEntryStatus().getFilePath()));
+        responseBuilder.header("Content-Length", file.getCeCompressedSize());
+        responseBuilder.header("Content-Type", "application/octet");
+        responseBuilder.entity(new File(file.getCefPath()));
 
         return responseBuilder.build();
     }
-
-
 }
