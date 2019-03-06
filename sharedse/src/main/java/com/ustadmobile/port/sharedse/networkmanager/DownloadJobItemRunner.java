@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -418,29 +419,31 @@ public class DownloadJobItemRunner implements Runnable {
             try {
                 appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
 
-                List<ContainerEntryWithMd5> containerEntryList = containerEntryListCall.execute()
-                        .body();
-                Collection<ContainerEntryWithMd5> entriesToDownload = containerManager
-                        .linkExistingItems(containerEntryList);//returns items we don't have yet
-                history.setStartTime(System.currentTimeMillis());
+                Response<List<ContainerEntryWithMd5>> response = containerEntryListCall.execute();
+                if(response.isSuccessful()){
+                    List<ContainerEntryWithMd5> containerEntryList =response.body();
+                    Collection<ContainerEntryWithMd5> entriesToDownload = containerManager
+                            .linkExistingItems(containerEntryList);//returns items we don't have yet
+                    history.setStartTime(System.currentTimeMillis());
 
-                int downloadedCount = 0;
-                UstadMobileSystemImpl.l(UMLog.INFO, 699, "Downloading " +
-                        entriesToDownload.size() + " ContainerEntryFiles from " + downloadEndpoint);
-                for(ContainerEntryWithMd5 entry : entriesToDownload) {
-                    File destFile = File.createTempFile("dltmpfile", ""+ entry.getCeCefUid());
-                    httpDownload = new ResumableHttpDownload(downloadEndpoint +
-                            CONTAINER_ENTRY_FILE_PATH + entry.getCeCefUid(),
-                            destFile.getAbsolutePath());
-                    httpDownload.setConnectionOpener(connectionOpener);
-                    httpDownloadRef.set(httpDownload);
-                    if(httpDownload.download()) {
-                        containerManager.addEntry(destFile, entry.getCePath(), ContainerManager.OPTION_COPY);
-                        downloadedCount++;
+                    int downloadedCount = 0;
+                    UstadMobileSystemImpl.l(UMLog.INFO, 699, "Downloading " +
+                            entriesToDownload.size() + " ContainerEntryFiles from " + downloadEndpoint);
+                    for(ContainerEntryWithMd5 entry : entriesToDownload) {
+                        File destFile = File.createTempFile("dltmpfile", ""+ entry.getCeCefUid());
+                        httpDownload = new ResumableHttpDownload(downloadEndpoint +
+                                CONTAINER_ENTRY_FILE_PATH + entry.getCeCefUid(),
+                                destFile.getAbsolutePath());
+                        httpDownload.setConnectionOpener(connectionOpener);
+                        httpDownloadRef.set(httpDownload);
+                        if(httpDownload.download()) {
+                            containerManager.addEntry(destFile, entry.getCePath(), ContainerManager.OPTION_COPY);
+                            downloadedCount++;
+                        }
                     }
-                }
 
-                downloaded = downloadedCount == entriesToDownload.size();
+                    downloaded = downloadedCount == entriesToDownload.size();
+                }
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
                         "Failed to download a file from " + endpointUrl, e);
