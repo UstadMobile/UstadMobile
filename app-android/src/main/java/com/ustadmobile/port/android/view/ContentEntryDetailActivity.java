@@ -125,6 +125,7 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     @Override
     public void setContentEntryTitle(String title) {
         entryDetailsTitle.setText(title);
+        getSupportActionBar().setTitle(title);
     }
 
     @Override
