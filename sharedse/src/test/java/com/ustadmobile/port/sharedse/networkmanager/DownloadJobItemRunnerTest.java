@@ -135,12 +135,12 @@ public class DownloadJobItemRunnerTest {
 
     @BeforeClass
     public static void setupDatabases() {
-        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
-                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
-        DriverConnectionPoolInitializer.bindDataSource("clientdb",
-                SharedSeTestConfig.TESTDB_JDBCURL_CLIENTUMAPPDATABASE, true);
-        DriverConnectionPoolInitializer.bindDataSource("peerdb",
-                SharedSeTestConfig.TESTDB_JDBCURL_PEERUMAPPDATABASE, true);
+//        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+//                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
+//        DriverConnectionPoolInitializer.bindDataSource("clientdb",
+//                SharedSeTestConfig.TESTDB_JDBCURL_CLIENTUMAPPDATABASE, true);
+//        DriverConnectionPoolInitializer.bindDataSource("peerdb",
+//                SharedSeTestConfig.TESTDB_JDBCURL_PEERUMAPPDATABASE, true);
     }
 
 

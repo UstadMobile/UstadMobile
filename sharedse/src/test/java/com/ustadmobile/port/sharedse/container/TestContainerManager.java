@@ -5,10 +5,12 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
+import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +36,7 @@ public class TestContainerManager {
 
     private List<File> testFiles = new ArrayList<>();
 
-    File tmpDir;
+    private File tmpDir;
 
     @Before
     public void setup() throws IOException {
@@ -43,9 +45,7 @@ public class TestContainerManager {
         db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         dbRepo = db.getRepository("http://localhost/dummy/", "");
 
-        tmpDir = File.createTempFile("TestContainerManager", "tmpdir");
-        tmpDir.delete();
-        tmpDir.mkdirs();
+        tmpDir = SharedSeTestUtil.makeTempDir("TestContainerManager", "tmpdir");
 
 
         for(String testFileName : testFileNames) {
@@ -60,6 +60,11 @@ public class TestContainerManager {
                 UMIOUtils.readFully(resourceIn, fout);
             }
         }
+    }
+
+    @After
+    public void tearDown() {
+        UmFileUtilSe.deleteRecursively(tmpDir);
     }
 
 
