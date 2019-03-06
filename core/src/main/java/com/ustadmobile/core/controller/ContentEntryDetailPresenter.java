@@ -96,8 +96,10 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                     view.setContentEntryAuthor(result.getAuthor());
                     view.setContentEntryTitle(result.getTitle());
                     view.setContentEntryDesc(result.getDescription());
-                    view.loadEntryDetailsThumbnail(result.getThumbnailUrl() != null
-                            && !result.getThumbnailUrl().isEmpty() ? result.getThumbnailUrl() : "");
+                    if (result.getThumbnailUrl() != null
+                            && !result.getThumbnailUrl().isEmpty()) {
+                        view.loadEntryDetailsThumbnail(result.getThumbnailUrl());
+                    }
                 });
             }
 
