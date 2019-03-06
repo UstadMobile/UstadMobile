@@ -214,22 +214,25 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
             new Thread(() -> {
 
-                containerUid = containerDao.getMostRecentContainerForContentEntry(getEntryUuid())
-                        .getContainerUid();
+                Container container = containerDao.getMostRecentContainerForContentEntry(getEntryUuid());
+                if (container != null) {
+                    containerUid = container.getContainerUid();
+                    NetworkNode localNetworkNode = networkNodeDao.findLocalActiveNodeByContainerUid(
+                            containerUid, minLastSeen, BAD_NODE_FAILURE_THRESHOLD
+                            , maxFailureFromTimeStamp);
 
-                NetworkNode localNetworkNode = networkNodeDao.findLocalActiveNodeByContainerUid(
-                        containerUid, minLastSeen, BAD_NODE_FAILURE_THRESHOLD
-                        , maxFailureFromTimeStamp);
+                    if (localNetworkNode == null && !monitorStatus.get()) {
+                        monitorStatus.set(true);
+                        monitor.startMonitoringAvailability(this,
+                                Collections.singletonList(containerUid));
+                    }
 
-                if (localNetworkNode == null && !monitorStatus.get()) {
-                    monitorStatus.set(true);
-                    monitor.startMonitoringAvailability(this,
-                            Collections.singletonList(containerUid));
+                    Set<Long> monitorSet = new HashSet<>();
+                    monitorSet.add(localNetworkNode != null ? containerUid : 0L);
+                    handleLocalAvailabilityStatus(monitorSet);
                 }
 
-                Set<Long> monitorSet = new HashSet<>();
-                monitorSet.add(localNetworkNode != null ? containerUid : 0L);
-                handleLocalAvailabilityStatus(monitorSet);
+
             }).start();
         }
 
