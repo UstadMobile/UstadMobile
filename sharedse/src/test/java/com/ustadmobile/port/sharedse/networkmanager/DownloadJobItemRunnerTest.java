@@ -381,7 +381,7 @@ public class DownloadJobItemRunnerTest {
         jobItemRunner.run();
 
         item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
-                        downloadJobItem.getDjiUid());
+                downloadJobItem.getDjiUid());
 
         assertEquals("File download task completed successfully",
                 JobStatus.COMPLETE, item.getDjiStatus());
@@ -535,7 +535,7 @@ public class DownloadJobItemRunnerTest {
         new Thread(jobItemRunner).start();
 
         WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao()
-                .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
+                        .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status >= JobStatus.RUNNING_MIN);
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));

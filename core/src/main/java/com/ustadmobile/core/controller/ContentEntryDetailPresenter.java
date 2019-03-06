@@ -37,8 +37,6 @@ import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 
 public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
 
-    //TODO: Handle monitoring availability using container
-
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
 
     private String navigation;
@@ -67,7 +65,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     private static final int TIME_INTERVAL_FROM_LAST_FAILURE = 5;
 
-    private  UstadMobileSystemImpl impl;
+    private UstadMobileSystemImpl impl;
 
     public ContentEntryDetailPresenter(Object context, Hashtable arguments,
                                        ContentEntryDetailView viewContract, LocalAvailabilityMonitor monitor) {
@@ -98,8 +96,10 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                     view.setContentEntryAuthor(result.getAuthor());
                     view.setContentEntryTitle(result.getTitle());
                     view.setContentEntryDesc(result.getDescription());
-                    view.loadEntryDetailsThumbnail(result.getThumbnailUrl() != null
-                            && !result.getThumbnailUrl().isEmpty() ? result.getThumbnailUrl() : "");
+                    if (result.getThumbnailUrl() != null
+                            && !result.getThumbnailUrl().isEmpty()) {
+                        view.loadEntryDetailsThumbnail(result.getThumbnailUrl());
+                    }
                 });
             }
 
@@ -114,7 +114,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             public void onSuccess(List<Container> result) {
                 view.runOnUiThread(() -> {
                     view.setDetailsButtonEnabled(!result.isEmpty());
-                    if(!result.isEmpty()){
+                    if (!result.isEmpty()) {
                         Container container = result.get(0);
                         view.setDownloadSize(container.getFileSize());
                     }
@@ -130,20 +130,20 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid,
                 new UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>>() {
 
-            @Override
-            public void onSuccess(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
-                view.runOnUiThread(() -> {
-                    view.setTranslationLabelVisible(!result.isEmpty());
-                    view.setFlexBoxVisible(!result.isEmpty());
-                    view.setAvailableTranslations(result, entryUuid);
+                    @Override
+                    public void onSuccess(List<ContentEntryRelatedEntryJoinWithLanguage> result) {
+                        view.runOnUiThread(() -> {
+                            view.setTranslationLabelVisible(!result.isEmpty());
+                            view.setFlexBoxVisible(!result.isEmpty());
+                            view.setAvailableTranslations(result, entryUuid);
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
                 });
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
 
         statusUmLiveData = contentEntryStatusDao.
                 findContentEntryStatusByUid(entryUuid);
@@ -152,15 +152,17 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     private String getLicenseType(ContentEntry result) {
-        switch (result.getLicenseType()){
+        switch (result.getLicenseType()) {
             case ContentEntry.LICENSE_TYPE_CC_BY:
                 return "CC BY";
             case ContentEntry.LICENSE_TYPE_CC_BY_SA:
                 return "CC BY SA";
-            case ContentEntry.LICESNE_TYPE_CC_BY_NC_SA:
-                return "CC BY NC SA";
             case ContentEntry.LICENSE_TYPE_CC_BY_SA_NC:
                 return "CC BY SA NC";
+            case ContentEntry.LICENSE_TYPE_CC_BY_NC:
+                return "CC BY NC";
+            case ContentEntry.LICESNE_TYPE_CC_BY_NC_SA:
+                return "CC BY NC SA";
             case ContentEntry.PUBLIC_DOMAIN:
                 return "Public Domain";
             case ContentEntry.ALL_RIGHTS_RESERVED:
@@ -170,13 +172,15 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
 
-    private void onEntryStatusChanged(ContentEntryStatus status){
+    private void onEntryStatusChanged(ContentEntryStatus status) {
 
         boolean isDownloadComplete = status != null &&
                 status.getDownloadStatus() == JobStatus.COMPLETE;
 
         String buttonLabel = impl.getString((status == null || !isDownloadComplete
-                ? MessageID.download: MessageID.open),getContext());
+                ? MessageID.download : MessageID.open), getContext());
+
+        String progressLabel = impl.getString(MessageID.downloading, getContext());
 
         boolean isDownloading = status != null
                 && status.getDownloadStatus() >= JobStatus.RUNNING_MIN
@@ -184,17 +188,25 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
         view.runOnUiThread(() -> {
             view.setButtonTextLabel(buttonLabel);
-            view.setDownloadButtonVisible(isDownloadComplete || !isDownloading);
+            view.setDownloadButtonVisible(!isDownloading);
+            view.setDownloadButtonClickableListener(isDownloadComplete);
+            view.setDownloadProgressVisible(isDownloading);
+            view.setDownloadProgressLabel(progressLabel);
             view.setLocalAvailabilityStatusViewVisible(isDownloading);
         });
 
-        if(isDownloading){
-            view.runOnUiThread(() ->
-                    view.updateDownloadProgress(status.getTotalSize() > 0 ?
-                    (float) status.getBytesDownloadSoFar() / (float) status.getTotalSize() : 0));
+        if (isDownloading) {
+
+            view.runOnUiThread(() -> {
+                view.setDownloadButtonVisible(false);
+                view.setDownloadProgressVisible(true);
+                view.updateDownloadProgress(status.getTotalSize() > 0 ?
+                        (float) status.getBytesDownloadSoFar() / (float) status.getTotalSize() : 0f);
+            });
+
         }
 
-        if(!isDownloadComplete){
+        if (!isDownloadComplete) {
             long currentTimeStamp = System.currentTimeMillis();
             long minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1);
             long maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
@@ -202,22 +214,25 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
             new Thread(() -> {
 
-                containerUid = containerDao.getMostRecentContainerForContentEntry(getEntryUuid())
-                        .getContainerUid();
+                Container container = containerDao.getMostRecentContainerForContentEntry(getEntryUuid());
+                if (container != null) {
+                    containerUid = container.getContainerUid();
+                    NetworkNode localNetworkNode = networkNodeDao.findLocalActiveNodeByContainerUid(
+                            containerUid, minLastSeen, BAD_NODE_FAILURE_THRESHOLD
+                            , maxFailureFromTimeStamp);
 
-                NetworkNode localNetworkNode = networkNodeDao.findLocalActiveNodeByContainerUid(
-                        containerUid, minLastSeen,BAD_NODE_FAILURE_THRESHOLD
-                        ,maxFailureFromTimeStamp);
+                    if (localNetworkNode == null && !monitorStatus.get()) {
+                        monitorStatus.set(true);
+                        monitor.startMonitoringAvailability(this,
+                                Collections.singletonList(containerUid));
+                    }
 
-                if(localNetworkNode == null && !monitorStatus.get()){
-                    monitorStatus.set(true);
-                    monitor.startMonitoringAvailability(this,
-                            Collections.singletonList(containerUid));
+                    Set<Long> monitorSet = new HashSet<>();
+                    monitorSet.add(localNetworkNode != null ? containerUid : 0L);
+                    handleLocalAvailabilityStatus(monitorSet);
                 }
 
-                Set<Long> monitorSet = new HashSet<>();
-                monitorSet.add(localNetworkNode != null ? containerUid : 0L);
-                handleLocalAvailabilityStatus(monitorSet);
+
             }).start();
         }
 
@@ -274,26 +289,26 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
             //hard coded strings because these are actually in sharedse
             args.put("contentEntryUid", String.valueOf(this.entryUuid));
-            impl.go("DownloadDialog", args, getContext());
+            view.runOnUiThread(() -> view.showDownloadOptionsDialog(args));
         }
 
     }
 
-    public void handleLocalAvailabilityStatus(Set<Long> locallyAvailableEntries){
+    public void handleLocalAvailabilityStatus(Set<Long> locallyAvailableEntries) {
         int icon = locallyAvailableEntries.contains(
                 containerUid) ? LOCALLY_AVAILABLE_ICON : LOCALLY_NOT_AVAILABLE_ICON;
 
         String status = impl.getString(
-                (icon == LOCALLY_AVAILABLE_ICON ? MessageID.download_locally_availability:
-                        MessageID.download_cloud_availability),getContext());
+                (icon == LOCALLY_AVAILABLE_ICON ? MessageID.download_locally_availability :
+                        MessageID.download_cloud_availability), getContext());
 
-        view.runOnUiThread(() -> view.updateLocalAvailabilityViews(icon,status));
+        view.runOnUiThread(() -> view.updateLocalAvailabilityViews(icon, status));
     }
 
 
     @Override
     public void onDestroy() {
-        if(monitorStatus.get()){
+        if (monitorStatus.get()) {
             monitorStatus.set(false);
             monitor.stopMonitoringAvailability(this);
         }

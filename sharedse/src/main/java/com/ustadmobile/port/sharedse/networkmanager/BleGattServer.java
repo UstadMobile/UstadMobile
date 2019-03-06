@@ -2,8 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithStatus;
+import com.ustadmobile.core.db.dao.ContainerDao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,15 +70,15 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
         byte requestType = requestReceived.getRequestType();
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
-                ContentEntryFileDao contentEntryDao =
-                        UmAppDatabase.getInstance(context).getContentEntryFileDao();
+                ContainerDao containerDao =
+                        UmAppDatabase.getInstance(context).getContainerDao();
                 List<Long> entryStatusResponse = new ArrayList<>();
 
-                for(long entryFileUid: bleMessageBytesToLong(requestReceived.getPayload())){
-                    ContentEntryFileWithStatus contentEntryFile =
-                            contentEntryDao.findByUidWithStatus(entryFileUid);
-                    entryStatusResponse.add(contentEntryFile != null
-                            && contentEntryFile.getEntryStatus() != null ? 1L: 0L);
+                for(long containerUid: bleMessageBytesToLong(requestReceived.getPayload())){
+
+                    long foundLocalContainerUid =
+                            containerDao.findLocalAvailabilityByUid(containerUid);
+                    entryStatusResponse.add(foundLocalContainerUid != 0 ? 1L: 0L);
                 }
                 return new BleMessage(ENTRY_STATUS_RESPONSE,
                         bleMessageLongToBytes(entryStatusResponse));

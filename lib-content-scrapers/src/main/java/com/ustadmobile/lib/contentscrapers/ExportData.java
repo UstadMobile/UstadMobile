@@ -112,12 +112,8 @@ public class ExportData {
         UMLogUtil.logDebug("size of langVariantList is " + langVariantList.size());
 
         List<Container> containerList = repository.getContainerDao().findAllPublikContainers();
-        List<ContainerEntry> containerEntryList = db.getContainerEntryDao().findAllPublikContainerEntries();
-        List<ContainerEntryFile> containerEntryFileList = db.getContainerEntryFileDao().findAllPublikContainerEntryFiles();
 
         UMLogUtil.logDebug("size of container is " + containerList.size());
-        UMLogUtil.logDebug("size of ContainerEntry is " + containerEntryList.size());
-        UMLogUtil.logDebug("size of ContainerEntryFile is " + containerEntryFileList.size());
 
         saveListToJson(split(contentEntryList, size), "contentEntry.", destinationDirectory);
         saveListToJson(split(parentChildJoinList, size), "contentEntryParentChildJoin.", destinationDirectory);
@@ -131,8 +127,6 @@ public class ExportData {
         saveListToJson(split(langVariantList, size), "languageVariant.", destinationDirectory);
 
         saveListToJson(split(containerList, size), "container.", destinationDirectory);
-        saveListToJson(split(containerEntryList, size), "containerEntry.", destinationDirectory);
-        saveListToJson(split(containerEntryFileList, size), "containerEntryFile.", destinationDirectory);
 
         FileUtils.writeStringToFile(new File(destination, "index.json"), gson.toJson(pathList), UTF_ENCODING);
 

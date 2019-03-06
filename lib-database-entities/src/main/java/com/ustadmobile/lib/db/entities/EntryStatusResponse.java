@@ -7,15 +7,12 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 /**
  * Represents the response from a network node to whether or not a given entry is available locally
  */
-@UmEntity(indices = {@UmIndex(name="nodeId_fileUid_unique", unique = true,
-        value = {"erContentEntryFileUid", "erNodeId"})})
+@UmEntity(indices = {@UmIndex(name="containerUid_nodeId_unique", unique = true,
+        value = {"erContainerUid", "erNodeId"})})
 public class EntryStatusResponse {
 
     @UmPrimaryKey(autoIncrement = true)
     private int erId;
-
-    @Deprecated
-    private long erContentEntryFileUid;
 
     private long erContainerUid;
 
@@ -34,10 +31,7 @@ public class EntryStatusResponse {
     }
 
 
-
-    public EntryStatusResponse() {
-
-    }
+    public EntryStatusResponse() { }
 
     public int getErId() {
         return erId;
@@ -45,14 +39,6 @@ public class EntryStatusResponse {
 
     public void setErId(int erId) {
         this.erId = erId;
-    }
-
-    public long getErContentEntryFileUid() {
-        return erContentEntryFileUid;
-    }
-
-    public void setErContentEntryFileUid(long erContentEntryFileUid) {
-        this.erContentEntryFileUid = erContentEntryFileUid;
     }
 
     public long getResponseTime() {

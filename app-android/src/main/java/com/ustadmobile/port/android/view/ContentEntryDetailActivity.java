@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,8 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -25,6 +28,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -125,6 +129,7 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     @Override
     public void setContentEntryTitle(String title) {
         entryDetailsTitle.setText(title);
+        getSupportActionBar().setTitle(title);
     }
 
     @Override
@@ -180,13 +185,12 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     }
 
     @Override
-    public void setDownloadButtonVisible(boolean isDownloaded) {
-        downloadButton.setOnClickListener(view ->
-                entryDetailPresenter.handleDownloadButtonClick(isDownloaded,
-                        entryDetailPresenter.getEntryUuid()));
-        downloadButton.setVisibility(isDownloaded ? View.GONE : View.VISIBLE);
+    public void setDownloadButtonVisible(boolean visible) {
+        downloadButton.setVisibility(visible ? View.VISIBLE : View.GONE);
 
     }
+
+
 
     @Override
     public void setButtonTextLabel(String textLabel) {
@@ -222,6 +226,32 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         flexBox.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+    @Override
+    public void setDownloadProgressVisible(boolean visible) {
+        downloadProgress.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setDownloadProgressLabel(String progressLabel) {
+        downloadProgress.setStatusText(progressLabel);
+    }
+
+    @Override
+    public void setDownloadButtonClickableListener(boolean isDownloadComplete) {
+        downloadButton.setOnClickListener(view ->
+                entryDetailPresenter.handleDownloadButtonClick(isDownloadComplete,
+                        entryDetailPresenter.getEntryUuid()));
+    }
+
+    @Override
+    public void showDownloadOptionsDialog(Hashtable args) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        runAfterGrantingPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                () -> impl.go("DownloadDialog", args, getContext()),
+                impl.getString(MessageID.download_storage_permission_title,getContext()),
+                impl.getString(MessageID.download_storage_permission_message,getContext()));
+    }
 
     @Override
     public void selectContentEntryOfLanguage(long uid) {

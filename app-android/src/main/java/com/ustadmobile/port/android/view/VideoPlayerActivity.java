@@ -67,6 +67,11 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
             setContentView(R.layout.activity_landscape_video_player_view);
         }
 
+        if (savedInstanceState != null) {
+            playbackPosition = (long) savedInstanceState.get("playback");
+            playWhenReady = (boolean) savedInstanceState.get("playWhenReady");
+            currentWindow = (int) savedInstanceState.get("currentWindow");
+        }
 
         playerView = findViewById(R.id.activity_video_player_view);
 
@@ -147,50 +152,48 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
 
     @Override
     public void setVideoParams(String videoPath, String audioPath, String srtPath) {
-        runOnUiThread(() -> {
-            if (audioPath != null && !audioPath.isEmpty()) {
+        if (audioPath != null && !audioPath.isEmpty()) {
 
-                player.addListener(new Player.DefaultEventListener() {
-                    @Override
-                    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                        if (playbackState == (Player.STATE_READY) && playWhenReady) {
-                            playbackPosition = player.getContentPosition();
-                            releaseAudio();
-                            playAudio(playbackPosition);
-                        } else {
-                            releaseAudio();
-                        }
-                        super.onPlayerStateChanged(playWhenReady, playbackState);
+            player.addListener(new Player.DefaultEventListener() {
+                @Override
+                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                    if (playbackState == (Player.STATE_READY) && playWhenReady) {
+                        playbackPosition = player.getContentPosition();
+                        releaseAudio();
+                        playAudio(playbackPosition);
+                    } else {
+                        releaseAudio();
                     }
-                });
-            }
-
-            if (videoPath != null && !videoPath.isEmpty()) {
-                Uri uri = Uri.parse(videoPath);
-                MediaSource mediaSource = buildMediaSource(uri);
-                MergingMediaSource mergedSource = null;
-
-                if (srtPath != null && !srtPath.isEmpty()) {
-
-                    Format subtitleFormat = Format.createTextSampleFormat(
-                            null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
-                            C.SELECTION_FLAG_DEFAULT, null);
-
-                    Uri subTitleUri = Uri.parse(srtPath);
-
-                    DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
-                            Util.getUserAgent(this, "ustadmobile"));
-
-                    MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
-                            createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
-
-                    mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
+                    super.onPlayerStateChanged(playWhenReady, playbackState);
                 }
+            });
+        }
 
+        if (videoPath != null && !videoPath.isEmpty()) {
+            Uri uri = Uri.parse(videoPath);
+            MediaSource mediaSource = buildMediaSource(uri);
+            MergingMediaSource mergedSource = null;
 
-                player.prepare(mergedSource == null ? mediaSource : mergedSource, false, false);
+            if (srtPath != null && !srtPath.isEmpty()) {
+
+                Format subtitleFormat = Format.createTextSampleFormat(
+                        null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
+                        C.SELECTION_FLAG_DEFAULT, null);
+
+                Uri subTitleUri = Uri.parse(srtPath);
+
+                DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
+                        Util.getUserAgent(this, "ustadmobile"));
+
+                MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
+                        createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
+
+                mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
             }
-        });
+
+
+            player.prepare(mergedSource == null ? mediaSource : mergedSource, false, false);
+        }
     }
 
 
@@ -199,6 +202,13 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
         audioPlayer.play();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putLong("playback", playbackPosition);
+        outState.putBoolean("playWhenReady", playWhenReady);
+        outState.putInt("currentWindow", currentWindow);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onResume() {

@@ -136,7 +136,7 @@ public class DownloadJobItemRunner implements Runnable {
                         httpDownload.getCurrentDownloadSpeed());
                 appDb.getDownloadJobDao().updateBytesDownloadedSoFar
                         (downloadItem.getDjiDjUid(),
-                        null);
+                                null);
             }
         }
     }
@@ -384,7 +384,7 @@ public class DownloadJobItemRunner implements Runnable {
                 downloadEndpoint = endpointUrl;
             }else{
                 if(currentNetworkNode.getGroupSsid() == null
-                    || !currentNetworkNode.getGroupSsid().equals(connectivityStatus.getWifiSsid())) {
+                        || !currentNetworkNode.getGroupSsid().equals(connectivityStatus.getWifiSsid())) {
 
                     if(!connectToLocalNodeNetwork()) {
                         //recording failure will push the node towards the bad threshold, after which
@@ -557,7 +557,7 @@ public class DownloadJobItemRunner implements Runnable {
 
         //disconnect first
         if(connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED
-            && connectivityStatus.getWifiSsid() != null) {
+                && connectivityStatus.getWifiSsid() != null) {
             WaitForLiveData.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
                     (connectivityStatus) -> connectivityStatus != null
                             && connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_UNMETERED);

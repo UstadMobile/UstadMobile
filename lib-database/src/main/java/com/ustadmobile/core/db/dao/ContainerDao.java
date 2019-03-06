@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.Container;
@@ -13,6 +14,8 @@ import java.util.List;
 @UmRepository
 public abstract class ContainerDao implements SyncableDao<Container, ContainerDao> {
 
+    @UmInsert
+    public abstract Long [] insert(List<Container> containerList);
 
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
@@ -54,6 +57,11 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
             "WHERE ContainerEntry.ceContainerUid = Container.containerUid) " +
             "WHERE containerUid = :containerUid")
     public abstract void updateContainerSizeAndNumEntries(long containerUid);
+
+    @UmQuery("SELECT Container.containerUid FROM Container " +
+            "WHERE (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries " +
+            "AND Container.containerUid = :containerUid")
+    public abstract Long findLocalAvailabilityByUid(long containerUid);
 
 
 
