@@ -10,6 +10,7 @@ import java.util.List;
 @UmDao
 public abstract class ContainerEntryFileDao implements BaseDao<ContainerEntryFile> {
 
+    //TODO: split this to handle very large queries
     @UmQuery("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
     public abstract List<ContainerEntryFile> findEntriesByMd5Sums(List<String> md5Sums);
 

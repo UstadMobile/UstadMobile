@@ -81,4 +81,7 @@ public abstract class DownloadSetDao {
     @UmQuery("UPDATE DownloadSet SET destinationDir = :destinationDir WHERE dsUid = :dsUid")
     public abstract void updateDestinationDirectory(long dsUid, String destinationDir, UmCallback<Integer> callback);
 
+    @UmQuery("SELECT destinationDir FROM DownloadSet WHERE dsUid = :dsUid")
+    public abstract String getDestinationDir(long dsUid);
+
 }

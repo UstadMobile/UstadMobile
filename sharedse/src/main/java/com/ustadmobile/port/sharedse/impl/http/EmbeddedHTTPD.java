@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -113,14 +114,20 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
 
 
-    public EmbeddedHTTPD(int portNum, Object context) {
+    public EmbeddedHTTPD(int portNum, Object context, UmAppDatabase appDatabase) {
         super(portNum);
-        //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
         addRoute("/ContentEntryFile/(.*)+", ContentEntryFileResponder.class, context);
-        //TODO: Setup 404 handling
+        addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder.class, appDatabase);
+        addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
+                ContainerEntryListResponder.class, appDatabase);
     }
+
+    public EmbeddedHTTPD(int portNum, Object context) {
+        this(portNum, context, UmAppDatabase.getInstance(context));
+    }
+
 
     @Override
     public Response serve(IHTTPSession session) {

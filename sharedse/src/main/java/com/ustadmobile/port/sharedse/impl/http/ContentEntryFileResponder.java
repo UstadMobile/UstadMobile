@@ -25,6 +25,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  * addRoute("/ContentEntryFile/(.*)+", ContentEntryFileResponder.class, context);
  *
  */
+@Deprecated
 public class ContentEntryFileResponder extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
     @Override

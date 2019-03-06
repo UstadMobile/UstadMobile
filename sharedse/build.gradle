@@ -65,6 +65,10 @@ dependencies {
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
     implementation "org.json:json:$version_json"
 
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+
 
     implementation project(":core")
     testImplementation project (':lib-database-jdbc')

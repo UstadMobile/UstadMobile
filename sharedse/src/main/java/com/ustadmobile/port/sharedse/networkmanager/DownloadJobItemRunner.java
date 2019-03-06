@@ -8,16 +8,24 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
+import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -25,6 +33,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_DISCONNECTED;
 import static com.ustadmobile.lib.db.entities.ConnectivityStatus.STATE_METERED;
@@ -55,7 +68,12 @@ public class DownloadJobItemRunner implements Runnable {
 
     private String endpointUrl;
 
+    @Deprecated
     static final String CONTENT_ENTRY_FILE_PATH = "ContentEntryFile/";
+
+    static final String CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5";
+
+    static final String CONTAINER_ENTRY_FILE_PATH = "ContainerEntryFile/";
 
     private UmLiveData<ConnectivityStatus> statusLiveData;
 
@@ -107,6 +125,10 @@ public class DownloadJobItemRunner implements Runnable {
 
     private final Object downloadWiFiLock = new Object();
 
+    private IContainerEntryListService containerEntryListService;
+
+    private String destinationDir;
+
     /**
      * Timer task to keep track of the download status
      */
@@ -146,6 +168,13 @@ public class DownloadJobItemRunner implements Runnable {
         this.context = context;
         this.httpDownloadRef = new AtomicReference<>();
         this.connectivityStatus = initialConnectivityStatus;
+
+        //Note: the url is passed as a parameter at runtime
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl("http://localhost/dummy/").build();
+        containerEntryListService = retrofit.create(IContainerEntryListService.class);
     }
 
 
@@ -297,6 +326,9 @@ public class DownloadJobItemRunner implements Runnable {
         downloadSetConnectivityData.observeForever(downloadSetConnectivityObserver);
         //entryStatusLiveData.observeForever(entryStatusObserver);
 
+        destinationDir = appDb.getDownloadSetDao().getDestinationDir(downloadItem
+                .getDownloadSetItem().getDsiDsUid());
+
         currentContentEntryFileStatus = appDb.getEntryStatusResponseDao()
                 .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
 
@@ -316,6 +348,12 @@ public class DownloadJobItemRunner implements Runnable {
         StatusCheckTask statusCheckTask = new StatusCheckTask();
         statusCheckTimer.scheduleAtFixedRate(statusCheckTask,
                 0, TimeUnit.SECONDS.toMillis(1));
+
+        Container container = appDbRepo.getContainerDao()
+                .findByUid(downloadItem.getDjiContainerUid());
+
+        ContainerManager containerManager = new ContainerManager(container, appDb, appDbRepo,
+                destinationDir);
 
         do {
             long currentTimeStamp = System.currentTimeMillis();
@@ -367,25 +405,45 @@ public class DownloadJobItemRunner implements Runnable {
                 connectionOpener = networkManager.getLocalConnectionOpener();
             }
 
-            String downloadUrl = downloadEndpoint + CONTENT_ENTRY_FILE_PATH +
-                    downloadItem.getDjiContentEntryFileUid();
-            history.setUrl(downloadUrl);//TODO: update end of download update to inc. url
+            Call<List<ContainerEntryWithMd5>> containerEntryListCall = containerEntryListService
+                    .findByContainerWithMd5(downloadEndpoint + CONTAINER_ENTRY_LIST_PATH,
+                            downloadItem.getDjiContainerUid());
+
+            history.setUrl(downloadEndpoint);
 
             UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
-                    " starting download from" + downloadUrl + " FromCloud=" + isFromCloud +
+                    " starting download from" + downloadEndpoint + " FromCloud=" + isFromCloud +
                     " Attempts remaining= " + attemptsRemaining);
 
             try {
                 appDb.getDownloadJobItemDao().incrementNumAttempts(downloadItem.getDjiUid());
-                httpDownload = new ResumableHttpDownload(downloadUrl,
-                        downloadItem.getDestinationFile());
-                httpDownload.setConnectionOpener(connectionOpener);
-                httpDownloadRef.set(httpDownload);
+
+                List<ContainerEntryWithMd5> containerEntryList = containerEntryListCall.execute()
+                        .body();
+                Collection<ContainerEntryWithMd5> entriesToDownload = containerManager
+                        .linkExistingItems(containerEntryList);//returns items we don't have yet
                 history.setStartTime(System.currentTimeMillis());
-                downloaded = httpDownload.download();
+
+                int downloadedCount = 0;
+                UstadMobileSystemImpl.l(UMLog.INFO, 699, "Downloading " +
+                        entriesToDownload.size() + " ContainerEntryFiles from " + downloadEndpoint);
+                for(ContainerEntryWithMd5 entry : entriesToDownload) {
+                    File destFile = File.createTempFile("dltmpfile", ""+ entry.getCeCefUid());
+                    httpDownload = new ResumableHttpDownload(downloadEndpoint +
+                            CONTAINER_ENTRY_FILE_PATH + entry.getCeCefUid(),
+                            destFile.getAbsolutePath());
+                    httpDownload.setConnectionOpener(connectionOpener);
+                    httpDownloadRef.set(httpDownload);
+                    if(httpDownload.download()) {
+                        containerManager.addEntry(destFile, entry.getCePath(), ContainerManager.OPTION_COPY);
+                        downloadedCount++;
+                    }
+                }
+
+                downloaded = downloadedCount == entriesToDownload.size();
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
-                        "Failed to download a file from " + downloadUrl,e);
+                        "Failed to download a file from " + endpointUrl, e);
             }
 
             if(!downloaded) {
@@ -401,10 +459,6 @@ public class DownloadJobItemRunner implements Runnable {
         httpDownloadRef.set(null);
 
         if(downloaded){
-            ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-            fileStatus.setFilePath(downloadItem.getDestinationFile());
-            fileStatus.setCefsContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
-            appDb.getContentEntryFileStatusDao().insert(fileStatus);
             appDb.getDownloadJobDao().updateBytesDownloadedSoFar(downloadItem.getDjiDjUid(),
                     null);
             appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
