@@ -67,6 +67,11 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
             setContentView(R.layout.activity_landscape_video_player_view);
         }
 
+        if (savedInstanceState != null) {
+            playbackPosition = (long) savedInstanceState.get("playback");
+            playWhenReady = (boolean) savedInstanceState.get("playWhenReady");
+            currentWindow = (int) savedInstanceState.get("currentWindow");
+        }
 
         playerView = findViewById(R.id.activity_video_player_view);
 
@@ -197,6 +202,13 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
         audioPlayer.play();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putLong("playback", playbackPosition);
+        outState.putBoolean("playWhenReady", playWhenReady);
+        outState.putInt("currentWindow", currentWindow);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onResume() {
