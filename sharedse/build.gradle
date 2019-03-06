@@ -35,6 +35,7 @@ buildConfig {
             clsName = "SharedSeTestConfig"
             buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
             buildConfigField 'String', 'TESTDB_JDBCURL_CLIENTUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.clientdb.url']
+            buildConfigField 'String', 'TESTDB_JDBCURL_PEERUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.peerdb.url']
         }
     }
 }

@@ -43,6 +43,14 @@ public class Container {
      */
     private int cntNumEntries;
 
+    public Container() {
+
+    }
+
+    public Container(ContentEntry contentEntry) {
+        this.containerContentEntryUid = contentEntry.getContentEntryUid();
+    }
+
     public long getContainerUid() {
         return containerUid;
     }

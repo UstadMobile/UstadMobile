@@ -15,8 +15,6 @@ import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntry;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
@@ -29,6 +27,7 @@ import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPDTestServer;
 import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -39,30 +38,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipFile;
 
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.Okio;
-
-import static com.ustadmobile.port.sharedse.networkmanager.DownloadJobItemRunner.CONTENT_ENTRY_FILE_PATH;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -81,12 +67,6 @@ import static org.mockito.Mockito.when;
  * @author Kileha3
  */
 public class DownloadJobItemRunnerTest {
-
-    @Deprecated
-    private MockWebServer mockCloudWebServer;
-
-    @Deprecated
-    private MockWebServer mockPeerWebServer;
 
     private EmbeddedHTTPDTestServer cloudServer;
 
@@ -108,21 +88,19 @@ public class DownloadJobItemRunnerTest {
 
     private String cloudEndPoint, localEndPoint;
 
-    @Deprecated
-    private ContentEntryFileDispatcher cloudServerDispatcher = null;
+    private File webServerTmpDir;
 
-    @Deprecated
-    private ContentEntryFileDispatcher mockPeerServerDispatcher = null;
+    private File containerTmpDir;
 
-    private static File webServerTmpDir;
+    private File webServerTmpContentEntryFile;
 
-    private static File containerTmpDir;
+    private File peerTmpContentEntryFile;
 
-    private static File webServerTmpContentEntryFile;
+    private File peerContainerFileTmpDir;
+
+    private File clientContainerDir;
 
     private static final long TEST_CONTENT_ENTRY_FILE_UID = 1000L;
-
-    private static final String ENDPOINT_FILE_POSTFIX = "/" + CONTENT_ENTRY_FILE_PATH;
 
     private static final String TEST_FILE_RESOURCE_PATH =
             "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub";
@@ -154,101 +132,33 @@ public class DownloadJobItemRunnerTest {
 
     private static final int MAX_THREAD_SLEEP_TIME = 2;
 
-    private class ContentEntryFileDispatcher extends Dispatcher {
-
-        private int numTimesToFail;
-
-        private long throttleBytesPerPeriod = 0;
-
-        private long throttlePeriod = 0L;
-
-        private TimeUnit throttleTimeUnit;
-
-        private AtomicInteger numFileGetRequests = new AtomicInteger();
-
-        @Override
-        public MockResponse dispatch(RecordedRequest request) {
-            if(request.getMethod().equals("GET")) {
-                numFileGetRequests.incrementAndGet();
-            }
-
-            if(numTimesToFail > 0) {
-                numTimesToFail--;
-                return new MockResponse().setResponseCode(500);
-            }else if (request.getPath().startsWith(ENDPOINT_FILE_POSTFIX)){
-                String contentEntryFilename = request.getPath().substring(
-                        ENDPOINT_FILE_POSTFIX.length());
-                File responseFile = new File(webServerTmpDir, contentEntryFilename);
-                try {
-                    BufferedSource fileBuffer = Okio.buffer(Okio.source(responseFile));
-                    Buffer outBuffer = new Buffer();
-                    fileBuffer.readFully(outBuffer, responseFile.length());
-
-                    MockResponse response = new MockResponse()
-                            .setBody(outBuffer)
-                            .setResponseCode(200)
-                            .addHeader("Content-Length", responseFile.length());
-
-                    if(throttleBytesPerPeriod > 0) {
-                        response.throttleBody(throttleBytesPerPeriod, throttlePeriod,
-                                throttleTimeUnit);
-                    }
-
-                    return response;
-                }catch(IOException e) {
-                    //should not happen
-                }
-
-
-            }
-            return new MockResponse().setResponseCode(404);
-        }
-
-        void setNumTimesToFail(int numTimesToFail) {
-            this.numTimesToFail = numTimesToFail;
-        }
-
-        void setThrottle(long throttleBytesPerPeriod, long throttlePeriod, TimeUnit timeUnit) {
-            this.throttleBytesPerPeriod = throttleBytesPerPeriod;
-            this.throttlePeriod = throttlePeriod;
-            this.throttleTimeUnit = timeUnit;
-        }
-
-        int getNumFileGetRequests() {
-            return numFileGetRequests.get();
-        }
-
-    }
-
-
 
     @BeforeClass
-    public static void setupTmpDir() throws IOException{
+    public static void setupDatabases() {
         DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
                 SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         DriverConnectionPoolInitializer.bindDataSource("clientdb",
                 SharedSeTestConfig.TESTDB_JDBCURL_CLIENTUMAPPDATABASE, true);
-        webServerTmpDir = File.createTempFile("downloadjobitemrunner", "tmpdir");
-        if(!(webServerTmpDir.delete() && webServerTmpDir.mkdirs())) {
-            throw new IOException("Could not make temporary directory");
-        }
-
-        InputStream resIn = DownloadJobItemRunnerTest.class.getResourceAsStream(
-                TEST_FILE_RESOURCE_PATH);
-        webServerTmpContentEntryFile = new File(webServerTmpDir,
-                ""+ TEST_CONTENT_ENTRY_FILE_UID);
-        FileOutputStream fout = new FileOutputStream(webServerTmpContentEntryFile);
-        UMIOUtils.readFully(resIn, fout);
-        resIn.close();
-        fout.close();
-
-        containerTmpDir = SharedSeTestUtil.makeTempDir("downloadjobitemrunnertest", "tmpdir");
+        DriverConnectionPoolInitializer.bindDataSource("peerdb",
+                SharedSeTestConfig.TESTDB_JDBCURL_PEERUMAPPDATABASE, true);
     }
+
 
 
     @Before
     public void setup() throws IOException {
         context = PlatformTestUtil.getTargetContext();
+
+        webServerTmpDir = SharedSeTestUtil.makeTempDir("webServerTmpDir",
+                ""+System.currentTimeMillis());
+        webServerTmpContentEntryFile = new File(webServerTmpDir, ""+ TEST_CONTENT_ENTRY_FILE_UID);
+
+        SharedSeTestUtil.extractResourceToFile(TEST_FILE_RESOURCE_PATH,
+                webServerTmpContentEntryFile);
+
+        containerTmpDir = SharedSeTestUtil.makeTempDir("containerTmpDir",
+                "" + System.currentTimeMillis());
+
         mockedNetworkManager = spy(NetworkManagerBle.class);
 
         mockedNetworkManagerBleWorking.set(true);
@@ -266,13 +176,11 @@ public class DownloadJobItemRunnerTest {
         groupBle =  new WiFiDirectGroupBle("DIRECT-PeerNode","networkPass123");
 
 
-        File downloadTmpDir = File.createTempFile("DownloadJobItemRunnerTest", "dldir");
-        if(!(downloadTmpDir.delete() && downloadTmpDir.mkdirs())) {
-            throw new IOException("Failed to create tmp directory" + downloadTmpDir);
-        }
+        clientContainerDir = SharedSeTestUtil.makeTempDir("clientContainerDir", "" + System.currentTimeMillis());
 
         UmAppDatabase.getInstance(context).clearAllTables();
         clientDb = UmAppDatabase.getInstance(context, "clientdb");
+        clientDb.clearAllTables();
         clientRepo = clientDb.getRepository("http://localhost/dummy/", "");
         networkNode = new NetworkNode();
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
@@ -280,39 +188,30 @@ public class DownloadJobItemRunnerTest {
         networkNode.setNodeId(clientDb.getNetworkNodeDao().insert(networkNode));
 
         serverDb = UmAppDatabase.getInstance(context);
+        serverDb.clearAllTables();
         serverRepo = serverDb.getRepository("http://localhost/dummy/", "");
 
 
-
-
-        //To be removed
         ContentEntry contentEntry = new ContentEntry();
         contentEntry.setTitle("Test entry");
         contentEntry.setContentEntryUid(clientDb.getContentEntryDao().insert(contentEntry));
 
-        ContentEntryFile contentEntryFile = new ContentEntryFile();
-        contentEntryFile.setContentEntryFileUid(0);
-        contentEntryFile.setFileSize(webServerTmpContentEntryFile.length());
-        contentEntryFile.setMimeType("application/epub+zip");
-        clientDb.getContentEntryFileDao().insert(contentEntryFile);
-
-        clientDb.getContentEntryContentEntryFileJoinDao().insert(
-                new ContentEntryContentEntryFileJoin(contentEntry, contentEntryFile));
-        //end to be removed
-
-        container = new Container();
+        container = new Container(contentEntry);
         container.setContainerUid(serverDb.getContainerDao().insert(container));
         containerManager = new ContainerManager(container, serverDb, serverRepo,
                 webServerTmpDir.getAbsolutePath());
         ZipFile zipFile = new ZipFile(webServerTmpContentEntryFile);
-        containerManager.addEntriesFromZip(zipFile);
+        containerManager.addEntriesFromZip(zipFile, ContainerManager.OPTION_COPY |
+                ContainerManager.OPTION_UPDATE_TOTALS);
+        zipFile.close();
+        zipFile = null;
 
         //add the container itself to the client database (would normally happen via sync/preload)
         clientRepo.getContainerDao().insert(container);
 
 
         DownloadSet downloadSet = new DownloadSet();
-        downloadSet.setDestinationDir(downloadTmpDir.getAbsolutePath());
+        downloadSet.setDestinationDir(clientContainerDir.getAbsolutePath());
         downloadSet.setDsRootContentEntryUid(0L);
         downloadSet.setDsUid((int) clientDb.getDownloadSetDao().insert(downloadSet));
 
@@ -329,7 +228,7 @@ public class DownloadJobItemRunnerTest {
                 container);
         downloadJobItem.setDjiStatus(JobStatus.QUEUED);
         downloadJobItem.setDownloadedSoFar(0);
-        downloadJobItem.setDestinationFile(new File(downloadTmpDir,
+        downloadJobItem.setDestinationFile(new File(clientContainerDir,
                 String.valueOf(TEST_CONTENT_ENTRY_FILE_UID)).getAbsolutePath());
         downloadJobItem.setDjiUid(clientDb.getDownloadJobItemDao().insert(downloadJobItem));
 
@@ -351,16 +250,27 @@ public class DownloadJobItemRunnerTest {
                 serverDb);
         cloudServer.start();
 
-        cloudServerDispatcher =  new ContentEntryFileDispatcher();
-        mockCloudWebServer = new MockWebServer();
-        mockCloudWebServer.setDispatcher(cloudServerDispatcher);
-        mockCloudWebServer.start();
-        //cloudEndPoint = mockCloudWebServer.url("/").toString();
         cloudEndPoint = cloudServer.getLocalURL();
 
-        //Server itself will only start after request to connect to peer
-        mockPeerServerDispatcher = new ContentEntryFileDispatcher();
-        mockPeerWebServer = null;
+        UmAppDatabase peerDb = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext(),
+                "peerdb");
+        peerDb.clearAllTables();
+        UmAppDatabase peerRepo = peerDb.getRepository("http://localhost/dummy/", "");
+        peerRepo.getContainerDao().insert(container);
+        peerContainerFileTmpDir = SharedSeTestUtil.makeTempDir("peerContainerFileTmpDir",
+                "" + System.currentTimeMillis());
+        ContainerManager peerContainerManager = new ContainerManager(container,
+                peerDb, peerRepo, peerContainerFileTmpDir.getAbsolutePath());
+
+        peerTmpContentEntryFile = File.createTempFile("peerTmpContentEntryFile",
+                "" + System.currentTimeMillis() + ".zip");
+        SharedSeTestUtil.extractResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile);
+        ZipFile peerZipFile = new ZipFile(peerTmpContentEntryFile);
+        peerContainerManager.addEntriesFromZip(peerZipFile, ContainerManager.OPTION_COPY);
+        peerZipFile.close();
+
+        peerServer = new EmbeddedHTTPDTestServer(0, PlatformTestUtil.getTargetContext(),
+                peerDb);
 
 
         when(mockedNetworkManager.makeEntryStatusTask(any(Object.class),
@@ -414,26 +324,23 @@ public class DownloadJobItemRunnerTest {
 
     @After
     public void tearDown() throws IOException{
-        if(mockCloudWebServer != null){
-            mockCloudWebServer.shutdown();
-        }
-        if(mockPeerWebServer != null){
-            mockPeerWebServer.shutdown();
-        }
-
         if(cloudServer != null)
             cloudServer.stop();
 
         if(peerServer != null)
             peerServer.stop();
+
+        UmFileUtilSe.deleteRecursively(peerContainerFileTmpDir);
+        UmFileUtilSe.deleteRecursively(clientContainerDir);
+        UmFileUtilSe.deleteRecursively(webServerTmpDir);
+        UmFileUtilSe.deleteRecursively(containerTmpDir);
+        peerTmpContentEntryFile.delete();
     }
 
     private void startPeerWebServer() throws IOException {
-        if(mockPeerWebServer == null){
-            mockPeerWebServer = new MockWebServer();
-            mockPeerWebServer.setDispatcher(mockPeerServerDispatcher);
-            mockPeerWebServer.start();
-            localEndPoint = mockPeerWebServer.url("/").toString();
+        if(!peerServer.isAlive()) {
+            peerServer.start();
+            localEndPoint = peerServer.getLocalHttpUrl();
         }
     }
 
@@ -684,8 +591,9 @@ public class DownloadJobItemRunnerTest {
     }
 
 
-    //@Test
-    public void givenDownloadLocallyAvailable_whenDownloadStarted_shouldDownloadFromLocalNode() {
+    @Test
+    public void givenDownloadLocallyAvailable_whenDownloadStarted_shouldDownloadFromLocalNode()
+            throws IOException{
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
 
@@ -699,23 +607,22 @@ public class DownloadJobItemRunnerTest {
         jobItemRunner.run();
 
         assertTrue("File downloaded from peer web server",
-                mockPeerWebServer.getRequestCount() >=1);
+                peerServer.getRequestCount() >=1);
         assertEquals("Cloud mock server received no requests", 0 ,
-                mockCloudWebServer.getRequestCount());
+                cloudServer.getRequestCount());
 
         item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 downloadJobItem.getDjiUid());
-        assertEquals("File downloaded successfully",JobStatus.COMPLETE,
-                item.getDjiStatus());
 
-
+        assertContainersHaveSameContent(container.getContainerUid(), container.getContainerUid(),
+                serverDb, serverRepo, clientDb, clientRepo);
     }
 
     //TODO: After basic cases are running
     public void givenDownloadStartedWithoutFileAvailable_whenDownloadBecomesLocallyAvailable_shouldSwitchToDownloadLocally()
             throws InterruptedException {
 
-        cloudServerDispatcher.setThrottle(512, 1,TimeUnit.SECONDS);
+        cloudServer.setThrottle(512);
 
         entryStatusResponse.setAvailable(false);
         entryStatusResponse.setErId((int)
@@ -747,8 +654,8 @@ public class DownloadJobItemRunnerTest {
         latch.await(100, TimeUnit.SECONDS);
 
         assertTrue("File downloaded from peer web server",
-                mockPeerWebServer.getRequestCount() >= 1
-                        && mockCloudWebServer.getRequestCount() >= 1);
+                peerServer.getRequestCount() >= 1
+                        && cloudServer.getRequestCount() >= 1);
 
 
         item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
@@ -767,8 +674,9 @@ public class DownloadJobItemRunnerTest {
 
     }
 
-    //@Test
-    public void givenDownloadLocallyAvailableFromBadNode_whenDownloadStarted_shouldDownloadFromCloud() {
+    @Test
+    public void givenDownloadLocallyAvailableFromBadNode_whenDownloadStarted_shouldDownloadFromCloud()
+            throws IOException{
 
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
@@ -798,17 +706,15 @@ public class DownloadJobItemRunnerTest {
                 status -> status == JobStatus.COMPLETE);
 
         assertTrue("File downloaded from cloud web server",
-                mockCloudWebServer.getRequestCount() >=1);
-        assertNull("Mock webserver for peer has not been started", mockPeerWebServer);
+                cloudServer.getRequestCount() >=1);
+        assertFalse("Mock webserver for peer has not been started", peerServer.isAlive());
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
-                downloadJobItem.getDjiUid());
-        assertEquals("File downloaded successfully from cloud",item.getDjiStatus(),
-                JobStatus.COMPLETE);
+        assertContainersHaveSameContent(container.getContainerUid(), container.getContainerUid(),
+                serverDb, serverRepo, clientDb, clientRepo);
     }
 
 
-    //@Test
+    @Test
     public void givenAlreadyConnectedToPeerWithFile_whenDownloadStarts_shouldDownloadFromSamePeerWithoutReconnecting()
             throws IOException{
 
@@ -818,7 +724,7 @@ public class DownloadJobItemRunnerTest {
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
 
         networkNode.setGroupSsid("DIRECT-group");
-        networkNode.setEndpointUrl(mockPeerWebServer.url("/").toString());
+        networkNode.setEndpointUrl(peerServer.getLocalURL());
         clientDb.getNetworkNodeDao().update(networkNode);
 
         connectivityStatus.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
@@ -837,14 +743,17 @@ public class DownloadJobItemRunnerTest {
         jobItemRunner.run();
 
         assertTrue("File downloaded from peer web server",
-                mockPeerWebServer.getRequestCount() >=1);
+                peerServer.getRequestCount() >=1);
         assertEquals("Cloud mock server received no requests", 0 ,
-                mockCloudWebServer.getRequestCount());
+                cloudServer.getRequestCount());
 
         item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 downloadJobItem.getDjiUid());
         assertEquals("File downloaded successfully",JobStatus.COMPLETE,
                 item.getDjiStatus());
+
+        assertContainersHaveSameContent(container.getContainerUid(), container.getContainerUid(),
+                serverDb, serverRepo, clientDb, clientRepo);
 
         //should not have attempted to change the connection
         verify(mockedNetworkManager, times(0)).connectToWiFi(any(), any());
@@ -853,8 +762,9 @@ public class DownloadJobItemRunnerTest {
     }
 
 
-    //@Test
-    public void givenDownloadLocallyAvailable_whenAnErrorOccursSendingConnectBleMessage_shouldRetryAndDownloadFromCloud(){
+    @Test
+    public void givenDownloadLocallyAvailable_whenAnErrorOccursSendingConnectBleMessage_shouldRetryAndDownloadFromCloud()
+            throws IOException{
 
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
@@ -876,12 +786,14 @@ public class DownloadJobItemRunnerTest {
         assertEquals("File download task completed successfully",
                 JobStatus.COMPLETE, item.getDjiStatus());
 
-        assertEquals("Same file size", webServerTmpContentEntryFile.length(),
-                new File(item.getDestinationFile()).length());
+        assertContainersHaveSameContent(container.getContainerUid(), container.getContainerUid(),
+                serverDb, serverRepo, clientDb, clientRepo);
 
-        assertTrue("File downloaded from cloud web server",
-                mockCloudWebServer.getRequestCount() == 1
-                        && mockPeerWebServer.getRequestCount() == 0);
+        assertEquals("Mock peer server received no requests", 0,
+                peerServer.getRequestCount());
+        assertTrue("Cloud server received requests",
+                cloudServer.getRequestCount() > 0);
+
 
         //Verify that group request credentials were requested
         verify(mockedNetworkManager, atLeast(2))
@@ -889,8 +801,9 @@ public class DownloadJobItemRunnerTest {
 
     }
 
-    //@Test
-    public void givenDownloadLocallyAvailable_whenBleConnectMessageIsReturnedButWifiDoesNotConnect_shouldRetryAndDownloadFromCloud() {
+    @Test
+    public void givenDownloadLocallyAvailable_whenBleConnectMessageIsReturnedButWifiDoesNotConnect_shouldRetryAndDownloadFromCloud()
+            throws IOException{
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
 
@@ -908,25 +821,27 @@ public class DownloadJobItemRunnerTest {
 
         item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
                 downloadJobItem.getDjiUid());
-
         assertEquals("File download task completed successfully",
                 JobStatus.COMPLETE, item.getDjiStatus());
 
-        assertEquals("Same file size", webServerTmpContentEntryFile.length(),
-                new File(item.getDestinationFile()).length());
+        assertContainersHaveSameContent(container.getContainerUid(), container.getContainerUid(),
+                serverDb, serverRepo, clientDb, clientRepo);
 
-        assertTrue("File downloaded from cloud web server",
-                mockCloudWebServer.getRequestCount() == 1
-                        && mockPeerWebServer.getRequestCount() == 0);
+
+
+        assertEquals("Mock peer server received no requests", 0,
+                peerServer.getRequestCount());
+        assertTrue("Cloud server received requests",
+                cloudServer.getRequestCount() > 0);
 
         //verify that peer tried to connect to the WiFi
         verify(mockedNetworkManager, atLeast(2)).connectToWiFi(any(),any());
     }
 
-    //@Test
+    @Test
     public void givenDownloadLocallyAvailable_whenConnectsButDownloadFails_shouldDownloadFromCloud() {
 
-        mockPeerServerDispatcher.setNumTimesToFail(4);
+        peerServer.setNumTimesToFail(4);
 
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
@@ -947,9 +862,11 @@ public class DownloadJobItemRunnerTest {
                 status -> status != null && status == JobStatus.COMPLETE);
 
 
-        assertTrue("File downloaded from cloud web server after failure when try " +
-                        "to download from peer",
-                mockCloudWebServer.getRequestCount() >=1 && mockPeerWebServer.getRequestCount()>=1);
+        assertTrue("Cloud server received requests",
+                cloudServer.getRequestCount() > 0);
+        assertTrue("Peer server received requests",
+                peerServer.getRequestCount() > 0);
+
         verify(mockedNetworkManager).restoreWifi();
 
         item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(

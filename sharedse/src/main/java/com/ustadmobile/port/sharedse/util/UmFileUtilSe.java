@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.util;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.File;
@@ -40,6 +42,31 @@ public class UmFileUtilSe {
         }
         return canWriteFiles;
     }
+
+    public static boolean deleteRecursively(File file){
+        boolean allDeleted = true;
+        for(File childFile : file.listFiles()){
+            if(childFile.isDirectory()) {
+                allDeleted &= deleteRecursively(childFile);
+            }else if(!childFile.delete()) {
+                UstadMobileSystemImpl.l(UMLog.WARN, 53, "WARN: delete recursively " +
+                        "could not delete child file " + childFile.getAbsolutePath());
+                childFile.deleteOnExit();
+                allDeleted = false;
+            }
+        }
+
+        boolean thisFileDeleted = file.delete();
+        allDeleted &= thisFileDeleted;
+        if(!thisFileDeleted) {
+            file.deleteOnExit();
+            UstadMobileSystemImpl.l(UMLog.WARN, 53, "WARN: delete recursively " +
+                    "could not delete " + file.getAbsolutePath());
+        }
+
+        return allDeleted;
+    }
+
 
     public static void copyFile(File src, File dst, int bufferSize) throws IOException{
         try (

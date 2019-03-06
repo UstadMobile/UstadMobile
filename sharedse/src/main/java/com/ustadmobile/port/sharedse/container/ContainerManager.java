@@ -53,8 +53,7 @@ public class ContainerManager {
         this.container = container;
         this.db = db;
         this.dbRepo = dbRepo;
-        if(newFileStorageDir != null)
-            this.newFileDir = new File(newFileStorageDir);
+        this.newFileDir = new File(newFileStorageDir);
 
         loadFromDb();
     }
@@ -170,37 +169,47 @@ public class ContainerManager {
      * @param zipFile
      * @throws IOException
      */
-    public void addEntriesFromZip(ZipFile zipFile) throws IOException{
-        File tmpDir = File.createTempFile("container" + container.getContainerUid(), "uziptmp");
-        if(!(tmpDir.delete() && tmpDir.mkdirs())){
-            throw new IOException("Could not make temporary directory");
-        }
-
-        Map<File, String> filesToAddMap = new HashMap<>();
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-        while(entries.hasMoreElements()){
-            ZipEntry entry = entries.nextElement();
-            if(entry.isDirectory())
-                continue;
-
-            File unzipTmpFile = new File(tmpDir, entry.getName());
-            File parentDirFile = unzipTmpFile.getParentFile();
-            if(!parentDirFile.isDirectory() && !parentDirFile.mkdirs())
-                throw new IOException("Could not make directory for: " + unzipTmpFile.getAbsolutePath());
-
-            try (
-                InputStream zipIn = zipFile.getInputStream(entry);
-                OutputStream fileOut = new FileOutputStream(unzipTmpFile);
-            ) {
-                UMIOUtils.readFully(zipIn, fileOut);
-            }catch(IOException e) {
-                throw e;
+    public void addEntriesFromZip(ZipFile zipFile, int flags) throws IOException{
+        File tmpDir = null;
+        try {
+            tmpDir = File.createTempFile("container" + container.getContainerUid(), "uziptmp");
+            if(!(tmpDir.delete() && tmpDir.mkdirs())){
+                throw new IOException("Could not make temporary directory");
             }
 
-            filesToAddMap.put(unzipTmpFile, entry.getName());
+            Map<File, String> filesToAddMap = new HashMap<>();
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while(entries.hasMoreElements()){
+                ZipEntry entry = entries.nextElement();
+                if(entry.isDirectory())
+                    continue;
+
+                File unzipTmpFile = new File(tmpDir, entry.getName());
+                File parentDirFile = unzipTmpFile.getParentFile();
+                if(!parentDirFile.isDirectory() && !parentDirFile.mkdirs())
+                    throw new IOException("Could not make directory for: " + unzipTmpFile.getAbsolutePath());
+
+                try (
+                        InputStream zipIn = zipFile.getInputStream(entry);
+                        OutputStream fileOut = new FileOutputStream(unzipTmpFile);
+                ) {
+                    UMIOUtils.readFully(zipIn, fileOut);
+                }catch(IOException e) {
+                    throw e;
+                }
+
+                filesToAddMap.put(unzipTmpFile, entry.getName());
+            }
+
+            addEntries(filesToAddMap, flags);
+        }catch(IOException e) {
+            throw e;
+        }finally {
+            if(tmpDir != null)
+                UmFileUtilSe.deleteRecursively(tmpDir);
         }
 
-        addEntries(filesToAddMap, false);
+
     }
 
 

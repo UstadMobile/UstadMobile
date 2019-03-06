@@ -8,14 +8,11 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
-import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService;
@@ -69,9 +66,6 @@ public class DownloadJobItemRunner implements Runnable {
 
     private String endpointUrl;
 
-    @Deprecated
-    static final String CONTENT_ENTRY_FILE_PATH = "ContentEntryFile/";
-
     static final String CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5";
 
     static final String CONTAINER_ENTRY_FILE_PATH = "ContainerEntryFile/";
@@ -112,8 +106,6 @@ public class DownloadJobItemRunner implements Runnable {
     private AtomicReference<WiFiDirectGroupBle> wiFiDirectGroupBle = new AtomicReference<>();
 
     private NetworkNode currentNetworkNode;
-
-    private EntryStatusResponse currentContentEntryFileStatus;
 
     /**
      * Boolean to indicate if we are waiting for a local connection.
@@ -247,8 +239,8 @@ public class DownloadJobItemRunner implements Runnable {
 //    private void handleContentEntryFileStatus(EntryStatusResponse entryStatusResponse){
 //        if(entryStatusResponse != null){
 //            availableLocally.set(entryStatusResponse.isAvailable() ? 1:0);
-//            if(availableLocally.get() == 1 && currentContentEntryFileStatus!= null
-//                    && !currentContentEntryFileStatus.isAvailable()){
+//            if(availableLocally.get() == 1 && currentEntryStatusResponse!= null
+//                    && !currentEntryStatusResponse.isAvailable()){
 //                this.currentNetworkNode =
 //                        appDb.getNetworkNodeDao().findNodeById(entryStatusResponse.getErNodeId());
 //                connectToLocalNodeNetwork();
@@ -304,7 +296,7 @@ public class DownloadJobItemRunner implements Runnable {
         appDb.getDownloadJobDao().update(downloadJobId, JobStatus.RUNNING);
 
         networkManager.startMonitoringAvailability(this,
-                Arrays.asList(downloadItem.getDjiContentEntryFileUid()));
+                Arrays.asList(downloadItem.getDjiContainerUid()));
 
         statusLiveData = appDb.getConnectivityStatusDao().getStatusLive();
         downloadJobItemLiveData = appDb.getDownloadJobItemDao().getLiveStatus(downloadItem.getDjiUid());
@@ -330,8 +322,8 @@ public class DownloadJobItemRunner implements Runnable {
         destinationDir = appDb.getDownloadSetDao().getDestinationDir(downloadItem
                 .getDownloadSetItem().getDsiDsUid());
 
-        currentContentEntryFileStatus = appDb.getEntryStatusResponseDao()
-                .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
+//        currentEntryStatusResponse = appDb.getEntryStatusResponseDao()
+//                .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
 
         startDownload();
     }
@@ -363,10 +355,10 @@ public class DownloadJobItemRunner implements Runnable {
 
             //TODO: if the content is available on the node we already connected to, take that one
             currentNetworkNode = appDb.getNetworkNodeDao()
-                    .findNodeWithContentFileEntry(downloadItem.getDjiContentEntryFileUid(),
+                    .findLocalActiveNodeByContainerUid(downloadItem.getDjiContainerUid(),
                             minLastSeen,BAD_PEER_FAILURE_THRESHOLD,maxFailureFromTimeStamp);
 
-            boolean isFromCloud = currentContentEntryFileStatus == null || currentNetworkNode == null;
+            boolean isFromCloud = (currentNetworkNode == null);
             DownloadJobItemHistory history = new DownloadJobItemHistory();
             history.setMode(isFromCloud ? MODE_CLOUD : MODE_LOCAL);
             history.setStartTime(System.currentTimeMillis());
@@ -430,16 +422,21 @@ public class DownloadJobItemRunner implements Runnable {
                     UstadMobileSystemImpl.l(UMLog.INFO, 699, "Downloading " +
                             entriesToDownload.size() + " ContainerEntryFiles from " + downloadEndpoint);
                     for(ContainerEntryWithMd5 entry : entriesToDownload) {
-                        File destFile = File.createTempFile("dltmpfile", ""+ entry.getCeCefUid());
+                        File destFile = new File(new File(destinationDir),
+                                entry.getCeCefUid() +".tmp");
                         httpDownload = new ResumableHttpDownload(downloadEndpoint +
                                 CONTAINER_ENTRY_FILE_PATH + entry.getCeCefUid(),
                                 destFile.getAbsolutePath());
                         httpDownload.setConnectionOpener(connectionOpener);
                         httpDownloadRef.set(httpDownload);
                         if(httpDownload.download()) {
-                            containerManager.addEntry(destFile, entry.getCePath(), ContainerManager.OPTION_COPY);
+                            containerManager.addEntry(destFile, entry.getCePath(),
+                                    ContainerManager.OPTION_COPY);
                             downloadedCount++;
                         }
+
+                        if(!destFile.delete())
+                            destFile.deleteOnExit();
                     }
 
                     downloaded = downloadedCount == entriesToDownload.size();
