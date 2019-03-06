@@ -58,13 +58,9 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView 
     }
 
     private void clickUpNavigation() {
-        runOnUiThread(() -> {
-            if (mPresenter != null) {
-                mPresenter.handleUpNavigation();
-            }
-        });
-
-
+        if (mPresenter != null) {
+            mPresenter.handleUpNavigation();
+        }
     }
 
     @Override
@@ -72,7 +68,7 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView 
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                clickUpNavigation();
+                runOnUiThread(this::clickUpNavigation);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -86,15 +82,11 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView 
 
     @Override
     public void showError(String message) {
-        runOnUiThread(() -> {
-            Toast.makeText((Context) getContext(), message, Toast.LENGTH_SHORT).show();
-        });
+        Toast.makeText((Context) getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void setToolbarTitle(String title) {
-        runOnUiThread(() -> {
-            getUMToolbar().setTitle(title);
-        });
+        getUMToolbar().setTitle(title);
     }
 }
