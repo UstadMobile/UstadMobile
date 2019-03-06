@@ -284,7 +284,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
             //hard coded strings because these are actually in sharedse
             args.put("contentEntryUid", String.valueOf(this.entryUuid));
-            impl.go("DownloadDialog", args, getContext());
+            view.runOnUiThread(() -> view.showDownloadOptionsDialog(args));
         }
 
     }

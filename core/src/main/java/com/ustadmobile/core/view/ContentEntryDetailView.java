@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 
+import java.util.Hashtable;
 import java.util.List;
 
 public interface ContentEntryDetailView extends UstadView {
@@ -46,5 +47,7 @@ public interface ContentEntryDetailView extends UstadView {
     void setDownloadProgressLabel(String progressLabel);
 
     void setDownloadButtonClickableListener(boolean isDownloadComplete);
+
+    void showDownloadOptionsDialog(Hashtable hashtable);
 
 }
