@@ -37,8 +37,6 @@ import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 
 public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
 
-    //TODO: Handle monitoring availability using container
-
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
 
     private String navigation;
@@ -201,7 +199,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                 view.setDownloadButtonVisible(false);
                 view.setDownloadProgressVisible(true);
                 view.updateDownloadProgress(status.getTotalSize() > 0 ?
-                        (float) (status.getBytesDownloadSoFar() / (float) status.getTotalSize()) * 100: 0);
+                        (float) status.getBytesDownloadSoFar() / (float) status.getTotalSize() : 0f);
             });
 
         }
