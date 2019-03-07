@@ -20,16 +20,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.controller.EpubContentPresenter;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppViewChoiceListener;
-import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -44,9 +44,9 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends ZippedContentActivity implements
+public class EpubContentActivity extends ZippedContentActivity implements
         ContainerPageFragment.OnFragmentInteractionListener,
-        ContainerView, AppViewChoiceListener, ListView.OnItemClickListener,
+        EpubContentView, AppViewChoiceListener, ListView.OnItemClickListener,
         TocListView.OnItemClickListener{
 
 
@@ -59,7 +59,7 @@ public class ContainerActivity extends ZippedContentActivity implements
     private String onpageSelectedJS = "";
 
 
-    private ContainerController mContainerController;
+    private EpubContentPresenter mEpubContentPresenter;
 
     private String mBaseURL = null;
 
@@ -150,9 +150,10 @@ public class ContainerActivity extends ZippedContentActivity implements
 
         onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__",
                 EmbeddedHttpdService.ANDROID_ASSETS_PATH);
-        mContainerController = new ContainerController(this, this);
-        mContainerController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
-                null);
+        mEpubContentPresenter = new EpubContentPresenter(this,
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+        Hashtable savedHt = UMAndroidUtil.bundleToHashtable(saved);
+        mEpubContentPresenter.onCreate(savedHt);
     }
 
     public String getBaseURL() {
@@ -160,7 +161,7 @@ public class ContainerActivity extends ZippedContentActivity implements
     }
 
     public String getXapiQuery() {
-        return mContainerController.getXAPIQuery();
+        return mEpubContentPresenter.getXAPIQuery();
     }
 
     /**
@@ -171,7 +172,7 @@ public class ContainerActivity extends ZippedContentActivity implements
      * @param runnable
      */
     public void runWhenMounted(Runnable runnable) {
-        if(mContainerController != null) {
+        if(mEpubContentPresenter != null) {
             runnable.run();
         }else {
             runWhenContentMounted.add(runnable);
@@ -238,8 +239,8 @@ public class ContainerActivity extends ZippedContentActivity implements
     }
 
     public void handlePageTitleUpdated(int index, String title) {
-        if(mPager != null && mPager.getCurrentItem() == index && mContainerController != null) {
-            mContainerController.handlePageTitleUpdated(title);
+        if(mPager != null && mPager.getCurrentItem() == index && mEpubContentPresenter != null) {
+            mEpubContentPresenter.handlePageTitleUpdated(title);
         }
     }
 
@@ -257,7 +258,7 @@ public class ContainerActivity extends ZippedContentActivity implements
 
     public void onDestroy() {
         mSavedPosition = -1;
-
+        mEpubContentPresenter.onDestroy();
         super.onDestroy();
     }
 
@@ -278,7 +279,7 @@ public class ContainerActivity extends ZippedContentActivity implements
     }
 
     @Override
-    public void setController(ContainerController controller) {
+    public void setController(EpubContentPresenter controller) {
 
     }
 
@@ -289,8 +290,7 @@ public class ContainerActivity extends ZippedContentActivity implements
 
     @Override
     public void setCoverImage(String imageUrl) {
-        //ContainerActivity will be deleted in favor of ContentEntry anyway
-        //ImageLoader.getInstance().loadImage(imageUrl, coverImageLoadTarget, mContainerController);
+        Picasso.with(this).load(imageUrl).into((ImageView)findViewById(R.id.item_basepoint_cover_img));
     }
 
     @Override
@@ -340,7 +340,7 @@ public class ContainerActivity extends ZippedContentActivity implements
         @Override
         public View getNodeView(Object node, View recycleView, int depth) {
             if(recycleView == null) {
-                LayoutInflater inflater = LayoutInflater.from(ContainerActivity.this);
+                LayoutInflater inflater = LayoutInflater.from(EpubContentActivity.this);
                 recycleView = inflater.inflate(R.layout.item_epubview_child, null);
             }
 
@@ -396,7 +396,7 @@ public class ContainerActivity extends ZippedContentActivity implements
          * @param position Position in the list of fragment to create
          */
         public Fragment getItem(int position) {
-            ContainerPageFragment existingFrag = pagesMap.get(new Integer(position));
+            ContainerPageFragment existingFrag = pagesMap.get(position);
 
             //something wrong HERE
             if(existingFrag != null) {
@@ -405,7 +405,7 @@ public class ContainerActivity extends ZippedContentActivity implements
                 ContainerPageFragment frag =
                         ContainerPageFragment.newInstance(hrefList[position], position);
 
-                this.pagesMap.put(Integer.valueOf(position), frag);
+                this.pagesMap.put(position, frag);
                 return frag;
             }
         }

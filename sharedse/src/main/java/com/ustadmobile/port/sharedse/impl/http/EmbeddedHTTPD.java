@@ -5,6 +5,8 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -49,6 +51,11 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
     private Map<String, Long> clientIpToLastActiveMap = new Hashtable<>();
 
+    private UmAppDatabase appDatabase;
+
+    private UmAppDatabase repository;
+
+
     public interface ClientActivityListener {
         void OnClientListChanged(Map<String, Long> clientIpToLastActiveMap);
     }
@@ -74,6 +81,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
     private Hashtable<String, ZipFile> mountedZips = new Hashtable<>();
 
+    private Hashtable<String, ContainerManager> mountedContainers = new Hashtable<>();
+
     static
     {
         theMimeTypes.put("htm", "text/html");
@@ -81,6 +90,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         theMimeTypes.put("xhtml", "application/xhtml+xml");
         theMimeTypes.put("xml", "text/xml");
         theMimeTypes.put("txt", "text/plain");
+        theMimeTypes.put("webp", "image/webp");
 
         StringTokenizer st = new StringTokenizer(
                 "css		text/css "+
@@ -114,7 +124,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
 
 
-    public EmbeddedHTTPD(int portNum, Object context, UmAppDatabase appDatabase) {
+    public EmbeddedHTTPD(int portNum, Object context, UmAppDatabase appDatabase, UmAppDatabase repository) {
         super(portNum);
         id = idCounter;
         idCounter++;
@@ -122,6 +132,12 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder.class, appDatabase);
         addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
                 ContainerEntryListResponder.class, appDatabase);
+        this.appDatabase = appDatabase;
+        this.repository = repository;
+    }
+
+    public EmbeddedHTTPD(int portNum, Object context, UmAppDatabase appDatabase) {
+        this(portNum, context, appDatabase, appDatabase.getRepository("http://localhost/dummy/", ""));
     }
 
     public EmbeddedHTTPD(int portNum, Object context) {
@@ -194,6 +210,29 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         }
 
         return null;
+    }
+
+    public String mountContainer(long containerUid, String mountPath, boolean epubHtmlFilterEnabled,
+                                 String epubScriptPath) {
+        Container container = repository.getContainerDao().findByUid(containerUid);
+        if(container == null) {
+            return null;
+        }
+
+        ContainerManager containerManager = new ContainerManager(container, appDatabase, repository);
+        if(mountPath == null){
+            mountPath = "/container/" + container.getContainerUid() +"/" +
+                    System.currentTimeMillis() + "/";
+        }
+
+        addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
+                MountedContainerResponder.class, containerManager);
+
+        return mountPath;
+    }
+
+    public void unmountContainer(String mountPath) {
+        removeRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX);
     }
 
     private String toFullZipMountPath(String mountPath) {

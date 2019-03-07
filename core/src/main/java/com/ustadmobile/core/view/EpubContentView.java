@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.controller.EpubContentPresenter;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.UmCallback;
 
@@ -38,11 +38,13 @@ import com.ustadmobile.core.impl.UmCallback;
  *
  * @author mike
  */
-public interface ContainerView extends UstadView {
+public interface EpubContentView extends UstadView {
 
     String VIEW_NAME = "Container";
 
-    void setController(ContainerController controller);
+    String ARG_CONTAINER_UID = "containerUid";
+
+    void setController(EpubContentPresenter controller);
         
     void setContainerTitle(String containerTitle);
 
@@ -56,6 +58,11 @@ public interface ContainerView extends UstadView {
 
     void setAuthorName(String authorName);
 
+    @Deprecated
     void mountZip(String zipPath, UmCallback<String> callback);
+
+    void mountContainer(long containerUid, UmCallback<String> callback);
+
+    void unmountContainer(String mountedUrl);
     
 }

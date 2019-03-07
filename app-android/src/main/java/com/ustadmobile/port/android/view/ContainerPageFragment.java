@@ -31,7 +31,7 @@ import java.io.InputStream;
 
 /**
  * A simple Fragment that uses a WebView to show one part of a piece of content. This fragment MUST
- * be attached to ContainerActivity in order to work. When the fragment is restored from a saved
+ * be attached to EpubContentActivity in order to work. When the fragment is restored from a saved
  * state the internal server URL may have changed since hwen it was created. It therefor relies on
  * attaching to the activity to get these values.
  */
@@ -100,7 +100,7 @@ public class ContainerPageFragment extends Fragment {
             pageSpineIndex = getArguments().getInt(ARG_PAGE_INDEX);
         }
 //        TODO: check this - what if it hasn't attached yet?
-        this.autoplayRunJavascript = ((ContainerActivity)getActivity()).getAutoplayRunJavascript();
+        this.autoplayRunJavascript = ((EpubContentActivity)getActivity()).getAutoplayRunJavascript();
     }
 
     @Override
@@ -213,8 +213,8 @@ public class ContainerPageFragment extends Fragment {
 
     private void updatePageTitle(String pageTitle) {
         this.currentPageTitle = pageTitle;
-        if(getActivity() != null && getActivity() instanceof ContainerActivity) {
-            ((ContainerActivity)getActivity()).handlePageTitleUpdated(pageSpineIndex, pageTitle);
+        if(getActivity() != null && getActivity() instanceof EpubContentActivity) {
+            ((EpubContentActivity)getActivity()).handlePageTitleUpdated(pageSpineIndex, pageTitle);
         }
     }
 
@@ -242,8 +242,8 @@ public class ContainerPageFragment extends Fragment {
         super.onAttach(context);
         try {
             mListener = (OnFragmentInteractionListener) context;
-            if(context instanceof ContainerActivity) {
-                final ContainerActivity activity = (ContainerActivity)context;
+            if(context instanceof EpubContentActivity) {
+                final EpubContentActivity activity = (EpubContentActivity)context;
                 activity.runWhenMounted(new Runnable() {
                     @Override
                     public void run() {

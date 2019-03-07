@@ -225,8 +225,14 @@ public class UMTinCanUtil {
      */
     public static JSONObject makeActorFromActiveUser(Object context) {
         UmAccount account = UmAccountManager.getActiveAccount(context);
-        return UMTinCanUtil.makeActorFromUserAccount(account.getUsername(),
-                account.getEndpointUrl());
+        if(account != null) {
+            return UMTinCanUtil.makeActorFromUserAccount(account.getUsername(),
+                    account.getEndpointUrl());
+        }else {
+            return UMTinCanUtil.makeActorFromUserAccount("anonymous",
+                    UmAccountManager.getActiveEndpoint(context));
+        }
+
     }
 
 

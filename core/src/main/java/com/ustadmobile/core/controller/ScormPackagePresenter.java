@@ -84,7 +84,7 @@ public class ScormPackagePresenter extends UstadBaseController {
     }
 
     public void onCreate(Hashtable args) {
-        scormPackageView.mountZip((String)args.get(ContainerController.ARG_CONTAINERURI),
+        scormPackageView.mountZip((String)args.get(EpubContentPresenter.ARG_CONTAINERURI),
                 zipMountedCallback);
     }
 

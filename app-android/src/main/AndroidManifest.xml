@@ -56,7 +56,7 @@
         </provider>
 
         <activity
-            android:name="com.ustadmobile.port.android.view.ContainerActivity"
+            android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label=""
             android:screenOrientation="portrait" />

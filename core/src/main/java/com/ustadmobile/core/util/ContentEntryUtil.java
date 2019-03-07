@@ -6,7 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
@@ -16,7 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.ContainerController.ARG_CONTAINERURI;
+import static com.ustadmobile.core.controller.EpubContentPresenter.ARG_CONTAINERURI;
 
 public class ContentEntryUtil {
 
@@ -76,8 +76,8 @@ public class ContentEntryUtil {
                             break;
                         case "application/epub+zip":
 
-                            args.put(ARG_CONTAINERURI, String.valueOf(result.getContainerUid()));
-                            impl.go(ContainerView.VIEW_NAME, args, context);
+                            args.put(EpubContentView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
+                            impl.go(EpubContentView.VIEW_NAME, args, context);
                             break;
                         case "application/khan-video+zip":
 

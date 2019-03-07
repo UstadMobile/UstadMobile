@@ -29,7 +29,7 @@ import java.util.Hashtable;
  *
  * Displays an XAPI Zip Package.
  *
- * Pass ContainerController.ARG_CONTAINERURI when creating to provide the location of the xAPI
+ * Pass EpubContentPresenter.ARG_CONTAINERURI when creating to provide the location of the xAPI
  * zip to open
  *
  * Uses the Rustici launch method to find the URL to launch:
@@ -107,7 +107,7 @@ public class XapiPackagePresenter extends UstadBaseController {
     public void onCreate(Hashtable args) {
         this.args = args;
         registrationUUID = UMUUID.randomUUID().toString();
-        view.mountZip((String)args.get(ContainerController.ARG_CONTAINERURI),
+        view.mountZip((String)args.get(EpubContentPresenter.ARG_CONTAINERURI),
                 zipMountedCallbackHandler);
     }
 

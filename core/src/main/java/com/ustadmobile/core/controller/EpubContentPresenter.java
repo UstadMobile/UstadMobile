@@ -61,7 +61,6 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument;
-import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
@@ -74,9 +73,9 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
-import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.impl.UmCallback;
 
@@ -97,9 +96,9 @@ import org.json.*;
  * 
  * @author mike
  */
-public class ContainerController extends UstadBaseController {
+public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
     
-    private ContainerView containerView;
+    private EpubContentView epubContentView;
 
     private OcfDocument ocf;
     
@@ -113,13 +112,13 @@ public class ContainerController extends UstadBaseController {
         
     /**
      * Use with loadController as the key for the containerURI in args hashtable
-     * @see ContainerController#loadController(java.util.Hashtable) 
+     * @see EpubContentPresenter#loadController(java.util.Hashtable)
      */
     public static final String ARG_CONTAINERURI = "URI";
 
     /**
      * Use with loadController as the key for the mime type in args hashtable
-     * @see ContainerController#loadController(java.util.Hashtable) 
+     * @see EpubContentPresenter#loadController(java.util.Hashtable)
      */
     public static final String ARG_MIMETYPE = "MIME";
     
@@ -163,7 +162,8 @@ public class ContainerController extends UstadBaseController {
 
         @Override
         public void onFailure(Throwable exception) {
-
+            UstadMobileSystemImpl.l(UMLog.ERROR, 500, "Exception mounting container");
+            exception.printStackTrace();
         }
     };
 
@@ -215,18 +215,18 @@ public class ContainerController extends UstadBaseController {
                 final String authorNames = opf.getNumCreators() > 0 ?
                         UMUtil.joinStrings(opf.getCreators(), ", ") : null;
 
-                containerView.runOnUiThread(new Runnable() {
+                epubContentView.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        containerView.setContainerTitle(containerTitle);
-                        containerView.setSpineUrls(baseUrl, linearSpineHrefs, xapiQuery);
+                        epubContentView.setContainerTitle(containerTitle);
+                        epubContentView.setSpineUrls(baseUrl, linearSpineHrefs, xapiQuery);
                         if(opfCoverImageItem != null) {
-                            containerView.setCoverImage(UMFileUtil.resolveLink(baseUrl,
+                            epubContentView.setCoverImage(UMFileUtil.resolveLink(baseUrl,
                                     opfCoverImageItem.href));
                         }
 
                         if(authorNames != null) {
-                            containerView.setAuthorName(authorNames);
+                            epubContentView.setAuthorName(authorNames);
                         }
                     }
                 });
@@ -263,10 +263,10 @@ public class ContainerController extends UstadBaseController {
                 XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(
                         new ByteArrayInputStream(response.getResponseBody()), "UTF-8");
                 navDocument.load(xpp);
-                containerView.runOnUiThread(new Runnable() {
+                epubContentView.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        containerView.setTableOfContents(navDocument.getToc());
+                        epubContentView.setTableOfContents(navDocument.getToc());
                     }
                 });
             }catch(IOException e) {
@@ -282,33 +282,16 @@ public class ContainerController extends UstadBaseController {
         }
     };
 
-    
-    /**
-     * Empty constructor - this creates a blank unusable object - required for async loading
-     */
-    public ContainerController(Object context) {
-         super(context);
+    public EpubContentPresenter(Object context, Hashtable args, EpubContentView view) {
+        super(context, args, view);
+        this.epubContentView = view;
     }
 
-    public ContainerController(Object context, ContainerView view) {
-        this(context);
-        this.containerView = view;
+    public void onCreate(Hashtable savedState) {
+        Long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID)
+                .toString());
+        view.mountContainer(containerUid, mountedCallbackHandler);
     }
-
-    public void onCreate(Hashtable arguments, Hashtable savedState) {
-        String fileUri = (String)arguments.get(ARG_CONTAINERURI);
-        containerView.mountZip(fileUri, mountedCallbackHandler);
-    }
-
-    public UstadView getView() {
-        return containerView;
-    }
-    
-    public void setView(UstadView view) {
-        this.containerView = (ContainerView)view;
-        super.setView(view);
-    }
-
 
     /**
      * Returns a Query String for the xAPI parameters for the container including 
@@ -411,10 +394,17 @@ public class ContainerController extends UstadBaseController {
     }
 
     public void handlePageTitleUpdated(String pageTitle) {
-        if(containerView != null) {
-            containerView.setPageTitle(pageTitle);
+        if(epubContentView != null) {
+            epubContentView.setPageTitle(pageTitle);
         }
     }
-    
-    
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mountedUrl != null){
+            view.unmountContainer(mountedUrl);
+        }
+    }
 }

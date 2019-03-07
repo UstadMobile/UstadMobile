@@ -195,7 +195,7 @@ public abstract class FileResponder {
             long lastModifiedTime = file.getLastModifiedTime();
             String fileName = file.getName();
             String etagNameInput = fileName;
-            String mimeType = EmbeddedHTTPD.getMimeType(fileName);
+            String mimeType = EmbeddedHTTPD.getMimeType(session.getUri());
 
 
 
@@ -221,6 +221,7 @@ public abstract class FileResponder {
                             EmbeddedHTTPD.getMimeType(fileName), retInputStream, contentLength);
 
                     r.addHeader("ETag", etag);
+                    r.addHeader("Content-Type", mimeType);
 
                         /*
                          * range request is inclusive: e.g. range 0-1 length is 2 bytes as per
@@ -246,6 +247,7 @@ public abstract class FileResponder {
                 r.addHeader("ETag", etag);
                 r.addHeader("Content-Length", String.valueOf(totalLength));
                 r.addHeader("Connection", "close");
+                r.addHeader("Content-Type", mimeType);
                 if(cacheControlHeader != null)
                     r.addHeader("Cache-Control", cacheControlHeader);
                 return r;

@@ -113,7 +113,7 @@ public class H5PContentPresenter extends UstadBaseController {
     }
 
     public void onCreate(Hashtable args) {
-        this.h5pFileUri = (String)args.get(ContainerController.ARG_CONTAINERURI);
+        this.h5pFileUri = (String)args.get(EpubContentPresenter.ARG_CONTAINERURI);
         h5PContentView.mountH5PDist(mH5PDistMountedCallback);
     }
 
