@@ -157,8 +157,6 @@ public class ReportEditPresenter
                 fromTime = UMCalendarUtil.getDateInMilliPlusDays(-14);
                 break;
             case TIME_PERIOD_LAST_MONTH:
-                //TODO: Figure out from the 1st of this month
-                //TODO: Figure out if the last month had 30 or 31 or 28 days.
                 fromTime = UMCalendarUtil.getDateInMilliPlusDays(-31);
                 break;
             case TIME_PERIOD_LAST_THREE_MONTHS:

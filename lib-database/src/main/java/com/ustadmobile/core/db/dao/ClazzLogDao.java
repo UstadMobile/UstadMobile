@@ -173,25 +173,52 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
             " GROUP BY ClazzLog.logDate")
-    public abstract void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
-            UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
+    public abstract void getNumberOfClassesOpenForDate(long fromDate, long toDate,
+                                                              UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
 
     @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
             " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
             "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
             "       AND ClazzLog.clazzLogClazzUid in (:clazzes) " +
             " GROUP BY ClazzLog.logDate")
-    public abstract void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
-              List<Long> clazzes, UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
+    public abstract void getNumberOfClassesOpenForDateClazzes(long fromDate, long toDate,
+                          List<Long> clazzes, UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
 
-    public void getNumberOfClassesOpenForDateLocationClazzes(long fromDate, long toDate,
-         List<Long> clazzes, List<Long> locations,
-         UmCallback<List<NumberOfDaysClazzesOpen>> resultList){
-        if(clazzes.isEmpty()){
-            getNumberOfClassesOpenForDateLocationClazzes(fromDate,toDate,resultList);
+    @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
+            "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
+            "       AND Clazz.clazzLocationUid in (:locations) " +
+            " GROUP BY ClazzLog.logDate")
+    public abstract void getNumberOfClassesOpenForDateLocations(long fromDate, long toDate,
+                                                              List<Long> locations, UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
+
+    @UmQuery ("SELECT COUNT(Clazz.clazzName) as number, clazzLog.logDate as date from ClazzLog " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid" +
+            "   WHERE ClazzLog.logDate > :fromDate and ClazzLog.logDate < :toDate " +
+            "       AND ClazzLog.clazzLogClazzUid in (:clazzes) " +
+            "       AND Clazz.clazzLocationUid in (:locations) " +
+            " GROUP BY ClazzLog.logDate")
+    public abstract void getNumberOfClassesOpenForDateClazzesLocation(long fromDate, long toDate,
+                                    List<Long> clazzes, List<Long> locations,
+                                    UmCallback<List<NumberOfDaysClazzesOpen>> resultList);
+
+    public void getNumberOfClassesOpenForDateClazzes(long fromDate, long toDate,
+                                                     List<Long> clazzes, List<Long> locations,
+                                                     UmCallback<List<NumberOfDaysClazzesOpen>> resultList){
+        if(locations.isEmpty()){
+            if(clazzes.isEmpty()){
+                getNumberOfClassesOpenForDate(fromDate, toDate, resultList);
+            }else{
+                getNumberOfClassesOpenForDateClazzes(fromDate, toDate, clazzes, resultList);
+            }
         }else{
-            getNumberOfClassesOpenForDateLocationClazzes(fromDate,toDate,clazzes, resultList);
+            if(clazzes.isEmpty()){
+                getNumberOfClassesOpenForDateLocations(fromDate, toDate, locations, resultList);
+            }else{
+                getNumberOfClassesOpenForDateClazzesLocation(fromDate, toDate, clazzes, locations, resultList);
+            }
         }
+        
     }
 
     @UmQuery("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")

@@ -79,9 +79,7 @@ public class ReportNumberOfDaysClassesOpenPresenter
 
         LinkedHashMap<Float, Float> dataMap = new LinkedHashMap<>();
 
-        //TODO: Account for location and clazzes.
-
-        repository.getClazzLogDao().getNumberOfClassesOpenForDateLocationClazzes(fromDate, toDate,
+        repository.getClazzLogDao().getNumberOfClassesOpenForDateClazzes(fromDate, toDate,
                 clazzList, locationList,
                 new UmCallback<List<ClazzLogDao.NumberOfDaysClazzesOpen>>() {
             @Override
@@ -106,14 +104,5 @@ public class ReportNumberOfDaysClassesOpenPresenter
     public void dataToCSV(){
         view.generateCSVReport();
     }
-
-    public void dataToXLS(){
-        //TODO
-    }
-
-    public void dataToJSON(){
-        //TODO
-    }
-
 
 }
