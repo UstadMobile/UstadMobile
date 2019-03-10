@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle;
 
 import java.util.LinkedHashMap;
 
@@ -29,8 +30,7 @@ public interface ClazzActivityListView extends UstadView {
      *
      * @param listProvider The provider data
      */
-    void setListProvider(UmProvider<ClazzActivity> listProvider);
-
+    void setListProvider(UmProvider<ClazzActivityWithChangeTitle> listProvider);
 
     /**
      * For Android: closes the activity.

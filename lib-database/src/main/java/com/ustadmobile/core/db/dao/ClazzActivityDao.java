@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
+import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -43,6 +44,15 @@ public abstract class ClazzActivityDao implements SyncableDao<ClazzActivity, Cla
     @UmQuery("SELECT * FROM ClazzActivity where clazzActivityClazzUid = :clazzUid AND " +
             "clazzActivityDone = 1 ORDER BY clazzActivityLogDate DESC")
     public abstract UmProvider<ClazzActivity> findByClazzUid(long clazzUid);
+
+    @UmQuery("SELECT ClazzActivityChange.clazzActivityChangeTitle AS changeTitle, ClazzActivity.* " +
+            "FROM ClazzActivity " +
+            "LEFT JOIN ClazzActivityChange " +
+            "   ON ClazzActivity.clazzActivityClazzActivityChangeUid = ClazzActivityChange.clazzActivityChangeUid " +
+            "WHERE clazzActivityClazzUid = :clazzUid " +
+            "AND clazzActivityDone = 1 " +
+            "ORDER BY clazzActivityLogDate DESC")
+    public abstract UmProvider<ClazzActivityWithChangeTitle> findWithChangeTitleByClazzUid(long clazzUid);
 
     @UmQuery("SELECT * FROM ClazzActivity WHERE clazzActivityUid = :uid")
     public abstract ClazzActivity findByUid(long uid);

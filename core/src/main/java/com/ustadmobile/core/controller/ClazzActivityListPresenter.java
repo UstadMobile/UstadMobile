@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.ClazzActivityEditView;
 import com.ustadmobile.core.view.ClazzActivityListView;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
+import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle;
 import com.ustadmobile.lib.db.entities.DailyActivityNumbers;
 import com.ustadmobile.lib.db.entities.Role;
 
@@ -47,7 +48,7 @@ public class ClazzActivityListPresenter
     private HashMap<Float, Long> barMapWithOGDateTimes;
 
     //Provider 
-    private UmProvider<ClazzActivity> providerList;
+    private UmProvider<ClazzActivityWithChangeTitle> providerList;
 
     private boolean canEdit;
     private long loggedInPersonUid = 0L;
@@ -126,7 +127,7 @@ public class ClazzActivityListPresenter
         super.onCreate(savedState);
 
         //Populate the provider
-        providerList = repository.getClazzActivityDao().findByClazzUid(currentClazzUid);
+        providerList = repository.getClazzActivityDao().findWithChangeTitleByClazzUid(currentClazzUid);
 
         setProviderOnView();
 

@@ -25,7 +25,8 @@ public class AddActivityChangeDialogPresenter
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
 
-    public AddActivityChangeDialogPresenter(Object context, Hashtable arguments, AddActivityChangeDialogView view) {
+    public AddActivityChangeDialogPresenter(Object context, Hashtable arguments,
+                                            AddActivityChangeDialogView view) {
         super(context, arguments, view);
 
         //Get arguments and set them.

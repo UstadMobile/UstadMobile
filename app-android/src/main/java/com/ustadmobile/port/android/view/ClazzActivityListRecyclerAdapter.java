@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
@@ -14,17 +13,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzActivityListPresenter;
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
-import com.ustadmobile.lib.db.entities.ClazzActivityChange;
+import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle;
 
 import java.util.Locale;
 
@@ -32,34 +27,25 @@ import java.util.Locale;
  * The ClazzActivityList's recycler adapter.
  */
 public class ClazzActivityListRecyclerAdapter extends
-        PagedListAdapter<ClazzActivity, ClazzActivityListRecyclerAdapter.ClazzActivityViewHolder> {
+        PagedListAdapter<ClazzActivityWithChangeTitle, ClazzActivityListRecyclerAdapter.ClazzActivityViewHolder> {
 
     Context theContext;
-    Fragment theFragment;
-    ClazzActivityListPresenter thePresenter;
-    Boolean showImage = false;
+    private Fragment theFragment;
+    private ClazzActivityListPresenter thePresenter;
+    private Boolean showImage;
 
-    ClazzActivityChangeDao activityChangeDao =
-            UmAppDatabase.getInstance(theContext).getClazzActivityChangeDao();
 
-    protected class ClazzActivityViewHolder extends RecyclerView.ViewHolder{
-        protected ClazzActivityViewHolder(View itemView){
+    class ClazzActivityViewHolder extends RecyclerView.ViewHolder{
+        ClazzActivityViewHolder(View itemView){
             super(itemView);
         }
     }
 
-    protected ClazzActivityListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzActivity>
-                                                  diffCallback, Context context, Fragment fragment,
-                                               ClazzActivityListPresenter mPresenter){
-        super(diffCallback);
-        theContext = context;
-        theFragment = fragment;
-        thePresenter = mPresenter;
-    }
-    protected ClazzActivityListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzActivity>
-                                                  diffCallback, Context context, Fragment fragment,
-                                               ClazzActivityListPresenter mPresenter,
-                                          boolean imageShow){
+
+    ClazzActivityListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<ClazzActivityWithChangeTitle>
+                                             diffCallback, Context context, Fragment fragment,
+                                     ClazzActivityListPresenter mPresenter,
+                                     boolean imageShow){
         super(diffCallback);
         theContext = context;
         theFragment = fragment;
@@ -83,12 +69,13 @@ public class ClazzActivityListRecyclerAdapter extends
      * For every item part of the recycler adapter, this will be called and every item in it
      * will be set as per this function.
      *
-     * @param holder
-     * @param position
+     * @param holder            The holder
+     * @param position          The position
      */
     @Override
     public void onBindViewHolder(@NonNull ClazzActivityViewHolder holder, int position){
-        ClazzActivity clazzActivity = getItem(position);
+        ClazzActivityWithChangeTitle clazzActivity = getItem(position);
+        assert clazzActivity != null;
         boolean wasItGood = clazzActivity.isClazzActivityGoodFeedback();
 
 
@@ -107,7 +94,10 @@ public class ClazzActivityListRecyclerAdapter extends
         AppCompatImageView secondaryTextImageView =
                 holder.itemView.findViewById(R.id.item_clazzlog_log_status_text_imageview);
 
-        String verb = "Increased group work by ";
+        String verb = clazzActivity.getChangeTitle();
+        if(verb == null || verb.isEmpty()){
+            verb =  "Increased group work by";
+        }
 
         if(!wasItGood){
             secondaryTextImageView.setBackground(
@@ -115,10 +105,9 @@ public class ClazzActivityListRecyclerAdapter extends
         }else{
             secondaryTextImageView.setBackground(
                     AppCompatResources.getDrawable(theContext,R.drawable.ic_thumb_up_black_24dp));
-            //secondaryTextImageView.setBackgroundResource(R.drawable.ic_thumb_up_black_24dp);
         }
 
-        String desc = verb + clazzActivity.getClazzActivityQuantity()
+        String desc = verb + " " + clazzActivity.getClazzActivityQuantity()
                 + " times";
         statusTextView.setText(desc);
 
@@ -128,16 +117,6 @@ public class ClazzActivityListRecyclerAdapter extends
         ((TextView)holder.itemView
                 .findViewById(R.id.item_clazzlog_log_day))
                 .setText(prettyShortDay);
-
-
-        //TODO: Put ClazzActivityChange part of the return object
-//        ClazzActivityChange result =
-//                activityChangeDao.findByUid(clazzActivity.getClazzActivityClazzActivityChangeUid());
-//
-//        String uomverb = "times";
-//        String clazzActivityStatus = "" + result.getClazzActivityChangeTitle()
-//                + " " + result.getClazzActivityUnitOfMeasure() + " " + uomverb;
-//        statusTextView.setText(clazzActivityStatus);
 
         if(!showImage){
             secondaryTextImageView.setVisibility(View.INVISIBLE);

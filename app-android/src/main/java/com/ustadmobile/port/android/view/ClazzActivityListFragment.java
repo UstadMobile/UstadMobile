@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.content.res.AppCompatResources;
@@ -31,6 +32,7 @@ import com.ustadmobile.core.controller.ClazzActivityListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClazzActivityListView;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
+import com.ustadmobile.lib.db.entities.ClazzActivityWithChangeTitle;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -113,7 +116,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     @Override
     public void updateActivityBarChart(LinkedHashMap<Float, Float> dataMap){
-        List<BarEntry> barDataEntries = new ArrayList<BarEntry>();
+        List<BarEntry> barDataEntries = new ArrayList<>();
         Iterator<Map.Entry<Float, Float>> dataMapIterator = dataMap.entrySet().iterator();
         negativeValue = new HashMap<>();
         while(dataMapIterator.hasNext()){
@@ -123,10 +126,10 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
             BarEntry anEntry  = new BarEntry(thisBarKey, thisBarValue);
             if(thisBarValue < 0){
-                anEntry.setIcon(AppCompatResources.getDrawable(getContext(),
+                anEntry.setIcon(AppCompatResources.getDrawable(Objects.requireNonNull(getContext()),
                         R.drawable.ic_thumb_down_black_12dp));
             }else {
-                anEntry.setIcon(AppCompatResources.getDrawable(getContext(),
+                anEntry.setIcon(AppCompatResources.getDrawable(Objects.requireNonNull(getContext()),
                         R.drawable.ic_thumb_up_black_12dp));
             }
             if(thisBarValue <0){
@@ -147,9 +150,10 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
         dataSetBar1.setValueFormatter(
                 (value, entry, dataSetIndex, viewPortHandler) -> "" );
 
-        dataSetBar1.setColors(new int[]{ContextCompat.getColor(getContext(), R.color.traffic_green),
+        dataSetBar1.setColors(ContextCompat.getColor(Objects.requireNonNull(getContext()),
+                R.color.traffic_green),
                 ContextCompat.getColor(getContext(), R.color.traffic_orange),
-                ContextCompat.getColor(getContext(), R.color.traffic_red)});
+                ContextCompat.getColor(getContext(), R.color.traffic_red));
 
 
         BarData barData = new BarData(dataSetBar1);
@@ -171,7 +175,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
     @Override
     public void setClazzActivityChangesDropdownPresets(String[] presets) {
         this.changesPresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
                 android.R.layout.simple_spinner_item, changesPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         activityChangesSpinner.setAdapter(adapter);
@@ -193,13 +197,13 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
     /**
      * On Create of the View fragment . Part of Android's Fragment Override
      *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
+     * @param inflater              The inflator
+     * @param container             The container
+     * @param savedInstanceState    The saved instance
      * @return the root container
      */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         rootContainer =
@@ -229,19 +233,16 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
                 v -> {
                     mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_WEEK);
                     getTintedDrawable(lastWeekButton.getBackground(), R.color.primary);
-                    //lastWeekButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
         lastMonthButton.setOnClickListener(
                 v -> {
                     mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_MONTH);
                     getTintedDrawable(lastMonthButton.getBackground(), R.color.primary);
-                    //lastMonthButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
         lastYearButton.setOnClickListener(
                 v -> {
                     mPresenter.getActivityDataAndUpdateCharts(CHART_DURATION_LAST_YEAR);
                     getTintedDrawable(lastYearButton.getBackground(), R.color.primary);
-                    //lastYearButton.getBackground().setTint(getResources().getColor(R.color.primary));
                 });
 
         activityChangesSpinner =
@@ -277,7 +278,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     public Drawable getTintedDrawable(Drawable drawable, int color) {
         drawable = DrawableCompat.wrap(drawable);
-        int tintColor = ContextCompat.getColor(getContext(), color);
+        int tintColor = ContextCompat.getColor(Objects.requireNonNull(getContext()), color);
         DrawableCompat.setTint(drawable, tintColor);
         return drawable;
     }
@@ -292,40 +293,39 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
             getTintedDrawable(lastWeekButton.getBackground(), R.color.color_gray);
             getTintedDrawable(lastMonthButton.getBackground(), R.color.color_gray);
             getTintedDrawable(lastYearButton.getBackground(), R.color.color_gray);
-//            lastWeekButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-//            lastMonthButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
-//            lastYearButton.getBackground().setTint(getResources().getColor(R.color.color_gray));
+
         });
     }
 
-    //TODO: Maybe change from ClazzActivity to CumulativeClazzActivity
     // ClassLogList's DIFF callback
-    public static final DiffUtil.ItemCallback<ClazzActivity> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<ClazzActivity>(){
+    public static final DiffUtil.ItemCallback<ClazzActivityWithChangeTitle> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<ClazzActivityWithChangeTitle>(){
 
                 @Override
-                public boolean areItemsTheSame(ClazzActivity oldItem, ClazzActivity newItem) {
+                public boolean areItemsTheSame(ClazzActivityWithChangeTitle oldItem, ClazzActivityWithChangeTitle newItem) {
                     return oldItem.getClazzActivityUid() == newItem.getClazzActivityUid();
                 }
 
                 @Override
-                public boolean areContentsTheSame(ClazzActivity oldItem, ClazzActivity newItem) {
+                public boolean areContentsTheSame(ClazzActivityWithChangeTitle oldItem,
+                                                  @NonNull ClazzActivityWithChangeTitle newItem) {
                     return oldItem.equals(newItem);
                 }
             };
 
-    //TODO: check this
+
     @Override
-    public void setListProvider(UmProvider<ClazzActivity> clazzLogListProvider) {
+    public void setListProvider(UmProvider<ClazzActivityWithChangeTitle> clazzLogListProvider) {
 
         //Create a recycler adapter to set on the Recycler View.
         ClazzActivityListRecyclerAdapter recyclerAdapter = new ClazzActivityListRecyclerAdapter(
                 DIFF_CALLBACK, getContext(), this, mPresenter, true);
 
-        DataSource.Factory<Integer, ClazzActivity> factory =
-                (DataSource.Factory<Integer, ClazzActivity>) clazzLogListProvider.getProvider();
+        // A warning is expected
+        DataSource.Factory<Integer, ClazzActivityWithChangeTitle> factory =
+                (DataSource.Factory<Integer, ClazzActivityWithChangeTitle>) clazzLogListProvider.getProvider();
 
-        LiveData<PagedList<ClazzActivity>> data =
+        LiveData<PagedList<ClazzActivityWithChangeTitle>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
 
         data.observe(this, recyclerAdapter::submitList);
@@ -335,11 +335,7 @@ public class ClazzActivityListFragment extends UstadBaseFragment implements Claz
 
     @Override
     public void setFABVisibility(boolean visible) {
-        if(visible){
-            fab.setVisibility(View.VISIBLE);
-        }else{
-            fab.setVisibility(View.INVISIBLE);
-        }
+        fab.setVisibility(visible?View.VISIBLE:View.INVISIBLE);
     }
 
     @Override
