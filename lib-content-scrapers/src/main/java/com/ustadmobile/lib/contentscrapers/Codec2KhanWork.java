@@ -46,7 +46,7 @@ public class Codec2KhanWork {
             System.exit(1);
         }
 
-        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
         new Codec2KhanWork(new File(args[0]), new File(args[1]));
 
