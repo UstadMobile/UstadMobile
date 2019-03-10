@@ -218,25 +218,19 @@ public class ReportAttendanceGroupedByThresholdsPresenter
         }else {
 
             String overallLocation = "Overall";
-            recordDao.getAttendanceGroupedByThresholds(
+            recordDao.getAttendanceGroupedByThresholdsAndClasses(
                 currentTime, fromDate, toDate, (float)thresholdValues.low/100,
-                    (float)thresholdValues.med/100,
-                clazzList, locationList,
-                new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
+                    (float)thresholdValues.med/100, clazzList,
+                    new UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>>() {
 
                     @Override
                     public void onSuccess(List<AttendanceResultGroupedByAgeAndThreshold> result) {
-
                         dataMapsMap.put(overallLocation, result);
-
                         view.updateTables(dataMapsMap);
-
                     }
 
                     @Override
-                    public void onFailure(Throwable exception) {
-
-                    }
+                    public void onFailure(Throwable exception) { exception.printStackTrace();}
                 });
         }
 
@@ -249,15 +243,5 @@ public class ReportAttendanceGroupedByThresholdsPresenter
     public void dataToCSV(){
         view.generateCSVReport();
     }
-
-    //TODO: Export other formats
-    public void dataToXLS(){
-
-    }
-    //TODO: Export other formats
-    public void dataToJSON(){
-
-    }
-
 
 }

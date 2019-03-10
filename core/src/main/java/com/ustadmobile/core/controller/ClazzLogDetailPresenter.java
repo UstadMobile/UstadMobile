@@ -107,8 +107,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 clazzName = clazzDao.findByUid(currentClazzLog.getClazzLogClazzUid()).getClazzName();
 
                 view.runOnUiThread(() -> updateViewDateHeading());
-            }else {
-                //TODO: show error message to user + record - should not happen
             }
 
         }
@@ -364,7 +362,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 updateFeedEntries.add(thisEntry);
                             }
                         }
-                        //repository.getFeedEntryDao().updateList(newFeedEntries);
                     }
 
                     if(before != null
@@ -402,7 +399,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                 updateFeedEntries.add(thisEntry);
                             }
                         }
-                        //repository.getFeedEntryDao().updateList(newFeedEntries);
                     }
                 }
 
@@ -444,8 +440,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     }
                                 }
                             }
-
-                            //repository.getFeedEntryDao().updateList(newFeedEntries);
 
                         }
 
@@ -493,7 +487,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                                 }
                             }
-                            //repository.getFeedEntryDao().updateList(newFeedEntries);
                         }
 
                         @Override

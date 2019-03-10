@@ -78,8 +78,6 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
      * @param personUid     The person Uid
      */
     public void handleToggleClazzChecked(long clazzUid, long personUid, boolean checked){
-        //TODO: check this
-        int x;
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
         clazzMemberDao.findByPersonUidAndClazzUidAsync(personUid, clazzUid, new UmCallback<ClazzMember>() {
             @Override

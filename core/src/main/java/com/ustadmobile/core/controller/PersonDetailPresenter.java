@@ -151,8 +151,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         }
                     });
 
-                }else {
-                    //Todo: show this entity has not loaded yet
                 }
 
             }

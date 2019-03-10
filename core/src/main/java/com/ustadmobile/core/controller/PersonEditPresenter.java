@@ -363,8 +363,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
 
             } else if (field.getFieldUid() == PERSON_FIELD_UID_ATTENDANCE) {
-                //TODO: Check if we are still using attendance
-
                 thisView.setField(field.getFieldIndex(), field.getFieldUid(),
                         new PersonDetailViewField(field.getFieldType(),
                         field.getLabelMessageId(),field.getFieldIcon()), thisValue);
@@ -486,9 +484,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             updateThisPerson.setMotherNum((String) value);
 
         } else if (fieldcode == PERSON_FIELD_UID_BIRTHDAY) {
-            System.out.println(" ");
-            //TODO: Change and work this
-            //updateThisPerson.setDateOfBirth((Long) value);
+            updateThisPerson.setDateOfBirth((Long) value);
 
         } else if (fieldcode == PERSON_FIELD_UID_ADDRESS) {
             updateThisPerson.setAddress((String) value);
@@ -578,8 +574,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             @Override
             public void onSuccess(Integer result) {
 
-
-
                 //Update the custom fields
                 personCustomFieldValueDao.updateListAsync(customFieldsToUpdate,
                         new UmCallback<Integer>() {
@@ -592,6 +586,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                 .findAllClazzesByPersonUidAsList(mUpdatedPerson.getPersonUid());
 
                         List<FeedEntry> newFeedEntries = new ArrayList<>();
+                        List<FeedEntry> updateFeedEntries = new ArrayList<>();
+
                         String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                 PersonDetailView.ARG_PERSON_UID + "=" +
                                 String.valueOf(mUpdatedPerson.getPersonUid());
@@ -609,19 +605,24 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                     ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
                                         feedLinkViewPerson);
 
-                                newFeedEntries.add(
-                                    new FeedEntry(
-                                            feedEntryUid,
-                                            "Student details updated" ,
-                                            "Student " + mUpdatedPerson.getFirstNames()
+                                FeedEntry thisEntry = new FeedEntry(
+                                        feedEntryUid,
+                                        "Student details updated",
+                                        "Student " + mUpdatedPerson.getFirstNames()
                                                 + " " + mUpdatedPerson.getLastName()
-                                                    + " details updated"
-                                            ,
-                                            feedLinkViewPerson,
-                                            everyClazz.getClazzName(),
-                                            mne.getPersonUid()
-                                    )
+                                                + " details updated"
+                                        ,
+                                        feedLinkViewPerson,
+                                        everyClazz.getClazzName(),
+                                        mne.getPersonUid()
                                 );
+                                FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
+
+                                if(existingEntry == null){
+                                    newFeedEntries.add(thisEntry);
+                                }else{
+                                    updateFeedEntries.add(thisEntry);
+                                }
                             }
 
                             for(Person admin:admins){
@@ -630,25 +631,33 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                                         ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
                                         feedLinkViewPerson);
 
-                                newFeedEntries.add(
-                                    new FeedEntry(
-                                            feedEntryUid,
-                                            "Student details updated" ,
-                                            "Student " + mUpdatedPerson.getFirstNames()
-                                                    + " " + mUpdatedPerson.getLastName()
-                                                    + " details updated"
-                                            ,
-                                            feedLinkViewPerson,
-                                            everyClazz.getClazzName(),
-                                            admin.getPersonUid()
-                                    )
+                                FeedEntry thisEntry = new FeedEntry(
+                                        feedEntryUid,
+                                        "Student details updated" ,
+                                        "Student " + mUpdatedPerson.getFirstNames()
+                                                + " " + mUpdatedPerson.getLastName()
+                                                + " details updated"
+                                        ,
+                                        feedLinkViewPerson,
+                                        everyClazz.getClazzName(),
+                                        admin.getPersonUid()
                                 );
+
+                                FeedEntry existingEntry =
+                                        repository.getFeedEntryDao().findByUid(feedEntryUid);
+
+                                if(existingEntry == null){
+                                    newFeedEntries.add(thisEntry);
+                                }else{
+                                    updateFeedEntries.add(thisEntry);
+                                }
                             }
                         }
 
                         repository.getFeedEntryDao().insertList(newFeedEntries);
-                        //End of feed Generation
+                        repository.getFeedEntryDao().updateList(updateFeedEntries);
 
+                        //End of feed Generation
 
                         //Close the activity.
                         view.finish();

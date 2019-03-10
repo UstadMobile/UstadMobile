@@ -94,9 +94,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                 repository.getClazzLogDao().findByClazzUidNotCancelledWithSchedule(currentClazzUid);
         setProviderToView();
 
-        generateAttendanceBarChartDataTest();
-        generateAttendanceLineChartDataTest();
-
     }
 
     /**
@@ -163,7 +160,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         LinkedHashMap<Float, Float> lineDataMap = new LinkedHashMap<>();
         LinkedHashMap<Float, Float> barDataMap = new LinkedHashMap<>();
         long toDate = System.currentTimeMillis();
-        Long fromDate = toDate;
+        long fromDate = toDate;
 
         switch (duration){
             case CHART_DURATION_LAST_WEEK:
@@ -201,7 +198,7 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
             public void onSuccess(List<DailyAttendanceNumbers> result) {
 
                 for(DailyAttendanceNumbers everyDayAttendance: result){
-                    Long dd =everyDayAttendance.getLogDate();
+                    long dd =everyDayAttendance.getLogDate();
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(dd);
                     calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -267,36 +264,4 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                     }
                 });
     }
-
-
-    /**
-     * Generate and calculate test data for the line chart. TODO: Remove for production
-     */
-    private void generateAttendanceLineChartDataTest(){
-        LinkedHashMap<Float, Float> lineData = new LinkedHashMap<>();
-        lineData.put(1f, 0.1f);
-        lineData.put(2f, 0.4f);
-        lineData.put(3f, 0.2f);
-        lineData.put(4f, 0.4f);
-        lineData.put(5f, 0.2f);
-        lineData.put(6f, 0.4f);
-        lineData.put(7f, 0.2f);
-
-        view.updateAttendanceLineChart(lineData);
-    }
-
-    /**
-     * Generate and calculate test data for the bar chart. TODO: Remove for production.
-     */
-    private void generateAttendanceBarChartDataTest(){
-
-        LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
-
-        barData.put(3f, 0.9f);
-        barData.put(2f, 0.6f);
-        barData.put(1f, 0.3f);
-        view.updateAttendanceBarChart(barData);
-    }
-
-
 }

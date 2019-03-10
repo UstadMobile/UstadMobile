@@ -176,21 +176,6 @@ public class ClazzActivityListPresenter
     }
 
     /**
-     * Generates test data for the Bar chart. TODO: Remove in production
-     */
-    private void generateActivityBarChartDataTest(){
-
-        LinkedHashMap<Float, Float> barData = new LinkedHashMap<>();
-
-        barData.put(1f, 5f);
-        barData.put(2f,  -2f);
-        barData.put(3f, 5f);
-        barData.put(4f, -2f);
-        barData.put(5f, -2f);
-        view.updateActivityBarChart(barData);
-    }
-
-    /**
      * Handles going to Creating a new Activity. This is to be called when "Record Activity" FAB is
      * clicked.
      */

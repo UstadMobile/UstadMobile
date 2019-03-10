@@ -310,7 +310,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 }
                 if (fieldType == FIELD_TYPE_PHONE_NUMBER) {
                     et.setInputType(InputType.TYPE_CLASS_PHONE);
-
                 }
                 if (fieldType == FIELD_TYPE_DATE) {
 
@@ -324,6 +323,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                         et.setText(UMCalendarUtil.getPrettyDateFromLong(
                                 myCalendar.getTimeInMillis(), currentLocale));
+                        mPresenter.handleFieldEdited(fieldUid, myCalendar.getTimeInMillis());
 
                     };
 
@@ -347,13 +347,11 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                     et.addTextChangedListener(new TextWatcher() {
                         @Override
                         public void beforeTextChanged(CharSequence s, int start,
-                                                      int count, int after) {
-                        }
+                                                      int count, int after) {}
 
                         @Override
                         public void onTextChanged(CharSequence s, int start,
-                                                  int before, int count) {
-                        }
+                                                  int before, int count) {}
 
                         @Override
                         public void afterTextChanged(Editable s) {
@@ -493,12 +491,6 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
         //cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION |Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST);
-
-
-
-
-
-
 
     }
 

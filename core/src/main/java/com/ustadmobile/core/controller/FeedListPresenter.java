@@ -74,8 +74,9 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         view.updateAttendancePercentage(attendanceAverage);
         view.updateNumClasses(average.getNumClazzes());
         view.updateNumStudents(average.getNumStudents());
-        //TODO: Update with attendance trend.
-        view.updateAttendanceTrend(0, 0);
+        //TODOne: Update with attendance trend.
+        //Update: Not part of new Sprint design.
+        //view.updateAttendanceTrend(0, 0);
 
         checkPermissions();
     }

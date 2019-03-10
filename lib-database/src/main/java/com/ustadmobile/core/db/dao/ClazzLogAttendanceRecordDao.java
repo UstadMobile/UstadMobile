@@ -340,11 +340,9 @@ public abstract class ClazzLogAttendanceRecordDao implements
                           long locationUid,
                           UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList);
 
-    public void getAttendanceGroupedByThresholds(long datetimeNow, long fromTime,
+    public void getAttendanceGroupedByThresholdsAndClasses(long datetimeNow, long fromTime,
                  long toTime, float lowAttendanceThreshold, float midAttendanceThreshold,
-                 List<Long> clazzes, List<Long> locations,
-                 UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList ){
-        //TODO: Account for locations
+                 List<Long> clazzes, UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList ){
         if(clazzes.isEmpty()){
             getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime, lowAttendanceThreshold,
                     midAttendanceThreshold, resultList);
