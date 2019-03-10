@@ -4,14 +4,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
+import com.ustadmobile.core.db.dao.ContainerEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
 import com.ustadmobile.lib.contentscrapers.util.VideoApi;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerEntry;
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
+import com.ustadmobile.lib.db.entities.ContainerWithContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryFileWithContentEntryFileStatusAndContentEntryId;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -21,8 +28,11 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SUBTITLE_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT;
@@ -31,84 +41,87 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 public class Codec2KhanWork {
 
     public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Usage: <container file destination><khan folder destination><optional log{trace, debug, info, warn, error, fatal}>");
+            System.exit(1);
+        }
 
-        UMLogUtil.setLevel(args.length == 1 ? args[0] : "");
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
 
-        new Codec2KhanWork();
+        new Codec2KhanWork(new File(args[0]), new File(args[1]));
 
     }
 
-    public Codec2KhanWork() {
+    public Codec2KhanWork(File containerFolder, File khanFolder) {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         Type type = new TypeToken<List<SrtFormat>>() {
         }.getType();
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        ContentEntryFileStatusDao statusDao = db.getContentEntryFileStatusDao();
-        ContentEntryContentEntryFileJoinDao fileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        List<ContentEntryFileWithContentEntryFileStatusAndContentEntryId> khanFileList = contentEntryFileDao.findKhanFiles();
+        ContainerDao containerDao = repository.getContainerDao();
+        List<ContainerWithContentEntry> khanContainerList = containerDao.findKhanContainers();
+        ContainerEntryDao containerEntryDao = db.getContainerEntryDao();
 
-        for (ContentEntryFileWithContentEntryFileStatusAndContentEntryId khanFile : khanFileList) {
+        for (ContainerWithContentEntry khanFile : khanContainerList) {
             try {
 
-                UMLogUtil.logTrace("Started with khan file at " + khanFile.getFilePath());
-                File mp4VideoFile = null;
-                File contentFolder;
-                if (khanFile.getFilePath().endsWith(".mp4")) {
-                    mp4VideoFile = new File(khanFile.getFilePath());
-                    contentFolder = mp4VideoFile.getParentFile();
-                } else if (khanFile.getFilePath().endsWith(".zip")) {
-                    File zip = new File(khanFile.getFilePath());
-                    contentFolder = new File(UMFileUtil.stripExtensionIfPresent(zip.getPath()));
-                } else {
-                    UMLogUtil.logError("Found a file path that was not zip or mp4");
-                    continue;
-                }
-                File parentFolder = contentFolder.getParentFile();
-                if (parentFolder.getPath().endsWith("/en")) {
-                    UMLogUtil.logTrace("Got folder with parent en");
-                    parentFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(contentFolder.getName()));
-                    contentFolder = new File(parentFolder, parentFolder.getName());
-                }
-                UMLogUtil.logTrace("Got the parent folder " + parentFolder.getPath());
+                List<ContainerEntryWithContainerEntryFile> khanfileList = containerEntryDao.findByContainer(khanFile.getContainerUid());
 
-
-                // delete if greater than 420mb - go to next entry
                 if (khanFile.getFileSize() > 440401920) {
 
-                    statusDao.deleteByUid(khanFile.getCefsUid());
-                    contentEntryFileDao.deleteByUid(khanFile.getContentEntryFileUid());
-                    fileJoinDao.deleteByUid(khanFile.getContentEntryFileUid(), khanFile.getContentEntryUid());
-                    UMLogUtil.logTrace("found a file that was larger than 420mb at  " + khanFile.getFilePath());
+                    containerEntryDao.deleteByContainerUid(khanFile.getContainerUid());
+                    containerDao.deleteByUid(khanFile.getContainerUid());
+                    continue;
+
+                }
+
+                String khanId = khanFile.getSourceUrl();
+                khanId = khanId.substring(khanId.lastIndexOf("/") + 1);
+
+                File mp4VideoFile = null;
+                File contentFolder = null;
+                long containerEntryUidToDelete = 0L;
+                for (ContainerEntryWithContainerEntryFile file : khanfileList) {
+
+                    String nameOfFile = file.getCePath();
+                    if (nameOfFile.endsWith(".mp4")) {
+                        containerEntryUidToDelete = file.getCeUid();
+                        nameOfFile = nameOfFile.contains("/") ? nameOfFile.substring(nameOfFile.lastIndexOf("/") + 1) : nameOfFile;
+                        contentFolder = Paths.get(khanFolder.getAbsolutePath(), khanId, khanId).toFile();
+                        mp4VideoFile = new File(contentFolder, nameOfFile);
+                    }
+                }
+
+                if (contentFolder == null) {
+                    UMLogUtil.logError("Did not find the folder" + khanFile.getSourceUrl());
                     continue;
                 }
 
                 String entryId = khanFile.getEntryId();
-                File content = null;
-                if (mp4VideoFile != null) {
-                    content = new File(mp4VideoFile.getPath());
-                }
+                File content = new File(mp4VideoFile.getPath());
+
                 URL videoApiUrl = new URL("http://www.khanacademy.org/api/v1/videos/" + entryId);
                 VideoApi videoApi = gson.fromJson(IOUtils.toString(videoApiUrl, UTF_ENCODING), VideoApi.class);
-                String youtubeId = videoApi.youtube_id;
+                String youtubeId = "";
+                if (videoApi != null) {
+                    youtubeId = videoApi.youtube_id;
+                    if (videoApi.download_urls != null) {
 
-                if (videoApi.download_urls != null) {
-
-                    String videoUrl = videoApi.download_urls.mp4;
-                    if (videoUrl == null || videoUrl.isEmpty()) {
-                        videoUrl = videoApi.download_urls.mp4Low;
-                        if (videoUrl == null) {
-                            UMLogUtil.logError("Video was not available in any format for url: " + khanFile.getFilePath());
+                        String videoUrl = videoApi.download_urls.mp4;
+                        if (videoUrl == null || videoUrl.isEmpty()) {
+                            videoUrl = videoApi.download_urls.mp4Low;
+                            if (videoUrl == null) {
+                                UMLogUtil.logError("Video was not available in any format for url: " + khanFile.getSourceUrl());
+                            }
                         }
-                    }
-                    if (videoUrl != null) {
-                        content = new File(contentFolder, FilenameUtils.getName(videoUrl));
-                        FileUtils.copyURLToFile(new URL(videoUrl), content);
-                        UMLogUtil.logTrace("Got the video mp4");
-                    } else {
-                        UMLogUtil.logError("Did not get the video mp4 for " + khanFile.getFilePath());
+                        if (videoUrl != null) {
+                            content = new File(contentFolder, FilenameUtils.getName(videoUrl));
+                            FileUtils.copyURLToFile(new URL(videoUrl), content);
+                            UMLogUtil.logTrace("Got the video mp4");
+                        } else {
+                            UMLogUtil.logError("Did not get the video mp4 for " + khanFile.getSourceUrl());
+                        }
                     }
                 }
 
@@ -123,7 +136,7 @@ public class Codec2KhanWork {
 
                 } catch (Exception e) {
                     UMLogUtil.logInfo(ExceptionUtils.getStackTrace(e));
-                    UMLogUtil.logInfo("No subtitle for youtube link " + youtubeId + " and fileUid " + khanFile.getContentEntryFileUid());
+                    UMLogUtil.logInfo("No subtitle for youtube link " + youtubeId + " and fileUid " + khanFile.getContainerUid());
                 }
 
                 File webMFile = new File(contentFolder, UMFileUtil.stripExtensionIfPresent(content.getName()) + WEBM_EXT);
@@ -132,32 +145,24 @@ public class Codec2KhanWork {
                 UMLogUtil.logTrace("Converted Coddec2");
 
                 ContentScraperUtil.deleteFile(content);
-                ContentScraperUtil.deleteFile(mp4VideoFile);
+                if (!content.getPath().equals(mp4VideoFile.getPath())) {
+                    ContentScraperUtil.deleteFile(mp4VideoFile);
+                }
 
 
-                File zipFile = new File(parentFolder, contentFolder.getName() + ZIP_EXT);
-                ContentScraperUtil.zipDirectory(contentFolder,
-                        zipFile.getName(),
-                        parentFolder);
+                ContainerManager containerManager = new ContainerManager(khanFile, db,
+                        repository, containerFolder.getAbsolutePath());
+                HashMap<File, String> fileMap = new HashMap<>();
+                ContentScraperUtil.createContainerFromDirectory(contentFolder, fileMap);
+                containerManager.addEntries(fileMap, true);
+                containerDao.updateMimeType(MIMETYPE_KHAN, khanFile.getContainerUid());
+                containerEntryDao.deleteByContainerEntryUid(containerEntryUidToDelete);
 
-                contentEntryFileDao.updateFiles(zipFile.length(),
-                        ContentScraperUtil.getMd5(zipFile),
-                        ScraperConstants.MIMETYPE_KHAN,
-                        khanFile.getContentEntryFileUid());
-
-                UMLogUtil.logTrace("Zipped");
-
-                ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-                fileStatus.setCefsUid(khanFile.getCefsUid());
-                fileStatus.setFilePath(zipFile.getPath());
-                fileStatus.setCefsContentEntryFileUid(khanFile.getContentEntryFileUid());
-                statusDao.update(fileStatus);
-
-                UMLogUtil.logDebug("Completed conversion of " + khanFile.getFilePath());
+                UMLogUtil.logDebug("Completed conversion of " + khanFile.getSourceUrl());
 
             } catch (Exception e) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                UMLogUtil.logError("Error converting for video " + khanFile.getFilePath());
+                UMLogUtil.logError("Error converting for video " + khanFile.getSourceUrl());
             }
 
 

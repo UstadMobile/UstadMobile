@@ -37,4 +37,10 @@ public abstract class ContainerEntryDao implements BaseDao<ContainerEntry> {
             "WHERE ContainerEntry.ceContainerUid = :containerUid")
     public abstract void findByContainer(long containerUid, UmCallback<List<ContainerEntryWithContainerEntryFile>> umCallback);
 
+
+    @UmQuery("DELETE FROM ContainerEntry WHERE ceContainerUid = :containerUid" )
+    public abstract void deleteByContainerUid(long containerUid);
+
+    @UmQuery("DELETE FROM ContainerEntry WHERE ceUid = :containerEntryUid")
+    public abstract void deleteByContainerEntryUid(long containerEntryUid);
 }

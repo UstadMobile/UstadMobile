@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerWithContentEntry;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
 public abstract class ContainerDao implements SyncableDao<Container, ContainerDao> {
 
     @UmInsert
-    public abstract Long [] insert(List<Container> containerList);
+    public abstract Long[] insert(List<Container> containerList);
 
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
@@ -63,6 +64,15 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
             "AND Container.containerUid = :containerUid")
     public abstract Long findLocalAvailabilityByUid(long containerUid);
 
+    @UmQuery("SELECT Container.*, ContentEntry.entryId, ContentEntry.sourceUrl FROM Container " +
+            "LEFT JOIN ContentEntry ON Container.containerContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntry.publisher LIKE '%Khan Academy%' AND Container.mimeType = 'video/mp4'")
+    public abstract List<ContainerWithContentEntry> findKhanContainers();
 
+    @UmQuery("DELETE FROM Container WHERE containerUid = :containerUid")
+    public abstract void deleteByUid(long containerUid);
+
+    @UmQuery("UPDATE Container SET mimeType = :mimeType WHERE Container.containerUid = :containerUid")
+    public abstract void updateMimeType(String mimeType, long containerUid);
 
 }
