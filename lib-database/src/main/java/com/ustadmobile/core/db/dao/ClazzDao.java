@@ -276,7 +276,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "(SELECT (EXISTS (SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " +
                 " AND clazzMemberClazzUid = Clazz.clazzUid  AND clazzMemberActive = 1 " +
                 " ))) AS enrolled " +
-            "FROM Clazz WHERE Clazz.clazzActive = 1")
+            "FROM Clazz WHERE Clazz.clazzActive = 1 ORDER BY Clazz.clazzName ASC")
     public abstract UmProvider<ClazzWithEnrollment>
                                             findAllClazzesWithEnrollmentByPersonUid(long personUid);
 
