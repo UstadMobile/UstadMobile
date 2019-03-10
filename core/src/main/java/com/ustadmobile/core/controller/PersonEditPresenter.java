@@ -259,12 +259,13 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                     public void onFailure(Throwable exception) {exception.printStackTrace();}
                 });
 
-                //TODO: Check do we even need to update personWithPic if that object didnt change?
                 //Update personWithpic
                 personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
 
                     @Override
-                    public void onSuccess(Integer result) {}
+                    public void onSuccess(Integer result) {
+                        generateFeedsForPersonUpdate(repository, mUpdatedPerson);
+                    }
 
                     @Override
                     public void onFailure(Throwable exception) {
@@ -562,6 +563,86 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
     }
 
+    public static void generateFeedsForPersonUpdate(UmAppDatabase repository, Person mUpdatedPerson){
+        //All edits trigger a feed
+        List<ClazzWithNumStudents> personClazzes = repository.getClazzDao()
+                .findAllClazzesByPersonUidAsList(mUpdatedPerson.getPersonUid());
+
+        List<FeedEntry> newFeedEntries = new ArrayList<>();
+        List<FeedEntry> updateFeedEntries = new ArrayList<>();
+
+        String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
+                PersonDetailView.ARG_PERSON_UID + "=" +
+                String.valueOf(mUpdatedPerson.getPersonUid());
+
+        for(ClazzWithNumStudents everyClazz:personClazzes){
+            Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+            List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                    everyClazz.getClazzUid(), mneOfficerRole.getRoleUid());
+
+            List<Person> admins = repository.getPersonDao().findAllAdminsAsList();
+
+            for(Person mne:mneofficers){
+                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                        mne.getPersonUid(), everyClazz.getClazzUid(),
+                        ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
+                        feedLinkViewPerson);
+
+                FeedEntry thisEntry = new FeedEntry(
+                        feedEntryUid,
+                        "Student details updated",
+                        "Student " + mUpdatedPerson.getFirstNames()
+                                + " " + mUpdatedPerson.getLastName()
+                                + " details updated"
+                        ,
+                        feedLinkViewPerson,
+                        everyClazz.getClazzName(),
+                        mne.getPersonUid()
+                );
+                FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
+
+                if(existingEntry == null){
+                    newFeedEntries.add(thisEntry);
+                }else{
+                    updateFeedEntries.add(thisEntry);
+                }
+            }
+
+            for(Person admin:admins){
+                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                        admin.getPersonUid(), everyClazz.getClazzUid(),
+                        ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
+                        feedLinkViewPerson);
+
+                FeedEntry thisEntry = new FeedEntry(
+                        feedEntryUid,
+                        "Student details updated" ,
+                        "Student " + mUpdatedPerson.getFirstNames()
+                                + " " + mUpdatedPerson.getLastName()
+                                + " details updated"
+                        ,
+                        feedLinkViewPerson,
+                        everyClazz.getClazzName(),
+                        admin.getPersonUid()
+                );
+
+                FeedEntry existingEntry =
+                        repository.getFeedEntryDao().findByUid(feedEntryUid);
+
+                if(existingEntry == null){
+                    newFeedEntries.add(thisEntry);
+                }else{
+                    updateFeedEntries.add(thisEntry);
+                }
+            }
+        }
+
+        repository.getFeedEntryDao().insertList(newFeedEntries);
+        repository.getFeedEntryDao().updateList(updateFeedEntries);
+
+        //End of feed Generation
+    }
+
     /**
      * Done click handler on the Edit / Enrollment page: Clicking done will persist and save it and
      * end the activity.
@@ -581,83 +662,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                     public void onSuccess(Integer result) {
 
                         //Start of feed generation
-                        //All edits trigger a feed
-                        List<ClazzWithNumStudents> personClazzes = repository.getClazzDao()
-                                .findAllClazzesByPersonUidAsList(mUpdatedPerson.getPersonUid());
-
-                        List<FeedEntry> newFeedEntries = new ArrayList<>();
-                        List<FeedEntry> updateFeedEntries = new ArrayList<>();
-
-                        String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
-                                PersonDetailView.ARG_PERSON_UID + "=" +
-                                String.valueOf(mUpdatedPerson.getPersonUid());
-
-                        for(ClazzWithNumStudents everyClazz:personClazzes){
-                            Role mneOfficerRole = repository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
-                            List<Person> mneofficers = repository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                                    everyClazz.getClazzUid(), mneOfficerRole.getRoleUid());
-
-                            List<Person> admins = repository.getPersonDao().findAllAdminsAsList();
-
-                            for(Person mne:mneofficers){
-                                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                    mne.getPersonUid(), everyClazz.getClazzUid(),
-                                    ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
-                                        feedLinkViewPerson);
-
-                                FeedEntry thisEntry = new FeedEntry(
-                                        feedEntryUid,
-                                        "Student details updated",
-                                        "Student " + mUpdatedPerson.getFirstNames()
-                                                + " " + mUpdatedPerson.getLastName()
-                                                + " details updated"
-                                        ,
-                                        feedLinkViewPerson,
-                                        everyClazz.getClazzName(),
-                                        mne.getPersonUid()
-                                );
-                                FeedEntry existingEntry = repository.getFeedEntryDao().findByUid(feedEntryUid);
-
-                                if(existingEntry == null){
-                                    newFeedEntries.add(thisEntry);
-                                }else{
-                                    updateFeedEntries.add(thisEntry);
-                                }
-                            }
-
-                            for(Person admin:admins){
-                                long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                                        admin.getPersonUid(), everyClazz.getClazzUid(),
-                                        ScheduledCheck.TYPE_CHECK_PERSON_PROFILE_UPDATED,
-                                        feedLinkViewPerson);
-
-                                FeedEntry thisEntry = new FeedEntry(
-                                        feedEntryUid,
-                                        "Student details updated" ,
-                                        "Student " + mUpdatedPerson.getFirstNames()
-                                                + " " + mUpdatedPerson.getLastName()
-                                                + " details updated"
-                                        ,
-                                        feedLinkViewPerson,
-                                        everyClazz.getClazzName(),
-                                        admin.getPersonUid()
-                                );
-
-                                FeedEntry existingEntry =
-                                        repository.getFeedEntryDao().findByUid(feedEntryUid);
-
-                                if(existingEntry == null){
-                                    newFeedEntries.add(thisEntry);
-                                }else{
-                                    updateFeedEntries.add(thisEntry);
-                                }
-                            }
-                        }
-
-                        repository.getFeedEntryDao().insertList(newFeedEntries);
-                        repository.getFeedEntryDao().updateList(updateFeedEntries);
-
-                        //End of feed Generation
+                        generateFeedsForPersonUpdate(repository, mUpdatedPerson);
 
                         //Close the activity.
                         view.finish();

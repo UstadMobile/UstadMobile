@@ -194,7 +194,6 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         }
     }
 
-
     /**
      * Starts the camera intent.
      */

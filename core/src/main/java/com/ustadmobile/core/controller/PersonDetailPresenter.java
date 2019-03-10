@@ -91,6 +91,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private PersonPictureDao personPictureDao;
 
+    private Person currentPerson;
+
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     /**
@@ -131,6 +133,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             @Override
             public void onSuccess(Person thisPerson) {
                 if(thisPerson != null) {
+                    currentPerson = thisPerson;
                     if(thisPerson.getFatherNumber() != null && !thisPerson.getFatherNumber().isEmpty()){
                         oneParentNumber = thisPerson.getFatherNumber();
                     }else if(thisPerson.getMotherNum() != null && !thisPerson.getMotherNum().isEmpty()){
@@ -146,9 +149,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                         }
 
                         @Override
-                        public void onFailure(Throwable exception) {
-
-                        }
+                        public void onFailure(Throwable exception) { exception.printStackTrace();}
                     });
 
                 }
@@ -295,11 +296,25 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         personPicture.setPersonPicturePersonUid(personUid);
         personPicture.setPicTimestamp(System.currentTimeMillis());
 
+        PersonDao personDao = repository.getPersonDao();
+
         personPictureDao.insertAsync(personPicture, new UmCallback<Long>() {
             @Override
             public void onSuccess(Long personPictureUid) {
                 personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile);
 
+                //Update person and generate feeds for person
+                personDao.updateAsync(currentPerson, new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer result) {
+                        PersonEditPresenter.generateFeedsForPersonUpdate(repository, currentPerson);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
                 view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid));
             }
 
