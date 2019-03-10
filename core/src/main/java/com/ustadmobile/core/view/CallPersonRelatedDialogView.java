@@ -9,4 +9,5 @@ public interface CallPersonRelatedDialogView extends UstadView {
     void finish();
     void setOnDisplay(LinkedHashMap<Integer, CallPersonRelatedDialogPresenter.NameWithNumber> numbers);
     void handleClickCall(String number);
+    void showRetention(boolean show);
 }

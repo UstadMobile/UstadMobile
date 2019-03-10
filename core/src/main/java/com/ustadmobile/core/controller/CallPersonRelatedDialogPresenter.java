@@ -3,15 +3,21 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
+import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CallPersonRelatedDialogView;
+import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
+import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -58,7 +64,8 @@ public class CallPersonRelatedDialogPresenter extends UstadBaseController<CallPe
         }
     }
 
-    public void generateCallingMap(Person personToCall, ClazzMemberWithPerson teacherToCall){
+    public void generateCallingMap(Person personToCall, ClazzMemberWithPerson teacherToCall,
+                                   Person mainOfficer){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         putThisMap = new LinkedHashMap<>();
@@ -72,10 +79,15 @@ public class CallPersonRelatedDialogPresenter extends UstadBaseController<CallPe
                 teacherToCall.getPerson().getPhoneNum()));
 
 
-        //TODO: Retention officer's number? How?
-//        callMeMap.put(impl.getString(MessageID.retention_officer, context) +
-//                "(" + ")", );
-
+        if(mainOfficer != null){
+            putThisMap.put(NUMBER_RETENTION_OFFICER,
+                    new NameWithNumber(impl.getString(MessageID.retention_officer, context) +
+                    "(" + mainOfficer.getFirstNames() + " " + mainOfficer.getLastName() + ")",
+                            personToCall.getPhoneNum()));
+            view.showRetention(true);
+        }else{
+            view.showRetention(false);
+        }
 
         view.setOnDisplay(putThisMap);
     }
@@ -87,8 +99,10 @@ public class CallPersonRelatedDialogPresenter extends UstadBaseController<CallPe
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         PersonDao personDao = repository.getPersonDao();
-        ClazzDao clazzDao = repository.getClazzDao();
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+        EntityRoleDao entityRoleDao = repository.getEntityRoleDao();
+        RoleDao roleDao = repository.getRoleDao();
+        PersonGroupMemberDao groupMemberDao = repository.getPersonGroupMemberDao();
 
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
@@ -97,22 +111,34 @@ public class CallPersonRelatedDialogPresenter extends UstadBaseController<CallPe
                     currentPerson = result;
 
                     clazzMemberDao.findClazzMemberWithPersonByRoleForClazzUid(clazzUid,
-                            ClazzMember.ROLE_TEACHER, new UmCallback<List<ClazzMemberWithPerson>>() {
-                                @Override
-                                public void onSuccess(List<ClazzMemberWithPerson> result) {
-                                    ClazzMemberWithPerson mainTeacher;
-                                    if(!result.isEmpty()) {
-                                        mainTeacher = result.get(0);
+                        ClazzMember.ROLE_TEACHER, new UmCallback<List<ClazzMemberWithPerson>>() {
+                            @Override
+                            public void onSuccess(List<ClazzMemberWithPerson> result) {
+                                ClazzMemberWithPerson mainTeacher;
+                                Person mainOfficer = null;
+                                if(!result.isEmpty()) {
+                                    mainTeacher = result.get(0);
 
-                                        generateCallingMap(currentPerson, mainTeacher);
+                                    Role officerRole = roleDao.findByNameSync(Role.ROLE_NAME_OFFICER);
+                                    List<EntityRole> officerEntityRoles =
+                                            entityRoleDao.findGroupByRoleAndEntityTypeAndUidSync(Clazz.TABLE_ID,
+                                            clazzUid, officerRole.getRoleUid());
+                                    if(officerEntityRoles.size() >0){
+                                        long mainOfficerGroupUid =
+                                                officerEntityRoles.get(0).getErGroupUid();
+                                        List<Person> officers = groupMemberDao.findPersonByGroupUid(mainOfficerGroupUid);
+                                        mainOfficer = officers.get(0);
                                     }
-                                }
 
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
+                                    generateCallingMap(currentPerson, mainTeacher, mainOfficer);
                                 }
-                            });
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
                 }
             }
 

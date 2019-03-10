@@ -20,19 +20,15 @@ public class SelQuestionResponseNomination {
     //<-> SelQuestionResponse entity.
     private long selQuestionResponseNominationSelQuestionResponseUId;
 
-    //Added 31012019 sel TODO add to Migrations
+    //Added 31012019 sel
     private boolean nominationActive;
 
-    //Removed : TODO: add to Migrations
-//    @UmSyncLastChangedBy
-//    private int scheduleNominationQuestionResponseNominationLastChangedBy;
-
-    //Renamed: TODO: add to Migrations
+    //Renamed:
     @UmSyncMasterChangeSeqNum
     private long selQuestionResponseNominationMasterChangeSeqNum;
     //private long scheduleNominationQuestionResponseNominationMasterChangeSeqNum;
 
-    //Renamed: TODO: add to Migrations
+    //Renamed:
     @UmSyncLocalChangeSeqNum
     private long selQuestionResponseNominationLocalChangeSeqNum;
     //private long scheduleNominationQuestionResponseNominationLocalChangeSeqNum;

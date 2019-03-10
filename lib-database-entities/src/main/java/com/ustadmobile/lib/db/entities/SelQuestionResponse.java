@@ -18,7 +18,7 @@ public class SelQuestionResponse {
     // -> SelQuestionSetResponse
     private long selQuestionResponseSelQuestionSetResponseUid;
 
-    //Added the actual Question UID (28012019): TODO: Note for Migrations
+    //Added the actual Question UID (28012019):
     private long selQuestionResponseSelQuestionUid;
 
     @UmSyncMasterChangeSeqNum

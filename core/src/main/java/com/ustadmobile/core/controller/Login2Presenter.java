@@ -62,7 +62,6 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
                     view.setFinishAfficinityOnView();
                     UmAccountManager.setActiveAccount(result, getContext());
 
-                    //TODO: force sync here.
                     view.forceSync();
 
                     systemImpl.go(mNextDest, getContext());

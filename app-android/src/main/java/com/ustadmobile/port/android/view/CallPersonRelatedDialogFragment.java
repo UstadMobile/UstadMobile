@@ -38,7 +38,7 @@ public class CallPersonRelatedDialogFragment extends UstadDialogFragment impleme
     View rootView;
     AlertDialog dialog;
 
-    TextView fatherEntry, motherEntry, teacherEntry;
+    TextView fatherEntry, motherEntry, teacherEntry, officerEntry;
     CallPersonRelatedDialogPresenter mPresenter;
 
     @android.support.annotation.NonNull
@@ -61,6 +61,8 @@ public class CallPersonRelatedDialogFragment extends UstadDialogFragment impleme
                 rootView.findViewById(R.id.fragment_call_person_related_dialog_mother);
         teacherEntry =
                 rootView.findViewById(R.id.fragment_call_person_related_dialog_teacher);
+        officerEntry =
+                rootView.findViewById(R.id.fragment_call_person_related_dialog_retention);
 
         //Presenter stuff
         mPresenter = new CallPersonRelatedDialogPresenter(getContext(),
@@ -102,7 +104,8 @@ public class CallPersonRelatedDialogFragment extends UstadDialogFragment impleme
                         teacherEntry.setOnClickListener(v -> handleClickCall(nameWithNumber.number));
                         break;
                     case NUMBER_RETENTION_OFFICER:
-                        //TODO: Retention Offiver
+                        officerEntry.setText(nameWithNumber.name);
+                        officerEntry.setOnClickListener(v -> handleClickCall(nameWithNumber.number));
                         break;
                     default:
                         break;
@@ -117,6 +120,11 @@ public class CallPersonRelatedDialogFragment extends UstadDialogFragment impleme
     public void handleClickCall(String number) {
         startActivity(new Intent(Intent.ACTION_DIAL,
                 Uri.parse("tel:" + number)));
+    }
+
+    @Override
+    public void showRetention(boolean show) {
+        officerEntry.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
     @Override

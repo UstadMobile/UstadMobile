@@ -8,6 +8,22 @@
 
 
     <TextView
+        android:id="@+id/fragment_call_person_related_dialog_retention"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="Retention"
+        android:visibility="invisible"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_call_person_related_dialog_teacher"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
         android:id="@+id/fragment_call_person_related_dialog_teacher"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,7 +34,7 @@
         android:text="TextView"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_call_person_related_dialog_mother" />
@@ -50,4 +66,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
 </android.support.constraint.ConstraintLayout>

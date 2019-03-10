@@ -51,7 +51,6 @@ public class UMAndroidUtil {
         while(iterator.hasNext()) {
             key = iterator.next();
             val = bundle.get(key);
-            //TODO: could this not simply be putAll?
             if(val instanceof String) {
                 retVal.put(key, val);
             }else if(val instanceof Integer) {
