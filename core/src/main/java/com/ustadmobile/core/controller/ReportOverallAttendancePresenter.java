@@ -90,6 +90,7 @@ public class ReportOverallAttendancePresenter
         }
         if(arguments.containsKey(ARG_LOCATION_LIST)){
             locations = (long[]) arguments.get(ARG_LOCATION_LIST);
+            //TODO: Get recursive all sub locations as well.
             locationList = convertLongArray(locations);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
@@ -195,7 +196,6 @@ public class ReportOverallAttendancePresenter
         ClazzLogAttendanceRecordDao attendanceRecordDao =
                 repository.getClazzLogAttendanceRecordDao();
 
-        //TODO: Account for locations in the Dao.
         attendanceRecordDao.findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate,
             clazzesList, locationList, new UmCallback<List<DailyAttendanceNumbers>>() {
 
@@ -214,14 +214,6 @@ public class ReportOverallAttendancePresenter
 
     public void dataToCSV(){
         view.generateCSVReport();
-    }
-
-    public void dataToXLS(){
-        //TODO
-    }
-
-    public void dataToJSON(){
-        //TODO
     }
 
     @Override

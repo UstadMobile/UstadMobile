@@ -344,6 +344,7 @@ public abstract class ClazzLogAttendanceRecordDao implements
                  long toTime, float lowAttendanceThreshold, float midAttendanceThreshold,
                  List<Long> clazzes, List<Long> locations,
                  UmCallback<List<AttendanceResultGroupedByAgeAndThreshold>> resultList ){
+        //TODO: Account for locations
         if(clazzes.isEmpty()){
             getAttendanceGroupedByThresholds(datetimeNow, fromTime, toTime, lowAttendanceThreshold,
                     midAttendanceThreshold, resultList);
@@ -453,6 +454,69 @@ public abstract class ClazzLogAttendanceRecordDao implements
 
             " LEFT JOIN ClazzMember ON " +
             " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzLog.done = 1 " +
+            " AND ClazzLog.clazzLogClazzUid IN (:clazzes) " +
+            " AND Clazz.clazzLocationUid IN (:locations)  " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            "group by (ClazzLog.logDate)")
+    public abstract void findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(long fromDate,
+                                        long toDate, List<Long> clazzes, List<Long> locations,
+                                        UmCallback<List<DailyAttendanceNumbers>> resultObject);
+
+    @UmQuery("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
+            " ClazzLog.logDate, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
+            " ClazzLog.clazzLogClazzUid as clazzUid, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
+            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
+            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
+            " ClazzLog.clazzLogUid as clazzLogUid " +
+            " from ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            " LEFT JOIN ClazzMember ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
+            " LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
+            " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
+            " WHERE ClazzLog.done = 1 " +
+            " AND Clazz.clazzLocationUid IN (:locations)  " +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            "group by (ClazzLog.logDate)")
+    public abstract void findOverallDailyAttendanceNumbersByDateAndLocation(long fromDate,
+                                       long toDate, List<Long> locations,
+                                       UmCallback<List<DailyAttendanceNumbers>> resultObject);
+
+    @UmQuery("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
+            " ClazzLog.logDate, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
+            " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
+            " ClazzLog.clazzLogClazzUid as clazzUid, " +
+            " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
+            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
+            " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
+            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
+            " ClazzLog.clazzLogUid as clazzLogUid " +
+            " from ClazzLogAttendanceRecord " +
+            " LEFT JOIN ClazzLog ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+
+            " LEFT JOIN ClazzMember ON " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
             " WHERE ClazzLog.done = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
@@ -463,7 +527,6 @@ public abstract class ClazzLogAttendanceRecordDao implements
 
 
     /**
-     * TODO: Account for Locations,.
      * @param fromDate  from date
      * @param toDate    to date
      * @param clazzes   list of classes
@@ -474,9 +537,19 @@ public abstract class ClazzLogAttendanceRecordDao implements
                 List<Long> clazzes, List<Long> locations,
                 UmCallback<List<DailyAttendanceNumbers>> resultObject){
         if(clazzes.isEmpty()){
-            findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, resultObject);
+            if(locations.isEmpty()) {
+                findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, resultObject);
+            }else{
+                findOverallDailyAttendanceNumbersByDateAndLocation(fromDate, toDate, locations,
+                        resultObject);
+            }
         }else{
-            findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate,clazzes,resultObject);
+            if(locations.isEmpty()) {
+                findOverallDailyAttendanceNumbersByDateAndStuff(fromDate, toDate, clazzes, resultObject);
+            }else{
+                findOverallDailyAttendanceNumbersByDateAndClazzesAndLocations(fromDate, toDate,
+                        clazzes, locations, resultObject);
+            }
         }
     }
 
