@@ -107,10 +107,8 @@ public class SELSelectConsentPresenter
                         goToNextQuestion();
 
                     }else{
-                        //TODO remove another newResponse creation? : Check
                         //Go re-do/do the recognition activity.
-                        SelQuestionSetResponse newResponse =
-                                new SelQuestionSetResponse();
+                        SelQuestionSetResponse newResponse = new SelQuestionSetResponse();
                         newResponse.setSelQuestionSetResponseStartTime(System.currentTimeMillis());
                         newResponse.setSelQuestionSetResponseClazzMemberUid(currentClazzMemberUid);
                         newResponse.setSelQuestionSetResposeUid(
