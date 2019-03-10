@@ -17,7 +17,9 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzListPresenter;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.UMCalendar;
 
 /**
  * The ClazzList Recycler Adapter used here.
@@ -81,12 +83,16 @@ public class ClazzListRecyclerAdapter extends
         }
 
         //Get lastRecordedAttendance
-        //TODO
+
+        String lastRecordedString = theFragment.getText(R.string.not_recorded).toString();
+        if(clazz.getLastRecorded() > 0){
+            lastRecordedString = theFragment.getText(R.string.last_recorded) + " " +
+                    UMCalendarUtil.getPrettyDateSimpleFromLong(clazz.getLastRecorded());
+        }
 
         String attendancePercentageText =
                 attendancePercentage + "% " + theFragment.getText(R.string.attendance)
-                        + " (" + theFragment.getText(R.string.last_recorded)
-                        + " " + lastRecordedAttendance + ")";
+                        + " (" + lastRecordedString + ")";
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_numstudents_text))
                 .setText(subTitle);
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlist_attendance_percentage))

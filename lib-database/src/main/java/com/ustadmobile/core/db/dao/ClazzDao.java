@@ -69,7 +69,11 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     static final String TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)";
 
-    private static final String CLAZZ_WHERE = " SELECT Clazz.*, (SELECT COUNT(*) " +
+    private static final String CLAZZ_WHERE = " SELECT Clazz.*, " +
+            "(SELECT ClazzLog.logDate FROM ClazzLog " +
+            "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
+            "ORDER BY ClazzLog.logDate DESC LIMIT 1) AS lastRecorded, " +
+            "(SELECT COUNT(*) " +
             " FROM ClazzMember WHERE " +
             " ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
             " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT +

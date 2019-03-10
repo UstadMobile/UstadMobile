@@ -8,6 +8,8 @@ public class ClazzWithNumStudents extends Clazz {
 
     private String teacherNames;
 
+    private long lastRecorded;
+
     public int getNumTeachers() {
         return numTeachers;
     }
@@ -30,5 +32,13 @@ public class ClazzWithNumStudents extends Clazz {
 
     public void setNumStudents(int numStudents) {
         this.numStudents = numStudents;
+    }
+
+    public long getLastRecorded() {
+        return lastRecorded;
+    }
+
+    public void setLastRecorded(long lastRecorded) {
+        this.lastRecorded = lastRecorded;
     }
 }

@@ -279,6 +279,22 @@ public class UMCalendarUtil {
         return format.format(calendar.getTime());
     }
 
+    public static String getPrettyDateSimpleFromLong(long thisDate, Locale locale){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format;
+        if(locale != null) {
+            format = new SimpleDateFormat("EEE dd/MMM/yy", locale);
+        }else{
+            format = new SimpleDateFormat("EEE dd/MMM/yy");
+        }
+        return format.format(calendar.getTime());
+    }
+
+    public static String getPrettyDateSimpleFromLong(long thisDate){
+        return getPrettyDateSimpleFromLong(thisDate, null);
+    }
+
     public static String getPrettyDateSuperSimpleFromLong(long thisDate){
         return getPrettyDateSuperSimpleFromLong(thisDate, null);
     }
