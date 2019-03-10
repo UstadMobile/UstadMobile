@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.annotations.NonNull;
@@ -75,8 +76,10 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
 
         if(DateFormat.is24HourFormat(getContext())) {
             justTheTimeFormat = new SimpleDateFormat("HH:mm");
+
         }else {
             justTheTimeFormat = new SimpleDateFormat("hh:mm a");
+
         }
 
         //A Time picker listener that sets the from time.
@@ -262,7 +265,27 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
                 justTheTimeFormat = new SimpleDateFormat("hh:mm a");
             }
 
-            //TODO Get hour and schedule properly  (it might be because of Time Zones)
+
+            long startTimeLong = schedule.getSceduleStartTime();
+            long endTimeLong = schedule.getScheduleEndTime();
+
+            java.text.DateFormat formatter =
+                    SimpleDateFormat.getTimeInstance(java.text.DateFormat.SHORT);
+            //start time
+            long startMins = startTimeLong / (1000 * 60);
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, (int)(startMins / 60));
+            cal.set(Calendar.MINUTE, (int)(startMins % 60));
+            String startTime = formatter.format(cal.getTime());
+
+            //end time
+            //start time
+            long endMins = endTimeLong / (1000 * 60);
+            cal.set(Calendar.HOUR_OF_DAY, (int)(endMins / 60));
+            cal.set(Calendar.MINUTE, (int)(endMins % 60));
+            String endTime = formatter.format(cal.getTime());
+
+
             Calendar fromCal = Calendar.getInstance();
             Calendar toCal = Calendar.getInstance();
 
@@ -270,6 +293,7 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
                     (int) TimeUnit.MILLISECONDS.toHours(schedule.getSceduleStartTime()));
             fromCal.set(Calendar.MINUTE,
                     (int) TimeUnit.MILLISECONDS.toMinutes(schedule.getSceduleStartTime()));
+
 
             toCal.set(Calendar.HOUR_OF_DAY,
                     (int) TimeUnit.MILLISECONDS.toHours(schedule.getScheduleEndTime()));
@@ -281,8 +305,11 @@ public class AddScheduleDialogFragment extends UstadDialogFragment implements
             String timeOnToET = justTheTimeFormat.format(schedule.getScheduleEndTime());
             //String timeOnToET = justTheTimeFormat.format(toCal.getTime());
 
-            fromET.setText(timeOnET);
-            toET.setText(timeOnToET);
+//            fromET.setText(timeOnET);
+//            toET.setText(timeOnToET);
+
+            fromET.setText(startTime);
+            toET.setText(endTime);
 
             scheduleSpinner.setSelection(schedule.getScheduleFrequency() -1);
             daySpinner.setSelection(schedule.getScheduleDay() -1);
