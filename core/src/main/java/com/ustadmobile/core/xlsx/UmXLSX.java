@@ -583,8 +583,6 @@ public class UmXLSX {
                     int c = everyValuePair.colIndex;
                     String v = everyValuePair.value;
 
-
-                    //TODO: Check
                     int valueId = addValueToSharedString(v);
 
                     if(!rowMap.containsKey(r)){
@@ -600,7 +598,6 @@ public class UmXLSX {
                     newColElement.setAttribute("t", "s");
 
                     Element newColValue = doc.createElement("v");
-                    //TODO: Check
                     newColValue.setTextContent(String.valueOf(valueId));
                     newColElement.appendChild(newColValue);
 

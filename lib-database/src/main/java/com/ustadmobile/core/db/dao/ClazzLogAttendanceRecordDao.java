@@ -464,11 +464,11 @@ public abstract class ClazzLogAttendanceRecordDao implements
 
     /**
      * TODO: Account for Locations,.
-     * @param fromDate
-     * @param toDate
-     * @param clazzes
-     * @param locations
-     * @param resultObject
+     * @param fromDate  from date
+     * @param toDate    to date
+     * @param clazzes   list of classes
+     * @param locations list of locations
+     * @param resultObject  the result
      */
     public void findOverallDailyAttendanceNumbersByDateAndStuff(long fromDate, long toDate,
                 List<Long> clazzes, List<Long> locations,

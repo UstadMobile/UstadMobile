@@ -99,7 +99,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                 continue;
             }
 
-            //TODO: Check/Test it
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
 

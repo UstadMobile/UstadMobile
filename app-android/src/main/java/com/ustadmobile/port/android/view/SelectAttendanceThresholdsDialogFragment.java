@@ -96,6 +96,7 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         midNumberPicker = rootView.findViewById(R.id.fragment_select_attendance_thresholds_dialog_number_picker_medium);
         highNumberPicker = rootView.findViewById(R.id.fragment_select_attendance_thresholds_dialog_number_picker_high);
 
+        assert getArguments() != null;
         if(getArguments().containsKey(ARG_THRESHOLD_LOW)){
             setUpNP(lowNumberPicker, (Integer) getArguments().get(ARG_THRESHOLD_LOW));
         }else{

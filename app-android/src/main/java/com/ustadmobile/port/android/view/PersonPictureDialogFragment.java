@@ -40,7 +40,6 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
 
     PersonPictureDialogPresenter mPresenter;
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,9 +52,7 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         theImage = rootView.findViewById(R.id.fragment_person_picture_dialog_imageview);
         updateImageButton =
                 rootView.findViewById(R.id.fragment_person_picture_dialog_update_picture_button);
-        updateImageButton.setOnClickListener(view -> {
-            //TODO: Figure how to get permission and do Activity stuff here in a Dialog
-        });
+
 
         theImage = rootView.findViewById(R.id.fragment_person_picture_dialog_imageview);
         theImage.setOnClickListener(view -> dialog.cancel());
@@ -72,8 +69,6 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         }
     }
 
-
-
     @android.support.annotation.NonNull
     @NonNull
     @Override
@@ -86,42 +81,30 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
         dialog = builder.create();
         dialog.setOnShowListener(this);
 
-        dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        Objects.requireNonNull(dialog.getWindow()).setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 
         return dialog;
     }
 
 
     @Override
-    public void onClick(DialogInterface dialogInterface, int i) {
-
-    }
+    public void onClick(DialogInterface dialogInterface, int i) {}
 
     @Override
-    public void onShow(DialogInterface dialogInterface) {
-    }
+    public void onShow(DialogInterface dialogInterface) {}
 
     @Override
-    public void onClick(View view) {
-
-    }
+    public void onClick(View view) {}
 
     @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-    }
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {}
 
     @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
-    }
+    public void onNothingSelected(AdapterView<?> adapterView) {}
 
     @Override
-    public void finish() {
-
-    }
+    public void finish() {}
 
     @Override
     public void setPictureOnView(String imagePath) {
@@ -140,8 +123,8 @@ public class PersonPictureDialogFragment extends UstadDialogFragment implements
     @Override
     public void showUpdateImageButton(boolean show) {
         runOnUiThread(() -> {
-            //updateImageButton.setActivated(show);
-            //updateImageButton.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+            //This button is hidden at the moment. We update picture from the Person Edit/Detail
+            // screens.
         });
     }
 }

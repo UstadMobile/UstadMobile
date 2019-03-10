@@ -108,9 +108,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
             feedText.setText(feedEntry.getDescription());
             feedTitle.setText(feedEntry.getTitle());
 
-            String feedTextString = feedEntry.getTitle();
             if (UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
-                //TODO : Apply more complex deadline with scheduling in the future ie Check schedule
                 feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),
                         R.color.accent));
                 feedText.setText(feedEntry.getDescription());
@@ -255,7 +253,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
         runOnUiThread(() -> attendancePercentageView.setText(concatString));
     }
 
-    //TODO: Sprint 4
     @Override
     public void updateAttendanceTrend(int trend, int per) {
         switch(trend){
