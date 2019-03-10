@@ -61,15 +61,17 @@ public class Codec2KhanWork {
         UmAppDatabase repository = db.getRepository("https://localhost", "");
         ContainerDao containerDao = repository.getContainerDao();
         List<ContainerWithContentEntry> khanContainerList = containerDao.findKhanContainers();
+        UMLogUtil.logTrace("Number of khan containers left to convert " + khanContainerList.size());
         ContainerEntryDao containerEntryDao = db.getContainerEntryDao();
 
         for (ContainerWithContentEntry khanFile : khanContainerList) {
             try {
 
                 List<ContainerEntryWithContainerEntryFile> khanfileList = containerEntryDao.findByContainer(khanFile.getContainerUid());
-
+                UMLogUtil.logTrace("Number of files in khanfileList " + khanfileList.size());
                 if (khanFile.getFileSize() > 440401920) {
 
+                    UMLogUtil.logTrace("Found a filesize of 420m for container" + khanFile.getSourceUrl());
                     containerEntryDao.deleteByContainerUid(khanFile.getContainerUid());
                     containerDao.deleteByUid(khanFile.getContainerUid());
                     continue;
