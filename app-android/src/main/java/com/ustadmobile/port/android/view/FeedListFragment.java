@@ -188,7 +188,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
         summaryCard = rootContainer.findViewById(R.id.fragment_feed_list_report_card);
 
         //Create presenter and call its onCreate()
-        mPresenter = new FeedListPresenter(this, UMAndroidUtil.bundleToHashtable(
+        mPresenter = new FeedListPresenter(getContext(), UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 

@@ -130,9 +130,6 @@ public class SELQuestionPresenter
         args.put(ARG_QUESTION_TEXT, questionText);
         args.put(ARG_DONE_CLAZZMEMBER_UIDS, doneClazzMemberUids);
 
-        //TODO: test this:
-        //args = gottenArguments;
-
         view.finish();
 
         //Go to view

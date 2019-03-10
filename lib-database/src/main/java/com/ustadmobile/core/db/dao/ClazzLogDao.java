@@ -218,7 +218,7 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
                 getNumberOfClassesOpenForDateClazzesLocation(fromDate, toDate, clazzes, locations, resultList);
             }
         }
-        
+
     }
 
     @UmQuery("UPDATE ClazzLog SET canceled = :canceled WHERE clazzLogScheduleUid = :scheduleUid AND logDate >= :after ")

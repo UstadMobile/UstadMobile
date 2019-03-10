@@ -26,12 +26,13 @@
         android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
         android:text="TextView"
+        android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/item_sel_question_title"
         android:layout_marginLeft="32dp" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/item_sel_question_secondary_menu_imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

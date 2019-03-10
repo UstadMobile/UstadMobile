@@ -12,10 +12,8 @@ import android.widget.NumberPicker;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportAttendanceGroupedByThresholdsPresenter;
-import com.ustadmobile.core.controller.SelectAttendanceThresholdsDialogPresenter;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
 
@@ -38,7 +36,6 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
         View.OnClickListener, DismissableDialog {
 
     View rootView;
-    SelectAttendanceThresholdsDialogPresenter mPresenter;
     AlertDialog dialog;
 
     NumberPicker lowNumberPicker, midNumberPicker, highNumberPicker;
@@ -113,11 +110,6 @@ public class SelectAttendanceThresholdsDialogFragment extends UstadDialogFragmen
             setUpNP(highNumberPicker, THRESHOLD_HIGH_DEFAULT);
         }
 
-
-
-        mPresenter = new SelectAttendanceThresholdsDialogPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getArguments()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Dialog stuff:
         //Dialog's positive / negative listeners :
