@@ -79,6 +79,8 @@ public class Codec2KhanWork {
                 String khanId = khanFile.getSourceUrl();
                 khanId = khanId.substring(khanId.lastIndexOf("/") + 1);
 
+                UMLogUtil.logTrace("Got the khanId from sourceUrl " + khanId);
+
                 File mp4VideoFile = null;
                 File contentFolder = null;
                 long containerEntryUidToDelete = 0L;
@@ -97,6 +99,9 @@ public class Codec2KhanWork {
                     UMLogUtil.logError("Did not find the folder" + khanFile.getSourceUrl());
                     continue;
                 }
+
+                UMLogUtil.logTrace("Got the contentFolder  at " + contentFolder.getPath());
+                UMLogUtil.logTrace("Got the mp4  at " + mp4VideoFile.getPath());
 
                 String entryId = khanFile.getEntryId();
                 File content = new File(mp4VideoFile.getPath());
