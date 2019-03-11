@@ -105,9 +105,9 @@ public class ClazzStudentListPresenter extends
         this.teachersEditable = true;
 
         //Find the Provider
-        clazzPersonListProvider = repository.getClazzMemberDao()
-                .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
-            setProviderToView();
+//        clazzPersonListProvider = repository.getClazzMemberDao()
+//                .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
+//        setProviderToView();
 
         //Initialise sort spinner data:
         idToOrderInteger = new Hashtable<>();
@@ -117,7 +117,6 @@ public class ClazzStudentListPresenter extends
     }
 
     public void checkPermissions(){
-        PersonDao personDao = repository.getPersonDao();
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPerson, Role.PERMISSION_PERSON_INSERT,
             new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {

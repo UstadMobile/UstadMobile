@@ -30,13 +30,9 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
 
 public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<ReportAtRiskStudentsView> {
 
-    private long fromDate;
-    private long toDate;
     private List<Long> clazzList, locationList;
     private boolean genderDisaggregated = true;
-    private List<Clazz> totalClazzList;
     public static final float RISK_THRESHOLD = 0.4f;
-    private int index;
 
     private UmProvider<PersonWithEnrollment> atRiskStudentsUmProvider;
 
@@ -52,12 +48,11 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
         dataMapsMap = new LinkedHashMap<>();
         clazzList = new ArrayList<>();
         locationList = new ArrayList<>();
-        totalClazzList = new ArrayList<>();
         if(arguments.containsKey(ARG_FROM_DATE)){
-            fromDate = (long) arguments.get(ARG_FROM_DATE);
+            long fromDate = (long) arguments.get(ARG_FROM_DATE);
         }
         if(arguments.containsKey(ARG_TO_DATE)){
-            toDate = (long) arguments.get(ARG_TO_DATE);
+            long toDate = (long) arguments.get(ARG_TO_DATE);
         }
         if(arguments.containsKey(ARG_LOCATION_LIST)){
             long[] locations = (long[]) arguments.get(ARG_LOCATION_LIST);
@@ -87,22 +82,18 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
      * Queries database, gets raw report data, updates view. The Guts of the logic
      */
     private void getDataAndUpdateView(){
-        long currentTime = System.currentTimeMillis();
 
         ClazzDao clazzDao = repository.getClazzDao();
-        LocationDao locationDao = repository.getLocationDao();
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
 
-
-        //1. Build a list of all clazzes for this report. This comes from both the location
+        //1. Build a list of all classes for this report. This comes from both the location
         // and the specified clazz list.
-        clazzDao.findAllClazzesByLocationAndUidList(locationList, clazzList, new UmCallback<List<Clazz>>() {
+        clazzDao.findAllClazzesByLocationAndUidList(locationList, clazzList,
+                new UmCallback<List<Clazz>>() {
             @Override
             public void onSuccess(List<Clazz> clazzList) {
-                totalClazzList = clazzList;
-                index = 0;
 
-                //build a long list of clazzes.
+                //build a long list of classes.
                 List<Long> clazzUidList = new ArrayList<>();
                 for(Clazz everyClazz:clazzList){
                     clazzUidList.add(everyClazz.getClazzUid());
@@ -113,25 +104,6 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
                         clazzMemberDao.findAllStudentsAtRiskForClazzListAsync(clazzUidList,
                                 RISK_THRESHOLD);
                 updateProviderToView();
-
-                //Non Live data way:
-//                for(Clazz everyClazz:clazzList){
-//
-//                    //Run Query
-//                    clazzMemberDao.findAllStudentsAtRiskForClazzUidAsync(everyClazz.getClazzUid(),
-//                        RISK_THRESHOLD, new UmCallback<List<PersonWithEnrollment>>() {
-//                            @Override
-//                            public void onSuccess(List<PersonWithEnrollment> riskStudents) {
-//                                index++;
-//                                buildMapAndUpdateView(everyClazz.getClazzName(), riskStudents);
-//                            }
-//
-//                            @Override
-//                            public void onFailure(Throwable exception) {
-//                                exception.printStackTrace();
-//                            }
-//                        });
-//                }
             }
 
             @Override
@@ -139,8 +111,6 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
                 exception.printStackTrace();
             }
         });
-
-
     }
 
     /**
@@ -149,16 +119,6 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
     private void updateProviderToView(){
         view.setReportProvider(atRiskStudentsUmProvider);
     }
-
-    private void buildMapAndUpdateView(String theClassName,
-                                       List result){
-        dataMapsMap.put(theClassName, result);
-        if(index >= totalClazzList.size()){
-            view.runOnUiThread(() -> view.updateTables(dataMapsMap));
-            //view.updateTables(dataMapsMap);
-        }
-    }
-
 
     public boolean isGenderDisaggregated() {
         return genderDisaggregated;
@@ -182,8 +142,8 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
         PersonWithEnrollment personWithEnrollment = (PersonWithEnrollment)arg;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        args.put(ARG_PERSON_UID, (long) personWithEnrollment.getPersonUid());
-        args.put(ARG_CLAZZ_UID, (long) personWithEnrollment.getClazzUid());
+        args.put(ARG_PERSON_UID, personWithEnrollment.getPersonUid());
+        args.put(ARG_CLAZZ_UID, personWithEnrollment.getClazzUid());
         impl.go(CallPersonRelatedDialogView.VIEW_NAME, args, view.getContext());
     }
 }

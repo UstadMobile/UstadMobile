@@ -13,7 +13,6 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -70,9 +69,6 @@ public class PersonWithEnrollmentRecyclerAdapter
 
     private int headingCLId;
 
-    private boolean classChange = true;
-    private long currentClazz = 0L;
-
     private int addCMCLT, addCMCLS;
 
     private static final int IMAGE_PERSON_THUMBNAIL_WIDTH = 26;
@@ -108,19 +104,6 @@ public class PersonWithEnrollmentRecyclerAdapter
         mPresenter = presenter;
         showAttendance = attendance;
         showEnrollment = enrollment;
-    }
-
-    PersonWithEnrollmentRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
-            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
-            boolean enrollment, boolean rmode){
-        super(diffCallback);
-        theContext = context;
-        theActivity = activity;
-        mPresenter = presenter;
-        showAttendance = attendance;
-        showEnrollment = enrollment;
-        reportMode = rmode;
     }
 
     PersonWithEnrollmentRecyclerAdapter(
@@ -312,8 +295,6 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         //ENROLLMENT
         if(showEnrollment){
-
-
             checkBox.setVisibility(View.VISIBLE);
             checkBox.setTextColor(Color.BLACK);
             checkBox.setSystemUiVisibility(View.VISIBLE);
@@ -417,8 +398,7 @@ public class PersonWithEnrollmentRecyclerAdapter
             }
         }
 
-        if(showEnrollment == false && showAttendance == true){
-
+        if(!showEnrollment && showAttendance){
 
             //if(showAddStudent && showAddTeacher) {
                 if (position == 0) {//First Entry. Add Teacher and Add Teacher item
@@ -440,6 +420,7 @@ public class PersonWithEnrollmentRecyclerAdapter
                 } else {
                     PersonWithEnrollment previousPerson = getItem(position - 1);
                     assert previousPerson != null;
+
                     if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
                             personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
 
@@ -474,14 +455,11 @@ public class PersonWithEnrollmentRecyclerAdapter
             removeHeading(cl, headingCLId, holder);
         }
 
-
-
         if(personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER){
 
             //Disable attendance for Teachers
             trafficLight.setVisibility(View.GONE);
             attendanceTextView.setVisibility(View.GONE);
-            
         }
 
         if(getItemCount() == position+1) {
