@@ -292,12 +292,4 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
         return atomFeedRepository;
     }
-
-    @Override
-    public void scheduleChecks(Object context) {
-        //by default - do nothing
-        System.out.println("Hello");
-        super.scheduleChecks(context);
-        System.out.println("Fixed?");
-    }
 }
