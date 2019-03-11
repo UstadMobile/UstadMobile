@@ -149,6 +149,14 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
      * @return A new instance of fragment ContainerPageFragment.
      */
     public static FeedListFragment newInstance() {
+
+
+//        // ACRA exception testing: Remove me.
+//        String a = null;
+//        if(a.equals("null")){
+//            a=null;
+//        }
+
         FeedListFragment fragment = new FeedListFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);

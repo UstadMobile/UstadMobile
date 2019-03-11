@@ -16,6 +16,8 @@ import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 public class TestScheduledCheckRunner {
 
     UmAppDatabase db;
@@ -78,7 +80,21 @@ public class TestScheduledCheckRunner {
                 feedEntry.getFeedEntryUid());
     }
 
+    @Test
     public void givenNextDayRecordAttendanceCheck_whenRun_thenShouldCreateFeedEntriesFor() {
+
+        initDb();
+        ScheduledCheck check = new ScheduledCheck(System.currentTimeMillis(),
+                ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER,
+                ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" + clazzLog.getClazzLogUid());
+        check.setScheduledCheckId(db.getScheduledCheckDao().insert(check));
+
+        ScheduledCheckRunner runner = new ScheduledCheckRunner(check, db, repo);
+        runner.run();
+
+        FeedEntryDao feedEntryDao = repo.getFeedEntryDao();
+        List<FeedEntry> allFeeds = feedEntryDao.findAll();
+        Assert.assertNotNull(allFeeds);
 
     }
 

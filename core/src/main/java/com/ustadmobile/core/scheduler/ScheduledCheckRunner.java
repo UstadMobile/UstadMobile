@@ -95,10 +95,14 @@ public class ScheduledCheckRunner implements Runnable{
 
             //Get officers
             Role officerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
-            List<Person> officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                    currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+            List<Person> officers = new ArrayList<>();
+            if(officerRole != null){
+                officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                        currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+            }
 
             //If condition meets:
+            List<Person> finalOfficers = officers;
             dbRepository.getClazzMemberDao().findAllMembersForAttendanceOverConsecutiveDays(
                 ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyLow,
                 currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
@@ -113,7 +117,7 @@ public class ScheduledCheckRunner implements Runnable{
                                     String.valueOf(each.getPersonUid());
 
                             //Send to Officer as well.
-                            for(Person officer:officers){
+                            for(Person officer: finalOfficers){
 
                                 long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                                         officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
@@ -153,12 +157,17 @@ public class ScheduledCheckRunner implements Runnable{
             String clazzName = dbRepository.getClazzDao().getClazzName(
                     currentClazzLog.getClazzLogClazzUid());
 
-            Role mneOfficerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
-            List<Person> mneofficers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                    currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
 
+            //Get M&E officers
+            Role mneOfficerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
+            List<Person> mneofficers = new ArrayList<>();
+            if(mneOfficerRole != null){
+                mneofficers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                        currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
+            }
 
             //9. MNE An alert when a student has not attended a single day in a month(dropout)
+            List<Person> finalMneofficers = mneofficers;
             dbRepository.getClazzMemberDao().findAllMembersForAttendanceOverConsecutiveDays(
                 ClazzLogAttendanceRecord.STATUS_ABSENT, absentFrequencyHigh,
                 currentClazzLog.getClazzLogClazzUid(), new UmCallback<List<PersonNameWithClazzName>>() {
@@ -169,15 +178,13 @@ public class ScheduledCheckRunner implements Runnable{
                         List<FeedEntry> newFeedEntries = new ArrayList<>();
                         for(PersonNameWithClazzName each:theseGuys){
 
+                            //Feed link
                             String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                     PersonDetailView.ARG_PERSON_UID + "=" +
                                     String.valueOf(each.getPersonUid());
-                            String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
-                                    ClazzListView.ARG_CLAZZ_UID + "=" +
-                                    currentClazzLog.getClazzLogClazzUid();
 
-
-                            for( Person mne: mneofficers){
+                            for( Person mne: finalMneofficers){
+                                //Feed uid
                                 long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                                         mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
                                         ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH,
@@ -217,19 +224,26 @@ public class ScheduledCheckRunner implements Runnable{
 
             //Get officers
             Role officerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
-            List<Person> officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                    currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
-
+            List<Person> officers = new ArrayList<>();
+            if(officerRole != null){
+              officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                      currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+            }
+            //Get teachers
             List<ClazzMemberWithPerson> teachers = dbRepository.getClazzMemberDao()
                     .findClazzMemberWithPersonByRoleForClazzUidSync(
                             currentClazzLog.getClazzLogClazzUid(), ClazzMember.ROLE_TEACHER);
-
+            //Get M&E officers
             Role mneOfficerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_MNE);
-            List<Person> mneofficers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                    currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
-
+            List<Person> mneofficers = new ArrayList<>();
+            if(mneOfficerRole != null){
+                mneofficers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                        currentClazzLog.getClazzLogClazzUid(), mneOfficerRole.getRoleUid());
+            }
+            //Get Admins
             List<Person> admins = dbRepository.getPersonDao().findAllAdminsAsList();
 
+            //Build a list of new feed entries to be added.
             List<FeedEntry> newFeedEntries = new ArrayList<>();
 
             String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
@@ -283,6 +297,8 @@ public class ScheduledCheckRunner implements Runnable{
                         clazzName,
                         admin.getPersonUid()));
             }
+
+            dbRepository.getFeedEntryDao().insertList(newFeedEntries);
         }
 
         if(scheduledCheck.getCheckType() == ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH){
@@ -294,8 +310,12 @@ public class ScheduledCheckRunner implements Runnable{
 
             //Get officers
             Role officerRole = dbRepository.getRoleDao().findByNameSync(Role.ROLE_NAME_OFFICER);
-            List<Person> officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
-                    currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+            List<Person> officers = new ArrayList<>();
+            if(officerRole != null){
+                officers = dbRepository.getClazzDao().findPeopleWithRoleAssignedToClazz(
+                        currentClazzLog.getClazzLogClazzUid(), officerRole.getRoleUid());
+            }
+
 
             //Officer to get an alert when student has been absent 2 or more days in a row
             float clazzBeforeAttendance = dbRepository.getClazzDao().findClazzAttendancePercentageWithoutLatestClazzLog(
