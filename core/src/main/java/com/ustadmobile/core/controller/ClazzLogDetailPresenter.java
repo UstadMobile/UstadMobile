@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -27,9 +28,13 @@ import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonNameWithClazzName;
 import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.ScheduledCheck;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -57,6 +62,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private List<ClazzLogDao.ClazzLogUidAndDate> currentClazzLogs;
 
     private ClazzLog currentClazzLog;
+    private Schedule currentSchedule;
 
     private int currentClazzLogIndex;
 
@@ -83,6 +89,8 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private UmProvider<ClazzLogAttendanceRecordWithPerson> clazzLogAttendanceRecordUmProvider;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+    ClazzDao clazzDao = repository.getClazzDao();
+    ScheduleDao scheduleDao = repository.getScheduleDao();
 
     private UmCallback<ClazzLog> setupFromClazzLogCallback = new UmCallback<ClazzLog>() {
         @Override
@@ -97,6 +105,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     repository.getClazzDao().getClazzNameAsync(clazzLog.getClazzLogClazzUid(),
                             setTitleCallback);
                 }
+
+                //Get clazzlog schedule
+                currentSchedule = scheduleDao.findByUid(currentClazzLog.getClazzLogScheduleUid());
 
                 //Get all teachers
                 ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
@@ -222,6 +233,28 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         Locale currentLocale = Locale.getDefault();
         prettyDate += " (" +
                 UMCalendarUtil.getPrettyDateFromLong(currentClazzLog.getLogDate(), currentLocale) + ")";
+
+        //Add Schedule time to this pretty Date
+
+        //Add time to ClazzLog's date
+        long startTimeLong = currentSchedule.getSceduleStartTime();
+        long endTimeLong = currentSchedule.getScheduleEndTime();
+        DateFormat formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+
+        //start time
+        long startMins = startTimeLong / (1000 * 60);
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, (int)(startMins / 60));
+        cal.set(Calendar.MINUTE, (int)(startMins % 60));
+        String startTime = formatter.format(cal.getTime());
+
+        //end time
+        long endMins = endTimeLong / (1000 * 60);
+        cal.set(Calendar.HOUR_OF_DAY, (int)(endMins / 60));
+        cal.set(Calendar.MINUTE, (int)(endMins % 60));
+        String endTime = formatter.format(cal.getTime());
+
+        prettyDate = prettyDate + "(" + startTime + " - " + endTime + ")";
 
         view.updateDateHeading(prettyDate);
     }
