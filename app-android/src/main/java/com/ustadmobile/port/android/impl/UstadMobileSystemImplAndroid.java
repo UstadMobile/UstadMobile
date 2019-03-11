@@ -938,8 +938,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void scheduleChecks(Object context) {
         super.scheduleChecks(context);
         UmAppDatabase db = UmAppDatabase.getInstance(context);
+
+        //Get list of ScheduledChecks where CheckUid is null
         List<ScheduledCheck> checksToSchedule = db.getScheduledCheckDao()
                 .findAllChecksWhereCheckUuidIsNull();
+
         for(ScheduledCheck check : checksToSchedule) {
             Data workData = new Data.Builder()
                     .putLong(ScheduledCheckWorker.ARG_SCHEDULE_CHECK_UID, check.getScheduledCheckId())

@@ -55,10 +55,14 @@ public class ClazzLogScheduleWorker extends Worker {
     @Override
     public Result doWork() {
         UmAppDatabase dbRepo = UmAccountManager.getRepositoryForActiveAccount(getApplicationContext());
+        //Create ClazzLogs for Today (call SchduledDao ) -
+        // -> loop over clazzes and schedules and create ClazzLogs
         dbRepo.getScheduleDao().createClazzLogsForToday(
                 UmAccountManager.getActivePersonUid(getApplicationContext()), dbRepo);
 
+        //Queue next worker at 00:00
         queueClazzLogScheduleWorker(getNextClazzLogScheduleDueTime());
+
         UstadMobileSystemImpl.getInstance().scheduleChecks(getApplicationContext());
         return Result.success();
     }

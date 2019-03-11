@@ -70,11 +70,13 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     }
 
     /**
+     * Creates ClazzLogs for every clazzes the account person has access to between start and end
+     * time.
      *
-     * @param startTime
-     * @param endTime
-     * @param accountPersonUid
-     * @param db
+     * @param startTime             between start time
+     * @param endTime               AND end time
+     * @param accountPersonUid      The person
+     * @param db                    The database
      */
     public void createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
         //This method will usually be called from the Workmanager in Android every day. Making the
