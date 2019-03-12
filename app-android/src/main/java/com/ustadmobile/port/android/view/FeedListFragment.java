@@ -108,7 +108,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
             feedText.setText(feedEntry.getDescription());
             feedTitle.setText(feedEntry.getTitle());
 
-            if (UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
+            if (feedEntry.getDeadline() > 0 &&
+                    UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
                 feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),
                         R.color.accent));
                 feedText.setText(feedEntry.getDescription());
@@ -116,8 +117,10 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
 
             if(feedEntry.getLink().startsWith(ClassDetailView.VIEW_NAME)){
                 recordAttendanceButton.setText(R.string.view_class);
+                //Change feedIcon as needed
             }else if(feedEntry.getLink().startsWith(PersonDetailView.VIEW_NAME)){
                 recordAttendanceButton.setText(R.string.view_student);
+                //Change feedIcon as needed
             }
             recordAttendanceButton.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
             holder.itemView.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));

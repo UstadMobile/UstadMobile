@@ -9,6 +9,8 @@ import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @UmDao
@@ -106,16 +108,31 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
         insertList(clazzAttendanceHighSCs);
 
 
-        //Next day attendance taken or not checks. - Teachers get
+        //Next day attendance taken or not checks. - Teachers, Officers, Admins get this
         List<ClazzLog> logsWithoutNextDayCheck = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER);
         List<ScheduledCheck> addThese = new ArrayList<>();
         for(ClazzLog clazzLog : logsWithoutNextDayCheck) {
             long checkTime = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(clazzLog.getLogDate(), 1);
+            Calendar tomorrowZeroHourCalendar = Calendar.getInstance();
+            tomorrowZeroHourCalendar.setTime(new Date(checkTime));
+            tomorrowZeroHourCalendar.set(Calendar.HOUR_OF_DAY, 0);
+            tomorrowZeroHourCalendar.set(Calendar.MINUTE, 0);
+            tomorrowZeroHourCalendar.set(Calendar.SECOND, 0);
+            tomorrowZeroHourCalendar.set(Calendar.MILLISECOND, 0);
+
+            long tomorrowZeroHour = tomorrowZeroHourCalendar.getTimeInMillis();
+
+//            //TODOne: Remove: Testing:
+//            Calendar test = Calendar.getInstance();
+//            test.add(Calendar.MINUTE, 2);
+//            tomorrowZeroHour = test.getTimeInMillis();
+
             ScheduledCheck nextDayCheck = new ScheduledCheck(
-                    checkTime,
+                    tomorrowZeroHour,
                     ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER,
-                    clazzLog.getClazzLogUid());
+                    ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" +
+                        clazzLog.getClazzLogUid());
 
             addThese.add(nextDayCheck);
         }

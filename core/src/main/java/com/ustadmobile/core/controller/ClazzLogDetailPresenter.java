@@ -437,6 +437,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     }
                 }
 
+                repository.getFeedEntryDao().insertList(newFeedEntries);
+                repository.getFeedEntryDao().updateList(updateFeedEntries);
+
                 //6. Create feedEntries for student not partial more than 3 times.
                 clazzMemberDao.findAllMembersForAttendanceOverConsecutiveDays(
                     ClazzLogAttendanceRecord.STATUS_PARTIAL, tardyFrequency,
@@ -444,6 +447,10 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     new UmCallback<List<PersonNameWithClazzName>>() {
                         @Override
                         public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+                            //Create feed entries for this user
+                            List<FeedEntry> newEntries = new ArrayList<>();
+                            List<FeedEntry> updateEntries = new ArrayList<>();
+
                             for(PersonNameWithClazzName each:theseGuys){
 
                                 String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
@@ -469,12 +476,15 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     );
 
                                     if(existingEntry == null){
-                                        newFeedEntries.add(thisEntry);
+                                        newEntries.add(thisEntry);
                                     }else{
-                                        updateFeedEntries.add(thisEntry);
+                                        updateEntries.add(thisEntry);
                                     }
                                 }
                             }
+                            //Updating/Inserting inside this thread to avoid concurrent modification exception
+                            repository.getFeedEntryDao().insertList(newEntries);
+                            repository.getFeedEntryDao().updateList(updateEntries);
 
                         }
 
@@ -490,6 +500,11 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                     new UmCallback<List<PersonNameWithClazzName>>() {
                         @Override
                         public void onSuccess(List<PersonNameWithClazzName> theseGuys) {
+
+                            //Create feed entries for this user
+                            List<FeedEntry> newEntries = new ArrayList<>();
+                            List<FeedEntry> updateEntries = new ArrayList<>();
+
                             for(PersonNameWithClazzName each:theseGuys){
 
                                 String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
@@ -515,13 +530,16 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     );
 
                                     if(existingEntry == null){
-                                        newFeedEntries.add(thisEntry);
+                                        newEntries.add(thisEntry);
                                     }else{
-                                        updateFeedEntries.add(thisEntry);
+                                        updateEntries.add(thisEntry);
                                     }
 
                                 }
                             }
+                            //Updating/Inserting inside this thread to avoid concurrent modification exception
+                            repository.getFeedEntryDao().insertList(newEntries);
+                            repository.getFeedEntryDao().updateList(updateEntries);
                         }
 
                         @Override
@@ -529,11 +547,6 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                             exception.printStackTrace();
                         }
                     });
-
-
-                repository.getFeedEntryDao().insertList(newFeedEntries);
-                repository.getFeedEntryDao().updateList(updateFeedEntries);
-
 
                 //8. Set any FeedEntry to done
                 repository.getFeedEntryDao().markEntryAsDoneByClazzLogUidAndTaskType(
