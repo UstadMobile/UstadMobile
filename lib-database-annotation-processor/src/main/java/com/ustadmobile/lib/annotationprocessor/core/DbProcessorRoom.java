@@ -19,6 +19,7 @@ import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -469,12 +470,13 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
         TypeName entityInsertionAdapterTypeName = ParameterizedTypeName.get(
                 ClassName.get("android.arch.persistence.room", "EntityInsertionAdapter"),
                 ClassName.get(entityComponentType));
+        UmInsert insertAnnotation = daoMethod.getAnnotation(UmInsert.class);
 
-
-
-
+        String onConflictStr = insertAnnotation != null && insertAnnotation.onConflict() ==
+                UmOnConflictStrategy.REPLACE ? "REPLACE" : "ABORT";
         CodeBlock.Builder insertQueryCodeBlock = CodeBlock.builder()
-                .add("return \"INSERT INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
+                .add("return \"INSERT OR " + onConflictStr +
+                        " INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
         CodeBlock.Builder bindCodeBlock = CodeBlock.builder();
         StringBuilder paramSection = new StringBuilder();
         int fieldCount = 0;
