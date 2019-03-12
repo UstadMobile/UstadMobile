@@ -55,15 +55,17 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
                     ScheduledCheck.TYPE_RECORD_ATTENDANCE_REMINDER,
                     ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" +
                             clazzLog.getClazzLogUid());
+            recordReminderCheck.setScClazzLogUid(clazzLog.getClazzLogUid());
             newCheckList.add(recordReminderCheck);
+            //insert(recordReminderCheck);
         }
-        insertList(newCheckList);
+        //insertList(newCheckList);
 
 
         //Create Scheduled Checks for repetition checks for TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER
         List<ClazzLog> logsWithoutRepetitionChecks = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_LOW_OFFICER);
-        List<ScheduledCheck> repetitionOfficerChecks = new ArrayList<>();
+        //List<ScheduledCheck> repetitionOfficerChecks = new ArrayList<>();
 
         for(ClazzLog clazzLog: logsWithoutRepetitionChecks){
             ScheduledCheck repetitionReminderOfficerCheck = new ScheduledCheck(
@@ -72,14 +74,14 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
                     ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" +
                             clazzLog.getClazzLogClazzUid()
             );
-            repetitionOfficerChecks.add(repetitionReminderOfficerCheck);
+            repetitionReminderOfficerCheck.setScClazzLogUid(clazzLog.getClazzLogUid());
+            newCheckList.add(repetitionReminderOfficerCheck);
         }
-        insertList(repetitionOfficerChecks);
 
         //Create Scheduled Checks for TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH
         List<ClazzLog> logsWithoutAbsentHighChecks = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_ABSENT_REPETITION_TIME_HIGH);
-        List<ScheduledCheck> absentHighChecks = new ArrayList<>();
+        //List<ScheduledCheck> absentHighChecks = new ArrayList<>();
 
         for(ClazzLog clazzLog: logsWithoutAbsentHighChecks){
             ScheduledCheck absentHighCheck = new ScheduledCheck(
@@ -88,14 +90,14 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
                     ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" +
                             clazzLog.getClazzLogClazzUid()
             );
-            absentHighChecks.add(absentHighCheck);
+            absentHighCheck.setScClazzLogUid(clazzLog.getClazzLogUid());
+            newCheckList.add(absentHighCheck);
         }
-        insertList(absentHighChecks);
 
         //Create Scheduled Checks for TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH
         List<ClazzLog> logsWithoutClazzAttendanceHigh = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH);
-        List<ScheduledCheck> clazzAttendanceHighSCs = new ArrayList<>();
+        //List<ScheduledCheck> clazzAttendanceHighSCs = new ArrayList<>();
         for(ClazzLog clazzLog:logsWithoutClazzAttendanceHigh){
             ScheduledCheck clazzAttendanceHighSC = new ScheduledCheck(
                     clazzLog.getLogDate(),
@@ -103,40 +105,49 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
                     ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" +
                             clazzLog.getClazzLogClazzUid()
             );
-            clazzAttendanceHighSCs.add(clazzAttendanceHighSC);
+            clazzAttendanceHighSC.setScClazzLogUid(clazzLog.getClazzLogUid());
+            newCheckList.add(clazzAttendanceHighSC);
         }
-        insertList(clazzAttendanceHighSCs);
-
 
         //Next day attendance taken or not checks. - Teachers, Officers, Admins get this
         List<ClazzLog> logsWithoutNextDayCheck = findPendingLogsWithoutScheduledCheck(
                 ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER);
-        List<ScheduledCheck> addThese = new ArrayList<>();
+
         for(ClazzLog clazzLog : logsWithoutNextDayCheck) {
-            long checkTime = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(clazzLog.getLogDate(), 1);
-            Calendar tomorrowZeroHourCalendar = Calendar.getInstance();
-            tomorrowZeroHourCalendar.setTime(new Date(checkTime));
-            tomorrowZeroHourCalendar.set(Calendar.HOUR_OF_DAY, 0);
-            tomorrowZeroHourCalendar.set(Calendar.MINUTE, 0);
-            tomorrowZeroHourCalendar.set(Calendar.SECOND, 0);
-            tomorrowZeroHourCalendar.set(Calendar.MILLISECOND, 0);
 
-            long tomorrowZeroHour = tomorrowZeroHourCalendar.getTimeInMillis();
 
-//            //TODOne: Remove: Testing:
-//            Calendar test = Calendar.getInstance();
-//            test.add(Calendar.MINUTE, 2);
-//            tomorrowZeroHour = test.getTimeInMillis();
+            //Get current date calendar
+            Date clazzLogDate = new Date(clazzLog.getLogDate());
+            Calendar clazzLogCalendar = Calendar.getInstance();
+            clazzLogCalendar.setTime(clazzLogDate);
+            //Go to tomorrow
+            clazzLogCalendar.add(Calendar.DATE, 1);
+            Date tomorrowDate = new Date(clazzLogCalendar.getTimeInMillis());
+
+            Calendar tomorrowCalendar = Calendar.getInstance();
+            tomorrowCalendar.setTime(tomorrowDate);
+
+            //Set it to 00:00
+            tomorrowCalendar.set(Calendar.HOUR_OF_DAY, 0);
+            tomorrowCalendar.set(Calendar.MINUTE, 0);
+            tomorrowCalendar.set(Calendar.SECOND, 0);
+            tomorrowCalendar.set(Calendar.MILLISECOND, 0);
+
+            long tomorrowZeroHour = tomorrowCalendar.getTimeInMillis();
 
             ScheduledCheck nextDayCheck = new ScheduledCheck(
                     tomorrowZeroHour,
                     ScheduledCheck.TYPE_CHECK_ATTENDANCE_NOT_RECORDED_DAY_AFTER,
                     ScheduledCheck.PARAM_CLAZZ_LOG_UID + "=" +
                         clazzLog.getClazzLogUid());
+            nextDayCheck.setScClazzLogUid(clazzLog.getClazzLogUid());
 
-            addThese.add(nextDayCheck);
+            newCheckList.add(nextDayCheck);
+
         }
-        insertList(addThese);
+
+        //TODO: Check. Doesn't always persist to database for the next iteration.
+        insertList(newCheckList);
     }
 
 

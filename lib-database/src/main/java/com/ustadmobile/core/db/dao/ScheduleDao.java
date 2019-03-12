@@ -93,15 +93,19 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
         long startMsOfDay = ((startCalendar.get(Calendar.HOUR_OF_DAY) * 24) +
                 startCalendar.get(Calendar.MINUTE)) * 60 * 1000;
 
+        //Get a list of all classes the logged in user has access to:
         List<ClazzWithTimeZone> clazzList = db.getClazzDao().findAllClazzesWithSelectPermission(
                 accountPersonUid);
+        //Loop over the classes
         for(ClazzWithTimeZone clazz : clazzList) {
+            //Skipp classes that have no time zone
             if(clazz.getTimeZone() == null) {
                 System.err.println("Warning: cannot create schedules for clazz" +
                         clazz.getClazzUid() + " as it has no timezone");
                 continue;
             }
 
+            //Get a list of schedules for the classes
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
             for(Schedule schedule : clazzSchedules) {
 
