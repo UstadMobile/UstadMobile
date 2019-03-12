@@ -78,7 +78,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      * @param accountPersonUid      The person
      * @param db                    The database
      */
-    public void createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
+    public void
+    createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
         //This method will usually be called from the Workmanager in Android every day. Making the
         // start time 00:00 and end tim 23:59
         Calendar startCalendar = Calendar.getInstance();
@@ -117,7 +118,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                     int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 
                     int dayOfWeek;
-                    if(incToday){
+                    if(!incToday){
                         dayOfWeek = tomorrowDay;
                     }else{
                         dayOfWeek = today;
@@ -168,7 +169,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
     @UmInsert
     public abstract void insertScheduledCheck(ScheduledCheck check);
-
 
     /**
      * Used in testing.

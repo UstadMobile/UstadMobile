@@ -18,7 +18,7 @@
 
 
         <ImageView
-            android:id="@+id/imageView8"
+            android:id="@+id/item_feedlist_feed_icon_extra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

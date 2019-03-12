@@ -7,6 +7,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +17,13 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogListPresenter;
+import com.ustadmobile.core.db.dao.ScheduleDao;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
+import com.ustadmobile.lib.db.entities.Schedule;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -63,6 +68,37 @@ public class ClazzLogListRecyclerAdapter extends
     }
 
     /**
+     *
+     * Gets the appropriate string of schedule frequency and returns MessageID code for applicable
+     * string.
+     * @param frequency The Schedule freqency (from Schedule entity's scheduleFrequency field)
+     * @return  MessageID code for applicable string.
+     */
+    public static int frequencyToMessageID(int frequency){
+        int frequencyId = 0;
+        switch(frequency){
+            case Schedule.SCHEDULE_FREQUENCY_DAILY:
+                frequencyId = MessageID.daily;
+                break;
+            case Schedule.SCHEDULE_FREQUENCY_WEEKLY:
+                frequencyId = MessageID.weekly;
+                break;
+            case Schedule.SCHEDULE_FREQUENCY_ONCE:
+                frequencyId = MessageID.once;
+                break;
+            case Schedule.SCHEDULE_FREQUENCY_MONTHLY:
+                frequencyId = MessageID.monthly;
+                break;
+            case Schedule.SCHEDULE_FREQUENCY_YEARLY:
+                frequencyId = MessageID.yearly;
+                break;
+            default:
+                break;
+        }
+        return frequencyId;
+    }
+
+    /**
      * This method sets the elements after it has been obtained for that item'th position.
      *
      * For every item part of the recycler adapter, this will be called and every item in it
@@ -75,8 +111,17 @@ public class ClazzLogListRecyclerAdapter extends
         assert clazzLog != null;
 
         Locale currentLocale = theFragment.getResources().getConfiguration().locale;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         String prettyDate =
                 UMCalendarUtil.getPrettyDateFromLong(clazzLog.getLogDate(), currentLocale);
+
+        //Get frequency of schedule
+
+        String frequencyName =
+                impl.getString(frequencyToMessageID(clazzLog.getScheduleFrequency()),
+                    theContext);
+
         //Add time to ClazzLog's date
         long startTimeLong = clazzLog.getSceduleStartTime();
         long endTimeLong = clazzLog.getScheduleEndTime();
@@ -95,7 +140,7 @@ public class ClazzLogListRecyclerAdapter extends
         cal.set(Calendar.MINUTE, (int)(endMins % 60));
         String endTime = formatter.format(cal.getTime());
 
-        prettyDate = prettyDate + " (" + startTime + " - " + endTime + ")";
+        prettyDate = prettyDate + " (" + frequencyName + ", " + startTime + " - " + endTime + ")";
 
         String prettyShortDay =
                 UMCalendarUtil.getSimpleDayFromLongDate(clazzLog.getLogDate(), currentLocale);
@@ -118,15 +163,19 @@ public class ClazzLogListRecyclerAdapter extends
                     theFragment.getText(R.string.absent);
         }
 
-        TextView statusTextView = holder.itemView
-                .findViewById(R.id.item_clazzlog_log_status_text);
+        TextView statusTextView = holder.itemView.findViewById(R.id.item_clazzlog_log_status_text);
 
-        ((TextView)holder.itemView
-                .findViewById(R.id.item_clazzlog_log_date))
-                .setText(prettyDate);
-        ((TextView)holder.itemView
-                .findViewById(R.id.item_clazzlog_log_day))
-                .setText(prettyShortDay);
+        AppCompatImageView doneIV = holder.itemView.findViewById(R.id.item_clazzlog_log_done_image);
+
+        if(clazzLog.isDone()){
+            //Update doneIV to tick
+            doneIV.setImageResource(R.drawable.ic_check_black_24dp);
+        }else{
+            //Update doneIV to pencil
+            doneIV.setImageResource(R.drawable.ic_edit);
+        }
+        ((TextView)holder.itemView.findViewById(R.id.item_clazzlog_log_date)).setText(prettyDate);
+        ((TextView)holder.itemView.findViewById(R.id.item_clazzlog_log_day)).setText(prettyShortDay);
         statusTextView.setText(clazzLogAttendanceStatus);
 
         if(!showImage){

@@ -8,6 +8,9 @@ public class ClazzLogWithScheduleStartEndTimes extends ClazzLog {
     //End time
     private long scheduleEndTime;
 
+    //Frequency
+    private int scheduleFrequency;
+
     public long getSceduleStartTime() {
         return sceduleStartTime;
     }
@@ -22,5 +25,13 @@ public class ClazzLogWithScheduleStartEndTimes extends ClazzLog {
 
     public void setScheduleEndTime(long scheduleEndTime) {
         this.scheduleEndTime = scheduleEndTime;
+    }
+
+    public int getScheduleFrequency() {
+        return scheduleFrequency;
+    }
+
+    public void setScheduleFrequency(int scheduleFrequency) {
+        this.scheduleFrequency = scheduleFrequency;
     }
 }

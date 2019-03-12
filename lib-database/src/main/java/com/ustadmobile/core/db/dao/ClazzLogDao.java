@@ -157,7 +157,8 @@ public abstract class ClazzLogDao implements SyncableDao<ClazzLog, ClazzLogDao> 
     @UmQuery("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND NOT canceled")
     public abstract UmProvider<ClazzLog> findByClazzUidNotCanceled(long clazzUid);
 
-    @UmQuery("SELECT ClazzLog.*, Schedule.sceduleStartTime, Schedule.scheduleEndTime FROM ClazzLog " +
+    @UmQuery("SELECT ClazzLog.*, Schedule.sceduleStartTime, Schedule.scheduleEndTime, " +
+            "Schedule.scheduleFrequency FROM ClazzLog " +
             "LEFT JOIN Schedule ON Schedule.scheduleUid = ClazzLog.clazzLogScheduleUid " +
             "WHERE clazzLogClazzUid = :clazzUid AND NOT canceled ORDER BY logDate ASC")
     public abstract UmProvider<ClazzLogWithScheduleStartEndTimes>
