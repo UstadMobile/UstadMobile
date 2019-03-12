@@ -59,5 +59,28 @@ public interface EpubContentView extends UstadView {
     void mountContainer(long containerUid, UmCallback<String> callback);
 
     void unmountContainer(String mountedUrl);
-    
+
+    /**
+     * Set if the progress bar is visible or not
+     *
+     * @param progressVisible true for the progress bar to be visible (e.g. container is being mounted/parsed),
+     *                        false otherwise.
+     */
+    void setProgressBarVisible(boolean progressVisible);
+
+    /**
+     * Set the progress bar progress percentage to show. -1 for indeterminate, 0-100 for a percentage
+     *
+     * @param progress -1
+     *
+     * @return
+     */
+    void setProgressBarProgress(int progress);
+
+    /**
+     *
+     * @param spinePos
+     */
+    void goToLinearSpinePosition(int spinePos);
+
 }

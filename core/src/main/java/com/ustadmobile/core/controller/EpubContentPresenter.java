@@ -61,6 +61,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument;
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
@@ -81,6 +82,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -101,6 +103,10 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
 
     private String mountedUrl;
+
+    private String opfBaseUrl;
+
+    private String[] linearSpineUrls;
 
     /**
      * First HTTP callback: run this once the container has been mounted to an http directory
@@ -170,12 +176,12 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
                 opf.loadFromOPF(xpp);
                 final String[] linearSpineHrefsRelative = opf.getLinearSpineHREFs();
 
-                final String baseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
+                opfBaseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
                         mountedUrl, ocf.getRootFiles().get(0).getFullPath()));
 
-                String[] linearSpineHrefsAbsolute = new String[linearSpineHrefsRelative.length];
+                linearSpineUrls = new String[linearSpineHrefsRelative.length];
                 for(int i = 0; i < linearSpineHrefsRelative.length; i++) {
-                    linearSpineHrefsAbsolute[i] = UMFileUtil.joinPaths(baseUrl,
+                    linearSpineUrls[i] = UMFileUtil.joinPaths(opfBaseUrl,
                             linearSpineHrefsRelative[i]);
                 }
 
@@ -185,9 +191,9 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
 
                 epubContentView.runOnUiThread(() -> {
                     epubContentView.setContainerTitle(opf.getTitle());
-                    epubContentView.setSpineUrls(linearSpineHrefsAbsolute);
+                    epubContentView.setSpineUrls(linearSpineUrls);
                     if(opfCoverImageItem != null) {
-                        epubContentView.setCoverImage(UMFileUtil.resolveLink(baseUrl,
+                        epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl,
                                 opfCoverImageItem.href));
                     }
 
@@ -228,6 +234,7 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
                 navDocument.load(xpp);
                 epubContentView.runOnUiThread(() ->
                         epubContentView.setTableOfContents(navDocument.getToc()));
+                view.runOnUiThread(() -> view.setProgressBarVisible(false));
             }catch(IOException e) {
                 e.printStackTrace();
             }catch(XmlPullParserException x) {
@@ -249,12 +256,24 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
     public void onCreate(Hashtable savedState) {
         long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID)
                 .toString());
+        view.setProgressBarProgress(-1);
+        view.setProgressBarVisible(true);
         view.mountContainer(containerUid, mountedCallbackHandler);
     }
 
     public void handlePageTitleUpdated(String pageTitle) {
         if(epubContentView != null) {
             epubContentView.setPageTitle(pageTitle);
+        }
+    }
+
+    public void handleClickNavItem(EpubNavItem navItem) {
+        if(opfBaseUrl != null && linearSpineUrls != null) {
+            String navItemUrl = UMFileUtil.resolveLink(opfBaseUrl, navItem.getHref());
+            int hrefIndex = Arrays.asList(linearSpineUrls).indexOf(navItemUrl);
+            if(hrefIndex != -1) {
+                epubContentView.goToLinearSpinePosition(hrefIndex);
+            }
         }
     }
 

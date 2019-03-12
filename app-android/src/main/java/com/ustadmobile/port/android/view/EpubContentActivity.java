@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,24 +16,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.EpubContentPresenter;
-import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.EpubContentView;
-import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -50,69 +43,26 @@ public class EpubContentActivity extends ZippedContentActivity implements
     /** The Page Adapter used to manage swiping between epub pages */
     private ContainerViewPagerAdapter mPagerAdapter;
 
-    private String onpageSelectedJS = "";
-
-
     private EpubContentPresenter mEpubContentPresenter;
 
     private String mBaseURL = null;
-
-    private String mMountedPath;
-
-    //Key when saving state for the current page
-    private static final String OUTSTATE_CURRENTITEM = "currentitem";
-
-    //Key when saving state for the current mount point
-    private static final String OUTSTATE_MOUNTPOINT = "mountpt";
-
-    private int mSavedPosition = -1;
-
-    private Hashtable mArgs;
 
     private DrawerLayout mDrawerLayout;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private EpubNavDocument navDocument;
-
     private TocListView tocList;
 
-    private String[] spineUrls;
-
     private ImageView coverImageView;
-
 
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
 
-        setContentView(R.layout.activity_container_epubpager);
-        DrawerLayout drawerLayout = findViewById(R.id.container_drawer_layout);
+        setContentView(R.layout.activity_epub_content);
+        mDrawerLayout = findViewById(R.id.container_drawer_layout);
 
-
-        InputStream is = null;
-        try {
-            AssetManager asMgr = getApplicationContext().getAssets();
-            is = asMgr.open("http/epub/onpageshow.js");
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            UMIOUtils.readFully(is, bout, 1024);
-            onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
-        }catch(IOException e) {
-            System.err.println("Error loading javascript for page changing");
-            e.printStackTrace();
-        }finally {
-            UMIOUtils.closeInputStream(is);
-        }
-
-        mArgs = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
-
-        if(saved != null) {
-            if(saved.getInt(OUTSTATE_CURRENTITEM, -1) != -1) {
-                mSavedPosition = saved.getInt(OUTSTATE_CURRENTITEM);
-            }
-        }
-
-        Toolbar toolbar = findViewById(R.id.container_toolbar);
+        Toolbar toolbar = findViewById(R.id.um_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -129,7 +79,7 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
         if(!UstadMobileSystemImpl.getInstance().getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
                 getContext())) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             mDrawerToggle.setDrawerIndicatorEnabled(false);
         }
         mDrawerToggle.syncState();
@@ -139,8 +89,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
         tocList = (TocListView)findViewById(R.id.activity_container_epubpager_toclist);
         coverImageView = (ImageView)findViewById(R.id.item_basepoint_cover_img);
 
-        onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__",
-                EmbeddedHttpdService.ANDROID_ASSETS_PATH);
         mEpubContentPresenter = new EpubContentPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         Hashtable savedHt = UMAndroidUtil.bundleToHashtable(saved);
@@ -182,7 +130,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
     @Override
     public void setSpineUrls(String[] spineUrls) {
-        this.spineUrls = spineUrls;
         mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(),
                 spineUrls);
         mPager.setOffscreenPageLimit(1);
@@ -192,24 +139,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
     @Override
     public void setPageTitle(String pageTitle) {
         setTitle(pageTitle);
-    }
-
-    public void handlePageTitleUpdated(int index, String title) {
-        if(mPager != null && mPager.getCurrentItem() == index && mEpubContentPresenter != null) {
-            mEpubContentPresenter.handlePageTitleUpdated(title);
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if(mPager != null) {
-            outState.putInt(OUTSTATE_CURRENTITEM, mPager.getCurrentItem());
-        }
-
-        if(mMountedPath != null) {
-            outState.putString(OUTSTATE_MOUNTPOINT, mMountedPath);
-        }
     }
 
     public void onDestroy() {
@@ -230,7 +159,22 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
     @Override
     public void setContainerTitle(String title) {
-        ((TextView)findViewById(R.id.item_basepoint_cover_title)).setText(title);
+        setTitle(title);
+    }
+
+    @Override
+    public void setProgressBarVisible(boolean progressVisible) {
+        findViewById(R.id.progressBar).setVisibility(progressVisible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setProgressBarProgress(int progress) {
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        if(progress == -1) {
+            progressBar.setIndeterminate(true);
+        }else {
+            progressBar.setProgress(progress);
+        }
     }
 
     @Override
@@ -252,11 +196,14 @@ public class EpubContentActivity extends ZippedContentActivity implements
     @Override
     public void onClick(Object item, View view) {
         EpubNavItem navItem = (EpubNavItem)item;
-        int hrefIndex = Arrays.asList(spineUrls).indexOf(navItem.getHref());
-        if(hrefIndex != -1) {
-            mPager.setCurrentItem(hrefIndex, true);
-            mDrawerLayout.closeDrawers();
-        }
+        mEpubContentPresenter.handleClickNavItem(navItem);
+        mDrawerLayout.closeDrawers();
+    }
+
+
+    @Override
+    public void goToLinearSpinePosition(int spinePos) {
+        mPager.setCurrentItem(spinePos, true);
     }
 
     private class ContainerTocListAdapter extends TocListView.TocListViewAdapter{
@@ -307,7 +254,7 @@ public class EpubContentActivity extends ZippedContentActivity implements
     private static class ContainerViewPagerAdapter extends FragmentStatePagerAdapter {
 
 
-        WeakHashMap<Integer, ContainerPageFragment> pagesMap;
+        WeakHashMap<Integer, EpubContentPageFragment> pagesMap;
 
         /**
          * Array of the page HREF items to be shown
@@ -329,14 +276,14 @@ public class EpubContentActivity extends ZippedContentActivity implements
          * @param position Position in the list of fragment to create
          */
         public Fragment getItem(int position) {
-            ContainerPageFragment existingFrag = pagesMap.get(position);
+            EpubContentPageFragment existingFrag = pagesMap.get(position);
 
             //something wrong HERE
             if(existingFrag != null) {
                 return existingFrag;
             }else {
-                ContainerPageFragment frag =
-                        ContainerPageFragment.newInstance(urlList[position]);
+                EpubContentPageFragment frag =
+                        EpubContentPageFragment.newInstance(urlList[position], position);
 
                 this.pagesMap.put(position, frag);
                 return frag;
