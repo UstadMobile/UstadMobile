@@ -48,8 +48,7 @@ public class TestEmbeddedHTTPD {
 
             httpd = new EmbeddedHTTPD(0, PlatformTestUtil.getTargetContext());
             httpd.start();
-            mountedPath = httpd.mountZip(epubToMount.getAbsolutePath(), MOUNT_PATH,
-                    false, null);
+            mountedPath = httpd.mountZip(epubToMount.getAbsolutePath(), MOUNT_PATH);
         }catch(IOException e) {
             ioe = e;
         }finally {
@@ -67,41 +66,5 @@ public class TestEmbeddedHTTPD {
         epubToMount.delete();
     }
 
-    @Test
-    public void givenZipMounted_whenContentDownloadedOverHttp_shouldBeTheSameFile() throws IOException {
-        String fileUrl = UMFileUtil.joinPaths(new String[]{
-                "http://localhost:" + httpd.getListeningPort(), mountedPath, TEST_ENTRY_PATH});
-        HttpURLConnection urlConnection = (HttpURLConnection)new URL(fileUrl).openConnection();
-        InputStream in = urlConnection.getInputStream();
-        File tmpSaveFile = File.createTempFile("TestEmbeddedHTTPD-content-dl", "opf");
-        FileOutputStream fileOut = new FileOutputStream(tmpSaveFile);
-
-        UMIOUtils.readFully(in, fileOut, 8*1024);
-
-        UMIOUtils.closeInputStream(in);
-        UMIOUtils.closeOutputStream(fileOut);
-
-        ZipFile zipFile = new ZipFile(epubToMount);
-        ZipEntry zipEntry = zipFile.getEntry(TEST_ENTRY_PATH);
-        Assert.assertEquals("File downloaded over http size = entry size from zip", zipEntry.getSize(),
-                tmpSaveFile.length());
-
-        //close it
-        in.close();
-        fileOut.close();
-        urlConnection.disconnect();
-
-
-        String dirListingUrl =UMFileUtil.joinPaths(new String[] {
-                "http://localhost:" + httpd.getListeningPort(), mountedPath, "EPUB/"});
-        urlConnection = (HttpURLConnection)new URL(dirListingUrl).openConnection();
-        in = urlConnection.getInputStream();
-
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        UMIOUtils.readFully(in, bout, 8*1024);
-        String result = new String(bout.toByteArray(), "UTF-8");
-        Assert.assertNotNull(result);
-
-    }
 
 }

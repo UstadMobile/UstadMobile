@@ -14,7 +14,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -73,6 +75,7 @@ public class TestMountedContainerResponder {
         RouterNanoHTTPD.UriResource mockUriResource = mock(RouterNanoHTTPD.UriResource.class);
         when(mockUriResource.initParameter(0, ContainerManager.class))
                 .thenReturn(containerManager);
+        when(mockUriResource.initParameter(1, List.class)).thenReturn(new ArrayList());
         when(mockUriResource.getUri()).thenReturn(mountPath +
                 MountedContainerResponder.URI_ROUTE_POSTFIX);
 
@@ -100,6 +103,7 @@ public class TestMountedContainerResponder {
         RouterNanoHTTPD.UriResource mockUriResource = mock(RouterNanoHTTPD.UriResource.class);
         when(mockUriResource.initParameter(0, ContainerManager.class))
                 .thenReturn(containerManager);
+        when(mockUriResource.initParameter(1, List.class)).thenReturn(new ArrayList());
         when(mockUriResource.getUri()).thenReturn(mountPath +
                 MountedContainerResponder.URI_ROUTE_POSTFIX);
 
