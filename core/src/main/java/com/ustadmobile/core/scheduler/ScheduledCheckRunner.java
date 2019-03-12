@@ -360,6 +360,7 @@ public class ScheduledCheckRunner implements Runnable{
                             feedLinkViewClass,
                             clazzName,
                             teacher.getClazzMemberPersonUid());
+                    thisEntry.setDeadline(currentClazzLog.getLogDate());
 
                     FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
                     if(existingEntry != null){
@@ -380,6 +381,7 @@ public class ScheduledCheckRunner implements Runnable{
                             feedLinkViewClass,
                             clazzName,
                             officer.getPersonUid());
+                    thisEntry.setDeadline(currentClazzLog.getLogDate());
 
                     FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
                     if(existingEntry != null){
@@ -399,6 +401,7 @@ public class ScheduledCheckRunner implements Runnable{
                             feedLinkViewClass,
                             clazzName,
                             mne.getPersonUid());
+                    thisEntry.setDeadline(currentClazzLog.getLogDate());
 
                     FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
                     if(existingEntry != null){
@@ -418,6 +421,7 @@ public class ScheduledCheckRunner implements Runnable{
                             feedLinkViewClass,
                             clazzName,
                             admin.getPersonUid());
+                    thisEntry.setDeadline(currentClazzLog.getLogDate());
 
                     FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
                     if(existingEntry != null){

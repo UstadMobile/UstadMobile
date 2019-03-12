@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
@@ -96,6 +97,27 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
                 }
             })
         );
+    }
+
+    /**
+     * Mark feed as done so it can be dismissed from the feed list.
+     * @param feedUid   the feed uid
+     */
+    public void markFeedAsDone(long feedUid){
+        FeedEntryDao feedEntryDao = repository.getFeedEntryDao();
+        feedEntryDao.findByUidAsync(feedUid, new UmCallback<FeedEntry>() {
+            @Override
+            public void onSuccess(FeedEntry thisFeed) {
+                if(thisFeed != null) {
+                    thisFeed.setFeedEntryDone(true);
+                    feedEntryDao.update(thisFeed);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
+        });
+
     }
 
     /**

@@ -4,17 +4,17 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +25,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.FeedListPresenter;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.FeedListView;
-import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -38,7 +35,8 @@ import java.util.Objects;
  * FeedListFragment Android fragment extends UstadBaseFragment - fragment responsible for displaying
  * the feed page and actions on them depending on the feed.
  */
-public class FeedListFragment extends UstadBaseFragment implements FeedListView {
+public class FeedListFragment extends UstadBaseFragment implements FeedListView,
+        RecyclerItemTouchHelper.RecyclerItemTouchHelperListener  {
 
     View rootContainer;
     private RecyclerView mRecyclerView;
@@ -47,86 +45,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     private Button reportButton;
     private ImageView reportImageView;
     private CardView summaryCard;
-
-    /**
-     * The Recycler Adapter for Feed Entries.
-     */
-    protected class FeedListRecyclerAdapter extends
-            PagedListAdapter<FeedEntry,
-                    FeedListRecyclerAdapter.FeedViewHolder> {
-
-        class FeedViewHolder extends RecyclerView.ViewHolder {
-            FeedViewHolder(View itemView) {
-                super(itemView);
-            }
-        }
-
-        FeedListRecyclerAdapter(@NonNull DiffUtil.ItemCallback<FeedEntry> diffCallback) {
-            super(diffCallback);
-        }
-
-        /**
-         * This method inflates the card layout (to parent view given) and returns it.
-         *
-         * @param parent        View given.
-         * @param viewType      View Type not used here.
-         * @return              New ViewHolder for the ClazzStudent type
-         */
-        @NonNull
-        @Override
-        public FeedViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View feedEntryListItem =
-                    LayoutInflater.from(getContext()).inflate(
-                            R.layout.item_feedlist_feed, parent, false);
-            return new FeedViewHolder(feedEntryListItem);
-        }
-
-        /**
-         * This method sets the elements after it has been obtained for that item'th position.
-         * @param holder    The holder
-         * @param position  The position in the recycler view.
-         */
-        @Override
-        public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
-
-            FeedEntry feedEntry = getItem(position);
-
-            TextView feedTitle = holder.itemView
-                .findViewById(R.id.item_feedlist_feed_title);
-
-            TextView feedText = holder.itemView
-                    .findViewById(R.id.item_feedlist_feed_card_subtitle);
-
-            ImageView feedIcon = holder.itemView
-                .findViewById(R.id.item_feedlist_feed_icon);
-
-            Button recordAttendanceButton = holder.itemView
-                    .findViewById(R.id.item_feedlist_attendance_record_attendance_button);
-
-            assert feedEntry != null;
-
-            feedText.setText(feedEntry.getDescription());
-            feedTitle.setText(feedEntry.getTitle());
-
-            if (feedEntry.getDeadline() > 0 &&
-                    UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.getDeadline()){
-                feedText.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),
-                        R.color.accent));
-                feedText.setText(feedEntry.getDescription());
-            }
-
-            if(feedEntry.getLink().startsWith(ClassDetailView.VIEW_NAME)){
-                recordAttendanceButton.setText(R.string.view_class);
-                //Change feedIcon as needed
-            }else if(feedEntry.getLink().startsWith(PersonDetailView.VIEW_NAME)){
-                recordAttendanceButton.setText(R.string.view_student);
-                //Change feedIcon as needed
-            }
-            recordAttendanceButton.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
-            holder.itemView.setOnClickListener(v -> mPresenter.handleClickFeedEntry(feedEntry));
-
-        }
-    }
 
     /**
      * The Diff callback
@@ -180,10 +98,16 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
         //Use Linear Layout Manager : Set layout Manager
         RecyclerView.LayoutManager mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
-        DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(mRecyclerView.getContext(),
-                LinearLayoutManager.VERTICAL);
-        mRecyclerView.addItemDecoration(dividerItemDecoration);
+
+        //Swipe trial:
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(),
+                DividerItemDecoration.VERTICAL));
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback =
+                new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(mRecyclerView);
+        //end of Swipe
 
         numClassesView =
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_classes);
@@ -209,9 +133,22 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     }
 
     @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        System.out.println("hi");
+        FeedListRecyclerAdapter adapter = (FeedListRecyclerAdapter) mRecyclerView.getAdapter();
+        long feedUid = adapter.positionToFeedUid.get(position);
+        if(feedUid != 0){
+            mPresenter.markFeedAsDone(feedUid);
+        }
+        adapter.notifyItemRemoved(position);
+
+    }
+
+    @Override
     public void setFeedEntryProvider(UmProvider<FeedEntry> feedEntryUmProvider) {
         FeedListRecyclerAdapter recyclerAdapter =
-                new FeedListRecyclerAdapter(DIFF_CALLBACK);
+                new FeedListRecyclerAdapter(this, DIFF_CALLBACK, getContext(),
+                        mPresenter);
 
         // A warning is expected
         DataSource.Factory<Integer, FeedEntry> factory =
@@ -328,5 +265,4 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
             toolbar.setTitle(title);
         }
     }
-
 }

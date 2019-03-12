@@ -19,6 +19,7 @@ import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -135,25 +136,25 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
 
 
         dbManagerImplSpec.addMethod(MethodSpec.constructorBuilder()
-                    .addParameter(ClassName.get(Object.class), "context")
-                    .addParameter(ClassName.get(String.class), "dbName")
-                    .addModifiers(Modifier.PUBLIC)
-                    .addCode("this.context = (Context)context;\n")
-                    .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
-                    .addCode("this._repositories = new $T<>();\n", Vector.class)
-                    .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
-                            ".class, dbName).addCallback(new DbManagerCallback()).build();\n",
-                            ClassName.get("android.arch.persistence.room", "Room"))
+                .addParameter(ClassName.get(Object.class), "context")
+                .addParameter(ClassName.get(String.class), "dbName")
+                .addModifiers(Modifier.PUBLIC)
+                .addCode("this.context = (Context)context;\n")
+                .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
+                .addCode("this._repositories = new $T<>();\n", Vector.class)
+                .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
+                                ".class, dbName).addCallback(new DbManagerCallback()).build();\n",
+                        ClassName.get("android.arch.persistence.room", "Room"))
                 .build())
-            .addMethod(MethodSpec.methodBuilder("execute")
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(Override.class)
-                    .addParameter(Runnable.class, "_runnable")
-                    .addCode("this.dbExecutor.execute(_runnable);\n").build())
-            .addType(TypeSpec.classBuilder("DbManagerCallback")
-                    .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase")
-                            .nestedClass("Callback"))
-                    .addMethod(generateOnCreateMethod(dbType, dbManagerImplSpec)).build());
+                .addMethod(MethodSpec.methodBuilder("execute")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addParameter(Runnable.class, "_runnable")
+                        .addCode("this.dbExecutor.execute(_runnable);\n").build())
+                .addType(TypeSpec.classBuilder("DbManagerCallback")
+                        .superclass(ClassName.get(ROOM_PKG_NAME, "RoomDatabase")
+                                .nestedClass("Callback"))
+                        .addMethod(generateOnCreateMethod(dbType, dbManagerImplSpec)).build());
 
         if(DbProcessorUtils.isSyncableDatabase(dbType.asType(), processingEnv)) {
             addDbWithSyncableInsertLockImplementation(dbManagerImplSpec);
@@ -164,12 +165,12 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                     .addField(ClassName.get("android.arch.persistence.db",
                             "SupportSQLiteStatement"), "_deleteLastPksStatement")
                     .addMethod(MethodSpec.methodBuilder("getLastPksQuery")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(ClassName.get("android.arch.persistence.db",
-                                "SupportSQLiteQuery"))
-                        .addCode(CodeBlock.builder()
-                                .beginControlFlow("if(_lastPksQuery == null)")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(ClassName.get("android.arch.persistence.db",
+                                    "SupportSQLiteQuery"))
+                            .addCode(CodeBlock.builder()
+                                    .beginControlFlow("if(_lastPksQuery == null)")
                                     .add("_lastPksQuery = new $T();\n",
                                             ClassName.get("com.ustadmobile.lib.database",
                                                     "SyncablePkUtilsAndroid",
@@ -178,16 +179,16 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                                     .add("return _lastPksQuery;\n").build())
                             .build())
                     .addMethod(MethodSpec.methodBuilder("getDeleteLastPksStatement")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(ClassName.get("android.arch.persistence.db",
-                                "SupportSQLiteStatement"))
-                        .addCode(CodeBlock.builder()
-                            .beginControlFlow("if(_deleteLastPksStatement == null)")
-                                .add("_deleteLastPksStatement = _roomDb.compileStatement($S);\n",
-                                        "DELETE FROM _lastsyncablepk")
-                                .endControlFlow()
-                                .add("return _deleteLastPksStatement;\n").build())
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(ClassName.get("android.arch.persistence.db",
+                                    "SupportSQLiteStatement"))
+                            .addCode(CodeBlock.builder()
+                                    .beginControlFlow("if(_deleteLastPksStatement == null)")
+                                    .add("_deleteLastPksStatement = _roomDb.compileStatement($S);\n",
+                                            "DELETE FROM _lastsyncablepk")
+                                    .endControlFlow()
+                                    .add("return _deleteLastPksStatement;\n").build())
                             .build());
 
         }
@@ -199,7 +200,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .addMember("version", String.valueOf(db.version()));
 
         Map<? extends ExecutableElement, ? extends AnnotationValue> annotationEntryMap =
-            dbType.getAnnotationMirrors().get(0).getElementValues();
+                dbType.getAnnotationMirrors().get(0).getElementValues();
         for(Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
                 annotationEntryMap.entrySet()) {
             String key = entry.getKey().getSimpleName().toString();
@@ -232,9 +233,9 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             if(dbMethod.getAnnotation(UmDbContext.class) != null) {
                 MethodSpec.Builder contextMethodBuilder =
                         MethodSpec.methodBuilder(dbMethod.getSimpleName().toString())
-                        .returns(ClassName.get(Object.class))
-                        .addCode("return this.context;\n")
-                        .addAnnotation(Override.class);
+                                .returns(ClassName.get(Object.class))
+                                .addCode("return this.context;\n")
+                                .addAnnotation(Override.class);
 
                 if(dbMethod.getModifiers().contains(Modifier.PROTECTED))
                     contextMethodBuilder.addModifiers(Modifier.PROTECTED);
@@ -272,9 +273,9 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
 
 
         writeJavaFileToDestination(JavaFile.builder(packageName, roomDbTypeSpec.build()).build(),
-            destination);
+                destination);
         writeJavaFileToDestination(JavaFile.builder(packageName, dbManagerImplSpec.build()).build(),
-            destination);
+                destination);
     }
 
 
@@ -330,10 +331,10 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .returns(ClassName.get(daoMethod.getReturnType()))
                 .addCode(CodeBlock.builder()
                         .beginControlFlow("if($L == null)", daoFieldName)
-                            .add("$L = _roomDb.$L();\n", daoFieldName, daoMethodName)
-                            .add("$L.setExecutor(dbExecutor);\n", daoFieldName)
-                            .add("$L.setDbManager(this);\n", daoFieldName)
-                            .add("$L.setRoomDatabase(_roomDb);\n", daoFieldName)
+                        .add("$L = _roomDb.$L();\n", daoFieldName, daoMethodName)
+                        .add("$L.setExecutor(dbExecutor);\n", daoFieldName)
+                        .add("$L.setDbManager(this);\n", daoFieldName)
+                        .add("$L.setRoomDatabase(_roomDb);\n", daoFieldName)
                         .endControlFlow()
                         .add("return $L;\n", daoFieldName).build()).build());
 
@@ -404,7 +405,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             }else if(daoMethod.getAnnotation(UmQuery.class) != null) {
                 roomDaoClassSpec.addMethod(
                         generateQueryMethod(daoMethod.getAnnotation(UmQuery.class).value(),
-                        daoMethod, daoClass, dbType, roomDaoClassSpec));
+                                daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmQueryFindByPrimaryKey.class) != null) {
                 roomDaoClassSpec.addMethod(generateQueryMethod(
                         generateFindByPrimaryKeySql(daoClass, daoMethod, processingEnv, '`'),
@@ -418,11 +419,11 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
             }else if(daoMethod.getAnnotation(UmSyncFindLocalChanges.class) != null) {
                 roomDaoClassSpec.addMethod(
                         generateQueryMethod(generateFindLocalChangesSql(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
+                                processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncFindAllChanges.class) != null) {
                 roomDaoClassSpec.addMethod(generateQueryMethod(
                         generateSyncFindAllChanges(daoClass, daoMethod,
-                        processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
+                                processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
             }else if(daoMethod.getAnnotation(UmSyncCheckIncomingCanUpdate.class) != null) {
                 roomDaoClassSpec.addMethod(generateQueryMethod(generateSyncFindUpdatableSql(daoClass,
                         daoMethod, processingEnv), daoMethod, daoClass, dbType, roomDaoClassSpec));
@@ -451,7 +452,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
 
         writeJavaFileToDestination(
                 JavaFile.builder(processingEnv.getElementUtils().getPackageOf(daoClass).toString(),
-                roomDaoClassSpec.build()).build(), destination);
+                        roomDaoClassSpec.build()).build(), destination);
     }
 
     private MethodSpec generateRoomSyncableInsertMethod(ExecutableElement daoMethod,
@@ -469,12 +470,13 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
         TypeName entityInsertionAdapterTypeName = ParameterizedTypeName.get(
                 ClassName.get("android.arch.persistence.room", "EntityInsertionAdapter"),
                 ClassName.get(entityComponentType));
+        UmInsert insertAnnotation = daoMethod.getAnnotation(UmInsert.class);
 
-
-
-
+        String onConflictStr = insertAnnotation != null && insertAnnotation.onConflict() ==
+                UmOnConflictStrategy.REPLACE ? "REPLACE" : "ABORT";
         CodeBlock.Builder insertQueryCodeBlock = CodeBlock.builder()
-                .add("return \"INSERT INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
+                .add("return \"INSERT OR " + onConflictStr +
+                        " INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
         CodeBlock.Builder bindCodeBlock = CodeBlock.builder();
         StringBuilder paramSection = new StringBuilder();
         int fieldCount = 0;
@@ -497,11 +499,11 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 if(fieldTypeEl.getQualifiedName().toString().equals(String.class.getName())) {
                     bindCodeBlock.beginControlFlow("if(value.get$L() != null)",
                             DbProcessorUtils.capitalize(field.getSimpleName()))
-                                .add("stmt.bindString($L, value.get$L());\n",
+                            .add("stmt.bindString($L, value.get$L());\n",
                                     fieldCount + 1,
                                     DbProcessorUtils.capitalize(field.getSimpleName()))
                             .nextControlFlow("else")
-                                .add("stmt.bindNull($L);\n", fieldCount+1)
+                            .add("stmt.bindNull($L);\n", fieldCount+1)
                             .endControlFlow();
                 }
             }else if(INSERT_BIND_LONG.contains(fieldType.getKind())) {
@@ -769,10 +771,10 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
      */
     @Override
     public MethodSpec generateQueryMethod(String querySql,
-                                                   ExecutableElement daoMethod,
-                                                   TypeElement daoType,
-                                                   TypeElement dbType,
-                                                   TypeSpec.Builder daoClassBuilder) {
+                                          ExecutableElement daoMethod,
+                                          TypeElement daoType,
+                                          TypeElement dbType,
+                                          TypeSpec.Builder daoClassBuilder) {
         //check for livedata return types
         //Class returnType = daoMethod.getReturnType();
         TypeMirror returnType = daoMethod.getReturnType();
