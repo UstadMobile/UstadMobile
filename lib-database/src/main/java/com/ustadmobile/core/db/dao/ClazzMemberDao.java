@@ -419,7 +419,8 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " AND ClazzLog.done = 1) * 1.0) as attended_average " +
             " FROM ClazzMember " +
-            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid ")
+            " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
+            " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT + " ")
     public abstract void getAttendanceAverageAsListForClazzBetweenDates(long clazzUid,
                                                                 long fromDate, long toDate,
                                                                 UmCallback<List<Float>> resultList);
