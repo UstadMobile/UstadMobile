@@ -60,7 +60,7 @@ public abstract class ZippedContentActivity extends UstadBaseActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-            String mountedUri = httpd.mountZipOnHttp(strings[0], null, false, null);
+            String mountedUri = httpd.mountZipOnHttp(strings[0], null);
             return UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
                     mountedUri);
         }
@@ -85,8 +85,7 @@ public abstract class ZippedContentActivity extends UstadBaseActivity {
         @Override
         protected String doInBackground(Long... containerUid) {
 
-            String mountedUri = httpd.mountContainer(containerUid[0], null,
-                    false, null);
+            String mountedUri = httpd.mountContainer(containerUid[0], null);
             return UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
                     mountedUri);
         }

@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
+import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -32,6 +34,16 @@ public class MountedContainerResponder extends FileResponder implements RouterNa
         HTML_EXTENSIONS.add("htm");
     }
 
+    public interface MountedContainerFilter {
+
+        NanoHTTPD.Response filterResponse(NanoHTTPD.Response responseIn,
+                                          RouterNanoHTTPD.UriResource uriResource,
+                                          Map<String, String> urlParams,
+                                          NanoHTTPD.IHTTPSession session);
+
+    }
+
+    @Deprecated
     public static class MountedZipFilter {
 
         public MountedZipFilter(Pattern pattern, String replacement) {
@@ -114,8 +126,15 @@ public class MountedContainerResponder extends FileResponder implements RouterNa
                     "text/plain", "Entry not found in container");
         }
 
-        return newResponseFromFile(uriResource, session,
+        List<MountedContainerFilter> filterList = uriResource.initParameter(1, List.class);
+        NanoHTTPD.Response response = newResponseFromFile(uriResource, session,
                 new FileSource(new File(entry.getContainerEntryFile().getCefPath())));
+        for(MountedContainerFilter filter : filterList) {
+            response = filter.filterResponse(response, uriResource, urlParams, session);
+        }
+
+
+        return response;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.H5PContentView;
+import com.ustadmobile.core.view.UstadView;
 
 import org.json.JSONObject;
 
@@ -113,7 +114,7 @@ public class H5PContentPresenter extends UstadBaseController {
     }
 
     public void onCreate(Hashtable args) {
-        this.h5pFileUri = (String)args.get(EpubContentPresenter.ARG_CONTAINERURI);
+        this.h5pFileUri = (String)args.get(UstadView.ARG_CONTAINER_UID);
         h5PContentView.mountH5PDist(mH5PDistMountedCallback);
     }
 

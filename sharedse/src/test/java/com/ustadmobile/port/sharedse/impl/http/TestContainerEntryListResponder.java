@@ -7,9 +7,8 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
-import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -64,7 +63,7 @@ public class TestContainerEntryListResponder {
         Map<File, String> fileMap = new HashMap<>();
         for(String filename : RES_FILENAMES) {
             File resFile = new File(tmpDir, filename);
-            SharedSeTestUtil.extractResourceToFile(RES_FOLDER + filename,
+            UmFileUtilSe.extractResourceToFile(RES_FOLDER + filename,
                     resFile);
             fileMap.put(resFile, filename);
         }

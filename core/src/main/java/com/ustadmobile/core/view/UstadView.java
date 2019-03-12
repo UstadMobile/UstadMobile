@@ -37,6 +37,9 @@ package com.ustadmobile.core.view;
 public interface UstadView {
 
 
+    //Begin common arguments
+    String ARG_CONTAINER_UID = "containerUid";
+
 
     /**
      * Return the system specific context for this view (e.g. Activity on Android

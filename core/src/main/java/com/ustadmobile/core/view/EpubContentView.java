@@ -44,11 +44,9 @@ public interface EpubContentView extends UstadView {
 
     String ARG_CONTAINER_UID = "containerUid";
 
-    void setController(EpubContentPresenter controller);
-        
     void setContainerTitle(String containerTitle);
 
-    void setSpineUrls(String basePath, String[] spineUrls, String query);
+    void setSpineUrls(String[] urls);
 
     void setPageTitle(String pageTitle);
 
@@ -58,11 +56,31 @@ public interface EpubContentView extends UstadView {
 
     void setAuthorName(String authorName);
 
-    @Deprecated
-    void mountZip(String zipPath, UmCallback<String> callback);
-
     void mountContainer(long containerUid, UmCallback<String> callback);
 
     void unmountContainer(String mountedUrl);
-    
+
+    /**
+     * Set if the progress bar is visible or not
+     *
+     * @param progressVisible true for the progress bar to be visible (e.g. container is being mounted/parsed),
+     *                        false otherwise.
+     */
+    void setProgressBarVisible(boolean progressVisible);
+
+    /**
+     * Set the progress bar progress percentage to show. -1 for indeterminate, 0-100 for a percentage
+     *
+     * @param progress -1
+     *
+     * @return
+     */
+    void setProgressBarProgress(int progress);
+
+    /**
+     *
+     * @param spinePos
+     */
+    void goToLinearSpinePosition(int spinePos);
+
 }

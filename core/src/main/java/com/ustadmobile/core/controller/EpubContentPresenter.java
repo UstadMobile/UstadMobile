@@ -1,7 +1,7 @@
 /*
     This file is part of Ustad Mobile.
 
-    Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
+    Ustad Mobile Copyright (C) 2011-2019 UstadMobile Inc.
 
     Ustad Mobile is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument;
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
@@ -70,13 +71,9 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
-import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.lib.util.UMUtil;
-import com.ustadmobile.core.util.URLTextUtil;
-import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.impl.UmCallback;
 
 
@@ -85,14 +82,11 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.json.*;
-
-
 /**
- * Represents a container (e.g. epub file)
- * 
+ * Shows an EPUB with a table of contents, and page by page swipe navigation
  * 
  * @author mike
  */
@@ -101,62 +95,30 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
     private EpubContentView epubContentView;
 
     private OcfDocument ocf;
-    
-    private OpfDocument activeOPF;
-
-    private String registrationUUID;
-    
-    private TinCanXML tinCanXMLSummary;
-
-    public static final String PREFKEY_PREFIX_LASTOPENED = "laxs-";
-        
-    /**
-     * Use with loadController as the key for the containerURI in args hashtable
-     * @see EpubContentPresenter#loadController(java.util.Hashtable)
-     */
-    public static final String ARG_CONTAINERURI = "URI";
-
-    /**
-     * Use with loadController as the key for the mime type in args hashtable
-     * @see EpubContentPresenter#loadController(java.util.Hashtable)
-     */
-    public static final String ARG_MIMETYPE = "MIME";
-    
-    /**
-     * Use with loadController as the key for the OPF index to load from the
-     * container if this container is an EPUB file
-     */
-    public static final String ARG_OPFINDEX = "OPFI";
 
     /**
      * Hardcoded fixed path to the container.xml file as per the open container
      * format spec : META-INF/container.xml
      */
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
-    
-    /**
-     * Harded postfix added to container files when downloading the thumbnail
-     * for them.  E.g. For a book called bookname.epub where the PNG thumbnail
-     * was given in the OPDS feed we will have a file called bookname.epub.thumb.png
-     */
-    public static final String THUMBNAIL_POSTFIX = ".thumb.";
-    
-    
-    public static final int CMD_RESUME_SESSION = 1011;
-
-
 
     private String mountedUrl;
 
-    private UmHttpCall containerXmlCall;
+    private String opfBaseUrl;
 
+    private String[] linearSpineUrls;
+
+    /**
+     * First HTTP callback: run this once the container has been mounted to an http directory
+     *
+     */
     private UmCallback<String> mountedCallbackHandler = new UmCallback<String>() {
 
         @Override
         public void onSuccess(String result) {
             mountedUrl = result;
             String containerUri = UMFileUtil.joinPaths(mountedUrl, OCF_CONTAINER_PATH);
-            containerXmlCall = UstadMobileSystemImpl.getInstance().makeRequestAsync(
+            UstadMobileSystemImpl.getInstance().makeRequestAsync(
                     new UmHttpRequest(getContext(), containerUri), containerHttpCallbackHandler);
         }
 
@@ -167,6 +129,9 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
         }
     };
 
+    /**
+     * Second HTTP callback: parses the container.xml file and finds the OPF
+     */
     private UmHttpResponseCallback containerHttpCallbackHandler = new UmHttpResponseCallback() {
         @Override
         public void onComplete(UmHttpCall call, UmHttpResponse response) {
@@ -198,6 +163,9 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
         }
     };
 
+    /**
+     * Third HTTP callback: parses the OPF and sets up the view
+     */
     private UmHttpResponseCallback opfHttpCallbackHandler = new UmHttpResponseCallback() {
         @Override
         public void onComplete(UmHttpCall call, UmHttpResponse response) {
@@ -206,28 +174,31 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
                 XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(
                         new ByteArrayInputStream(response.getResponseBody()));
                 opf.loadFromOPF(xpp);
-                final String[] linearSpineHrefs = opf.getLinearSpineHREFs();
-                final String baseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
+                final String[] linearSpineHrefsRelative = opf.getLinearSpineHREFs();
+
+                opfBaseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
                         mountedUrl, ocf.getRootFiles().get(0).getFullPath()));
-                final String xapiQuery = getXAPIQuery(UMFileUtil.resolveLink(mountedUrl, "/xapi/"));
-                final String containerTitle = opf.title;
+
+                linearSpineUrls = new String[linearSpineHrefsRelative.length];
+                for(int i = 0; i < linearSpineHrefsRelative.length; i++) {
+                    linearSpineUrls[i] = UMFileUtil.joinPaths(opfBaseUrl,
+                            linearSpineHrefsRelative[i]);
+                }
+
                 final OpfItem opfCoverImageItem = opf.getCoverImage(null);
                 final String authorNames = opf.getNumCreators() > 0 ?
                         UMUtil.joinStrings(opf.getCreators(), ", ") : null;
 
-                epubContentView.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        epubContentView.setContainerTitle(containerTitle);
-                        epubContentView.setSpineUrls(baseUrl, linearSpineHrefs, xapiQuery);
-                        if(opfCoverImageItem != null) {
-                            epubContentView.setCoverImage(UMFileUtil.resolveLink(baseUrl,
-                                    opfCoverImageItem.href));
-                        }
+                epubContentView.runOnUiThread(() -> {
+                    epubContentView.setContainerTitle(opf.getTitle());
+                    epubContentView.setSpineUrls(linearSpineUrls);
+                    if(opfCoverImageItem != null) {
+                        epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl,
+                                opfCoverImageItem.href));
+                    }
 
-                        if(authorNames != null) {
-                            epubContentView.setAuthorName(authorNames);
-                        }
+                    if(authorNames != null) {
+                        epubContentView.setAuthorName(authorNames);
                     }
                 });
 
@@ -248,7 +219,7 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
 
         @Override
         public void onFailure(UmHttpCall call, IOException exception) {
-
+            exception.printStackTrace();
         }
     };
 
@@ -257,18 +228,13 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
         public void onComplete(UmHttpCall call, UmHttpResponse response) {
             final EpubNavDocument navDocument = new EpubNavDocument();
             try {
-//                XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser();
-//                xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-//                xpp.setInput(new ByteArrayInputStream(response.getResponseBody()), "UTF-8");
                 XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(
                         new ByteArrayInputStream(response.getResponseBody()), "UTF-8");
+                xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                 navDocument.load(xpp);
-                epubContentView.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        epubContentView.setTableOfContents(navDocument.getToc());
-                    }
-                });
+                epubContentView.runOnUiThread(() ->
+                        epubContentView.setTableOfContents(navDocument.getToc()));
+                view.runOnUiThread(() -> view.setProgressBarVisible(false));
             }catch(IOException e) {
                 e.printStackTrace();
             }catch(XmlPullParserException x) {
@@ -278,7 +244,7 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
 
         @Override
         public void onFailure(UmHttpCall call, IOException exception) {
-
+            exception.printStackTrace();
         }
     };
 
@@ -288,109 +254,11 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
     }
 
     public void onCreate(Hashtable savedState) {
-        Long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID)
+        long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID)
                 .toString());
+        view.setProgressBarProgress(-1);
+        view.setProgressBarVisible(true);
         view.mountContainer(containerUid, mountedCallbackHandler);
-    }
-
-    /**
-     * Returns a Query String for the xAPI parameters for the container including 
-     * the tincan actor, authorization, endpoint, and registration UUID
-     * 
-     * @return Query string as above
-     */
-    public String getXAPIQuery(String xapiEndpoint) {
-        return "?actor=" +
-            URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-                //This file itself will be deleted
-            //"&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
-            "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
-            "&registration=" + registrationUUID;
-    }
-
-    public String getXAPIQuery() {
-        return getXAPIQuery(UMFileUtil.resolveLink(mountedUrl, "/xapi/"));
-    }
-    
-    /**
-     * Generate a launched statement for this course
-     * 
-     * @return 
-     */
-    public JSONObject makeLaunchedStatement() {
-        JSONObject stmt = null;
-        
-        try {
-            stmt = new JSONObject();
-            
-            if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
-                stmt.put("object", this.tinCanXMLSummary.getLaunchActivity().getActivityJSON());
-            }else {
-                JSONObject objectObj = new JSONObject();
-                objectObj.put("id", "epub:" + activeOPF.id);
-                stmt.put("object", objectObj);
-            }
-            
-            stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(getContext()));
-            
-            JSONObject verbDef = new JSONObject();
-            verbDef.put("id", "http://adlnet.gov/expapi/verbs/launched");
-            stmt.put("verb", verbDef);
-            stmt.put("context", getTinCanContext());
-        }catch(JSONException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 190, null, e);
-        }
-        
-        return stmt;
-    }
-
-    /**
-     * Make a JSON Object for the TinCan context object with the for the given
-     * registration 
-     * 
-     * @param registrationUUID Registration UUID for the context as per xAPI spec
-     * @return JSON Object with the registration property set
-     */
-    public static JSONObject makeTinCanContext(String registrationUUID) {
-        JSONObject context = null;
-        try {
-            context = new JSONObject();
-            context.put("registration", registrationUUID);
-        }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 189, null, e);
-        }
-        
-        return context;
-    }
-    
-    /**
-     * Get a JSON Object representing the TinCan context of the container
-     * Really this is just here to put in the registration
-     * 
-     * @return 
-     */
-    public JSONObject getTinCanContext() {
-        return makeTinCanContext(this.registrationUUID);
-    }
-
-
-    /**
-     * Gets the current registration UUID that is being used for the container.
-     * 
-     * This is generated at random or loaded from a saved value and handled
-     * when loadController runs.
-     * 
-     * @return XAPI Registration UUID as a String
-     */
-    public String getRegistrationUUID() {
-        return registrationUUID;
-    }
-    
-    /**
-     * Sets the current registration UUID to be used
-     */
-    public void setRegistrationUUID(String registrationUUID) {
-        this.registrationUUID = registrationUUID;
     }
 
     public void handlePageTitleUpdated(String pageTitle) {
@@ -399,6 +267,15 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
         }
     }
 
+    public void handleClickNavItem(EpubNavItem navItem) {
+        if(opfBaseUrl != null && linearSpineUrls != null) {
+            String navItemUrl = UMFileUtil.resolveLink(opfBaseUrl, navItem.getHref());
+            int hrefIndex = Arrays.asList(linearSpineUrls).indexOf(navItemUrl);
+            if(hrefIndex != -1) {
+                epubContentView.goToLinearSpinePosition(hrefIndex);
+            }
+        }
+    }
 
     @Override
     public void onDestroy() {

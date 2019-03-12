@@ -191,8 +191,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
      * @param mountPath The path to use after /mount .
      * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
      */
-    public String mountZip(String zipPath, String mountPath, boolean epubHtmlFilterEnabled,
-                           String epubScriptPath) {
+    @Deprecated
+    public String mountZip(String zipPath, String mountPath) {
         if(mountPath == null) {
             mountPath= UMFileUtil.getFilename(zipPath) + '-' +
                     new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
@@ -201,7 +201,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         try {
             ZipFile zipFile = new ZipFile(zipPath);
             addRoute(PREFIX_MOUNT + mountPath + "/" + MountedZipHandler.URI_ROUTE_POSTFIX,
-                    MountedZipHandler.class, zipFile, epubHtmlFilterEnabled, epubScriptPath);
+                    MountedZipHandler.class, zipFile);
             String fullPath = toFullZipMountPath(mountPath);
             mountedZips.put(fullPath, zipFile);
             return toFullZipMountPath(mountPath);
@@ -212,8 +212,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         return null;
     }
 
-    public String mountContainer(long containerUid, String mountPath, boolean epubHtmlFilterEnabled,
-                                 String epubScriptPath) {
+    public String mountContainer(long containerUid, String mountPath,
+                                 List<MountedContainerResponder.MountedContainerFilter> filters) {
         Container container = repository.getContainerDao().findByUid(containerUid);
         if(container == null) {
             return null;
@@ -226,9 +226,13 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         }
 
         addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
-                MountedContainerResponder.class, containerManager);
+                MountedContainerResponder.class, containerManager, filters);
 
         return mountPath;
+    }
+
+    public String mountContainer(long containerUid, String mountPath) {
+        return mountContainer(containerUid, mountPath, new ArrayList<>());
     }
 
     public void unmountContainer(String mountPath) {
@@ -356,25 +360,11 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
      *
      * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
      */
-    public String mountZipOnHttp(String zipPath, String mountName, boolean epubFilterEnabled,
-                                 String epubScriptToAdd) {
+    public String mountZipOnHttp(String zipPath, String mountName) {
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
                 + this + "httpd server = " + this + " listening port = " + getListeningPort());
 
-        String extension = UMFileUtil.getExtension(zipPath);
-        HashMap<String, List<MountedZipHandler.MountedZipFilter>> filterMap = null;
-
-        if(extension != null && extension.endsWith("epub")) {
-            filterMap = new HashMap<>();
-            List<MountedZipHandler.MountedZipFilter> xhtmlFilterList = new ArrayList<>();
-            MountedZipHandler.MountedZipFilter autoplayFilter = new MountedZipHandler.MountedZipFilter(
-                    Pattern.compile("autoplay(\\s?)=(\\s?)([\"'])autoplay", Pattern.CASE_INSENSITIVE),
-                    "data-autoplay$1=$2$3autoplay");
-            xhtmlFilterList.add(autoplayFilter);
-            filterMap.put("xhtml", xhtmlFilterList);
-        }
-
-        mountName = mountZip(zipPath, mountName, epubFilterEnabled, epubScriptToAdd);
+        mountName = mountZip(zipPath, mountName);
         return mountName;
     }
 }
