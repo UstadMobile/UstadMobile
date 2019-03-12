@@ -56,9 +56,6 @@ public interface EpubContentView extends UstadView {
 
     void setAuthorName(String authorName);
 
-    @Deprecated
-    void mountZip(String zipPath, UmCallback<String> callback);
-
     void mountContainer(long containerUid, UmCallback<String> callback);
 
     void unmountContainer(String mountedUrl);
