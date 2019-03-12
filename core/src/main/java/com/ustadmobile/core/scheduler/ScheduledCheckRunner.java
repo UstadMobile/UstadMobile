@@ -2,7 +2,9 @@ package com.ustadmobile.core.scheduler;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ClassDetailView;
@@ -314,17 +316,47 @@ public class ScheduledCheckRunner implements Runnable{
                 List<FeedEntry> newFeedEntries = new ArrayList<>();
                 List<FeedEntry> updateFeedEntries = new ArrayList<>();
 
+                Schedule clazzLogSchedule =
+                        dbRepository.getScheduleDao().findByUid(currentClazzLog.getClazzLogScheduleUid());
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+                String timeBit = "";
+                if(clazzLogSchedule != null){
+                    //Add time to ClazzLog's date
+                    long startTimeLong = clazzLogSchedule.getSceduleStartTime();
+                    long endTimeLong = clazzLogSchedule.getScheduleEndTime();
+                    DateFormat formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+
+                    //start time
+                    long startMins = startTimeLong / (1000 * 60);
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.HOUR_OF_DAY, (int)(startMins / 60));
+                    cal.set(Calendar.MINUTE, (int)(startMins % 60));
+                    String startTime = formatter.format(cal.getTime());
+
+                    //end time
+                    long endMins = endTimeLong / (1000 * 60);
+                    cal.set(Calendar.HOUR_OF_DAY, (int)(endMins / 60));
+                    cal.set(Calendar.MINUTE, (int)(endMins % 60));
+                    String endTime = formatter.format(cal.getTime());
+                    timeBit = ", " + startTime + " - " + endTime;
+                }
+
                 String feedLinkViewClass = ClassDetailView.VIEW_NAME + "?" +
                         ClazzListView.ARG_CLAZZ_UID + "=" +
                         currentClazzLog.getClazzLogClazzUid();
+                String feedLinkDesc = "No attendance recorded for class " + clazzName  + " (" +
+                        UMCalendarUtil.getPrettyDateSimpleFromLong(currentClazzLog.getLogDate())
+                        + timeBit + ")";
+                String feedLinkTitle = "Record attendance (overdue)";
 
                 for(ClazzMemberWithPerson teacher:teachers){
                     long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
                             teacher.getPerson().getPersonUid(), currentClazzLog.getClazzLogUid(),
                             ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, "Record attendance (overdue)",
-                            "No attendance recorded for class. ",
+                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                            feedLinkDesc,
                             feedLinkViewClass,
                             clazzName,
                             teacher.getClazzMemberPersonUid());
@@ -343,8 +375,8 @@ public class ScheduledCheckRunner implements Runnable{
                             officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
                             ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, "Record attendance (overdue)",
-                            "No attendance recorded for class. ",
+                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                            feedLinkDesc,
                             feedLinkViewClass,
                             clazzName,
                             officer.getPersonUid());
@@ -362,8 +394,8 @@ public class ScheduledCheckRunner implements Runnable{
                             mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
                             ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, "Record attendance (overdue)",
-                            "No attendance recorded for class. ",
+                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                            feedLinkDesc,
                             feedLinkViewClass,
                             clazzName,
                             mne.getPersonUid());
@@ -381,8 +413,8 @@ public class ScheduledCheckRunner implements Runnable{
                             admin.getPersonUid(), currentClazzLog.getClazzLogUid(),
                             ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, "Record attendance (overdue)",
-                            "No attendance recorded for class. ",
+                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                            feedLinkDesc,
                             feedLinkViewClass,
                             clazzName,
                             admin.getPersonUid());
@@ -393,7 +425,6 @@ public class ScheduledCheckRunner implements Runnable{
                     }else{
                         newFeedEntries.add(thisEntry);
                     }
-
                 }
 
                 dbRepository.getFeedEntryDao().insertList(newFeedEntries);

@@ -30,6 +30,8 @@ public class FeedEntry {
 
     private long feedEntryClazzLogUid;
 
+    private long dateCreated;
+
     /**
      * As per ScheduledCheck.TYPE_ constants
      */
@@ -45,7 +47,7 @@ public class FeedEntry {
     private int feedEntryLastChangedBy;
 
     public FeedEntry() {
-
+        this.dateCreated = System.currentTimeMillis();
     }
 
     public FeedEntry(long feedEntryUid, String title, String description, String link,
@@ -56,6 +58,7 @@ public class FeedEntry {
         this.link = link;
         this.feedEntryClazzName = feedEntryClazzName;
         this.feedEntryPersonUid = personUid;
+        this.dateCreated = System.currentTimeMillis();
     }
 
     public long getFeedEntryLocalChangeSeqNum() {
@@ -192,5 +195,13 @@ public class FeedEntry {
 
     public void setFeedEntryCheckType(int feedEntryCheckType) {
         this.feedEntryCheckType = feedEntryCheckType;
+    }
+
+    public long getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(long dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }

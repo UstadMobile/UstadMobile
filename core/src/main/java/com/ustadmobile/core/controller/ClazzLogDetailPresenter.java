@@ -237,24 +237,26 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
         //Add Schedule time to this pretty Date
 
         //Add time to ClazzLog's date
-        long startTimeLong = currentSchedule.getSceduleStartTime();
-        long endTimeLong = currentSchedule.getScheduleEndTime();
-        DateFormat formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+        if(currentSchedule != null) {
+            long startTimeLong = currentSchedule.getSceduleStartTime();
+            long endTimeLong = currentSchedule.getScheduleEndTime();
+            DateFormat formatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
 
-        //start time
-        long startMins = startTimeLong / (1000 * 60);
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, (int)(startMins / 60));
-        cal.set(Calendar.MINUTE, (int)(startMins % 60));
-        String startTime = formatter.format(cal.getTime());
+            //start time
+            long startMins = startTimeLong / (1000 * 60);
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, (int) (startMins / 60));
+            cal.set(Calendar.MINUTE, (int) (startMins % 60));
+            String startTime = formatter.format(cal.getTime());
 
-        //end time
-        long endMins = endTimeLong / (1000 * 60);
-        cal.set(Calendar.HOUR_OF_DAY, (int)(endMins / 60));
-        cal.set(Calendar.MINUTE, (int)(endMins % 60));
-        String endTime = formatter.format(cal.getTime());
+            //end time
+            long endMins = endTimeLong / (1000 * 60);
+            cal.set(Calendar.HOUR_OF_DAY, (int) (endMins / 60));
+            cal.set(Calendar.MINUTE, (int) (endMins % 60));
+            String endTime = formatter.format(cal.getTime());
+            prettyDate = prettyDate + "(" + startTime + " - " + endTime + ")";
+        }
 
-        prettyDate = prettyDate + "(" + startTime + " - " + endTime + ")";
 
         view.updateDateHeading(prettyDate);
     }

@@ -278,13 +278,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView 
     @Override
     public void showReportOptionsOnSummaryCard(boolean visible) {
         runOnUiThread(() -> {
-            if(visible) {
-                reportImageView.setVisibility(View.VISIBLE);
-                reportButton.setVisibility(View.VISIBLE);
-            }else{
-                reportImageView.setVisibility(View.GONE);
-                reportButton.setVisibility(View.GONE);
-            }
+            reportImageView.setVisibility(visible?View.VISIBLE:View.GONE);
+            reportButton.setVisibility(visible?View.VISIBLE:View.GONE);
         });
 
     }

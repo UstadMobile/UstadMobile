@@ -33,7 +33,8 @@ public abstract class FeedEntryDao implements SyncableDao<FeedEntry, FeedEntryDa
     @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
     public abstract FeedEntry findByUid(long uid) ;
 
-    @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0")
+    @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0" +
+            " ORDER BY dateCreated DESC")
     public abstract UmProvider<FeedEntry> findByPersonUid(long personUid);
 
     @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryPersonUid = :personUid AND feedEntryDone = 0")
