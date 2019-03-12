@@ -126,5 +126,22 @@ public class UmFileUtilSe {
         return getMd5Sum(file, new byte[UMIOUtils.DEFAULT_BUFFER_SIZE]);
     }
 
+    public static void extractResourceToFile(String resourcePath, File destFile) throws IOException {
+        try(
+                FileOutputStream fout = new FileOutputStream(destFile);
+                InputStream resIn = UmFileUtilSe.class.getResourceAsStream(resourcePath);
+        ) {
+            UMIOUtils.readFully(resIn, fout);
+        }
+    }
+
+    public static File makeTempDir(String prefix, String postfix) throws IOException{
+        File tmpDir = File.createTempFile(prefix, postfix);
+        if(tmpDir.delete() && tmpDir.mkdirs())
+            return tmpDir;
+        else
+            throw new IOException("Could not delete / create tmp dir");
+    }
+
 
 }

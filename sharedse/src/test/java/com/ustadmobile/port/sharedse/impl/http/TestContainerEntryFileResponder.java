@@ -5,7 +5,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
-import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -55,12 +54,12 @@ public class TestContainerEntryFileResponder {
     public void givenExistingContainerEntryFileUid_whenGetCalled_shouldReturnFileContents() throws IOException{
         Container container = new Container();
         container.setContainerUid(appDatabase.getContainerDao().insert(container));
-        File containerFileTmpDir = SharedSeTestUtil.makeTempDir("testcontainerentryfileresponder",
+        File containerFileTmpDir = UmFileUtilSe.makeTempDir("testcontainerentryfileresponder",
                 "containerdir");
         ContainerManager containerManager = new ContainerManager(container, appDatabase, appRepo,
                 containerFileTmpDir.getAbsolutePath());
         File fileToAdd = File.createTempFile("testcontainerentryfileresponder", "tmpfile");
-        SharedSeTestUtil.extractResourceToFile("/com/ustadmobile/port/sharedse/container/",
+        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/sharedse/container/",
                 fileToAdd);
         Map<File, String> fileMap = new HashMap<>();
         fileMap.put(fileToAdd, "testfile1.png");

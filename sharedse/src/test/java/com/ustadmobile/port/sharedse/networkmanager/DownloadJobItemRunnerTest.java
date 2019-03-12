@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntry;
@@ -26,9 +25,7 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPDTestServer;
-import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
-import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.After;
@@ -149,14 +146,14 @@ public class DownloadJobItemRunnerTest {
     public void setup() throws IOException {
         context = PlatformTestUtil.getTargetContext();
 
-        webServerTmpDir = SharedSeTestUtil.makeTempDir("webServerTmpDir",
+        webServerTmpDir = UmFileUtilSe.makeTempDir("webServerTmpDir",
                 ""+System.currentTimeMillis());
         webServerTmpContentEntryFile = new File(webServerTmpDir, ""+ TEST_CONTENT_ENTRY_FILE_UID);
 
-        SharedSeTestUtil.extractResourceToFile(TEST_FILE_RESOURCE_PATH,
+        UmFileUtilSe.extractResourceToFile(TEST_FILE_RESOURCE_PATH,
                 webServerTmpContentEntryFile);
 
-        containerTmpDir = SharedSeTestUtil.makeTempDir("containerTmpDir",
+        containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
                 "" + System.currentTimeMillis());
 
         mockedNetworkManager = spy(NetworkManagerBle.class);
@@ -176,7 +173,7 @@ public class DownloadJobItemRunnerTest {
         groupBle =  new WiFiDirectGroupBle("DIRECT-PeerNode","networkPass123");
 
 
-        clientContainerDir = SharedSeTestUtil.makeTempDir("clientContainerDir", "" + System.currentTimeMillis());
+        clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis());
 
         UmAppDatabase.getInstance(context).clearAllTables();
         clientDb = UmAppDatabase.getInstance(context, "clientdb");
@@ -257,14 +254,14 @@ public class DownloadJobItemRunnerTest {
         peerDb.clearAllTables();
         UmAppDatabase peerRepo = peerDb.getRepository("http://localhost/dummy/", "");
         peerRepo.getContainerDao().insert(container);
-        peerContainerFileTmpDir = SharedSeTestUtil.makeTempDir("peerContainerFileTmpDir",
+        peerContainerFileTmpDir = UmFileUtilSe.makeTempDir("peerContainerFileTmpDir",
                 "" + System.currentTimeMillis());
         ContainerManager peerContainerManager = new ContainerManager(container,
                 peerDb, peerRepo, peerContainerFileTmpDir.getAbsolutePath());
 
         peerTmpContentEntryFile = File.createTempFile("peerTmpContentEntryFile",
                 "" + System.currentTimeMillis() + ".zip");
-        SharedSeTestUtil.extractResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile);
+        UmFileUtilSe.extractResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile);
         ZipFile peerZipFile = new ZipFile(peerTmpContentEntryFile);
         peerContainerManager.addEntriesFromZip(peerZipFile, ContainerManager.OPTION_COPY);
         peerZipFile.close();

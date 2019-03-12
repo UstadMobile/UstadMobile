@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.core.util.URLTextUtil;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.UMUtil;
@@ -107,7 +108,7 @@ public class XapiPackagePresenter extends UstadBaseController {
     public void onCreate(Hashtable args) {
         this.args = args;
         registrationUUID = UMUUID.randomUUID().toString();
-        view.mountZip((String)args.get(EpubContentPresenter.ARG_CONTAINERURI),
+        view.mountZip((String)args.get(UstadView.ARG_CONTAINER_UID),
                 zipMountedCallbackHandler);
     }
 

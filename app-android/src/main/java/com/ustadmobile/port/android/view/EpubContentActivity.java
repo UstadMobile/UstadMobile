@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.res.AssetManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -28,7 +27,6 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -38,15 +36,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 import java.util.WeakHashMap;
 
 public class EpubContentActivity extends ZippedContentActivity implements
-        ContainerPageFragment.OnFragmentInteractionListener,
-        EpubContentView, AppViewChoiceListener, ListView.OnItemClickListener,
+        EpubContentView, ListView.OnItemClickListener,
         TocListView.OnItemClickListener{
 
 
@@ -81,8 +75,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
     private EpubNavDocument navDocument;
 
-    private Vector<Runnable> runWhenContentMounted = new Vector<>();
-
     private TocListView tocList;
 
     private String[] spineUrls;
@@ -95,13 +87,13 @@ public class EpubContentActivity extends ZippedContentActivity implements
         super.onCreate(saved);
 
         setContentView(R.layout.activity_container_epubpager);
-        DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
+        DrawerLayout drawerLayout = findViewById(R.id.container_drawer_layout);
 
 
         InputStream is = null;
         try {
             AssetManager asMgr = getApplicationContext().getAssets();
-            is = asMgr.open("http/onpageshow.js");
+            is = asMgr.open("http/epub/onpageshow.js");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             UMIOUtils.readFully(is, bout, 1024);
             onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
@@ -120,11 +112,10 @@ public class EpubContentActivity extends ZippedContentActivity implements
             }
         }
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
+        Toolbar toolbar = findViewById(R.id.container_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this,
                 mDrawerLayout, toolbar, R.string.open, R.string.closed) {
 
@@ -160,36 +151,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
         return mBaseURL;
     }
 
-    public String getXapiQuery() {
-        return mEpubContentPresenter.getXAPIQuery();
-    }
-
-    /**
-     * A runnable posted here will be run when the controller is ready. If the controller is currently
-     * ready the method will be run immediately. Otherwise it will be added to a vector of Runnables
-     * to run when the controller is ready.
-     *
-     * @param runnable
-     */
-    public void runWhenMounted(Runnable runnable) {
-        if(mEpubContentPresenter != null) {
-            runnable.run();
-        }else {
-            runWhenContentMounted.add(runnable);
-        }
-    }
-
-    /**
-     * The user was asked to choose from a list of available registrations: handle choice
-     *
-     * @param commandId The command id that was supplied when using showChoiceDialog
-     * @param choice
-     */
-    @Override
-    public void appViewChoiceSelected(int commandId, int choice) {
-
-    }
-
     /**
      * Override the onCreateOptionsMenu : In Container mode we don't show the standard app menu
      * options like logout, about etc.  We show only a close button in the top right to make things
@@ -220,11 +181,10 @@ public class EpubContentActivity extends ZippedContentActivity implements
     }
 
     @Override
-    public void setSpineUrls(String basePath, String[] spineUrls, String query) {
-        this.mBaseURL = basePath;
+    public void setSpineUrls(String[] spineUrls) {
         this.spineUrls = spineUrls;
         mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(),
-                basePath, spineUrls, query);
+                spineUrls);
         mPager.setOffscreenPageLimit(1);
         mPager.setAdapter(mPagerAdapter);
     }
@@ -232,10 +192,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
     @Override
     public void setPageTitle(String pageTitle) {
         setTitle(pageTitle);
-    }
-
-    public String getAutoplayRunJavascript() {
-        return onpageSelectedJS;
     }
 
     public void handlePageTitleUpdated(int index, String title) {
@@ -257,7 +213,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
     }
 
     public void onDestroy() {
-        mSavedPosition = -1;
         mEpubContentPresenter.onDestroy();
         super.onDestroy();
     }
@@ -274,23 +229,13 @@ public class EpubContentActivity extends ZippedContentActivity implements
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
-    @Override
-    public void setController(EpubContentPresenter controller) {
-
-    }
-
-    @Override
     public void setContainerTitle(String title) {
         ((TextView)findViewById(R.id.item_basepoint_cover_title)).setText(title);
     }
 
     @Override
     public void setCoverImage(String imageUrl) {
-        Picasso.with(this).load(imageUrl).into((ImageView)findViewById(R.id.item_basepoint_cover_img));
+        Picasso.with(this).load(imageUrl).into(coverImageView);
     }
 
     @Override
@@ -367,23 +312,11 @@ public class EpubContentActivity extends ZippedContentActivity implements
         /**
          * Array of the page HREF items to be shown
          */
-        private String[] hrefList;
+        private String[] urlList;
 
-        /**
-         * Base URL of pages (directory name)
-         */
-        private String baseURI;
-
-        /**
-         * Query string to append to the end of each page
-         */
-        private String query;
-
-        public ContainerViewPagerAdapter(FragmentManager fm, String baseURI, String[] hrefList, String query) {
+        public ContainerViewPagerAdapter(FragmentManager fm, String[] urlList) {
             super(fm);
-            this.baseURI = baseURI;
-            this.hrefList = hrefList;
-            this.query = query;
+            this.urlList = urlList;
             this.pagesMap = new WeakHashMap<>();
         }
 
@@ -403,44 +336,17 @@ public class EpubContentActivity extends ZippedContentActivity implements
                 return existingFrag;
             }else {
                 ContainerPageFragment frag =
-                        ContainerPageFragment.newInstance(hrefList[position], position);
+                        ContainerPageFragment.newInstance(urlList[position]);
 
                 this.pagesMap.put(position, frag);
                 return frag;
             }
         }
 
-        public int getFragmentIndexByHREF(String href) {
-            return Arrays.asList(hrefList).indexOf(href);
-        }
-
-
-        public void updatePageProps(String baseURI, String[] hrefList, String query, boolean reload) {
-            this.baseURI = baseURI;
-            this.hrefList = hrefList;
-            this.query = query;
-
-            Iterator<Map.Entry<Integer, ContainerPageFragment>> iterator = pagesMap.entrySet().iterator();
-            ContainerPageFragment frag;
-            Map.Entry<Integer, ContainerPageFragment> entry;
-            while(iterator.hasNext()) {
-                entry = iterator.next();
-                frag = entry.getValue();
-                frag.setBaseURI(baseURI, false);
-                frag.setPageHref(hrefList[entry.getKey()], false);
-                frag.setQuery(query, reload);
-            }
-        }
-
         @Override
         public int getCount() {
-            return hrefList.length;
+            return urlList.length;
         }
-    }
-
-
-    public String getBaseUrl() {
-        return mBaseURL;
     }
 
     @Override

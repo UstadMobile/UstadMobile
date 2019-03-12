@@ -44,11 +44,9 @@ public interface EpubContentView extends UstadView {
 
     String ARG_CONTAINER_UID = "containerUid";
 
-    void setController(EpubContentPresenter controller);
-        
     void setContainerTitle(String containerTitle);
 
-    void setSpineUrls(String basePath, String[] spineUrls, String query);
+    void setSpineUrls(String[] urls);
 
     void setPageTitle(String pageTitle);
 

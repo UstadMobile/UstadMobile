@@ -5,7 +5,6 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
-import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
@@ -45,7 +44,7 @@ public class TestContainerManager {
         db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         dbRepo = db.getRepository("http://localhost/dummy/", "");
 
-        tmpDir = SharedSeTestUtil.makeTempDir("TestContainerManager", "tmpdir");
+        tmpDir = UmFileUtilSe.makeTempDir("TestContainerManager", "tmpdir");
 
 
         for(String testFileName : testFileNames) {

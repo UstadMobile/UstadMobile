@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.contentformats.scorm.ScormManifest;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -84,7 +85,7 @@ public class ScormPackagePresenter extends UstadBaseController {
     }
 
     public void onCreate(Hashtable args) {
-        scormPackageView.mountZip((String)args.get(EpubContentPresenter.ARG_CONTAINERURI),
+        scormPackageView.mountZip((String)args.get(UstadView.ARG_CONTAINER_UID),
                 zipMountedCallback);
     }
 
