@@ -71,7 +71,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     private static final String CLAZZ_WHERE = " SELECT Clazz.*, " +
             "(SELECT ClazzLog.logDate FROM ClazzLog " +
-            "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid " +
+            "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.done = 1 " +
             "ORDER BY ClazzLog.logDate DESC LIMIT 1) AS lastRecorded, " +
             "(SELECT COUNT(*) " +
             " FROM ClazzMember WHERE " +

@@ -123,10 +123,10 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
 
             long tomorrowZeroHour = tomorrowZeroHourCalendar.getTimeInMillis();
 
-//            //TODO: Remove: Testing:
-            Calendar test = Calendar.getInstance();
-            test.add(Calendar.MINUTE, 2);
-            tomorrowZeroHour = test.getTimeInMillis();
+//            //TODOne: Remove: Testing:
+//            Calendar test = Calendar.getInstance();
+//            test.add(Calendar.MINUTE, 2);
+//            tomorrowZeroHour = test.getTimeInMillis();
 
             ScheduledCheck nextDayCheck = new ScheduledCheck(
                     tomorrowZeroHour,
