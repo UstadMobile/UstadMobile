@@ -17,11 +17,9 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzLogListPresenter;
-import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes;
 import com.ustadmobile.lib.db.entities.Schedule;
 
@@ -74,7 +72,7 @@ public class ClazzLogListRecyclerAdapter extends
      * @param frequency The Schedule freqency (from Schedule entity's scheduleFrequency field)
      * @return  MessageID code for applicable string.
      */
-    public static int frequencyToMessageID(int frequency){
+    private static int frequencyToMessageID(int frequency){
         int frequencyId = 0;
         switch(frequency){
             case Schedule.SCHEDULE_FREQUENCY_DAILY:
