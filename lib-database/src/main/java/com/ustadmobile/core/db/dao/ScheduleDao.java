@@ -141,8 +141,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                                 startCalendar, clazz.getTimeZone(),dayOfWeek, incToday);
 
-                        //Set to midnight AT the Time Zone.
-                        nextScheduleOccurence.set(Calendar.DAY_OF_WEEK, dayOfWeek);
                         //Set to 00:00
                         nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
                         nextScheduleOccurence.set(Calendar.MINUTE, 0);
@@ -160,6 +158,14 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
                     nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                             startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
+
+                    //Set to 00:00
+                    nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
+                    nextScheduleOccurence.set(Calendar.MINUTE, 0);
+                    nextScheduleOccurence.set(Calendar.SECOND, 0);
+                    nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+
+                    //Now move it to desired hour:
                     nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
                     nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
                     nextScheduleOccurence.set(Calendar.SECOND, 0);

@@ -363,6 +363,7 @@ public class UMCalendarUtil {
                 result.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
             }
 
+            result.set(Calendar.DAY_OF_WEEK, dayOfWeek);
             return result;
         }
 
