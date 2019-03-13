@@ -36,7 +36,6 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.PNG_EXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
@@ -91,13 +90,13 @@ public class KhanContentIndexer implements Runnable {
 
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.err.println("Usage:<file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 2) {
+            System.err.println("Usage:<file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
         UMLogUtil.logDebug(args[0]);
-        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
         // UMLogUtil.logError(args[1]);
 
@@ -110,14 +109,14 @@ public class KhanContentIndexer implements Runnable {
                         ScrapeQueueItemDao.STATUS_PENDING));
             }
 
-            scrapeFromRoot(new File(args[0]), runId);
+            scrapeFromRoot(new File(args[0]), new File(args[1]), runId);
         } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Main method exception catch khan");
         }
     }
 
-    public static void startScrape(String startUrl, File destDir, int runId) throws IOException {
+    public static void startScrape(String startUrl, File destDir, File containerDir, int runId) throws IOException {
         //setup the database
         URL url;
         try {
@@ -131,8 +130,7 @@ public class KhanContentIndexer implements Runnable {
         UmAppDatabase repository = db.getRepository("https://localhost", "");
 
         destDir.mkdirs();
-        File destinationDirectory = destDir;
-
+        containerDir.mkdirs();
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         LanguageDao languageDao = repository.getLanguageDao();
@@ -158,7 +156,7 @@ public class KhanContentIndexer implements Runnable {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, khanAcademyEntry, 6);
 
-        File englishFolder = new File(destinationDirectory, "en");
+        File englishFolder = new File(destDir, "en");
         englishFolder.mkdirs();
 
         ContentScraperUtil.createQueueItem(queueDao, url, khanAcademyEntry, englishFolder, ScraperConstants.KhanContentType.TOPICS.getType(), runId, ScrapeQueueItem.ITEM_TYPE_INDEX);
@@ -195,7 +193,8 @@ public class KhanContentIndexer implements Runnable {
             URL scrapeUrl;
             try {
                 scrapeUrl = new URL(item.getScrapeUrl());
-                return new KhanContentScraper(scrapeUrl, new File(item.getDestDir()), parent,
+                return new KhanContentScraper(scrapeUrl, new File(item.getDestDir()),
+                        containerDir, parent,
                         item.getContentType(), item.getSqiUid(), factory);
             } catch (IOException ignored) {
                 throw new RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" +
@@ -230,8 +229,8 @@ public class KhanContentIndexer implements Runnable {
 
     }
 
-    public static void scrapeFromRoot(File destDir, int runId) throws IOException {
-        startScrape(ROOT_URL, destDir, runId);
+    public static void scrapeFromRoot(File destDir, File containerDir, int runId) throws IOException {
+        startScrape(ROOT_URL, destDir, containerDir, runId);
     }
 
 
@@ -292,6 +291,18 @@ public class KhanContentIndexer implements Runnable {
                         UMLogUtil.logError("Could not get json from the script for url " + url);
                         return EMPTY_STRING;
                     }
+                } else if (node.getWholeData().contains("{\"initialState\"")) {
+
+                    String data = node.getWholeData();
+                    try {
+                        int index = data.indexOf("{\"initialState\"");
+                        int end = data.lastIndexOf("})");
+                        return data.substring(index, end);
+                    } catch (IndexOutOfBoundsException e) {
+                        UMLogUtil.logError("Could not get json from the script for url " + url);
+                        return EMPTY_STRING;
+                    }
+
                 }
             }
         }
@@ -305,6 +316,9 @@ public class KhanContentIndexer implements Runnable {
         String jsonString = getJsonStringFromScript(url.toString());
 
         TopicListResponse response = gson.fromJson(jsonString, TopicListResponse.class);
+        if (response.componentProps == null) {
+            response = gson.fromJson(jsonString, PropsTopiclistResponse.class).props;
+        }
 
         List<TopicListResponse.ComponentData.Modules> modulesList = response.componentProps.modules;
 
@@ -343,6 +357,9 @@ public class KhanContentIndexer implements Runnable {
         String subjectJson = getJsonStringFromScript(topicUrl.toString());
 
         SubjectListResponse response = gson.fromJson(subjectJson, SubjectListResponse.class);
+        if (response.componentProps == null) {
+            response = gson.fromJson(subjectJson, PropsSubjectResponse.class).props;
+        }
 
         // one page on the website doesn't follow standard code
         if (response == null) {
@@ -515,19 +532,6 @@ public class KhanContentIndexer implements Runnable {
 
             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, tutorialEntry, entry
                     , contentCount++);
-
-            if (ScraperConstants.KhanContentType.VIDEO.getType().equals(contentItem.kind)) {
-                String videoUrl = contentItem.downloadUrls.mp4;
-                if (videoUrl == null || videoUrl.isEmpty()) {
-                    videoUrl = contentItem.downloadUrls.mp4Low;
-                    if (videoUrl == null) {
-                        UMLogUtil.logError("Video was not available in any format for url: " + url);
-                        continue;
-                    }
-                    UMLogUtil.logTrace("Video was not available in mp4, found in mp4-low at " + url);
-                }
-                url = new URL(url, videoUrl);
-            }
 
             ContentScraperUtil.createQueueItem(queueDao, url, entry, newContentFolder,
                     contentItem.kind, runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE);

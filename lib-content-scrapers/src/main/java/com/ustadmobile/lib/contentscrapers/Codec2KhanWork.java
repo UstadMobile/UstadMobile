@@ -6,18 +6,11 @@ import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContainerEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
 import com.ustadmobile.lib.contentscrapers.util.VideoApi;
-import com.ustadmobile.lib.db.entities.Container;
-import com.ustadmobile.lib.db.entities.ContainerEntry;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithContentEntryFileStatusAndContentEntryId;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
 
 import org.apache.commons.io.FileUtils;
@@ -36,7 +29,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SUBTITLE_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 public class Codec2KhanWork {
 

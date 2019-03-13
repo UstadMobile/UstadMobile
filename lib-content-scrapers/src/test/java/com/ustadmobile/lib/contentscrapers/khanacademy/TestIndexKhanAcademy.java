@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
@@ -31,7 +33,6 @@ import okio.BufferedSource;
 import okio.Okio;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 public class TestIndexKhanAcademy {
 
@@ -102,6 +103,7 @@ public class TestIndexKhanAcademy {
     public void givenServerOnline_whenKhanContentScraped_thenShouldConvertAndDownloadAllFiles() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
         UmAppDatabase repo = db.getRepository("https://localhost", "");
         ScrapeRunDao runDao = db.getScrapeRunDao();
         ScrapeRun run = new ScrapeRun();
@@ -111,22 +113,17 @@ public class TestIndexKhanAcademy {
         runDao.insert(run);
 
         File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("testContainer").toFile();
 
         KhanContentIndexer.startScrape(mockWebServer.
                         url("/json/com/ustadmobile/lib/contentscrapers/khanacademy/mainpage.txt").toString(),
-                tmpDir, run.getScrapeRunUid());
+                tmpDir, containerDir, run.getScrapeRunUid());
 
         File englishFolder = new File(tmpDir, "en");
         Assert.assertEquals(true, englishFolder.isDirectory());
 
         File courseFolder = new File(englishFolder, "x9b4a5e7a");
         Assert.assertEquals(true, courseFolder.isDirectory());
-
-        File directoryForCourse = new File(courseFolder, "x9b4a5e7a");
-        Assert.assertEquals(true, courseFolder.isDirectory());
-
-        File videoFile = new File(directoryForCourse, "video.mp4");
-        Assert.assertEquals(true, videoFile.isFile());
 
         ContentEntryDao contentEntryDao = repo.getContentEntryDao();
         ContentEntryParentChildJoinDao parentChildDaoJoin = repo.getContentEntryParentChildJoinDao();
@@ -146,27 +143,26 @@ public class TestIndexKhanAcademy {
         ContentEntryParentChildJoin subjectHeadingJoin = parentChildDaoJoin.findParentByChildUuids(headingTopicEntry.getContentEntryUid());
         Assert.assertEquals(true, subjectHeadingJoin.getCepcjParentContentEntryUid() == gradeEntry.getContentEntryUid());
 
-
     }
 
     @Test
-    public void givenServerOnline_whenKhanVideoContentScrapedAGAIN_thenShouldNotDownloadFilesAgain() throws Exception {
+    public void givenKhanAcademyChangedTheSourceOnEachPage_whenDifferent_findTheCorrectJson() throws IOException {
 
-        File tmpDir = Files.createTempDirectory("testIndexKhancontentscraper").toFile();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        String json = KhanContentIndexer.getJsonStringFromScript(mockWebServer.
+                url("/json/com/ustadmobile/lib/contentscrapers/khanacademy/videopage.txt").toString());
 
-        KhanContentScraper scraper = new KhanContentScraper(tmpDir, driver);
-        scraper.scrapeVideoContent(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/files/video.mp4").toString());
+        SubjectListResponse response = gson.fromJson(json, SubjectListResponse.class);
+        if (response.componentProps == null) {
+            response = gson.fromJson(json, PropsSubjectResponse.class).props;
+        }
 
-        long firstDownloadTime = new File(tmpDir, tmpDir.getName() + ZIP_EXT).lastModified();
-        //now run scrapeContent again...
-
-        scraper.scrapeVideoContent(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/files/video.mp4").toString());
-
-        long lastModified = new File(tmpDir, tmpDir.getName() + ZIP_EXT).lastModified();
-        //Assert that last modified dates are lower than firstDownloadCompleteTime
-        Assert.assertTrue(lastModified == firstDownloadTime);
+        Assert.assertNotNull("Got the right content", response.componentProps);
 
     }
+
+
+
 
 
 }

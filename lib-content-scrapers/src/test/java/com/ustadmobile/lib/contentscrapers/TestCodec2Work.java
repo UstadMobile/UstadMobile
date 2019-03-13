@@ -13,6 +13,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class TestCodec2Work {
 
@@ -69,6 +71,14 @@ public class TestCodec2Work {
         Codec2KhanWork.main(new String[]{khanfolder.getPath(), containerFolder.getPath()});
 
         
+    }
+
+    @Test
+    public void test2(){
+
+        Path path = Paths.get("container", "container.xml");
+
+
     }
 
 

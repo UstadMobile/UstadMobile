@@ -2,17 +2,11 @@ package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 
@@ -156,17 +150,14 @@ public class TestPhetContentScraper {
         File englishSimulation = new File(titleDirectory, SIM_EN);
         Assert.assertTrue("English Simulation exists", englishSimulation.length() > 0);
 
-        File engETag = new File(titleDirectory, "simulation_en" + ScraperConstants.ETAG_TXT);
+        File engETag = new File(englishLocation, "simulation_en" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("English ETag exists", engETag.length() > 0);
-
-        File titleZip = new File(englishLocation, scraper.getTitle() + ScraperConstants.ZIP_EXT);
-        Assert.assertTrue("English Simulation Folder exists", titleZip.length() > 0);
 
         File spanishDir = new File(tmpDir, "es");
         Assert.assertTrue("Spanish Folder exists", spanishDir.isDirectory());
 
         File spanishTitleDirectory = new File(spanishDir, scraper.getTitle());
-        Assert.assertTrue("Spanish Zip exists", spanishTitleDirectory.isDirectory());
+        Assert.assertTrue("Spanish File Folder exists", spanishTitleDirectory.isDirectory());
 
         File aboutSpanishFile = new File(spanishTitleDirectory, ScraperConstants.ABOUT_HTML);
         Assert.assertTrue("About File English Exists", aboutSpanishFile.length() > 0);
@@ -174,11 +165,8 @@ public class TestPhetContentScraper {
         File spanishSimulation = new File(spanishTitleDirectory, SIM_ES);
         Assert.assertTrue("Spanish Simulation exists", spanishSimulation.length() > 0);
 
-        File spanishETag = new File(spanishTitleDirectory, "simulation_es" + ScraperConstants.ETAG_TXT);
+        File spanishETag = new File(spanishDir, "simulation_es" + ScraperConstants.ETAG_TXT);
         Assert.assertTrue("Spanish ETag exists", spanishETag.length() > 0);
-
-        File spanishTitleZip = new File(spanishDir, scraper.getTitle() + ScraperConstants.ZIP_EXT);
-        Assert.assertTrue("Spanish Title Zip exists", spanishTitleZip.length() > 0);
 
     }
 
@@ -186,12 +174,13 @@ public class TestPhetContentScraper {
     @Test
     public void givenServerOnline_whenPhetContentScraped_thenShouldConvertAndDownload() throws IOException {
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
         String mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString();
-        PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
+        PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir, containerDir);
         scraper.scrapeContent();
 
         AssertAllFiles(tmpDir, scraper);
@@ -200,12 +189,13 @@ public class TestPhetContentScraper {
     @Test
     public void givenServerOnline_whenPhetContentScrapedAgain_thenShouldNotDownloadFilesAgain() throws IOException {
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
         String mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString();
-        PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
+        PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir, containerDir);
         scraper.scrapeContent();
         File englishLocation = new File(tmpDir, "en");
         File titleDirectory = new File(englishLocation, scraper.getTitle());
@@ -224,11 +214,12 @@ public class TestPhetContentScraper {
     @Test(expected = IllegalArgumentException.class)
     public void givenServerOnline_whenPhetContentScraped_thenShouldThrowIllegalArgumentJarNotSupported() throws IOException {
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/legacy/jar").toString(), tmpDir);
+        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/legacy/jar").toString(), tmpDir, containerDir);
         scraper.scrapeContent();
 
     }
@@ -236,11 +227,12 @@ public class TestPhetContentScraper {
     @Test(expected = IllegalArgumentException.class)
     public void givenServerOnline_whenPhetContentScraped_thenShouldThrowIllegalArgumentFlashNotSupported() throws IOException {
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/legacy/flash").toString(), tmpDir);
+        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/legacy/flash").toString(), tmpDir, containerDir);
         scraper.scrapeContent();
 
     }
@@ -257,13 +249,12 @@ public class TestPhetContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
         File tmpDir = Files.createTempDirectory("testphetindexscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
-        index.findContent(mockWebServer.url(PHET_MAIN_CONTENT).toString(), tmpDir);
+        index.findContent(mockWebServer.url(PHET_MAIN_CONTENT).toString(), tmpDir, containerDir);
 
         ContentEntryDao contentEntryDao = repo.getContentEntryDao();
         ContentEntryParentChildJoinDao parentChildDaoJoin = repo.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao fileDao = repo.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao fileEntryJoin = repo.getContentEntryContentEntryFileJoinDao();
         ContentEntryContentCategoryJoinDao categoryJoinDao = repo.getContentEntryContentCategoryJoinDao();
         ContentEntryRelatedEntryJoinDao relatedJoin = repo.getContentEntryRelatedEntryJoinDao();
 
@@ -297,12 +288,6 @@ public class TestPhetContentScraper {
         Assert.assertEquals("Related Join with Simulation Exists - Spanish Match", true, spanishEnglishJoin.getCerejRelatedEntryUid() == spanishEntry.getContentEntryUid());
         Assert.assertEquals("Related Join with Simulation Exists - English Match", true, spanishEnglishJoin.getCerejContentEntryUid() == englishSimulationEntry.getContentEntryUid());
 
-        List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(englishSimulationEntry.getContentEntryUid());
-        Assert.assertEquals(true, listOfFiles.size() > 0);
-
-        ContentEntryFile file = fileDao.findByUid(listOfFiles.get(0).getCecefjContentEntryFileUid());
-        Assert.assertEquals(true, ScraperConstants.MIMETYPE_ZIP.equalsIgnoreCase(file.getMimeType()));
-
     }
 
 
@@ -314,35 +299,16 @@ public class TestPhetContentScraper {
         db.clearAllTables();
 
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
+        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString(), tmpDir, containerDir);
         scraper.scrapeContent();
 
         ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, repo.getContentEntryDao(), "", repo.getLanguageDao(), db.getLanguageVariantDao());
 
     }
-
-    @Test
-    public void givenParametersFromGradleCommandLineAndServerOnline_whenPhetContentScraped_thenShouldConvertAndDownload() throws IOException {
-
-        if (System.getProperty("phetUrl") != null && System.getProperty("phetDir") != null) {
-            File tmp = new File(System.getProperty("phetDir"));
-            PhetContentScraper scraper = new PhetContentScraper(System.getProperty("phetUrl"), tmp);
-            scraper.scrapeContent();
-            AssertAllFiles(tmp, scraper);
-        }
-    }
-
-    @Test
-    public void givenParametersFromGradleCommandLineAndServerOnline_findSimulationsAndDownload() throws IOException {
-        IndexPhetContentScraper content = new IndexPhetContentScraper();
-        if (System.getProperty("findPhetUrl") != null && System.getProperty("findPhetDir") != null) {
-            content.findContent(System.getProperty("findPhetUrl"), new File(System.getProperty("findPhetDir")));
-        }
-    }
-
 
 }

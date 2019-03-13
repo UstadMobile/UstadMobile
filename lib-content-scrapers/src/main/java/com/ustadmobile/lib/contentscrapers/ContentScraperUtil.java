@@ -6,13 +6,12 @@ import com.google.gson.GsonBuilder;
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -22,18 +21,17 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData;
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -79,6 +77,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -332,13 +331,13 @@ public class ContentScraperUtil {
 
     }
 
-    public static Map<File, String> createContainerFromDirectory(File directory, Map<File, String> filemap){
+    public static Map<File, String> createContainerFromDirectory(File directory, Map<File, String> filemap) {
         Path sourceDirPath = Paths.get(directory.toURI());
         try {
             Files.walk(sourceDirPath).filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
                         String relativePath = sourceDirPath.relativize(path).toString()
-                                                            .replaceAll(Pattern.quote("\\"), "/");
+                                .replaceAll(Pattern.quote("\\"), "/");
                         filemap.put(path.toFile(), relativePath);
 
                     });
@@ -474,35 +473,33 @@ public class ContentScraperUtil {
 
         String eTag = conn.getHeaderField("ETag");
         if (eTag != null) {
-            String text;
             eTag = eTag.replaceAll("\"", EMPTY_STRING);
             File eTagFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
-
-            if (ContentScraperUtil.fileHasContent(eTagFile)) {
-                text = FileUtils.readFileToString(eTagFile, UTF_ENCODING);
-                FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-                return !eTag.equalsIgnoreCase(text);
-            } else {
-                FileUtils.writeStringToFile(eTagFile, eTag, ScraperConstants.UTF_ENCODING);
-                return true;
-            }
+            return ContentScraperUtil.isFileContentsUpdated(eTagFile, eTag);
         }
 
         String lastModified = conn.getHeaderField("Last-Modified");
         File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
-        String text;
-
         if (lastModified != null) {
-            if (ContentScraperUtil.fileHasContent(modifiedFile)) {
-                text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-                return !lastModified.equalsIgnoreCase(text);
-            } else {
-                FileUtils.writeStringToFile(modifiedFile, lastModified, ScraperConstants.UTF_ENCODING);
-                return true;
-            }
+            return ContentScraperUtil.isFileContentsUpdated(modifiedFile, lastModified);
         }
 
         return true;
+    }
+
+
+    public static void deleteETagOrModified(File destination, String fileName) {
+
+        File eTagFile = new File(destination, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT);
+        if (ContentScraperUtil.fileHasContent(eTagFile)) {
+            ContentScraperUtil.deleteFile(eTagFile);
+        }
+
+        File modifiedFile = new File(destination, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
+        if (ContentScraperUtil.fileHasContent(modifiedFile)) {
+            ContentScraperUtil.deleteFile(modifiedFile);
+        }
+
     }
 
 
@@ -782,10 +779,10 @@ public class ContentScraperUtil {
                 changedLang.setName(nameOfLang.getName());
             }
             boolean isChanged = false;
-            if (!language.getIso_639_1_standard().equals(changedLang.getIso_639_1_standard())) {
+            if (language.getIso_639_1_standard() == null || !language.getIso_639_1_standard().equals(changedLang.getIso_639_1_standard())) {
                 isChanged = true;
             }
-            if (!language.getName().equals(changedLang.getName())) {
+            if (language.getName() == null || language.getName().equals(changedLang.getName())) {
                 isChanged = true;
             }
             if (isChanged) {
@@ -797,42 +794,51 @@ public class ContentScraperUtil {
     }
 
 
+    public static boolean isFileContentsUpdated(File modifiedFile, String data) throws IOException {
+        if (ContentScraperUtil.fileHasContent(modifiedFile)) {
+            String text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
+            return !data.equalsIgnoreCase(text);
+        } else {
+            FileUtils.writeStringToFile(modifiedFile, data,
+                    ScraperConstants.UTF_ENCODING);
+        }
+        return true;
+    }
+
+
     /**
-     * @param ePubFile                            file that was downloaded
-     * @param contentEntryFileDao                 dao to insert the file to database
-     * @param contentEntryFileStatusDao           dao to insert path of file to database
-     * @param contentEntry                        entry that is joined to file
-     * @param md5                                 md5 of file
-     * @param contentEntryContentEntryFileJoinDao file join with entry
-     * @param mobileOptimized                     isMobileOptimized
-     * @param fileType                            filetype of file
+     * @param contentEntry    entry that is joined to file
+     * @param mobileOptimized isMobileOptimized
+     * @param fileType        filetype of file
+     * @param tmpDir
+     * @param db
+     * @param repository
+     * @param containerDir
      * @returns the entry file
      */
-    public static ContentEntryFile insertContentEntryFile(File ePubFile, ContentEntryFileDao contentEntryFileDao,
-                                                          ContentEntryFileStatusDao contentEntryFileStatusDao,
-                                                          ContentEntry contentEntry, String md5,
-                                                          ContentEntryContentEntryFileJoinDao contentEntryContentEntryFileJoinDao,
-                                                          boolean mobileOptimized, String fileType) {
+    public static Container insertContainer(ContainerDao containerDao, ContentEntry contentEntry,
+                                            boolean mobileOptimized, String fileType,
+                                            long lastModified, File tmpDir, UmAppDatabase db,
+                                            UmAppDatabase repository, File containerDir) throws IOException {
 
-        ContentEntryFile contentEntryFile = new ContentEntryFile();
-        contentEntryFile.setMimeType(fileType);
-        contentEntryFile.setFileSize(ePubFile.length());
-        contentEntryFile.setLastModified(ePubFile.lastModified());
-        contentEntryFile.setMd5sum(md5);
-        contentEntryFile.setMobileOptimized(mobileOptimized);
-        contentEntryFile.setContentEntryFileUid(contentEntryFileDao.insert(contentEntryFile));
+        Container container = new Container();
+        container.setMimeType(fileType);
+        container.setLastModified(lastModified);
+        container.setContainerContentEntryUid(contentEntry.getContentEntryUid());
+        container.setMobileOptimized(mobileOptimized);
+        container.setContainerUid(containerDao.insert(container));
 
-        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileJoin.setCecefjContentEntryUid(contentEntry.getContentEntryUid());
-        fileJoin.setCecefjUid(contentEntryContentEntryFileJoinDao.insert(fileJoin));
+        Map<File, String> fileMap = new HashMap<>();
+        if (tmpDir.isDirectory()) {
+            ContentScraperUtil.createContainerFromDirectory(tmpDir, fileMap);
+        } else {
+            fileMap.put(tmpDir, tmpDir.getName());
+        }
+        ContainerManager manager = new ContainerManager(container, db,
+                repository, containerDir.getAbsolutePath());
+        manager.addEntries(fileMap, true);
 
-        ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-        fileStatus.setCefsContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileStatus.setFilePath(ePubFile.getAbsolutePath());
-        fileStatus.setCefsUid((int) contentEntryFileStatusDao.insert(fileStatus));
-
-        return contentEntryFile;
+        return container;
     }
 
     public static String getMd5(File ePubFile) throws IOException {
@@ -845,70 +851,6 @@ public class ContentScraperUtil {
 
 
     /**
-     * Checks if data is missing from the database by checking the file md5 and updates the database
-     *
-     * @param contentFile               file that is already downloaded
-     * @param contentEntry              content entry that is joined to file
-     * @param contentEntryFileDao       dao to insert the missing file entry
-     * @param contentEntryFileJoinDao   dao to insert the missing file join entry
-     * @param contentEntryFileStatusDao dao to insert the missing status path entry
-     * @param fileType                  file type of the file downloaded
-     * @param isMobileOptimized         is the file mobileOptimized
-     * @throws IOException
-     */
-    public static void checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(File contentFile, ContentEntry contentEntry,
-                                                                            ContentEntryFileDao contentEntryFileDao,
-                                                                            ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao,
-                                                                            ContentEntryFileStatusDao contentEntryFileStatusDao,
-                                                                            String fileType, boolean isMobileOptimized) throws IOException {
-
-        String md5EpubFile = ContentScraperUtil.getMd5(contentFile);
-
-        List<ContentEntryFile> listOfFiles = contentEntryFileDao.findFilesByContentEntryUid(contentEntry.getContentEntryUid());
-        if (listOfFiles == null || listOfFiles.isEmpty()) {
-            ContentScraperUtil.insertContentEntryFile(contentFile, contentEntryFileDao, contentEntryFileStatusDao, contentEntry, md5EpubFile, contentEntryFileJoinDao, isMobileOptimized, fileType);
-        } else {
-
-            boolean isFileFound = false;
-            // if file is found, it already exists in database and not needed to be added
-            for (ContentEntryFile file : listOfFiles) {
-                if (file.getMd5sum().equals(md5EpubFile)) {
-                    isFileFound = true;
-                    break;
-                }
-            }
-            if (!isFileFound) {
-                ContentScraperUtil.insertContentEntryFile(contentFile, contentEntryFileDao, contentEntryFileStatusDao, contentEntry, md5EpubFile, contentEntryFileJoinDao, isMobileOptimized, fileType);
-            }
-        }
-
-    }
-
-    /**
-     * Check if file entry exists in the db, get the last modified date of the file otherwise return -1
-     *
-     * @param contentFile         current file that will be used to saved into db
-     * @param contentEntry        the content entry that is linked to finding the list of files it contains
-     * @param contentEntryFileDao dao to query the db
-     * @return last modified of the file stored in the db or -1 if file not found
-     * @throws IOException
-     */
-    public static long getLastModifiedOfFileFromContentEntry(File contentFile, ContentEntry contentEntry,
-                                                             ContentEntryFileDao contentEntryFileDao) throws IOException {
-        String md5EpubFile = ContentScraperUtil.getMd5(contentFile);
-
-        List<ContentEntryFile> listOfFiles = contentEntryFileDao.findFilesByContentEntryUid(contentEntry.getContentEntryUid());
-        if (listOfFiles != null && !listOfFiles.isEmpty()) {
-            for (ContentEntryFile file : listOfFiles) {
-                if (file.getMd5sum().equals(md5EpubFile)) {
-                    return file.getLastModified();
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
      * Insert or updateState language variant
      *
      * @param variantDao variant dao to insert/updateState
@@ -918,11 +860,11 @@ public class ContentScraperUtil {
      */
     public static LanguageVariant insertOrUpdateLanguageVariant(LanguageVariantDao variantDao, String variant, Language language) {
         LanguageVariant languageVariant = null;
-        if (!variant.isEmpty()) {
+        if (variant != null && !variant.isEmpty()) {
             CountryCode countryCode = CountryCode.getByCode(variant);
             if (countryCode == null) {
                 List<CountryCode> countryList = CountryCode.findByName(variant);
-                if (countryList != null && !countryList.isEmpty()) {
+                if (!countryList.isEmpty()) {
                     countryCode = countryList.get(0);
                 }
             }
@@ -1331,5 +1273,15 @@ public class ContentScraperUtil {
                 UMLogUtil.logTrace("Could not delete: " + content.getPath());
             }
         }
+    }
+
+    public static long getLastModifiedOfFileFromContentEntry(ContentEntry childEntry, ContainerDao containerDao) {
+
+        Container container = containerDao.getMostRecentContainerForContentEntry(childEntry.getContentEntryUid());
+        if (container != null) {
+            return container.getLastModified();
+        }
+        return -1;
+
     }
 }

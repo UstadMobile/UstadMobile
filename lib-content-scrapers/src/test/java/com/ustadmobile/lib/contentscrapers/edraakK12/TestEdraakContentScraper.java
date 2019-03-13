@@ -128,7 +128,6 @@ public class TestEdraakContentScraper {
         Assert.assertNotNull("Created Gson POJO Object", gsonContent);
 
         Assert.assertTrue("Downloaded Questions json exist", ContentScraperUtil.fileHasContent(new File(courseDirectory, QUESTIONS_JSON)));
-        Assert.assertTrue("Downloaded zip exists", ContentScraperUtil.fileHasContent(new File(tmpDir, gsonContent.id + ".zip")));
 
         List<ContentResponse> questionSetList = scraper.getQuestionSet(gsonContent);
         Assert.assertNotNull("Has Questions Set", questionSetList);

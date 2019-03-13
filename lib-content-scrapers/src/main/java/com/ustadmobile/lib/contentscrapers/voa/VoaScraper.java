@@ -3,12 +3,8 @@ package com.ustadmobile.lib.contentscrapers.voa;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
@@ -49,7 +45,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 /**
  * The Voice of America Website is an html website with content for learning english.
@@ -71,6 +66,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
  */
 public class VoaScraper implements Runnable {
 
+    private File containerDir;
     private int sqiUid;
     private ContentEntry parentEntry;
     private URL scrapUrl;
@@ -87,8 +83,9 @@ public class VoaScraper implements Runnable {
         voaDirectory.mkdirs();
     }
 
-    public VoaScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, int sqiUid) {
+    public VoaScraper(URL scrapeUrl, File destinationDirectory, File containerDir, ContentEntry parent, int sqiUid) {
         this.destinationDir = destinationDirectory;
+        this.containerDir = containerDir;
         this.scrapUrl = scrapeUrl;
         this.parentEntry = parent;
         this.sqiUid = sqiUid;
@@ -102,9 +99,7 @@ public class VoaScraper implements Runnable {
         System.gc();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
+        ContainerDao containerDao = repository.getContainerDao();
         ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
 
 
@@ -116,20 +111,21 @@ public class VoaScraper implements Runnable {
         try {
             scrapeContent();
 
-            File content = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()) + ScraperConstants.ZIP_EXT);
+            File content = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()));
             successful = true;
             if (isContentUpdated()) {
-                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                        parentEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
-                        ScraperConstants.MIMETYPE_ZIP);
-            } else {
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
-                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                ContentScraperUtil.insertContainer(containerDao, parentEntry,
+                        true, ScraperConstants.MIMETYPE_TINCAN,
+                        content.lastModified(), content,
+                        db, repository, containerDir);
+                FileUtils.deleteDirectory(content);
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
+            ContentScraperUtil.deleteFile(
+                    new File(destinationDir,
+                            FilenameUtils.getBaseName(scrapUrl.getPath()) + ScraperConstants.LAST_MODIFIED_TXT));
         }
 
         queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
@@ -155,10 +151,8 @@ public class VoaScraper implements Runnable {
         String lessonId = FilenameUtils.getBaseName(scrapUrl.getPath());
 
         File voaDirectory = new File(destinationDir, lessonId);
+        File modifiedFile = new File(destinationDir, lessonId + ScraperConstants.LAST_MODIFIED_TXT);
         voaDirectory.mkdirs();
-
-        File zipFile = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
-
         try {
             WebElement element = driver.findElementByCssSelector("script[type*=json]");
             JavascriptExecutor js = driver;
@@ -167,20 +161,14 @@ public class VoaScraper implements Runnable {
             VoaResponse response = gson.fromJson(scriptText, VoaResponse.class);
 
             long dateModified = ContentScraperUtil.parseServerDate(response.dateModified.replace("Z", "").replace(" ", "T"));
+            boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
 
-            File modifiedFile = new File(voaDirectory, voaDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
-            String text;
-
-
-            boolean isUpdated = true;
-            if (ContentScraperUtil.fileHasContent(modifiedFile)) {
-                text = FileUtils.readFileToString(modifiedFile, UTF_ENCODING);
-                isUpdated = !String.valueOf(dateModified).equalsIgnoreCase(text);
-            } else {
-                FileUtils.writeStringToFile(modifiedFile, String.valueOf(dateModified), ScraperConstants.UTF_ENCODING);
+            if (ContentScraperUtil.fileHasContent(voaDirectory)) {
+                isUpdated = false;
+                FileUtils.deleteDirectory(voaDirectory);
             }
 
-            if (!isUpdated && ContentScraperUtil.fileHasContent(zipFile)) {
+            if (!isUpdated) {
                 isContentUpdated = false;
                 driver.close();
                 driver.quit();
@@ -189,15 +177,15 @@ public class VoaScraper implements Runnable {
 
         } catch (NoSuchElementException ignored) {
 
-            File file = new File(destinationDir, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT);
-            if (file.exists()) {
-                long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
-                isContentUpdated = modified > file.lastModified();
+            long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
+            boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(modified));
+            if (!isUpdated) {
+
+                isContentUpdated = false;
                 driver.close();
                 driver.quit();
                 return;
             }
-
         }
         String quizHref = null;
         String quizAjaxUrl = null;
@@ -358,8 +346,6 @@ public class VoaScraper implements Runnable {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("VOA failed to create tin can file for url " + scrapUrl.toString());
         }
-
-        ContentScraperUtil.zipDirectory(voaDirectory, zipFile.getName(), destinationDir);
     }
 
     private Map<String, String> createParams(String quizId, int count, String selectedAnswer, String voted) {

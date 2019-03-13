@@ -1,14 +1,10 @@
 package com.ustadmobile.lib.contentscrapers;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 
@@ -41,8 +37,6 @@ public class TestExportData {
 
         ContentEntryDao contentDao = repo.getContentEntryDao();
         ContentEntryParentChildJoinDao pcjdao = repo.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao contentFileDao = repo.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repo.getContentEntryContentEntryFileJoinDao();
         ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = repo.getContentEntryRelatedEntryJoinDao();
 
         new LanguageList().addAllLanguages();
@@ -284,19 +278,6 @@ public class TestExportData {
         NumberQuizJoin.setCepcjUid(7);
         pcjdao.insert(NumberQuizJoin);
 
-        ContentEntryFile contentEntryFile = new ContentEntryFile();
-        contentEntryFile.setMimeType("application/zip");
-        contentEntryFile.setFileSize(10000);
-        contentEntryFile.setLastModified(1540728217);
-        contentEntryFile.setContentEntryFileUid(8);
-        contentFileDao.insert(contentEntryFile);
-
-        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
-        fileJoin.setCecefjUid(9);
-        contentEntryFileJoinDao.insert(fileJoin);
-
         ContentEntryRelatedEntryJoin englishEnglishJoin = new ContentEntryRelatedEntryJoin();
         englishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
         englishEnglishJoin.setCerejRelatedEntryUid(quiz.getContentEntryUid());
@@ -315,19 +296,6 @@ public class TestExportData {
         arabicQuiz.setPublik(true);
         contentDao.insert(arabicQuiz);
 
-        ContentEntryFile updatedFile = new ContentEntryFile();
-        updatedFile.setMimeType("application/zip");
-        updatedFile.setFileSize(10);
-        updatedFile.setLastModified(1540728218);
-        updatedFile.setContentEntryFileUid(11);
-        contentFileDao.insert(updatedFile);
-
-        ContentEntryContentEntryFileJoin sameFileJoin = new ContentEntryContentEntryFileJoin();
-        sameFileJoin.setCecefjContentEntryFileUid(updatedFile.getContentEntryFileUid());
-        sameFileJoin.setCecefjContentEntryUid(arabicQuiz.getContentEntryUid());
-        sameFileJoin.setCecefjUid(12);
-        contentEntryFileJoinDao.insert(sameFileJoin);
-
         ContentEntryRelatedEntryJoin arabicEnglishJoin = new ContentEntryRelatedEntryJoin();
         arabicEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
         arabicEnglishJoin.setCerejRelatedEntryUid(arabicQuiz.getContentEntryUid());
@@ -345,18 +313,6 @@ public class TestExportData {
         spanishQuiz.setPublik(true);
         contentDao.insert(spanishQuiz);
 
-        ContentEntryFile spanishFile = new ContentEntryFile();
-        spanishFile.setMimeType("application/zip");
-        spanishFile.setFileSize(10000);
-        spanishFile.setLastModified(1540728218);
-        spanishFile.setContentEntryFileUid(15);
-        contentFileDao.insert(spanishFile);
-
-        ContentEntryContentEntryFileJoin spanishFileJoin = new ContentEntryContentEntryFileJoin();
-        spanishFileJoin.setCecefjContentEntryFileUid(spanishFile.getContentEntryFileUid());
-        spanishFileJoin.setCecefjContentEntryUid(spanishQuiz.getContentEntryUid());
-        spanishFileJoin.setCecefjUid(16);
-        contentEntryFileJoinDao.insert(spanishFileJoin);
 
         ContentEntryRelatedEntryJoin spanishEnglishJoin = new ContentEntryRelatedEntryJoin();
         spanishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());

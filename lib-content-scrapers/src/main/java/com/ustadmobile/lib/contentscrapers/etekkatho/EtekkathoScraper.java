@@ -4,7 +4,6 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -12,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * The etekkatho website has a single url link for download
@@ -49,8 +47,15 @@ public class EtekkathoScraper {
 
             File content = new File(etekDirectory, etekDirectory.getName());
 
-            isUpdated = ContentScraperUtil.isFileModified(conn, etekDirectory, FilenameUtils.getBaseName(contentUrl.getPath()));
-            if (!isUpdated && ContentScraperUtil.fileHasContent(content)) {
+            isUpdated = ContentScraperUtil.isFileModified(conn, etekDirectory, etekDirectory.getName());
+
+            if (ContentScraperUtil.fileHasContent(content)) {
+                isUpdated = false;
+                ContentScraperUtil.deleteFile(content);
+                return;
+            }
+
+            if (!isUpdated) {
                 return;
             }
 
@@ -60,6 +65,7 @@ public class EtekkathoScraper {
             FileUtils.copyInputStreamToFile(conn.getInputStream(), content);
         } catch (IOException e) {
             UMLogUtil.logError("Unable to download content for etekkatho for url " + scrapUrl);
+            ContentScraperUtil.deleteETagOrModified(etekDirectory, etekDirectory.getName());
         } finally {
             if (conn != null) {
                 conn.disconnect();

@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy;
 
-import com.google.gson.annotations.SerializedName;
+import com.ustadmobile.lib.contentscrapers.util.DownloadUrl;
 
 import java.util.List;
 
@@ -57,18 +57,6 @@ public class ModuleResponse {
             public int expectedDoNCount;
 
             public DownloadUrl downloadUrls;
-
-            public class DownloadUrl {
-
-                String mp4;
-
-                String png;
-
-                @SerializedName("mp4-low")
-                String mp4Low;
-
-            }
-
 
         }
     }

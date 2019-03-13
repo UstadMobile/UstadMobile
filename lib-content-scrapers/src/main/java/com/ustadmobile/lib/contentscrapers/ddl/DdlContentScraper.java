@@ -2,14 +2,13 @@ package com.ustadmobile.lib.contentscrapers.ddl;
 
 import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
@@ -29,9 +28,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -54,42 +51,42 @@ public class DdlContentScraper {
     private final File destinationDirectory;
     private final URL url;
     private final ContentEntryDao contentEntryDao;
-    private final ContentEntryFileDao contentEntryFileDao;
-    private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
-    private final ContentEntryFileStatusDao contentFileStatusDao;
     private final ContentCategorySchemaDao categorySchemaDao;
     private final ContentCategoryDao contentCategoryDao;
     private final LanguageDao languageDao;
+    private final ContainerDao containerDao;
+    private final UmAppDatabase db;
+    private final UmAppDatabase repository;
+    private final File containerDir;
     private Document doc;
     ArrayList<ContentEntry> contentEntries;
 
-    public DdlContentScraper(String url, File destination) throws MalformedURLException {
+    public DdlContentScraper(String url, File destination, File containerDir) throws MalformedURLException {
         this.urlString = url;
         this.destinationDirectory = destination;
+        this.containerDir = containerDir;
         this.url = new URL(url);
         destinationDirectory.mkdirs();
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
         categorySchemaDao = repository.getContentCategorySchemaDao();
         contentCategoryDao = repository.getContentCategoryDao();
         languageDao = repository.getLanguageDao();
+        containerDao = repository.getContainerDao();
     }
 
 
-    public static void main(String[] args) throws URISyntaxException {
-        if (args.length < 2) {
-            System.err.println("Usage: <ddl website url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.err.println("Usage: <ddl website url> <file destination><container destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         try {
-            new DdlContentScraper(args[0], new File(args[1])).scrapeContent();
+            new DdlContentScraper(args[0], new File(args[1]), new File(args[2])).scrapeContent();
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Exception running scrapeContent ddl");
@@ -129,6 +126,7 @@ public class DdlContentScraper {
 
             Element downloadItem = downloadList.get(downloadCount);
             String href = downloadItem.attr("href");
+            File modifiedFile = getEtagOrModifiedFile(resourceFolder, FilenameUtils.getBaseName(FilenameUtils.getName(href)));
             HttpURLConnection conn = null;
             try {
                 URL fileUrl = new URL(url, href);
@@ -141,27 +139,49 @@ public class DdlContentScraper {
                 File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
                 String mimeType = Files.probeContentType(resourceFile.toPath());
 
-                if (!ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href)) && ContentScraperUtil.fileHasContent(resourceFile)) {
 
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(resourceFile, contentEntry, contentEntryFileDao,
-                            contentEntryFileJoinDao, contentFileStatusDao, mimeType, true);
+                boolean isUpdated = ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href));
+
+                if (ContentScraperUtil.fileHasContent(resourceFile)) {
+                    isUpdated = false;
+                    ContentScraperUtil.deleteFile(resourceFile);
+                }
+
+                if (!isUpdated) {
                     continue;
                 }
 
                 FileUtils.copyURLToFile(uri.toURL(), resourceFile);
 
-                ContentScraperUtil.insertContentEntryFile(resourceFile, contentEntryFileDao, contentFileStatusDao, contentEntry,
-                        ContentScraperUtil.getMd5(resourceFile), contentEntryFileJoinDao, true, mimeType);
+                ContentScraperUtil.insertContainer(containerDao, contentEntry, true, mimeType,
+                        resourceFile.lastModified(), resourceFile, db, repository, containerDir);
+                ContentScraperUtil.deleteFile(resourceFile);
 
                 contentEntries.add(contentEntry);
-            } catch(Exception e){
+            } catch (Exception e) {
                 UMLogUtil.logError("Error downloading resource from url " + url + "/" + href);
-            }finally {
+                if (modifiedFile != null) {
+                    ContentScraperUtil.deleteFile(modifiedFile);
+                }
+
+            } finally {
                 if (conn != null) {
                     conn.disconnect();
                 }
             }
         }
+    }
+
+    private File getEtagOrModifiedFile(File resourceFolder, String name) {
+        File eTag = new File(resourceFolder, name + ScraperConstants.ETAG_TXT);
+        if (ContentScraperUtil.fileHasContent(eTag)) {
+            return eTag;
+        }
+        File modified = new File(resourceFolder, name + ScraperConstants.LAST_MODIFIED_TXT);
+        if (ContentScraperUtil.fileHasContent(modified)) {
+            return modified;
+        }
+        return null;
     }
 
     protected ArrayList<ContentEntry> getContentEntries() {

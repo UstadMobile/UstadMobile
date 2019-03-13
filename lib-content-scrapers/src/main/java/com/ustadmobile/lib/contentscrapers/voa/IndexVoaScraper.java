@@ -1,10 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.voa;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
@@ -13,7 +10,6 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanDriverFactory;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
@@ -22,12 +18,10 @@ import com.ustadmobile.port.sharedse.util.WorkQueue;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +61,9 @@ public class IndexVoaScraper implements Runnable {
     private static Language englishLang;
     private static ScrapeQueueItemDao queueDao;
     private static WorkQueue scrapeWorkQueue;
+    private static File containerDirectory;
+    private static UmAppDatabase db;
+    private static UmAppDatabase repository;
 
 
     private final URL indexerUrl;
@@ -77,11 +74,11 @@ public class IndexVoaScraper implements Runnable {
     private final int runId;
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 2) {
+            System.err.println("Usage: <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
         UMLogUtil.logInfo(args[0]);
 
         try {
@@ -93,18 +90,18 @@ public class IndexVoaScraper implements Runnable {
                         ScrapeQueueItemDao.STATUS_PENDING));
             }
 
-            scrapeFromRoot(new File(args[0]), runId);
+            scrapeFromRoot(new File(args[0]), new File(args[1]), runId);
         } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Main method exception catch khan");
         }
     }
 
-    private static void scrapeFromRoot(File dest, int runId) throws IOException {
-        startScrape(ROOT_URL, dest, runId);
+    private static void scrapeFromRoot(File dest, File containerDir, int runId) throws IOException {
+        startScrape(ROOT_URL, dest, containerDir, runId);
     }
 
-    private static void startScrape(String scrapeUrl, File destinationDir, int runId) throws IOException {
+    private static void startScrape(String scrapeUrl, File destinationDir, File containerDir, int runId) throws IOException {
         try {
             url = new URL(scrapeUrl);
         } catch (MalformedURLException e) {
@@ -113,9 +110,11 @@ public class IndexVoaScraper implements Runnable {
         }
 
         destinationDir.mkdirs();
+        containerDir.mkdirs();
+        containerDirectory = containerDir;
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         LanguageDao languageDao = repository.getLanguageDao();
@@ -210,7 +209,9 @@ public class IndexVoaScraper implements Runnable {
             URL scrapeContentUrl;
             try {
                 scrapeContentUrl = new URL(item.getScrapeUrl());
-                return new VoaScraper(scrapeContentUrl, new File(item.getDestDir()),
+                return new VoaScraper(scrapeContentUrl,
+                        new File(item.getDestDir()),
+                        containerDir,
                         parent, item.getSqiUid());
             } catch (IOException ignored) {
                 throw new RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" +
