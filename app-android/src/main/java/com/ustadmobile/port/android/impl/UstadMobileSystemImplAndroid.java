@@ -78,6 +78,7 @@ import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.core.view.BaseReportView;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.core.view.CallPersonRelatedDialogView;
 import com.ustadmobile.core.view.ClassDetailView;
@@ -299,6 +300,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReportMasterView.VIEW_NAME, ReportMasterActivity.class);
         viewNameToAndroidImplMap.put(ReportSELView.VIEW_NAME, ReportSELActivity.class);
         viewNameToAndroidImplMap.put(PersonListSearchView.VIEW_NAME, PersonListSearchActivity.class);
+        viewNameToAndroidImplMap.put(BaseReportView.VIEW_NAME, ReportSelectionFragment.class);
     }
 
     /**

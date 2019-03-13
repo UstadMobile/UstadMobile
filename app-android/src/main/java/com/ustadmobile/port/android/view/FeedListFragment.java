@@ -42,8 +42,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     private RecyclerView mRecyclerView;
     private TextView numClassesView, numStudentsView, attendancePercentageView;
     private FeedListPresenter mPresenter;
-    private Button reportButton;
-    private ImageView reportImageView;
     private CardView summaryCard;
 
     /**
@@ -108,10 +106,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_num_students);
         attendancePercentageView =
                 rootContainer.findViewById(R.id.fragment_feed_list_report_card_attendance_percentage);
-        reportButton =
-                rootContainer.findViewById(R.id.fragment_feed_list_report_card_view_report);
-        reportImageView =
-                rootContainer.findViewById(R.id.fragment_feed_list_report_card_report_icon);
 
         summaryCard = rootContainer.findViewById(R.id.fragment_feed_list_report_card);
 
@@ -119,8 +113,6 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         mPresenter = new FeedListPresenter(getContext(), UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
-        reportButton.setOnClickListener(v -> mPresenter.handleClickViewReports());
 
         return rootContainer;
     }
@@ -210,13 +202,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     }
 
     @Override
-    public void showReportOptionsOnSummaryCard(boolean visible) {
-        runOnUiThread(() -> {
-            reportImageView.setVisibility(visible?View.VISIBLE:View.GONE);
-            reportButton.setVisibility(visible?View.VISIBLE:View.GONE);
-        });
-
-    }
+    public void showReportOptionsOnSummaryCard(boolean visible) {}
 
     @Override
     public void showSummaryCard(boolean visible) {

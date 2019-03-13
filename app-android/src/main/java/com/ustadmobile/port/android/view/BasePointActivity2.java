@@ -59,6 +59,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
     private ClazzListFragment classesFragment;
     private PeopleListFragment peopleListFragment;
+    private ReportSelectionFragment reportSelectionFragment;
     private FeedListFragment newFrag;
 
     public static final int VIEW_POSITION_POSITION_FEED = 0;
@@ -122,11 +123,16 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         AHBottomNavigationItem people_item =
                 new AHBottomNavigationItem(R.string.people,
                         R.drawable.ic_person_black_24dp, R.color.default_back_color);
+        AHBottomNavigationItem report_item =
+                new AHBottomNavigationItem(R.string.reports,
+                        R.drawable.ic_insert_chart_black_24dp, R.color.default_back_color);
+
 
         //Add the items
         bottomNavigation.addItem(feed_item);
         bottomNavigation.addItem(classes_item);
         bottomNavigation.addItem(people_item);
+        bottomNavigation.addItem(report_item);
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
@@ -152,6 +158,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                     break;
                 case 2:
                     updateTitle(getText(R.string.people).toString());
+                    break;
+                case 3:
+                    updateTitle(getText(R.string.reports).toString());
                     break;
 
             }
@@ -446,6 +455,12 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                         this.positionMap.put(position, peopleListFragment);
                         return peopleListFragment;
 
+                    case 3:
+                        reportSelectionFragment =
+                                ReportSelectionFragment.newInstance();
+                        this.positionMap.put(position, reportSelectionFragment);
+                        return reportSelectionFragment;
+
                     default:
                         return null;
                 }
@@ -455,7 +470,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         @Override
         public int getCount() {
             //return positionMap.size();
-            return 3;
+            return 4;
         }
     }
 

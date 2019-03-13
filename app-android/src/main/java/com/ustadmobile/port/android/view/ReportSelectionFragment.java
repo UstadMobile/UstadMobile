@@ -1,15 +1,16 @@
 package com.ustadmobile.port.android.view;
 
-
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ReportSelectionPresenter;
-import com.ustadmobile.core.view.ReportSelectionView;
+import com.ustadmobile.core.controller.BaseReportPresenter;
+import com.ustadmobile.core.view.BaseReportView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -17,15 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+public class ReportSelectionFragment extends UstadBaseFragment implements BaseReportView {
 
-/**
- * The ReportSelection activity.
- * <p>
- * This Activity extends UstadBaseActivity and implements ReportSelectionView
- */
-public class ReportSelectionActivity extends UstadBaseActivity implements ReportSelectionView {
-
-    private ReportSelectionPresenter mPresenter;
+    View rootContainer;
+    private BaseReportPresenter mPresenter;
 
     ExpandableListView expandableListView;
     ExpandableListAdapter expandableListAdapter;
@@ -33,25 +29,35 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
 
     HashMap<String, ExpandableListDataReports> expandableListDataReportsHashMap;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        //Setting layout:
-        setContentView(R.layout.activity_report_selection);
+    public static ReportSelectionFragment newInstance(){
+        ReportSelectionFragment fragment = new ReportSelectionFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        // Inflate the layout for this fragment
+        rootContainer = inflater.inflate(R.layout.activity_report_selection, container, false);
+        setHasOptionsMenu(true);
+
 
         //Call the Presenter
-        mPresenter = new ReportSelectionPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+        mPresenter = new BaseReportPresenter(getContext(),
+                UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-        expandableListView = findViewById(R.id.activity_report_selection_expandable_report_list);
+        expandableListView = rootContainer.findViewById(R.id.activity_report_selection_expandable_report_list);
 
         //new:
-        expandableListDataReportsHashMap = ExpandableListDataReports.getDataAll(getApplicationContext());
+        expandableListDataReportsHashMap = ExpandableListDataReports.getDataAll(getContext());
         expandableListTitle = new ArrayList<>(expandableListDataReportsHashMap.keySet());
 
-        expandableListAdapter = new CustomExpandableListAdapter(this,
+        expandableListAdapter = new CustomExpandableListAdapter(getContext(),
                 expandableListDataReportsHashMap,  expandableListTitle);
 
         expandableListView.setAdapter(expandableListAdapter);
@@ -90,24 +96,12 @@ public class ReportSelectionActivity extends UstadBaseActivity implements Report
             return false;
         });
 
+        return rootContainer;
+
     }
 
-    /**
-     * Handles what happens when toolbar menu option selected. Here it is handling what happens when
-     * back button is pressed.
-     *
-     * @param item  The item selected.
-     * @return      true if accounted for.
-     */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public void finish() {
+
     }
-
-
 }

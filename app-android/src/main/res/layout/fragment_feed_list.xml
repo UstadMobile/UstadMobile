@@ -43,32 +43,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-            <android.support.v7.widget.AppCompatImageButton
-                android:id="@+id/fragment_feed_list_report_card_report_icon"
-                android:layout_width="25dp"
-                android:layout_height="27dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="12dp"
-                android:contentDescription="@string/attendance"
-                android:tint="@color/primary"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView3"
-                app:srcCompat="@drawable/ic_insert_chart_black_24dp" />
-
-            <Button
-                android:id="@+id/fragment_feed_list_report_card_view_report"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/view_more_reports_and_analytics"
-                android:textColor="@color/primary"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_feed_list_report_card_report_icon"
-                app:layout_constraintTop_toBottomOf="@+id/textView12" />
-
             <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/imageView3"
                 android:layout_width="40dp"
