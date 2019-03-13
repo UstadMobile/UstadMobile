@@ -3,9 +3,9 @@ package com.ustadmobile.lib.contentscrapers.ck12;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
+import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
@@ -13,7 +13,6 @@ import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.QuestionResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse;
-
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -28,9 +27,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -38,12 +34,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -69,6 +61,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_INPUT_LIN
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_OUTPUT_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JAX_OUTPUT_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_EVENTS_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATH_EVENTS_LINK;
@@ -90,7 +83,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 
 /**
@@ -144,7 +136,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
  * Append some custom css
  * </p>
  * Create a content directory for all the url and their location into a json so it can be played back.
- * Zip all files with the plixId as the name
+ *
  */
 public class CK12ContentScraper {
 
@@ -191,7 +183,6 @@ public class CK12ContentScraper {
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         UMLogUtil.logInfo(args[2]);
-
 
 
         try {
@@ -244,9 +235,8 @@ public class CK12ContentScraper {
         PlixResponse response = gson.fromJson(
                 IOUtils.toString(new URL(plixUrl), ScraperConstants.UTF_ENCODING), PlixResponse.class);
 
-        File fileLastModified = new File(plixDirectory, "plix-last-modified.txt");
-        isContentUpdated = ContentScraperUtil.isContentUpdated(
-                ContentScraperUtil.parseServerDate(response.response.question.updated), fileLastModified);
+        File fileLastModified = new File(destinationDirectory, plixName + LAST_MODIFIED_TXT);
+        isContentUpdated = ContentScraperUtil.isFileContentsUpdated(fileLastModified, String.valueOf(ContentScraperUtil.parseServerDate(response.response.question.updated)));
 
         if (!isContentUpdated) {
             return;
@@ -345,7 +335,7 @@ public class CK12ContentScraper {
         }
 
         FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(indexList), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT, destinationDirectory);
+
     }
 
     public void scrapeVideoContent() throws IOException {
@@ -359,8 +349,8 @@ public class CK12ContentScraper {
         assetDirectory = new File(videoHtmlLocation, "asset");
         assetDirectory.mkdirs();
 
-        File lastUpdated = new File(videoHtmlLocation, "video-last-modified.txt");
-        isContentUpdated = isPageUpdated(fullSite, lastUpdated);
+        File modifiedFile = new File(destinationDirectory, videoContentName + LAST_MODIFIED_TXT);
+        isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(isPageUpdated(fullSite)));
 
         if (!isContentUpdated) {
             return;
@@ -385,7 +375,7 @@ public class CK12ContentScraper {
             try {
                 File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
                 if (!ContentScraperUtil.fileHasContent(thumbnail)) {
-                    FileUtils.copyURLToFile(new URL(scrapUrl,imageThumbnail), thumbnail);
+                    FileUtils.copyURLToFile(new URL(scrapUrl, imageThumbnail), thumbnail);
                 }
 
             } catch (IOException ignored) {
@@ -407,10 +397,9 @@ public class CK12ContentScraper {
                     ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-            UMLogUtil.logError("Video Tin can file unable to create for url" +  urlString);
+            UMLogUtil.logError("Video Tin can file unable to create for url" + urlString);
         }
 
-        ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName + ZIP_EXT, destinationDirectory);
     }
 
     public boolean isContentUpdated() {
@@ -462,10 +451,9 @@ public class CK12ContentScraper {
         return null;
     }
 
-    private boolean isPageUpdated(Document doc, File file) {
+    private long isPageUpdated(Document doc) {
         String date = doc.select("h2:contains(Last Modified) ~ span").attr("data-date");
-        long parsedDate = ContentScraperUtil.parseServerDate(date);
-        return ContentScraperUtil.isContentUpdated(parsedDate, file);
+        return ContentScraperUtil.parseServerDate(date);
     }
 
 
@@ -480,8 +468,8 @@ public class CK12ContentScraper {
         assetDirectory = new File(readHtmlLocation, "asset");
         assetDirectory.mkdirs();
 
-        File lastUpdated = new File(readHtmlLocation, "read-last-modified.txt");
-        isContentUpdated = isPageUpdated(html, lastUpdated);
+        File modifiedFile = new File(destinationDirectory, readContentName + LAST_MODIFIED_TXT);
+        isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(isPageUpdated(html)));
 
         if (!isContentUpdated) {
             return;
@@ -538,10 +526,8 @@ public class CK12ContentScraper {
                     ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-            UMLogUtil.logError("Read Tin can file unable to create for url" +  urlString);
+            UMLogUtil.logError("Read Tin can file unable to create for url" + urlString);
         }
-
-        ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName + ZIP_EXT, destinationDirectory);
     }
 
     private String appendMathJaxScript() {
@@ -661,8 +647,9 @@ public class CK12ContentScraper {
         String practiceName = response.response.test.title;
         String updated = response.response.test.updated;
 
-        File modifiedFile = new File(practiceDirectory, ScraperConstants.LAST_MODIFIED_TXT);
-        isContentUpdated = ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(updated), modifiedFile);
+        File modifiedFile = new File(destinationDirectory, practiceUrl + LAST_MODIFIED_TXT);
+        isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(ContentScraperUtil.parseServerDate(updated)));
+
         if (!isContentUpdated) {
             return;
         }
@@ -746,7 +733,7 @@ public class CK12ContentScraper {
                     ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-            UMLogUtil.logError("Practice Tin can file unable to create for url" +  urlString);
+            UMLogUtil.logError("Practice Tin can file unable to create for url" + urlString);
         }
 
         ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);
@@ -757,8 +744,6 @@ public class CK12ContentScraper {
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.TIMER_PATH), new File(practiceDirectory, TIMER_NAME));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.TROPHY_PATH), new File(practiceDirectory, TROPHY_NAME));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CHECK_PATH), new File(practiceDirectory, CHECK_NAME));
-
-        ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl + ZIP_EXT, destinationDirectory);
 
     }
 

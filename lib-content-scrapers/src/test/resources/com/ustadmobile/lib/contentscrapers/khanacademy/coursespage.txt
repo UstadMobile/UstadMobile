@@ -454,14 +454,14 @@ $LAB.queueWait(function() {
                       "description": "Sal counts squirrels and horses.",
                       "downloadUrls": {
                         "m3u8": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.m3u8/y2-uaPiyoxc.m3u8",
-                        "mp4": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4/y2-uaPiyoxc.mp4",
+                        "mp4": "/content/com/ustadmobile/lib/contentscrapers/files/video.mp4",
                         "mp4-low": "/content/com/ustadmobile/lib/contentscrapers/files/video.mp4",
                         "mp4-low-ios": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4-low-ios/y2-uaPiyoxc-low-ios.mp4",
                         "png": "https://cdn.kastatic.org/KA-youtube-converted/y2-uaPiyoxc.mp4/y2-uaPiyoxc.png"
                       },
                       "duration": 56,
                       "kind": "Video",
-                      "nodeUrl": "/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/v/counting-with-small-numbers",
+                      "nodeUrl": "/json/com/ustadmobile/lib/contentscrapers/khanacademy/videopage.txt",
                       "progressKey": "vx9b4a5e7a",
                       "slug": "counting-with-small-numbers",
                       "sponsored": false,

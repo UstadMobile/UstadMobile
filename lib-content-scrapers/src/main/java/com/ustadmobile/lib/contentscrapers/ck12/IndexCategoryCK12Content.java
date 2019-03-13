@@ -1,10 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
@@ -35,11 +33,11 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.text.AbstractDocument;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_TINCAN;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
@@ -82,35 +80,36 @@ public class IndexCategoryCK12Content {
     private static final String CK_12 = "CK12";
     private final ContentEntryDao contentEntryDao;
     private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private final ContentEntryFileDao contentEntryFileDao;
-    private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private final LanguageDao languageDao;
+    private final ContainerDao containerDao;
+    private final UmAppDatabase db;
+    private final UmAppDatabase repository;
+    private final File containerDir;
     private Language englishLang;
     private ContentEntry ck12ParentEntry;
     URL url;
     private File destinationDirectory;
-    private ContentEntryFileStatusDao contentFileStatusDao;
 
-    public static void main(String[] args) throws IOException {
-        if (args.length < 2) {
-            System.err.println("Usage: <ck12 url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.err.println("Usage: <ck12 url> <file destination><folder container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
 
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         try {
-            new IndexCategoryCK12Content(args[0], new File(args[1])).findContent();
-        }catch (Exception e){
+            new IndexCategoryCK12Content(args[0], new File(args[1]), new File(args[2])).findContent();
+        } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logFatal("Exception running findContent CK12 Index Scraper");
         }
     }
 
 
-    public IndexCategoryCK12Content(String urlString, File destinationDirectory) throws IOException {
+    public IndexCategoryCK12Content(String urlString, File destinationDirectory, File containerDir) throws IOException {
 
         try {
             url = new URL(urlString);
@@ -121,15 +120,15 @@ public class IndexCategoryCK12Content {
 
         destinationDirectory.mkdirs();
         this.destinationDirectory = destinationDirectory;
+        containerDir.mkdirs();
+        this.containerDir = containerDir;
 
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
+        containerDao = repository.getContainerDao();
         languageDao = repository.getLanguageDao();
 
         new LanguageList().addAllLanguages();
@@ -441,6 +440,7 @@ public class IndexCategoryCK12Content {
 
             CK12ContentScraper scraper = new CK12ContentScraper(url.toString(), topicDestination);
             try {
+                String mimeType = MIMETYPE_TINCAN;
                 switch (groupType.toLowerCase()) {
 
                     case "video":
@@ -448,6 +448,7 @@ public class IndexCategoryCK12Content {
                         break;
                     case "plix":
                         scraper.scrapePlixContent();
+                        mimeType = MIMETYPE_WEB_CHUNK;
                         break;
                     case "practice":
                         scraper.scrapePracticeContent();
@@ -464,23 +465,18 @@ public class IndexCategoryCK12Content {
                 }
 
 
-                File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
-
+                File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()));
                 if (scraper.isContentUpdated()) {
-                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                            topicEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true,
-                            ScraperConstants.MIMETYPE_ZIP);
-
-                } else {
-
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, topicEntry, contentEntryFileDao,
-                            contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
+                    ContentScraperUtil.insertContainer(containerDao, topicEntry, true,
+                            mimeType, content.lastModified(), content, db, repository,
+                            containerDir);
                 }
 
             } catch (Exception e) {
                 UMLogUtil.logError("Unable to scrape content from " + groupType + " at url " + url);
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                File modifiedFile = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + LAST_MODIFIED_TXT);
+                ContentScraperUtil.deleteFile(modifiedFile);
             }
 
         }

@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy;
 
+import com.ustadmobile.lib.contentscrapers.util.DownloadUrl;
+import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
+
 import java.util.List;
 
 class SubjectListResponse {
@@ -17,6 +20,16 @@ class SubjectListResponse {
         public NavData tutorialNavData;
 
         public NavData tutorialPageData;
+
+        public Transcript preloadedTranscript;
+
+        public class Transcript {
+
+            public String locale;
+
+            public List<SrtFormat> subtitles;
+
+        }
 
         public class Curation {
 
@@ -96,6 +109,8 @@ class SubjectListResponse {
                 public String kind;
 
                 public String perseusContent;
+
+                public DownloadUrl downloadUrls;
 
             }
         }

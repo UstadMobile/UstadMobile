@@ -58,7 +58,7 @@ public class ContentEntryUtil {
                     Hashtable args = new Hashtable();
                     switch (result.getMimeType()) {
                         case "application/zip":
-
+                        case "application/tincan+zip":
                             args.put(ARG_CONTAINERURI, String.valueOf(result.getContainerUid()));
                             impl.go(XapiPackageView.VIEW_NAME, args, context);
                             break;

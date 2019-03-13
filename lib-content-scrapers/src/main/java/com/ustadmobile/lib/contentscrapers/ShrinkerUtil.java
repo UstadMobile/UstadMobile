@@ -3,14 +3,10 @@ package com.ustadmobile.lib.contentscrapers;
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithFilePath;
 import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.io.FileUtils;
@@ -53,58 +49,33 @@ public class ShrinkerUtil {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage: <file or db><if file file location><optional log{trace, debug, info, warn, error, fatal}>");
+            System.err.println("Usage:<file location><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
 
-        if ("db".equals(args[0])) {
-            UmAppDatabase db = UmAppDatabase.getInstance(null);
-            UmAppDatabase repository = db.getRepository("https://localhost", "");
-            shrinkAllEpubInDatabase(repository);
-        } else {
-            try {
-                File epubFile = new File(args[1]);
-                ShrinkerUtil.shrinkEpub(epubFile);
+        try {
+            File epubFile = new File(args[1]);
+            ShrinkerUtil.shrinkEpub(epubFile);
 
-            } catch (Exception e) {
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                UMLogUtil.logError("Failed to shrink epub " + args[1]);
-            }
+        } catch (Exception e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Failed to shrink epub " + args[1]);
         }
-    }
 
-    public static void shrinkAllEpubInDatabase(UmAppDatabase repository) {
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        List<ContentEntryFileWithFilePath> epubFileList = contentEntryFileDao.findEpubsFiles();
-        for (ContentEntryFileWithFilePath entryfile : epubFileList) {
-            try {
-                File epubFile = new File(entryfile.getFilePath());
-                ShrinkerUtil.shrinkEpub(epubFile);
-                contentEntryFileDao.updateEpubFiles(epubFile.length(), ContentScraperUtil.getMd5(epubFile), entryfile.getContentEntryFileUid());
-
-            } catch (Exception e) {
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                UMLogUtil.logError("Failed to shrink epub " + entryfile.getFilePath());
-            }
-        }
     }
 
 
-    public static void shrinkEpub(File epub) throws IOException {
-        File tmpFolder = null;
+    public static File shrinkEpub(File epub) throws IOException {
+        File tmpFolder;
         try {
             tmpFolder = createTmpFolderForZipAndUnZip(epub);
             shrinkEpubFiles(tmpFolder);
-            ContentScraperUtil.zipDirectory(tmpFolder, epub.getName(), epub.getParentFile());
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             throw e;
-        } finally {
-            if (tmpFolder != null) {
-                FileUtils.deleteDirectory(tmpFolder);
-            }
         }
+        return tmpFolder;
     }
 
     private static File createTmpFolderForZipAndUnZip(File contentFile) throws IOException {
@@ -132,7 +103,7 @@ public class ShrinkerUtil {
         FileOutputStream opfFileOutputStream = null;
         try {
             OcfDocument ocfDoc = new OcfDocument();
-            File ocfFile = new File(directory, "META-INF/container.xml");
+            File ocfFile = new File(directory, Paths.get("META-INF", "container.xml").toString());
             ocfFileInputStream = new FileInputStream(ocfFile);
             XmlPullParser ocfParser = UstadMobileSystemImpl.getInstance()
                     .newPullParser(ocfFileInputStream);

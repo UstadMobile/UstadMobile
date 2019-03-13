@@ -1,10 +1,12 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.contentscrapers.etekkatho.EtekkathoScraper;
 import com.ustadmobile.lib.contentscrapers.etekkatho.IndexEtekkathoScraper;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,6 +22,7 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class TestEtekScraper {
@@ -33,11 +36,11 @@ public class TestEtekScraper {
                 if (request.getPath().contains("json")) {
 
                     String fileName;
-                    if(request.getPath().contains("?handle")){
+                    if (request.getPath().contains("?handle")) {
                         fileName = request.getPath().substring(5,
                                 request.getPath().indexOf("?handle"));
-                    }else{
-                       fileName = request.getPath().substring(5);
+                    } else {
+                        fileName = request.getPath().substring(5);
                     }
                     String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
                     MockResponse response = new MockResponse().setResponseCode(200);
@@ -73,6 +76,12 @@ public class TestEtekScraper {
         }
     };
 
+    @Before
+    public void clearDb() {
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
+    }
+
     @Test
     public void givenServerOnline_whenEtekIsScrapedAgain_thenShouldDownloadOnlyOnce() throws IOException {
 
@@ -92,11 +101,15 @@ public class TestEtekScraper {
         File lessonFile = new File(lessonFolder, "123-321");
         Assert.assertEquals(true, lessonFile.isFile() && lessonFile.exists() && lessonFile.length() > 0);
 
-        long modified = lessonFile.lastModified();
+        lessonFile.delete();
+
+        File eTagFile = new File(lessonFolder, "123-321" + ETAG_TXT);
+        Assert.assertEquals(true, eTagFile.isFile() && eTagFile.exists() && eTagFile.length() > 0);
+        long modified = eTagFile.lastModified();
 
         scraper.scrapeContent();
 
-        Assert.assertEquals(modified, lessonFile.lastModified());
+        Assert.assertEquals(modified, eTagFile.lastModified());
 
 
     }
@@ -105,13 +118,14 @@ public class TestEtekScraper {
     public void givenWhenServerOnline_whenEtekisIndexred_AllDirectoriesAndFilesCorrectlyDownloaded() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testEtekIndexScraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
         IndexEtekkathoScraper scraper = new IndexEtekkathoScraper();
         scraper.findContent(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/etek/etekhomepage.html").toString(),
-                tmpDir);
+                tmpDir, containerDir);
 
         File educationFolder = new File(tmpDir, "Education");
         Assert.assertEquals(true, educationFolder.isDirectory());
@@ -122,8 +136,10 @@ public class TestEtekScraper {
         File lessonFolder = new File(assessmentFolder, "123-321");
         Assert.assertEquals(true, lessonFolder.isDirectory());
 
-        File lessonFile = new File(lessonFolder, "123-321");
-        Assert.assertEquals(true, lessonFile.isFile());
+        File eTagFile = new File(lessonFolder, "123-321" + ETAG_TXT);
+        Assert.assertEquals(true, eTagFile.isFile());
+
+        Assert.assertTrue("container has the file", containerDir.listFiles().length > 0);
 
     }
 

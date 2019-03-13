@@ -3,19 +3,14 @@ package com.ustadmobile.lib.contentscrapers.edraakK12;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
-import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
-import com.ustadmobile.lib.contentscrapers.voa.VoaScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
@@ -30,8 +25,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
@@ -75,14 +68,15 @@ public class IndexEdraakK12Content {
     private static ScrapeQueueItemDao queueDao;
     private static WorkQueue scrapeWorkQueue;
     private static int runId;
+    private static File containerDirectory;
 
 
-    public static void main(String[] args) throws IOException {
-        if (args.length < 1) {
-            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.err.println("Usage: <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
         UMLogUtil.logInfo(args[0]);
 
         try {
@@ -94,7 +88,7 @@ public class IndexEdraakK12Content {
                         ScrapeQueueItemDao.STATUS_PENDING));
             }
 
-            scrapeFromRoot(new File(args[0]), runId);
+            scrapeFromRoot(new File(args[0]), new File(args[1]), runId);
         } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Main method exception catch khan");
@@ -102,11 +96,11 @@ public class IndexEdraakK12Content {
 
     }
 
-    public static void scrapeFromRoot(File dest, int runId) throws IOException {
-        startScrape(ROOT_URL, dest, runId);
+    public static void scrapeFromRoot(File dest, File containerDir, int runId) throws IOException {
+        startScrape(ROOT_URL, dest, containerDir, runId);
     }
 
-    public static void startScrape(String scrapeUrl, File destinationDir, int runIdscrape) throws IOException {
+    public static void startScrape(String scrapeUrl, File destinationDir, File containerDir, int runIdscrape) throws IOException {
         try {
             url = new URL(scrapeUrl);
         } catch (MalformedURLException e) {
@@ -115,6 +109,8 @@ public class IndexEdraakK12Content {
         }
 
         destinationDir.mkdirs();
+        containerDir.mkdirs();
+        containerDirectory = containerDir;
         destinationDirectory = destinationDir;
         runId = runIdscrape;
 
@@ -175,7 +171,9 @@ public class IndexEdraakK12Content {
             URL scrapeContentUrl;
             try {
                 scrapeContentUrl = new URL(item.getScrapeUrl());
-                return new EdraakK12ContentScraper(scrapeContentUrl, new File(item.getDestDir()),
+                return new EdraakK12ContentScraper(scrapeContentUrl,
+                        new File(item.getDestDir()),
+                        containerDir,
                         parent, item.getSqiUid());
             } catch (IOException ignored) {
                 throw new RuntimeException("SEVERE: invalid URL to scrape: should not be in queue:" +
@@ -210,8 +208,8 @@ public class IndexEdraakK12Content {
                     parentContent.program == 0 ? response.program : parentContent.program);
 
             ContentScraperUtil.createQueueItem(queueDao, new URL(scrapeUrl), parentEntry,
-                    new File(destinationDirectory, parentContent.id), "", runId,
-                    ScrapeQueueItem.ITEM_TYPE_SCRAPE);
+                    new File(destinationDirectory, parentContent.id), "",
+                    runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE);
             scrapeWorkQueue.checkQueue();
 
         } else {

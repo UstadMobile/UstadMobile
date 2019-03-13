@@ -1,13 +1,10 @@
 package com.ustadmobile.lib.contentscrapers.etekkatho;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
@@ -57,31 +54,32 @@ public class IndexEtekkathoScraper {
     private URL url;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private ContentEntryFileDao contentEntryFileDao;
-    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
-    private ContentEntryFileStatusDao contentFileStatusDao;
     private HashMap<String, ContentEntry> headingHashMap;
     private Language englishLang;
     private int subjectCount = 0;
+    private ContainerDao containerDao;
+    private UmAppDatabase db;
+    private UmAppDatabase repository;
+    private File containerDirectory;
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Usage: <etekkatho html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 3) {
+            System.err.println("Usage: <etekkatho html url> <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         try {
-            new IndexEtekkathoScraper().findContent(args[0], new File(args[1]));
+            new IndexEtekkathoScraper().findContent(args[0], new File(args[1]), new File(args[2]));
         } catch (IOException e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logFatal("Exception running findContent Etek");
         }
     }
 
-    public void findContent(String urlString, File destinationDir) throws IOException {
+    public void findContent(String urlString, File destinationDir, File containerDir) throws IOException {
 
         try {
             url = new URL(urlString);
@@ -91,14 +89,14 @@ public class IndexEtekkathoScraper {
         }
 
         destinationDir.mkdirs();
+        containerDir.mkdirs();
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        containerDirectory = containerDir;
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
+        containerDao = repository.getContainerDao();
         LanguageDao languageDao = repository.getLanguageDao();
         headingHashMap = new HashMap<>();
 
@@ -269,15 +267,10 @@ public class IndexEtekkathoScraper {
                 File content = new File(contentFolder, fileName);
 
                 if (scraper.isUpdated()) {
-                    ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                            lessonEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoin, true,
-                            scraper.getMimeType());
-
-                } else {
-
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, lessonEntry, contentEntryFileDao,
-                            contentEntryFileJoin, contentFileStatusDao, scraper.getMimeType(), true);
-
+                    ContentScraperUtil.insertContainer(containerDao, lessonEntry, true,
+                            scraper.getMimeType(), content.lastModified(), content, db, repository,
+                            containerDirectory);
+                    ContentScraperUtil.deleteFile(content);
                 }
 
             } catch (Exception e) {

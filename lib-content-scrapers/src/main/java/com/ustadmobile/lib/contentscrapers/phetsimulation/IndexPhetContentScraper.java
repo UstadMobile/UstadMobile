@@ -1,11 +1,9 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -18,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -49,26 +48,27 @@ public class IndexPhetContentScraper {
     private URL url;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private ContentEntryFileDao contentEntryFileDao;
-    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
     private ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
     private ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao;
-    private ContentEntryFileStatusDao contentFileStatusDao;
     private LanguageDao languageDao;
     private Language englishLang;
     private LanguageVariantDao languageVariantDao;
+    private ContainerDao containerDao;
+    private UmAppDatabase db;
+    private UmAppDatabase repository;
+    private File containerDir;
 
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Usage: <phet html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 3) {
+            System.err.println("Usage: <phet html url> <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         try {
-            new IndexPhetContentScraper().findContent(args[0], new File(args[1]));
+            new IndexPhetContentScraper().findContent(args[0], new File(args[1]), new File(args[2]));
         } catch (IOException e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logFatal("Exception running findContent phet");
@@ -82,7 +82,7 @@ public class IndexPhetContentScraper {
      * @param destinationDir destination folder for phet content
      * @throws IOException
      */
-    public void findContent(String urlString, File destinationDir) throws IOException {
+    public void findContent(String urlString, File destinationDir, File containerDir) throws IOException {
 
         try {
             url = new URL(urlString);
@@ -93,16 +93,16 @@ public class IndexPhetContentScraper {
 
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
+        containerDir.mkdirs();
+        this.containerDir = destinationDir;
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         contentEntryCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
         contentEntryRelatedJoinDao = repository.getContentEntryRelatedEntryJoinDao();
-        contentFileStatusDao = db.getContentEntryFileStatusDao();
+        containerDao = repository.getContainerDao();
         languageDao = repository.getLanguageDao();
         languageVariantDao = repository.getLanguageVariantDao();
 
@@ -141,7 +141,8 @@ public class IndexPhetContentScraper {
             String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1);
             String thumbnail = simulation.parent().selectFirst("img").attr("src");
 
-            PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
+            PhetContentScraper scraper = new PhetContentScraper(simulationUrl,
+                    destinationDirectory, containerDir);
             try {
                 scraper.scrapeContent();
                 ContentEntry englishSimContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, title,
@@ -151,16 +152,13 @@ public class IndexPhetContentScraper {
 
                 boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
                 File enLangLocation = new File(destinationDirectory, "en");
-                File englishContentFile = new File(enLangLocation, title + ScraperConstants.ZIP_EXT);
+                File englishContentFile = new File(enLangLocation, title);
                 if (isEnglishUpdated) {
-
-                    ContentScraperUtil.insertContentEntryFile(englishContentFile, contentEntryFileDao, contentFileStatusDao, englishSimContentEntry,
-                            ContentScraperUtil.getMd5(englishContentFile), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
-
-
-                } else {
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(englishContentFile, englishSimContentEntry, contentEntryFileDao,
-                            contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                    ContentScraperUtil.insertContainer(containerDao, englishSimContentEntry,
+                            true, ScraperConstants.MIMETYPE_TINCAN,
+                            englishContentFile.lastModified(),
+                            englishContentFile, db, repository, containerDir);
+                    FileUtils.deleteDirectory(englishContentFile);
 
                 }
 
@@ -187,13 +185,10 @@ public class IndexPhetContentScraper {
                         File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
                         if (scraper.getLanguageUpdatedMap().get(langCode)) {
 
-                            ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, translation,
-                                    ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
-
-
-                        } else {
-                            ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, translation, contentEntryFileDao,
-                                    contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                            ContentScraperUtil.insertContainer(containerDao, translation,
+                                    true, ScraperConstants.MIMETYPE_TINCAN,
+                                    content.lastModified(),
+                                    content, db, repository, containerDir);
 
                         }
 

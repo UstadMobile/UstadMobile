@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
@@ -45,7 +43,6 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENA
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_MP4;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_WEBM;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 
 /**
@@ -62,6 +59,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
  */
 public class EdraakK12ContentScraper implements Runnable {
 
+    private File containerDirectory;
     private int sqiUid;
     private ContentEntry parentEntry;
     private File destinationDirectory;
@@ -89,8 +87,9 @@ public class EdraakK12ContentScraper implements Runnable {
         this.destinationDirectory = destinationDir;
     }
 
-    public EdraakK12ContentScraper(URL scrapeUrl, File destinationDirectory, ContentEntry parent, int sqiUid) {
+    public EdraakK12ContentScraper(URL scrapeUrl, File destinationDirectory, File containerDir, ContentEntry parent, int sqiUid) {
         this.destinationDirectory = destinationDirectory;
+        this.containerDirectory = containerDir;
         this.scrapUrl = scrapeUrl;
         this.parentEntry = parent;
         this.sqiUid = sqiUid;
@@ -105,9 +104,7 @@ public class EdraakK12ContentScraper implements Runnable {
         System.gc();
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
+        ContainerDao containerDao = repository.getContainerDao();
         ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
 
 
@@ -119,16 +116,11 @@ public class EdraakK12ContentScraper implements Runnable {
         try {
             scrapeContent();
             successful = true;
-            File content = new File(destinationDirectory.getParentFile(), destinationDirectory.getName() + ZIP_EXT);
+            File content = new File(destinationDirectory.getParentFile(), destinationDirectory.getName());
             if (hasContentUpdated()) {
-                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, parentEntry,
-                        ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
-            } else {
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, parentEntry, contentEntryFileDao,
-                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
+                ContentScraperUtil.insertContainer(containerDao, parentEntry, true, ScraperConstants.MIMETYPE_ZIP,
+                        content.lastModified(), content, db, repository, containerDirectory);
             }
-
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
@@ -234,12 +226,7 @@ public class EdraakK12ContentScraper implements Runnable {
         } catch (IOException ie) {
             UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
         }
-        // nothing changed, keep same files
-        if (anyContentUpdated) {
-            // add these files into the directory
-            ContentScraperUtil.zipDirectory(destinationDirectory,
-                    response.id + ZIP_EXT, destinationDirectory.getParentFile());
-        }
+
         contentUpdated = anyContentUpdated;
     }
 
