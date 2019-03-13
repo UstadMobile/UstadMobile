@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
-import com.ustadmobile.port.sharedse.util.SharedSeTestUtil;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -13,10 +12,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -39,7 +39,7 @@ public class TestMountedContainerResponder {
 
     @Before
     public void setup() throws IOException {
-        containerTmpDir = SharedSeTestUtil.makeTempDir("TestMountedContainerResponder",
+        containerTmpDir = UmFileUtilSe.makeTempDir("TestMountedContainerResponder",
                 "containerTmpDir");
 
         db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
@@ -51,7 +51,7 @@ public class TestMountedContainerResponder {
         containerManager = new ContainerManager(container, db, repo,
                 containerTmpDir.getAbsolutePath());
         File tmpExtractFile = new File(containerTmpDir, "testfile1.png");
-        SharedSeTestUtil.extractResourceToFile("/com/ustadmobile/port/sharedse/container/testfile1.png",
+        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/sharedse/container/testfile1.png",
                 tmpExtractFile);
         Map<File, String> addMap = new HashMap<>();
         addMap.put(tmpExtractFile, "subfolder/testfile1.png");
@@ -75,6 +75,7 @@ public class TestMountedContainerResponder {
         RouterNanoHTTPD.UriResource mockUriResource = mock(RouterNanoHTTPD.UriResource.class);
         when(mockUriResource.initParameter(0, ContainerManager.class))
                 .thenReturn(containerManager);
+        when(mockUriResource.initParameter(1, List.class)).thenReturn(new ArrayList());
         when(mockUriResource.getUri()).thenReturn(mountPath +
                 MountedContainerResponder.URI_ROUTE_POSTFIX);
 
@@ -102,6 +103,7 @@ public class TestMountedContainerResponder {
         RouterNanoHTTPD.UriResource mockUriResource = mock(RouterNanoHTTPD.UriResource.class);
         when(mockUriResource.initParameter(0, ContainerManager.class))
                 .thenReturn(containerManager);
+        when(mockUriResource.initParameter(1, List.class)).thenReturn(new ArrayList());
         when(mockUriResource.getUri()).thenReturn(mountPath +
                 MountedContainerResponder.URI_ROUTE_POSTFIX);
 

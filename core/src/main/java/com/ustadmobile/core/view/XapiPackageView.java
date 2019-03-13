@@ -11,6 +11,8 @@ public interface XapiPackageView extends UstadView{
 
     String VIEW_NAME = "XapiPackage";
 
+    String ARG_CONTAINER_UID = "containerUid";
+
     void setTitle(String title);
 
     void loadUrl(String url);

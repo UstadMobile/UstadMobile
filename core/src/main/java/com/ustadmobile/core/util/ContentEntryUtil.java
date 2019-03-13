@@ -16,8 +16,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 
 import java.util.Hashtable;
 
-import static com.ustadmobile.core.controller.EpubContentPresenter.ARG_CONTAINERURI;
-
 public class ContentEntryUtil {
 
     public static void goToContentEntry(long contentEntryUid, UmAppDatabase dbRepo,
@@ -59,7 +57,7 @@ public class ContentEntryUtil {
                     switch (result.getMimeType()) {
                         case "application/zip":
                         case "application/tincan+zip":
-                            args.put(ARG_CONTAINERURI, String.valueOf(result.getContainerUid()));
+                            args.put(XapiPackageView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
                             impl.go(XapiPackageView.VIEW_NAME, args, context);
                             break;
                         case "video/mp4":
