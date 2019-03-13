@@ -73,6 +73,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      * Creates ClazzLogs for every clazzes the account person has access to between start and end
      * time.
      *
+     * Note: We always create ClazzLogs in the TimeZone.
+     *
      * @param startTime             between start time
      * @param endTime               AND end time
      * @param accountPersonUid      The person
@@ -134,9 +136,20 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
                     }else {
 
-                        //Everyday- so today.
+                        //This will get the next schedule for that day. For the same day, it will
+                        //return itself if incToday is set to true, else it will go to next week.
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                                 startCalendar, clazz.getTimeZone(),dayOfWeek, incToday);
+
+                        //Set to midnight AT the Time Zone.
+                        nextScheduleOccurence.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+                        //Set to 00:00
+                        nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
+                        nextScheduleOccurence.set(Calendar.MINUTE, 0);
+                        nextScheduleOccurence.set(Calendar.SECOND, 0);
+                        nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+
+                        //Now move it to desired hour:
                         nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
                         nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
                         nextScheduleOccurence.set(Calendar.SECOND, 0);

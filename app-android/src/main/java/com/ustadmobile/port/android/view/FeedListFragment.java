@@ -133,7 +133,8 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
         if(feedUid != 0){
             mPresenter.markFeedAsDone(feedUid);
         }
-        adapter.notifyItemRemoved(position);
+        //adapter.notifyItemRemoved(position);
+
 
     }
 

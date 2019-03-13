@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -29,6 +30,9 @@ public abstract class FeedEntryDao implements SyncableDao<FeedEntry, FeedEntryDa
 
     @UmInsert
     public abstract void insertAsync(FeedEntry entity, UmCallback<Long> result);
+
+    @UmUpdate
+    public abstract void updateAsync(FeedEntry entity, UmCallback<Integer> resultObject);
 
     @UmQuery("SELECT * FROM FeedEntry WHERE feedEntryUid = :uid")
     public abstract FeedEntry findByUid(long uid) ;

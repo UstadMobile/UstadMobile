@@ -53,9 +53,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
         repository = UmAppDatabase.getInstance(view.getContext());
 
-        feedEntryUmProvider = repository.getFeedEntryDao()
-                .findByPersonUid(loggedInPersonUid);
-        updateFeedProviderToView();
+        updateFeedEntries();
 
         //All clazz's average live data
         averageUmLiveData = repository.getClazzDao().getClazzSummaryLiveData();
@@ -64,6 +62,13 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
         //Check permissions
         checkPermissions();
+    }
+
+    public void updateFeedEntries(){
+        feedEntryUmProvider = repository.getFeedEntryDao()
+                .findByPersonUid(loggedInPersonUid);
+
+        updateFeedProviderToView();
     }
 
     /**
@@ -111,6 +116,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
                 if(thisFeed != null) {
                     thisFeed.setFeedEntryDone(true);
                     feedEntryDao.update(thisFeed);
+                    updateFeedEntries();
                 }
             }
 
@@ -124,7 +130,7 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
      * Updates the View with the feed provider set on the Presenter
      */
     private void updateFeedProviderToView(){
-        view.setFeedEntryProvider(feedEntryUmProvider);
+        view.runOnUiThread(() -> view.setFeedEntryProvider(feedEntryUmProvider));
     }
 
     /**
