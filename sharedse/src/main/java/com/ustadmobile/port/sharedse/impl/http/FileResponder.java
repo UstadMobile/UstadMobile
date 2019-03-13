@@ -218,10 +218,9 @@ public abstract class FileResponder {
                     retInputStream = isHeadRequest ? null : new RangeInputStream(retInputStream, range[0], range[1]);
                     long contentLength = (range[1]+1) - range[0];
                     NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
-                            EmbeddedHTTPD.getMimeType(fileName), retInputStream, contentLength);
+                            mimeType, retInputStream, contentLength);
 
                     r.addHeader("ETag", etag);
-                    r.addHeader("Content-Type", mimeType);
 
                         /*
                          * range request is inclusive: e.g. range 0-1 length is 2 bytes as per
@@ -242,12 +241,11 @@ public abstract class FileResponder {
                 // see RangeInputStream.available
                 retInputStream = isHeadRequest ? null : retInputStream;
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                    EmbeddedHTTPD.getMimeType(fileName), retInputStream, totalLength);
+                    mimeType, retInputStream, totalLength);
 
                 r.addHeader("ETag", etag);
                 r.addHeader("Content-Length", String.valueOf(totalLength));
                 r.addHeader("Connection", "close");
-                r.addHeader("Content-Type", mimeType);
                 if(cacheControlHeader != null)
                     r.addHeader("Cache-Control", cacheControlHeader);
                 return r;

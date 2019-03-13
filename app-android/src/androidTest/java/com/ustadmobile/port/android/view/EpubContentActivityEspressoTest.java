@@ -8,6 +8,7 @@ import android.support.test.espresso.contrib.DrawerActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.espresso.web.webdriver.Locator;
 import android.support.v4.content.ContextCompat;
+import android.view.Gravity;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -19,6 +20,7 @@ import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
+import com.ustadmobile.test.port.android.UmViewActions;
 
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
@@ -48,6 +50,7 @@ import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
 public class EpubContentActivityEspressoTest {
@@ -134,7 +137,7 @@ public class EpubContentActivityEspressoTest {
 
         onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.um_toolbar))))
                 .check(matches(withText(opfDocument.getTitle())));
-        onView(withId(R.id.container_drawer_layout)).perform(DrawerActions.open());
+        onView(withId(R.id.container_drawer_layout)).perform(DrawerActions.open(Gravity.END));
 
         String firstNavTitle = navDocument.getToc().getChild(0).getTitle();
         onView(allOf(withId(R.id.expandedListItem), withText(firstNavTitle)))
@@ -149,7 +152,7 @@ public class EpubContentActivityEspressoTest {
         //Ensure that Espresso can see the progress bar - so it waits for this to be idle
         SystemClock.sleep(1000);
 
-        onView(withId(R.id.container_drawer_layout)).perform(DrawerActions.open());
+        onView(withId(R.id.container_drawer_layout)).perform(DrawerActions.open(Gravity.END));
         onView(allOf(withId(R.id.expandedListItem), withText("Page 3")))
                 .perform(click());
 
@@ -158,6 +161,36 @@ public class EpubContentActivityEspressoTest {
                 .withElement(findElement(Locator.CLASS_NAME, "page_number"))
                 .check(webMatches(getText(), containsString("3")));
     }
+
+    @Test
+    public void givenValidEpubOpen_whenSingleTapOnContent_thenActionBarShouldHideAndShow() {
+        launchActivity();
+
+        //Ensure that Espresso can see the progress bar - so it waits for this to be idle
+        SystemClock.sleep(1000);
+        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.um_toolbar))))
+                .check(matches(withText(opfDocument.getTitle())));
+
+        //When we single tap on the content, the toolbar should go away
+        onView(allOf(withId(R.id.fragment_container_page_webview), withTagValue(equalTo(0))))
+                .perform(UmViewActions.singleTap(200, 200));
+
+        SystemClock.sleep(1000);
+        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.um_toolbar))))
+                .check(matches(not(isDisplayed())));
+
+        //When we single tap again, the toolbar should come back
+        SystemClock.sleep(1000);
+        onView(allOf(withId(R.id.fragment_container_page_webview), withTagValue(equalTo(0))))
+                .perform(UmViewActions.singleTap(200, 200));
+
+        SystemClock.sleep(1000);
+        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.um_toolbar))))
+                .check(matches(isDisplayed()));
+
+    }
+
+
 
 
 

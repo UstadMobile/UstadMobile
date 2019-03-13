@@ -6,8 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +34,7 @@ import java.util.WeakHashMap;
 
 public class EpubContentActivity extends ZippedContentActivity implements
         EpubContentView, ListView.OnItemClickListener,
-        TocListView.OnItemClickListener{
+        TocListView.OnItemClickListener, EpubContentPageFragment.TapToHideToolbarHandler{
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -49,8 +49,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
     private DrawerLayout mDrawerLayout;
 
-    private ActionBarDrawerToggle mDrawerToggle;
-
     private TocListView tocList;
 
     private ImageView coverImageView;
@@ -64,26 +62,12 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
         Toolbar toolbar = findViewById(R.id.um_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        mDrawerToggle = new ActionBarDrawerToggle(this,
-                mDrawerLayout, toolbar, R.string.open, R.string.closed) {
-
-            public void onDrawerOpened(View drawerView) {
-            }
-
-            public void onDrawerClosed(View drawerView) {
-            }
-        };
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if(!UstadMobileSystemImpl.getInstance().getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
                 getContext())) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            mDrawerToggle.setDrawerIndicatorEnabled(false);
         }
-        mDrawerToggle.syncState();
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
         tocList = (TocListView)findViewById(R.id.activity_container_epubpager_toclist);
@@ -110,10 +94,19 @@ public class EpubContentActivity extends ZippedContentActivity implements
      */
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_container, menu);
+        inflater.inflate(R.menu.menu_epub_content, menu);
         return true;
     }
 
+
+    @Override
+    public void onTap(int pageIndex) {
+        if(getSupportActionBar().isShowing()) {
+            getSupportActionBar().hide();
+        }else {
+            getSupportActionBar().show();
+        }
+    }
 
     /**
      * Handle when the user has tapped an item from the table of contents on the drawer
@@ -148,7 +141,10 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_leavecontainer) {
+        if(item.getItemId() == R.id.menu_epub_content_showtoc) {
+            mDrawerLayout.openDrawer(Gravity.END);
+            return true;
+        }else if(item.getItemId() == android.R.id.home) {
             finish();
             return true;
         }
@@ -278,7 +274,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
         public Fragment getItem(int position) {
             EpubContentPageFragment existingFrag = pagesMap.get(position);
 
-            //something wrong HERE
             if(existingFrag != null) {
                 return existingFrag;
             }else {

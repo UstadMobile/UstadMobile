@@ -7,11 +7,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GestureDetectorCompat;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -50,6 +56,34 @@ public class EpubContentPageFragment extends Fragment {
      * Main root view here
      */
     private ViewGroup viewGroup;
+
+    private TapToHideToolbarHandler mTapToHideToolbarHandler;
+
+    public static final int HANDLER_CLICK_ON_LINK = 1;
+
+    public static final int HANDLER_CLICK_ON_VIEW = 2;
+
+    private Handler webViewTouchHandler;
+
+    private MotionEvent touchDownEvent;
+
+    private long touchDownTime;
+
+    private GestureDetectorCompat gestureDetector;
+
+    interface TapToHideToolbarHandler {
+
+        void onTap(int pageIndex);
+
+    }
+
+    private Handler.Callback webViewClickCallback = (msg) -> {
+        if(msg.what == HANDLER_CLICK_ON_VIEW){
+            mTapToHideToolbarHandler.onTap(mPageIndex);
+        }
+
+        return true;
+    };
 
     public static EpubContentPageFragment newInstance(String url, int pageIndex) {
         EpubContentPageFragment fragment = new EpubContentPageFragment();
@@ -97,6 +131,7 @@ public class EpubContentPageFragment extends Fragment {
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl(mUrl);
         webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -106,6 +141,19 @@ public class EpubContentPageFragment extends Fragment {
                     Context.DOWNLOAD_SERVICE);
             downloadManager.enqueue(request);
         });
+
+        webViewTouchHandler = new Handler(webViewClickCallback);
+
+        gestureDetector = new GestureDetectorCompat(webView.getContext(),
+                new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                webViewTouchHandler.sendEmptyMessageDelayed(HANDLER_CLICK_ON_VIEW, 200);
+                return super.onSingleTapUp(e);
+            }
+        });
+
+        webView.setOnTouchListener((view, motionEvent) -> gestureDetector.onTouchEvent(motionEvent));
 
         return viewGroup;
     }
@@ -125,5 +173,18 @@ public class EpubContentPageFragment extends Fragment {
         if(webView != null) {
             webView.onResume();
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if(context instanceof TapToHideToolbarHandler)
+            mTapToHideToolbarHandler = (TapToHideToolbarHandler)context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mTapToHideToolbarHandler = null;
     }
 }

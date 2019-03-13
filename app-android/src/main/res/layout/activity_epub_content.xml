@@ -14,12 +14,42 @@
         android:orientation="vertical"
         android:id="@+id/container_relative_layout">
 
-        <include android:id="@+id/container_toolbar" layout="@layout/toolbar_with_progress"/>
+        <!-- Not using import here as we need the animate layout changes only for showing
+         / hiding the toolbar -->
+        <android.support.design.widget.AppBarLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            android:id="@+id/appbar"
+            android:elevation="@dimen/dimen_4dp"
+            android:animateLayoutChanges="true"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/um_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+
+            <ProgressBar
+                android:visibility="gone"
+                android:progressDrawable="@drawable/progress_bar_drawable"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_4dp" />
+
+        </android.support.design.widget.AppBarLayout>
 
         <android.support.v4.view.ViewPager
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/container_epubrunner_pager"
-            android:layout_below="@+id/container_toolbar"
+            android:layout_below="@+id/appbar"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -31,7 +61,7 @@
         android:id="@+id/activity_basepoint_navigationview"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_gravity="start"
+        android:layout_gravity="end"
         app:itemIconTint="@color/basepoint_navigation_drawer_tint"
         android:background="@android:color/white"
         >
