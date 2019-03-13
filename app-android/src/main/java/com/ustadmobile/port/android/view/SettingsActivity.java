@@ -16,6 +16,8 @@ public class SettingsActivity extends UstadBaseActivity implements SettingsView 
 
     SettingsPresenter mPresenter;
     ConstraintLayout selLayout;
+    ConstraintLayout calendatLayout, rolesLayout, groupsLayout, rolesAssignmentLayout,
+            locationsLayout, auditLogLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +32,24 @@ public class SettingsActivity extends UstadBaseActivity implements SettingsView 
 
         selLayout = findViewById(R.id.activity_settings2_sel_question_set_cl);
 
+        calendatLayout = findViewById(R.id.activity_settings2_holiday_calendar_cl);
+        rolesLayout = findViewById(R.id.activity_settings2_roles_cl);
+        groupsLayout = findViewById(R.id.activity_settings2_users_cl);
+        rolesAssignmentLayout = findViewById(R.id.activity_settings2_roles_assignment_cl);
+        locationsLayout = findViewById(R.id.activity_settings2_locations_cl);
+        auditLogLayout = findViewById(R.id.activity_settings2_audit_log_cl);
+
         mPresenter = new SettingsPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         selLayout.setOnClickListener(view -> mPresenter.goToSELQuestionSets());
+        calendatLayout.setOnClickListener(view -> mPresenter.goToHolidayCalendarList());
+        rolesLayout.setOnClickListener(view -> mPresenter.goToRolesList());
+        groupsLayout.setOnClickListener(view -> mPresenter.goToGroupsList());
+        rolesAssignmentLayout.setOnClickListener(view -> mPresenter.goToRolesAssignmentList());
+        locationsLayout.setOnClickListener(view -> mPresenter.goToLocationsList());
+        auditLogLayout.setOnClickListener(view -> mPresenter.goToAuditLogSelection());
 
     }
 }

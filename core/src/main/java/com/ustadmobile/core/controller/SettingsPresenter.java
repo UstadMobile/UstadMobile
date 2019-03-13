@@ -23,4 +23,23 @@ public class SettingsPresenter extends UstadBaseController<SettingsView> {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.go(SELQuestionSetsView.VIEW_NAME, args, context);
     }
+
+    public void goToHolidayCalendarList() {
+    }
+
+
+    public void goToRolesList() {
+    }
+
+    public void goToGroupsList() {
+    }
+
+    public void goToRolesAssignmentList() {
+    }
+
+    public void goToLocationsList() {
+    }
+
+    public void goToAuditLogSelection() {
+    }
 }
