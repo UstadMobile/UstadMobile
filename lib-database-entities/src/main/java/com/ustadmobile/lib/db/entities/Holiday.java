@@ -22,6 +22,8 @@ public class Holiday {
     //The name of this holiday set.
     private long holidayName;
 
+
+
     @UmSyncLocalChangeSeqNum
     private long holidayLocalChangeSeqNum;
 

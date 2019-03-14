@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -19,6 +20,10 @@ public abstract class PersonGroupMemberDao implements SyncableDao<PersonGroupMem
     @UmQuery("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid")
     public abstract void findAllGroupWherePersonIsIn(long personUid,
                                                  UmCallback<List<PersonGroupMember>> resultList);
+
+    @UmQuery("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid")
+    public abstract UmProvider<PersonGroupMember> finAllMembersWithGroupId(long groupUid);
+
     @UmQuery("Select Person.* from PersonGroupMember " +
             " LEFT JOIN Person on PersonGroupMember.groupMemberPersonUid = Person.personUid " +
             " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid")

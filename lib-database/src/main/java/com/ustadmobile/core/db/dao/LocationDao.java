@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -7,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
@@ -43,5 +45,8 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
 
     @UmQuery("SELECT * FROM Location WHERE title = :name")
     public abstract void findByTitleAsync(String name, UmCallback<List<Location>> resultList);
+
+    @UmQuery("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0")
+    public abstract UmProvider<LocationWithSubLocationCount> findAllTopLocationsWithCount();
 
 }

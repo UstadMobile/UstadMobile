@@ -1,10 +1,12 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.EntityRole;
+import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
@@ -43,4 +45,6 @@ public abstract class EntityRoleDao implements SyncableDao<EntityRole, EntityRol
     public abstract List<EntityRole> findGroupByRoleAndEntityTypeAndUidSync(int tableId, long entityUid,
                                                             long roleUid);
 
+    @UmQuery("SELECT *, '' AS groupName, '' AS entityName, '' AS entityType FROM EntityRole")
+    public abstract UmProvider<EntityRoleWithGroupName> findAllRoleAssignments();
 }

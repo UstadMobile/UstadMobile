@@ -1,6 +1,9 @@
 package com.ustadmobile.core.view;
 
 
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.UMCalendar;
+
 /**
  * Core View. Screen is for HolidayCalendarDetail's View
  */
@@ -12,6 +15,7 @@ public interface HolidayCalendarDetailView extends UstadView {
 
     //Any argument keys:
 
+    void setListProvider(UmProvider<UMCalendar> umProvider);
     /**
      * Method to finish the screen / view.
      */

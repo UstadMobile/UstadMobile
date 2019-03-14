@@ -21,6 +21,8 @@ public class UMCalendar implements SyncableEntity{
     private String umCalendarName;
 
 
+
+
     //todo: seems like wrong prefix
     @UmSyncMasterChangeSeqNum
     private long personMasterChangeSeqNum;

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -21,5 +22,9 @@ public abstract class RoleDao implements SyncableDao<Role, RoleDao> {
 
     @UmQuery("SELECT * FROM Role WHERE roleName = :roleName")
     public abstract Role findByNameSync(String roleName);
+
+    @UmQuery("SELECT * FROM Role")
+    public abstract UmProvider<Role> findAllRoles();
+
 
 }
