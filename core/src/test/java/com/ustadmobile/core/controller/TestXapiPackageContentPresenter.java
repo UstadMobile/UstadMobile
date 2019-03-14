@@ -45,7 +45,7 @@ public class TestXapiPackageContentPresenter {
 
     private TinCanXML xapiXml;
 
-    private String lastMountedUrl;
+    private volatile String lastMountedUrl;
 
     @Before
     public void setup() throws IOException {
@@ -107,13 +107,13 @@ public class TestXapiPackageContentPresenter {
                 PlatformTestUtil.getTargetContext(), args, mockXapiPackageContentView);
         xapiPresenter.onCreate(null);
 
-        verify(mockXapiPackageContentView, timeout(5000)).mountContainer(
+        verify(mockXapiPackageContentView, timeout(15000)).mountContainer(
                 eq(xapiContainer.getContainerUid()), any());
 
-        verify(mockXapiPackageContentView, timeout(5000)).loadUrl(
+        verify(mockXapiPackageContentView, timeout(15000)).loadUrl(
                 UMFileUtil.joinPaths(lastMountedUrl, "tetris.html"));
 
-        verify(mockXapiPackageContentView, timeout(5000)).setTitle("Tin Can Tetris Example");
+        verify(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example");
     }
 
 }
