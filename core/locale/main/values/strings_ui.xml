@@ -550,12 +550,14 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="audit_log">Audit log</string>
     <string name="audit_log_setting_desc"> View and export audit log</string>
 
+    <string name="new_holiday">New holiday</string>
     <string name="add_holiday_calendar">Add holiday calendar</string>
     <string name="entries">entries</string>
     <string name="holiday_calendar_name">Holiday calendar name</string>
     <string name="add_calendar_range">Add a calendar range</string>
     <string name="add_holiday">Add holiday</string>
 
+    <string name="new_role">New role</string>
     <string name="permissions">Permissions</string>
     <string name="permission">permission</string>
     <string name="add_role">Add role</string>
@@ -566,9 +568,11 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="add_group">Add group</string>
     <string name="group_name">Group name</string>
     <string name="add_people">Add people</string>
+    <string name="new_group">New group</string>
     <string name="last_active">Last active</string>
     <string name="ago">ago</string>
 
+    <string name="new_role_assignment">New role assignment</string>
     <string name="add_new_role_assignment">Add new role assignment</string>
     <string name="in">in</string>
     <string name="assign_role_to">Assign role to</string>
@@ -580,6 +584,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="scope_location">Location</string>
     <string name="assign_to">Assign to</string>
 
+    <string name="add_edit_location">Add\/Edit location</string>
     <string name="sub_locations">sub locations</string>
     <string name="add_location">Add location</string>
     <string name="location_title">Location title</string>
