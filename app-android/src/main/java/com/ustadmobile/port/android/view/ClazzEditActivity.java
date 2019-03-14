@@ -35,7 +35,7 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 /**
  * The ClazzEdit activity - responsible for the Class Edit screen activity on Android.
- * The ClazzEdit screen has Schedule recycler view and a Holiday calendar spinner along side
+ * The ClazzEdit screen has Schedule recycler view and a DateRange calendar spinner along side
  * EditText for Class name and description.
  *
  * This Activity extends UstadBaseActivity and implements ClazzEditView
@@ -125,7 +125,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule);
         addScheduleButton.setOnClickListener(v -> mPresenter.handleClickAddSchedule());
 
-        //Holiday Spinner (drop-down)
+        //DateRange Spinner (drop-down)
         holidaySpinner = findViewById(R.id.activity_clazz_edit_holiday_calendar_selected);
         holidaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -217,7 +217,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
     /**
      * Handles holiday selected
-     * @param id    The id/position of the Holiday selected from the spinner.
+     * @param id    The id/position of the DateRange selected from the spinner.
      */
     @Override
     public void setHolidaySelected(long id) {

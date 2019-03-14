@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -11,8 +14,9 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  * Its basically a collection of dates and time. (holidays and schedules)
  */
 @UmEntity(tableId = 28)
-public class UMCalendar implements SyncableEntity{
+public class UMCalendar{
 
+    public static final int CATEGORY_HOLIDAY = 1;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long umCalendarUid;
@@ -20,34 +24,40 @@ public class UMCalendar implements SyncableEntity{
     //The name of this calendar
     private String umCalendarName;
 
+    //Category
+    private int umCalendarCategory;
 
+    public boolean isUmCalendarActive() {
+        return umCalendarActive;
+    }
 
+    public void setUmCalendarActive(boolean umCalendarActive) {
+        this.umCalendarActive = umCalendarActive;
+    }
+
+    //active
+    private boolean umCalendarActive;
+
+    public UMCalendar(String name, int category){
+        this.umCalendarName = name;
+        this.umCalendarCategory = category;
+        this.umCalendarActive = true;
+    }
+
+    public UMCalendar(){
+
+    }
 
     //todo: seems like wrong prefix
     @UmSyncMasterChangeSeqNum
-    private long personMasterChangeSeqNum;
+    private long umCalendarMasterChangeSeqNum;
 
     @UmSyncLocalChangeSeqNum
-    private long personLocalChangeSeqNum;
+    private long umCalendarLocalChangeSeqNum;
 
     @UmSyncLastChangedBy
     private int umCalendarLastChangedBy;
 
-    public long getPersonMasterChangeSeqNum() {
-        return personMasterChangeSeqNum;
-    }
-
-    public void setPersonMasterChangeSeqNum(long personMasterChangeSeqNum) {
-        this.personMasterChangeSeqNum = personMasterChangeSeqNum;
-    }
-
-    public long getPersonLocalChangeSeqNum() {
-        return personLocalChangeSeqNum;
-    }
-
-    public void setPersonLocalChangeSeqNum(long personLocalChangeSeqNum) {
-        this.personLocalChangeSeqNum = personLocalChangeSeqNum;
-    }
 
     public long getUmCalendarUid() {
         return umCalendarUid;
@@ -65,23 +75,28 @@ public class UMCalendar implements SyncableEntity{
         this.umCalendarName = umCalendarName;
     }
 
-    @Override
-    public long getMasterChangeSeqNum() {
-        return 0;
+    public int getUmCalendarCategory() {
+        return umCalendarCategory;
     }
 
-    @Override
-    public void setMasterChangeSeqNum(long masterChangeSeqNum) {
+    public void setUmCalendarCategory(int umCalendarCategory) {
+        this.umCalendarCategory = umCalendarCategory;
     }
 
-    @Override
-    public long getLocalChangeSeqNum() {
-        return 0;
+    public long getUmCalendarMasterChangeSeqNum() {
+        return umCalendarMasterChangeSeqNum;
     }
 
-    @Override
-    public void setLocalChangeSeqNum(long localChangeSeqNum) {
+    public void setUmCalendarMasterChangeSeqNum(long umCalendarMasterChangeSeqNum) {
+        this.umCalendarMasterChangeSeqNum = umCalendarMasterChangeSeqNum;
+    }
 
+    public long getUmCalendarLocalChangeSeqNum() {
+        return umCalendarLocalChangeSeqNum;
+    }
+
+    public void setUmCalendarLocalChangeSeqNum(long umCalendarLocalChangeSeqNum) {
+        this.umCalendarLocalChangeSeqNum = umCalendarLocalChangeSeqNum;
     }
 
     public int getUmCalendarLastChangedBy() {

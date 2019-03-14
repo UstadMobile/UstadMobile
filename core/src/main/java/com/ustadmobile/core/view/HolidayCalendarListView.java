@@ -1,7 +1,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Holiday;
+import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries;
 
 
 /**
@@ -26,7 +26,7 @@ public interface HolidayCalendarListView extends UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<Holiday> listProvider);
+    void setListProvider(UmProvider<UMCalendarWithNumEntries> listProvider);
 
 
 }

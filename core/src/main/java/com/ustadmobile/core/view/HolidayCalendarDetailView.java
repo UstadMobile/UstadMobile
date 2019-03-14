@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.DateRange;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 
 /**
@@ -14,8 +15,13 @@ public interface HolidayCalendarDetailView extends UstadView {
     String VIEW_NAME = "HolidayCalendarDetail";
 
     //Any argument keys:
+    String ARG_CALENDAR_UID = "CalendarUid";
+    String ARG_DATERANGE_UID = "DateRangeUid";
 
-    void setListProvider(UmProvider<UMCalendar> umProvider);
+    void setListProvider(UmProvider<DateRange> umProvider);
+
+    void updateCalendarOnView(UMCalendar calendar);
+
     /**
      * Method to finish the screen / view.
      */

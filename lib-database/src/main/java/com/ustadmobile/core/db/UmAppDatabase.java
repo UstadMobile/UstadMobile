@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db;
 
 import com.ustadmobile.core.db.dao.AccessTokenDao;
+import com.ustadmobile.core.db.dao.AuditLogDao;
 import com.ustadmobile.core.db.dao.ClazzActivityChangeDao;
 import com.ustadmobile.core.db.dao.ClazzActivityDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
@@ -28,7 +29,7 @@ import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
-import com.ustadmobile.core.db.dao.HolidayDao;
+import com.ustadmobile.core.db.dao.DateRangeDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
@@ -70,6 +71,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
@@ -89,6 +91,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
+import com.ustadmobile.lib.db.entities.DateRange;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
@@ -97,7 +100,6 @@ import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.FeedEntry;
-import com.ustadmobile.lib.db.entities.Holiday;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
@@ -152,7 +154,7 @@ import java.util.Hashtable;
         SelQuestion.class, SelQuestionResponse.class,
         SelQuestionResponseNomination.class, SelQuestionSet.class,
         SelQuestionSetRecognition.class, SelQuestionSetResponse.class,
-        Schedule.class, Holiday.class, UMCalendar.class,
+        Schedule.class, DateRange.class, UMCalendar.class,
         ClazzActivity.class, ClazzActivityChange.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
         ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
@@ -163,7 +165,7 @@ import java.util.Hashtable;
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class,
-        SelQuestionOption.class, ScheduledCheck.class
+        SelQuestionOption.class, ScheduledCheck.class, AuditLog.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -287,7 +289,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract UMCalendarDao getUMCalendarDao();
 
-    public abstract HolidayDao getHolidayDao();
+    public abstract DateRangeDao getDateRangeDao();
 
     public abstract ClazzActivityDao getClazzActivityDao();
 
@@ -338,6 +340,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract SelQuestionOptionDao getSELQuestionOptionDao();
 
     public abstract ScheduledCheckDao getScheduledCheckDao();
+
+    public abstract AuditLogDao getAuditLogDao();
 
     @UmDbContext
     public abstract Object getContext();

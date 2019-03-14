@@ -15,7 +15,9 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.HolidayCalendarListView;
-import com.ustadmobile.lib.db.entities.Holiday;
+import com.ustadmobile.lib.db.entities.DateRange;
+import com.ustadmobile.lib.db.entities.UMCalendar;
+import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -80,33 +82,33 @@ public class HolidayCalendarListActivity extends UstadBaseActivity implements Ho
     /**
      * The DIFF CALLBACK
      */
-    public static final DiffUtil.ItemCallback<Holiday> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Holiday>() {
+    public static final DiffUtil.ItemCallback<UMCalendarWithNumEntries> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<UMCalendarWithNumEntries>() {
                 @Override
-                public boolean areItemsTheSame(Holiday oldItem,
-                                               Holiday newItem) {
+                public boolean areItemsTheSame(UMCalendarWithNumEntries oldItem,
+                                               UMCalendarWithNumEntries newItem) {
                     return oldItem == newItem;
                 }
 
                 @Override
-                public boolean areContentsTheSame(Holiday oldItem,
-                                                  Holiday newItem) {
+                public boolean areContentsTheSame(UMCalendarWithNumEntries oldItem,
+                                                  UMCalendarWithNumEntries newItem) {
                     return oldItem.equals(newItem);
                 }
             };
 
     @Override
-    public void setListProvider(UmProvider<Holiday> listProvider) {
+    public void setListProvider(UmProvider<UMCalendarWithNumEntries> listProvider) {
         HolidayCalendarListRecyclerAdapter recyclerAdapter =
                 new HolidayCalendarListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        DataSource.Factory<Integer, Holiday> factory =
-                (DataSource.Factory<Integer, Holiday>)
+        DataSource.Factory<Integer, UMCalendarWithNumEntries> factory =
+                (DataSource.Factory<Integer, UMCalendarWithNumEntries>)
                         listProvider.getProvider();
-        LiveData<PagedList<Holiday>> data =
+        LiveData<PagedList<UMCalendarWithNumEntries>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);

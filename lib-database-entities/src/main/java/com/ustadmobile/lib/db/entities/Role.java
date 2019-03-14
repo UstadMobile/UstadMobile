@@ -33,6 +33,9 @@ public class Role {
     //bit flags made of up PERMISSION_ constants
     private long rolePermissions;
 
+    //active
+    private boolean roleActive;
+
     public static final long PERMISSION_CLAZZ_SELECT = 1;
 
     public static final long PERMISSION_CLAZZ_INSERT = 2;
@@ -85,14 +88,14 @@ public class Role {
      */
     public static final long PERMISSION_REPORTS_VIEW = 8388608;
 
-
     public Role() {
-
+        this.roleActive = true;
     }
 
     public Role(String roleName, long rolePermissions) {
         this.roleName = roleName;
         this.rolePermissions = rolePermissions;
+        this.roleActive = true;
     }
 
     public long getRoleUid() {

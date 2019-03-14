@@ -1,27 +1,28 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.DateRangeDao;
+import com.ustadmobile.core.db.dao.UMCalendarDao;
 import com.ustadmobile.core.impl.UmAccountManager;
-
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.HolidayCalendarDetailView;
+import com.ustadmobile.core.view.HolidayCalendarListView;
+import com.ustadmobile.lib.db.entities.UMCalendar;
+import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries;
+
 import java.util.Hashtable;
 
-import com.ustadmobile.core.view.HolidayCalendarListView;
-import com.ustadmobile.core.view.HolidayCalendarDetailView;
-
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Holiday;
-
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.HolidayDao;
+import static com.ustadmobile.core.view.HolidayCalendarDetailView.ARG_CALENDAR_UID;
 
 /**
  *  Presenter for HolidayCalendarList view
 **/
 public class HolidayCalendarListPresenter extends UstadBaseController<HolidayCalendarListView> {
 
-        private UmProvider<Holiday> umProvider;
+        private UmProvider<UMCalendarWithNumEntries> umProvider;
             UmAppDatabase repository;
-    private HolidayDao providerDao;
+    private UMCalendarDao providerDao;
         
     
 
@@ -31,8 +32,8 @@ public class HolidayCalendarListPresenter extends UstadBaseController<HolidayCal
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
         
         //Get provider Dao
-        providerDao = repository.getHolidayDao();
-                
+        providerDao = repository.getUMCalendarDao();
+
         
     }
 
@@ -40,8 +41,8 @@ public class HolidayCalendarListPresenter extends UstadBaseController<HolidayCal
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-                //Get provider 
-        umProvider = providerDao.findAllHolidays();
+        //Get provider
+        umProvider = providerDao.findAllHolidaysWithEntriesCount();
         view.setListProvider(umProvider);
                 
     }
@@ -51,6 +52,17 @@ public class HolidayCalendarListPresenter extends UstadBaseController<HolidayCal
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         impl.go(HolidayCalendarDetailView.VIEW_NAME, args, context);
+    }
+
+    public void handleEditCalendar(long calendarUid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_CALENDAR_UID, calendarUid);
+        impl.go(HolidayCalendarDetailView.VIEW_NAME, args, context);
+    }
+
+    public void handleDeleteCalendar(long calendarUid){
+        repository.getDateRangeDao().inactivateRange(calendarUid);
     }
     
 }

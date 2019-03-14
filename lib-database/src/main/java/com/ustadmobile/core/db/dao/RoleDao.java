@@ -23,8 +23,10 @@ public abstract class RoleDao implements SyncableDao<Role, RoleDao> {
     @UmQuery("SELECT * FROM Role WHERE roleName = :roleName")
     public abstract Role findByNameSync(String roleName);
 
-    @UmQuery("SELECT * FROM Role")
-    public abstract UmProvider<Role> findAllRoles();
+    @UmQuery("SELECT * FROM Role WHERE roleActive = 1")
+    public abstract UmProvider<Role> findAllActiveRoles();
 
+    @UmQuery("UPDATE Role SET roleActive = 0 WHERE roleUid = :uid")
+    public abstract void inactiveRole(long uid);
 
 }

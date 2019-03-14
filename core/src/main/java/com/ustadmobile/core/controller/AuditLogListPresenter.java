@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.AuditLogDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.lib.db.entities.AuditLog;
@@ -15,7 +16,7 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
 
     private UmProvider<AuditLog> umProvider;
     UmAppDatabase repository;
-    //private AuditLogDao providerDao;
+    private AuditLogDao providerDao;
 
 
     public AuditLogListPresenter(Object context, Hashtable arguments, AuditLogListView view) {
@@ -24,8 +25,7 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
         //Get provider Dao
-        //providerDao = repository.getAuditLogDao();
-
+        providerDao = repository.getAuditLogDao();
 
     }
 
@@ -34,7 +34,7 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
         super.onCreate(savedState);
 
         //Get provider 
-        //umProvider = providerDao.
+        umProvider = providerDao.findAllAuditLogs();
         view.setListProvider(umProvider);
 
     }

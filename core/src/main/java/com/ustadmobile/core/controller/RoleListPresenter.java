@@ -15,6 +15,8 @@ import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.RoleDao;
 
+import static com.ustadmobile.core.view.RoleListView.ROLE_UID;
+
 /**
  * Presenter for RoleList view
  **/
@@ -41,9 +43,20 @@ public class RoleListPresenter extends UstadBaseController<RoleListView> {
         super.onCreate(savedState);
 
         //Get provider 
-        umProvider = providerDao.findAllRoles();
+        umProvider = providerDao.findAllActiveRoles();
         view.setListProvider(umProvider);
 
+    }
+
+    public void handleEditRole(long roleUid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ROLE_UID, roleUid);
+        impl.go(RoleDetailView.VIEW_NAME, args, context);
+    }
+
+    public void handleRoleDelete(long roleUid){
+        repository.getRoleDao().inactiveRole(roleUid);
     }
 
     public void handleClickPrimaryActionButton() {

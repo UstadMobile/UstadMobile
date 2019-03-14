@@ -14,6 +14,7 @@ public interface RoleListView extends UstadView {
     String VIEW_NAME = "RoleList";
 
     //Any argument keys:
+    String ROLE_UID = "RoleUid";
 
     /**
      * Method to finish the screen / view.

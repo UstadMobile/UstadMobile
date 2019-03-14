@@ -554,6 +554,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="new_holiday">New holiday</string>
     <string name="add_holiday_calendar">Add holiday calendar</string>
     <string name="entries">entries</string>
+    <string name="entry">entry</string>
     <string name="holiday_calendar_name">Holiday calendar name</string>
     <string name="add_calendar_range">Add a calendar range</string>
     <string name="add_holiday">Add holiday</string>

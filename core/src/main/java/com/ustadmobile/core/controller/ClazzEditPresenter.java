@@ -76,16 +76,12 @@ public class ClazzEditPresenter
                         }
 
                         @Override
-                        public void onFailure(Throwable exception) {
-
-                        }
+                        public void onFailure(Throwable exception) { exception.printStackTrace();}
                     });
                 }
 
                 @Override
-                public void onFailure(Throwable exception) {
-
-                }
+                public void onFailure(Throwable exception) { exception.printStackTrace();}
             });
         }
     }
@@ -104,8 +100,7 @@ public class ClazzEditPresenter
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
                 view.updateClazzEditView(result);
-                holidaysLiveData = repository.getUMCalendarDao()
-                        .findAllUMCalendarsAsLiveDataList();
+                holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
             }
@@ -132,7 +127,7 @@ public class ClazzEditPresenter
 
     /**
      * Handles the change in holidays called (mostly called from UMCalendar live data observing.
-     * Upon this method call (ie: when calendar updates, it will set the Holiday presets on
+     * Upon this method call (ie: when calendar updates, it will set the DateRange presets on
      * the view.
      *
      * @param umCalendar The list of UMCalendar holidays
@@ -178,7 +173,7 @@ public class ClazzEditPresenter
      * Updates the class holiday calendar set to the currently editing class. Does NOT persist the
      * data to the database.
      *
-     * @param position The position of the Holiday Calendars from the Holiday drop down preset.
+     * @param position The position of the DateRange Calendars from the DateRange drop down preset.
      */
     public void updateHoliday(long position){
         mUpdatedClazz.setClazzHolidayUMCalendarUid(position);

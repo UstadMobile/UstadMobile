@@ -23,7 +23,7 @@ public class Clazz {
 
     private float attendanceAverage;
 
-    //Gives the Holiday calendar Uid
+    //Gives the DateRange calendar Uid
     private long clazzHolidayUMCalendarUid;
 
     //Gives the schedule calendar ui

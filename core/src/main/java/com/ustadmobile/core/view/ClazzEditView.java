@@ -35,7 +35,7 @@ public interface ClazzEditView extends UstadView {
 
     /**
      * Handles holiday selected
-     * @param id    The id/position of the Holiday selected from the drop-down.
+     * @param id    The id/position of the DateRange selected from the drop-down.
      */
     void setHolidaySelected(long id);
 
