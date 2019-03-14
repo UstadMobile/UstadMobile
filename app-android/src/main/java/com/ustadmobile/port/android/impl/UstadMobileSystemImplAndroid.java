@@ -76,6 +76,8 @@ import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AuditLogListView;
+import com.ustadmobile.core.view.AuditLogSelectionView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.BaseReportView;
@@ -90,7 +92,13 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
 import com.ustadmobile.core.view.DummyView;
+import com.ustadmobile.core.view.GroupDetailView;
+import com.ustadmobile.core.view.GroupListView;
 import com.ustadmobile.core.view.H5PContentView;
+import com.ustadmobile.core.view.HolidayCalendarDetailView;
+import com.ustadmobile.core.view.HolidayCalendarListView;
+import com.ustadmobile.core.view.LocationDetailView;
+import com.ustadmobile.core.view.LocationListView;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
@@ -107,6 +115,10 @@ import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
 import com.ustadmobile.core.view.ReportSELView;
 import com.ustadmobile.core.view.ReportSelectionView;
+import com.ustadmobile.core.view.RoleAssignmentDetailView;
+import com.ustadmobile.core.view.RoleAssignmentListView;
+import com.ustadmobile.core.view.RoleDetailView;
+import com.ustadmobile.core.view.RoleListView;
 import com.ustadmobile.core.view.SELEditView;
 import com.ustadmobile.core.view.SELQuestionDetail2View;
 //import com.ustadmobile.core.view.SELQuestionDetailView;
@@ -301,6 +313,19 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReportSELView.VIEW_NAME, ReportSELActivity.class);
         viewNameToAndroidImplMap.put(PersonListSearchView.VIEW_NAME, PersonListSearchActivity.class);
         viewNameToAndroidImplMap.put(BaseReportView.VIEW_NAME, ReportSelectionFragment.class);
+        viewNameToAndroidImplMap.put(HolidayCalendarListView.VIEW_NAME, HolidayCalendarListActivity.class);
+        viewNameToAndroidImplMap.put(HolidayCalendarDetailView.VIEW_NAME, HolidayCalendarDetailActivity.class);
+        viewNameToAndroidImplMap.put(RoleListView.VIEW_NAME, RoleListActivity.class);
+        viewNameToAndroidImplMap.put(RoleDetailView.VIEW_NAME, RoleDetailActivity.class);
+        viewNameToAndroidImplMap.put(GroupListView.VIEW_NAME, GroupListActivity.class);
+        viewNameToAndroidImplMap.put(GroupDetailView.VIEW_NAME, GroupDetailActivity.class);
+        viewNameToAndroidImplMap.put(RoleAssignmentDetailView.VIEW_NAME, RoleAssignmentDetailActivity.class);
+        viewNameToAndroidImplMap.put(RoleAssignmentListView.VIEW_NAME, RoleAssignmentListActivity.class);
+        viewNameToAndroidImplMap.put(LocationListView.VIEW_NAME, LocationListActivity.class);
+        viewNameToAndroidImplMap.put(LocationDetailView.VIEW_NAME, LocationDetailActivity.class);
+        viewNameToAndroidImplMap.put(AuditLogSelectionView.VIEW_NAME, AuditLogSelectionActivity.class);
+        viewNameToAndroidImplMap.put(AuditLogListView.VIEW_NAME, AuditLogListActivity.class);
+
     }
 
     /**

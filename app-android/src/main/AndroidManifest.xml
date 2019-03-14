@@ -203,6 +203,42 @@
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
+            android:name="com.ustadmobile.port.android.view.HolidayCalendarListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.HolidayCalendarDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.RoleListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.RoleDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.GroupListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.GroupDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.RoleAssignmentDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.RoleAssignmentListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.LocationListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.LocationDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.AuditLogSelectionActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.AuditLogListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />

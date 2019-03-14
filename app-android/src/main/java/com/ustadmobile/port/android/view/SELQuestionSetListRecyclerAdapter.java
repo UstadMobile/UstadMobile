@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -13,7 +14,6 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SELQuestionSetsPresenter;
-import com.ustadmobile.core.tincan.Activity;
 import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions;
 
 public class SELQuestionSetListRecyclerAdapter extends
