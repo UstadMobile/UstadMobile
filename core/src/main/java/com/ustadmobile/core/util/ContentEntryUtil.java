@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
-import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.core.view.XapiPackageContentView;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 
@@ -57,8 +57,8 @@ public class ContentEntryUtil {
                     switch (result.getMimeType()) {
                         case "application/zip":
                         case "application/tincan+zip":
-                            args.put(XapiPackageView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
-                            impl.go(XapiPackageView.VIEW_NAME, args, context);
+                            args.put(XapiPackageContentView.ARG_CONTAINER_UID, String.valueOf(result.getContainerUid()));
+                            impl.go(XapiPackageContentView.VIEW_NAME, args, context);
                             break;
                         case "video/mp4":
 
