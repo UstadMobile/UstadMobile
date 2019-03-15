@@ -18,6 +18,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipFile;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +48,8 @@ public class TestXapiPackageContentPresenter {
     private TinCanXML xapiXml;
 
     private volatile String lastMountedUrl;
+
+    private CountDownLatch mountLatch = new CountDownLatch(1);
 
     @Before
     public void setup() throws IOException {
@@ -78,6 +82,7 @@ public class TestXapiPackageContentPresenter {
                 lastMountedUrl = UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
                         httpd.mountContainer(invocation.getArgument(0), null));
                 UmCallbackUtil.onSuccessIfNotNull(invocation.getArgument(1), lastMountedUrl);
+                mountLatch.countDown();
             }).start();
 
             return null;
@@ -99,7 +104,7 @@ public class TestXapiPackageContentPresenter {
     }
 
     @Test
-    public void givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
+    public void givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() throws InterruptedException{
         Hashtable args = new Hashtable();
         args.put(XapiPackageContentView.ARG_CONTAINER_UID, String.valueOf(xapiContainer.getContainerUid()));
 
@@ -107,10 +112,12 @@ public class TestXapiPackageContentPresenter {
                 PlatformTestUtil.getTargetContext(), args, mockXapiPackageContentView);
         xapiPresenter.onCreate(null);
 
-        verify(mockXapiPackageContentView, timeout(15000)).mountContainer(
+        mountLatch.await(15000, TimeUnit.MILLISECONDS);
+
+        verify(mockXapiPackageContentView).mountContainer(
                 eq(xapiContainer.getContainerUid()), any());
 
-        verify(mockXapiPackageContentView, timeout(15000)).loadUrl(
+        verify(mockXapiPackageContentView, timeout(5000)).loadUrl(
                 UMFileUtil.joinPaths(lastMountedUrl, "tetris.html"));
 
         verify(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example");

@@ -1,13 +1,13 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.ShowErrorUmCallback;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.ShowErrorUmHttpResponseCallback;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMUUID;
@@ -45,46 +45,41 @@ public class XapiPackageContentPresenter extends UstadBaseController<XapiPackage
 
     private String registrationUUID;
 
-    private UmCallback zipMountedCallbackHandler = new UmCallback() {
+    private class ZipMountedCallbackHandler extends ShowErrorUmCallback<String> {
+
+        public ZipMountedCallbackHandler() {
+            super(view, MessageID.error_opening_file);
+        }
+
         @Override
-        public void onSuccess(Object result) {
-            mountedPath = (String)result;
+        public void onSuccess(String result) {
+            mountedPath = result;
             UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(
-                    getContext(),
-                    UMFileUtil.joinPaths(mountedPath, "tincan.xml")),
-                    tincanXmlResponseCallback);
+                            getContext(),
+                            UMFileUtil.joinPaths(mountedPath, "tincan.xml")),
+                    new TinCanResponseCallback());
+        }
+    }
+
+    private class TinCanResponseCallback extends ShowErrorUmHttpResponseCallback {
+
+        private TinCanResponseCallback() {
+            super(view, MessageID.error_opening_file);
         }
 
-        @Override
-        public void onFailure(Throwable exception) {
-            view.showErrorNotification(UstadMobileSystemImpl.getInstance().getString(
-                    MessageID.error_opening_file, getContext()));
-        }
-    };
-
-
-    private UmHttpResponseCallback tincanXmlResponseCallback = new UmHttpResponseCallback() {
         @Override
         public void onComplete(UmHttpCall call, UmHttpResponse response) {
+            super.onComplete(call, response);
             if(response.isSuccessful()) {
                 try {
                     handleTinCanXmlLoaded(response.getResponseBody());
-                }catch(IOException|XmlPullParserException e) {
+                } catch (IOException | XmlPullParserException e) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e);
                     onFailure(call, new IOException(e));
                 }
-            }else {
-                onFailure(call, new IOException("TinCan.xml request not successful"));
             }
         }
-
-        @Override
-        public void onFailure(UmHttpCall call, IOException exception) {
-            view.showErrorNotification(UstadMobileSystemImpl.getInstance().getString(
-                    MessageID.error_opening_file, getContext()));
-        }
-    };
-
+    }
 
     public XapiPackageContentPresenter(Object context, Hashtable args, XapiPackageContentView view) {
         super(context, args, view);
@@ -93,7 +88,7 @@ public class XapiPackageContentPresenter extends UstadBaseController<XapiPackage
     public void onCreate(Hashtable savedState) {
         registrationUUID = UMUUID.randomUUID().toString();
         long containerUid = Long.parseLong((String)getArguments().get(UstadView.ARG_CONTAINER_UID));
-        view.mountContainer(containerUid, zipMountedCallbackHandler);
+        view.mountContainer(containerUid, new ZipMountedCallbackHandler());
     }
 
     private void handleTinCanXmlLoaded(byte[] tincanXmlBytes) throws IOException, XmlPullParserException{

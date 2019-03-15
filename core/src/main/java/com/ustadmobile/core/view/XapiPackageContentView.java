@@ -6,7 +6,7 @@ import com.ustadmobile.core.impl.UmCallback;
  * Created by mike on 9/13/17.
  */
 
-public interface XapiPackageContentView extends UstadView{
+public interface XapiPackageContentView extends UstadView, ViewWithErrorNotifier{
 
     String VIEW_NAME = "XapiPackage";
 
@@ -17,7 +17,5 @@ public interface XapiPackageContentView extends UstadView{
     void loadUrl(String url);
 
     void mountContainer(long containerUid, UmCallback<String> callback);
-
-    void showErrorNotification(String errorMessage);
 
 }
