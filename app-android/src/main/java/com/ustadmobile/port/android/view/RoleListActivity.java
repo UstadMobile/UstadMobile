@@ -100,7 +100,7 @@ public class RoleListActivity extends UstadBaseActivity implements RoleListView 
     @Override
     public void setListProvider(UmProvider<Role> listProvider) {
         RoleListRecyclerAdapter recyclerAdapter =
-                new RoleListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new RoleListRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

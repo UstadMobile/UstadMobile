@@ -60,4 +60,7 @@ public abstract class UMCalendarDao implements SyncableDao<UMCalendar, UMCalenda
     @UmQuery("SELECT * FROM UMCalendar WHERE umCalendarUid = :uid")
     public abstract void findByUidAsync(long uid, UmCallback<UMCalendar> resultObject);
 
+    @UmQuery("UPDATE UMCalendar SET umCalendarActive = 0 WHERE umCalendarUid = :uid")
+    public abstract void inactivateCalendarAsync(long uid, UmCallback<Integer> resultObject);
+
 }

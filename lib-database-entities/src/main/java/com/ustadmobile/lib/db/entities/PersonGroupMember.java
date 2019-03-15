@@ -28,6 +28,20 @@ public class PersonGroupMember {
     @UmSyncLastChangedBy
     private int groupMemberLastChangedBy;
 
+    private boolean groupMemberActive;
+
+    public PersonGroupMember(){
+        this.groupMemberActive = true;
+    }
+
+    public boolean isGroupMemberActive() {
+        return groupMemberActive;
+    }
+
+    public void setGroupMemberActive(boolean groupMemberActive) {
+        this.groupMemberActive = groupMemberActive;
+    }
+
     public long getGroupMemberUid() {
         return groupMemberUid;
     }

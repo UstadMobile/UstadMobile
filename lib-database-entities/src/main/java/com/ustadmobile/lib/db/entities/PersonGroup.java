@@ -25,6 +25,20 @@ public class PersonGroup {
 
     private long groupPersonUid;
 
+    public PersonGroup(){
+        this.groupActive = true;
+    }
+
+    public boolean isGroupActive() {
+        return groupActive;
+    }
+
+    public void setGroupActive(boolean groupActive) {
+        this.groupActive = groupActive;
+    }
+
+    private boolean groupActive;
+
     public long getGroupUid() {
         return groupUid;
     }

@@ -100,7 +100,7 @@ public class GroupListActivity extends UstadBaseActivity implements GroupListVie
     @Override
     public void setListProvider(UmProvider<GroupWithMemberCount> listProvider) {
         GroupListRecyclerAdapter recyclerAdapter =
-                new GroupListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new GroupListRecyclerAdapter(DIFF_CALLBACK, mPresenter,this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

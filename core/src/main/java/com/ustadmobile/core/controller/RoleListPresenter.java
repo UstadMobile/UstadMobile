@@ -56,7 +56,7 @@ public class RoleListPresenter extends UstadBaseController<RoleListView> {
     }
 
     public void handleRoleDelete(long roleUid){
-        repository.getRoleDao().inactiveRole(roleUid);
+        repository.getRoleDao().inactiveRoleAsync(roleUid, null);
     }
 
     public void handleClickPrimaryActionButton() {

@@ -62,7 +62,7 @@ public class HolidayCalendarListPresenter extends UstadBaseController<HolidayCal
     }
 
     public void handleDeleteCalendar(long calendarUid){
-        repository.getDateRangeDao().inactivateRange(calendarUid);
+        repository.getUMCalendarDao().inactivateCalendarAsync(calendarUid, null);
     }
     
 }

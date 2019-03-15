@@ -34,8 +34,10 @@ public class EntityRole {
     @UmIndexField
     private long erRoleUid;
 
-    public EntityRole() {
+    private boolean erActive;
 
+    public EntityRole() {
+        this.erActive = true;
     }
 
     public EntityRole(int erTableId, long erEntityUid, long erGroupUid, long erRoleUid) {
@@ -43,6 +45,15 @@ public class EntityRole {
         this.erEntityUid = erEntityUid;
         this.erGroupUid = erGroupUid;
         this.erRoleUid = erRoleUid;
+        this.erActive = true;
+    }
+
+    public boolean isErActive() {
+        return erActive;
+    }
+
+    public void setErActive(boolean erActive) {
+        this.erActive = erActive;
     }
 
     public long getErUid() {

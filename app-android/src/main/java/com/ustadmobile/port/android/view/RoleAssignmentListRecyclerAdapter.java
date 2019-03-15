@@ -6,11 +6,11 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.app.Activity;
 
@@ -82,10 +82,12 @@ public class RoleAssignmentListRecyclerAdapter extends
     protected RoleAssignmentListRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<EntityRoleWithGroupName> diffCallback,
             RoleAssignmentListPresenter thePresenter,
+            Activity activity,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theContext = context;
+        theActivity = activity;
     }
 
 

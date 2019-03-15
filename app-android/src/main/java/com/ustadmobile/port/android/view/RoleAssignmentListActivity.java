@@ -100,7 +100,7 @@ public class RoleAssignmentListActivity extends UstadBaseActivity implements Rol
     @Override
     public void setListProvider(UmProvider<EntityRoleWithGroupName> listProvider) {
         RoleAssignmentListRecyclerAdapter recyclerAdapter =
-                new RoleAssignmentListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new RoleAssignmentListRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

@@ -2,7 +2,8 @@ package com.ustadmobile.core.view;
 
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.PersonGroupMember;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 /**
  * Core View. Screen is for GroupDetail's View
@@ -14,8 +15,11 @@ public interface GroupDetailView extends UstadView {
     String VIEW_NAME = "GroupDetail";
 
     //Any argument keys:
+    String GROUP_UID = "GroupUid";
 
-    void setListProvider(UmProvider<PersonGroupMember> provider);
+    void setListProvider(UmProvider<PersonWithEnrollment> provider);
+
+    void updateGroupOnView(PersonGroup group);
 
     /**
      * Method to finish the screen / view.

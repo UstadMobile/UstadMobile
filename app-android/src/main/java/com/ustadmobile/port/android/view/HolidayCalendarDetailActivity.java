@@ -10,6 +10,8 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -75,6 +77,22 @@ public class HolidayCalendarDetailActivity extends UstadBaseActivity implements 
         addRangeCL = findViewById(R.id.activity_holiday_calendar_detail_add_cl);
 
         title = findViewById(R.id.activity_holiday_calendar_detail_name);
+        title.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateCalendarName(s.toString());
+            }
+        });
 
         //Call the Presenter
         mPresenter = new HolidayCalendarDetailPresenter(this,
@@ -128,8 +146,22 @@ public class HolidayCalendarDetailActivity extends UstadBaseActivity implements 
     }
 
     @Override
-    public void updateCalendarOnView(UMCalendar calendar) {
-        title.setText(calendar.getUmCalendarName());
+    public void updateCalendarOnView(UMCalendar updatedCalendar) {
+        //title.setText(calendar.getUmCalendarName());
+
+
+        String calendarName = "";
+
+        if(updatedCalendar != null){
+            if(updatedCalendar.getUmCalendarName() != null){
+                calendarName = updatedCalendar.getUmCalendarName();
+            }
+
+
+        }
+
+        String finalCalendarName = calendarName;
+        runOnUiThread(() -> title.setText(finalCalendarName));
 
     }
 }

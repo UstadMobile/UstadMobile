@@ -4,11 +4,15 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RoleDetailPresenter;
 import com.ustadmobile.core.view.RoleDetailView;
+import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -20,6 +24,7 @@ public class RoleDetailActivity extends UstadBaseActivity implements RoleDetailV
     private Toolbar toolbar;
     private RoleDetailPresenter mPresenter;
     private RecyclerView mRecyclerView;
+    private EditText title;
 
 
     /**
@@ -59,6 +64,24 @@ public class RoleDetailActivity extends UstadBaseActivity implements RoleDetailV
                 new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        title = findViewById(R.id.activity_role_detail_name);
+        title.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateRoleName(s.toString());
+            }
+        });
+
         //Call the Presenter
         mPresenter = new RoleDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -72,4 +95,22 @@ public class RoleDetailActivity extends UstadBaseActivity implements RoleDetailV
 
     }
 
+    @Override
+    public void updateRoleOnView(Role role) {
+
+        String roleName = "";
+
+
+        if(role != null){
+            if(role.getRoleName() != null){
+                roleName = role.getRoleName();
+            }
+        }
+
+        String finalRoleName = roleName;
+        runOnUiThread(() -> title.setText(finalRoleName));
+
+        //TODO: update ticks on permissions as well.
+
+    }
 }

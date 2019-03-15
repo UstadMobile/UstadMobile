@@ -39,6 +39,9 @@ public abstract class DateRangeDao implements SyncableDao<DateRange, DateRangeDa
     @UmQuery("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
     public abstract void inactivateRange(long uid);
 
+    @UmQuery("UPDATE DateRange SET dateRangeActive = 0 WHERE dateRangeUid = :uid")
+    public abstract void inactivateRangeAsync(long uid, UmCallback<Integer> resultObject);
+
     @UmUpdate
     public abstract void updateAsync(DateRange entity, UmCallback<Integer> result);
 

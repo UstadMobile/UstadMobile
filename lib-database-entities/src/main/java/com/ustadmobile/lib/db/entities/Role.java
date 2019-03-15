@@ -145,4 +145,12 @@ public class Role {
     public void setRolePermissions(long rolePermissions) {
         this.rolePermissions = rolePermissions;
     }
+
+    public boolean isRoleActive() {
+        return roleActive;
+    }
+
+    public void setRoleActive(boolean roleActive) {
+        this.roleActive = roleActive;
+    }
 }

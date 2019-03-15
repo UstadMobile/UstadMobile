@@ -28,6 +28,20 @@ public class Location {
 
     private String timeZone;
 
+    private boolean locationActive;
+
+    public Location(){
+        this.locationActive = true;
+    }
+
+    public boolean isLocationActive() {
+        return locationActive;
+    }
+
+    public void setLocationActive(boolean locationActive) {
+        this.locationActive = locationActive;
+    }
+
     @UmSyncLocalChangeSeqNum
     private long locationLocalChangeSeqNum;
 
@@ -37,14 +51,11 @@ public class Location {
     @UmSyncLastChangedBy
     private int locationLastChangedBy;
 
-    public Location() {
-
-    }
-
     public Location(String title, String description, String timeZone) {
         this.title = title;
         this.locationDesc = description;
         this.timeZone = timeZone;
+        this.locationActive = true;
     }
 
 

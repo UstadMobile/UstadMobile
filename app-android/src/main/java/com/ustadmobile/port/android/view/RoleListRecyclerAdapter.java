@@ -3,14 +3,13 @@ package com.ustadmobile.port.android.view;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.app.Activity;
 
@@ -48,7 +47,10 @@ public class RoleListRecyclerAdapter extends
         AppCompatImageView menu =
                 holder.itemView.findViewById(R.id.item_title_with_desc_and_dots_dots);
 
-        holder.itemView.setOnClickListener(v -> mPresenter.handleEditRole(entity.getRoleUid()));
+        holder.itemView.setOnClickListener(v -> {
+            assert entity != null;
+            mPresenter.handleEditRole(entity.getRoleUid());
+        });
 
         assert entity != null;
         title.setText(entity.getRoleName());
@@ -97,10 +99,12 @@ public class RoleListRecyclerAdapter extends
     protected RoleListRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<Role> diffCallback,
             RoleListPresenter thePresenter,
+            Activity activity,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theContext = context;
+        theActivity = activity;
     }
 
 

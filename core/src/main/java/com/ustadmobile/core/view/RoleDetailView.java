@@ -1,6 +1,8 @@
 package com.ustadmobile.core.view;
 
 
+import com.ustadmobile.lib.db.entities.Role;
+
 /**
  * Core View. Screen is for RoleDetail's View
  */
@@ -18,5 +20,6 @@ public interface RoleDetailView extends UstadView {
     void finish();
 
 
+    void updateRoleOnView(Role role);
 }
 

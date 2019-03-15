@@ -100,7 +100,7 @@ public class HolidayCalendarListActivity extends UstadBaseActivity implements Ho
     @Override
     public void setListProvider(UmProvider<UMCalendarWithNumEntries> listProvider) {
         HolidayCalendarListRecyclerAdapter recyclerAdapter =
-                new HolidayCalendarListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new HolidayCalendarListRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

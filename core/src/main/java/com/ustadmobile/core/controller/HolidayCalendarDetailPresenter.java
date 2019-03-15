@@ -70,9 +70,6 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
         }else{
             initFromCalendar(currentCalendarUid);
         }
-
-
-
     }
 
     public void updateRanges(){
@@ -95,7 +92,6 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
             public void onSuccess(UMCalendar result) {
                 updatedCalendar = result;
                 view.updateCalendarOnView(result);
-
                 updateRanges();
             }
 
@@ -104,7 +100,6 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
                 exception.printStackTrace();
             }
         });
-
 
     }
 
@@ -121,6 +116,9 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
         }
     }
 
+    public void updateCalendarName(String name){
+        updatedCalendar.setUmCalendarName(name);
+    }
 
     public void handleAddDateRange(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -157,8 +155,9 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
 
     public void handleClickDone() {
 
-        currentCalendar.setUmCalendarActive(true);
-        repository.getUMCalendarDao().updateAsync(currentCalendar, new UmCallback<Integer>() {
+        updatedCalendar.setUmCalendarActive(true);
+        updatedCalendar.setUmCalendarCategory(UMCalendar.CATEGORY_HOLIDAY);
+        repository.getUMCalendarDao().updateAsync(updatedCalendar, new UmCallback<Integer>() {
             @Override
             public void onSuccess(Integer result) {
                 view.finish();

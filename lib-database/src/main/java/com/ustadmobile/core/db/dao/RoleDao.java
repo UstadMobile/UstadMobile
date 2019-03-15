@@ -1,10 +1,12 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -29,4 +31,15 @@ public abstract class RoleDao implements SyncableDao<Role, RoleDao> {
     @UmQuery("UPDATE Role SET roleActive = 0 WHERE roleUid = :uid")
     public abstract void inactiveRole(long uid);
 
+    @UmQuery("UPDATE Role SET roleActive = 0 WHERE roleUid = :uid")
+    public abstract void inactiveRoleAsync(long uid, UmCallback<Integer> resultObject);
+
+    @UmQuery("SELECT * FROM Role WHERE roleUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<Role> resultObject);
+
+    @UmQuery("SELECT * FROM Role WHERE roleUid = :uid")
+    public abstract UmLiveData<Role> findByUidLive(long uid);
+
+    @UmUpdate
+    public abstract void updateAsync(Role entitiy, UmCallback<Integer> resultObject);
 }
