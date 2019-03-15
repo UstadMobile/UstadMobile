@@ -5,15 +5,14 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.app.Activity;
 
@@ -22,7 +21,6 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.GroupDetailPresenter;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import java.io.File;
@@ -52,12 +50,14 @@ public class GroupDetailRecyclerAdapter extends
 
         PersonWithEnrollment personWithEnrollment = getItem(position);
 
-        TextView studentNameTextView = holder.itemView.findViewById(R.id.item_image_with_title_with_desc_and_dots_title);
-        TextView lastActiveTextView = holder.itemView.findViewById(R.id.item_image_with_title_with_desc_and_dots_desc);
+        TextView studentNameTextView =
+                holder.itemView.findViewById(R.id.item_image_with_title_with_desc_and_dots_title);
+        TextView lastActiveTextView =
+                holder.itemView.findViewById(R.id.item_image_with_title_with_desc_and_dots_desc);
         ImageView personPicture =
                 holder.itemView.findViewById(R.id.item_image_with_title_with_desc_and_dots_image);
         AppCompatImageView menu =
-                holder.itemView.findViewById(R.id.item_title_with_desc_and_dots_dots);
+                holder.itemView.findViewById(R.id.item_image_with_title_with_desc_and_dots_dots);
 
 
         //NAME:
@@ -99,7 +99,6 @@ public class GroupDetailRecyclerAdapter extends
         menu.setOnClickListener((View v) -> {
             //creating a popup menu
             PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
-            popup.getMenu().findItem(R.id.edit).setVisible(false);
             popup.setOnMenuItemClickListener(item -> {
                 int i = item.getItemId();
                 if (i == R.id.edit) {
@@ -113,6 +112,8 @@ public class GroupDetailRecyclerAdapter extends
             });
             //inflating menu from xml resource
             popup.inflate(R.menu.menu_item_schedule);
+
+            popup.getMenu().findItem(R.id.edit).setVisible(false);
 
             //displaying the popup
             popup.show();

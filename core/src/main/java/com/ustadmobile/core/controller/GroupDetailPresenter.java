@@ -41,7 +41,7 @@ public class GroupDetailPresenter extends UstadBaseController<GroupDetailView> {
         groupDao = repository.getPersonGroupDao();
         //Get or create group Uid
 
-        if(arguments.contains(GROUP_UID)){
+        if(arguments.containsKey(GROUP_UID)){
             currentGroupUid = (long) arguments.get(GROUP_UID);
         }
 
