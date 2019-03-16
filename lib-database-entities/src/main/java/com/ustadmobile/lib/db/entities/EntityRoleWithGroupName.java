@@ -5,6 +5,10 @@ public class EntityRoleWithGroupName extends EntityRole {
     String groupName;
     String entityName;
     String entityType;
+    String roleName;
+    String clazzName;
+    String locationName;
+    String personName;
 
     public String getGroupName() {
         return groupName;
@@ -28,5 +32,37 @@ public class EntityRoleWithGroupName extends EntityRole {
 
     public void setEntityType(String entityType) {
         this.entityType = entityType;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getClazzName() {
+        return clazzName;
+    }
+
+    public void setClazzName(String clazzName) {
+        this.clazzName = clazzName;
+    }
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+
+    public String getPersonName() {
+        return personName;
+    }
+
+    public void setPersonName(String personName) {
+        this.personName = personName;
     }
 }

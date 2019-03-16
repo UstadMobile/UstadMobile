@@ -10,6 +10,8 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 import static com.ustadmobile.core.db.dao.RoleDao.SELECT_ACCOUNT_IS_ADMIN;
 
 @UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
@@ -27,6 +29,9 @@ public abstract class RoleDao implements SyncableDao<Role, RoleDao> {
 
     @UmQuery("SELECT * FROM Role WHERE roleActive = 1")
     public abstract UmProvider<Role> findAllActiveRoles();
+
+    @UmQuery("SELECT * FROM Role WHERE roleActive = 1")
+    public abstract UmLiveData<List<Role>> findAllActiveRolesLive();
 
     @UmQuery("UPDATE Role SET roleActive = 0 WHERE roleUid = :uid")
     public abstract void inactiveRole(long uid);

@@ -14,6 +14,10 @@ import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName;
 
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 
+import sun.nio.cs.US_ASCII;
+
+import static com.ustadmobile.core.view.RoleAssignmentDetailView.ENTITYROLE_UID;
+
 /**
  * Presenter for RoleAssignmentList view
  **/
@@ -40,9 +44,20 @@ public class RoleAssignmentListPresenter extends UstadBaseController<RoleAssignm
         super.onCreate(savedState);
 
         //Get provider 
-        umProvider = providerDao.findAllRoleAssignments();
+        umProvider = providerDao.findAllActiveRoleAssignments();
         view.setListProvider(umProvider);
 
+    }
+
+    public void handleEditRoleAssignment(long roleEntityUid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ENTITYROLE_UID, roleEntityUid);
+        impl.go(RoleAssignmentDetailView.VIEW_NAME, args, context);
+    }
+
+    public void handleDeleteRoleAssignment(long roleEntityUid){
+        providerDao.inavtivateEntityRoleAsync(roleEntityUid, null);
     }
 
     public void handleClickPrimaryActionButton() {

@@ -57,17 +57,7 @@ public class GroupListPresenter extends UstadBaseController<GroupListView> {
     }
 
     public void handleDeleteGroup(long uid){
-        repository.getPersonGroupDao().inactivateGroupAsync(uid, new UmCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer result) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-
-            }
-        });
+        providerDao.inactivateGroupAsync(uid,null);
     }
 
     public void handleClickPrimaryActionButton() {

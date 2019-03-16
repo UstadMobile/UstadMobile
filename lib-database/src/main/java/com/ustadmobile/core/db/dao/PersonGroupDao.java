@@ -11,6 +11,8 @@ import com.ustadmobile.lib.db.entities.GroupWithMemberCount;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
 insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
@@ -21,6 +23,12 @@ public abstract class PersonGroupDao implements SyncableDao<PersonGroup, PersonG
 
     @UmQuery("SELECT *, 0 AS memberCount FROM PersonGroup WHERE groupActive = 1")
     public abstract UmProvider<GroupWithMemberCount> findAllActiveGroups();
+
+    @UmQuery("SELECT *, 0 AS memberCount FROM PersonGroup WHERE groupActive = 1")
+    public abstract UmLiveData<List<GroupWithMemberCount>> findAllActiveGroupsLive();
+
+    @UmQuery("SELECT * FROM PersonGroup WHERE groupActive = 1")
+    public abstract UmLiveData<List<PersonGroup>> findAllActivePersonGroupsLive();
 
     @UmQuery("UPDATE PersonGroup SET groupActive = 0 WHERE groupUid = :uid")
     public abstract void inactivateGroupAsync(long uid, UmCallback<Integer> resultObject);

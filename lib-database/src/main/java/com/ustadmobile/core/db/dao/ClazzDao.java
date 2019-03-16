@@ -131,6 +131,9 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmQuery("SELECT * FROM Clazz")
     public abstract List<Clazz> findAllAsList();
 
+    @UmQuery("SELECT * FROM Clazz")
+    public abstract UmLiveData<List<Clazz>> findAllLive();
+
     @UmQuery("SELECT * FROM Clazz WHERE clazzUid = :uid")
     public abstract void findByUidAsync(long uid, UmCallback<Clazz> resultObject);
 

@@ -18,51 +18,35 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <EditText android:id="@+id/activity_role_assignment_detail_name" android:layout_width="0dp"
-        android:layout_height="wrap_content" android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:ems="10"
-        android:hint="@string/groups" android:inputType="text|textPersonName|textCapSentences"
-        android:textColor="@color/text_primary" app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0" app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_detail_appbar"
-        android:autofillHints="@string/groups" />
-
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/activity_role_assignment_detail_add_cl" android:layout_width="0dp"
-        android:layout_height="48dp" android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.0"
+    <RadioGroup
+        android:id="@+id/activity_role_assignment_detail_radio_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_detail_name">
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_assign_to"
 
+        >
 
-        <ImageView android:id="@+id/activity_role_assignment_detail_add_image"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_marginStart="16dp" android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
+        <RadioButton
+            android:id="@+id/activity_role_assignment_detail_user_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/role_individual"
+            android:textSize="12sp" />
 
-        <TextView android:id="@+id/activity_role_assignment_detail_add_text"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_marginStart="8dp" android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp" android:text="@string/role"
-            android:textColor="@color/text_primary"
-            app:layout_constraintStart_toEndOf="@+id/activity_role_assignment_detail_add_image"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </android.support.constraint.ConstraintLayout>
-
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/activity_role_assignment_detail_recyclerview"
-        android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_alignParentBottom="true" android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" android:scrollbars="vertical" android:visibility="visible"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/activity_role_assignment_detail_fab"
-        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_detail_add_cl"
-        tools:layout_editor_absoluteX="16dp" />
+        <RadioButton
+            android:id="@+id/activity_role_assignment_detail_group_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/role_group"
+            android:textSize="12sp" />
+    </RadioGroup>
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
         android:id="@+id/activity_role_assignment_detail_fab" android:layout_width="wrap_content"
@@ -73,5 +57,110 @@
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/activity_role_assignment_assign_to"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_detail_appbar"
+        tools:text="@string/assign_role_to" />
+
+    <TextView
+        android:id="@+id/activity_role_assignment_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/role_group"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_detail_radio_options" />
+
+    <TextView
+        android:id="@+id/activity_role_assignment_role"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/role"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_group_spinner" />
+
+    <TextView
+        android:id="@+id/activity_role_assignment_scope"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/scope_by"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_role_spinner" />
+
+    <TextView
+        android:id="@+id/activity_role_assignmen_assign"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/assign_to"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_scope_spinner" />
+
+    <Spinner
+        android:id="@+id/activity_role_assignment_group_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_group" />
+
+    <Spinner
+        android:id="@+id/activity_role_assignment_role_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_role" />
+
+    <Spinner
+        android:id="@+id/activity_role_assignment_scope_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_scope" />
+
+    <Spinner
+        android:id="@+id/activity_role_assignment_assignee_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_role_assignmen_assign" />
 
 </android.support.constraint.ConstraintLayout>
