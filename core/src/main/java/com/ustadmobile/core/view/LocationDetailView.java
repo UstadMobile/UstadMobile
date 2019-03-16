@@ -11,6 +11,7 @@ public interface LocationDetailView extends UstadView {
     String VIEW_NAME = "LocationDetail";
 
     //Any argument keys:
+    String LOCATION_UID = "LocationUid";
 
     /**
      * Method to finish the screen / view.

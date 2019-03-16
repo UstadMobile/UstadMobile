@@ -100,7 +100,7 @@ public class LocationListActivity extends UstadBaseActivity implements LocationL
     @Override
     public void setListProvider(UmProvider<LocationWithSubLocationCount> listProvider) {
         LocationListRecyclerAdapter recyclerAdapter =
-                new LocationListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new LocationListRecyclerAdapter(DIFF_CALLBACK, mPresenter,this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

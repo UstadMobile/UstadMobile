@@ -15,6 +15,8 @@ import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount;
 
+import static com.ustadmobile.core.view.LocationDetailView.LOCATION_UID;
+
 /**
  * Presenter for LocationList view
  **/
@@ -41,7 +43,7 @@ public class LocationListPresenter extends UstadBaseController<LocationListView>
         super.onCreate(savedState);
 
         //Get provider 
-        umProvider = providerDao.findAllTopLocationsWithCount();
+        umProvider = providerDao.findAllLocationsWithCount();
         view.setListProvider(umProvider);
 
     }
@@ -53,5 +55,15 @@ public class LocationListPresenter extends UstadBaseController<LocationListView>
         impl.go(LocationDetailView.VIEW_NAME, args, context);
     }
 
+    public void handleClickEditLocation(long uid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(LOCATION_UID, uid);
+        impl.go(LocationDetailView.VIEW_NAME, args, context);
+    }
+
+    public void handleDeleteLocation(long uid){
+        providerDao.inactivateLocationAsync(uid, null);
+    }
 
 }

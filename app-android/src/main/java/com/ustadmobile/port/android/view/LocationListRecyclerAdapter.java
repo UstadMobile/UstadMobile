@@ -47,6 +47,17 @@ public class LocationListRecyclerAdapter extends
         TextView desc = holder.itemView.findViewById(R.id.item_title_with_desc_and_dots_desc);
         AppCompatImageView menu =
                 holder.itemView.findViewById(R.id.item_title_with_desc_and_dots_dots);
+
+        title.setText(entity.getTitle());
+        int subLocationCount = entity.getSubLocations();
+        String entitiesString = theActivity.getText(R.string.sub_locations).toString();
+        if(subLocationCount == 1){
+            entitiesString = theActivity.getText(R.string.sub_location).toString();
+        }
+
+        desc.setText(subLocationCount + " " + entitiesString);
+
+        holder.itemView.setOnClickListener(v -> mPresenter.handleClickEditLocation(entity.getLocationUid()));
         //Options to Edit/Delete every schedule in the list
         menu.setOnClickListener((View v) -> {
             //creating a popup menu
@@ -55,9 +66,10 @@ public class LocationListRecyclerAdapter extends
             popup.setOnMenuItemClickListener(item -> {
                 int i = item.getItemId();
                 if (i == R.id.edit) {
-
+                    mPresenter.handleClickEditLocation(entity.getLocationUid());
                     return true;
                 } else if (i == R.id.delete) {
+                    mPresenter.handleDeleteLocation(entity.getLocationUid());
 
                     return true;
                 } else {
@@ -83,10 +95,12 @@ public class LocationListRecyclerAdapter extends
     protected LocationListRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<LocationWithSubLocationCount> diffCallback,
             LocationListPresenter thePresenter,
+            Activity activity,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theContext = context;
+        theActivity = activity;
     }
 
 

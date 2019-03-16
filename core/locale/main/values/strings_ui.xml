@@ -589,6 +589,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
     <string name="add_edit_location">Add\/Edit location</string>
     <string name="sub_locations">sub locations</string>
+    <string name="sub_location">sub location</string>
     <string name="add_location">Add location</string>
     <string name="location_title">Location title</string>
     <string name="parent_location">Parent location</string>

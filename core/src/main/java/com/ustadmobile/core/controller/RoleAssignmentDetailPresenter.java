@@ -273,8 +273,8 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         }
         if(originalEntityRole.getErEntityUid() != 0){
             long entityUid = originalEntityRole.getErEntityUid();
-            if(roleIdToPosition.containsKey(entityUid)){
-                selectedPosition = roleIdToPosition.get(entityUid);
+            if(clazzIdToPosition.containsKey(entityUid)){
+                selectedPosition = clazzIdToPosition.get(entityUid);
             }
         }
 
@@ -301,8 +301,8 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         }
         if(originalEntityRole.getErEntityUid() != 0){
             long entityUid = originalEntityRole.getErEntityUid();
-            if(roleIdToPosition.containsKey(entityUid)){
-                selectedPosition = roleIdToPosition.get(entityUid);
+            if(peopleIdToPosition.containsKey(entityUid)){
+                selectedPosition = peopleIdToPosition.get(entityUid);
             }
         }
 
