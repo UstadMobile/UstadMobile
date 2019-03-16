@@ -20,8 +20,6 @@ public class DownloadJobItem {
 
     private long djiDjUid;
 
-    private long djiContentEntryFileUid;
-
     private long djiContainerUid;
 
     private long downloadedSoFar;
@@ -42,17 +40,11 @@ public class DownloadJobItem {
 
     private int numAttempts;
 
+    private long djiParentDjiUid;
+
 
     public DownloadJobItem() {
 
-    }
-
-    @Deprecated
-    public DownloadJobItem(DownloadJob downloadJob, DownloadSetItem downloadSetItem,
-                           ContentEntryFile contentEntryFile) {
-        this.djiDjUid = downloadJob.getDjUid();
-        this.djiDsiUid = downloadSetItem.getDsiUid();
-        this.djiContentEntryFileUid = contentEntryFile.getContentEntryFileUid();
     }
 
     public DownloadJobItem(DownloadJob downloadJob,DownloadSetItem downloadSetItem,
@@ -159,14 +151,13 @@ public class DownloadJobItem {
     }
 
 
-    @Deprecated
-
-    public long getDjiContentEntryFileUid() {
-        return djiContentEntryFileUid;
+    public long getDjiParentDjiUid() {
+        return djiParentDjiUid;
     }
 
-    @Deprecated
-    public void setDjiContentEntryFileUid(long djiContentEntryFileUid) {
-        this.djiContentEntryFileUid = djiContentEntryFileUid;
+    public void setDjiParentDjiUid(long djiParentDjiUid) {
+        this.djiParentDjiUid = djiParentDjiUid;
     }
+
+
 }

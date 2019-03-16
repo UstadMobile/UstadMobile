@@ -5,6 +5,8 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
+import com.ustadmobile.lib.db.entities.ContentEntryStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;

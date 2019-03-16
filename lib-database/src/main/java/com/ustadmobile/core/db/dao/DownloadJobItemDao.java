@@ -92,6 +92,12 @@ public abstract class DownloadJobItemDao {
     @UmInsert
     public abstract void insert(List<DownloadJobItem> jobRunItems);
 
+
+    @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
+            "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
+            "WHERE DownloadJobItem.djiUid = :djiUid")
+    public abstract DownloadJobItemWithDownloadSetItem findByUidWithDownloadSetItem(long djiUid);
+
     /**
      * Insert a single DownloadJobItem
      *
@@ -194,4 +200,8 @@ public abstract class DownloadJobItemDao {
             "LIMIT 1")
     public abstract UmLiveData<List<DownloadJobItemWithDownloadSetItem>> findNextDownloadJobItems();
 
+    @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
+            "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
+            "WHERE DownloadSetItem.dsiContentEntryUid = :contentEntryUid")
+    public abstract DownloadJobItemWithDownloadSetItem findByContentEntryUid(long contentEntryUid);
 }

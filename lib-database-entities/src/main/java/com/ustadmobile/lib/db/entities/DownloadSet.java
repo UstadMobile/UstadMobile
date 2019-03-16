@@ -25,7 +25,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class DownloadSet {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int dsUid;
+    private long dsUid;
 
     private String destinationDir;
 
@@ -37,11 +37,15 @@ public class DownloadSet {
 
     }
 
-    public int getDsUid() {
+    public DownloadSet(ContentEntry rootContentEntry) {
+        this.dsRootContentEntryUid = rootContentEntry.getContentEntryUid();
+    }
+
+    public long getDsUid() {
         return dsUid;
     }
 
-    public void setDsUid(int dsUid) {
+    public void setDsUid(long dsUid) {
         this.dsUid = dsUid;
     }
 

@@ -50,11 +50,6 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
     @UmQuery("UPDATE ContentEntryStatus SET downloadStatus = :downloadStatus WHERE cesUid = :contentEntryUid")
     public abstract void updateDownloadStatus(long contentEntryUid, int downloadStatus);
 
-//    @UmQuery("UPDATE ContentEntryStatus SET " +
-//            "totalSize = 42 " +
-//            "WHERE cesUid IN :updateList")
-//    public abstract void updateItems(List<Long> updateList);
-
     @UmQuery("SELECT * FROM ContentEntryStatus WHERE invalidated")
     public abstract List<ContentEntryStatus> findAllInvalidated();
 
