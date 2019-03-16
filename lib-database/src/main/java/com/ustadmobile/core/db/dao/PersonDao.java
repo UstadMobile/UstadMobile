@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
@@ -52,6 +53,26 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmUpdate
     public abstract void update(Person entity);
+
+    @UmInsert
+    public abstract long insertAuditLog(AuditLog entity);
+
+    public  void createAuditLog(long toPersonUid, long fromPersonUid){
+        AuditLog auditLog = new AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid);
+
+        insertAuditLog(auditLog);
+
+    }
+
+    public void insertPerson(Person entity, long loggedInPersonUid){
+        long personUid = insert(entity);
+        createAuditLog(personUid, loggedInPersonUid);
+    }
+
+    public void updatePerson(Person entity, long loggedInPersonUid){
+        update(entity);
+        createAuditLog(entity.getPersonUid(), loggedInPersonUid);
+    }
 
     @UmQuery("SELECT * FROM Person where active = 1")
     public abstract UmLiveData<List<Person>> findAllActiveLive();
