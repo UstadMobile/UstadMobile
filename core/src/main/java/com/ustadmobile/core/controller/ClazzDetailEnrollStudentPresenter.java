@@ -6,6 +6,8 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.PersonGroupDao;
+import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -15,6 +17,8 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
+import com.ustadmobile.lib.db.entities.PersonGroup;
+import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import java.util.Hashtable;
@@ -24,6 +28,7 @@ import java.util.Map;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON_TYPE;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
+import static com.ustadmobile.core.view.GroupDetailView.GROUP_UID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 
@@ -38,9 +43,12 @@ import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_
 public class ClazzDetailEnrollStudentPresenter extends
         CommonHandlerPresenter<ClazzDetailEnrollStudentView> {
 
-    private long currentClazzUid = -1L;
-    private int currentRole = -1;
+    private long currentClazzUid = 0;
+    private int currentRole = 0;
     private UmProvider<PersonWithEnrollment> personWithEnrollmentUmProvider;
+
+    //PersonGroup enrollment
+    private long groupUid = 0;
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
@@ -58,6 +66,9 @@ public class ClazzDetailEnrollStudentPresenter extends
             currentRole = (int) arguments.get(ARG_NEW_PERSON_TYPE);
         }
 
+        if (arguments.containsKey(GROUP_UID)) {
+            groupUid = (long) arguments.get(GROUP_UID);
+        }
     }
 
     /**
@@ -74,9 +85,13 @@ public class ClazzDetailEnrollStudentPresenter extends
         if(currentRole == ClazzMember.ROLE_TEACHER){
             personWithEnrollmentUmProvider = repository.getClazzMemberDao()
                     .findAllEligibleTeachersWithEnrollmentForClassUid(currentClazzUid);
-        }else{
+        }else if(currentRole == ClazzMember.ROLE_STUDENT){
             personWithEnrollmentUmProvider = repository.getClazzMemberDao()
                     .findAllStudentsWithEnrollmentForClassUid(currentClazzUid);
+        }else if(groupUid != 0){
+            //PersonGroup enrollmnet
+            personWithEnrollmentUmProvider =
+                    repository.getPersonDao().findAllPeopleWithEnrollment();
         }
 
         setProviderToView();
@@ -97,10 +112,11 @@ public class ClazzDetailEnrollStudentPresenter extends
      * 3. Go to PersonEdit for that person.
      *
      */
-    public void handleClickEnrollNewStudent(){
+    public void handleClickEnrollNewPerson(){
         //Goes to PersonEditActivity with currentClazzUid passed as argument
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Person newPerson = new Person();
+        newPerson.setActive(false);
         PersonDao personDao = repository.getPersonDao();
         PersonCustomFieldDao personFieldDao =
                 repository.getPersonCustomFieldDao();
@@ -135,20 +151,12 @@ public class ClazzDetailEnrollStudentPresenter extends
                     }
 
                     @Override
-                    public void onFailure(Throwable exception) {
-                        System.out.println("ClazzDetailEnrollStudentPresenter - " +
-                                "findAllCustomFields FAILURE");
-                        exception.printStackTrace();
-                    }
+                    public void onFailure(Throwable exception) {exception.printStackTrace();}
                 });
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-                System.out.println("ClazzDetailEnrollStudentPresenter - " +
-                        "Inserting new blank student - FAILURE");
-                exception.printStackTrace();
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
 
 
@@ -189,8 +197,57 @@ public class ClazzDetailEnrollStudentPresenter extends
      * @param enrolled  The enrolled status. True for enrolled, False for un-enrolled.
      */
     private void handleEnrollChanged(PersonWithEnrollment person, boolean enrolled){
-        System.out.println("handleEnrollChanged : " + person.getFirstNames() + " " +
-            person.getLastName() + " is to be " + enrolled);
+
+        if(groupUid != 0){
+            //PersonGroup enrollment.
+            PersonGroupMemberDao groupMemberDao = repository.getPersonGroupMemberDao();
+
+            groupMemberDao.findMemberByGroupAndPersonAsync(groupUid, person.getPersonUid(),
+                    new UmCallback<PersonGroupMember>() {
+                @Override
+                public void onSuccess(PersonGroupMember existingGroupMember) {
+
+
+                    if (enrolled){
+                        if(existingGroupMember == null){
+                            //Create the PersonGroupMember
+                            PersonGroupMember newGroupMember = new PersonGroupMember();
+                            newGroupMember.setGroupMemberGroupUid(groupUid);
+                            newGroupMember.setGroupMemberPersonUid(person.getPersonUid());
+                            newGroupMember.setGroupMemberActive(true);
+                            groupMemberDao.insertAsync(newGroupMember, new UmCallback<Long>() {
+                                @Override
+                                public void onSuccess(Long result) {
+                                    newGroupMember.setGroupMemberUid(result);
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {exception.printStackTrace();}
+                            });
+
+                        }else {
+                            if (!existingGroupMember.isGroupMemberActive()){
+                                existingGroupMember.setGroupMemberActive(true);
+                                groupMemberDao.update(existingGroupMember);
+                            }
+                            //else let it be
+                        }
+
+                    }else{
+                        //if already enrolled, disable ClazzMember.
+                        if(existingGroupMember != null){
+                            existingGroupMember.setGroupMemberActive(false);
+                            groupMemberDao.update(existingGroupMember);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {exception.printStackTrace();}
+            });
+
+            return;
+        }
 
         clazzMemberDao.findByPersonUidAndClazzUidAsync(person.getPersonUid(), currentClazzUid,
                 new UmCallback<ClazzMember>() {
@@ -244,8 +301,6 @@ public class ClazzDetailEnrollStudentPresenter extends
                 exception.printStackTrace();
             }
         });
-
-
     }
 
     /**

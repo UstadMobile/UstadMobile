@@ -151,7 +151,12 @@ public class GroupDetailActivity extends UstadBaseActivity implements GroupDetai
             }
         }
         String finalGroupName = groupName;
-        runOnUiThread(() -> title.setText(finalGroupName));
+        runOnUiThread(() -> {
+            title.setText(finalGroupName);
+            if(!finalGroupName.isEmpty()){
+                toolbar.setTitle(finalGroupName);
+            }
+        });
 
     }
 

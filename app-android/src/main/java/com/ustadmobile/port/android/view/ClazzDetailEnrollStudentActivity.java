@@ -23,6 +23,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.GroupDetailView.GROUP_UID;
 
 /**
  * Clazz detail Enroll Student - Enrollment activity.
@@ -44,6 +45,9 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
     private long currentClazzUid;
     private int currentRole;
+
+    //PersonGroup enrollment
+    private long groupUid;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -71,11 +75,16 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
         //Get the clazz Uid from the arguments
         if(getIntent().hasExtra(ARG_CLAZZ_UID)){
-            currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, -1L);
+            currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0);
         }
 
         if(getIntent().hasExtra(ARG_NEW_PERSON_TYPE)){
-            currentRole = getIntent().getIntExtra(ARG_NEW_PERSON_TYPE, -1);
+            currentRole = getIntent().getIntExtra(ARG_NEW_PERSON_TYPE, 0);
+        }
+
+        //PersonGroup enrollment
+        if(getIntent().hasExtra(GROUP_UID)){
+            groupUid = getIntent().getLongExtra(GROUP_UID, 0);
         }
 
         Button enrollNewClazzMemberButton =
@@ -84,8 +93,13 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
         if(currentRole == ClazzMember.ROLE_TEACHER){
             toolbar.setTitle(getText(R.string.add_teacher));
             enrollNewClazzMemberButton.setText(getText(R.string.enroll_new_teacher));
-        }else{
+        }else if(currentRole == ClazzMember.ROLE_STUDENT){
             toolbar.setTitle(getText(R.string.add_student));
+            enrollNewClazzMemberButton.setText(getText(R.string.enroll_new_student));
+        }else if(groupUid != 0){
+            //Add person to group
+            toolbar.setTitle(R.string.enroll_group_member);
+            enrollNewClazzMemberButton.setText(getText(R.string.enroll_new_group_member));
         }
 
         //RecyclerView:
@@ -101,7 +115,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
         //Enroll new student
         Button newStudentButton = findViewById(R.id.activity_clazz_Detail_enroll_student_new);
-        newStudentButton.setOnClickListener(v -> mPresenter.handleClickEnrollNewStudent());
+        newStudentButton.setOnClickListener(v -> mPresenter.handleClickEnrollNewPerson());
 
         //FAB
         FloatingTextButton fab = findViewById(R.id.activity_clazz_detail_enroll_student_fab_done);

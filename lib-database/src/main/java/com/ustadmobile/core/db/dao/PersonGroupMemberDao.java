@@ -42,6 +42,10 @@ public abstract class PersonGroupMemberDao implements SyncableDao<PersonGroupMem
             " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid")
     public abstract List<Person> findPersonByGroupUid(long groupUid);
 
+    @UmQuery("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid AND " +
+            " groupMemberPersonUid = :personUid ")
+    public abstract void findMemberByGroupAndPersonAsync(long groupUid, long personUid,
+                                                    UmCallback<PersonGroupMember> resultObject);
 
     @UmQuery("UPDATE PersonGroupMember SET groupMemberActive = 0 " +
             " WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid")

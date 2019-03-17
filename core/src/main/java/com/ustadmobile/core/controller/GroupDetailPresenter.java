@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ClazzDetailEnrollStudentView;
 import com.ustadmobile.core.view.GroupDetailView;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
@@ -133,7 +134,9 @@ public class GroupDetailPresenter extends UstadBaseController<GroupDetailView> {
     public void handleClickAddStudent(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        //TODO: Go to some place to assign new students.
+        args.put(GROUP_UID, currentGroupUid);
+        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, context);
+
     }
 
     public void handleClickStudent(long uid){
