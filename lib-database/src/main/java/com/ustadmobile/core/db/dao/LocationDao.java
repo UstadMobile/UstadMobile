@@ -74,8 +74,12 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     @UmQuery("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0")
     public abstract UmProvider<LocationWithSubLocationCount> findAllTopLocationsWithCount();
 
-    @UmQuery("SELECT *, 0 AS subLocations FROM Location")
+    @UmQuery("SELECT *, " +
+            " (SELECT COUNT(*) FROM Location WHERE Location.parentLocationUid = LOC.locationUid) " +
+            " AS subLocations  " +
+            "FROM Location AS LOC")
     public abstract UmProvider<LocationWithSubLocationCount> findAllLocationsWithCount();
+
 
     @UmQuery("UPDATE Location SET locationActive = 0 WHERE locationUid = :uid")
     public abstract void inactivateLocationAsync(long uid, UmCallback<Integer> resultObject);

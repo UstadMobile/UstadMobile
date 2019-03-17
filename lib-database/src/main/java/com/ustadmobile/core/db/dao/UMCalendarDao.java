@@ -32,7 +32,11 @@ public abstract class UMCalendarDao implements SyncableDao<UMCalendar, UMCalenda
             " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY )
     public abstract UmProvider<UMCalendar> findAllHolidays();
 
-    @UmQuery("SELECT * , 0 AS numEntries FROM UMCalendar WHERE umCalendarActive = 1 AND " +
+    @UmQuery("SELECT UMCalendar.* ," +
+            " (SELECT COUNT(*) FROM DateRange " +
+            "   WHERE dateRangeUMCalendarUid = UMCalendar.umCalendarUid " +
+            "   AND dateRange.dateRangeActive = 1) AS numEntries " +
+            " FROM UMCalendar WHERE umCalendarActive = 1 AND " +
             " umCalendarCategory = " + UMCalendar.CATEGORY_HOLIDAY )
     public abstract UmProvider<UMCalendarWithNumEntries> findAllHolidaysWithEntriesCount();
 

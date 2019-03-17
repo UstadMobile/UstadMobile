@@ -222,7 +222,17 @@ public class ClazzEditPresenter
      */
     public void handleClickDone() {
         mUpdatedClazz.setClazzActive(true);
+        repository.getLocationDao().findByUidAsync(mUpdatedClazz.getClazzLocationUid(), new UmCallback<Location>() {
+            @Override
+            public void onSuccess(Location result) {
+                result.setTitle(mUpdatedClazz.getClazzName() + "'s default location");
+                result.setLocationActive(true);
+                repository.getLocationDao().update(result);
+            }
 
+            @Override
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
+        });
         clazzDao.updateAsync(mUpdatedClazz, new UmCallback<Integer>(){
             @Override
             public void onSuccess(Integer result) {

@@ -55,8 +55,7 @@ public class RoleListRecyclerAdapter extends
         assert entity != null;
         title.setText(entity.getRoleName());
         long rolePermissions = entity.getRolePermissions();
-        //TODO: Get count from rolePermissions
-        int count = 0;
+        int count = Long.bitCount(rolePermissions);
         String permissionString = theActivity.getText(R.string.permissions).toString();
         if(count == 1){
             permissionString = theActivity.getText(R.string.permission).toString();
