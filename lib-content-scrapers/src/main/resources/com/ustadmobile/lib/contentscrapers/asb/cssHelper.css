@@ -1,0 +1,4 @@
+div#centered img{
+    max-width: 90vh !important;
+    max-height: 90vh !important;
+}

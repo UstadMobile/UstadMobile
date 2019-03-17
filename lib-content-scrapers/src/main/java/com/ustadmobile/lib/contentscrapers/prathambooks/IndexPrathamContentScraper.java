@@ -17,9 +17,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -31,14 +33,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ustadmobile.lib.contentscrapers.ContentScraperUtil.deleteETagOrModified;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 
@@ -131,7 +135,7 @@ public class IndexPrathamContentScraper {
 
     private void downloadPrathamContentList(URL contentUrl, String cookie, File destinationDir) throws URISyntaxException, IOException {
 
-        BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
+        BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), UTF_ENCODING), BooksResponse.class);
 
         if (contentBooksList.data.size() == 0) {
             return;
@@ -176,7 +180,30 @@ public class IndexPrathamContentScraper {
                 }
                 try {
                     FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
-                    File tmpFolder = ShrinkerUtil.shrinkEpub(content);
+                    ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+                    options.styleElementHelper = styleElement -> {
+                        String text = styleElement.text();
+                        if (text.startsWith("@font-face") || text.startsWith(".english")) {
+                            return ShrinkerUtil.STYLE_OUTSOURCE_TO_LINKED_CSS;
+                        } else {
+                            return ShrinkerUtil.STYLE_DROP;
+                        }
+                    };
+                    options.editor = document -> {
+                        
+                        Elements elements = document.select("p");
+                        List<Element> elementsToRemove = new ArrayList<>();
+                        for (Element element : elements) {
+                            if (element.text().isEmpty()) {
+                                elementsToRemove.add(element);
+                            } else {
+                                element.attr("style", "display: flex; justify-content: center");
+                            }
+                        }
+                        elementsToRemove.forEach(Node::remove);
+                        return document;
+                    };
+                    File tmpFolder = ShrinkerUtil.shrinkEpub(content, options);
                     ContentScraperUtil.insertContainer(containerDao, contentEntry,
                             true, ScraperConstants.MIMETYPE_EPUB,
                             tmpFolder.lastModified(), tmpFolder,
