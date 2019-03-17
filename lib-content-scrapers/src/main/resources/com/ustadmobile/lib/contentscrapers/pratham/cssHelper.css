@@ -1,5 +1,6 @@
 img.responsive_illustration{
     max-width: 100% !important;
+    max-height: 90vh !important
 }
  div.attrib-logo img, div.spp_logo_placeholder img, img.publisher-logo, img.book-levels {
      max-width: 50% !important;
@@ -11,36 +12,36 @@ img.responsive_illustration, div.attrib-logo img, div.spp_logo_placeholder img, 
      margin-right: auto;
 }
 p{
-     display: flex;
-     justify-content: center;
- }
+     display: block;
+     text-align: center;
+}
 
 @media (min-width: 858px) {
     html {
-        font-size: 18px;
+        font-size: 25px;
     }
 }
 
 @media (min-width: 780px) {
     html {
-        font-size: 17px;
+        font-size: 24px;
     }
 }
 
 @media (min-width: 702px) {
     html {
-        font-size: 16px;
+        font-size: 23px;
     }
 }
 
 @media (min-width: 724px) {
     html {
-        font-size: 15px;
+        font-size: 22px;
     }
 }
 
 @media (max-width: 623px) {
     html {
-        font-size: 14px;
+        font-size: 21px;
     }
 }

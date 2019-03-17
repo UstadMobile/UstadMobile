@@ -312,9 +312,10 @@ public class AsbScraper {
                 File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
 
                 if (ContentScraperUtil.fileHasContent(tmpFolder)) {
-                    isUpdated = false;
                     FileUtils.deleteDirectory(tmpFolder);
                 }
+
+                isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
@@ -353,8 +354,6 @@ public class AsbScraper {
                         ScraperConstants.MIMETYPE_EPUB, ePubFile.lastModified(),
                         tmpDir, db, repository, containerDir);
                 ContentScraperUtil.deleteFile(ePubFile);
-                FileUtils.deleteDirectory(tmpDir);
-
 
             } catch (Exception e) {
                 ContentScraperUtil.deleteFile(modifiedFile);

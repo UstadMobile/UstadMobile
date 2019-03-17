@@ -114,14 +114,19 @@ public class EdraakK12ContentScraper implements Runnable {
 
         boolean successful = false;
         try {
+            File content = new File(destinationDirectory.getParentFile(), destinationDirectory.getName());
+            if (ContentScraperUtil.fileHasContent(content)) {
+                FileUtils.deleteDirectory(content);
+            }
             scrapeContent();
             successful = true;
-            File content = new File(destinationDirectory.getParentFile(), destinationDirectory.getName());
+
             if (hasContentUpdated()) {
                 ContentScraperUtil.insertContainer(containerDao, parentEntry, true, ScraperConstants.MIMETYPE_ZIP,
                         content.lastModified(), content, db, repository, containerDirectory);
             }
         } catch (Exception e) {
+            UMLogUtil.logError(ExceptionUtils.getCause(e).getMessage());
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
@@ -162,13 +167,18 @@ public class EdraakK12ContentScraper implements Runnable {
             throw new IllegalArgumentException("Null target component, or target component children are null for id " + response.id);
 
         boolean anyContentUpdated = false;
+        boolean hasVideo = false;
+        boolean hasQuestions = false;
+        String exceptionQuestion = "";
+        String exceptionVideo = "";
 
         List<ContentResponse> questionsList = getQuestionSet(response);
         try {
             anyContentUpdated = downloadQuestions(questionsList, destinationDirectory, scrapUrl);
+            hasQuestions = true;
         } catch (IllegalArgumentException e) {
-            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-            UMLogUtil.logError("The question set was not available for response id " + response.id);
+            exceptionQuestion = ExceptionUtils.getStackTrace(e);
+            UMLogUtil.logDebug("The question set was not available for response id " + response.id);
         }
 
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(response.target_component.component_type)) {
@@ -179,15 +189,23 @@ public class EdraakK12ContentScraper implements Runnable {
                 if (ScraperConstants.ComponentType.VIDEO.getType().equalsIgnoreCase(children.component_type)) {
 
                     try {
-                        anyContentUpdated = downloadVideo(children);
+                        anyContentUpdated = downloadVideo(children) || anyContentUpdated;
+                        hasVideo = true;
                     } catch (IllegalArgumentException e) {
-                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
-                        UMLogUtil.logError("Video was unable to download or had no video for response id" + response.id);
+                        exceptionVideo = ExceptionUtils.getStackTrace(e);
+                        UMLogUtil.logDebug("Video was unable to download or had no video for response id" + response.id);
                     }
                 }
 
             }
         }
+
+        if (!hasVideo && !hasQuestions) {
+            throw new IllegalArgumentException(exceptionQuestion + "\n" +
+                    exceptionVideo +
+                    "\nNo Video or Questions found in this id " + response.id);
+        }
+
 
         File contentJsonFile = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
         if (anyContentUpdated || !ContentScraperUtil.fileHasContent(contentJsonFile)) {
@@ -198,18 +216,6 @@ public class EdraakK12ContentScraper implements Runnable {
             anyContentUpdated = true;
         }
 
-        File tinCanFile = new File(destinationDirectory, TINCAN_FILENAME);
-        if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
-            try {
-                ContentScraperUtil.generateTinCanXMLFile(destinationDirectory, response.title, "ar",
-                        ScraperConstants.INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
-                        scrapUrl.toString().substring(0, scrapUrl.toString().indexOf("component/")) + response.id,
-                        "", "en");
-            } catch (ParserConfigurationException | TransformerException e) {
-                UMLogUtil.logError("Failed to created tin can file for response" + response.id);
-            }
-            anyContentUpdated = true;
-        }
         try {
             String index = UMIOUtils.readToString(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), UTF_ENCODING);
             Document doc = Jsoup.parse(index, UTF_ENCODING);
@@ -223,10 +229,22 @@ public class EdraakK12ContentScraper implements Runnable {
             checkBeforeCopyToFile(ScraperConstants.BOLD_ARABIC_FONT_LINK, new File(destinationDirectory, ARABIC_FONT_BOLD));
             checkBeforeCopyToFile(ScraperConstants.EDRAAK_CSS_LINK, new File(destinationDirectory, EDRAAK_CSS_FILENAME));
             checkBeforeCopyToFile(ScraperConstants.EDRAAK_JS_LINK, new File(destinationDirectory, EDRAAK_JS_FILENAME));
-        } catch (IOException ie) {
-            UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
-        }
 
+            File tinCanFile = new File(destinationDirectory, TINCAN_FILENAME);
+            if (!ContentScraperUtil.fileHasContent(tinCanFile)) {
+
+                ContentScraperUtil.generateTinCanXMLFile(destinationDirectory, response.title, "ar",
+                        ScraperConstants.INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
+                        scrapUrl.toString().substring(0, scrapUrl.toString().indexOf("component/")) + response.id,
+                        "", "en");
+
+                anyContentUpdated = true;
+            }
+
+        } catch (IOException | TransformerException | ParserConfigurationException e) {
+            UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
+            throw new IOException(ExceptionUtils.getCause(e));
+        }
         contentUpdated = anyContentUpdated;
     }
 
@@ -335,8 +353,12 @@ public class EdraakK12ContentScraper implements Runnable {
                     hint.description = ContentScraperUtil.downloadAllResources(hint.description, exerciseDirectory, url);
                 }
 
-                if (exerciseDirectory.listFiles().length > 0) {
-                    exerciseUpdatedCount++;
+                try {
+                    if (exerciseDirectory.listFiles().length > 0) {
+                        exerciseUpdatedCount++;
+                    }
+                } catch (NullPointerException ignored) {
+
                 }
 
             }

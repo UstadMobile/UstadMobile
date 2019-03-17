@@ -171,9 +171,10 @@ public class IndexPrathamContentScraper {
                 File tmpDir = new File(UMFileUtil.stripExtensionIfPresent(content.getPath()));
 
                 if (ContentScraperUtil.fileHasContent(tmpDir)) {
-                    isUpdated = false;
-                    FileUtils.deleteDirectory(content);
+                    FileUtils.deleteDirectory(tmpDir);
                 }
+
+                isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
@@ -214,7 +215,6 @@ public class IndexPrathamContentScraper {
                             tmpFolder.lastModified(), tmpFolder,
                             db, repository, containerDir);
                     ContentScraperUtil.deleteFile(content);
-                    FileUtils.deleteDirectory(tmpFolder);
 
                 } catch (IOException io) {
                     cookie = loginPratham();
