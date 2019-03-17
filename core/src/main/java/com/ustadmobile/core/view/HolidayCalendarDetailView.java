@@ -16,7 +16,6 @@ public interface HolidayCalendarDetailView extends UstadView {
 
     //Any argument keys:
     String ARG_CALENDAR_UID = "CalendarUid";
-    String ARG_DATERANGE_UID = "DateRangeUid";
 
     void setListProvider(UmProvider<DateRange> umProvider);
 

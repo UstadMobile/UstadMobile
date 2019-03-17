@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson;
@@ -36,6 +37,29 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
 
     @UmUpdate
     public abstract void updateAsync(ClazzMember entity, UmCallback<Integer> resultObject);
+
+
+
+    @UmInsert
+    public abstract long insertAuditLog(AuditLog entity);
+
+    public  void createAuditLog(long toPersonUid, long fromPersonUid){
+        AuditLog auditLog = new AuditLog(fromPersonUid, ClazzMember.TABLE_ID, toPersonUid);
+        insertAuditLog(auditLog);
+
+    }
+
+    public void insertClazzMember(ClazzMember entity, long loggedInPersonUid){
+        long personUid = insert(entity);
+        createAuditLog(personUid, loggedInPersonUid);
+    }
+
+    public void updateClazzMember(ClazzMember entity, long loggedInPersonUid){
+        update(entity);
+        createAuditLog(entity.getClazzMemberUid(), loggedInPersonUid);
+    }
+
+
 
     @UmQuery("SELECT * FROM ClazzMember")
     public abstract List<ClazzMember> findAllAsList();

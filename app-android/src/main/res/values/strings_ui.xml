@@ -596,8 +596,40 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
     <string name="changed_by">Changed by</string>
     <string name="audit_log_desc">An audit log is a log of all activities relevant to class management, teachers and students.</string>
-
     <string name="person">Person</string>
+
+    <string name="permission_person_select">View people</string>
+    <string name="permission_person_insert">Add People</string>
+    <string name="permission_person_update">Update People</string>
+    <string name="permission_person_picture_select">View profile pictures</string>
+    <string name="permission_person_picture_insert">Add profile pictures</string>
+    <string name="permission_person_picture_update">Update profile pictures</string>
+
+    <string name="permission_clazz_select">View Classes</string>
+    <string name="permission_clazz_insert">Add Classes</string>
+    <string name="permission_clazz_update">Update Classes</string>
+
+    <string name="permission_clazz_add_teacher">Add teachers to class</string>
+    <string name="permission_clazz_add_student">Add students to class</string>
+
+    <string name="permission_attendance_select">View attendance</string>
+    <string name="permission_attendance_insert">Take attendance</string>
+    <string name="permission_attendance_update">Update attendance</string>
+
+    <string name="permission_activity_select">View class activity</string>
+    <string name="permission_activity_insert">Take class activity</string>
+    <string name="permission_activity_update">Update class activity</string>
+
+    <string name="permission_sel_question_select">View SEL questions</string>
+    <string name="permission_sel_question_insert">Add SEL questions</string>
+    <string name="permission_sel_question_update">Update SEL questions</string>
+
+    <string name="permission_sel_select">View SEL results</string>
+    <string name="permission_sel_insert">Record SEL</string>
+    <string name="permission_sel_update">Update SEL results</string>
+
+
+
 
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>

@@ -9,6 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate;
+import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzAverage;
 import com.ustadmobile.lib.db.entities.ClazzMember;
@@ -139,6 +140,24 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     @UmUpdate
     public abstract void updateAsync(Clazz entity, UmCallback<Integer> resultObject);
+
+    @UmInsert
+    public abstract long insertAuditLog(AuditLog entity);
+
+    public  void createAuditLog(long toPersonUid, long fromPersonUid){
+        AuditLog auditLog = new AuditLog(fromPersonUid, Clazz.TABLE_ID, toPersonUid);
+        insertAuditLog(auditLog);
+    }
+
+    public void insertClazz(Clazz entity, long loggedInPersonUid){
+        long personUid = insert(entity);
+        createAuditLog(personUid, loggedInPersonUid);
+    }
+
+    public void updateClazz(Clazz entity, long loggedInPersonUid){
+        update(entity);
+        createAuditLog(entity.getClazzUid(), loggedInPersonUid);
+    }
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE :personUid in " +

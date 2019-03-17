@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Hashtable;
 
+import com.ustadmobile.core.view.AddDateRangeDialogView;
 import com.ustadmobile.core.view.HolidayCalendarDetailView;
 
 import com.ustadmobile.core.db.UmProvider;
@@ -18,8 +19,8 @@ import com.ustadmobile.lib.db.entities.UMCalendar;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 
+import static com.ustadmobile.core.view.AddDateRangeDialogView.DATERANGE_UID;
 import static com.ustadmobile.core.view.HolidayCalendarDetailView.ARG_CALENDAR_UID;
-import static com.ustadmobile.core.view.HolidayCalendarDetailView.ARG_DATERANGE_UID;
 
 /**
  * Presenter for HolidayCalendarDetail view
@@ -123,16 +124,16 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
     public void handleAddDateRange(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        //TODO:
-        //impl.go(AddDateRangeDialogView.VIEW_NAME, args, context);
+        args.put(HolidayCalendarDetailView.ARG_CALENDAR_UID, currentCalendarUid);
+        impl.go(AddDateRangeDialogView.VIEW_NAME, args, context);
     }
 
     public void handleEditRange(long rangeUid){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
-        args.put(ARG_DATERANGE_UID, rangeUid);
-        //TODO:
-        //impl.go(AddDateRangeDialogView.VIEW_NAME, args, context);
+        args.put(DATERANGE_UID, rangeUid);
+        args.put(ARG_CALENDAR_UID, currentCalendarUid);
+        impl.go(AddDateRangeDialogView.VIEW_NAME, args, context);
     }
 
     public void handleDeleteRange(long rangeUid){
@@ -141,14 +142,11 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
             public void onSuccess(DateRange result) {
                 if (result != null){
                     result.setDateRangeActive(false);
-
                 }
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
     }
 
@@ -164,9 +162,7 @@ public class HolidayCalendarDetailPresenter extends UstadBaseController<HolidayC
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
 
     }

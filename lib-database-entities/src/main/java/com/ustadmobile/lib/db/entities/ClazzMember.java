@@ -7,17 +7,20 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
+import static com.ustadmobile.lib.db.entities.ClazzMember.TABLE_ID;
+
 /**
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
  * or a student. Each member has a joining date, and a leaving date.
  */
-@UmEntity(tableId = 31)
+@UmEntity(tableId = TABLE_ID)
 public class ClazzMember {
 
     public static final int ROLE_STUDENT = 1;
 
     public static final int ROLE_TEACHER = 2;
 
+    public static final int TABLE_ID = 31;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long clazzMemberUid;

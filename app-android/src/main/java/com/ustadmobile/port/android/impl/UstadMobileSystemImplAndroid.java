@@ -72,6 +72,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AddActivityChangeDialogView;
+import com.ustadmobile.core.view.AddDateRangeDialogView;
 import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
 import com.ustadmobile.core.view.AddScheduleDialogView;
@@ -325,6 +326,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(LocationDetailView.VIEW_NAME, LocationDetailActivity.class);
         viewNameToAndroidImplMap.put(AuditLogSelectionView.VIEW_NAME, AuditLogSelectionActivity.class);
         viewNameToAndroidImplMap.put(AuditLogListView.VIEW_NAME, AuditLogListActivity.class);
+        viewNameToAndroidImplMap.put(AddDateRangeDialogView.VIEW_NAME, AddDateRangeDialogFragment.class);
 
     }
 

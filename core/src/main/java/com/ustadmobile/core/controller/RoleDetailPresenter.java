@@ -28,6 +28,15 @@ public class RoleDetailPresenter extends UstadBaseController<RoleDetailView> {
     private Role updatedRole;
     RoleDao roleDao;
 
+    public long getPermissionField() {
+        return permissionField;
+    }
+
+    public void setPermissionField(long permissionField) {
+        this.permissionField = permissionField;
+    }
+
+    private long permissionField = 0;
 
     public RoleDetailPresenter(Object context, Hashtable arguments, RoleDetailView view) {
         super(context, arguments, view);
@@ -110,6 +119,8 @@ public class RoleDetailPresenter extends UstadBaseController<RoleDetailView> {
     public void handleClickDone() {
 
         updatedRole.setRoleActive(true);
+        updatedRole.setRolePermissions(permissionField);
+
         roleDao.updateAsync(updatedRole, new UmCallback<Integer>() {
             @Override
             public void onSuccess(Integer result) {
@@ -117,10 +128,10 @@ public class RoleDetailPresenter extends UstadBaseController<RoleDetailView> {
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
 
     }
+
+
 }

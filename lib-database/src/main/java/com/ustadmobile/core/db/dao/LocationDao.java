@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.LocationWithSubLocationCount;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -31,6 +32,26 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
 
     @UmUpdate
     public abstract void updateAsync(Location entity, UmCallback<Integer> resultObject);
+
+    @UmInsert
+    public abstract long insertAuditLog(AuditLog entity);
+
+    public  void createAuditLog(long toPersonUid, long fromPersonUid){
+        AuditLog auditLog = new AuditLog(fromPersonUid, Location.TABLE_ID, toPersonUid);
+
+        insertAuditLog(auditLog);
+
+    }
+
+    public void insertLocation(Location entity, long loggedInPersonUid){
+        long personUid = insert(entity);
+        createAuditLog(personUid, loggedInPersonUid);
+    }
+
+    public void updateLocation(Location entity, long loggedInPersonUid){
+        update(entity);
+        createAuditLog(entity.getLocationUid(), loggedInPersonUid);
+    }
 
     @UmQuery("SELECT * FROM Location WHERE locationUid = :uid")
     public abstract Location findByUid(long uid);

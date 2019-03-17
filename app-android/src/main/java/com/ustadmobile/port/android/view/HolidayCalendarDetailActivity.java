@@ -128,7 +128,7 @@ public class HolidayCalendarDetailActivity extends UstadBaseActivity implements 
     @Override
     public void setListProvider(UmProvider<DateRange> listProvider) {
         HolidayCalendarDetailRecyclerAdapter recyclerAdapter =
-                new HolidayCalendarDetailRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new HolidayCalendarDetailRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

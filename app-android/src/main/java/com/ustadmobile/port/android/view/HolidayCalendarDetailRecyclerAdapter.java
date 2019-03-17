@@ -3,14 +3,13 @@ package com.ustadmobile.port.android.view;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.app.Activity;
 
@@ -19,7 +18,6 @@ import com.ustadmobile.core.controller.HolidayCalendarDetailPresenter;
 
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.DateRange;
-import com.ustadmobile.lib.db.entities.UMCalendar;
 
 public class HolidayCalendarDetailRecyclerAdapter extends
         PagedListAdapter<DateRange,
@@ -52,11 +50,11 @@ public class HolidayCalendarDetailRecyclerAdapter extends
 
         assert entity != null;
         String rangeString =
-                UMCalendarUtil.getPrettyDateSimpleFromLong(entity.getDateRangeFromDate());
+                UMCalendarUtil.getPrettySuperSimpleDateSimpleWithoutYearFromLong(entity.getDateRangeFromDate());
 
         if (entity.getDateRangeToDate() > 0) {
             rangeString = rangeString + " - " +
-                    UMCalendarUtil.getPrettyDateSimpleFromLong(entity.getDateRangeToDate());
+                    UMCalendarUtil.getPrettySuperSimpleDateSimpleWithoutYearFromLong(entity.getDateRangeToDate());
         }
         title.setText(rangeString);
 
@@ -96,9 +94,11 @@ public class HolidayCalendarDetailRecyclerAdapter extends
     protected HolidayCalendarDetailRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<DateRange> diffCallback,
             HolidayCalendarDetailPresenter thePresenter,
+            Activity activity,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
+        theActivity = activity;
         theContext = context;
     }
 
