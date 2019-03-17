@@ -422,14 +422,21 @@ public class TestShrinkerUtils {
             for (Element element : elements) {
                 if (element.text().isEmpty()) {
                     elementsToRemove.add(element);
-                } else {
-                    element.attr("style", "display: flex; justify-content: center");
                 }
             }
             elementsToRemove.forEach(Node::remove);
+            document.head().append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable-no\" />");
             return document;
         };
-        ShrinkerUtil.shrinkEpub(epub, options);
+        options.linkHelper = () -> {
+            try {
+                return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING);
+            } catch (IOException e) {
+                return null;
+            }
+        };
+        File epubFolder = ShrinkerUtil.shrinkEpub(epub, options);
+        ContentScraperUtil.zipDirectory(epubFolder, "fixed.epub", tmpDir);
 
 
     }

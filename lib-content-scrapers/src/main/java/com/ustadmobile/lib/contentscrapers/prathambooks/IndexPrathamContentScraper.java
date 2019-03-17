@@ -190,18 +190,23 @@ public class IndexPrathamContentScraper {
                         }
                     };
                     options.editor = document -> {
-                        
                         Elements elements = document.select("p");
                         List<Element> elementsToRemove = new ArrayList<>();
                         for (Element element : elements) {
                             if (element.text().isEmpty()) {
                                 elementsToRemove.add(element);
-                            } else {
-                                element.attr("style", "display: flex; justify-content: center");
                             }
                         }
                         elementsToRemove.forEach(Node::remove);
+                        document.head().append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable-no\" />");
                         return document;
+                    };
+                    options.linkHelper = () -> {
+                        try {
+                            return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING);
+                        } catch (IOException e) {
+                            return null;
+                        }
                     };
                     File tmpFolder = ShrinkerUtil.shrinkEpub(content, options);
                     ContentScraperUtil.insertContainer(containerDao, contentEntry,
