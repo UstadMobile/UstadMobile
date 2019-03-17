@@ -91,7 +91,7 @@ public class ClazzDetailEnrollStudentPresenter extends
         }else if(groupUid != 0){
             //PersonGroup enrollmnet
             personWithEnrollmentUmProvider =
-                    repository.getPersonDao().findAllPeopleWithEnrollment();
+                    repository.getPersonDao().findAllPeopleWithEnrollmentInGroup(groupUid);
         }
 
         setProviderToView();
