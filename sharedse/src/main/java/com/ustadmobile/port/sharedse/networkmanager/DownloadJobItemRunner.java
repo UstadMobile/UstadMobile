@@ -340,6 +340,8 @@ public class DownloadJobItemRunner implements Runnable {
      * Start downloading a file
      */
     private void startDownload(){
+        UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+                " StartDownload: ContainerUid = " + downloadItem.getDjiContainerUid());
         int attemptsRemaining = 3;
 
         boolean downloaded = false;
@@ -469,9 +471,14 @@ public class DownloadJobItemRunner implements Runnable {
         if(downloaded){
             appDb.getDownloadJobDao().updateBytesDownloadedSoFar(downloadItem.getDjiDjUid(),
                     null);
+            long currentDownloadSpeed = httpDownload != null ? httpDownload.getCurrentDownloadSpeed() : 1;
+            long totalDownloaded = completedEntriesBytesDownloaded.get() +
+                    (httpDownload != null ? httpDownload.getDownloadedSoFar() : 0);
+            long downloadTotalSize = httpDownload != null ? httpDownload.getTotalSize() : 0L;
+
             appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
-                    JobStatus.COMPLETE, httpDownload.getDownloadedSoFar(),
-                    httpDownload.getTotalSize(),httpDownload.getCurrentDownloadSpeed());
+                    JobStatus.COMPLETE, totalDownloaded,
+                    downloadTotalSize, currentDownloadSpeed);
         }
 
         stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);

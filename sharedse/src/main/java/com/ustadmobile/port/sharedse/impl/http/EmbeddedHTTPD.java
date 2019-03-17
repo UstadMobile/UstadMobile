@@ -91,6 +91,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         theMimeTypes.put("xml", "text/xml");
         theMimeTypes.put("txt", "text/plain");
         theMimeTypes.put("webp", "image/webp");
+        theMimeTypes.put("webm", "video/webm");
 
         StringTokenizer st = new StringTokenizer(
                 "css		text/css "+

@@ -1,13 +1,12 @@
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.controller.XapiPackagePresenter;
 import com.ustadmobile.core.impl.UmCallback;
 
 /**
  * Created by mike on 9/13/17.
  */
 
-public interface XapiPackageView extends UstadView{
+public interface XapiPackageContentView extends UstadView, ViewWithErrorNotifier{
 
     String VIEW_NAME = "XapiPackage";
 
@@ -17,8 +16,6 @@ public interface XapiPackageView extends UstadView{
 
     void loadUrl(String url);
 
-    void mountZip(String zipUri, UmCallback<String> callback);
-
-    XapiPackagePresenter getPresenter();
+    void mountContainer(long containerUid, UmCallback<String> callback);
 
 }

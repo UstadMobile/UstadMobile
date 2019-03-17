@@ -265,13 +265,6 @@ public class UMTinCanUtil {
     }
 
     /**
-     * 
-     */
-    public static String generateUUID() {
-        return UMUUID.randomUUID().toString();
-    }
-    
-    /**
      * Given a string that represents a statement result from the GET api
      * of a TinCan endpoint this method will convert them into an array
      * of JSON Objects each representing the individual statements themselves.
@@ -302,29 +295,7 @@ public class UMTinCanUtil {
     }
     
     
-    /**
-     * Go through a given list of statements and provide a String array of
-     * all the distinct registration IDs found 
-     * 
-     * @param stmts Array of JSON objects, each should be an XAPI Statement
-     * @return A String array of registration UUIDs found, 0 length String array if none found.  Not necssarily in the same order.
-     */
-    public static String[] getDistinctRegistrations(JSONObject[] stmts) {
-        Vector resultVector = new Vector();
-        String registration;
-        for(int i = 0; i < stmts.length; i++) {
-            registration = getStatementRegistration(stmts[i]);
-            
-            if(registration != null && resultVector.contains(registration)) {
-                resultVector.addElement(registration);
-            }   
-        }
-        
-        String[] result = new String[resultVector.size()];
-        resultVector.copyInto(result);
-        return result;
-    }
-    
+
     /**
      * Gets the registration from a JSONObject representing an XAPI statement
      * if it has one

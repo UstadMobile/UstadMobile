@@ -61,7 +61,7 @@
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.XapiPackageActivity"
+            android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
