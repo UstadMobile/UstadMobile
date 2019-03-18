@@ -6,7 +6,9 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 
@@ -61,28 +63,6 @@ public abstract class DownloadJobItemDao {
         }
     }
 
-    public static class DownloadJobInfo{
-
-        private int totalDownloadItems;
-
-        private long totalSize;
-
-        public int getTotalDownloadItems() {
-            return totalDownloadItems;
-        }
-
-        public void setTotalDownloadItems(int totalDownloadItems) {
-            this.totalDownloadItems = totalDownloadItems;
-        }
-
-        public long getTotalSize() {
-            return totalSize;
-        }
-
-        public void setTotalSize(long totalSize) {
-            this.totalSize = totalSize;
-        }
-    }
 
     /**
      * Insert a list of DownloadJobItems
@@ -91,6 +71,9 @@ public abstract class DownloadJobItemDao {
      */
     @UmInsert
     public abstract void insert(List<DownloadJobItem> jobRunItems);
+
+    @UmUpdate
+    public abstract int update(DownloadJob downloadJob);
 
     /**
      * Insert a single DownloadJobItem
@@ -162,8 +145,8 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT * FROM DownloadJobItem")
     public abstract List<DownloadJobItem> findAll();
 
-    @UmQuery("SELECT COUNT(*) as totalDownloadItems, SUM(downloadLength) as totalSize FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
-    public abstract DownloadJobInfo getDownloadJobInfoByJobUid(long djiDjUid);
+    @UmQuery("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
+    public abstract int  getTotalDownloadJobItems(long djiDjUid);
 
     @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid, Container.fileSize, " +
             "Container.containerContentEntryUid as contentEntryUid , Container.containerUid " +

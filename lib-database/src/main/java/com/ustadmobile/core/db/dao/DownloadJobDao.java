@@ -123,11 +123,6 @@ public abstract class DownloadJobDao {
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
     public abstract UmLiveData<Boolean> getAnyActiveDownloadJob();
 
-    @UmQuery("UPDATE DownloadJob SET totalBytesToDownload = " +
-            "(SELECT SUM(downloadLength) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +
-            "WHERE djUid = :downloadJobId")
-    public abstract void updateTotalBytesToDownload(long downloadJobId);
-
     @UmQuery("UPDATE DownloadJob SET bytesDownloadedSoFar = " +
             "(SELECT SUM(downloadedSoFar) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +
             "WHERE djUid = :downloadJobId")
