@@ -68,7 +68,7 @@ import static android.os.Looper.getMainLooper;
  * This class provides methods to perform android network related communications.
  * All Bluetooth Low Energy and WiFi direct communications will be handled here.
  * Also, this is maintained as a singleton by all activities binding to NetworkServiceAndroid,
- * which is responsible to call the init method of this class.
+ * which is responsible to call the onCreate method of this class.
  *
  * <p>
  * Use {@link NetworkManagerAndroidBle#startAdvertising()} to start advertising
@@ -414,6 +414,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
             service.addCharacteristic(writeCharacteristic);
             if(gattServerAndroid == null)
+                return;
+
+            if(((BleGattServerAndroid)gattServerAndroid).getGattServer() == null)
                 return;
 
             ((BleGattServerAndroid)gattServerAndroid).getGattServer().addService(service);

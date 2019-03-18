@@ -177,10 +177,6 @@ public abstract class DownloadJobItemDao {
     public abstract List<String> getDestinationFiles(List<Long> djiDsiUids);
 
 
-    @UmQuery("SELECT djiContainerUid FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
-    public abstract List<Long> getContainerUids(List<Long> djiDsiUids);
-
-
     @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
             "LEFT JOIN DownloadSet on DownloadSetItem.dsiDsUid = DownloadSet.dsUid " +

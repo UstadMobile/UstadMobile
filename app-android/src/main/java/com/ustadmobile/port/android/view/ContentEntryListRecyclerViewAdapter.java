@@ -247,7 +247,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             if (oldItem.getThumbnailUrl() != null ? !oldItem.getThumbnailUrl().equals(newItem.getThumbnailUrl()) : newItem.getThumbnailUrl() == null) {
                 return false;
             }
-            if (oldItem.getContentEntryStatus() != null) {
+            if (oldItem.getContentEntryStatus() != null && newItem.getContentEntryStatus() != null) {
 
                 if (oldItem.getContentEntryStatus().getBytesDownloadSoFar() != newItem.getContentEntryStatus().getBytesDownloadSoFar()) {
                     return false;
@@ -259,7 +259,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
 
                 return oldItem.getContentEntryStatus().getTotalSize() == newItem.getContentEntryStatus().getTotalSize();
 
-            } else return newItem.getContentEntryStatus() == null;
+            } else return newItem.getContentEntryStatus() == oldItem.getContentEntryStatus();
         }
     };
 }

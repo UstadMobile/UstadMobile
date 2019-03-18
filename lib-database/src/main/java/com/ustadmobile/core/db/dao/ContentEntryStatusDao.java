@@ -64,4 +64,7 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insertOrAbort(List<ContentEntryStatus> statusList);
 
+    @UmQuery("DELETE FROM ContentEntryStatus WHERE cesUid = :cesUid")
+    public abstract void deleteByFileUids(long cesUid);
+
 }

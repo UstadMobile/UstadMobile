@@ -71,8 +71,6 @@ public abstract class DownloadJobDao {
      *
      * @return A list of all DownloadJob entity objects
      */
-    @UmQuery("SELECT * From DownloadJob")
-    public abstract List<DownloadJob> findAll();
 
     @UmQuery("SELECT * FROM DownloadJob WHERE djUid = :djUid")
     public abstract UmLiveData<DownloadJob>  getJobLive(long djUid);

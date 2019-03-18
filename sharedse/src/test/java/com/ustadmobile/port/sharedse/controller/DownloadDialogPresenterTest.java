@@ -7,8 +7,6 @@ import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;

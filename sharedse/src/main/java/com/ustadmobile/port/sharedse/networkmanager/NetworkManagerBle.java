@@ -557,23 +557,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().
                 findBySetUid(downloadSetUid);
 
-        AtomicBoolean taskRunRef = new AtomicBoolean(false);
-
-        UmObserver<List<DownloadJob>> statusChangeObserver = jobs ->{
-            if(!taskRunRef.get() && jobs.size() == downloadJobs.size()){
-                makeDeleteJobTask(mContext,args).run();
-            }
-            taskRunRef.set(jobs.size() == downloadJobs.size());
-        };
-
-        umAppDatabase.getDownloadJobDao().getJobsLive(JobStatus.CANCELED)
-                .observeForever(statusChangeObserver);
-
-
         for(DownloadJob downloadJob : downloadJobs){
             umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
-                    JobStatus.CANCELED, JobStatus.CANCELLING, JobStatus.CANCELED);
+                    JobStatus.CANCELED, -1, JobStatus.CANCELED);
         }
+
+        makeDeleteJobTask(mContext,args).run();
     }
 
     /**
