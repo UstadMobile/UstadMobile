@@ -36,6 +36,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EDRAAK_CSS_FI
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EDRAAK_JS_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INDEX_HTML;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_CSS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MATERIAL_JS;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON;
@@ -114,20 +115,18 @@ public class EdraakK12ContentScraper implements Runnable {
 
         boolean successful = false;
         try {
-            File content = new File(destinationDirectory.getParentFile(), destinationDirectory.getName());
-            if (ContentScraperUtil.fileHasContent(content)) {
-                FileUtils.deleteDirectory(content);
-            }
             scrapeContent();
             successful = true;
-
             if (hasContentUpdated()) {
                 ContentScraperUtil.insertContainer(containerDao, parentEntry, true, ScraperConstants.MIMETYPE_ZIP,
-                        content.lastModified(), content, db, repository, containerDirectory);
+                        destinationDirectory.lastModified(), destinationDirectory, db, repository, containerDirectory);
+
             }
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getCause(e).getMessage());
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            File lastModified = new File(destinationDirectory.getParentFile(), destinationDirectory.getName() + LAST_MODIFIED_TXT);
+            ContentScraperUtil.deleteFile(lastModified);
         }
 
         queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
@@ -152,6 +151,21 @@ public class EdraakK12ContentScraper implements Runnable {
             urlConnection = (HttpURLConnection) scrapUrl.openConnection();
             urlConnection.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
             response = new GsonBuilder().create().fromJson(IOUtils.toString(urlConnection.getInputStream(), UTF_ENCODING), ContentResponse.class);
+
+            File lastModified = new File(destinationDirectory.getParentFile(), destinationDirectory.getName() + LAST_MODIFIED_TXT);
+            contentUpdated = ContentScraperUtil.isFileContentsUpdated(lastModified, (response.updated != null && !response.updated.isEmpty()) ? response.updated :
+                    (response.created != null && !response.created.isEmpty()) ? response.created :
+                            String.valueOf(System.currentTimeMillis()));
+
+            if (!contentUpdated) {
+                return;
+            }
+
+            if (ContentScraperUtil.fileHasContent(destinationDirectory)) {
+                FileUtils.deleteDirectory(destinationDirectory);
+                destinationDirectory.mkdirs();
+            }
+
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID for url " + scrapUrl.toString(), e.getCause());
         } finally {
@@ -160,13 +174,14 @@ public class EdraakK12ContentScraper implements Runnable {
             }
         }
 
+
         if (!ContentScraperUtil.isImportedComponent(response.component_type))
             throw new IllegalArgumentException("Not an imported content type! for id" + response.id);
 
         if (response.target_component == null || response.target_component.children == null)
             throw new IllegalArgumentException("Null target component, or target component children are null for id " + response.id);
 
-        boolean anyContentUpdated = false;
+
         boolean hasVideo = false;
         boolean hasQuestions = false;
         String exceptionQuestion = "";
@@ -174,7 +189,7 @@ public class EdraakK12ContentScraper implements Runnable {
 
         List<ContentResponse> questionsList = getQuestionSet(response);
         try {
-            anyContentUpdated = downloadQuestions(questionsList, destinationDirectory, scrapUrl);
+            downloadQuestions(questionsList, destinationDirectory, scrapUrl);
             hasQuestions = true;
         } catch (IllegalArgumentException e) {
             exceptionQuestion = ExceptionUtils.getStackTrace(e);
@@ -189,7 +204,7 @@ public class EdraakK12ContentScraper implements Runnable {
                 if (ScraperConstants.ComponentType.VIDEO.getType().equalsIgnoreCase(children.component_type)) {
 
                     try {
-                        anyContentUpdated = downloadVideo(children) || anyContentUpdated;
+                        downloadVideo(children);
                         hasVideo = true;
                     } catch (IllegalArgumentException e) {
                         exceptionVideo = ExceptionUtils.getStackTrace(e);
@@ -208,12 +223,11 @@ public class EdraakK12ContentScraper implements Runnable {
 
 
         File contentJsonFile = new File(destinationDirectory, ScraperConstants.CONTENT_JSON);
-        if (anyContentUpdated || !ContentScraperUtil.fileHasContent(contentJsonFile)) {
+        if (!ContentScraperUtil.fileHasContent(contentJsonFile)) {
             // store the json in a file after modifying image links
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             String jsonString = gson.toJson(response);
             FileUtils.writeStringToFile(contentJsonFile, jsonString, ScraperConstants.UTF_ENCODING);
-            anyContentUpdated = true;
         }
 
         try {
@@ -237,15 +251,12 @@ public class EdraakK12ContentScraper implements Runnable {
                         ScraperConstants.INDEX_HTML, ScraperConstants.MODULE_TIN_CAN_FILE,
                         scrapUrl.toString().substring(0, scrapUrl.toString().indexOf("component/")) + response.id,
                         "", "en");
-
-                anyContentUpdated = true;
             }
 
         } catch (IOException | TransformerException | ParserConfigurationException e) {
             UMLogUtil.logError("Failed to download the necessary files for response id " + response.id);
             throw new IOException(ExceptionUtils.getCause(e));
         }
-        contentUpdated = anyContentUpdated;
     }
 
     private boolean downloadVideo(ContentResponse children) {
@@ -267,9 +278,7 @@ public class EdraakK12ContentScraper implements Runnable {
             try {
                 FileUtils.copyURLToFile(videoUrl, videoFile);
                 ShrinkerUtil.convertVideoToWebM(videoFile, webmFile);
-                if (!videoFile.delete()) {
-                    throw new IOException("Could not delete the video");
-                }
+                ContentScraperUtil.deleteFile(videoFile);
                 return true;
             } catch (IOException e) {
                 throw new IllegalArgumentException("Download Video Malformed url for response");
@@ -335,33 +344,30 @@ public class EdraakK12ContentScraper implements Runnable {
         for (ContentResponse exercise : questionsList) {
 
             File exerciseDirectory = new File(destinationDir, exercise.id);
-            if (ContentScraperUtil.isContentUpdated(ContentScraperUtil.parseServerDate(exercise.updated), exerciseDirectory)) {
+            exerciseDirectory.mkdirs();
 
-                exerciseDirectory.mkdirs();
+            exercise.full_description = ContentScraperUtil.downloadAllResources(exercise.full_description, exerciseDirectory, url);
+            exercise.explanation = ContentScraperUtil.downloadAllResources(exercise.explanation, exerciseDirectory, url);
+            exercise.description = ContentScraperUtil.downloadAllResources(exercise.description, exerciseDirectory, url);
 
-                exercise.full_description = ContentScraperUtil.downloadAllResources(exercise.full_description, exerciseDirectory, url);
-                exercise.explanation = ContentScraperUtil.downloadAllResources(exercise.explanation, exerciseDirectory, url);
-                exercise.description = ContentScraperUtil.downloadAllResources(exercise.description, exerciseDirectory, url);
-
-                if (ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)) {
-                    for (ContentResponse.Choice choice : exercise.choices) {
-                        choice.description = ContentScraperUtil.downloadAllResources(choice.description, exerciseDirectory, url);
-                    }
+            if (ComponentType.MULTICHOICE.getType().equalsIgnoreCase(exercise.component_type)) {
+                for (ContentResponse.Choice choice : exercise.choices) {
+                    choice.description = ContentScraperUtil.downloadAllResources(choice.description, exerciseDirectory, url);
                 }
+            }
 
-                for (ContentResponse.Hint hint : exercise.hints) {
-                    hint.description = ContentScraperUtil.downloadAllResources(hint.description, exerciseDirectory, url);
+            for (ContentResponse.Hint hint : exercise.hints) {
+                hint.description = ContentScraperUtil.downloadAllResources(hint.description, exerciseDirectory, url);
+            }
+
+            try {
+                if (exerciseDirectory.listFiles().length > 0) {
+                    exerciseUpdatedCount++;
                 }
-
-                try {
-                    if (exerciseDirectory.listFiles().length > 0) {
-                        exerciseUpdatedCount++;
-                    }
-                } catch (NullPointerException ignored) {
-
-                }
+            } catch (NullPointerException ignored) {
 
             }
+
 
         }
 
