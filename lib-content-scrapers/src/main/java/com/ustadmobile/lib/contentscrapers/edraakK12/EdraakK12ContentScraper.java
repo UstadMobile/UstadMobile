@@ -123,7 +123,7 @@ public class EdraakK12ContentScraper implements Runnable {
 
             }
         } catch (Exception e) {
-            UMLogUtil.logError(ExceptionUtils.getCause(e).getMessage());
+            UMLogUtil.logError(ExceptionUtils.getMessage(e));
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             File lastModified = new File(destinationDirectory.getParentFile(), destinationDirectory.getName() + LAST_MODIFIED_TXT);
             ContentScraperUtil.deleteFile(lastModified);
@@ -216,9 +216,10 @@ public class EdraakK12ContentScraper implements Runnable {
         }
 
         if (!hasVideo && !hasQuestions) {
-            throw new IllegalArgumentException(exceptionQuestion + "\n" +
-                    exceptionVideo +
-                    "\nNo Video or Questions found in this id " + response.id);
+            throw new IllegalArgumentException(
+                    exceptionQuestion + "\n" +
+                            exceptionVideo +
+                            "\nNo Video or Questions found in this id " + response.id);
         }
 
 
