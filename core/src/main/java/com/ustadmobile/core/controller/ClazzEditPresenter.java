@@ -41,6 +41,8 @@ public class ClazzEditPresenter
     private UmProvider<Schedule> clazzScheduleLiveData;
     private UmLiveData<List<UMCalendar>> holidaysLiveData;
 
+    private long loggedInPersonUid = 0L;
+
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzDao clazzDao = repository.getClazzDao();
 
@@ -61,6 +63,8 @@ public class ClazzEditPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
             initFromClazz(currentClazzUid);
@@ -69,7 +73,9 @@ public class ClazzEditPresenter
                     "Clazz Location", TimeZone.getDefault().getID()), new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long newLocationUid) {
-                    clazzDao.insertAsync(new Clazz("", newLocationUid), new UmCallback<Long>() {
+
+                    clazzDao.insertClazzAsync(new Clazz("", newLocationUid),
+                            loggedInPersonUid ,new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
                             view.runOnUiThread(() -> initFromClazz(result));
@@ -233,7 +239,7 @@ public class ClazzEditPresenter
             @Override
             public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
-        clazzDao.updateAsync(mUpdatedClazz, new UmCallback<Integer>(){
+        clazzDao.updateClazzAsync(mUpdatedClazz, loggedInPersonUid, new UmCallback<Integer>(){
             @Override
             public void onSuccess(Integer result) {
                 //Close the activity.

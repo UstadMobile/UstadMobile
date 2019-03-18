@@ -59,14 +59,43 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     public  void createAuditLog(long toPersonUid, long fromPersonUid){
         AuditLog auditLog = new AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid);
-
         insertAuditLog(auditLog);
-
     }
 
     public void insertPerson(Person entity, long loggedInPersonUid){
         long personUid = insert(entity);
         createAuditLog(personUid, loggedInPersonUid);
+    }
+
+    public void insertPersonAsync(Person entity, long loggedInPersonUid, UmCallback callback){
+        insertAsync(entity, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                long personUid = result;
+                createAuditLog(personUid, loggedInPersonUid);
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onSuccess(exception);
+            }
+        });
+    }
+
+    public void updatePersonAsync(Person entity, long loggedInPersonUid, UmCallback callback){
+        updateAsync(entity, new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                createAuditLog(entity.getPersonUid(), loggedInPersonUid);
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onSuccess(exception);
+            }
+        });
     }
 
     public void updatePerson(Person entity, long loggedInPersonUid){

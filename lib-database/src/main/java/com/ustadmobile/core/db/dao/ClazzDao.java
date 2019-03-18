@@ -154,10 +154,45 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
         createAuditLog(personUid, loggedInPersonUid);
     }
 
+    public void insertClazzAsync(Clazz entity, long loggedInPersonUid, UmCallback<Long> callback){
+        //long personUid = insert(entity);
+        insertAsync(entity, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                createAuditLog(entity.getClazzUid(), loggedInPersonUid);
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onFailure(exception);
+            }
+        });
+
+    }
+
     public void updateClazz(Clazz entity, long loggedInPersonUid){
         update(entity);
         createAuditLog(entity.getClazzUid(), loggedInPersonUid);
     }
+
+    public void updateClazzAsync(Clazz entity, long loggedInPersonUid, UmCallback<Integer> callback){
+        //long personUid = insert(entity);
+        updateAsync(entity, new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                createAuditLog(entity.getClazzUid(), loggedInPersonUid);
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                callback.onFailure(exception);
+            }
+        });
+
+    }
+
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE :personUid in " +

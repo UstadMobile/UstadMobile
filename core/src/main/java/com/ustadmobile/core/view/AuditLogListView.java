@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.AuditLog;
+import com.ustadmobile.lib.db.entities.AuditLogWithNames;
 
 
 /**
@@ -26,7 +27,7 @@ public interface AuditLogListView extends UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<AuditLog> listProvider);
+    void setListProvider(UmProvider<AuditLogWithNames> listProvider);
 
 
 }

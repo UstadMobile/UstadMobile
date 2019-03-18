@@ -16,6 +16,7 @@ import com.ustadmobile.core.controller.AuditLogListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.lib.db.entities.AuditLog;
+import com.ustadmobile.lib.db.entities.AuditLogWithNames;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -82,33 +83,33 @@ public class AuditLogListActivity extends UstadBaseActivity implements AuditLogL
     /**
      * The DIFF CALLBACK
      */
-    public static final DiffUtil.ItemCallback<AuditLog> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<AuditLog>() {
+    public static final DiffUtil.ItemCallback<AuditLogWithNames> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<AuditLogWithNames>() {
                 @Override
-                public boolean areItemsTheSame(AuditLog oldItem,
-                                               AuditLog newItem) {
+                public boolean areItemsTheSame(AuditLogWithNames oldItem,
+                                               AuditLogWithNames newItem) {
                     return oldItem == newItem;
                 }
 
                 @Override
-                public boolean areContentsTheSame(AuditLog oldItem,
-                                                  AuditLog newItem) {
+                public boolean areContentsTheSame(AuditLogWithNames oldItem,
+                                                  AuditLogWithNames newItem) {
                     return oldItem.equals(newItem);
                 }
             };
 
     @Override
-    public void setListProvider(UmProvider<AuditLog> listProvider) {
+    public void setListProvider(UmProvider<AuditLogWithNames> listProvider) {
         AuditLogListRecyclerAdapter recyclerAdapter =
-                new AuditLogListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                new AuditLogListRecyclerAdapter(DIFF_CALLBACK, mPresenter,this,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
-        DataSource.Factory<Integer, AuditLog> factory =
-                (DataSource.Factory<Integer, AuditLog>)
+        DataSource.Factory<Integer, AuditLogWithNames> factory =
+                (DataSource.Factory<Integer, AuditLogWithNames>)
                         listProvider.getProvider();
-        LiveData<PagedList<AuditLog>> data =
+        LiveData<PagedList<AuditLogWithNames>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);

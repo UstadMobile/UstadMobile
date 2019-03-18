@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.AuditLogDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.lib.db.entities.AuditLog;
+import com.ustadmobile.lib.db.entities.AuditLogWithNames;
 
 import java.util.Hashtable;
 
@@ -14,7 +15,7 @@ import java.util.Hashtable;
  **/
 public class AuditLogListPresenter extends UstadBaseController<AuditLogListView> {
 
-    private UmProvider<AuditLog> umProvider;
+    private UmProvider<AuditLogWithNames> umProvider;
     UmAppDatabase repository;
     private AuditLogDao providerDao;
 
@@ -34,7 +35,7 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
         super.onCreate(savedState);
 
         //Get provider 
-        umProvider = providerDao.findAllAuditLogs();
+        umProvider = providerDao.findAllAuditLogsWithName();
         view.setListProvider(umProvider);
 
     }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.core.view.AuditLogSelectionView;
 import com.ustadmobile.core.view.GroupListView;
 import com.ustadmobile.core.view.HolidayCalendarListView;
@@ -36,7 +37,6 @@ public class SettingsPresenter extends UstadBaseController<SettingsView> {
         impl.go(HolidayCalendarListView.VIEW_NAME, args, context);
     }
 
-
     public void goToRolesList() {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -64,6 +64,10 @@ public class SettingsPresenter extends UstadBaseController<SettingsView> {
     public void goToAuditLogSelection() {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.go(AuditLogSelectionView.VIEW_NAME, args, context);
+        //impl.go(AuditLogSelectionView.VIEW_NAME, args, context);
+        //TODO: remove
+        impl.go(AuditLogListView.VIEW_NAME, args, context);
     }
+
+
 }

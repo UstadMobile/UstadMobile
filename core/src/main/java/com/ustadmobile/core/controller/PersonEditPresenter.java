@@ -99,6 +99,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     private long enrollToClazz = -1L;
 
+    private Long loggedInPersonUid = 0L;
+
     public long getPersonUid() {
         return personUid;
     }
@@ -151,6 +153,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 repository.getPersonDetailPresenterFieldDao();
         PersonCustomFieldDao personCustomFieldDao = repository.getPersonCustomFieldDao();
 
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
         if(newPersonString.equals("true")){
             view.updateToolbarTitle(impl.getString(MessageID.new_person, context));
@@ -260,7 +263,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 });
 
                 //Update personWithpic
-                personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
+                personDao.updatePersonAsync(personWithPic, loggedInPersonUid, new UmCallback<Integer>(){
+                //personDao.updateAsync(personWithPic, new UmCallback<Integer>(){
 
                     @Override
                     public void onSuccess(Integer result) {
@@ -650,7 +654,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
      */
     public void handleClickDone(){
         mUpdatedPerson.setActive(true);
-        personDao.updateAsync(mUpdatedPerson, new UmCallback<Integer>(){
+        personDao.updatePersonAsync(mUpdatedPerson, loggedInPersonUid, new UmCallback<Integer>(){
+        //personDao.updateAsync(mUpdatedPerson, new UmCallback<Integer>(){
 
             @Override
             public void onSuccess(Integer result) {

@@ -109,9 +109,7 @@ public class PeopleListPresenter
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
         }));
     }
 
@@ -138,7 +136,8 @@ public class PeopleListPresenter
         PersonCustomFieldValueDao customFieldValueDao =
                 repository.getPersonCustomFieldValueDao();
 
-        personDao.createPersonAsync(newPerson, new UmCallback<Long>() {
+        personDao.insertPersonAsync(newPerson, loggedInPersonUid, new UmCallback<Long>(){
+        //personDao.createPersonAsync(newPerson, new UmCallback<Long>() {
 
             @Override
             public void onSuccess(Long result) {

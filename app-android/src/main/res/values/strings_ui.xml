@@ -630,7 +630,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
     <string name="enroll_new_group_member">Enroll new group member</string>
     <string name="enroll_group_member">Enroll person</string>
-
+    <string name="changed">changed</string>
+    <string name="inserted">inserted</string>
 
 
 
