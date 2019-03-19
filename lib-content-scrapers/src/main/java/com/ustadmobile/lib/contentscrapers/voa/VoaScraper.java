@@ -118,7 +118,6 @@ public class VoaScraper implements Runnable {
                         true, ScraperConstants.MIMETYPE_TINCAN,
                         content.lastModified(), content,
                         db, repository, containerDir);
-                FileUtils.deleteDirectory(content);
             }
 
         } catch (Exception e) {
@@ -313,7 +312,7 @@ public class VoaScraper implements Runnable {
 
         finalDoc.body().attr("style", "padding:2%");
         if (quizHref != null) {
-            finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
+            finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe id=\"myFrame\" src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
         }
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.QUIZ_HTML_LINK),
                 new File(voaDirectory, ScraperConstants.QUIZ_HTML_FILE));
