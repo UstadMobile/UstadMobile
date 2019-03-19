@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.ClazzEditView;
+import com.ustadmobile.core.view.SelectClazzFeaturesView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Location;
@@ -23,6 +24,10 @@ import java.util.TimeZone;
 
 import static com.ustadmobile.core.view.ClazzEditView.ARG_SCHEDULE_UID;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
+import static com.ustadmobile.core.view.SelectClazzFeaturesView.CLAZZ_FEATURE_ACTIVITY_ENABLED;
+import static com.ustadmobile.core.view.SelectClazzFeaturesView.CLAZZ_FEATURE_ATTENDANCE_ENABLED;
+import static com.ustadmobile.core.view.SelectClazzFeaturesView.CLAZZ_FEATURE_CLAZZUID;
+import static com.ustadmobile.core.view.SelectClazzFeaturesView.CLAZZ_FEATURE_SEL_ENABLED;
 
 
 /**
@@ -158,6 +163,11 @@ public class ClazzEditPresenter
         view.setHolidayPresets(holidayPreset, selectedPosition);
     }
 
+    public void updateFeatures(Clazz clazz){
+        mUpdatedClazz.setAttendanceFeature(clazz.isAttendanceFeature());
+        mUpdatedClazz.setActivityFeature(clazz.isActivityFeature());
+        mUpdatedClazz.setSelFeature(clazz.isSelFeature());
+    }
     /**
      * Updates the class name of the currently editing class. Does NOT persist the data.
      *
@@ -284,5 +294,15 @@ public class ClazzEditPresenter
         ScheduleDao scheduleDao = repository.getScheduleDao();
         scheduleDao.disableSchedule((Long) arg);
 
+    }
+
+    public void handleClickFeaturesSelection() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, Object> args = new Hashtable<>();
+        args.put(CLAZZ_FEATURE_CLAZZUID, currentClazzUid);
+        args.put(CLAZZ_FEATURE_ATTENDANCE_ENABLED, mUpdatedClazz.isAttendanceFeature()?"yes":"no");
+        args.put(CLAZZ_FEATURE_ACTIVITY_ENABLED, mUpdatedClazz.isActivityFeature()?"yes":"no");
+        args.put(CLAZZ_FEATURE_SEL_ENABLED, mUpdatedClazz.isSelFeature()?"yes":"no");
+        impl.go(SelectClazzFeaturesView.VIEW_NAME, args, getContext());
     }
 }

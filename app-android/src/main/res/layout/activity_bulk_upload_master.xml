@@ -93,7 +93,7 @@
 
     <Spinner
         android:id="@+id/activity_bulk_upload_master_timezone_spinner"
-        android:layout_width="395dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"

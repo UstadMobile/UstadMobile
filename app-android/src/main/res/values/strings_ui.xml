@@ -633,6 +633,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="changed">changed</string>
     <string name="inserted">inserted</string>
 
+    <string name="sel_caps">SEL</string>
+
 
 
     <string name="onboarding_get_started_label">Get Started</string>

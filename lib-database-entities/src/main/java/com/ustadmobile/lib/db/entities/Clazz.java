@@ -35,6 +35,15 @@ public class Clazz {
     //Location
     private long clazzLocationUid;
 
+    //Attendance
+    private boolean attendanceFeature;
+
+    //Activity
+    private boolean activityFeature;
+
+    //SEL
+    private boolean selFeature;
+
     @UmSyncMasterChangeSeqNum
     private long clazzMasterChangeSeqNum;
 
@@ -43,6 +52,30 @@ public class Clazz {
 
     @UmSyncLastChangedBy
     private int clazzLastChangedBy;
+
+    public boolean isAttendanceFeature() {
+        return attendanceFeature;
+    }
+
+    public void setAttendanceFeature(boolean attendanceFeature) {
+        this.attendanceFeature = attendanceFeature;
+    }
+
+    public boolean isActivityFeature() {
+        return activityFeature;
+    }
+
+    public void setActivityFeature(boolean activityFeature) {
+        this.activityFeature = activityFeature;
+    }
+
+    public boolean isSelFeature() {
+        return selFeature;
+    }
+
+    public void setSelFeature(boolean selFeature) {
+        this.selFeature = selFeature;
+    }
 
     public boolean isClazzActive() {
         return clazzActive;
@@ -77,16 +110,24 @@ public class Clazz {
     }
 
     public Clazz() {
-
+        this.attendanceFeature = true;
+        this.activityFeature = true;
+        this.selFeature = true;
     }
 
     public Clazz(String clazzName){
         this.clazzName = clazzName;
+        this.attendanceFeature = true;
+        this.activityFeature = true;
+        this.selFeature = true;
     }
 
     public Clazz(String clazzName, long clazzLocationUid) {
         this.clazzName = clazzName;
         this.clazzLocationUid = clazzLocationUid;
+        this.attendanceFeature = true;
+        this.activityFeature = true;
+        this.selFeature = true;
     }
 
     public float getAttendanceAverage() {

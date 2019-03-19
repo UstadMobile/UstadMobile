@@ -35,9 +35,7 @@ public class SelectClazzesDialogPresenter
     public SelectClazzesDialogPresenter(Object context, Hashtable arguments,
                                         SelectClazzesDialogView view) {
         super(context, arguments, view);
-
-        System.out.println("hey hey");
-
+        
         if(arguments.containsKey(ARG_LOCATIONS_SET)){
             long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
             locations =

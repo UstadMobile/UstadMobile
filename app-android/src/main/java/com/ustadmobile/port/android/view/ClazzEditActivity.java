@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzEditPresenter;
@@ -40,7 +41,8 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
  *
  * This Activity extends UstadBaseActivity and implements ClazzEditView
  */
-public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditView {
+public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditView,
+        SelectClazzFeaturesDialogFragment.ClazzFeaturesSelectDialogListener {
 
     private Toolbar toolbar;
 
@@ -51,6 +53,8 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     TextInputLayout classDescTIP;
     Button addScheduleButton;
     Spinner holidaySpinner;
+
+    TextView featuresTextView;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -82,10 +86,14 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
                 new LinearLayoutManager(getApplicationContext());
         scheduleRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        featuresTextView = findViewById(R.id.activity_clazz_edit_features_selected);
+
         //Call the Presenter
         mPresenter = new ClazzEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        featuresTextView.setOnClickListener(v -> mPresenter.handleClickFeaturesSelection());
 
         //Clazz Name
         classNameTIP = findViewById(R.id.activity_clazz_edit_name);
@@ -196,6 +204,30 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
             }
         }
 
+        String featuresText="";
+        if(updatedClazz.isAttendanceFeature()){
+            String addComma="";
+            if(!featuresText.equals("")){
+                addComma =",";
+            }
+            featuresText =  featuresText + addComma + " " + getText(R.string.attendance) ;
+        }
+        if(updatedClazz.isActivityFeature()){
+            String addComma="";
+            if(!featuresText.equals("")){
+                addComma =",";
+            }
+            featuresText = featuresText + addComma + " " +getText(R.string.activity_change) ;
+        }
+        if(updatedClazz.isSelFeature()){
+            String addComma="";
+            if(!featuresText.equals("")){
+                addComma =",";
+            }
+            featuresText = featuresText + addComma + " " +getText(R.string.sel_caps) ;
+        }
+        featuresTextView.setText(featuresText);
+
         String finalClazzName = clazzName;
         String finalClazzDesc = clazzDesc;
         runOnUiThread(() -> {
@@ -222,5 +254,35 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     @Override
     public void setHolidaySelected(long id) {
         mPresenter.updateHoliday(id);
+    }
+
+    @Override
+    public void onSelectClazzesFeaturesResult(Clazz clazz) {
+        featuresTextView.setText("");
+        String featuresText="";
+
+        if(clazz.isAttendanceFeature()){
+            String addComma="";
+            if(!featuresText.equals("")){
+                addComma =",";
+            }
+            featuresText = featuresText + addComma + " " + getText(R.string.attendance);
+        }
+        if(clazz.isActivityFeature()){
+            String addComma="";
+            if(!featuresText.equals("")){
+                addComma =",";
+            }
+            featuresText = featuresText + addComma + " " + getText(R.string.activity_change);
+        }
+        if(clazz.isSelFeature()){
+            String addComma="";
+            if(!featuresText.equals("")){
+                addComma =",";
+            }
+            featuresText = featuresText + addComma + " " + getText(R.string.sel_caps);
+        }
+        featuresTextView.setText(featuresText);
+        mPresenter.updateFeatures(clazz);
     }
 }

@@ -1,19 +1,17 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.view.LocationDetailView;
+import com.ustadmobile.lib.db.entities.Location;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-
-import com.ustadmobile.core.view.LocationDetailView;
-import com.ustadmobile.lib.db.entities.Location;
 
 import static com.ustadmobile.core.view.LocationDetailView.LOCATIONS_SET;
 import static com.ustadmobile.core.view.LocationDetailView.LOCATION_UID;

@@ -132,6 +132,7 @@ import com.ustadmobile.core.view.SELSelectConsentView;
 import com.ustadmobile.core.view.SELSelectStudentView;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
+import com.ustadmobile.core.view.SelectClazzFeaturesView;
 import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
@@ -327,6 +328,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AuditLogSelectionView.VIEW_NAME, AuditLogSelectionActivity.class);
         viewNameToAndroidImplMap.put(AuditLogListView.VIEW_NAME, AuditLogListActivity.class);
         viewNameToAndroidImplMap.put(AddDateRangeDialogView.VIEW_NAME, AddDateRangeDialogFragment.class);
+        viewNameToAndroidImplMap.put(SelectClazzFeaturesView.VIEW_NAME, SelectClazzFeaturesDialogFragment.class);
 
     }
 
