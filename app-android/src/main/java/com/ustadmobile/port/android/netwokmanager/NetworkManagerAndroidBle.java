@@ -51,6 +51,10 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -735,12 +739,25 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 
         int netId = wifiManager.addNetwork(config);
-        wifiManager.disconnect();
-        boolean requestAccepted = wifiManager.enableNetwork(netId, true);
-        UstadMobileSystemImpl.l(UMLog.INFO, 693, "Network: Connecting to wifi: "
-                + ssid + " passphrase: '" + passphrase +"', " + "request submitted ?"
-                + requestAccepted);
-        wifiManager.reconnect();
+
+        try{
+            Class<?> actionLister = Class.forName("android.net.wifi.WifiManager$ActionListener");
+            Object proxyInstance = Proxy.newProxyInstance(actionLister.getClassLoader(),
+                    new Class[] {actionLister}, new WifiConnectInvocationProxyHandler());
+
+            Method connectMethod = wifiManager.getClass().getMethod("connect",
+                    int.class, actionLister);
+            connectMethod.invoke(wifiManager,netId,proxyInstance);
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -945,5 +962,19 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             try{ mContext.unregisterReceiver(mReceiver); }catch (Exception ignored){}
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(umP2PReceiver);
         super.onDestroy();
+    }
+
+    /**
+     * This class is used when creating a ActionListener proxy to be used on
+     * WifiManager#connect(int,ActionListener) invocation through reflection.
+     */
+    public class WifiConnectInvocationProxyHandler implements InvocationHandler{
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+                    "Method was invoked using reflection  "+method.getName());
+            return null;
+        }
     }
 }

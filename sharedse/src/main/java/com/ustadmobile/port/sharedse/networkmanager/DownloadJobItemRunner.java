@@ -115,7 +115,7 @@ public class DownloadJobItemRunner implements Runnable {
      */
     private AtomicBoolean waitingForLocalConnection = new AtomicBoolean(false);
 
-    private static final int BAD_PEER_FAILURE_THRESHOLD = 2;
+    public static final int BAD_PEER_FAILURE_THRESHOLD = 2;
 
     private static final int CONNECTION_TIMEOUT = 60;
 

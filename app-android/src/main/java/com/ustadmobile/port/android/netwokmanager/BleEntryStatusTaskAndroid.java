@@ -104,11 +104,17 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mGattClient = destinationPeer.connectGatt(
                     (Context) context,false, mCallback);
            mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+
+           managerBle.handleNodeConnectionHistory(destinationPeer.getAddress(),
+                   mGattClient == null);
+
            if(mGattClient == null){
                 UstadMobileSystemImpl.l(UMLog.ERROR,698,
                         "Failed to connect to " + destinationPeer.getAddress());
+
                 UmAppDatabase.getInstance(context).getNetworkNodeDao()
                         .updateRetryCount(networkNode.getNodeId(),null);
+
                 onResponseReceived(networkNode.getBluetoothMacAddress(), null,
                         new IOException("BLE failed on connectGatt to " +
                                 networkNode.getBluetoothMacAddress()));

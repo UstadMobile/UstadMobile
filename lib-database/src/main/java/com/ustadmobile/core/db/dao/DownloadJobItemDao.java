@@ -148,12 +148,12 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
     public abstract int  getTotalDownloadJobItems(long djiDjUid);
 
-    @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid, Container.fileSize, " +
-            "Container.containerContentEntryUid as contentEntryUid , Container.containerUid " +
-            "FROM DownloadSetItem LEFT JOIN Container " +
-            "ON Container.containerContentEntryUid = (SELECT containerContentEntryUid FROM Container " +
-            "WHERE containerContentEntryUid =  DownloadSetItem.dsiContentEntryUid ORDER BY lastModified  DESC LIMIT 1) " +
-            "WHERE DownloadSetItem.dsiDsUid = :downloadSetUid")
+    @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid, Container.fileSize, \n" +
+            "Container.containerContentEntryUid as contentEntryUid , Container.containerUid\n" +
+            "FROM DownloadSetItem LEFT JOIN Container \n" +
+            "ON Container.containerUid = (SELECT Container.containerUid FROM Container \n" +
+            "WHERE containerContentEntryUid =  DownloadSetItem.dsiContentEntryUid ORDER BY lastModified  DESC LIMIT 1) \n" +
+            "WHERE  Container.fileSize != 0 AND DownloadSetItem.dsiDsUid = :downloadSetUid")
     public abstract List<DownloadJobItemToBeCreated> findJobItemsToBeCreatedDownloadSet(long downloadSetUid);
 
     @UmQuery("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")

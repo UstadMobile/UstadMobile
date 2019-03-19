@@ -60,9 +60,12 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
     public abstract void updateContainerSizeAndNumEntries(long containerUid);
 
     @UmQuery("SELECT Container.containerUid FROM Container " +
-            "WHERE (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries " +
-            "AND Container.containerUid = :containerUid")
+            "WHERE (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) = Container.cntNumEntries" +
+            " AND Container.containerUid = :containerUid")
     public abstract Long findLocalAvailabilityByUid(long containerUid);
+
+    @UmQuery("SELECT * FROM Container WHERE Container.containerUid = :containerUid")
+    public abstract List<Container> findAllWithId(long containerUid);
 
     @UmQuery("SELECT Container.*, ContentEntry.entryId, ContentEntry.sourceUrl FROM Container " +
             "LEFT JOIN ContentEntry ON Container.containerContentEntryUid = ContentEntry.contentEntryUid " +
