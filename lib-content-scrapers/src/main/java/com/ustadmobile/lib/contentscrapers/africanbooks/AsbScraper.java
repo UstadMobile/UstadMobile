@@ -309,17 +309,18 @@ public class AsbScraper {
                 ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryJoinDao, category, childEntry);
 
                 boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, bookObj.date);
-                File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
-
-                if (ContentScraperUtil.fileHasContent(tmpFolder)) {
-                    FileUtils.deleteDirectory(tmpFolder);
-                }
 
                 isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
                 }
+
+                File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
+                if (ContentScraperUtil.fileHasContent(tmpFolder)) {
+                    FileUtils.deleteDirectory(tmpFolder);
+                }
+
 
                 FileUtils.copyURLToFile(epubUrl, ePubFile);
 

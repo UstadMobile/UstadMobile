@@ -168,17 +168,18 @@ public class IndexPrathamContentScraper {
 
                 File content = new File(resourceFolder, data.slug + EPUB_EXT);
                 boolean isUpdated = ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id));
-                File tmpDir = new File(UMFileUtil.stripExtensionIfPresent(content.getPath()));
-
-                if (ContentScraperUtil.fileHasContent(tmpDir)) {
-                    FileUtils.deleteDirectory(tmpDir);
-                }
 
                 isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
                 }
+
+                File tmpDir = new File(UMFileUtil.stripExtensionIfPresent(content.getPath()));
+                if (ContentScraperUtil.fileHasContent(tmpDir)) {
+                    FileUtils.deleteDirectory(tmpDir);
+                }
+
                 try {
                     FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
                     ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();

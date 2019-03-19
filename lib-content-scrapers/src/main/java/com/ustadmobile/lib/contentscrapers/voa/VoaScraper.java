@@ -152,6 +152,7 @@ public class VoaScraper implements Runnable {
         File voaDirectory = new File(destinationDir, lessonId);
         File modifiedFile = new File(destinationDir, lessonId + ScraperConstants.LAST_MODIFIED_TXT);
         voaDirectory.mkdirs();
+        boolean isUpdated = false;
         try {
             WebElement element = driver.findElementByCssSelector("script[type*=json]");
             JavascriptExecutor js = driver;
@@ -160,32 +161,29 @@ public class VoaScraper implements Runnable {
             VoaResponse response = gson.fromJson(scriptText, VoaResponse.class);
 
             long dateModified = ContentScraperUtil.parseServerDate(response.dateModified.replace("Z", "").replace(" ", "T"));
-            boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
-
-            if (ContentScraperUtil.fileHasContent(voaDirectory)) {
-                isUpdated = false;
-                FileUtils.deleteDirectory(voaDirectory);
-            }
-
-            if (!isUpdated) {
-                isContentUpdated = false;
-                driver.close();
-                driver.quit();
-                return;
-            }
+            isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
 
         } catch (NoSuchElementException ignored) {
 
             long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
-            boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(modified));
-            if (!isUpdated) {
+            isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(modified));
 
-                isContentUpdated = false;
-                driver.close();
-                driver.quit();
-                return;
-            }
         }
+
+        isUpdated = true;
+
+        if (!isUpdated) {
+            isContentUpdated = false;
+            driver.close();
+            driver.quit();
+            return;
+        }
+
+        if (ContentScraperUtil.fileHasContent(voaDirectory)) {
+            FileUtils.deleteDirectory(voaDirectory);
+            voaDirectory.mkdirs();
+        }
+
         String quizHref = null;
         String quizAjaxUrl = null;
 
