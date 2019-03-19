@@ -2,7 +2,6 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
@@ -34,8 +33,8 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -263,6 +262,32 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public abstract void stopScanning();
 
+
+    private void handleNode(NetworkNodeDao networkNodeDao,
+                            NetworkNode node , long updateTime){
+        try{
+            List<Long> entryUidsToMonitor =
+                    new ArrayList<>(getAllUidsToBeMonitored());
+            if(!isStopMonitoring){
+                if(entryUidsToMonitor.size() > 0){
+                    BleEntryStatusTask entryStatusTask =
+                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
+                    entryStatusTasks.add(entryStatusTask);
+                    entryStatusTaskExecutorService.execute(entryStatusTask);
+                }
+                node.setNetworkNodeLastUpdated(updateTime);
+                networkNodeDao.insert(node);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                        "New node added to the database , address = "
+                                +node.getBluetoothMacAddress()
+                                + (entryUidsToMonitor.size() > 0 ? " monitor task created"
+                                : " no entriries to be monitored"));
+            }
+        }catch (RejectedExecutionException e){
+            e.printStackTrace();
+        }
+    }
+
     /**
      * This should be called by the platform implementation when BLE discovers a nearby device
      * @param node The nearby device discovered
@@ -272,29 +297,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
             long updateTime = Calendar.getInstance().getTimeInMillis();
 
             NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
-            networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),updateTime,
-                    new UmCallback<Integer>() {
+            networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),
+                    updateTime, new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {
                             if(result == 0){
-                                List<Long> entryUidsToMonitor =
-                                        new ArrayList<>(getAllUidsToBeMonitored());
-                                if(!isStopMonitoring){
-                                    if(entryUidsToMonitor.size() > 0){
-                                        BleEntryStatusTask entryStatusTask =
-                                                makeEntryStatusTask(mContext,entryUidsToMonitor,node);
-                                        entryStatusTasks.add(entryStatusTask);
-                                        entryStatusTaskExecutorService.execute(entryStatusTask);
-                                    }
-                                    node.setNetworkNodeLastUpdated(updateTime);
-                                    networkNodeDao.insert(node);
-                                    UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                "New node added to the database , address = "
-                                        +node.getBluetoothMacAddress()
-                                        + (entryUidsToMonitor.size() > 0 ? " monitor task created"
-                                        : " no entriries to be monitored"));
-
-                                }
+                                handleNode(networkNodeDao,node,updateTime);
                             }
                         }
 
@@ -303,7 +311,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                                     "NetworkNode updated failed",new Exception(exception));
                         }
-                    });
+            });
         }
     }
 
@@ -398,52 +406,60 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
-        availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
-        UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Registered a monitor with "
-                + entryUidsToMonitor.size() + " entry(s) to be monitored");
+        try{
+            availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Registered a monitor with "
+                    + entryUidsToMonitor.size() + " entry(s) to be monitored");
 
-        NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
-        EntryStatusResponseDao responseDao =
-                UmAppDatabase.getInstance(mContext).getEntryStatusResponseDao();
+            NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
+            EntryStatusResponseDao responseDao =
+                    UmAppDatabase.getInstance(mContext).getEntryStatusResponseDao();
 
-        long lastUpdateTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1);
+            long lastUpdateTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1);
 
-        List<Long> uniqueEntryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
-        List<Long> knownNetworkNodes =
-                getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime,1));
+            List<Long> uniqueEntryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
+            List<Long> knownNetworkNodes =
+                    getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime,1));
 
-        UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                "Found total of   " + uniqueEntryUidsToMonitor +
-                        " to check from entry status availability");
-
-        List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
-                responseDao.findEntriesWithoutRecentResponse(uniqueEntryUidsToMonitor,knownNetworkNodes,
-                        System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2));
-
-        //Group entryUUid by node where their status will be checked from
-        LinkedHashMap<Integer,List<Long>> nodeToCheckEntryList = new LinkedHashMap<>();
-        for(EntryStatusResponseDao.EntryWithoutRecentResponse entryResponse: entryWithoutRecentResponses){
-            int nodeIdToCheckFrom = entryResponse.getNodeId();
-            if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
-                nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
-
-            nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContainerUid());
-        }
-
-        UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                "Created total of  "+nodeToCheckEntryList.entrySet().size()
-                        + "entry(s) to be checked from");
-
-        //Make entryStatusTask as per node list and entryUuids found
-        for(int nodeId : nodeToCheckEntryList.keySet()){
-            NetworkNode networkNode = networkNodeDao.findNodeById(nodeId);
-            BleEntryStatusTask entryStatusTask = makeEntryStatusTask(mContext,
-                    nodeToCheckEntryList.get(nodeId),networkNode);
-            entryStatusTasks.add(entryStatusTask);
-            entryStatusTaskExecutorService.execute(entryStatusTask);
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Status check started for "+nodeToCheckEntryList.get(nodeId).size()
-                            + " entry(s) task from "+networkNode.getBluetoothMacAddress());
+                    "Found total of   " + uniqueEntryUidsToMonitor +
+                            " to check from entry status availability");
+
+            List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
+                    responseDao.findEntriesWithoutRecentResponse(
+                            uniqueEntryUidsToMonitor, knownNetworkNodes,
+                            System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2));
+
+            //Group entryUUid by node where their status will be checked from
+            LinkedHashMap<Integer,List<Long>> nodeToCheckEntryList = new LinkedHashMap<>();
+
+            for(EntryStatusResponseDao.EntryWithoutRecentResponse entryResponse:
+                    entryWithoutRecentResponses){
+
+                int nodeIdToCheckFrom = entryResponse.getNodeId();
+                if(!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
+                    nodeToCheckEntryList.put(nodeIdToCheckFrom, new ArrayList<>());
+
+                nodeToCheckEntryList.get(nodeIdToCheckFrom).add(entryResponse.getContainerUid());
+            }
+
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Created total of  "+nodeToCheckEntryList.entrySet().size()
+                            + "entry(s) to be checked from");
+
+            //Make entryStatusTask as per node list and entryUuids found
+            for(int nodeId : nodeToCheckEntryList.keySet()){
+                NetworkNode networkNode = networkNodeDao.findNodeById(nodeId);
+                BleEntryStatusTask entryStatusTask = makeEntryStatusTask(mContext,
+                        nodeToCheckEntryList.get(nodeId),networkNode);
+                entryStatusTasks.add(entryStatusTask);
+                entryStatusTaskExecutorService.execute(entryStatusTask);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                        "Status check started for "+nodeToCheckEntryList.get(nodeId).size()
+                                + " entry(s) task from "+networkNode.getBluetoothMacAddress());
+            }
+        }catch (RejectedExecutionException e){
+            e.printStackTrace();
         }
     }
 
