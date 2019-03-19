@@ -654,7 +654,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
         if(record == null || success){
             record = new AtomicInteger(0);
-
+            badNodeTracker.put(bluetoothAddress,record);
         }
 
         if(!success){
@@ -665,6 +665,15 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         if(badNodeTracker.get(bluetoothAddress).get() == 5){
             umAppDatabase.getNetworkNodeDao().deleteByBluetoothAddress(bluetoothAddress);
         }
+    }
+
+    /**
+     * Get bad node by bluetooth address
+     * @param bluetoothAddress node bluetooth address
+     * @return bad node
+     */
+    public AtomicInteger getBadNodeTracker(String bluetoothAddress){
+        return badNodeTracker.get(bluetoothAddress);
     }
 
 

@@ -16,6 +16,10 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 
+import java.sql.Time;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,6 +50,10 @@ public class NetworkManagerBleAndroidService extends Service {
 
     private UmObserver<Boolean> activeDownloadJobObserver;
 
+    private UmAppDatabase umAppDatabase;
+
+    private ScheduledExecutorService mBadNodeExecutorService;
+
     private ServiceConnection mHttpdServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -61,6 +69,16 @@ public class NetworkManagerBleAndroidService extends Service {
     };
 
 
+    private Runnable badNodeDeletionTask = new Runnable() {
+        @Override
+        public void run() {
+            long minLastSeen = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5);
+            umAppDatabase.getNetworkNodeDao().deleteOldAndBadNode(minLastSeen,5);
+        }
+    };
+
+
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
@@ -69,13 +87,19 @@ public class NetworkManagerBleAndroidService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        umAppDatabase = UmAppDatabase.getInstance(getApplicationContext());
+
         Intent serviceIntent = new Intent(getApplicationContext(), EmbeddedHttpdService.class);
         bindService(serviceIntent, mHttpdServiceConnection, Context.BIND_AUTO_CREATE);
 
-        activeDownloadJobData = UmAppDatabase.getInstance(this)
-                .getDownloadJobDao().getAnyActiveDownloadJob();
+        activeDownloadJobData = umAppDatabase.getDownloadJobDao().getAnyActiveDownloadJob();
         activeDownloadJobObserver = this::handleActiveJob;
         activeDownloadJobData.observeForever(activeDownloadJobObserver);
+
+        mBadNodeExecutorService = Executors.newScheduledThreadPool(1);
+        mBadNodeExecutorService.scheduleAtFixedRate(badNodeDeletionTask,
+                0,5, TimeUnit.MINUTES);
     }
 
     private void handleHttpdServiceBound() {
@@ -115,6 +139,9 @@ public class NetworkManagerBleAndroidService extends Service {
 
         if(mHttpDownloadServiceActive.get())
             activeDownloadJobData.removeObserver(activeDownloadJobObserver);
+
+        if(badNodeDeletionTask != null)
+            mBadNodeExecutorService.shutdown();
 
         NetworkManagerAndroidBle managerAndroidBle = managerAndroidBleRef.get();
         if(managerAndroidBle != null)

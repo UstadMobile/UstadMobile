@@ -72,6 +72,11 @@ public abstract class NetworkNodeDao {
                                                                   int maxFailuresInPeriod,
                                                                   long maxFailuresFromTimestamp);
 
+    @UmQuery("DELETE FROM NetworkNode WHERE NetworkNode.lastUpdateTimeStamp < :minLastSeenTimestamp " +
+            "OR NetworkNode.numFailureCount >= :maxFailuresInPeriod")
+    public abstract void deleteOldAndBadNode(long minLastSeenTimestamp,
+                                             int maxFailuresInPeriod);
+
 
     @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid, endpointUrl = :endpointUrl  WHERE nodeId = :nodeId")
     public abstract void updateNetworkNodeGroupSsid(long nodeId, String groupSsid, String endpointUrl);

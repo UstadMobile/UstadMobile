@@ -18,6 +18,7 @@ import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
@@ -104,7 +105,10 @@ public class BleEntryStatusTaskTest {
 
         managerBle.handleNodeConnectionHistory(networkNode.getBluetoothMacAddress(), true);
 
-        assertNotNull("The node was not deleted from the db",
+        assertNotNull("The node was not deleted from the db and counter was reset to 0",
                 networkNodeDao.findNodeByBluetoothAddress(networkNode.getBluetoothMacAddress()));
+
+        assertEquals("Counter was reset to 0",0,
+                managerBle.getBadNodeTracker(networkNode.getBluetoothMacAddress()).get());
     }
 }
