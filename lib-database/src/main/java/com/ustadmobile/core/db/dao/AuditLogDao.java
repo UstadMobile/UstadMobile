@@ -11,6 +11,8 @@ import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.AuditLogWithNames;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
         insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
@@ -43,6 +45,11 @@ public abstract class AuditLogDao implements SyncableDao<AuditLog, AuditLogDao> 
             "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
             "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid")
     public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithName();
+
+    public UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilter(long fromTime, long toTime,
+            List<Long> locations, List<Long> clazzes, List<Long> people, List<Long> actors){
+        return findAllAuditLogsWithName();
+    }
 
     //TODO: Audit Log filters
 

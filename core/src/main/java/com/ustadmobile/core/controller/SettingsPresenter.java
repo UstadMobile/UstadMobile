@@ -65,8 +65,7 @@ public class SettingsPresenter extends UstadBaseController<SettingsView> {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         //impl.go(AuditLogSelectionView.VIEW_NAME, args, context);
-        //TODO: remove
-        impl.go(AuditLogListView.VIEW_NAME, args, context);
+        impl.go(AuditLogSelectionView.VIEW_NAME, args, context);
     }
 
 

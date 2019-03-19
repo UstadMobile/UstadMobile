@@ -50,6 +50,7 @@ public class ReportEditPresenter
     private List<Long> selectedClasses;
     private List<Long> selectedLocations;
     private ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues thresholdValues;
+    private long fromTime, toTime;
 
     private static final int TIME_PERIOD_LAST_WEEK = 1;
     private static final int TIME_PERIOD_LAST_TWO_WEEK = 2;
@@ -59,7 +60,7 @@ public class ReportEditPresenter
 
     private boolean showThreshold, showRadioGroup, showGenderDisaggregated;
     private boolean showClazzes, showLocations;
-    private long fromTime, toTime;
+
 
     public ReportEditPresenter(Object context, Hashtable arguments, ReportEditView view) {
         super(context, arguments, view);
@@ -264,6 +265,8 @@ public class ReportEditPresenter
         impl.go(linkViewName, args, view.getContext());
 
     }
+
+    //Getts and Setters:
 
     public void setStudentNumbers(boolean studentNumbers) {
         this.studentNumbers = studentNumbers;

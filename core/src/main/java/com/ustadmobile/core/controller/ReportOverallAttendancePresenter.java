@@ -38,9 +38,7 @@ public class ReportOverallAttendancePresenter
     //eg: private long clazzUid = -1;
     private long fromDate;
     private long toDate;
-    private long[] locations;
     private List<Long> locationList;
-    private long[] clazzes;
     private List<Long> clazzesList;
     private boolean genderDisaggregate;
     private Boolean showPercentages = false;
@@ -89,12 +87,12 @@ public class ReportOverallAttendancePresenter
             toDate = (long) arguments.get(ARG_TO_DATE);
         }
         if(arguments.containsKey(ARG_LOCATION_LIST)){
-            locations = (long[]) arguments.get(ARG_LOCATION_LIST);
+            long[] locations = (long[]) arguments.get(ARG_LOCATION_LIST);
             //TODO: Get recursive all sub locations as well.
             locationList = convertLongArray(locations);
         }
         if(arguments.containsKey(ARG_CLAZZ_LIST)){
-            clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
+            long[] clazzes = (long[]) arguments.get(ARG_CLAZZ_LIST);
             clazzesList = convertLongArray(clazzes);
         }
         if(arguments.containsKey(ARG_GENDER_DISAGGREGATE)){
