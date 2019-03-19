@@ -8,7 +8,6 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -21,7 +20,6 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import java.io.IOException;
 import java.util.List;
 
-import static com.ustadmobile.port.sharedse.networkmanager.DownloadJobItemRunner.BAD_PEER_FAILURE_THRESHOLD;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 
 /**
@@ -106,19 +104,17 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mGattClient = destinationPeer.connectGatt(
                     (Context) context,false, mCallback);
            mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+
+           managerBle.handleNodeConnectionHistory(destinationPeer.getAddress(),
+                   mGattClient == null);
+
            if(mGattClient == null){
                 UstadMobileSystemImpl.l(UMLog.ERROR,698,
                         "Failed to connect to " + destinationPeer.getAddress());
-                NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(context)
-                        .getNetworkNodeDao();
 
-                //delete node from db if is termed as bad node.
-                networkNodeDao.updateRetryCount(networkNode.getNodeId(),null);
-                NetworkNode networkNode = networkNodeDao.
-                        findNodeByBluetoothAddress(destinationPeer.getAddress());
-                if(networkNode.getNumFailureCount() > BAD_PEER_FAILURE_THRESHOLD){
-                    networkNodeDao.deleteByBluetoothAddress(destinationPeer.getAddress());
-                }
+                UmAppDatabase.getInstance(context).getNetworkNodeDao()
+                        .updateRetryCount(networkNode.getNodeId(),null);
+
                 onResponseReceived(networkNode.getBluetoothMacAddress(), null,
                         new IOException("BLE failed on connectGatt to " +
                                 networkNode.getBluetoothMacAddress()));

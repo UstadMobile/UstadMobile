@@ -447,6 +447,4 @@ public class DownloadDialogPresenterTest {
                 umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
                 .getDestinationDir());
     }
-
-
 }

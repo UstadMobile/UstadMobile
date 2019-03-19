@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -119,6 +120,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     private ExecutorService entryStatusTaskExecutorService = Executors.newFixedThreadPool(5);
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
+
+    protected HashMap<String, AtomicInteger> badNodeTracker = new HashMap<>();
 
     private static final int MAX_THREAD_COUNT = 1;
 
@@ -637,6 +640,31 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     public void releaseWifiLock(Object lockHolder) {
         wifiLockHolders.remove(lockHolder);
+    }
+
+    /**
+     * Handle node connection history, delete node which failed to connect for over 5 attempts
+     * @param bluetoothAddress node bluetooth address
+     * @param success connection status , True if the connection was made successfully,
+     *               otherwise false
+     */
+    public void handleNodeConnectionHistory(String bluetoothAddress, boolean success){
+
+        AtomicInteger record = badNodeTracker.get(bluetoothAddress);
+
+        if(record == null || success){
+            record = new AtomicInteger(0);
+
+        }
+
+        if(!success){
+            record.set(record.incrementAndGet());
+            badNodeTracker.put(bluetoothAddress,record);
+        }
+
+        if(badNodeTracker.get(bluetoothAddress).get() == 5){
+            umAppDatabase.getNetworkNodeDao().deleteByBluetoothAddress(bluetoothAddress);
+        }
     }
 
 
