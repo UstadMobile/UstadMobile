@@ -1,6 +1,10 @@
 package com.ustadmobile.core.view;
 
 
+import com.ustadmobile.lib.db.entities.Location;
+
+import java.util.List;
+
 /**
  * Core View. Screen is for LocationDetail's View
  */
@@ -12,6 +16,11 @@ public interface LocationDetailView extends UstadView {
 
     //Any argument keys:
     String LOCATION_UID = "LocationUid";
+    String LOCATIONS_SET="LocationDetailLocationSet";
+
+    void populateTopLocation(List<Location> locations);
+
+    void updateLocationOnView(Location location);
 
     /**
      * Method to finish the screen / view.

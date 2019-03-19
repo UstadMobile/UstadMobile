@@ -19,7 +19,7 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
  * The SelectMultipleTreeDialog Presenter.
  */
 public class SelectMultipleTreeDialogPresenter
-        extends UstadBaseController<SelectMultipleTreeDialogView> {
+        extends CommonLocationHandlerPresenter<SelectMultipleTreeDialogView> {
 
     HashMap<String, Long> selectedOptions;
 
@@ -31,7 +31,7 @@ public class SelectMultipleTreeDialogPresenter
                                              SelectMultipleTreeDialogView view) {
         super(context, arguments, view);
 
-        if(arguments.containsKey(ARG_LOCATIONS_SET)){
+        if (arguments.containsKey(ARG_LOCATIONS_SET)) {
             long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
             selectedLocationsList =
                     ReportOverallAttendancePresenter.convertLongArray(locationsArray);
@@ -46,7 +46,7 @@ public class SelectMultipleTreeDialogPresenter
         return selectedOptions;
     }
 
-    public void getTopLocations(){
+    public void getTopLocations() {
         LocationDao locationDao = repository.getLocationDao();
         locationDao.findTopLocationsAsync(new UmCallback<List<Location>>() {
             @Override
@@ -67,24 +67,13 @@ public class SelectMultipleTreeDialogPresenter
     }
 
 
-    public void locationChecked(String locationName, Long locationUid, boolean checked){
-        if(checked){
-            selectedOptions.put(locationName, locationUid);
-        }else{
-            if(selectedOptions.containsKey(locationName)){
-                selectedOptions.remove(locationName);
-            }
-        }
-
-    }
-
     public void handleClickPrimaryActionButton() {
         view.finish();
     }
 
 
     public List<Long> getSelectedLocationsList() {
-        if(selectedLocationsList == null){
+        if (selectedLocationsList == null) {
             return new ArrayList<>();
         }
         return selectedLocationsList;
@@ -93,4 +82,16 @@ public class SelectMultipleTreeDialogPresenter
     public void setSelectedLocationsList(List<Long> selectedLocationsList) {
         this.selectedLocationsList = selectedLocationsList;
     }
+
+    @Override
+    public void locationChecked(String locationName, Long locationUid, boolean checked) {
+        if (checked) {
+            selectedOptions.put(locationName, locationUid);
+        } else {
+            if (selectedOptions.containsKey(locationName)) {
+                selectedOptions.remove(locationName);
+            }
+        }
+    }
+
 }

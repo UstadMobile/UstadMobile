@@ -119,9 +119,7 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         }
 
         @Override
-        public void onFailure(Throwable exception) {
-
-        }
+        public void onFailure(Throwable exception) { exception.printStackTrace();}
     }
 
     @Override
@@ -279,7 +277,8 @@ public class SelectMultipleTreeDialogFragment extends UstadDialogFragment implem
         }
 
         //Init adapter with the location node binder as types of data to accept
-        adapter = new TreeViewAdapterWithBind(nodes, Arrays.asList(new LocationNodeBinder(mPresenter)));
+        adapter = new TreeViewAdapterWithBind(nodes, Arrays.asList(
+                new LocationNodeBinder(mPresenter)));
 
         //Set adapter to Recycler view.
         runOnUiThread(() -> recyclerView.setAdapter(adapter));

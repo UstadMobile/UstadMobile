@@ -6,16 +6,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.SelectMultipleTreeDialogPresenter;
+import com.ustadmobile.core.controller.CommonLocationHandlerPresenter;
 
 import tellh.com.recyclertreeview_lib.TreeNode;
 import tellh.com.recyclertreeview_lib.TreeViewBinder;
 
 public class LocationNodeBinder extends TreeViewBinder<LocationNodeBinder.ViewHolder> {
 
-    SelectMultipleTreeDialogPresenter mPresenter;
+    CommonLocationHandlerPresenter mPresenter;
 
-    LocationNodeBinder(SelectMultipleTreeDialogPresenter presenter){
+    LocationNodeBinder(CommonLocationHandlerPresenter presenter){
         this.mPresenter = presenter;
     }
 
