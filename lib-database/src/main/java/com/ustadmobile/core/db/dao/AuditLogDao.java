@@ -46,11 +46,112 @@ public abstract class AuditLogDao implements SyncableDao<AuditLog, AuditLogDao> 
             "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid")
     public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithName();
 
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime " +
+            " AND Clazz.clazzUid IN (:clazzes) ")
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByClazz(long fromTime,
+                                                    long toTime, List<Long> clazzes);
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime AND Actor.personUid IN (:actors)" )
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByActors(long fromTime,
+                                                    long toTime, List<Long> actors);
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime AND Person.personUid IN (:people)" )
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByPeople(long fromTime,
+                                                                                         long toTime, List<Long> people);
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime  " +
+            " AND Clazz.clazzUid IN (:clazzes) " +
+            " AND Actor.personUid IN (:actors)")
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByActorsAndClazzes
+            (long fromTime,long toTime, List<Long> actors, List<Long> clazzes);
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime  " +
+            " AND Person.personUid in (:people) " +
+            " AND Actor.personUid IN (:actors)")
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByActorsAndPeople
+            (long fromTime,long toTime, List<Long> actors, List<Long> people);
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime  " +
+            " AND Clazz.clazzUid IN (:clazzes) " +
+            " AND Person.personUid IN (:people)")
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByPeopleAndClazzes
+            (long fromTime,long toTime, List<Long> people, List<Long> clazzes);
+
+    @UmQuery("SELECT AuditLog.*, Actor.firstNames || ' ' || Actor.lastName AS actorName, " +
+            "Clazz.clazzName AS clazzName, Person.firstNames || ' ' || Person.lastName AS personName " +
+            "FROM AuditLog LEFT JOIN Person AS Actor ON AuditLog.auditLogActorPersonUid = Actor.personUid " +
+            "LEFT JOIN Clazz ON AuditLog.auditLogEntityUid = Clazz.clazzUid " +
+            "LEFT JOIN Person ON AuditLog.auditLogEntityUid = Person.personUid " +
+            "WHERE auditLogDate > :fromTime " +
+            " AND auditLogDate < :toTime " +
+            " AND Clazz.clazzUid IN (:clazzes) " +
+            " AND Actor.personUid IN (:actors) " +
+            " AND Person.personUid in (:people) ")
+    public abstract UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilterByActorsAndClazzesAndPeople
+            (long fromTime,long toTime, List<Long> actors, List<Long> clazzes, List<Long> people);
+
     public UmProvider<AuditLogWithNames> findAllAuditLogsWithNameFilter(long fromTime, long toTime,
             List<Long> locations, List<Long> clazzes, List<Long> people, List<Long> actors){
-        return findAllAuditLogsWithName();
+
+        if( clazzes.isEmpty() && people.isEmpty() && actors.isEmpty()){
+            return findAllAuditLogsWithName();
+        }else if(!clazzes.isEmpty() && !people.isEmpty() && !actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByActorsAndClazzesAndPeople(fromTime, toTime,
+                    actors, clazzes, people);
+        }else if(!clazzes.isEmpty() && !people.isEmpty() && actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByPeopleAndClazzes(fromTime, toTime, people, clazzes);
+        }else if(clazzes.isEmpty() && !people.isEmpty() && !actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByActorsAndPeople(fromTime, toTime, actors, people);
+        }else if(!clazzes.isEmpty() && people.isEmpty() && !actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByActorsAndClazzes(fromTime, toTime, actors, clazzes);
+        }else if( clazzes.isEmpty() && people.isEmpty() && !actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByActors(fromTime, toTime, actors);
+        }else if(clazzes.isEmpty() && !people.isEmpty() && actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByPeople(fromTime, toTime, people);
+        }else if(!clazzes.isEmpty() && people.isEmpty() && actors.isEmpty()){
+            return findAllAuditLogsWithNameFilterByClazz(fromTime, toTime, clazzes);
+        }else{
+            return findAllAuditLogsWithName();
+        }
+
     }
 
-    //TODO: Audit Log filters
 
 }

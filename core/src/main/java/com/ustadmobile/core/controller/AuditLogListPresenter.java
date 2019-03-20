@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.AuditLogWithNames;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -40,6 +41,10 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
         super(context, arguments, view);
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        locationList = new ArrayList<>();
+        clazzesList = new ArrayList<>();
+        peopleList = new ArrayList<>();
+        actorList = new ArrayList<>();
 
         //Get provider Dao
         providerDao = repository.getAuditLogDao();
