@@ -50,7 +50,7 @@ import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.A
  */
 
 public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
-        LiveDataWorkQueue.OnQueueEmptyListener, EmbeddedHTTPD.ClientActivityListener {
+        LiveDataWorkQueue.OnQueueEmptyListener {
 
     /**
      * Flag to indicate wifi direct group is inactive and it is not under creation
@@ -205,15 +205,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         if(connectivityStatusRef.get() != null
                 && connectivityStatusRef.get().getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
             new Thread(this::restoreWifi).start();
-        }
-    }
-
-    @Override
-    public void OnClientListChanged(Map<String, Long> clientIpToLastActiveMap) {
-        if(clientIpToLastActiveMap.isEmpty() && getWifiDirectGroup() != null){
-            UstadMobileSystemImpl.l(UMLog.INFO, 699,
-                    "No more clients, removing wifi direct group");
-            removeWifiDirectGroup();
         }
     }
 
