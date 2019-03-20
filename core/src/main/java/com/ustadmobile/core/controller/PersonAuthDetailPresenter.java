@@ -95,9 +95,9 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
             personDao.insertAsync(currentPerson, new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long result) {
-                    personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Long>() {
+                    personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
                         @Override
-                        public void onSuccess(Long result) {
+                        public void onSuccess(Integer result) {
                             view.finish();
                         }
 
