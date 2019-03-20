@@ -54,8 +54,8 @@ public class BleMessageTest {
         BleMessage sentMessage = new BleMessage((byte)0, payload);
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets(DEFAULT_MTU_SIZE));
 
-        assertTrue("Compressed payload is less compared to the original one",
-                payload.length > receivedMessage.getLength());
+        assertEquals("After depacketize the massage payload is the same after g-zipping",
+                payload.length, receivedMessage.getPayload().length);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class BleMessageTest {
         BleMessage receivedMessage = new BleMessage(sentMessage.getPackets(20));
 
        assertEquals("Uncompressed payload should have same length",
-               payload.length, receivedMessage.getLength());
+               payload.length, receivedMessage.getPayload().length);
     }
 
     @Test

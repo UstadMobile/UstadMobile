@@ -36,12 +36,12 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  * <p>
  * Byte 0: Request code (8 bit integer value between 0 and 255)
  * Byte 1-3: Maximum Transfer Unit (MTU)
- * Byte 4-7: Payload length
- * Byte 8-onwards: Payload
+ * Byte 4-5: Payload length
+ * Byte 6-onwards: Payload
  *<p>
  * Use {@link BleMessage#getPayload()} to get the actual payload sent from the peer device
  * <p>
- * Use {@link BleMessage#getLength()} to get the payload length
+ * Use {@link BleMessage#getLength()} to get the packets length
  * <p>
  * Use {@link BleMessage#getRequestType()} to get request type
  * <p>
@@ -57,12 +57,12 @@ public class BleMessage {
 
     private int mtu;
 
-    private int length;
+    private int length = 0;
 
     private static final int requestTypeStartIndex = 0;
     private static final int mtuStartIndex = 1;
     private static final int payloadLengthStartIndex = 3;
-    private static final int payLoadStartIndex = 7;
+    private static final int payLoadStartIndex = 5;
 
     private ByteArrayOutputStream outputStream;
 
@@ -81,7 +81,6 @@ public class BleMessage {
     public BleMessage(byte requestType, byte[] payload){
         this.requestType = requestType;
         this.payload = payload;
-        this.length = payload.length;
     }
 
 
@@ -98,7 +97,7 @@ public class BleMessage {
         mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, mtuStartIndex,
                 payloadLengthStartIndex)).getShort();
         length = ByteBuffer.wrap(Arrays.copyOfRange(packets, payloadLengthStartIndex,
-                payLoadStartIndex)).getInt();
+                payLoadStartIndex)).getShort();
 
         boolean isCompressed = receivedPayload.length > 0 &&
                 (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
@@ -189,9 +188,10 @@ public class BleMessage {
             throw new IllegalArgumentException();
         }else{
             int packetSize = (int) Math.ceil(payload.length / (double) mtu);
-            ByteBuffer headerBuffer = ByteBuffer.allocate(7);
+            length = packetSize;
+            ByteBuffer headerBuffer = ByteBuffer.allocate(5);
             byte[] header = headerBuffer.put(requestType).putShort((short) mtu)
-                    .putInt(payload.length).array();
+                    .putShort((short)packetSize).array();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
                 outputStream.write(header);
@@ -262,6 +262,7 @@ public class BleMessage {
         return mtu;
     }
 
+
     /**
      * Called when packet is received from the other peer for assembling
      * @param packets packet received from the other peer
@@ -275,7 +276,7 @@ public class BleMessage {
             mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, mtuStartIndex,
                     payloadLengthStartIndex)).getShort();
             length = ByteBuffer.wrap(Arrays.copyOfRange(packets, payloadLengthStartIndex,
-                    payLoadStartIndex)).getInt();
+                    payLoadStartIndex)).getShort();
             requestType = mRequestType;
         }
 
@@ -288,8 +289,8 @@ public class BleMessage {
             byte [] receivedPayload = ByteBuffer.wrap(
                     Arrays.copyOfRange(outputStream.toByteArray(), payLoadStartIndex,
                     outputStream.toByteArray().length)).array();
-
-            if(receivedPayload.length == length){
+            int receivedPacketsLength = (int) Math.ceil((float)(receivedPayload.length + 5) / mtu);
+            if(receivedPacketsLength == length){
                 try{
                     boolean isCompressed = receivedPayload.length > 0 &&
                             (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
@@ -306,6 +307,11 @@ public class BleMessage {
                     outputStream = null;
                 }
                 return true;
+            }else{
+                if(receivedPacketsLength > length){
+                    UMIOUtils.closeQuietly(outputStream);
+                    outputStream = null;
+                }
             }
         }
         return false;

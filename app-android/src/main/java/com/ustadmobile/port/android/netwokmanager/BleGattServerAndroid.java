@@ -45,7 +45,6 @@ class BleGattServerAndroid extends BleGattServer {
 
     private BleMessage receivedMessage;
 
-
     private BluetoothGattServerCallback mCallback = new BluetoothGattServerCallback() {
 
         /**
@@ -83,7 +82,7 @@ class BleGattServerAndroid extends BleGattServer {
 
             if (USTADMOBILE_BLE_SERVICE_UUID.equals(characteristic.getUuid())) {
                 //Grant permission to the peer device to write on this characteristics
-                boolean granted= gattServer.sendResponse(device, requestId,
+                boolean granted = gattServer.sendResponse(device, requestId,
                         BluetoothGatt.GATT_SUCCESS, 0, null);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                         "Write permission granted for "+device.getAddress()+" "+granted);
@@ -121,6 +120,7 @@ class BleGattServerAndroid extends BleGattServer {
                                          "Failed to notify peer device");
                              }
                         }
+
                         UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                                 "Response sent to "+device.getAddress());
                     }

@@ -54,7 +54,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
     }
 
     /**
-     * Constructor which will be used when creaating new instance for WiFi direct group creation request
+     * Constructor which will be used when creating new instance for WiFi direct group creation request
      * @param context Application context
      * @param message Message to be sent to the peer device (Carried WiFi group creation request)
      * @param peerToSendMessageTo Peer to send message to
