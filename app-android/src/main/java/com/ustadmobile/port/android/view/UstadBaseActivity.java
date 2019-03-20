@@ -70,6 +70,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private Runnable afterPermissionMethodRunner;
 
+    private Runnable runAfterServiceConnection;
+
     private String permissionDialogTitle;
 
     private String permissionDialogMessage;
@@ -99,6 +101,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                     .getService().getNetworkManagerBle();
             bleServiceBound = true;
             onBleNetworkServiceBound(networkManagerBle);
+
+            if(runAfterServiceConnection != null){
+                runAfterServiceConnection.run();
+                runAfterServiceConnection = null;
+            }
         }
 
         @Override
@@ -141,9 +148,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
      *
      * @param networkManagerBle
      */
-    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
-
-    }
+    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) { }
 
     protected void onBleNetworkServiceUnbound() {
 
@@ -248,7 +253,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         if(mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
         }
-
         super.onDestroy();
     }
 
@@ -264,8 +268,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                 impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
                         this), this);
                 return true;
-
-
         }
 
         return super.onOptionsItemSelected(item);
@@ -395,6 +397,17 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }
     }
 
+    /**
+     * Make sure NetworkManagerBle is not null when running a certain logic
+     * @param runnable Future task to be executed
+     */
+    public void runAfterServiceConnection(Runnable runnable){
+        this.runAfterServiceConnection = runnable;
+    }
+
+    /**
+     * @return Active NetworkManagerBle
+     */
     public NetworkManagerBle getNetworkManagerBle() {
         return networkManagerBle;
     }

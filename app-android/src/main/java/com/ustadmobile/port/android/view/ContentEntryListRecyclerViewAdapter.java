@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.arch.paging.PagedListAdapter;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -13,19 +14,22 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
+import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
-public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid,
-        ContentEntryListRecyclerViewAdapter.ViewHolder> {
+public class ContentEntryListRecyclerViewAdapter extends
+        PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid,
+        ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener {
 
     private final AdapterViewListener listener;
 
@@ -33,13 +37,31 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
 
     private Set<Long> containerUidsToMonitor = new HashSet<>();
 
-    private static final Object monitorObject  = new Object();
+    private WeakHashMap<Integer, ViewHolder> viewHolderWeakHashMap;
+
+    private NetworkManagerAndroidBle managerAndroidBle;
 
     ContentEntryListRecyclerViewAdapter(AdapterViewListener listener,
                                         LocalAvailabilityMonitor monitor) {
         super(DIFF_CALLBACK);
         this.listener = listener;
         this.monitor = monitor;
+        viewHolderWeakHashMap = new WeakHashMap<>();
+    }
+
+
+    void setNetworkManager(NetworkManagerAndroidBle managerAndroidBle){
+        this.managerAndroidBle = managerAndroidBle;
+        managerAndroidBle.addLocalAvailabilityListener(this);
+    }
+
+    @Override
+    public void onLocalAvailabilityChanged(Set<Long> locallyAvailableEntries) {
+        List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
+        for(ViewHolder viewHolder : viewHoldersToNotify){
+            boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
+            viewHolder.updateLocallyAvailabilityStatus(available);
+        }
     }
 
     protected interface AdapterViewListener {
@@ -56,23 +78,19 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
         return new ViewHolder(view);
     }
 
+
+
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         if(monitor != null){
             containerUidsToMonitor.clear();
-            monitor.stopMonitoringAvailability(monitorObject);
         }
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        ContentEntryWithContentEntryStatus entry = getItem(position);
-
-        List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
-        if(!containerUidList.isEmpty()){
-            monitor.startMonitoringAvailability(monitorObject,containerUidList);
-        }
+        ContentEntryWithStatusAndMostRecentContainerUid entry = getItem(position);
 
         if (entry == null) {
             holder.getEntryTitle().setText("");
@@ -82,7 +100,19 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
             holder.getView().setOnClickListener(null);
             holder.getDownloadView().setOnClickListener(null);
+            holder.getAvailabilityStatus().setText("");
+            holder.getAvailabilityIcon().setImageDrawable(null);
         } else {
+
+            boolean available = false;
+            if(managerAndroidBle != null)
+                available = managerAndroidBle.getLocalAvailabilityStatus(
+                        entry.getMostRecentContainer());
+
+            holder.updateLocallyAvailabilityStatus(available);
+
+            holder.setContainerUid(entry.getMostRecentContainer());
+            viewHolderWeakHashMap.put(entry.hashCode(),holder);
             holder.getView().setTag(entry.getContentEntryUid());
             holder.getEntryTitle().setText(entry.getTitle());
             holder.getEntryDescription().setText(entry.getDescription());
@@ -94,26 +124,29 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                         .into(holder.getThumbnailView());
             }
 
-            String contentDescription = null;
-            if (entry.getContentEntryStatus() != null) {
 
+            String contentDescription = null;
+            boolean showLocallyAvailabilityViews = true;
+            if (entry.getContentEntryStatus() != null) {
+                Context context = holder.getView().getContext();
                 ContentEntryStatus status = entry.getContentEntryStatus();
                 int dlStatus = status.getDownloadStatus();
 
                 if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.getTotalSize() > 0) {
-                    contentDescription = "Downloading";
+                    contentDescription = context.getString(R.string.download_entry_state_downloading);
                     holder.getDownloadView().setProgress((int) ((status.getBytesDownloadSoFar() * 100) / status.getTotalSize()));
                 } else {
-                    contentDescription = "Queued";
+                    contentDescription = context.getString(R.string.download_entry_state_queued);
                     holder.getDownloadView().setProgress(0);
                 }
 
                 if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
                     holder.getDownloadView().setImageResource(R.drawable.ic_pause_black_24dp);
-                    contentDescription = "Paused";
+                    contentDescription = context.getString(R.string.download_entry_state_paused);
                 } else if (dlStatus == JobStatus.COMPLETE) {
+                    showLocallyAvailabilityViews = false;
                     holder.getDownloadView().setImageResource(R.drawable.ic_offline_pin_black_24dp);
-                    contentDescription = "Downloaded";
+                    contentDescription = context.getString(R.string.download_entry_state_downloaded);
                 } else {
                     holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
                 }
@@ -121,6 +154,10 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                 holder.getDownloadView().setProgress(0);
                 holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
             }
+
+            int viewVisibility = showLocallyAvailabilityViews ? View.VISIBLE: View.GONE;
+            holder.getAvailabilityIcon().setVisibility(viewVisibility);
+            holder.getAvailabilityStatus().setVisibility(viewVisibility);
 
             ImageView iconView = holder.getIconView();
             int iconFlag = entry.getContentTypeFlag();
@@ -153,6 +190,11 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
         }
+
+        List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
+        if(!containerUidList.isEmpty()){
+            monitor.startMonitoringAvailability(monitor,containerUidList);
+        }
     }
 
     /**
@@ -163,26 +205,29 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
                 getCurrentList() == null ? new ArrayList<>() : getCurrentList();
         List<Long> uidsToMonitor = new ArrayList<>();
         for (ContentEntryWithStatusAndMostRecentContainerUid entry : currentDisplayedEntryList) {
-            if (entry !=null && entry.getContentEntryStatus() != null) {
-                boolean canBeMonitored = entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE
-                        && !containerUidsToMonitor.contains(entry.getMostRecentContainer());
-                if (canBeMonitored) {
-                    uidsToMonitor.add(entry.getMostRecentContainer());
-                }
+
+            boolean canBeMonitored = entry.getContentEntryStatus() == null ||
+                    entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE
+                    && !containerUidsToMonitor.contains(entry.getMostRecentContainer());
+            if (canBeMonitored) {
+                uidsToMonitor.add(entry.getMostRecentContainer());
             }
 
         }
         return uidsToMonitor;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder{
         final View mView;
         final TextView entryTitle;
         final TextView entryDescription;
         final TextView entrySize;
         final ImageView thumbnailView;
+        final ImageView availabilityIcon;
+        final TextView availabilityStatus;
         final DownloadStatusButton downloadView;
         final ImageView iconView;
+        private long containerUid;
 
         ViewHolder(View view) {
             super(view);
@@ -193,6 +238,25 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             thumbnailView = view.findViewById(R.id.content_entry_item_thumbnail);
             downloadView = view.findViewById(R.id.content_entry_item_download);
             iconView = view.findViewById(R.id.content_entry_item_imageview);
+            availabilityIcon = view.findViewById(R.id.content_entry_local_availability_icon);
+            availabilityStatus = view.findViewById(R.id.content_entry_local_availability_status);
+        }
+
+        void updateLocallyAvailabilityStatus(boolean available){
+            int icon = available ? R.drawable.ic_nearby_black_24px :
+                    R.drawable.ic_cloud_download_black_24dp;
+            int status = available ? R.string.download_locally_availability :
+                    R.string.download_cloud_availability;
+            getAvailabilityIcon().setImageResource(icon);
+            getAvailabilityStatus().setText(getView().getContext().getString(status));
+        }
+
+        void setContainerUid(long containerUid) {
+            this.containerUid = containerUid;
+        }
+
+        long getContainerUid() {
+            return containerUid;
         }
 
         @Override
@@ -226,6 +290,14 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
 
         public ImageView getIconView() {
             return iconView;
+        }
+
+        public ImageView getAvailabilityIcon() {
+            return availabilityIcon;
+        }
+
+        public TextView getAvailabilityStatus() {
+            return availabilityStatus;
         }
     }
 

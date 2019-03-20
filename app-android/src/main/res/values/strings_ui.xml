@@ -282,5 +282,9 @@
     <string name="download_locally_availability">Available nearby</string>
     <string name="download_cloud_availability">Available on cloud</string>
     <string name="clear_history">Clear History</string>
+    <string name="download_entry_state_downloading">Downloading</string>
+    <string name="download_entry_state_paused">Paused</string>
+    <string name="download_entry_state_queued">Queued</string>
+    <string name="download_entry_state_downloaded">Downloaded</string>
 
 </resources>

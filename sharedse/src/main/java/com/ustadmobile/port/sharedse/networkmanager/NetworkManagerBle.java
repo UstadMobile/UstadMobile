@@ -676,6 +676,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         return badNodeTracker.get(bluetoothAddress);
     }
 
+    public boolean getLocalAvailabilityStatus(long containerUid){
+        return locallyAvailableContainerUids.contains(containerUid);
+    }
+
 
     /**
      * Clean up the network manager for shutdown

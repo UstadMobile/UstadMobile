@@ -63,6 +63,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/content_entry_item_description" />
 
+    <ImageView
+        android:visibility="gone"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:id="@+id/content_entry_local_availability_icon"
+        android:src="@drawable/ic_location_pin_24dp"
+        android:layout_width="@dimen/dimen_20dp"
+        android:layout_height="@dimen/dimen_16dp"
+        app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+        app:layout_constraintEnd_toStartOf="@id/content_entry_local_availability_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
+        />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/content_entry_local_availability_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:gravity="start"
+        tools:text="Available locally"
+        android:textSize="13sp"
+        android:tint="@color/text_secondary"
+        app:layout_constraintStart_toEndOf="@id/content_entry_local_availability_icon"
+        app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size" />
+
     <com.ustadmobile.port.android.view.DownloadStatusButton
         android:id="@+id/content_entry_item_download"
         android:layout_width="42dp"
