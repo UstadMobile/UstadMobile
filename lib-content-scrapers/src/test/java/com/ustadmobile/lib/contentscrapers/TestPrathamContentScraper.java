@@ -95,15 +95,15 @@ public class TestPrathamContentScraper {
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamonebook.txt").url()).when(scraper).generatePrathamUrl("1");
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamlist.txt").url()).when(scraper).generatePrathamUrl("2");
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamempty.txt").url()).when(scraper).generatePrathamUrl("3");
-        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.epub").url()).when(scraper).generatePrathamEPubFileUrl(Mockito.anyString());
+        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip").url()).when(scraper).generatePrathamEPubFileUrl(Mockito.anyString());
         doReturn("").when(scraper).loginPratham();
 
         scraper.findContent(tmpDir, containerDir);
 
-        File resourceFolder = new File(tmpDir, "5859");
+        File resourceFolder = new File(tmpDir, "24620");
         Assert.assertEquals(true, resourceFolder.isDirectory());
 
-        File contentFile = new File(resourceFolder, "5859" + ETAG_TXT);
+        File contentFile = new File(resourceFolder, "24620" + ETAG_TXT);
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
 
