@@ -144,6 +144,7 @@ public class IndexPrathamContentScraper {
         }
 
         int retry = 0;
+        UMLogUtil.logTrace("Found a new list of items: " + contentBooksList.data.size());
         for (int contentCount = 0; contentCount < contentBooksList.data.size(); contentCount++) {
             HttpURLConnection connection = null;
             File resourceFolder = null;
@@ -152,6 +153,8 @@ public class IndexPrathamContentScraper {
                 BooksResponse.Data data = contentBooksList.data.get(contentCount);
 
                 URL epubUrl = generatePrathamEPubFileUrl(data.slug);
+
+                UMLogUtil.logTrace("Start scrape for " + data.slug);
 
                 String lang = getLangCode(data.language);
                 Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, lang);
@@ -185,7 +188,13 @@ public class IndexPrathamContentScraper {
 
                 try {
                     FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
+
+                    UMLogUtil.logTrace("downloaded the zip: " + content.getPath());
+
                     UmZipUtils.unzip(content, resourceFolder);
+
+                    UMLogUtil.logTrace("UnZipped the zip ");
+
                     File epub = new File(resourceFolder, data.slug + EPUB_EXT);
                     ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
                     options.styleElementHelper = styleElement -> {
@@ -216,10 +225,12 @@ public class IndexPrathamContentScraper {
                         }
                     };
                     File tmpFolder = ShrinkerUtil.shrinkEpub(epub, options);
+                    UMLogUtil.logTrace("Shrunk the Epub");
                     ContentScraperUtil.insertContainer(containerDao, contentEntry,
                             true, ScraperConstants.MIMETYPE_EPUB,
                             tmpFolder.lastModified(), tmpFolder,
                             db, repository, containerDir);
+                    UMLogUtil.logTrace("Completed: Created Container");
                     ContentScraperUtil.deleteFile(content);
                     ContentScraperUtil.deleteFile(epub);
 
@@ -228,8 +239,8 @@ public class IndexPrathamContentScraper {
                     retry++;
                     deleteETagOrModified(resourceFolder, String.valueOf(data.id));
                     if (retry == 2) {
-                        UMLogUtil.logInfo(ExceptionUtils.getStackTrace(io));
                         UMLogUtil.logError("Error for book " + data.title + " with id " + data.slug);
+                        UMLogUtil.logInfo(ExceptionUtils.getStackTrace(io));
                         retry = 0;
                         continue;
                     }
@@ -242,8 +253,8 @@ public class IndexPrathamContentScraper {
 
 
             } catch (Exception e) {
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Error saving book " + contentBooksList.data.get(contentCount).slug);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 if (resourceFolder != null) {
                     deleteETagOrModified(resourceFolder, resourceFolder.getName());
                 }
@@ -293,12 +304,10 @@ public class IndexPrathamContentScraper {
             conn.connect();
             String cookie = conn.getHeaderField("Set-Cookie");
             return cookie.substring(cookie.indexOf("_session"), cookie.indexOf(";"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (ProtocolException e) {
-            e.printStackTrace();
+            UMLogUtil.logError("Protocol Error for login to Pratham");
         } catch (IOException e) {
-            e.printStackTrace();
+            UMLogUtil.logError("IO Error for login to Pratham");
         } finally {
             if (conn != null) {
                 conn.disconnect();
