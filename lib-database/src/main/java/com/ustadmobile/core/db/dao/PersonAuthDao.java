@@ -52,6 +52,6 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
 
 
     @UmUpdate
-    public abstract void updateAsync(PersonAuth entity, UmCallback<Long> resultObject);
+    public abstract void updateAsync(PersonAuth entity, UmCallback<Integer> resultObject);
 
 }
