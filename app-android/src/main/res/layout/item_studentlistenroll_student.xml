@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/item_studentlist_student_cl"
     android:scrollHorizontally="false"
+    android:background="?android:selectableItemBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 

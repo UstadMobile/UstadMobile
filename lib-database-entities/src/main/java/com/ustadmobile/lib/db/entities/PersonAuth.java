@@ -20,6 +20,9 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 30)
 public class PersonAuth {
 
+    public static final int STATUS_SENT = 1;
+    public static final int STATUS_NOT_SENT = 0;
+
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long personAuthUid;
 
@@ -33,6 +36,8 @@ public class PersonAuth {
 
     @UmSyncLastChangedBy
     private int lastChangedBy;
+
+    private int personAuthStatus;
 
     public PersonAuth() {
 
@@ -81,5 +86,13 @@ public class PersonAuth {
 
     public void setLastChangedBy(int lastChangedBy) {
         this.lastChangedBy = lastChangedBy;
+    }
+
+    public int getPersonAuthStatus() {
+        return personAuthStatus;
+    }
+
+    public void setPersonAuthStatus(int personAuthStatus) {
+        this.personAuthStatus = personAuthStatus;
     }
 }

@@ -241,7 +241,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     @Override
     public void setHolidayPresets(String[] presets, int position) {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
-                android.R.layout.simple_spinner_item, presets);
+                R.layout.item_simple_spinner, presets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         holidaySpinner.setAdapter(adapter);
         holidaySpinner.setSelection(position);

@@ -45,5 +45,10 @@ public abstract class DateRangeDao implements SyncableDao<DateRange, DateRangeDa
     @UmUpdate
     public abstract void updateAsync(DateRange entity, UmCallback<Integer> result);
 
+    public void checkGivenDateAHolidayForClazz(long checkDate, long clazzUid){
+
+    }
+
+    //public abstract void checkGivenDateAHolidayForClazz2(long checkDate, long clazzUid);
 
 }

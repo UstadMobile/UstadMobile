@@ -6,12 +6,14 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="2dp"
     android:id="@+id/item_feedlist_feed_card"
+    android:background="?android:selectableItemBackground"
     android:layout_margin="10dp"
     android:elevation="2dp">
 
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
+        android:background="?android:selectableItemBackground"
         android:layout_height="match_parent">
 
 

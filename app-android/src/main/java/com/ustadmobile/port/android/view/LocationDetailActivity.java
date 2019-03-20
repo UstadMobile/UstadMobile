@@ -127,7 +127,7 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
         for(Location every_location : locations){
             long childLocationUid = every_location.getLocationUid();
             boolean selected = false;
-            if(selectedLocationList.contains(childLocationUid)){
+            if(selectedLocationList!= null && selectedLocationList.contains(childLocationUid)){
                 selected = true;
             }
             TreeNode<LocationLayoutType> app = new TreeNode<>(

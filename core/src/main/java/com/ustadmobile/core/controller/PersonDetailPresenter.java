@@ -574,4 +574,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         view.handleClickText(number);
     }
 
+    public void goToUpdateUsernamePassword() {
+    }
 }

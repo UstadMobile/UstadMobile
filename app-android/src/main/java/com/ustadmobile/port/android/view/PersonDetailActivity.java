@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -17,11 +19,14 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -78,17 +83,35 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     private String imagePathFromCamera;
     private static final int CAMERA_IMAGE_CAPTURE_REQUEST = 103 ;
 
+    private Menu mOptionsMenu;
+
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                onBackPressed();
-                return true;
+        int i = item.getItemId();
+        if (i == android.R.id.home) {
+            onBackPressed();
+            return true;
+
+        } else if (i == R.id.update_username_password) {
+            mPresenter.goToUpdateUsernamePassword();
+
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_person_detail, menu);
+        mOptionsMenu = menu;
+        return true;
     }
 
     @Override

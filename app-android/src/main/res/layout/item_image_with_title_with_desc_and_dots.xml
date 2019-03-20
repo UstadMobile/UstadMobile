@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/item_image_with_title_with_desc_and_dots_cl"
     android:layout_width="match_parent"
+    android:background="?android:selectableItemBackground"
     android:layout_height="wrap_content">
 
     <android.support.v7.widget.AppCompatImageView

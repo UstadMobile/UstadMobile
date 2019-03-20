@@ -110,7 +110,8 @@ public class ClazzEditPresenter
             @Override
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
-                view.updateClazzEditView(result);
+                view.runOnUiThread(() -> view.updateClazzEditView(result));
+
                 holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);

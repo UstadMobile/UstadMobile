@@ -436,12 +436,15 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " AND ClazzLog.done = 1 " +
             " AND ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
-            " AND ClazzLogAttendanceRecord.attendanceStatus =  " + ClazzLogAttendanceRecord.STATUS_ATTENDED + " ) * 1.0 " +
+            " ) * 1.0 " +
             " / " +
             " MAX(1.0, (SELECT COUNT(*)  FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
             " WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
-            " AND ClazzLog.done = 1) * 1.0) as attended_average " +
+            " AND ClazzLog.done = 1" +
+            " AND ClazzLog.logDate > :fromDate " +
+            " AND ClazzLog.logDate < :toDate " +
+            ") * 1.0) as attended_average " +
             " FROM ClazzMember " +
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT + " ")
