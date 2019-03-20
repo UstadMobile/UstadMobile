@@ -1,7 +1,10 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.util.Base64Coder;
@@ -43,5 +46,12 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
         return encryptPassword(providedPassword).equals(encryptedPassword);
     }
 
+
+    @UmQuery("SELECT * FROM PersonAuth WHERE personAuthUid = :uid")
+    public  abstract void findByUidAsync(long uid, UmCallback<PersonAuth> resultObject);
+
+
+    @UmUpdate
+    public abstract void updateAsync(PersonAuth entity, UmCallback<Long> resultObject);
 
 }

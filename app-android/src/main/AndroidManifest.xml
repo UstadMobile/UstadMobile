@@ -239,6 +239,9 @@
             android:name="com.ustadmobile.port.android.view.AuditLogListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
+            android:name="com.ustadmobile.port.android.view.PersonAuthDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity
             android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />

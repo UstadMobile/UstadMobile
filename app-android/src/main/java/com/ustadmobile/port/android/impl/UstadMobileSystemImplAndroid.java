@@ -102,6 +102,7 @@ import com.ustadmobile.core.view.LocationDetailView;
 import com.ustadmobile.core.view.LocationListView;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.core.view.PersonAuthDetailView;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
@@ -329,6 +330,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AuditLogListView.VIEW_NAME, AuditLogListActivity.class);
         viewNameToAndroidImplMap.put(AddDateRangeDialogView.VIEW_NAME, AddDateRangeDialogFragment.class);
         viewNameToAndroidImplMap.put(SelectClazzFeaturesView.VIEW_NAME, SelectClazzFeaturesDialogFragment.class);
+        viewNameToAndroidImplMap.put(PersonAuthDetailView.VIEW_NAME, PersonAuthDetailActivity.class);
 
     }
 

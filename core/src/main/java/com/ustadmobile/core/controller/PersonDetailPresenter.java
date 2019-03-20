@@ -15,6 +15,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.PersonAuthDetailView;
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.ustadmobile.core.view.PersonAuthDetailView.ARG_PERSONAUTH_PERSONUID;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.PersonPictureDialogView.ARG_PERSON_IMAGE_PATH;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
@@ -575,5 +577,9 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
     }
 
     public void goToUpdateUsernamePassword() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(ARG_PERSONAUTH_PERSONUID, currentPerson.getPersonUid());
+        impl.go(PersonAuthDetailView.VIEW_NAME, args, context);
     }
 }
