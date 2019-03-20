@@ -92,6 +92,7 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
             }
             currentPerson.setUsername(usernameSet);
             currentPersonAuth.setPasswordHash(PersonAuthDao.encryptPassword(passwordSet));
+            currentPersonAuth.setPersonAuthStatus(PersonAuth.STATUS_NOT_SENT);
             personDao.insertAsync(currentPerson, new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long result) {
