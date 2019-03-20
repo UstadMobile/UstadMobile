@@ -197,6 +197,7 @@ public class AsbScraper {
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
             URL makeUrl = generateMakeUrl(africanBooksUrl, bookId);
             File modifiedFile = new File(destinationDir, bookId + ScraperConstants.LAST_MODIFIED_TXT);
+            UMLogUtil.logTrace("Started with book id " + bookId);
             try {
 
                 driver.get(publishUrl.toString());
@@ -323,7 +324,7 @@ public class AsbScraper {
 
 
                 FileUtils.copyURLToFile(epubUrl, ePubFile);
-
+                UMLogUtil.logTrace("Got the epub");
                 if (ePubFile.length() == 0) {
                     ContentScraperUtil.deleteFile(modifiedFile);
                     retry++;
@@ -351,9 +352,11 @@ public class AsbScraper {
                     }
                 };
                 File tmpDir = ShrinkerUtil.shrinkEpub(ePubFile, options);
+                UMLogUtil.logTrace("Shrunk Epub");
                 ContentScraperUtil.insertContainer(containerDao, childEntry, true,
                         ScraperConstants.MIMETYPE_EPUB, ePubFile.lastModified(),
                         tmpDir, db, repository, containerDir);
+                UMLogUtil.logTrace("Completed: Created Container");
                 ContentScraperUtil.deleteFile(ePubFile);
 
             } catch (Exception e) {
