@@ -645,4 +645,8 @@ public abstract class UstadMobileSystemImpl {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context);
     }
 
+    public abstract void openFileInDefaultViewer(Object context, String path, String mimeType,
+                                                 UmCallback<Void> callback);
+
+
 }

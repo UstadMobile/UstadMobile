@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -403,9 +404,11 @@ public class TestShrinkerUtils {
 
         File tmpDir = Files.createTempDirectory("testShrinker").toFile();
 
-        File epub = new File(tmpDir, "epub.epub");
-        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.epub"),
-                epub);
+        File zip = new File(tmpDir, "epub.zip");
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip"),
+                zip);
+        File epub = new File(tmpDir, "24620-a-book-for-puchku.epub");
+        UmZipUtils.unzip(zip, tmpDir);
 
         ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
         options.styleElementHelper = styleElement -> {

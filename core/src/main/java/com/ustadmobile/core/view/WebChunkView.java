@@ -17,4 +17,6 @@ public interface WebChunkView extends UstadView {
     void showError(String message);
 
     void setToolbarTitle(String title);
+
+    void showErrorWithAction(String string, int get_app, String mimeType);
 }

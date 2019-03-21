@@ -22,6 +22,6 @@ public abstract class ShowErrorUmCallback<T> implements UmCallback<T> {
     @Override
     public void onFailure(Throwable exception) {
         view.showErrorNotification(UstadMobileSystemImpl.getInstance().getString(
-                errorMessage, view.getContext()));
+                errorMessage, view.getContext()), null, 0);
     }
 }
