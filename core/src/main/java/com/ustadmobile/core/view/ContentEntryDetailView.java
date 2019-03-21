@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import java.util.Hashtable;
 import java.util.List;
 
-public interface ContentEntryDetailView extends UstadView {
+public interface ContentEntryDetailView extends UstadView, ViewWithErrorNotifier {
 
     String VIEW_NAME = "ContentEntryDetail";
 
@@ -32,7 +32,9 @@ public interface ContentEntryDetailView extends UstadView {
 
     void setButtonTextLabel(String textLabel);
 
-    void showFileOpenError();
+    void showFileOpenError(String message, int actionMessageId, String mimeType);
+
+    void showFileOpenError(String message);
 
     void updateLocalAvailabilityViews(int icon, String status);
 

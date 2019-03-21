@@ -582,7 +582,7 @@ public class ContentScraperUtil {
 
         } else {
             ContentEntryContentCategoryJoin changedCategoryEntryJoin = new ContentEntryContentCategoryJoin();
-            changedCategoryEntryJoin.setCeccjUid(changedCategoryEntryJoin.getCeccjUid());
+            changedCategoryEntryJoin.setCeccjUid(categoryToSimulationJoin.getCeccjUid());
             changedCategoryEntryJoin.setCeccjContentCategoryUid(category.getContentCategoryUid());
             changedCategoryEntryJoin.setCeccjContentEntryUid(childEntry.getContentEntryUid());
             if (!changedCategoryEntryJoin.equals(categoryToSimulationJoin)) {

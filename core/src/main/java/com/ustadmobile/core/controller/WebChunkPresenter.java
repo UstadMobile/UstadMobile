@@ -3,13 +3,14 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.NoAppFoundException;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
-import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.lib.db.entities.Container;
@@ -18,7 +19,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import java.util.Hashtable;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
-import static com.ustadmobile.core.view.WebChunkView.ARG_CHUNK_PATH;
 import static com.ustadmobile.core.view.WebChunkView.ARG_CONTAINER_UID;
 import static com.ustadmobile.core.view.WebChunkView.ARG_CONTENT_ENTRY_ID;
 
@@ -96,7 +96,14 @@ public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
 
                     @Override
                     public void onFailure(Throwable exception) {
-                        view.runOnUiThread(() -> view.showError(exception.getMessage()));
+                        String message = exception.getMessage();
+                        if (exception instanceof NoAppFoundException) {
+                            view.runOnUiThread(() -> view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                                    MessageID.get_app,
+                                    ((NoAppFoundException) exception).getMimeType()));
+                        } else {
+                            view.runOnUiThread(() -> view.showError(message));
+                        }
                     }
                 });
     }

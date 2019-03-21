@@ -22,7 +22,7 @@ public abstract class ShowErrorUmHttpResponseCallback implements UmHttpResponseC
 
     @Override
     public void onComplete(UmHttpCall call, UmHttpResponse response) {
-        if(!response.isSuccessful()) {
+        if (!response.isSuccessful()) {
             onFailure(call, new IOException());
         }
     }
@@ -30,6 +30,6 @@ public abstract class ShowErrorUmHttpResponseCallback implements UmHttpResponseC
     @Override
     public void onFailure(UmHttpCall call, IOException exception) {
         view.showErrorNotification(UstadMobileSystemImpl.getInstance().getString(errorMessageId,
-                view.getContext()));
+                view.getContext()), null, 0);
     }
 }
