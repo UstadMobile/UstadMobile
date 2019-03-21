@@ -99,5 +99,44 @@ public class TestAsyncServiceManager {
                 lastStopTime.get() > lastStartTime.get());
     }
 
+    @Test
+    public void givenServiceStarting_whenAwaitCalled_shouldWaitForStarting() throws InterruptedException {
+        AsyncServiceManager serviceManager = setupAsyncServiceManagerMock(200, 1000);
+        serviceManager.setEnabled(true);
+        serviceManager.await(state -> state == AsyncServiceManager.STATE_STARTED, 2000,
+                TimeUnit.MILLISECONDS);
+        verify(serviceManager, times(1)).start();
+        Assert.assertEquals(AsyncServiceManager.STATE_STARTED, serviceManager.getState());
+    }
+
+    @Test
+    public void givenServiceStopped_whenStartingFails_shouldTargetStateStopped() throws InterruptedException {
+        AsyncServiceManager asyncServiceManager = spy(AsyncServiceManager.class);
+        doAnswer(invocation -> {
+            new Thread(() -> {
+                lastStartTime.set(System.currentTimeMillis());
+                try { Thread.sleep(200); }
+                catch(InterruptedException e) {}
+                asyncServiceManager.notifyStateChanged(AsyncServiceManager.STATE_STOPPED,
+                        AsyncServiceManager.STATE_STOPPED);
+            }).start();
+            return null;
+        }).when(asyncServiceManager).start();
+
+        scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
+        asyncServiceManager.setDelayedExecutor((runnable, delay) -> {
+            scheduledExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+        });
+
+        asyncServiceManager.setEnabled(true);
+        asyncServiceManager.await(state -> state == AsyncServiceManager.STATE_STOPPED,
+                5000, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals("When a service is asked to start, but fails, both the" +
+                "state and targe state can revert to stopped", AsyncServiceManager.STATE_STOPPED,
+                asyncServiceManager.getState());
+    }
+
 
 }
