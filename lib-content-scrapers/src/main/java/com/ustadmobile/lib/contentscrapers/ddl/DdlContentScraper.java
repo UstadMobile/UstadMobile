@@ -104,15 +104,16 @@ public class DdlContentScraper {
 
         Elements downloadList = doc.select("span.download-item a[href]");
 
-        String thumbnail = doc.selectFirst("aside img").attr("src");
+        Element imgTag = doc.selectFirst("aside img");
+        String thumbnail = imgTag != null ? imgTag.attr("src") : EMPTY_STRING;
 
         String lang = doc.select("html").attr("lang");
         Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
         String description = doc.selectFirst("meta[name=description]").attr("content");
         Element authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p");
-        String author = authorTag != null ? authorTag.text() : "";
+        String author = authorTag != null ? authorTag.text() : EMPTY_STRING;
         Element publisherTag = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p");
-        String publisher = publisherTag != null ? publisherTag.text() : "";
+        String publisher = publisherTag != null ? publisherTag.text() : EMPTY_STRING;
 
 
         ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(urlString, doc.title(),
@@ -142,11 +143,6 @@ public class DdlContentScraper {
 
                 boolean isUpdated = ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href));
 
-                if (ContentScraperUtil.fileHasContent(resourceFile)) {
-                    isUpdated = false;
-                    ContentScraperUtil.deleteFile(resourceFile);
-                }
-
                 if (!isUpdated) {
                     continue;
                 }
@@ -155,7 +151,6 @@ public class DdlContentScraper {
 
                 ContentScraperUtil.insertContainer(containerDao, contentEntry, true, mimeType,
                         resourceFile.lastModified(), resourceFile, db, repository, containerDir);
-                ContentScraperUtil.deleteFile(resourceFile);
 
                 contentEntries.add(contentEntry);
             } catch (Exception e) {
