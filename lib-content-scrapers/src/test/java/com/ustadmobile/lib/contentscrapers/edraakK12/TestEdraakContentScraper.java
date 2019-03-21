@@ -273,13 +273,4 @@ public class TestEdraakContentScraper {
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 
     }
-
-    @Test
-    public void test(){
-
-        EdraakK12ContentScraper.main(new String[] {"https://programs.edraak.org/api/component/5a608cc76380a6049b33feb6/?states_program_id=0",
-                "D:\\content\\test-edraak", "D:\\content\\test-container"});
-
-    }
-
 }
