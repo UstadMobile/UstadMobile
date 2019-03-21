@@ -30,13 +30,9 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  *
  * @author kileha3
  */
-public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
+public abstract class BleGattServer {
 
     private NetworkManagerBle networkManager;
-
-    private CountDownLatch mLatch = new CountDownLatch(1);
-
-    private String message = null;
 
     private Object context;
 
@@ -86,27 +82,12 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                         bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_REQUEST:
-                networkManager.handleWiFiDirectGroupChangeRequest(this);
-                networkManager.createWifiDirectGroup();
-                try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
-                catch(InterruptedException e) {
-                    mLatch.countDown();
-                    e.printStackTrace();
-                }
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
+                WiFiDirectGroupBle group = networkManager.awaitWifiDirectGroupReady(5000,
+                        TimeUnit.MILLISECONDS);
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
+                        new Gson().toJson(group).getBytes());
             default: return null;
         }
     }
 
-    @Override
-    public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        group.setEndpoint("http://192.168.49.1:"+ networkManager.getHttpd().getListeningPort()+"/");
-        this.message = new Gson().toJson(group);
-        mLatch.countDown();
-    }
-
-    @Override
-    public void groupRemoved(boolean successful, Exception err) {
-
-    }
 }

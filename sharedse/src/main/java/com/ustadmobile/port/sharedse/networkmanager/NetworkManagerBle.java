@@ -17,7 +17,6 @@ import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import fi.iki.elonen.NanoHTTPD;
 
 import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
 
@@ -55,17 +54,26 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     /**
      * Flag to indicate wifi direct group is inactive and it is not under creation
      */
+    @Deprecated
     public static final int WIFI_DIRECT_GROUP_INACTIVE_STATUS = 0;
 
     /**
      * Flag to indicate Wifi direct group is being created now
      */
+    @Deprecated
     public static final int WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS = 1;
 
     /**
      * Flag to indicate Wifi direct group is active
      */
+    @Deprecated
     public static final int WIFI_DIRECT_GROUP_ACTIVE_STATUS = 2;
+
+    /**
+     * Flag that the wifi direct group is currently being removed
+     */
+    @Deprecated
+    public static final int WIFI_DIRECT_GROUP_BEING_REMOVED = 3;
 
     /**
      * Flag to indicate entry status request
@@ -101,6 +109,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     /**
      * Wifi direct change current status
      */
+    @Deprecated
     protected int wifiDirectGroupChangeStatus = 0;
 
     /**
@@ -160,6 +169,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     private UmAppDatabase umAppDatabase;
 
     private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
+
+    private final Vector<NanoHTTPD.Response> activeClientResponses = new Vector<>();
 
     /**
      * Constructor to be used for testing purpose (mocks)
@@ -233,30 +244,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public abstract boolean canDeviceAdvertise();
 
-    /**
-     * Start advertising BLE service to the peer devices
-     * <b>Use case</b>
-     * When this method called, it will create BLE service and start advertising it.
-     */
-    public abstract void startAdvertising();
-
-    /**
-     * Stop advertising the service which was created and advertised by
-     * {@link NetworkManagerBle#startAdvertising()}
-     */
-    public abstract void stopAdvertising();
-
-    /**
-     * Start scanning for the peer devices whose services are being advertised
-     */
-    public abstract void startScanning();
-
-    /**
-     * Stop scanning task which was started by {@link NetworkManagerBle#startScanning()}
-     */
-    public abstract void stopScanning();
-
-
     private void handleNode(NetworkNodeDao networkNodeDao,
                             NetworkNode node , long updateTime){
         try{
@@ -309,6 +296,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     }
 
+    public abstract WiFiDirectGroupBle awaitWifiDirectGroupReady(long timeout, TimeUnit timeoutUnit);
+
     /**
      * Open bluetooth setting section from setting panel
      */
@@ -321,31 +310,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * @return true if the operation is successful, false otherwise
      */
     public abstract boolean setWifiEnabled(boolean enabled);
-
-    /**
-     * Create a new WiFi direct group on this device. A WiFi direct group
-     * will create a new SSID and passphrase other devices can use to connect in "legacy" mode.
-     *
-     * The process is asynchronous and the {@link WiFiDirectGroupListenerBle} should be used to
-     * listen for group creation.
-     *
-     * If a WiFi direct group is already under creation this method has no effect.
-     */
-    public abstract void createWifiDirectGroup();
-
-    /**
-     * Get current active WiFi Direct group (if any)
-     *
-     * @return The active WiFi direct group (if any) - otherwise null
-     */
-    public abstract WiFiDirectGroupBle getWifiDirectGroup();
-
-    /**
-     * Remove a WiFi group from the device.The process is asynchronous and the
-     * {@link WiFiDirectGroupListenerBle} should be used to listen for
-     * group removal.
-     */
-    public abstract void removeWifiDirectGroup();
 
     /**
      * Get Wifi direct group change status
@@ -361,35 +325,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     void setWifiDirectGroupChangeStatus(int wifiDirectGroupChangeStatus) {
         this.wifiDirectGroupChangeStatus = wifiDirectGroupChangeStatus;
-    }
-
-    /**
-     * Add all group change listeners to the list
-     * @param groupListenerBle Listener interface
-     *
-     * @see WiFiDirectGroupListenerBle
-     */
-    void handleWiFiDirectGroupChangeRequest(WiFiDirectGroupListenerBle groupListenerBle){
-        if(!wiFiDirectGroupListeners.contains(groupListenerBle)){
-            wiFiDirectGroupListeners.add(groupListenerBle);
-        }
-    }
-
-    /**
-     * Notify all listening object that Wifi direct group has been changed
-     * @param isCreated True if change was CREATION otherwise REMOVAL
-     * @param group Group information
-     *
-     * @see WiFiDirectGroupBle
-     */
-    protected void fireWiFiDirectGroupChanged(boolean isCreated, WiFiDirectGroupBle group){
-        for(WiFiDirectGroupListenerBle groupListenerBle : wiFiDirectGroupListeners){
-            if(isCreated){
-                groupListenerBle.groupCreated(group,null);
-            }else{
-                groupListenerBle.groupRemoved(true,null);
-            }
-        }
     }
 
 
@@ -553,7 +488,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     /**
      * @return Active RouterNanoHTTPD
      */
-    public abstract RouterNanoHTTPD getHttpd();
+    public abstract EmbeddedHTTPD getHttpd();
 
 
 
@@ -574,11 +509,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
         makeDeleteJobTask(mContext,args).run();
     }
-
-    /**
-     * Send p2p state changes to either stop or start p2p service advertising & broadcasting
-     */
-    public abstract void sendP2PStateChangeBroadcast();
 
 
     public void addLocalAvailabilityListener(LocalAvailabilityListener listener) {
