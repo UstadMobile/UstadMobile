@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.view;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
@@ -9,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
@@ -34,8 +35,9 @@ import java.util.Set;
 
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
+import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
 
-public class ContentEntryDetailActivity  extends UstadBaseActivity implements
+public class ContentEntryDetailActivity extends UstadBaseActivity implements
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
         LocalAvailabilityMonitor, LocalAvailabilityListener {
 
@@ -65,7 +67,7 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
 
     private DownloadProgressView downloadProgress;
 
-    HashMap<Integer,Integer> fileStatusIcon = new HashMap<>();
+    HashMap<Integer, Integer> fileStatusIcon = new HashMap<>();
 
 
     @Override
@@ -73,7 +75,7 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         super.onBleNetworkServiceBound(networkManagerBle);
         managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this,this);
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this, this);
         entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
         entryDetailPresenter.onStart();
         managerAndroidBle.addLocalAvailabilityListener(this);
@@ -96,8 +98,8 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         translationAvailableLabel = findViewById(R.id.entry_detail_available_label);
         flexBox = findViewById(R.id.entry_detail_flex);
 
-        fileStatusIcon.put(LOCALLY_AVAILABLE_ICON,R.drawable.ic_nearby_black_24px);
-        fileStatusIcon.put(LOCALLY_NOT_AVAILABLE_ICON,R.drawable.ic_cloud_download_black_24dp);
+        fileStatusIcon.put(LOCALLY_AVAILABLE_ICON, R.drawable.ic_nearby_black_24px);
+        fileStatusIcon.put(LOCALLY_NOT_AVAILABLE_ICON, R.drawable.ic_cloud_download_black_24dp);
 
         setUMToolbar(R.id.entry_detail_toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -191,16 +193,32 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
     }
 
 
-
     @Override
     public void setButtonTextLabel(String textLabel) {
         downloadButton.setText(textLabel);
     }
 
     @Override
-    public void showFileOpenError() {
-        Toast.makeText((Context) getContext(), R.string.error, Toast.LENGTH_LONG).show();
+    public void showFileOpenError(String message, int actionMessageId, String mimeType) {
+        showErrorNotification(message, () -> {
+            Context ctx = (Context) getContext();
+            String appPackageName = mimeTypeToPlayStoreIdMap.get(mimeType);
+            if (appPackageName == null) {
+                appPackageName = "cn.wps.moffice_eng";
+            }
+            try {
+                ctx.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (android.content.ActivityNotFoundException anfe) {
+                ctx.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+            }
+        }, actionMessageId);
     }
+
+    @Override
+    public void showFileOpenError(String message) {
+        showErrorNotification(message, null, 0);
+    }
+
 
     @Override
     public void updateLocalAvailabilityViews(int icon, String status) {
@@ -249,8 +267,8 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 () -> impl.go("DownloadDialog", args, getContext()),
-                impl.getString(MessageID.download_storage_permission_title,getContext()),
-                impl.getString(MessageID.download_storage_permission_message,getContext()));
+                impl.getString(MessageID.download_storage_permission_title, getContext()),
+                impl.getString(MessageID.download_storage_permission_message, getContext()));
     }
 
     @Override
@@ -260,7 +278,7 @@ public class ContentEntryDetailActivity  extends UstadBaseActivity implements
 
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
-        managerAndroidBle.startMonitoringAvailability(monitor,entryUidsToMonitor);
+        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor);
     }
 
     @Override

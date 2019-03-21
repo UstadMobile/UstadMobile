@@ -121,7 +121,7 @@ public class VoaScraper implements Runnable {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logTrace(ExceptionUtils.getStackTrace(e));
             ContentScraperUtil.deleteFile(
                     new File(destinationDir,
                             FilenameUtils.getBaseName(scrapUrl.getPath()) + ScraperConstants.LAST_MODIFIED_TXT));

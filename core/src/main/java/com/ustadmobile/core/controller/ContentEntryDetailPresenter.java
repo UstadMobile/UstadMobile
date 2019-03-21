@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.NoAppFoundException;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -66,6 +67,8 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     private static final int TIME_INTERVAL_FROM_LAST_FAILURE = 5;
 
     private UstadMobileSystemImpl impl;
+
+    public static final String NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype";
 
     public ContentEntryDetailPresenter(Object context, Hashtable arguments,
                                        ContentEntryDetailView viewContract, LocalAvailabilityMonitor monitor) {
@@ -279,7 +282,14 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
                         @Override
                         public void onFailure(Throwable exception) {
-                            view.runOnUiThread(view::showFileOpenError);
+                            String message = exception.getMessage();
+                            if (exception instanceof NoAppFoundException) {
+                                view.runOnUiThread(() -> view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
+                                        MessageID.get_app,
+                                        ((NoAppFoundException) exception).getMimeType()));
+                            } else {
+                                view.runOnUiThread(() -> view.showFileOpenError(message));
+                            }
                         }
                     });
 

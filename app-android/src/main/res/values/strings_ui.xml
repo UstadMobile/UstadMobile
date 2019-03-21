@@ -208,7 +208,6 @@
     <string name="options_uni_kunduz" value="1029">Kunduz University</string>
 
 
-
     <string name="options_gender_female" value="1007">Female</string>
     <string name="options_gender_male" value="1008">Male</string>
 
@@ -282,5 +281,7 @@
     <string name="download_locally_availability">Available nearby</string>
     <string name="download_cloud_availability">Available on cloud</string>
     <string name="clear_history">Clear History</string>
+    <string name="get_app">Get app</string>
+    <string name="no_app_found">"No app found to open file"</string>
 
 </resources>

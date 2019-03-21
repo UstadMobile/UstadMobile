@@ -38,7 +38,6 @@ public class ContentEntryListActivity extends UstadBaseActivity implements Conte
                     .add(R.id.entry_content, currentFrag)
                     .commit();
         }
-
     }
 
     @Override
@@ -53,7 +52,7 @@ public class ContentEntryListActivity extends UstadBaseActivity implements Conte
     }
 
     private void clickUpNavigation() {
-        runOnUiThread(() ->{
+        runOnUiThread(() -> {
             ContentEntryListFragment fragment = (ContentEntryListFragment) getSupportFragmentManager().findFragmentById(R.id.entry_content);
             fragment.clickUpNavigation();
         });
