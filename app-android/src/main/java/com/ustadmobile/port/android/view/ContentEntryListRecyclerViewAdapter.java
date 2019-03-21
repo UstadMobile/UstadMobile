@@ -21,9 +21,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -49,7 +51,6 @@ public class ContentEntryListRecyclerViewAdapter extends
         viewHolderWeakHashMap = new WeakHashMap<>();
     }
 
-
     void setNetworkManager(NetworkManagerAndroidBle managerAndroidBle){
         this.managerAndroidBle = managerAndroidBle;
         managerAndroidBle.addLocalAvailabilityListener(this);
@@ -68,6 +69,19 @@ public class ContentEntryListRecyclerViewAdapter extends
         void contentEntryClicked(ContentEntry entry);
 
         void downloadStatusClicked(ContentEntry entry);
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+
+        for(Map.Entry<Integer,ViewHolder> holderMap : viewHolderWeakHashMap.entrySet()){
+            if(holderMap.getValue().equals(holder)){
+                viewHolderWeakHashMap.remove(holderMap.getKey());
+                break;
+            }
+        }
+        super.onViewRecycled(holder);
+
     }
 
 

@@ -124,10 +124,10 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void onAttach(Context context) {
         if(context instanceof UstadBaseActivity){
             this.ustadBaseActivity = ((UstadBaseActivity)context);
-            ustadBaseActivity.runAfterServiceConnection(()->{
-                    managerAndroidBle = (NetworkManagerAndroidBle)
-                            ustadBaseActivity.getNetworkManagerBle();
-                    recyclerAdapter.setNetworkManager(managerAndroidBle);
+            ustadBaseActivity.runAfterServiceConnection( ()-> {
+                managerAndroidBle = (NetworkManagerAndroidBle)ustadBaseActivity
+                        .getNetworkManagerBle();
+                recyclerAdapter.setNetworkManager(managerAndroidBle);
             });
         }
 
