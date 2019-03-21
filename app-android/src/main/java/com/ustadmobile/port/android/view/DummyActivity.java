@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view;
 import android.Manifest;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,8 +18,8 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.DummyView;
-
-import java.util.concurrent.TimeUnit;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
 import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
@@ -75,19 +74,14 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        new Handler().postDelayed(() -> {
-            if(networkManagerBle != null){
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                        () -> networkManagerBle.sendP2PStateChangeBroadcast(),
-                        impl.getString(MessageID.location_permission_title,getContext()),
-                        impl.getString(MessageID.location_permission_message,getContext()));
-            }
-        }, TimeUnit.SECONDS.toMillis(2));
+    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
+        super.onBleNetworkServiceBound(networkManagerBle);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                ((NetworkManagerAndroidBle) networkManagerBle)::checkP2PBleServices,
+                impl.getString(MessageID.location_permission_title,getContext()),
+                impl.getString(MessageID.location_permission_message,getContext()));
     }
-
 
     public static class LibraryPagerAdapter extends FragmentPagerAdapter {
         private static int NUM_ITEMS = 2;

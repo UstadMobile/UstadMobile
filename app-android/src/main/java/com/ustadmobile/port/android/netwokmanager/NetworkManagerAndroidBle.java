@@ -31,12 +31,10 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.net.ConnectivityManagerCompat;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -64,8 +62,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static android.os.Looper.getMainLooper;
 
@@ -160,14 +156,20 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         handleNodeDiscovered(networkNode);
     };
 
-    private AsyncServiceManager scanningServiceManager = new AsyncServiceManager() {
+    private Handler delayedExecutionHandler = new Handler();
+
+    private AsyncServiceManager scanningServiceManager = new AsyncServiceManager(
+            AsyncServiceManager.STATE_STOPPED,
+            ((runnable, delay) -> delayedExecutionHandler.postDelayed(runnable, delay))) {
         @Override
         public void start() {
             if(isBleCapable()){
                 notifyStateChanged(STATE_STARTED);
                 bleScanningLastStartTime = System.currentTimeMillis();
-                bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()},
+                bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
                         leScanCallback);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "BLE Scanning started ");
             }else{
                 notifyStateChanged(STATE_STOPPED);
                 UstadMobileSystemImpl.l(UMLog.ERROR,689,
@@ -182,7 +184,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         }
     };
 
-    private AsyncServiceManager advertisingServiceManager = new AsyncServiceManager() {
+    private AsyncServiceManager advertisingServiceManager = new AsyncServiceManager(
+            AsyncServiceManager.STATE_STOPPED,
+            ((runnable, delay) -> delayedExecutionHandler.postDelayed(runnable, delay))) {
         @Override
         public void start() {
             if(canDeviceAdvertise()){
@@ -263,6 +267,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 }
             }
         };
+
+        private WifiP2PGroupServiceManager() {
+            super(STATE_STOPPED,
+                    (runnable, delay) -> delayedExecutionHandler.postDelayed(runnable, delay));
+        }
 
         protected BroadcastReceiver getWifiP2pBroadcastReceiver() {
             return wifiP2pBroadcastReceiver;

@@ -52,30 +52,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         LiveDataWorkQueue.OnQueueEmptyListener {
 
     /**
-     * Flag to indicate wifi direct group is inactive and it is not under creation
-     */
-    @Deprecated
-    public static final int WIFI_DIRECT_GROUP_INACTIVE_STATUS = 0;
-
-    /**
-     * Flag to indicate Wifi direct group is being created now
-     */
-    @Deprecated
-    public static final int WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS = 1;
-
-    /**
-     * Flag to indicate Wifi direct group is active
-     */
-    @Deprecated
-    public static final int WIFI_DIRECT_GROUP_ACTIVE_STATUS = 2;
-
-    /**
-     * Flag that the wifi direct group is currently being removed
-     */
-    @Deprecated
-    public static final int WIFI_DIRECT_GROUP_BEING_REMOVED = 3;
-
-    /**
      * Flag to indicate entry status request
      */
     public static final byte ENTRY_STATUS_REQUEST = (byte) 111;
@@ -105,12 +81,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * Maximum MTU for the packet transfer
      */
     public static final int MAXIMUM_MTU_SIZE = 512;
-
-    /**
-     * Wifi direct change current status
-     */
-    @Deprecated
-    protected int wifiDirectGroupChangeStatus = 0;
 
     /**
      * Bluetooth Low Energy service UUID for our app
@@ -169,8 +139,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     private UmAppDatabase umAppDatabase;
 
     private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
-
-    private final Vector<NanoHTTPD.Response> activeClientResponses = new Vector<>();
 
     /**
      * Constructor to be used for testing purpose (mocks)
@@ -311,22 +279,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public abstract boolean setWifiEnabled(boolean enabled);
 
-    /**
-     * Get Wifi direct group change status
-     * @return Current status
-     */
-    int getWifiDirectGroupChangeStatus() {
-        return wifiDirectGroupChangeStatus;
-    }
-
-    /**
-     * Set Wifi direct group change status
-     * @param wifiDirectGroupChangeStatus Status to be changed to
-     */
-    void setWifiDirectGroupChangeStatus(int wifiDirectGroupChangeStatus) {
-        this.wifiDirectGroupChangeStatus = wifiDirectGroupChangeStatus;
-    }
-
 
     /**
      * Start monitoring availability of specific entries from peer devices
@@ -336,6 +288,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
         try{
+            //isStopMonitoring = false;
             availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
             UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Registered a monitor with "
                     + entryUidsToMonitor.size() + " entry(s) to be monitored");
