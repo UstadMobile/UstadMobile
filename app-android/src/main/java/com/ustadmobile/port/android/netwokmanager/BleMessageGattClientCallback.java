@@ -125,6 +125,10 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         super.onServicesDiscovered(gatt, status);
         BluetoothGattService service = findMatchingService(gatt.getServices());
         if(service == null){
+            UstadMobileSystemImpl.l(UMLog.ERROR,698,
+                    "ERROR Ustadmobile Service not found on " + gatt.getDevice().getAddress());
+            responseListener.onResponseReceived(gatt.getDevice().getAddress(), null,
+                    new IOException("UstadMobile service not found on device"));
             return;
         }
 

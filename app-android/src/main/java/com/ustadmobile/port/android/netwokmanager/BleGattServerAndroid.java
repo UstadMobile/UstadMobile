@@ -99,7 +99,7 @@ class BleGattServerAndroid extends BleGattServer {
                             "Request received with default MTU size of " + currentMtuSize);
 
                     //Send back response
-                    BleMessage messageToSend =  handleRequest(receivedMessage);
+                    BleMessage messageToSend = handleRequest(receivedMessage);
                     receivedMessage.reset();
                     UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                             "Prepare response to send back to "+device.getAddress());
