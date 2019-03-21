@@ -31,12 +31,10 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.net.ConnectivityManagerCompat;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -63,9 +61,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import fi.iki.elonen.NanoHTTPD;
 
 import static android.os.Looper.getMainLooper;
 
@@ -82,7 +82,8 @@ import static android.os.Looper.getMainLooper;
  *
  *  @author kileha3
  */
-public class NetworkManagerAndroidBle extends NetworkManagerBle{
+public class NetworkManagerAndroidBle extends NetworkManagerBle
+        implements EmbeddedHTTPD.ResponseListener{
 
     private WifiManager wifiManager;
 
@@ -130,6 +131,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private volatile long bleScanningLastStartTime;
 
+    private AtomicLong wifiDirectGroupLastRequestedTime = new AtomicLong();
+
+    private AtomicLong wifiDirectRequestLastCompletedTime = new AtomicLong();
+
+    private AtomicInteger numActiveRequests = new AtomicInteger();
     /**
      *
      */
@@ -169,9 +175,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()},
                         leScanCallback);
             }else{
-                notifyStateChanged(STATE_STOPPED);
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
                 UstadMobileSystemImpl.l(UMLog.ERROR,689,
-                        "Scanning already started or not BLE capable, no need to start");
+                        "Not BLE capable, no need to start");
             }
         }
 
@@ -201,7 +207,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 if(gattServerAndroid == null
                     || ((BleGattServerAndroid)gattServerAndroid).getGattServer() == null
                     || bleServiceAdvertiser == null) {
-                    notifyStateChanged(STATE_STOPPED);
+                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
                     return;
                 }
 
@@ -228,13 +234,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                             @Override
                             public void onStartFailure(int errorCode) {
                                 super.onStartFailure(errorCode);
-                                notifyStateChanged(STATE_STOPPED);
+                                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
                                 UstadMobileSystemImpl.l(UMLog.ERROR,689,
                                         "Service could'nt start, with error code "+errorCode);
                             }
                         });
             }else {
-                notifyStateChanged(STATE_STOPPED);
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
             }
         }
 
@@ -252,15 +258,40 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
         private AtomicReference<WiFiDirectGroupBle> wiFiDirectGroup = new AtomicReference<>();
 
+        private Handler timeoutCheckHandler = new Handler();
+
+        private static final int TIMEOUT_AFTER_GROUP_CREATION = 2* 60 * 1000;
+
+        private static final int TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000;
+
+        private static final int TIMEOUT_CHECK_INTERVAL = 30 * 1000;
+
+        private class CheckTimeoutRunnable implements Runnable {
+            public void run() {
+                long timeNow = System.currentTimeMillis();
+                boolean timedOut = numActiveRequests.get() == 0
+                        && (timeNow - wifiDirectGroupLastRequestedTime.get()) > TIMEOUT_AFTER_GROUP_CREATION
+                        && (timeNow - wifiDirectRequestLastCompletedTime.get()) > TIMEOUT_AFTER_LAST_REQUEST;
+                setEnabled(!timedOut);
+
+                if(getState() != STATE_STOPPED)
+                    timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(),
+                            TIMEOUT_CHECK_INTERVAL);
+            }
+        }
+
         private BroadcastReceiver wifiP2pBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if(getState() == STATE_STARTING || getState() == STATE_STOPPING) {
-                    wifiP2pManager.requestGroupInfo(wifiP2pChannel, (group) -> {
-                        wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group) : null);
-                        notifyStateChanged(group != null ? STATE_STARTED : STATE_STOPPED);
-                    });
-                }
+                wifiP2pManager.requestGroupInfo(wifiP2pChannel, (group) -> {
+                    wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group) : null);
+                    if((group == null && getState() == STATE_STARTING)
+                        || (group != null && getState() == STATE_STOPPING)) {
+                        return;//it's working on it, and hasn't failed yet, don't notify status change
+                    }
+
+                    notifyStateChanged(group != null ? STATE_STARTED : STATE_STOPPED);
+                });
             }
         };
 
@@ -270,6 +301,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
         @Override
         public void start() {
+            timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(), TIMEOUT_CHECK_INTERVAL);
             wifiP2pManager.requestGroupInfo(wifiP2pChannel,
                     (wifiP2pGroup) -> {
                         if(wifiP2pGroup != null) {
@@ -293,7 +325,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 public void onFailure(int reason) {
                     UstadMobileSystemImpl.l(UMLog.ERROR,692,
                             "Failed to create a group with error code "+reason);
-                    notifyStateChanged(STATE_STOPPED);
+                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
                 }
             });
         }
@@ -305,6 +337,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 public void onSuccess() {
                     UstadMobileSystemImpl.l(UMLog.ERROR,693,
                             "Group removed successfully");
+                    wiFiDirectGroup.set(null);
                     notifyStateChanged(STATE_STOPPED);
                 }
 
@@ -312,8 +345,18 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
                 public void onFailure(int reason) {
                     UstadMobileSystemImpl.l(UMLog.ERROR,693,
                             "Failed to remove a group with error code " + reason);
-                    //check if wifi is enabled here
-                    notifyStateChanged(STATE_STARTED);
+
+                    //check if the group is still active
+                    wifiP2pManager.requestGroupInfo(wifiP2pChannel,
+                            (wifiP2pGroup) -> {
+                                if(wifiP2pGroup != null) {
+                                    wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup));
+                                    notifyStateChanged(STATE_STARTED, STATE_STARTED);
+                                }else {
+                                    wiFiDirectGroup.set(null);
+                                    notifyStateChanged(STATE_STOPPED);
+                                }
+                            });
                 }
             });
         }
@@ -448,6 +491,21 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         super.onCreate();
     }
 
+    @Override
+    public void responseStarted(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
+        if(session.getRemoteIpAddress() != null && session.getRemoteIpAddress().startsWith("192.168.49")) {
+            numActiveRequests.incrementAndGet();
+        }
+    }
+
+    @Override
+    public void responseFinished(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
+        if(session.getRemoteIpAddress() != null && session.getRemoteIpAddress().startsWith("192.168.49")) {
+            numActiveRequests.decrementAndGet();
+            wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis());
+        }
+    }
+
     /**
      * Check that the required
      */
@@ -517,6 +575,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     @Override
     public WiFiDirectGroupBle awaitWifiDirectGroupReady(long timeout, TimeUnit timeoutUnit) {
+        wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis());
         wifiP2pGroupServiceManager.setEnabled(true);
         wifiP2pGroupServiceManager.await(state ->
                         state == AsyncServiceManager.STATE_STARTED

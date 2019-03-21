@@ -91,14 +91,22 @@ public abstract class AsyncServiceManager {
         setEnabled(targetState == STATE_STARTED);
     }
 
-    protected void notifyStateChanged(final int state) {
+    protected void notifyStateChanged(final int state, final int newTargetState) {
         try {
             lock.lock();
             this.currentState = state;
+
+            if(newTargetState != -1)
+                targetState = newTargetState;
+
         }finally {
             lock.unlock();
         }
         fireStateChangedEvent(state);
+    }
+
+    protected void notifyStateChanged(final int state) {
+        notifyStateChanged(state, -1);
     }
 
     protected void fireStateChangedEvent(int newState) {
