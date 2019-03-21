@@ -42,14 +42,12 @@ public class SelectClazzesDialogPresenter
                     ReportOverallAttendancePresenter.convertLongArray(locationsArray);
         }
 
-        System.out.println("Hey 2");
         if(arguments.containsKey(ARG_CLASSES_SET)){
             long[] clazzesSelected = (long[]) arguments.get(ARG_CLASSES_SET);
             selectedClazzesList =
                     ReportOverallAttendancePresenter.convertLongArray(clazzesSelected);
         }
 
-        System.out.println("Hey 3");
     }
 
 
