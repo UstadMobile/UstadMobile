@@ -99,9 +99,12 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
 
         if(newState == BluetoothProfile.STATE_CONNECTED) {
+            UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                    "Device connected to " + gatt.getDevice().getAddress());
+
             if(!serviceDiscoveryRef.get()){
                 UstadMobileSystemImpl.l(UMLog.DEBUG,698,
-                        "Discovering services offered by remote device ="
+                        "Discovering services offered by "
                                 + gatt.getDevice().getAddress());
                 serviceDiscoveryRef.set(true);
                 gatt.discoverServices();
@@ -126,7 +129,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }
 
         UstadMobileSystemImpl.l(UMLog.DEBUG,698,
-                "Required Service found on " + gatt.getDevice().getAddress());
+                "Ustadmobile Service found on " + gatt.getDevice().getAddress());
         List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
 
         BluetoothGattCharacteristic characteristic = characteristics.get(0);
