@@ -10,6 +10,8 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.DateRange;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
 insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
@@ -45,10 +47,9 @@ public abstract class DateRangeDao implements SyncableDao<DateRange, DateRangeDa
     @UmUpdate
     public abstract void updateAsync(DateRange entity, UmCallback<Integer> result);
 
-    public void checkGivenDateAHolidayForClazz(long checkDate, long clazzUid){
-
-    }
-
-    //public abstract void checkGivenDateAHolidayForClazz2(long checkDate, long clazzUid);
+    @UmQuery("SELECT * FROM DateRange " +
+            " LEFT JOIN Clazz ON Clazz.clazzUid = :clazzUid " +
+            " WHERE DateRange.dateRangeUMCalendarUid = Clazz.clazzHolidayUMCalendarUid " )
+    public abstract List<DateRange> findAllHolidayDateRanges(long clazzUid);
 
 }

@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
+import com.ustadmobile.lib.db.entities.DateRange;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -67,6 +68,36 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
             }
         });
+    }
+
+    @UmQuery("SELECT * FROM DateRange " +
+            " LEFT JOIN Clazz ON Clazz.clazzUid = :clazzUid " +
+            " WHERE DateRange.dateRangeUMCalendarUid = Clazz.clazzHolidayUMCalendarUid " )
+    public abstract List<DateRange> findAllHolidayDateRanges(long clazzUid);
+
+    /**
+     * Checks if a given date is a holiday in the clazz uid specified.
+     * @param checkDate The date to check if its a holiday
+     * @param clazzUid  The clazz to check for's clazzUid
+     * @return  true if it is a holiday, false if not.
+     */
+    public boolean checkGivenDateAHolidayForClazz(long checkDate, long clazzUid){
+        //1. Get all date ranges for the given clazz day
+        List<DateRange> holidays = findAllHolidayDateRanges(clazzUid);
+        for(DateRange everyHoliday :holidays){
+            //2. Null checkDate's year even if its not present TODO
+            long fromDate = everyHoliday.getDateRangeFromDate();
+            long toDate = everyHoliday.getDateRangeToDate();
+            //3. Null year in fromDate and toDate
+            //3. Compare
+            if(toDate != 0){
+                return (checkDate >= fromDate && checkDate <= toDate);
+            }else{
+                return (checkDate == fromDate);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -134,7 +165,12 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         //skip
                         System.out.println("Skipping");
 
-                    }else {
+                    }else if(checkGivenDateAHolidayForClazz(startCalendar.getTimeInMillis(),
+                            clazz.getClazzUid())){
+                        //Its a holiday. Skup
+                        System.out.println("Skipping holiday");
+
+                    } else {
 
                         //This will get the next schedule for that day. For the same day, it will
                         //return itself if incToday is set to true, else it will go to next week.
@@ -156,20 +192,28 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
 
                 }else if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
 
-                    nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                            startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
+                    if(checkGivenDateAHolidayForClazz(startCalendar.getTimeInMillis(),
+                            clazz.getClazzUid())){
+                        //Its a holiday. Skup
+                        System.out.println("Skipping holiday");
 
-                    //Set to 00:00
-                    nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
-                    nextScheduleOccurence.set(Calendar.MINUTE, 0);
-                    nextScheduleOccurence.set(Calendar.SECOND, 0);
-                    nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+                    } else {
 
-                    //Now move it to desired hour:
-                    nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
-                    nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
-                    nextScheduleOccurence.set(Calendar.SECOND, 0);
-                    nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+                        nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                                startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
+
+                        //Set to 00:00
+                        nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
+                        nextScheduleOccurence.set(Calendar.MINUTE, 0);
+                        nextScheduleOccurence.set(Calendar.SECOND, 0);
+                        nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+
+                        //Now move it to desired hour:
+                        nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
+                        nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
+                        nextScheduleOccurence.set(Calendar.SECOND, 0);
+                        nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+                    }
                 }
 
                 if (nextScheduleOccurence != null && nextScheduleOccurence.before(endCalendar)) {
