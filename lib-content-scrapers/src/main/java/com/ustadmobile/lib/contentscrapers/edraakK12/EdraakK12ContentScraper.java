@@ -157,8 +157,6 @@ public class EdraakK12ContentScraper implements Runnable {
                     (response.created != null && !response.created.isEmpty()) ? response.created :
                             String.valueOf(System.currentTimeMillis()));
 
-            contentUpdated = true;
-
             if (!contentUpdated) {
                 return;
             }

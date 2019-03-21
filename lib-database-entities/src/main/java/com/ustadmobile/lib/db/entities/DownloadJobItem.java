@@ -47,14 +47,6 @@ public class DownloadJobItem {
 
     }
 
-    @Deprecated
-    public DownloadJobItem(DownloadJob downloadJob, DownloadSetItem downloadSetItem,
-                           ContentEntryFile contentEntryFile) {
-        this.djiDjUid = downloadJob.getDjUid();
-        this.djiDsiUid = downloadSetItem.getDsiUid();
-        this.djiContentEntryFileUid = contentEntryFile.getContentEntryFileUid();
-    }
-
     public DownloadJobItem(DownloadJob downloadJob,DownloadSetItem downloadSetItem,
                            Container container){
         this.djiDjUid = downloadJob.getDjUid();
