@@ -118,11 +118,10 @@ public class VoaScraper implements Runnable {
                         true, ScraperConstants.MIMETYPE_TINCAN,
                         content.lastModified(), content,
                         db, repository, containerDir);
-                FileUtils.deleteDirectory(content);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logTrace(ExceptionUtils.getStackTrace(e));
             ContentScraperUtil.deleteFile(
                     new File(destinationDir,
                             FilenameUtils.getBaseName(scrapUrl.getPath()) + ScraperConstants.LAST_MODIFIED_TXT));
@@ -153,6 +152,7 @@ public class VoaScraper implements Runnable {
         File voaDirectory = new File(destinationDir, lessonId);
         File modifiedFile = new File(destinationDir, lessonId + ScraperConstants.LAST_MODIFIED_TXT);
         voaDirectory.mkdirs();
+        boolean isUpdated = false;
         try {
             WebElement element = driver.findElementByCssSelector("script[type*=json]");
             JavascriptExecutor js = driver;
@@ -161,32 +161,29 @@ public class VoaScraper implements Runnable {
             VoaResponse response = gson.fromJson(scriptText, VoaResponse.class);
 
             long dateModified = ContentScraperUtil.parseServerDate(response.dateModified.replace("Z", "").replace(" ", "T"));
-            boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
-
-            if (ContentScraperUtil.fileHasContent(voaDirectory)) {
-                isUpdated = false;
-                FileUtils.deleteDirectory(voaDirectory);
-            }
-
-            if (!isUpdated) {
-                isContentUpdated = false;
-                driver.close();
-                driver.quit();
-                return;
-            }
+            isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
 
         } catch (NoSuchElementException ignored) {
 
             long modified = ContentScraperUtil.parseServerDate(driver.findElementByCssSelector("time").getAttribute("datetime"));
-            boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(modified));
-            if (!isUpdated) {
+            isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(modified));
 
-                isContentUpdated = false;
-                driver.close();
-                driver.quit();
-                return;
-            }
         }
+
+        isUpdated = true;
+
+        if (!isUpdated) {
+            isContentUpdated = false;
+            driver.close();
+            driver.quit();
+            return;
+        }
+
+        if (ContentScraperUtil.fileHasContent(voaDirectory)) {
+            FileUtils.deleteDirectory(voaDirectory);
+            voaDirectory.mkdirs();
+        }
+
         String quizHref = null;
         String quizAjaxUrl = null;
 
@@ -313,7 +310,7 @@ public class VoaScraper implements Runnable {
 
         finalDoc.body().attr("style", "padding:2%");
         if (quizHref != null) {
-            finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
+            finalDoc.selectFirst("div.quiz__body").after("<div class=\"iframe-container\"><iframe id=\"myFrame\" src=\"quiz.html\" frameborder=\"0\" scrolling=\"no\" width=\"100%\"></frame></div>");
         }
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.QUIZ_HTML_LINK),
                 new File(voaDirectory, ScraperConstants.QUIZ_HTML_FILE));

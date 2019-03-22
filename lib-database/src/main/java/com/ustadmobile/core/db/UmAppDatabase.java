@@ -10,10 +10,7 @@ import com.ustadmobile.core.db.dao.ContainerEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
@@ -66,9 +63,6 @@ import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
@@ -107,7 +101,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 16, entities = {
+@UmDatabase(version = 18, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -115,11 +109,9 @@ import java.util.Random;
         Person.class, Clazz.class, ClazzMember.class,
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
-        ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
-        ContentEntryFileStatus.class, ContentCategorySchema.class,
-        ContentCategory.class, Language.class, LanguageVariant.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+        ContentCategorySchema.class, ContentCategory.class, Language.class,
+        LanguageVariant.class, SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
@@ -612,6 +604,24 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             }
         });
 
+        builder.addMigration(new UmDbMigration(16, 18) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("DROP TABLE ContentEntryFile");
+                        db.execSql("DROP TABLE ContentEntryFileStatus");
+                        db.execSql("DROP TABLE ContentEntryContentEntryFileJoin");
+                        break;
+
+
+                }
+            }
+        });
+
         return builder;
     }
 
@@ -649,20 +659,13 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
 
-
     public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
-
-    public abstract ContentEntryContentEntryFileJoinDao getContentEntryContentEntryFileJoinDao();
-
-    public abstract ContentEntryFileDao getContentEntryFileDao();
 
     public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
 
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
 
     public abstract SyncStatusDao getSyncStatusDao();
-
-    public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
 
     public abstract ContentCategorySchemaDao getContentCategorySchemaDao();
 

@@ -12,8 +12,9 @@
 </head>
 
 <body onload="readJson();">
-<script type="text/javascript" src="asset/voaquiz.min.js"></script>
+<script type="text/javascript" src="asset/iframeResizer.contentWindow.min.js"></script>
 <script type="text/javascript" src="asset/iframeResizer.min.js"></script>
+<script type="text/javascript" src="asset/voaquiz.min.js"></script>
 <script type="text/javascript" src="asset/voa.min.js"></script>
 
 <div id="header">
@@ -29,7 +30,7 @@
         <h4 id="question"></h4>
         <div id="choices"></div>
         <div class="row" id="explaination"></div>
-        <div class="row">
+        <div class="row" data-iframe-height>
             <button class="waves-effect waves-light btn" id="correctAnswer" onclick=submitAnswer();>
                 Submit Answer
             </button>
@@ -42,6 +43,5 @@
 
 <script src="asset/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="asset/materialize.min.js"></script>
-<script type="text/javascript" src="asset/iframeResizer.contentWindow.min.js"></script>
 </body>
 </html>

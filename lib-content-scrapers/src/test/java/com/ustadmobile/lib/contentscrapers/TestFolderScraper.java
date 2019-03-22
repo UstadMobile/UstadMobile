@@ -45,9 +45,6 @@ public class TestFolderScraper {
         scienceFolder = new File(arabicFolder, "Science");
         scienceFolder.mkdirs();
 
-        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.epub"),
-                new File(mathFolder, "puchku.epub"));
-
         FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/folder/313-Ruby And Emerald-AR.epub"),
                 new File(arabicFolder, "ruby-ar.epub"));
 

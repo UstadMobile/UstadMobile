@@ -10,6 +10,6 @@ public interface ViewWithErrorNotifier extends UstadView{
      *
      * @param errorMessage Error message to show
      */
-    void showErrorNotification(String errorMessage);
+    void showErrorNotification(String errorMessage, Runnable action, int actionMessageId);
 
 }

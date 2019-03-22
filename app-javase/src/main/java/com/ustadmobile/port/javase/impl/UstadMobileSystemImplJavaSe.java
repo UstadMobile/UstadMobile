@@ -95,6 +95,11 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
         return null;
     }
 
+    @Override
+    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Void> callback) {
+
+    }
+
     protected File makeTempDir(String prefix, String suffix) {
         File tmpDir = null;
         try {
