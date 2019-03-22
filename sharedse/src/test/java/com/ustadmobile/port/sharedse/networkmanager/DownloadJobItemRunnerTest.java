@@ -283,7 +283,7 @@ public class DownloadJobItemRunnerTest {
             startPeerWebServer();
             Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
             groupBle.setEndpoint(localEndPoint);
-            wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
+            wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,
                     new Gson().toJson(groupBle).getBytes());
 
             bleResponseListener.onResponseReceived(networkNode.getBluetoothMacAddress(),

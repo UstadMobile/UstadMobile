@@ -65,7 +65,9 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
         super(context,managerAndroidBle,entryUidsToCheck,peerToCheck);
         this.context = context;
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
-        this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload);
+        this.message = new BleMessage(ENTRY_STATUS_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(peerToCheck.getBluetoothMacAddress()),
+                messagePayload);
     }
 
     /**
