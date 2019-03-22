@@ -177,6 +177,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void start() {
             if(isBleCapable()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "Starting BLE scanning");
                 notifyStateChanged(STATE_STARTED);
                 bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
                         leScanCallback);
@@ -202,6 +204,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void start() {
             if(canDeviceAdvertise()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "Starting BLE advertising service");
                 gattServerAndroid = new BleGattServerAndroid(mContext,
                         NetworkManagerAndroidBle.this);
                 bleServiceAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
@@ -259,10 +263,16 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         @Override
         public void stop() {
-            BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
-            mGattServer.clearServices();
-            mGattServer.close();
-            gattServerAndroid = null;
+            try {
+                BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
+                mGattServer.clearServices();
+                mGattServer.close();
+                gattServerAndroid = null;
+            }catch(Exception e) {
+                //maybe because bluetooth is actually off?
+                UstadMobileSystemImpl.l(UMLog.ERROR, 689,
+                        "Exception trying to stop gatt server", e);
+            }
             notifyStateChanged(STATE_STOPPED);
         }
     };

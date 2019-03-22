@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageAssembler;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 
@@ -43,8 +44,7 @@ class BleGattServerAndroid extends BleGattServer {
 
     private BluetoothGattServer gattServer;
 
-    private BleMessage receivedMessage;
-
+    private BleMessageAssembler messageAssembler = new BleMessageAssembler();
 
     private BluetoothGattServerCallback mCallback = new BluetoothGattServerCallback() {
 
@@ -88,19 +88,20 @@ class BleGattServerAndroid extends BleGattServer {
                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                         "Write permission granted for "+device.getAddress()+" "+granted);
                 //start receiving packets from the client device
-                boolean packetsReceived = receivedMessage.onPackageReceived(value);
+                BleMessage messageReceived = messageAssembler.handleIncomingPacket(
+                        device.getAddress(), value);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                         "Received all packets from "+device.getAddress()+" "
-                                + packetsReceived);
-                if(packetsReceived){
-                    int currentMtuSize = receivedMessage.getMtu();
+                                + (messageReceived != null));
+                if(messageReceived != null){
+                    int currentMtuSize = messageReceived.getMtu();
 
                     UstadMobileSystemImpl.l(UMLog.ERROR,691,
                             "Request received with default MTU size of " + currentMtuSize);
 
                     //Send back response
-                    BleMessage messageToSend = handleRequest(receivedMessage);
-                    receivedMessage.reset();
+                    BleMessage messageToSend = handleRequest(messageReceived);
+
                     UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                             "Prepare response to send back to "+device.getAddress());
                     //Our service doesn't require confirmation, if it does then reject sending packets
@@ -115,7 +116,7 @@ class BleGattServerAndroid extends BleGattServer {
                                      characteristic, false);
                              if(notified){
                                  UstadMobileSystemImpl.l(UMLog.DEBUG,691,
-                                         "Pee device notified on characteristics change");
+                                         "Peer device notified on characteristics change");
                              }else{
                                  UstadMobileSystemImpl.l(UMLog.ERROR,691,
                                          "Failed to notify peer device");
@@ -137,7 +138,6 @@ class BleGattServerAndroid extends BleGattServer {
      */
     BleGattServerAndroid(Context context, NetworkManagerAndroidBle networkManager) {
         super(context);
-        this.receivedMessage = new BleMessage();
         this.gattServer = networkManager.getBluetoothManager().openGattServer(context,mCallback);
         setNetworkManager(networkManager);
     }

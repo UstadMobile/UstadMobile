@@ -86,7 +86,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * Bluetooth Low Energy service UUID for our app
      */
     public static final UUID USTADMOBILE_BLE_SERVICE_UUID =
-            UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93d");
+            UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a");
 
     public static final String WIFI_DIRECT_GROUP_SSID_PREFIX="DIRECT-";
 
