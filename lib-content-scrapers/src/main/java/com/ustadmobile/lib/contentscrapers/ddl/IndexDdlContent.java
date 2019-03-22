@@ -56,7 +56,7 @@ public class IndexDdlContent {
     private File containerDir;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         if (args.length < 3) {
             System.err.println("Usage: <ddl website url> <file destination><container destination><optional log{trace, debug, info, warn, error, fatal}>");
@@ -65,8 +65,8 @@ public class IndexDdlContent {
 
         UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
 
-        UMLogUtil.logError(args[0]);
-        UMLogUtil.logError(args[1]);
+        UMLogUtil.logTrace(args[0]);
+        UMLogUtil.logTrace(args[1]);
         try {
             new IndexDdlContent().findContent(args[0], new File(args[1]), new File(args[2]));
         } catch (Exception e) {
@@ -118,8 +118,11 @@ public class IndexDdlContent {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
 
+        UMLogUtil.logTrace("browse English");
         browseLanguages("en", englishLang);
+        UMLogUtil.logTrace("browse Farsi");
         browseLanguages("fa", farsiLang);
+        UMLogUtil.logTrace("browse Pashto");
         browseLanguages("ps", pashtoLang);
 
     }
@@ -150,6 +153,7 @@ public class IndexDdlContent {
             } catch (NumberFormatException ignored) {
             }
         }
+        UMLogUtil.logTrace("max number of pages: " + maxNumber);
 
         browseList(lang, 1);
         langCount++;
@@ -160,24 +164,28 @@ public class IndexDdlContent {
         if (count > maxNumber) {
             return;
         }
-
+        UMLogUtil.logTrace("starting page: " + count);
         Document document = Jsoup.connect("https://www.darakhtdanesh.org/" + lang + "/resources/list?page=" + count)
                 .header("X-Requested-With", "XMLHttpRequest").get();
 
-        Elements resourceList = document.select("a[href]");
-
+        Elements resourceList = document.select("article[data-link]");
+        UMLogUtil.logTrace("found " + resourceList.size() + " articles to download");
         for (Element resource : resourceList) {
 
-            String url = resource.attr("href");
+            String url = resource.attr("data-link");
             if (url.contains("resource/")) {
 
                 DdlContentScraper scraper = new DdlContentScraper(url, destinationDirectory, containerDir);
                 try {
                     scraper.scrapeContent();
+                    UMLogUtil.logTrace("scraped url: " + url);
                     ArrayList<ContentEntry> subjectAreas = scraper.getParentSubjectAreas();
                     ArrayList<ContentEntry> contentEntryArrayList = scraper.getContentEntries();
                     ArrayList<ContentCategory> contentCategories = scraper.getContentCategories();
                     int subjectAreaCount = 0;
+                    UMLogUtil.logTrace("found " + subjectAreas.size() + " subjects in entry");
+                    UMLogUtil.logTrace("found " + contentEntryArrayList.size() + " files in entry");
+                    UMLogUtil.logTrace("found " + contentCategories.size() + " categories in entry");
                     for (ContentEntry subjectArea : subjectAreas) {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
@@ -200,8 +208,8 @@ public class IndexDdlContent {
                     }
 
                 } catch (IOException e) {
-                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                     UMLogUtil.logError("Error downloading resource at " + url);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 }
 
             }

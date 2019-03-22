@@ -273,5 +273,4 @@ public class TestEdraakContentScraper {
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 
     }
-
 }

@@ -61,9 +61,6 @@ public class IndexVoaScraper implements Runnable {
     private static Language englishLang;
     private static ScrapeQueueItemDao queueDao;
     private static WorkQueue scrapeWorkQueue;
-    private static File containerDirectory;
-    private static UmAppDatabase db;
-    private static UmAppDatabase repository;
 
 
     private final URL indexerUrl;
@@ -111,10 +108,9 @@ public class IndexVoaScraper implements Runnable {
 
         destinationDir.mkdirs();
         containerDir.mkdirs();
-        containerDirectory = containerDir;
 
-        db = UmAppDatabase.getInstance(null);
-        repository = db.getRepository("https://localhost", "");
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
         LanguageDao languageDao = repository.getLanguageDao();

@@ -161,11 +161,6 @@ public class EdraakK12ContentScraper implements Runnable {
                 return;
             }
 
-            if (ContentScraperUtil.fileHasContent(destinationDirectory)) {
-                FileUtils.deleteDirectory(destinationDirectory);
-                destinationDirectory.mkdirs();
-            }
-
         } catch (IOException | JsonSyntaxException e) {
             throw new IllegalArgumentException("JSON INVALID for url " + scrapUrl.toString(), e.getCause());
         } finally {
@@ -341,7 +336,6 @@ public class EdraakK12ContentScraper implements Runnable {
         if (questionsList == null || questionsList.isEmpty())
             throw new IllegalArgumentException("No Questions were found in the question set");
 
-        int exerciseUpdatedCount = 0;
         for (ContentResponse exercise : questionsList) {
 
             File exerciseDirectory = new File(destinationDir, exercise.id);
@@ -361,26 +355,15 @@ public class EdraakK12ContentScraper implements Runnable {
                 hint.description = ContentScraperUtil.downloadAllResources(hint.description, exerciseDirectory, url);
             }
 
-            try {
-                if (exerciseDirectory.listFiles().length > 0) {
-                    exerciseUpdatedCount++;
-                }
-            } catch (NullPointerException ignored) {
-
-            }
-
-
         }
 
         try {
-            if (exerciseUpdatedCount > 0) {
-                ContentScraperUtil.saveListAsJson(destinationDir, questionsList, QUESTIONS_JSON);
-            }
+            ContentScraperUtil.saveListAsJson(destinationDir, questionsList, QUESTIONS_JSON);
         } catch (IOException e) {
             throw new IllegalArgumentException("Invalid Questions Json");
         }
 
-        return exerciseUpdatedCount > 0;
+        return true;
     }
 
 
