@@ -161,7 +161,7 @@ public class ScraperConstants {
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
             ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
-            ComponentType.TEST.getType());
+            ComponentType.TEST.getType(), ComponentType.QUESTIONSET.getType());
 
 
     public static final String ARABIC_FONT_REGULAR = "DroidNaskh-Regular.woff2";

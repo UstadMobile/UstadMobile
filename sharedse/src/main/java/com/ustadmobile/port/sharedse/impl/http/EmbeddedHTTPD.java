@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.regex.Pattern;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -129,7 +128,6 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         super(portNum);
         id = idCounter;
         idCounter++;
-        addRoute("/ContentEntryFile/(.*)+", ContentEntryFileResponder.class, context);
         addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder.class, appDatabase);
         addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
                 ContainerEntryListResponder.class, appDatabase);

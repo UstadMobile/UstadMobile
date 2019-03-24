@@ -18,27 +18,6 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
         System.out.println("Update content entry status");
     }
 
-    @UmQuery("UPDATE ContentEntryStatus SET totalSize = \n" +
-            "\t(SELECT fileSize FROM ContentEntryFile  \n" +
-            "\tJOIN ContentEntryContentEntryFileJoin \n" +
-            "\tON ContentEntryFile.contentEntryFileUid =  ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid  \n" +
-            "\tAND ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntryStatus.cesUid  \n" +
-            "\tORDER BY ContentEntryFile.lastModified DESC LIMIT 1),\n" +
-            "bytesDownloadSoFar = \n" +
-            "\t(SELECT downloadedSoFar FROM DownloadJobItem \n" +
-            "\tLEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid \n" +
-            "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1),\n" +
-            "downloadStatus = \n" +
-            "\t(SELECT djiStatus FROM DownloadJobItem \n" +
-            "\tLEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid \n" +
-            "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1),\n" +
-            "downloadSpeed = \n" +
-            "\t(SELECT downloadSpeed FROM DownloadJobItem \n" +
-            "\tLEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid \n" +
-            "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1)\n" +
-            "WHERE cesUid = :contentEntryUid")
-    public abstract void updateLeaf(long contentEntryUid);
-
     @UmQuery("DELETE FROM ContentEntryStatus")
     public abstract void deleteAll(UmCallback<Void> callback);
 
