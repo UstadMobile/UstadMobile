@@ -638,7 +638,7 @@ public class ContentScraperUtil {
             category.setContentCategoryUid(categoryDao.insert(category));
         } else {
             ContentCategory changedCategory = new ContentCategory();
-            changedCategory.setContentCategoryUid(category.getCtnCatContentCategorySchemaUid());
+            changedCategory.setContentCategoryUid(category.getContentCategoryUid());
             changedCategory.setCtnCatContentCategorySchemaUid(schema.getContentCategorySchemaUid());
             changedCategory.setName(categoryName);
             if (!changedCategory.equals(category)) {
