@@ -123,6 +123,7 @@ public class DdlContentScraper {
 
 
         contentEntries = new ArrayList<>();
+        contentEntries.add(contentEntry);
         for (int downloadCount = 0; downloadCount < downloadList.size(); downloadCount++) {
 
             Element downloadItem = downloadList.get(downloadCount);
@@ -140,7 +141,6 @@ public class DdlContentScraper {
                 File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
                 String mimeType = Files.probeContentType(resourceFile.toPath());
 
-
                 boolean isUpdated = ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href));
 
                 if (!isUpdated) {
@@ -152,7 +152,6 @@ public class DdlContentScraper {
                 ContentScraperUtil.insertContainer(containerDao, contentEntry, true, mimeType,
                         resourceFile.lastModified(), resourceFile, db, repository, containerDir);
 
-                contentEntries.add(contentEntry);
             } catch (Exception e) {
                 UMLogUtil.logError("Error downloading resource from url " + url + "/" + href);
                 if (modifiedFile != null) {
