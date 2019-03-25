@@ -57,13 +57,15 @@ public class SelectPeopleDialogFragment extends UstadDialogFragment implements
     //Context (Activity calling this)
     private Context mAttachedContext;
 
+    boolean forActor;
+
     Toolbar toolbar;
 
     HashMap<String, Long> selectedPeople;
 
     //Main Activity should implement this ?
     public interface PersonSelectDialogListener{
-        void onSelectClazzesResult(HashMap<String, Long> selected);
+        void onSelectPeopleListener(HashMap<String, Long> selected, boolean actor);
     }
 
     /**
@@ -124,6 +126,10 @@ public class SelectPeopleDialogFragment extends UstadDialogFragment implements
             return false;
         });
 
+        if(getArguments().containsKey(ARG_SELECT_ACTOR)){
+            forActor = true;
+        }
+
         mPresenter = new SelectPeopleDialogPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
@@ -172,7 +178,8 @@ public class SelectPeopleDialogFragment extends UstadDialogFragment implements
     public void finish(){
         selectedPeople = mPresenter.getPeople();
         if(mAttachedContext instanceof PersonSelectDialogListener){
-             ((PersonSelectDialogListener) mAttachedContext).onSelectClazzesResult(selectedPeople);
+             ((PersonSelectDialogListener) mAttachedContext).onSelectPeopleListener(selectedPeople,
+                     forActor);
         }
         dialog.dismiss();
     }

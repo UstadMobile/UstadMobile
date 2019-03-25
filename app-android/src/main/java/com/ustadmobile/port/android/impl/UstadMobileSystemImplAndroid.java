@@ -56,6 +56,7 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
+import com.ustadmobile.core.controller.SelectPeopleDialogPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
@@ -136,6 +137,7 @@ import com.ustadmobile.core.view.SelectAttendanceThresholdsDialogView;
 import com.ustadmobile.core.view.SelectClazzFeaturesView;
 import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.core.view.SelectPeopleDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 import com.ustadmobile.core.view.SettingsView;
 import com.ustadmobile.core.view.XapiPackageView;
@@ -331,6 +333,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AddDateRangeDialogView.VIEW_NAME, AddDateRangeDialogFragment.class);
         viewNameToAndroidImplMap.put(SelectClazzFeaturesView.VIEW_NAME, SelectClazzFeaturesDialogFragment.class);
         viewNameToAndroidImplMap.put(PersonAuthDetailView.VIEW_NAME, PersonAuthDetailActivity.class);
+        viewNameToAndroidImplMap.put(SelectPeopleDialogView.VIEW_NAME, SelectPeopleDialogFragment.class);
 
     }
 

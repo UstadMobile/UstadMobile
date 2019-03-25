@@ -9,6 +9,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectPeopleDialogPresenter;
@@ -58,7 +62,26 @@ public class PersonListReturnSelectedRecyclerAdapter extends PagedListAdapter<Pe
         PersonWithEnrollment person = getItem(position);
         assert person != null;
 
-        //TODO
+        TextView title = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_title);
+        title.setText(person.getFirstNames() + " " + person.getLastName());
+
+        CheckBox checkBox = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox);
+        checkBox.setText("");
+
+        ImageView descImage = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_icon);
+        descImage.setVisibility(View.GONE);
+
+        checkBox.setChecked(person.getEnrolled());
+
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
+                {
+                    if(isChecked){
+                        thePresenter.addToPeople(person);
+                    }else{
+                        thePresenter.removePeople(person);
+                    }
+                }
+                );
 
     }
 

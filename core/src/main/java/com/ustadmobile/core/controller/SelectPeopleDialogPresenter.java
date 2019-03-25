@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectPeopleDialogView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 import java.util.HashMap;
@@ -43,6 +44,22 @@ public class SelectPeopleDialogPresenter
 
     }
 
+    public void addToPeople(Person person){
+        String personName = person.getFirstNames() + " " +
+                person.getLastName();
+        if(!people.containsKey(person.getPersonUid())){
+            people.put(personName, person.getPersonUid());
+        }
+    }
+
+    public void removePeople(Person person){
+        String personName = person.getFirstNames() + " " +
+                person.getLastName();
+        if(people.containsKey(personName)){
+            people.remove(personName);
+        }
+    }
+
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
@@ -53,6 +70,10 @@ public class SelectPeopleDialogPresenter
         personWithEnrollmentUmProvider = repository.getPersonDao().findAllPeopleWithEnrollment();
         view.setPeopleProvider(personWithEnrollmentUmProvider);
 
+    }
+
+    public void handleSelection(long personUid, boolean enrolled){
+        //TODO
     }
 
     public void handleCommonPressed(Object arg) {

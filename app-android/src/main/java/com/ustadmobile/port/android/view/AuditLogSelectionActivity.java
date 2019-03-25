@@ -28,7 +28,8 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 public class AuditLogSelectionActivity extends UstadBaseActivity implements AuditLogSelectionView,
         SelectClazzesDialogFragment.ClazzSelectDialogListener,
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
-        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
+        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener,
+        SelectPeopleDialogFragment.PersonSelectDialogListener{
 
     private Toolbar toolbar;
     private AuditLogSelectionPresenter mPresenter;
@@ -149,6 +150,29 @@ public class AuditLogSelectionActivity extends UstadBaseActivity implements Audi
     }
 
     @Override
+    public void onSelectPeopleListener(HashMap<String, Long> selected, boolean actor) {
+
+        Iterator<String> selectedPeopleNamesIterator = selected.keySet().iterator();
+        StringBuilder peopleSelectedString = new StringBuilder();
+        while(selectedPeopleNamesIterator.hasNext()){
+            peopleSelectedString.append(selectedPeopleNamesIterator.next());
+            if(selectedPeopleNamesIterator.hasNext()){
+                peopleSelectedString.append(", ");
+            }
+        }
+        List<Long> selectedPeopleList = new ArrayList<>(selected.values());
+
+        if(actor) {
+            //Find out if its actors or people
+            mPresenter.setSelectedActors(selectedPeopleList);
+            updateActorsSelected(peopleSelectedString.toString());
+        }else {
+            mPresenter.setSelectedPeople(selectedPeopleList);
+            updatePeopleSelected(peopleSelectedString.toString());
+        }
+    }
+
+    @Override
     public void onCustomTimesResult(long from, long to) {
         mPresenter.setFromTime(from);
         mPresenter.setToTime(to);
@@ -236,6 +260,4 @@ public class AuditLogSelectionActivity extends UstadBaseActivity implements Audi
             updateActorIfEmpty();
         }
     }
-
-
 }

@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.AuditLogSelectionView;
 import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.core.view.SelectClazzesDialogView;
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.core.view.SelectPeopleDialogView;
 import com.ustadmobile.core.view.SelectTwoDatesDialogView;
 
 import static com.ustadmobile.core.view.AuditLogSelectionView.ARG_AUDITLOG_ACTOR_LIST;
@@ -29,6 +30,7 @@ import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
 import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATION_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_TO_DATE;
+import static com.ustadmobile.core.view.SelectPeopleDialogView.ARG_SELECT_ACTOR;
 
 
 /**
@@ -195,8 +197,7 @@ public class AuditLogSelectionPresenter extends UstadBaseController<AuditLogSele
             args.put(ARG_LOCATIONS_SET, selectedPeopleArray);
         }
 
-        //TODO: This
-        //impl.go(SelectPeopleDialogView.VIEW_NAME, args, context);
+        impl.go(SelectPeopleDialogView.VIEW_NAME, args, context);
     }
 
     public void goToActorDialog() {
@@ -209,9 +210,8 @@ public class AuditLogSelectionPresenter extends UstadBaseController<AuditLogSele
                     ReportOverallAttendancePresenter.convertLongList(selectedActors);
             args.put(ARG_LOCATIONS_SET, selectedPeopleArray);
         }
-
-        //TODO: This
-        //impl.go(SelectPeopleDialogView.VIEW_NAME, args, context);
+        args.put(ARG_SELECT_ACTOR, "yes");
+        impl.go(SelectPeopleDialogView.VIEW_NAME, args, context);
     }
 
 
