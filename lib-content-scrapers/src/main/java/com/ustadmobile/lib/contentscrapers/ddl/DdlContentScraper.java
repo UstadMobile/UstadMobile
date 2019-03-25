@@ -143,6 +143,8 @@ public class DdlContentScraper {
 
                 boolean isUpdated = ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href));
 
+                isUpdated = true;
+
                 if (!isUpdated) {
                     continue;
                 }
