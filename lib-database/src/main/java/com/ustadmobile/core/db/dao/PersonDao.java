@@ -538,8 +538,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
                 person.setPersonUid(personUid);
 
                 PersonGroup personGroup = new PersonGroup();
-                personGroup.setGroupName(person.getFirstNames()!= null?person.getFirstNames():""
-                        + "'s group");
+                personGroup.setGroupName(person.getFirstNames()!= null?
+                        person.getFirstNames() + "'s group":
+                        "Person group");
                 insertPersonGroup(personGroup, new UmCallback<Long>() {
                     @Override
                     public void onSuccess(Long personGroupUid) {
