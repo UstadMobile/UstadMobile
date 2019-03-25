@@ -33,6 +33,7 @@
         android:layout_height="wrap_content" android:layout_marginStart="8dp"
         android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:ems="10"
         android:hint="@string/location_title"
+        android:windowSoftInputMode="stateHidden"
         android:inputType="text|textPersonName|textCapSentences"
         android:textColor="@color/text_primary" app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0" app:layout_constraintStart_toStartOf="parent"

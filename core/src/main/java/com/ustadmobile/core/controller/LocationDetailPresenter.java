@@ -162,6 +162,10 @@ public class LocationDetailPresenter extends CommonLocationHandlerPresenter<Loca
         return selectedLocationsList;
     }
 
+    public void setSelectedLocationsList(List<Long> selectedLocationsList) {
+        this.selectedLocationsList = selectedLocationsList;
+    }
+
     @Override
     public void locationChecked(String locationName, Long locationUid, boolean checked) {
         if (checked) {

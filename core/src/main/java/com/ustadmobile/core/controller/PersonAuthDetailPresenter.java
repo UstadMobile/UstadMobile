@@ -103,17 +103,14 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
                     loggedInPersonUid, new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {
-                            currentPersonAuth.setPersonAuthStatus(PersonAuth.STATUS_SENT);
                             personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
                                 @Override
-                                public void onSuccess(Integer result) {
-                                    view.finish();
-                                }
+                                public void onSuccess(Integer result) {view.finish();}
 
                                 @Override
-                                public void onFailure(Throwable exception) {exception.printStackTrace();}
+                                public void onFailure(Throwable exception) {exception.printStackTrace();
+                                    view.sendMessage(MessageID.unable_to_update_password);}
                             });
-
                         }
 
                         @Override
@@ -124,7 +121,8 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
                 }
 
                 @Override
-                public void onFailure(Throwable exception) { exception.printStackTrace();}
+                public void onFailure(Throwable exception) {exception.printStackTrace();
+                    view.sendMessage(MessageID.unable_to_update_password);}
             });
         }
 

@@ -34,7 +34,7 @@ group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 183
+    ustadVersionCode = 184
 
 
     version_junit = "4.12"

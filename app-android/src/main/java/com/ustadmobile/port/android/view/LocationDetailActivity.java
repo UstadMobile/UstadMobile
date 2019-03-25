@@ -8,7 +8,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -88,6 +90,8 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(getContext());
         locationDao = repository.getLocationDao();
 
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
         //Call the Presenter
         mPresenter = new LocationDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -97,14 +101,10 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
 
         locationTitle.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -153,12 +153,14 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
         runOnUiThread(() -> mRecyclerView.setAdapter(adapter));
 
 
-        //Set adapter listener
+        //Set adapter listener - on click the whole node itself. - Not the select listener.
         adapter.setOnTreeNodeListener(new TreeViewAdapter.OnTreeNodeListener() {
 
             @Override
             public boolean onClick(TreeNode treeNode, RecyclerView.ViewHolder viewHolder) {
                 if(!treeNode.isLeaf()){
+                    //If not a leaf, expand it:
+
                     List<TreeNode> nodeList = treeNode.getChildList();
                     for(TreeNode childNode : nodeList) {
                         if(childNode.isLeaf()) {
@@ -169,6 +171,7 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
                                     new LocationDetailActivity.PopulateTreeNodeCallback(childNode));
                         }
                     }
+                    //Toggle it
                     onToggle(treeNode.isExpand(), viewHolder);
                 }
 
@@ -285,6 +288,32 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
             }
 
             arrowIV.setVisibility(displayNodeContent.leaf? View.INVISIBLE:View.VISIBLE);
+
+            locationCB.setOnClickListener(v -> {
+                removeAllChecks();
+
+                if(locationCB.isChecked()){
+                    addLocation(locationUid);
+                    locationCB.setChecked(true);
+                    holder.itemView.post(() -> notifyDataSetChanged());
+                }else{
+                    locationCB.setChecked(false);
+                }
+
+            });
+
+
+
+        }
+
+        public void addLocation(long locationUid){
+            selectedLocationList = new ArrayList<>();
+            selectedLocationList.add(locationUid);
+            mPresenter.setSelectedLocationsList(selectedLocationList);
+        }
+
+        public void removeAllChecks(){
+            selectedLocationList = new ArrayList<>();
 
         }
     }
