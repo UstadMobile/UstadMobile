@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
 public interface SelectPeopleDialogView extends UstadView {
 
-    String VIEW_NAME="SelectPeopleDialogView";  
+    String VIEW_NAME="SelectPeopleDialogView";
     String ARG_SELECTED_PEOPLE = "SelectedPeople";
     void finish();
 
