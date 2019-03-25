@@ -145,7 +145,7 @@ public class TestPrathamContentScraper {
 
         DdlContentScraper scraper = new DdlContentScraper(
                 mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString(),
-                tmpDir, containerDir);
+                tmpDir, containerDir, "en");
         scraper.scrapeContent();
         scraper.getParentSubjectAreas();
 
