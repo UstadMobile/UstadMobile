@@ -170,7 +170,8 @@ public class ClazzLogListRecyclerAdapter extends
             doneIV.setImageResource(R.drawable.ic_check_black_24dp);
         }else{
             //Update doneIV to pencil
-            doneIV.setImageResource(R.drawable.ic_edit);
+            doneIV.setImageResource(R.drawable.ic_edit_gray);
+
         }
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlog_log_date)).setText(prettyDate);
         ((TextView)holder.itemView.findViewById(R.id.item_clazzlog_log_day)).setText(prettyShortDay);

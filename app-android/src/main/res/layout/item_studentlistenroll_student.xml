@@ -78,7 +78,7 @@
         android:layout_marginTop="8dp"
         android:textColorHighlight="@color/default_back_color"
         android:textColor="@color/default_back_color"
-        android:text="@string/enroll_in_class"
+        android:text="@string/enroll"
         app:layout_constraintBottom_toBottomOf="@+id/item_studentlist_student_simple_horizontal_divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

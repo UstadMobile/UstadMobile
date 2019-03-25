@@ -79,8 +79,8 @@ public class ClazzEditPresenter
                 @Override
                 public void onSuccess(Long newLocationUid) {
 
-                    clazzDao.insertClazzAsync(new Clazz("", newLocationUid),
-                            loggedInPersonUid ,new UmCallback<Long>() {
+                    clazzDao.insertAsync(new Clazz("", newLocationUid),
+                            new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
                             view.runOnUiThread(() -> initFromClazz(result));

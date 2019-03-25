@@ -323,11 +323,17 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         currentTableId = 0;
         switch (position){
             case 0:
-                currentTableId=Clazz.TABLE_ID;break;
+                currentTableId=Clazz.TABLE_ID;
+                view.setScopeAndAssigneeSelected(currentTableId);
+                break;
             case 1:
-                currentTableId=Person.TABLE_ID;break;
+                currentTableId=Person.TABLE_ID;
+                view.setScopeAndAssigneeSelected(currentTableId);
+                break;
             case 2:
-                currentTableId=Location.TABLE_ID;break;
+                currentTableId=Location.TABLE_ID;
+                view.setScopeAndAssigneeSelected(currentTableId);
+                break;
         }
         updatedEntityRole.setErTableId(currentTableId);
     }
@@ -368,7 +374,16 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
     }
 
     public void handleClickDone() {
+        updatedEntityRole.setErActive(true);
+        entityRoleDao.updateAsync(updatedEntityRole, new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                view.finish();
+            }
 
-        view.finish();
+            @Override
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
+        });
+
     }
 }

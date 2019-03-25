@@ -30,7 +30,7 @@ public class ClazzDetailPresenter
     private long currentClazzUid = -1;
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzDao clazzDao = repository.getClazzDao();
-
+    private Clazz currentClazz;
     private Long loggedInPersonUid = 0L;
 
     public ClazzDetailPresenter(Object context, Hashtable arguments, ClassDetailView view) {
@@ -69,38 +69,43 @@ public class ClazzDetailPresenter
 
     public void checkPermissions(){
 
-        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-            Role.PERMISSION_CLAZZ_UPDATE,
-            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
-                @Override
-                public void onSuccess(Boolean result) {
-                    view.setSettingsVisibility(result);
-                    clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+        clazzDao.findByUidAsync(currentClazzUid, new UmCallback<Clazz>() {
+            @Override
+            public void onSuccess(Clazz result) {
+                currentClazz = result;
+                clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
+                Role.PERMISSION_CLAZZ_UPDATE,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.setSettingsVisibility(result);
+                        clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
                         Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, new UmCallbackWithDefaultValue<>(false,
                         new UmCallback<Boolean>() {
                             @Override
                             public void onSuccess(Boolean result) {
-                                view.setAttendanceVisibility(result);
+                                view.setAttendanceVisibility(currentClazz.isAttendanceFeature()?result:false);
+
                                 clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
                                     Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT, new UmCallbackWithDefaultValue<>(false,
                                     new UmCallback<Boolean>() {
                                         @Override
                                         public void onSuccess(Boolean result) {
-                                            view.setSELVisibility(result);
+                                            view.setSELVisibility(currentClazz.isSelFeature()?result:false);
                                             clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
-                                                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT, new UmCallbackWithDefaultValue<>(false,
-                                                new UmCallback<Boolean>() {
-                                                    @Override
-                                                    public void onSuccess(Boolean result) {
-                                                        view.setActivityVisibility(result);
-                                                        //Setup view pager after all permissions
-                                                        view.setupViewPager();
-                                                    }
-                                                    @Override
-                                                    public void onFailure(Throwable exception) {
-                                                        exception.printStackTrace();
-                                                    }
-                                                }));
+                                            Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT, new UmCallbackWithDefaultValue<>(false,
+                                            new UmCallback<Boolean>() {
+                                                @Override
+                                                public void onSuccess(Boolean result) {
+                                                    view.setActivityVisibility(currentClazz.isActivityFeature()?result:false);
+                                                    //Setup view pager after all permissions
+                                                    view.setupViewPager();
+                                                }
+                                                @Override
+                                                public void onFailure(Throwable exception) {
+                                                    exception.printStackTrace();
+                                                }
+                                            }));
                                         }
                                         @Override
                                         public void onFailure(Throwable exception) {
@@ -113,13 +118,21 @@ public class ClazzDetailPresenter
                                 exception.printStackTrace();
                             }
                         }));
-                }
+                    }
 
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            }));
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                }));
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
 
     }
 
