@@ -641,6 +641,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
     <string name="enroll">Enroll</string>
 
+    <string name="unable_to_update_password">Unable to update password</string>
+
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>

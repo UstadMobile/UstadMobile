@@ -31,6 +31,7 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
     private Person currentPerson;
     private PersonAuth currentPersonAuth;
     private String usernameSet;
+    private long loggedInPersonUid = 0L;
 
     public PersonAuthDetailPresenter(Object context, Hashtable arguments, PersonAuthDetailView view) {
         super(context, arguments, view);
@@ -47,6 +48,8 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
+
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
         if(currentPersonUid != 0){
             personDao.findByUidAsync(currentPersonUid, new UmCallback<Person>() {
@@ -70,9 +73,7 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
                         }
 
                         @Override
-                        public void onFailure(Throwable exception) {
-
-                        }
+                        public void onFailure(Throwable exception) { exception.printStackTrace();}
                     });
                 }
 
@@ -93,17 +94,32 @@ public class PersonAuthDetailPresenter extends UstadBaseController<PersonAuthDet
             currentPerson.setUsername(usernameSet);
             currentPersonAuth.setPasswordHash(PersonAuthDao.encryptPassword(passwordSet));
             currentPersonAuth.setPersonAuthStatus(PersonAuth.STATUS_NOT_SENT);
-            personDao.insertAsync(currentPerson, new UmCallback<Long>() {
+            personDao.updateAsync(currentPerson, null);
+
+            personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
                 @Override
-                public void onSuccess(Long result) {
-                    personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
+                public void onSuccess(Integer result) {
+                    personAuthDao.resetPassword(currentPersonUid, passwordSet,
+                    loggedInPersonUid, new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {
-                            view.finish();
+                            currentPersonAuth.setPersonAuthStatus(PersonAuth.STATUS_SENT);
+                            personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
+                                @Override
+                                public void onSuccess(Integer result) {
+                                    view.finish();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {exception.printStackTrace();}
+                            });
+
                         }
 
                         @Override
-                        public void onFailure(Throwable exception) { exception.printStackTrace();}
+                        public void onFailure(Throwable exception) {
+                            view.sendMessage(MessageID.unable_to_update_password);
+                        }
                     });
                 }
 
