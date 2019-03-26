@@ -108,7 +108,7 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
 
            managerBle.handleNodeConnectionHistory(destinationPeer.getAddress(),
-                   mGattClient == null);
+                   mGattClient != null);
 
            if(mGattClient == null){
                 UstadMobileSystemImpl.l(UMLog.ERROR,698,

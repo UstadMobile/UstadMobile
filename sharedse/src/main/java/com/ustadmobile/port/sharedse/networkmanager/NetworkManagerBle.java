@@ -37,8 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import fi.iki.elonen.NanoHTTPD;
-
 import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
 
 /**
@@ -100,7 +98,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
-    protected HashMap<String, AtomicInteger> badNodeTracker = new HashMap<>();
+    protected HashMap<String, AtomicInteger> knownBadNodeTrackList = new HashMap<>();
 
     private static final int MAX_THREAD_COUNT = 1;
 
@@ -304,8 +302,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                     getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime,1));
 
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Found total of   " + uniqueEntryUidsToMonitor +
-                            " to check from entry status availability");
+                    "Found total of   " + uniqueEntryUidsToMonitor.size() +
+                            " uids to check their availability status");
 
             List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
                     responseDao.findEntriesWithoutRecentResponse(
@@ -326,8 +324,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
             }
 
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Created total of  "+nodeToCheckEntryList.entrySet().size()
-                            + "entry(s) to be checked from");
+                    "Created total of  " + nodeToCheckEntryList.entrySet().size()
+                            + " entry(s) to be checked from");
 
             //Make entryStatusTask as per node list and entryUuids found
             for(int nodeId : nodeToCheckEntryList.keySet()){
@@ -524,20 +522,33 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public void handleNodeConnectionHistory(String bluetoothAddress, boolean success){
 
-        AtomicInteger record = badNodeTracker.get(bluetoothAddress);
+        AtomicInteger record = knownBadNodeTrackList.get(bluetoothAddress);
 
         if(record == null || success){
             record = new AtomicInteger(0);
-            badNodeTracker.put(bluetoothAddress,record);
+            knownBadNodeTrackList.put(bluetoothAddress,record);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Connection succeeded bad node counter was set to " + record.get()
+                            + " for "+bluetoothAddress);
         }
 
         if(!success){
             record.set(record.incrementAndGet());
-            badNodeTracker.put(bluetoothAddress,record);
+            knownBadNodeTrackList.put(bluetoothAddress,record);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Connection failed and bad node counter set to " + record.get()
+                            + " for "+bluetoothAddress);
         }
 
-        if(badNodeTracker.get(bluetoothAddress).get() > 5){
+        if(knownBadNodeTrackList.get(bluetoothAddress).get() > 5){
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Bad node counter exceeded threshold (5), removing node with address "
+                            +bluetoothAddress + " from the list");
+            knownBadNodeTrackList.remove(bluetoothAddress);
             umAppDatabase.getNetworkNodeDao().deleteByBluetoothAddress(bluetoothAddress);
+
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Node with address "
+                            +bluetoothAddress + " removed from the list");
         }
     }
 
@@ -547,7 +558,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * @return bad node
      */
     public AtomicInteger getBadNodeTracker(String bluetoothAddress){
-        return badNodeTracker.get(bluetoothAddress);
+        return knownBadNodeTrackList.get(bluetoothAddress);
     }
 
 

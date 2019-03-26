@@ -63,8 +63,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private volatile long lastActive;
 
-    private Handler timeoutHandler;
-
     private Runnable mTimeoutRunnable = () -> {
 
     };
@@ -77,7 +75,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
         lastActive = System.currentTimeMillis();
-        timeoutHandler = new Handler();
     }
 
     /**
@@ -112,7 +109,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         }else {
             cleanup(gatt);
             UstadMobileSystemImpl.l(UMLog.DEBUG,698,
-                    "Connection failed with error code " + status + "from "
+                    "Connection disconnected " + status + "from "
                             + remoteDeviceAddress);
             if(responseListener != null) {
                 responseListener.onResponseReceived(remoteDeviceAddress, null,
