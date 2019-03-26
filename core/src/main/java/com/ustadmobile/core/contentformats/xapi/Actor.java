@@ -14,7 +14,7 @@ public class Actor {
 
     private String objectType;
 
-    private List<Actor> members;
+    private List<Actor> member;
 
     private Account account;
 
@@ -74,11 +74,11 @@ public class Actor {
     }
 
     public List<Actor> getMembers() {
-        return members;
+        return member;
     }
 
     public void setMembers(List<Actor> members) {
-        this.members = members;
+        this.member = members;
     }
 
     public Account getAccount() {
