@@ -1,10 +1,12 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.db.entities.CustomFieldWrapper;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -46,4 +48,9 @@ public abstract class PersonCustomFieldDao
 
     @UmQuery("SELECT * FROM PersonField WHERE labelMessageId = :messageId")
     public abstract void findByLabelMessageId(String messageId, UmCallback<PersonField> resultObject);
+
+    @UmQuery("SELECT PersonField.fieldName AS fieldName, '' AS fieldType, '' AS defaultValue " +
+            "FROM PersonField " +
+            "WHERE personCustomFieldUid > :minCustomFieldUid ")
+    public abstract UmProvider<CustomFieldWrapper> findAllCustomFieldsProvider(int minCustomFieldUid);
 }

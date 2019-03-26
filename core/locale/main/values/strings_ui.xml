@@ -643,6 +643,21 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
     <string name="unable_to_update_password">Unable to update password</string>
 
+    <string name="custom_fields">Custom fields</string>
+    <string name="custom_fields_desc">Add, remove and modify custom fields</string>
+    <string name="entity">Entity</string>
+    <string name="add_field">Add field</string>
+    <string name="field_name_english">Field name (English)</string>
+    <string name="field_name_arabic">Field name (Arabic)</string>
+    <string name="field_type">Field type</string>
+    <string name="text">Text</string>
+    <string name="dropdown">Dropdown</string>
+    <string name="options">Options</string>
+    <string name="option_value">Option value</string>
+    <string name="add_modify_option">Add\/modify option</string>
+    <string name="default_value">Default value</string>
+
+
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>

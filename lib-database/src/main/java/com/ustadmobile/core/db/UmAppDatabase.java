@@ -21,6 +21,9 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.CrawJoblItemDao;
 import com.ustadmobile.core.db.dao.CrawlJobDao;
+import com.ustadmobile.core.db.dao.CustomFieldDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
@@ -91,6 +94,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.CrawlJob;
 import com.ustadmobile.lib.db.entities.CrawlJobItem;
+import com.ustadmobile.lib.db.entities.CustomField;
+import com.ustadmobile.lib.db.entities.CustomFieldValue;
+import com.ustadmobile.lib.db.entities.CustomFieldValueOption;
 import com.ustadmobile.lib.db.entities.DateRange;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -165,7 +171,8 @@ import java.util.Hashtable;
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class,
-        SelQuestionOption.class, ScheduledCheck.class, AuditLog.class
+        SelQuestionOption.class, ScheduledCheck.class, AuditLog.class,
+        CustomField.class, CustomFieldValue.class, CustomFieldValueOption.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -342,6 +349,12 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract ScheduledCheckDao getScheduledCheckDao();
 
     public abstract AuditLogDao getAuditLogDao();
+
+    public abstract CustomFieldDao getCustomFieldDao();
+
+    public abstract CustomFieldValueDao getCustonFieldValueDao();
+
+    public abstract CustomFieldValueOptionDao getCustomFieldValueOptionDao();
 
     @UmDbContext
     public abstract Object getContext();

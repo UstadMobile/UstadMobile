@@ -17,7 +17,7 @@ public class SettingsActivity extends UstadBaseActivity implements SettingsView 
     SettingsPresenter mPresenter;
     ConstraintLayout selLayout;
     ConstraintLayout calendatLayout, rolesLayout, groupsLayout, rolesAssignmentLayout,
-            locationsLayout, auditLogLayout;
+            locationsLayout, auditLogLayout, customFieldsLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +38,7 @@ public class SettingsActivity extends UstadBaseActivity implements SettingsView 
         rolesAssignmentLayout = findViewById(R.id.activity_settings2_roles_assignment_cl);
         locationsLayout = findViewById(R.id.activity_settings2_locations_cl);
         auditLogLayout = findViewById(R.id.activity_settings2_audit_log_cl);
+        customFieldsLayout = findViewById(R.id.activity_settings2_customfields_cl);
 
         mPresenter = new SettingsPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -50,6 +51,7 @@ public class SettingsActivity extends UstadBaseActivity implements SettingsView 
         rolesAssignmentLayout.setOnClickListener(view -> mPresenter.goToRolesAssignmentList());
         locationsLayout.setOnClickListener(view -> mPresenter.goToLocationsList());
         auditLogLayout.setOnClickListener(view -> mPresenter.goToAuditLogSelection());
+        customFieldsLayout.setOnClickListener(view -> mPresenter.goToCustomFieldsList());
 
     }
 }

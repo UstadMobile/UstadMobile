@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.core.view.AuditLogSelectionView;
+import com.ustadmobile.core.view.CustomFieldListView;
 import com.ustadmobile.core.view.GroupListView;
 import com.ustadmobile.core.view.HolidayCalendarListView;
 import com.ustadmobile.core.view.LocationListView;
@@ -64,8 +64,13 @@ public class SettingsPresenter extends UstadBaseController<SettingsView> {
     public void goToAuditLogSelection() {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        //impl.go(AuditLogSelectionView.VIEW_NAME, args, context);
         impl.go(AuditLogSelectionView.VIEW_NAME, args, context);
+    }
+
+    public void goToCustomFieldsList(){
+        Hashtable args = new Hashtable();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.go(CustomFieldListView.VIEW_NAME, args, context);
     }
 
 
