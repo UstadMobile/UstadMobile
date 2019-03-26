@@ -4,27 +4,106 @@ import java.util.Map;
 
 public class Result {
 
-    public boolean completion;
+    private boolean completion;
 
-    public boolean success;
+    private boolean success;
 
-    public Score score;
+    private Score score;
 
-    public String duration;
+    private String duration;
 
-    public String response;
+    private String response;
 
     private class Score {
 
-        public long scaled;
+        private long scaled;
 
-        public long raw;
+        private long raw;
 
-        public long min;
+        private long min;
 
-        public long max;
+        private long max;
 
+        public long getScaled() {
+            return scaled;
+        }
+
+        public void setScaled(long scaled) {
+            this.scaled = scaled;
+        }
+
+        public long getRaw() {
+            return raw;
+        }
+
+        public void setRaw(long raw) {
+            this.raw = raw;
+        }
+
+        public long getMin() {
+            return min;
+        }
+
+        public void setMin(long min) {
+            this.min = min;
+        }
+
+        public long getMax() {
+            return max;
+        }
+
+        public void setMax(long max) {
+            this.max = max;
+        }
     }
 
     private Map<String, Long> extensions;
+
+    public boolean isCompletion() {
+        return completion;
+    }
+
+    public void setCompletion(boolean completion) {
+        this.completion = completion;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public Score getScore() {
+        return score;
+    }
+
+    public void setScore(Score score) {
+        this.score = score;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getResponse() {
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+
+    public Map<String, Long> getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(Map<String, Long> extensions) {
+        this.extensions = extensions;
+    }
 }

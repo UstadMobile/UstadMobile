@@ -5,6 +5,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -12,30 +13,25 @@ import java.util.List;
 
 public class ContextDeserializer implements JsonDeserializer<ContextActivity> {
 
+    private final Type listType = new TypeToken<ArrayList<XObject>>() {
+    }.getType();
+
     @Override
     public ContextActivity deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 
-        ContextActivity contextActivity = context.deserialize(json, ContextActivity.class);
+        ContextActivity contextActivity = new ContextActivity();
         JsonObject jsonObject = json.getAsJsonObject();
-        if (contextActivity.getParent() == null) {
-            List<XObject> list = checkIfArrayOrObject(jsonObject, "parent", context);
-            contextActivity.setParent(list);
-        }
+        List<XObject> parentList = checkIfArrayOrObject(jsonObject, "parent", context);
+        contextActivity.setParent(parentList);
 
-        if (contextActivity.getParent() == null) {
-            List<XObject> list = checkIfArrayOrObject(jsonObject, "grouping", context);
-            contextActivity.setGrouping(list);
-        }
+        List<XObject> groupingList = checkIfArrayOrObject(jsonObject, "grouping", context);
+        contextActivity.setGrouping(groupingList);
 
-        if (contextActivity.getParent() == null) {
-            List<XObject> list = checkIfArrayOrObject(jsonObject, "category", context);
-            contextActivity.setCategory(list);
-        }
+        List<XObject> categoryList = checkIfArrayOrObject(jsonObject, "category", context);
+        contextActivity.setCategory(categoryList);
 
-        if (contextActivity.getParent() == null) {
-            List<XObject> list = checkIfArrayOrObject(jsonObject, "other", context);
-            contextActivity.setOther(list);
-        }
+        List<XObject> otherList = checkIfArrayOrObject(jsonObject, "other", context);
+        contextActivity.setOther(otherList);
 
         return contextActivity;
     }
@@ -51,6 +47,8 @@ public class ContextDeserializer implements JsonDeserializer<ContextActivity> {
                     XObject object = context.deserialize(elem, XObject.class);
                     objects.add(object);
                     return objects;
+                } else {
+                    return context.deserialize(elem, listType);
                 }
             }
         }

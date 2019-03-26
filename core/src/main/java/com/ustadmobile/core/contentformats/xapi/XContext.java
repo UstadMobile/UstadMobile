@@ -4,21 +4,93 @@ import java.util.Map;
 
 public class XContext {
 
-    public Actor instructor;
+    private Actor instructor;
 
-    public String registration;
+    private String registration;
 
-    public String language;
+    private String language;
 
-    public String platform;
+    private String platform;
 
-    public String revision;
+    private String revision;
 
-    public Actor authority;
+    private Actor authority;
 
-    public Statement statement;
+    private Statement statement;
 
-    public ContextActivity contextActivities;
+    private ContextActivity contextActivities;
 
-    public Map<String, String> extensions;
+    private Map<String, String> extensions;
+
+    public Actor getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(Actor instructor) {
+        this.instructor = instructor;
+    }
+
+    public String getRegistration() {
+        return registration;
+    }
+
+    public void setRegistration(String registration) {
+        this.registration = registration;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getRevision() {
+        return revision;
+    }
+
+    public void setRevision(String revision) {
+        this.revision = revision;
+    }
+
+    public Actor getAuthority() {
+        return authority;
+    }
+
+    public void setAuthority(Actor authority) {
+        this.authority = authority;
+    }
+
+    public Statement getStatement() {
+        return statement;
+    }
+
+    public void setStatement(Statement statement) {
+        this.statement = statement;
+    }
+
+    public ContextActivity getContextActivities() {
+        return contextActivities;
+    }
+
+    public void setContextActivities(ContextActivity contextActivities) {
+        this.contextActivities = contextActivities;
+    }
+
+    public Map<String, String> getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(Map<String, String> extensions) {
+        this.extensions = extensions;
+    }
 }

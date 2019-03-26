@@ -43,6 +43,7 @@ repositories {
 dependencies {
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"
+    implementation "com.google.code.gson:gson:$version_gson"
 
     implementation project(':lib-database')
     compileOnly project(':lib-database-entities')

@@ -1,13 +1,26 @@
 package com.ustadmobile.core.contentformats.xapi;
 
-import com.sun.org.apache.xpath.internal.operations.String;
-
 import java.util.Map;
 
 public class Verb {
 
-    public String id;
+    private String id;
 
-    public Map<String, String> display;
+    private Map<String, String> display;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Map<String, String> getDisplay() {
+        return display;
+    }
+
+    public void setDisplay(Map<String, String> display) {
+        this.display = display;
+    }
 }
