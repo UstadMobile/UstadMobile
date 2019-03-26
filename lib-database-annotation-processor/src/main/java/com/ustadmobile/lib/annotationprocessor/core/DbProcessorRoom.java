@@ -135,16 +135,19 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .addJavadoc("Generated code - DO NOT EDIT!");
 
 
+        ParameterizedTypeName roomBuildTypeName = ParameterizedTypeName.get(
+                ClassName.get(ROOM_PKG_NAME, "RoomDatabase").nestedClass("Builder"),
+                ClassName.get(processingEnv.getElementUtils().getPackageOf(dbType).toString(), roomDbClassName));
+
         dbManagerImplSpec.addMethod(MethodSpec.constructorBuilder()
                     .addParameter(ClassName.get(Object.class), "context")
                     .addParameter(ClassName.get(String.class), "dbName")
+                    .addParameter(roomBuildTypeName, "roomBuilder")
                     .addModifiers(Modifier.PUBLIC)
                     .addCode("this.context = (Context)context;\n")
                     .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
                     .addCode("this._repositories = new $T<>();\n", Vector.class)
-                    .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
-                            ".class, dbName).addCallback(new DbManagerCallback()).build();\n",
-                            ClassName.get("android.arch.persistence.room", "Room"))
+                    .addCode("_roomDb = roomBuilder.addCallback(new DbManagerCallback()).build();\n")
                 .build())
             .addMethod(MethodSpec.methodBuilder("execute")
                     .addModifiers(Modifier.PUBLIC)
