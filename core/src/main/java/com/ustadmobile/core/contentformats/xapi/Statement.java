@@ -2,7 +2,6 @@ package com.ustadmobile.core.contentformats.xapi;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
@@ -15,7 +14,6 @@ public class Statement {
 
     private XObject object;
 
-    @SerializedName("object")
     private Statement subStatement;
 
     private Result result;

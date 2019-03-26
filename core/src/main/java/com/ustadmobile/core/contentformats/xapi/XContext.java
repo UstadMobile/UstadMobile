@@ -16,6 +16,8 @@ public class XContext {
 
     private Actor authority;
 
+    private Actor team;
+
     private Statement statement;
 
     private ContextActivity contextActivities;
@@ -92,5 +94,13 @@ public class XContext {
 
     public void setExtensions(Map<String, String> extensions) {
         this.extensions = extensions;
+    }
+
+    public Actor getTeam() {
+        return team;
+    }
+
+    public void setTeam(Actor team) {
+        this.team = team;
     }
 }
