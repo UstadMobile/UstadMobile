@@ -529,6 +529,7 @@ public class DownloadJobItemRunner implements Runnable {
     private boolean connectToLocalNodeNetwork(){
         waitingForLocalConnection.set(true);
         BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(currentNetworkNode.getBluetoothMacAddress()),
                 BleMessageUtil.bleMessageLongToBytes(Collections.singletonList(1L)));
         UstadMobileSystemImpl.l(UMLog.DEBUG,699, mkLogPrefix() +
                 " connecting local network: requesting group credentials ");

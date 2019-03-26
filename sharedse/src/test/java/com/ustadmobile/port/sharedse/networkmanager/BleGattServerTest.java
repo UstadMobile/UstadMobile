@@ -91,7 +91,8 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestMessageWithCorrectRequestHeader_whenHandlingIt_thenShouldReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(containerUids));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte)42,
+                bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -102,7 +103,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNotReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(containerUids));
+        BleMessage messageToSend = new BleMessage((byte) 0, (byte)42,bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -118,7 +119,7 @@ public class BleGattServerTest {
             return wiFiDirectGroupBle;
         }).when(mockedNetworkManager).awaitWifiDirectGroupReady(anyLong(), any());
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(containerUids));
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, (byte)42, bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -138,7 +139,8 @@ public class BleGattServerTest {
     @Test
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
 
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(containerUids));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte)42,
+                bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());
@@ -157,7 +159,7 @@ public class BleGattServerTest {
     @Test
     public void givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable(){
 
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(containerUids));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte)42, bleMessageLongToBytes(containerUids));
         umAppDatabase.clearAllTables();
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());

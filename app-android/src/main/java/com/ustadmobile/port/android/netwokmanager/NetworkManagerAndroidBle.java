@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.netwokmanager;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -31,6 +32,7 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.net.ConnectivityManagerCompat;
 
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -59,6 +61,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -112,7 +116,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      * When we use BLE for advertising and scanning, we need wait a little bit after one starts
      * before the other can start
      */
-    public static final int BLE_ADVERTISING_WAIT = 2000;
+    public static final int BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000;
 
     private AtomicBoolean wifiP2PCapable = new AtomicBoolean(false);
 
@@ -127,7 +131,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      */
     private List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
-    private volatile long bleScanningLastStartTime;
+    private volatile long bleAdvertisingLastStartTime;
 
     private AtomicLong wifiDirectGroupLastRequestedTime = new AtomicLong();
 
@@ -146,8 +150,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
 
     private static class WifiDirectGroupAndroid extends WiFiDirectGroupBle {
-        private WifiDirectGroupAndroid(WifiP2pGroup group) {
+        private WifiDirectGroupAndroid(WifiP2pGroup group, int endpointPort) {
             super(group.getNetworkName(), group.getPassphrase());
+            setEndpoint("http://192.168.49.1:" + endpointPort + "/");
         }
     }
 
@@ -164,16 +169,17 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         handleNodeDiscovered(networkNode);
     };
 
-    private Handler delayedExecutionHandler = new Handler();
+    private ScheduledExecutorService delayedExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private AsyncServiceManager scanningServiceManager = new AsyncServiceManager(
             AsyncServiceManager.STATE_STOPPED,
-            ((runnable, delay) -> delayedExecutionHandler.postDelayed(runnable, delay))) {
+            ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
         @Override
         public void start() {
             if(isBleCapable()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "Starting BLE scanning");
                 notifyStateChanged(STATE_STARTED);
-                bleScanningLastStartTime = System.currentTimeMillis();
                 bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
                         leScanCallback);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,689,
@@ -194,10 +200,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
     private AsyncServiceManager advertisingServiceManager = new AsyncServiceManager(
             AsyncServiceManager.STATE_STOPPED,
-            ((runnable, delay) -> delayedExecutionHandler.postDelayed(runnable, delay))) {
+            ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
         @Override
         public void start() {
             if(canDeviceAdvertise()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "Starting BLE advertising service");
                 gattServerAndroid = new BleGattServerAndroid(mContext,
                         NetworkManagerAndroidBle.this);
                 bleServiceAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
@@ -217,6 +225,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     return;
                 }
 
+                ((BleGattServerAndroid)gattServerAndroid).getGattServer().addService(service);
+
                 AdvertiseSettings settings = new AdvertiseSettings.Builder()
                         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
                         .setConnectable(true)
@@ -232,6 +242,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                             @Override
                             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                                 super.onStartSuccess(settingsInEffect);
+                                bleAdvertisingLastStartTime = System.currentTimeMillis();
                                 notifyStateChanged(STATE_STARTED);
                                 UstadMobileSystemImpl.l(UMLog.DEBUG,689,
                                         "Service advertised successfully");
@@ -252,10 +263,16 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         @Override
         public void stop() {
-            BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
-            mGattServer.clearServices();
-            mGattServer.close();
-            gattServerAndroid = null;
+            try {
+                BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
+                mGattServer.clearServices();
+                mGattServer.close();
+                gattServerAndroid = null;
+            }catch(Exception e) {
+                //maybe because bluetooth is actually off?
+                UstadMobileSystemImpl.l(UMLog.ERROR, 689,
+                        "Exception trying to stop gatt server", e);
+            }
             notifyStateChanged(STATE_STOPPED);
         }
     };
@@ -290,7 +307,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             @Override
             public void onReceive(Context context, Intent intent) {
                 wifiP2pManager.requestGroupInfo(wifiP2pChannel, (group) -> {
-                    wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group) : null);
+                    wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group,
+                            httpd.getListeningPort()) : null);
                     if((group == null && getState() == STATE_STARTING)
                         || (group != null && getState() == STATE_STOPPING)) {
                         return;//it's working on it, and hasn't failed yet, don't notify status change
@@ -303,7 +321,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         private WifiP2PGroupServiceManager() {
             super(STATE_STOPPED,
-                    (runnable, delay) -> delayedExecutionHandler.postDelayed(runnable, delay));
+                    (runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS));
         }
 
         protected BroadcastReceiver getWifiP2pBroadcastReceiver() {
@@ -316,7 +334,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             wifiP2pManager.requestGroupInfo(wifiP2pChannel,
                     (wifiP2pGroup) -> {
                         if(wifiP2pGroup != null) {
-                            wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup));
+                            wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
+                                    httpd.getListeningPort()));
                             notifyStateChanged(STATE_STARTED);
                         }else {
                             createNewGroup();
@@ -361,7 +380,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     wifiP2pManager.requestGroupInfo(wifiP2pChannel,
                             (wifiP2pGroup) -> {
                                 if(wifiP2pGroup != null) {
-                                    wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup));
+                                    wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
+                                            httpd.getListeningPort()));
                                     notifyStateChanged(STATE_STARTED, STATE_STARTED);
                                 }else {
                                     wiFiDirectGroup.set(null);
@@ -521,14 +541,24 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      * Check that the required
      */
     public void checkP2PBleServices() {
-        boolean scanningEnabled = isBluetoothEnabled() && isBleCapable() && wifiManager.isWifiEnabled();
-        boolean advertisingEnabled = scanningEnabled & canDeviceAdvertise()
-                && (System.currentTimeMillis() - bleScanningLastStartTime) > BLE_ADVERTISING_WAIT;
-        scanningServiceManager.setEnabled(scanningEnabled);
+        boolean permissionGranted = ActivityCompat.checkSelfPermission(mContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean scanningEnabled = permissionGranted && isBluetoothEnabled() && isBleCapable() && wifiManager.isWifiEnabled();
+        boolean advertisingEnabled = scanningEnabled & canDeviceAdvertise();
+        boolean waitedLongEnoughToStartScanning = true;
+        long timeNow = System.currentTimeMillis();
+
+        if(advertisingEnabled) {
+            waitedLongEnoughToStartScanning = bleAdvertisingLastStartTime != 0
+                    && (timeNow - bleAdvertisingLastStartTime) > BLE_SCAN_WAIT_AFTER_ADVERTISING;
+        }
+
+        scanningServiceManager.setEnabled(scanningEnabled && waitedLongEnoughToStartScanning);
         advertisingServiceManager.setEnabled(advertisingEnabled);
 
-        if(scanningEnabled && canDeviceAdvertise() && !advertisingEnabled) {
-            new Handler().postDelayed(this::checkP2PBleServices, BLE_ADVERTISING_WAIT);
+        if(scanningEnabled && !waitedLongEnoughToStartScanning) {
+            delayedExecutor.schedule(this::checkP2PBleServices,
+                    BLE_SCAN_WAIT_AFTER_ADVERTISING + 1000, TimeUnit.MILLISECONDS);
         }
     }
 

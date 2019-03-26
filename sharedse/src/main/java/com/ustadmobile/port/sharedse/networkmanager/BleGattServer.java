@@ -78,13 +78,13 @@ public abstract class BleGattServer {
                     entryStatusResponse.add(foundLocalContainerUid != null
                             && foundLocalContainerUid != 0 ? 1L: 0L);
                 }
-                return new BleMessage(ENTRY_STATUS_RESPONSE,
+                return new BleMessage(ENTRY_STATUS_RESPONSE, (byte)42,
                         bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_REQUEST:
                 WiFiDirectGroupBle group = networkManager.awaitWifiDirectGroupReady(5000,
                         TimeUnit.MILLISECONDS);
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,
                         new Gson().toJson(group).getBytes());
             default: return null;
         }

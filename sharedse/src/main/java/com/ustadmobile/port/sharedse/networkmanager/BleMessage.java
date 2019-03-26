@@ -7,6 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -17,7 +19,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
 
 /**
- * Class which is actual presentation of message that exchanged between peer devices.
+ * This class converts bytes
  *
  * <p>
  * Use {@link BleMessage#BleMessage(byte, byte[])} to send message
@@ -59,12 +61,52 @@ public class BleMessage {
 
     private int length;
 
+    private byte messageId;
+
     private static final int requestTypeStartIndex = 0;
     private static final int mtuStartIndex = 1;
     private static final int payloadLengthStartIndex = 3;
     private static final int payLoadStartIndex = 7;
 
-    private ByteArrayOutputStream outputStream;
+    public static final int HEADER_SIZE = 1 + 2 + 4;//Request type (byte - 1byte), mtu (short - 2 byts), length (int - 4bytes)
+
+    public static final int HEADER_REQUEST_TYPE_POS = 0;
+
+    public static final int HEADER_MTU_POS = 1;
+
+    public static final int HEADER_SIZE_POS = 3;
+
+    @Deprecated
+    private ByteArrayOutputStream packetReceivedOutputStream;
+
+    private byte[][] packetReceiveBuffer;
+
+    private int onPacketReceivedCount = 0;
+
+    private static Map<String, Byte> messageIds = new Hashtable<>();
+
+    public static byte findMessageId(byte[] packet) {
+        return packet[0];
+    }
+
+    public static byte getNextMessageIdForReceiver(String receiverAddr) {
+        Byte lastMessageId = messageIds.get(receiverAddr);
+        byte nextMessageId;
+        if(lastMessageId == null) {
+            nextMessageId = (byte)-128;
+        }else if(lastMessageId == 127){
+            nextMessageId = (byte)-128;
+        }else {
+            nextMessageId = (byte)(lastMessageId + 1);
+        }
+
+        messageIds.put(receiverAddr, nextMessageId);
+
+        return nextMessageId;
+    }
+
+
+
 
 
     /**
@@ -78,27 +120,29 @@ public class BleMessage {
      * @param requestType Type of the request that will be contained.
      * @param payload The actual payload to be sent
      */
-    public BleMessage(byte requestType, byte[] payload){
+    public BleMessage(byte requestType, byte messageId, byte[] payload){
         this.requestType = requestType;
         this.payload = payload;
         this.length = payload.length;
+        this.messageId = messageId;
     }
 
 
     /**
      * Constructor which will be used when receiving the message
-     * @param payload Received packets
+     * @param packetsReceived Received packets
      */
-    public BleMessage(byte[][] payload){
-        byte [] packets = depacketizePayload(payload);
-        byte [] receivedPayload = ByteBuffer.wrap(Arrays.copyOfRange(packets, payLoadStartIndex,
-                packets.length)).array();
-        requestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, requestTypeStartIndex,
-                mtuStartIndex)).get();
-        mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, mtuStartIndex,
-                payloadLengthStartIndex)).getShort();
-        length = ByteBuffer.wrap(Arrays.copyOfRange(packets, payloadLengthStartIndex,
-                payLoadStartIndex)).getInt();
+    public BleMessage(byte[][] packetsReceived){
+        constructFromPackets(packetsReceived);
+    }
+
+    private void constructFromPackets(byte[][] packetsReceived) {
+        messageId = packetsReceived[0][0];
+        byte[] messageBytes = depacketizePayload(packetsReceived);
+        assignHeaderValuesFromFirstPacket(packetsReceived[0]);
+
+        byte[] receivedPayload = new byte[length];
+        System.arraycopy(messageBytes, HEADER_SIZE, receivedPayload, 0, length);
 
         boolean isCompressed = receivedPayload.length > 0 &&
                 (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
@@ -107,6 +151,14 @@ public class BleMessage {
         if(isCompressed){
             this.payload = decompressPayload(receivedPayload);
         }
+    }
+
+    private void assignHeaderValuesFromFirstPacket(byte[] packet) {
+        messageId = packet[0];
+        requestType = packet[1];
+        mtu = ByteBuffer.wrap(new byte[]{packet[2], packet[3]}).getShort();
+        length = ByteBuffer.wrap(Arrays.copyOfRange(packet, payloadLengthStartIndex + 1,
+                payLoadStartIndex + 1)).getInt();
     }
 
 
@@ -138,20 +190,23 @@ public class BleMessage {
     /**
      * Internal message to compress message payload
      * @param payload payload to be compressed
-     * @return Compressed payload in byte array.
+     * @return Compressed payload in byte array, null if something goes wrong
      */
     private byte[] compressPayload(byte[] payload){
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        GZIPOutputStream gos = null;
-        try{
-            gos = new GZIPOutputStream(bos);
+        try (
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            GZIPOutputStream gos = new GZIPOutputStream(bos)
+        ){
             gos.write(payload);
-        } catch (IOException e) {
+            gos.flush();
+            gos.close();
+            return bos.toByteArray();
+        }catch (IOException e) {
+            //Very unlikely as we are reading from memory into memory
             e.printStackTrace();
-        }finally {
-            UMIOUtils.closeQuietly(gos);
         }
-        return bos.toByteArray();
+
+        return null;
     }
 
     /**
@@ -160,7 +215,7 @@ public class BleMessage {
      * @return Decompressed payload in byte array.
      */
     private byte[] decompressPayload(byte[] receivedPayload){
-        final int BUFFER_SIZE = 32;
+        final int BUFFER_SIZE = Math.min(32, receivedPayload.length);
         ByteArrayInputStream is = new ByteArrayInputStream(receivedPayload);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try{
@@ -170,6 +225,7 @@ public class BleMessage {
             while ((bytesRead = gis.read(data)) != -1) {
                 bout.write(data, 0, bytesRead);
             }
+            bout.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -178,6 +234,11 @@ public class BleMessage {
         return bout.toByteArray();
     }
 
+
+
+    private int calculateNumPackets(int payloadLength, int mtu) {
+        return (int) Math.ceil((payloadLength + HEADER_SIZE) / (double)(mtu - 1));
+    }
 
     /**
      * Internal method for constructing payload packets from the message payload
@@ -188,9 +249,11 @@ public class BleMessage {
         if(payload.length == 0){
             throw new IllegalArgumentException();
         }else{
-            int packetSize = (int) Math.ceil(payload.length / (double) mtu);
-            ByteBuffer headerBuffer = ByteBuffer.allocate(7);
-            byte[] header = headerBuffer.put(requestType).putShort((short) mtu)
+            int numPackets = calculateNumPackets(payload.length, mtu);
+            ByteBuffer headerBuffer = ByteBuffer.allocate(HEADER_SIZE);
+            byte[] header = headerBuffer
+                    .put(requestType)
+                    .putShort((short) mtu)
                     .putInt(payload.length).array();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
@@ -202,35 +265,36 @@ public class BleMessage {
             }finally {
                 UMIOUtils.closeQuietly(outputStream);
             }
-            byte [] totalPayLoad = outputStream.toByteArray();
-            byte[][] packets = new byte[packetSize][mtu];
-            int start = 0;
-            for(int position = 0; position < packets.length; position++) {
-                int end = start + mtu;
-                if(end > totalPayLoad.length){end = totalPayLoad.length;}
-                packets[position] = Arrays.copyOfRange(totalPayLoad,start, end);
-                start += mtu;
+            byte[] totalPayLoad = outputStream.toByteArray();
+            byte[][] packets = new byte[numPackets][mtu];
+            for(int i = 0; i < packets.length; i++) {
+                packets[i][0] = messageId;
+                int payloadPos = (i * (mtu-1));
+                System.arraycopy(totalPayLoad, payloadPos, packets[i], 1,
+                        Math.min(mtu - 1, totalPayLoad.length - payloadPos));
             }
+
             return packets;
         }
     }
 
     /**
-     * Internal method for reconstructing the payload from packets.
+     * Internal method for reconstructing the payload from packets. Strips out the mesage id
+     *
      * @param packets Payload packets to be depacketized
+     *
      * @return Constructed payload in byte array
      */
+    //TODO: Throw an exception if any packet has a different message id
     private byte[] depacketizePayload(byte[][] packets){
         if(packets.length == 0){
             throw new NullPointerException();
-        }else{
+        }else {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-            for(byte [] payLoad : packets){
+            for(byte [] packetContent : packets){
                 try {
-                    outputStream.write(payLoad);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }finally {
+                    outputStream.write(packetContent, 1, packetContent.length - 1);
+                } finally {
                     UMIOUtils.closeQuietly(outputStream);
                 }
             }
@@ -262,53 +326,29 @@ public class BleMessage {
         return mtu;
     }
 
+
+
     /**
      * Called when packet is received from the other peer for assembling
-     * @param packets packet received from the other peer
+     * @param packet packet received from the other peer
      * @return True if the packets are all received else False.
      */
-    public boolean onPackageReceived(byte [] packets){
-        byte mRequestType = ByteBuffer.wrap(Arrays.copyOfRange(packets, requestTypeStartIndex,
-                mtuStartIndex)).get();
-        if(outputStream == null && isValidRequestType(mRequestType)){
-            outputStream = new ByteArrayOutputStream();
-            mtu = ByteBuffer.wrap(Arrays.copyOfRange(packets, mtuStartIndex,
-                    payloadLengthStartIndex)).getShort();
-            length = ByteBuffer.wrap(Arrays.copyOfRange(packets, payloadLengthStartIndex,
-                    payLoadStartIndex)).getInt();
-            requestType = mRequestType;
+    public boolean onPackageReceived(byte [] packet){
+        if(onPacketReceivedCount == 0){
+            assignHeaderValuesFromFirstPacket(packet);
+            packetReceiveBuffer = new byte[calculateNumPackets(length, mtu)][mtu];
         }
 
-        if(outputStream != null){
-            try{
-                outputStream.write(packets);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            byte [] receivedPayload = ByteBuffer.wrap(
-                    Arrays.copyOfRange(outputStream.toByteArray(), payLoadStartIndex,
-                    outputStream.toByteArray().length)).array();
-
-            if(receivedPayload.length == length){
-                try{
-                    boolean isCompressed = receivedPayload.length > 0 &&
-                            (receivedPayload[0] == (byte) (GZIPInputStream.GZIP_MAGIC))
-                            && (receivedPayload[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
-                    this.payload = receivedPayload;
-                    if(isCompressed){
-                        this.payload = decompressPayload(receivedPayload);
-                    }
-                    outputStream.close();
-                }catch (IOException e) {
-                    e.printStackTrace();
-                }finally {
-                    UMIOUtils.closeQuietly(outputStream);
-                    outputStream = null;
-                }
-                return true;
-            }
+        if(onPacketReceivedCount < packetReceiveBuffer.length) {
+            packetReceiveBuffer[onPacketReceivedCount++] = packet;
         }
-        return false;
+
+        if(onPacketReceivedCount == packetReceiveBuffer.length) {
+            constructFromPackets(packetReceiveBuffer);
+            return true;
+        }else {
+            return false;
+        }
     }
 
 
@@ -325,11 +365,15 @@ public class BleMessage {
      * Reset a message
      */
     public void reset(){
-        outputStream = null;
+        packetReceivedOutputStream = null;
         requestType = 0;
         length = 0;
         mtu = DEFAULT_MTU_SIZE;
         payload = new byte[]{};
     }
 
+
+    public byte getMessageId() {
+        return messageId;
+    }
 }

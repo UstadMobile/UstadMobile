@@ -75,7 +75,7 @@ public class BleEntryStatusTaskTest {
     @Test
     public void givenBleMessageWithRequest_whenResponseReceived_thenShouldUpdateEntryStatusResponseInDatabase() {
 
-        BleMessage responseMessage = new BleMessage(ENTRY_STATUS_RESPONSE,
+        BleMessage responseMessage = new BleMessage(ENTRY_STATUS_RESPONSE, (byte)42,
                 bleMessageLongToBytes(localAvailabilityCheckResponse));
         mockedEntryStatusTask.onResponseReceived(networkNode.getBluetoothMacAddress(),responseMessage, null);
 
