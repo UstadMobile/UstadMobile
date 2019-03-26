@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 
 import com.ustadmobile.core.impl.UMLog;
@@ -62,6 +63,11 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private volatile long lastActive;
 
+    private Handler timeoutHandler;
+
+    private Runnable mTimeoutRunnable = () -> {
+
+    };
 
     /**
      * Constructor to be called when creating new callback
@@ -71,6 +77,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
         lastActive = System.currentTimeMillis();
+        timeoutHandler = new Handler();
     }
 
     /**
@@ -205,7 +212,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         if(messageComplete){
             responseListener.onResponseReceived(gatt.getDevice().getAddress(), receivedMessage,
                     null);
-            cleanup(gatt);
+            //The server should disconnect us shortly.
         }
     }
 

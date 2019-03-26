@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 
@@ -111,7 +112,7 @@ class BleGattServerAndroid extends BleGattServer {
                     if(!requireConfirmation){
                         byte[][] packets = messageToSend.getPackets(currentMtuSize);
                         for (byte[] packet : packets) {
-                            characteristic.setValue(packet);
+                             characteristic.setValue(packet);
                              boolean notified = gattServer.notifyCharacteristicChanged(device,
                                      characteristic, false);
                              if(notified){
@@ -124,6 +125,10 @@ class BleGattServerAndroid extends BleGattServer {
                         }
                         UstadMobileSystemImpl.l(UMLog.DEBUG,691,
                                 "Response sent to "+device.getAddress());
+
+                        gattServer.cancelConnection(device);
+                        UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                                "Response finished, canceled connection with  " +device.getAddress());
                     }
                 }
             }
