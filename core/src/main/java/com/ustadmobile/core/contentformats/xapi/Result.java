@@ -14,7 +14,7 @@ public class Result {
 
     private String response;
 
-    private class Score {
+    public class Score {
 
         private long scaled;
 
