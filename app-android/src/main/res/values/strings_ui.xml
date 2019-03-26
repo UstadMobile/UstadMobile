@@ -644,6 +644,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="unable_to_update_password">Unable to update password</string>
 
     <string name="custom_fields">Custom fields</string>
+    <string name="custom_field">Custom field</string>
     <string name="custom_fields_desc">Add, remove and modify custom fields</string>
     <string name="entity">Entity</string>
     <string name="add_field">Add field</string>
@@ -655,6 +656,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="options">Options</string>
     <string name="option_value">Option value</string>
     <string name="add_modify_option">Add\/modify option</string>
+    <string name="default_value">Default value</string>
 
 
     <string name="onboarding_get_started_label">Get Started</string>

@@ -5,12 +5,14 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 @UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@UmRepository
 public abstract class CustomFieldDao implements SyncableDao<CustomField, CustomFieldDao> {
 
     @UmQuery("SELECT * FROM CustomField WHERE customFieldUid = :uid")

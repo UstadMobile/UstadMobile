@@ -18,6 +18,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CustomFieldListPresenter;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.CustomField;
 
 public class CustomFieldListRecyclerAdapter extends
@@ -49,14 +50,15 @@ public class CustomFieldListRecyclerAdapter extends
         AppCompatImageView menu =
                 holder.itemView.findViewById(R.id.item_title_with_desc_and_dots_dots);
 
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         assert entity != null;
         title.setText(entity.getCustomFieldName());
         switch(entity.getCustomFieldType()){
             case CustomField.FIELD_TYPE_TEXT:
-                desc.setText(theActivity.getString(MessageID.text));
+                desc.setText(impl.getString(MessageID.text, theContext));
                 break;
             case CustomField.FIELD_TYPE_DROPDOWN:
-                desc.setText(theActivity.getString(MessageID.dropdown));
+                desc.setText(impl.getString(MessageID.dropdown, theContext));
                 break;
             default:break;
         }

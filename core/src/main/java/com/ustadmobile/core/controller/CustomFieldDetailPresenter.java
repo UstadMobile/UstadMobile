@@ -42,6 +42,7 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
     private long customFieldUid = 0;
 
     private String[] fieldTypePresets;
+    private String[] entityTypePresets;
 
     public static final int FIELD_TYPE_TEXT = 0 ;
     public static final int FIELD_TYPE_DROPDOWN = 1;
@@ -64,7 +65,7 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
     }
 
     public void initFromCustomField(long uid){
-        UmLiveData<CustomField> currentFieldLive = customFieldDao.findByUidLive(currentField.getCustomFieldUid());
+        UmLiveData<CustomField> currentFieldLive = customFieldDao.findByUidLive(uid);
         currentFieldLive.observe(CustomFieldDetailPresenter.this,
                 CustomFieldDetailPresenter.this::handleCustomFieldChanged);
         customFieldDao.findByUidAsync(uid, new UmCallback<CustomField>() {
@@ -92,6 +93,11 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
             impl.getString(MessageID.text, context), impl.getString(MessageID.dropdown, context)
         };
         view.setDropdownPresetsOnView(fieldTypePresets);
+
+        entityTypePresets = new String[] {
+                impl.getString(MessageID.clazz, context), impl.getString(MessageID.people, context)
+        };
+        view.setEntityTypePresetsOnView(entityTypePresets);
 
 
         if(customFieldUid == 0){
@@ -155,6 +161,9 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
         }
     }
 
+    public void handleDefaultValueChanged(String defaultString){
+        updatedField.setCustomFieldDefaultValue(defaultString);
+    }
     public void handleClickAddOption() {
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -189,9 +198,9 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
         }
     }
 
-
     private void getSetOptionProvider(){
-        optionProvider = optionDao.findAllOptionsForField(currentField.getCustomFieldUid());
+        optionProvider = optionDao.findAllOptionsForField(updatedField.getCustomFieldUid());
+        view.setListProvider(optionProvider);
     }
 
     public void handleClickDone() {

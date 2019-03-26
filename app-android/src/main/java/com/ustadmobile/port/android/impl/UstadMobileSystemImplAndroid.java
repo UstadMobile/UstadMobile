@@ -73,6 +73,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AddActivityChangeDialogView;
+import com.ustadmobile.core.view.AddCustomFieldOptionDialogView;
 import com.ustadmobile.core.view.AddDateRangeDialogView;
 import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
@@ -93,6 +94,8 @@ import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryView;
+import com.ustadmobile.core.view.CustomFieldDetailView;
+import com.ustadmobile.core.view.CustomFieldListView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.GroupDetailView;
 import com.ustadmobile.core.view.GroupListView;
@@ -334,6 +337,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SelectClazzFeaturesView.VIEW_NAME, SelectClazzFeaturesDialogFragment.class);
         viewNameToAndroidImplMap.put(PersonAuthDetailView.VIEW_NAME, PersonAuthDetailActivity.class);
         viewNameToAndroidImplMap.put(SelectPeopleDialogView.VIEW_NAME, SelectPeopleDialogFragment.class);
+        viewNameToAndroidImplMap.put(CustomFieldListView.VIEW_NAME, CustomFieldListActivity.class);
+        viewNameToAndroidImplMap.put(CustomFieldDetailView.VIEW_NAME, CustomFieldDetailActivity.class);
 
     }
 

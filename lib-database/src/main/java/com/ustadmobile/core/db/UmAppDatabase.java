@@ -352,7 +352,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract CustomFieldDao getCustomFieldDao();
 
-    public abstract CustomFieldValueDao getCustonFieldValueDao();
+    public abstract CustomFieldValueDao getCustomFieldValueDao();
 
     public abstract CustomFieldValueOptionDao getCustomFieldValueOptionDao();
 

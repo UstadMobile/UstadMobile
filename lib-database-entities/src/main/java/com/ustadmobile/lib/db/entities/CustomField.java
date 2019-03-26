@@ -29,6 +29,8 @@ public class CustomField {
     private int customFieldEntityType;
     //if false it is considered not active and it wont show up in the app. effectively "deleted"
     private boolean customFieldActive;
+    //Default value
+    private String customFieldDefaultValue;
 
     @UmSyncMasterChangeSeqNum
     private long customFieldMCSN;
@@ -126,5 +128,13 @@ public class CustomField {
 
     public void setCustomFieldActive(boolean customFieldActive) {
         this.customFieldActive = customFieldActive;
+    }
+
+    public String getCustomFieldDefaultValue() {
+        return customFieldDefaultValue;
+    }
+
+    public void setCustomFieldDefaultValue(String customFieldDefaultValue) {
+        this.customFieldDefaultValue = customFieldDefaultValue;
     }
 }

@@ -5,6 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
 
+    <Spinner
+        android:id="@+id/activity_custom_field_detail_entity_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView30" />
+
     <EditText
         android:id="@+id/activity_custom_field_detail_default_et"
         android:layout_width="0dp"
@@ -40,6 +51,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:autofillHints="@string/field_name_english"
         android:ems="10"
@@ -49,7 +61,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_appbar" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_entity_spinner" />
 
 
     <EditText
@@ -69,70 +81,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_name" />
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/activity_custom_field_detail_add_cl"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView29">
 
 
-        <ImageView
-            android:id="@+id/activity_custom_field_detail_add_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
-
-        <TextView
-            android:id="@+id/activity_custom_field_detail_add_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/add_modify_option"
-            android:textColor="@color/text_primary"
-            app:layout_constraintStart_toEndOf="@+id/activity_custom_field_detail_add_image"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </android.support.constraint.ConstraintLayout>
-
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/activity_custom_field_detail_recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:scrollbars="vertical"
-        android:visibility="visible"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/activity_custom_field_detail_fab"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_add_cl" />
-
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_custom_field_detail_fab" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_gravity="bottom|center"
-        android:layout_marginBottom="16dp" android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp" app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/fab_add" app:floating_title="@string/add_field"
-        app:floating_title_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textView28"
@@ -158,16 +108,102 @@
         app:layout_constraintTop_toBottomOf="@+id/textView28" />
 
     <TextView
-        android:id="@+id/textView29"
+        android:id="@+id/textView30"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="@string/options"
+        android:text="@string/entity"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_default_et" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_appbar" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/activity_custom_field_detail_options_cl"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/activity_custom_field_detail_fab"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_default_et">
+
+
+        <TextView
+            android:id="@+id/textView29"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/options"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/activity_custom_field_detail_add_cl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView29">
+
+
+            <ImageView
+                android:id="@+id/activity_custom_field_detail_add_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
+
+            <TextView
+                android:id="@+id/activity_custom_field_detail_add_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_modify_option"
+                android:textColor="@color/text_primary"
+                app:layout_constraintStart_toEndOf="@+id/activity_custom_field_detail_add_image"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/activity_custom_field_detail_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:scrollbars="vertical"
+            android:visibility="visible"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_custom_field_detail_add_cl" />
+    </android.support.constraint.ConstraintLayout>
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_custom_field_detail_fab" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_gravity="bottom|center"
+        android:layout_marginBottom="16dp" android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp" app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_check_white_24dp" app:floating_title="@string/done"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
