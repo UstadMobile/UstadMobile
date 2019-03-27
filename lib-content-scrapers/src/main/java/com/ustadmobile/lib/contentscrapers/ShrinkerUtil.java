@@ -47,6 +47,41 @@ public class ShrinkerUtil {
     public static final List<String> HTML_MIME_TYPES = Arrays.asList("application/xhtml+xml", "text/html");
     public static final List<String> IMAGE_MIME_TYPES = Arrays.asList(MIMETYPE_JPG, "image/png", "image/jpeg");
 
+
+    public static final int STYLE_OUTSOURCE_TO_LINKED_CSS = 0;
+
+    public static final int STYLE_KEEP = 1;
+
+    public static final int STYLE_DROP = 2;
+
+    public interface StyleElementHelper {
+
+        int decide(Element styleElement);
+
+    }
+
+    public interface LinkElementHelper {
+
+        String addLinksToHtml();
+
+    }
+
+    public interface HtmlDocumentEditor {
+
+        Document modifyDoc(Document html);
+
+    }
+
+    public static class EpubShrinkerOptions {
+
+        public StyleElementHelper styleElementHelper;
+
+        public LinkElementHelper linkHelper;
+
+        public HtmlDocumentEditor editor;
+
+    }
+
     public static void main(String[] args) {
         if (args.length < 1) {
             System.err.println("Usage:<file location><optional log{trace, debug, info, warn, error, fatal}>");
@@ -70,13 +105,26 @@ public class ShrinkerUtil {
         File tmpFolder;
         try {
             tmpFolder = createTmpFolderForZipAndUnZip(epub);
-            shrinkEpubFiles(tmpFolder);
+            shrinkEpubFiles(tmpFolder, null);
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             throw e;
         }
         return tmpFolder;
     }
+
+    public static File shrinkEpub(File epub, EpubShrinkerOptions options) throws IOException {
+        File tmpFolder;
+        try {
+            tmpFolder = createTmpFolderForZipAndUnZip(epub);
+            shrinkEpubFiles(tmpFolder, options);
+        } catch (IOException e) {
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            throw e;
+        }
+        return tmpFolder;
+    }
+
 
     private static File createTmpFolderForZipAndUnZip(File contentFile) throws IOException {
         File parentFolder = contentFile.getParentFile();
@@ -97,7 +145,7 @@ public class ShrinkerUtil {
     }
 
 
-    private static boolean shrinkEpubFiles(File directory) throws IOException {
+    private static boolean shrinkEpubFiles(File directory, EpubShrinkerOptions options) throws IOException {
         FileInputStream opfFileInputStream = null;
         FileInputStream ocfFileInputStream = null;
         FileOutputStream opfFileOutputStream = null;
@@ -160,10 +208,15 @@ public class ShrinkerUtil {
                          * Pratham uses an entity code to map &nbsp; to &#160; - this confuses jsoup
                          */
                         html = html.replaceAll("&nbsp;", "&#160;");
+                        html = html.replaceAll("\\u2029", "");
                         html = html.replace("<!DOCTYPE html[<!ENTITY nbsp \"&#160;\">]>",
                                 "<!DOCTYPE html>");
+
                         Document doc = Jsoup.parse(html, "", Parser.xmlParser());
                         doc.outputSettings().prettyPrint(false);
+                        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+
+                        doc = options != null && options.editor != null ? options.editor.modifyDoc(doc) : doc;
 
                         if (replacedFiles.size() != 0) {
                             Elements elements = doc.select("[src]");
@@ -173,6 +226,12 @@ public class ShrinkerUtil {
                         }
                         Elements styleList = doc.select("style[type=text/css]");
                         for (Element style : styleList) {
+                            int styleAction = options != null && options.styleElementHelper != null ?
+                                    options.styleElementHelper.decide(style) : STYLE_OUTSOURCE_TO_LINKED_CSS;
+
+                            if (styleAction == STYLE_DROP) {
+                                continue;
+                            }
 
                             String cssText = style.text();
                             if (cssText != null && !cssText.isEmpty()) {
@@ -198,8 +257,32 @@ public class ShrinkerUtil {
                                 }
                                 doc.head().append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + pathToStyleFile + "\"/>");
                             }
-
                         }
+                        String cssToAdd = options != null && options.linkHelper != null ?
+                                options.linkHelper.addLinksToHtml() : null;
+                        if (cssToAdd != null) {
+
+                            File cssFile = new File(htmlFile.getParentFile(), "cssHelper.css");
+                            FileUtils.writeStringToFile(cssFile, cssToAdd, UTF_ENCODING);
+                            String pathToCss = Paths.get(htmlFile.getParentFile().toURI())
+                                    .relativize(Paths.get(cssFile.toURI()))
+                                    .toString().replaceAll(Pattern.quote("\\"), "/");
+
+                            String pathFromOpfToCssFile = Paths.get(opfDir.toURI())
+                                    .relativize(Paths.get(cssFile.toURI()))
+                                    .toString().replaceAll(Pattern.quote("\\"), "/");
+
+                            OpfItem styleOpf = new OpfItem();
+                            styleOpf.href = pathFromOpfToCssFile;
+                            styleOpf.mediaType = MIMETYPE_CSS;
+                            styleOpf.id = "cssHelper";
+
+                            newOpfItems.add(styleOpf);
+
+                            doc.head().append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + pathToCss + "\"/>");
+                            styleMap.put(cssToAdd, pathFromOpfToCssFile);
+                        }
+
                         styleList.remove();
                         FileUtils.writeStringToFile(htmlFile, doc.toString(), UTF_ENCODING);
                     }
@@ -217,7 +300,7 @@ public class ShrinkerUtil {
 
             XmlSerializer xmlSerializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
             opfFileOutputStream = new FileOutputStream(opfFile);
-            xmlSerializer.setOutput(opfFileOutputStream, "UTF-8");
+            xmlSerializer.setOutput(opfFileOutputStream, UTF_ENCODING);
             document.serialize(xmlSerializer);
             opfFileOutputStream.flush();
 

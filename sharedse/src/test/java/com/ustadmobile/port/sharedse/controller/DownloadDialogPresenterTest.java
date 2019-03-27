@@ -7,8 +7,6 @@ import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -202,8 +200,8 @@ public class DownloadDialogPresenterTest {
         assertTrue(umAppDatabase.getDownloadSetDao()
                 .findDownloadSetUidByRootContentEntryUid(rootEntry.getContentEntryUid()) > 0);
 
-        assertEquals("4 DownloadJobItem were created ",
-                4, umAppDatabase.getDownloadJobItemDao().findAll().size());
+        assertEquals("3 DownloadJobItem were created ",
+                3, umAppDatabase.getDownloadJobItemDao().findAll().size());
 
         assertEquals("Total bytes to be downloaded was updated",
                 totalBytesToDownload,
@@ -449,6 +447,4 @@ public class DownloadDialogPresenterTest {
                 umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
                 .getDestinationDir());
     }
-
-
 }

@@ -6,13 +6,18 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities;
+import org.jsoup.nodes.Node;
 import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -318,6 +325,123 @@ public class TestShrinkerUtils {
         Element manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]");
 
         Assert.assertEquals("images/cover.png", manifestitem.attr("href"));
+    }
+
+    @Test
+    public void testInvalidText() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "epub.epub");
+        File testhtml = new File(tmpDir, "test.xhtml");
+
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/invalidchars.epub"),
+                epub);
+
+        ZipFile zipFile = new ZipFile(epub.getPath());
+        ZipEntry index = zipFile.getEntry("OEBPS/5.xhtml");
+        InputStream inputIndex = zipFile.getInputStream(index);
+
+        String html = IOUtils.toString(inputIndex, UTF_ENCODING);
+
+        html = html.replaceAll("&nbsp;", "&#160;");
+        html = html.replaceAll("\\u2029", "");
+        html = html.replace("<!DOCTYPE html[<!ENTITY nbsp \"&#160;\">]>",
+                "<!DOCTYPE html>");
+        Document doc = Jsoup.parse(html, "", Parser.xmlParser());
+        doc.outputSettings().prettyPrint(false);
+
+        FileUtils.writeStringToFile(testhtml, doc.toString(), UTF_ENCODING);
+
+
+        Assert.assertTrue("Unicode removed", !html.contains("\\u2029"));
+
+        ZipFile z = new ZipFile(epub.getPath());
+        ZipEntry i = z.getEntry("OEBPS/2.xhtml");
+        InputStream iI = z.getInputStream(i);
+
+        String test = IOUtils.toString(iI, UTF_ENCODING);
+
+        test = test.replaceAll("&nbsp;", "&#160;");
+        test = test.replaceAll("\\u2029", "");
+        test = test.replace("<!DOCTYPE html[<!ENTITY nbsp \"&#160;\">]>",
+                "<!DOCTYPE html>");
+        Document d = Jsoup.parse(test, "", Parser.xmlParser());
+        d.outputSettings().prettyPrint(false);
+        d.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+
+        FileUtils.writeStringToFile(testhtml, d.toString(), UTF_ENCODING);
+
+        Assert.assertTrue("Unicode removed", !test.contains("&nbsp;"));
+
+    }
+
+    @Test
+    public void testAsbEpub() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "epub.epub");
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub"),
+                epub);
+
+        ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+        options.linkHelper = () -> {
+            try {
+                return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING);
+            } catch (IOException e) {
+                return null;
+            }
+        };
+        ShrinkerUtil.shrinkEpub(epub, options);
+
+
+    }
+
+
+    @Test
+    public void testPrathamEpub() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File zip = new File(tmpDir, "epub.zip");
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip"),
+                zip);
+        File epub = new File(tmpDir, "24620-a-book-for-puchku.epub");
+        UmZipUtils.unzip(zip, tmpDir);
+
+        ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+        options.styleElementHelper = styleElement -> {
+            String text = styleElement.text();
+            if (text.startsWith("@font-face") || text.startsWith(".english")) {
+                return ShrinkerUtil.STYLE_OUTSOURCE_TO_LINKED_CSS;
+            } else {
+                return ShrinkerUtil.STYLE_DROP;
+            }
+        };
+        options.editor = document -> {
+            Elements elements = document.select("p");
+            List<Element> elementsToRemove = new ArrayList<>();
+            for (Element element : elements) {
+                if (element.text().isEmpty()) {
+                    elementsToRemove.add(element);
+                }
+            }
+            elementsToRemove.forEach(Node::remove);
+            document.head().append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable-no\" />");
+            return document;
+        };
+        options.linkHelper = () -> {
+            try {
+                return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING);
+            } catch (IOException e) {
+                return null;
+            }
+        };
+        File epubFolder = ShrinkerUtil.shrinkEpub(epub, options);
+        ContentScraperUtil.zipDirectory(epubFolder, "fixed.epub", tmpDir);
+
+
     }
 
 

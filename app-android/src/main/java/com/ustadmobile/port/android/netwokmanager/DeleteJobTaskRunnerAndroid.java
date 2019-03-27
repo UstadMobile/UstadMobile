@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 
@@ -82,6 +83,14 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
             List<String> destinationFiles = umAppDatabase.getDownloadJobItemDao()
                     .getDestinationFiles(downloadSetItemUids);
 
+            DownloadSet downloadSet = umAppDatabase.getDownloadSetDao()
+                    .findByUid((int) downloadSetUid);
+            if(downloadSet == null)
+                return Result.success();
+
+            umAppDatabase.getContentEntryStatusDao()
+                    .deleteByFileUids(downloadSet.getDsRootContentEntryUid());
+
             for(String destinationPath: destinationFiles){
                 File destinationFile = new File(destinationPath);
                 if(destinationFile.exists()) destinationFile.delete();
@@ -89,8 +98,8 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
             umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
 
-            umAppDatabase.getContentEntryFileStatusDao().deleteByFileUids(umAppDatabase
-                    .getDownloadJobItemDao().getContainerUids(downloadSetItemUids));
+            if(downloadSetItemUids.isEmpty())
+                return Result.success();
 
             return Result.success();
         }

@@ -7,8 +7,11 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -71,6 +74,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
         umAppDatabase = UmAppDatabase.getInstance(context);
+
         impl = UstadMobileSystemImpl.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
@@ -150,11 +154,10 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
 
             new Thread(() -> {
-                DownloadJobItemDao.DownloadJobInfo jobInfo = umAppDatabase.getDownloadJobItemDao()
-                        .getDownloadJobInfoByJobUid(downloadJobUid);
-                view.runOnUiThread(() -> view.setStatusText(statusMessage,
-                        jobInfo.getTotalDownloadItems(),
-                        UMFileUtil.formatFileSize(jobInfo.getTotalSize())));
+                int totalDownloadJobItems = umAppDatabase.getDownloadJobItemDao()
+                        .getTotalDownloadJobItems(downloadJobUid);
+                view.runOnUiThread(() -> view.setStatusText(statusMessage, totalDownloadJobItems,
+                        UMFileUtil.formatFileSize(downloadJob.getTotalBytesToDownload())));
             }).start();
 
         }
@@ -221,8 +224,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         downloadJob.setTimeCreated(System.currentTimeMillis());
         downloadJob.setDjStatus(JobStatus.NOT_QUEUED);
         downloadJob.setDjDsUid(downloadSetUid);
+        downloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(downloadJob));
+        downloadJobUid = downloadJob.getDjUid();
 
-        downloadJobUid = umAppDatabase.getDownloadJobDao().insert(downloadJob);
 
         List<DownloadJobItemDao.DownloadJobItemToBeCreated> itemToBeCreated =
                 umAppDatabase.getDownloadJobItemDao()
@@ -230,8 +234,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
         List<DownloadJobItem> jobItems = new ArrayList<>();
         List<ContentEntryStatus> statusList = new ArrayList<>();
-
+        long totalSize = 0L;
         for(DownloadJobItemDao.DownloadJobItemToBeCreated item: itemToBeCreated){
+            totalSize += item.getFileSize();
             DownloadJobItem jobItem = new DownloadJobItem();
             jobItem.setDjiContainerUid(item.getContainerUid());
             jobItem.setDjiDjUid(downloadJobUid);
@@ -245,11 +250,12 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             statusList.add(new ContentEntryStatus(item.getContentEntryUid(),
                     item.getFileSize() > 0, item.getFileSize()));
         }
-
+        downloadJob.setTotalBytesToDownload(totalSize);
         umAppDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
         umAppDatabase.getDownloadJobItemDao().insert(jobItems);
-        umAppDatabase.getDownloadJobDao().updateTotalBytesToDownload(downloadJobUid);
+        umAppDatabase.getDownloadJobItemDao().update(downloadJob);
     }
+
 
 
     public void handleClickPositive() {

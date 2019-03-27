@@ -38,6 +38,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,6 +46,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Xml;
@@ -53,21 +55,24 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.toughra.ustadmobile.BuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.NoAppFoundException;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.core.view.DummyView;
+import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.OnBoardingView;
@@ -81,11 +86,11 @@ import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
-import com.ustadmobile.port.android.view.EpubContentActivity;
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
 import com.ustadmobile.port.android.view.ContentEntryListActivity;
 import com.ustadmobile.port.android.view.DownloadDialogFragment;
 import com.ustadmobile.port.android.view.DummyActivity;
+import com.ustadmobile.port.android.view.EpubContentActivity;
 import com.ustadmobile.port.android.view.H5PContentActivity;
 import com.ustadmobile.port.android.view.Login2Activity;
 import com.ustadmobile.port.android.view.OnBoardingActivity;
@@ -405,10 +410,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                     referrer = ((Activity) ctx).getIntent().getExtras().getString(ARG_REFERRER, "");
                 }
 
-                if((flags & GO_FLAG_CLEAR_TOP) > 0) {
+                if ((flags & GO_FLAG_CLEAR_TOP) > 0) {
                     referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
                             referrer);
-                }else {
+                } else {
                     referrer += "/" + viewName + "?" + UMFileUtil.hashtableToQueryString(args);
                 }
 
@@ -643,27 +648,46 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return null;
     }
 
+    @Override
+    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Void> callback) {
+        Context ctx = (Context) context;
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Uri uri = FileProvider.getUriForFile(ctx, BuildConfig.APPLICATION_ID, new File(path));
+        if (mimeType == null || mimeType.isEmpty()) {
+            mimeType = "*/*";
+        }
+        intent.setDataAndType(uri, mimeType);
+        PackageManager pm = ctx.getPackageManager();
+        if (intent.resolveActivity(pm) != null) {
+            ctx.startActivity(intent);
+            UmCallbackUtil.onSuccessIfNotNull(callback, null);
+        } else {
+            UmCallbackUtil.onFailIfNotNull(callback,
+                    new NoAppFoundException("No activity found for mimetype", mimeType));
+        }
+    }
 
     @Override
     public void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback) {
         new Thread(() -> {
             List<UMStorageDir> dirList = new ArrayList<>();
-            File [] storageOptions = ContextCompat.getExternalFilesDirs((Context) context,null);
+            File[] storageOptions = ContextCompat.getExternalFilesDirs((Context) context, null);
             String contentDirName = getContentDirName(context);
 
-            File umDir = new File(storageOptions[deviceStorageIndex],contentDirName);
-            if(!umDir.exists())umDir.mkdirs();
+            File umDir = new File(storageOptions[deviceStorageIndex], contentDirName);
+            if (!umDir.exists()) umDir.mkdirs();
             dirList.add(new UMStorageDir(umDir.getAbsolutePath(),
                     getString(MessageID.phone_memory, context), true,
-                    true,false, UmFileUtilSe.canWriteFileInDir(umDir)));
+                    true, false, UmFileUtilSe.canWriteFileInDir(umDir)));
 
-            if(storageOptions.length > 1){
+            if (storageOptions.length > 1) {
                 File sdCardStorage = storageOptions[sdCardStorageIndex];
-                umDir = new File(sdCardStorage,contentDirName);
-                if(!umDir.exists())umDir.mkdirs();
+                umDir = new File(sdCardStorage, contentDirName);
+                if (!umDir.exists()) umDir.mkdirs();
                 dirList.add(new UMStorageDir(umDir.getAbsolutePath(),
                         getString(MessageID.memory_card, context), true,
-                        true,false,UmFileUtilSe.canWriteFileInDir(umDir)));
+                        true, false, UmFileUtilSe.canWriteFileInDir(umDir)));
             }
 
             callback.onDone(dirList);

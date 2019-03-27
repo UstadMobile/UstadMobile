@@ -39,7 +39,8 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <application android:supportsRtl="true">
+    <application android:supportsRtl="true"
+        android:usesCleartextTraffic="true">
         <activity
             android:theme="@style/ThemeOnboarding"
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
@@ -47,7 +48,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:authorities="${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

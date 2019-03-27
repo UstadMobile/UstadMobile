@@ -38,6 +38,11 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     public abstract UmProvider<ContentEntry> getChildrenByParentUid(long parentUid);
 
+    @UmQuery("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
+            "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
+    public abstract List<ContentEntry> getChildrenByParent(long parentUid);
+
     @UmQuery("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")

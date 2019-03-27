@@ -5,16 +5,10 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
-import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by mike on 1/30/18.
@@ -45,6 +39,9 @@ public abstract class NetworkNodeDao {
     @UmUpdate
     public abstract void update(NetworkNode node);
 
+    @UmQuery("DELETE FROM NetworkNode WHERE bluetoothMacAddress = :bluetoothAddress")
+    public abstract void deleteByBluetoothAddress(String bluetoothAddress);
+
     @UmQuery("DELETE FROM NetworkNode")
     public abstract void deleteAll(UmCallback<Void> callback);
 
@@ -74,6 +71,11 @@ public abstract class NetworkNodeDao {
                                                                   long minLastSeenTimestamp,
                                                                   int maxFailuresInPeriod,
                                                                   long maxFailuresFromTimestamp);
+
+    @UmQuery("DELETE FROM NetworkNode WHERE NetworkNode.lastUpdateTimeStamp < :minLastSeenTimestamp " +
+            "OR NetworkNode.numFailureCount >= :maxFailuresInPeriod")
+    public abstract void deleteOldAndBadNode(long minLastSeenTimestamp,
+                                             int maxFailuresInPeriod);
 
 
     @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid, endpointUrl = :endpointUrl  WHERE nodeId = :nodeId")

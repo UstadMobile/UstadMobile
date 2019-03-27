@@ -1,20 +1,24 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.WebChunkPresenter;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.view.ViewWithErrorNotifier;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-public class WebChunkActivity extends UstadBaseActivity implements WebChunkView {
+import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
+
+public class WebChunkActivity extends UstadBaseActivity implements WebChunkView, ViewWithErrorNotifier {
 
     private WebChunkPresenter mPresenter;
 
@@ -82,11 +86,27 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView 
 
     @Override
     public void showError(String message) {
-        Toast.makeText((Context) getContext(), message, Toast.LENGTH_SHORT).show();
+        showErrorNotification(message, null, 0);
     }
 
     @Override
     public void setToolbarTitle(String title) {
         getUMToolbar().setTitle(title);
+    }
+
+    @Override
+    public void showErrorWithAction(String message, int actionMessageId, String mimeType) {
+        showErrorNotification(message, () -> {
+            Context ctx = (Context) getContext();
+            String appPackageName = mimeTypeToPlayStoreIdMap.get(mimeType);
+            if (appPackageName == null) {
+                appPackageName = "cn.wps.moffice_eng";
+            }
+            try {
+                ctx.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (android.content.ActivityNotFoundException anfe) {
+                ctx.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+            }
+        }, actionMessageId);
     }
 }

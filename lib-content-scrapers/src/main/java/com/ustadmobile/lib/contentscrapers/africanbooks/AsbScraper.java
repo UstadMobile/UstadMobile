@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,9 +48,6 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -199,6 +197,7 @@ public class AsbScraper {
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
             URL makeUrl = generateMakeUrl(africanBooksUrl, bookId);
             File modifiedFile = new File(destinationDir, bookId + ScraperConstants.LAST_MODIFIED_TXT);
+            UMLogUtil.logTrace("Started with book id " + bookId);
             try {
 
                 driver.get(publishUrl.toString());
@@ -311,19 +310,21 @@ public class AsbScraper {
                 ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryJoinDao, category, childEntry);
 
                 boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, bookObj.date);
-                File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
 
-                if (ContentScraperUtil.fileHasContent(tmpFolder)) {
-                    isUpdated = false;
-                    FileUtils.deleteDirectory(tmpFolder);
-                }
+                isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
                 }
 
-                FileUtils.copyURLToFile(epubUrl, ePubFile);
+                File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
+                if (ContentScraperUtil.fileHasContent(tmpFolder)) {
+                    FileUtils.deleteDirectory(tmpFolder);
+                }
 
+
+                FileUtils.copyURLToFile(epubUrl, ePubFile);
+                UMLogUtil.logTrace("Got the epub");
                 if (ePubFile.length() == 0) {
                     ContentScraperUtil.deleteFile(modifiedFile);
                     retry++;
@@ -342,13 +343,21 @@ public class AsbScraper {
                     updateAsbEpub(bookObj, ePubFile);
                 }
 
-                File tmpDir = ShrinkerUtil.shrinkEpub(ePubFile);
+                ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+                options.linkHelper = () -> {
+                    try {
+                        return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING);
+                    } catch (IOException e) {
+                        return null;
+                    }
+                };
+                File tmpDir = ShrinkerUtil.shrinkEpub(ePubFile, options);
+                UMLogUtil.logTrace("Shrunk Epub");
                 ContentScraperUtil.insertContainer(containerDao, childEntry, true,
                         ScraperConstants.MIMETYPE_EPUB, ePubFile.lastModified(),
                         tmpDir, db, repository, containerDir);
+                UMLogUtil.logTrace("Completed: Created Container");
                 ContentScraperUtil.deleteFile(ePubFile);
-                FileUtils.deleteDirectory(tmpDir);
-
 
             } catch (Exception e) {
                 ContentScraperUtil.deleteFile(modifiedFile);
@@ -459,7 +468,7 @@ public class AsbScraper {
 
             zipFs = FileSystems.newFileSystem(epubFile.toPath(), ClassLoader.getSystemClassLoader());
             opfReader = new BufferedReader(
-                    new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), "UTF-8"));
+                    new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), UTF_ENCODING));
             StringBuffer opfModBuffer = new StringBuffer();
             String line;
             boolean modified = false;
@@ -476,7 +485,7 @@ public class AsbScraper {
                     opfModBuffer.append(descTag).append("\n</metadata>\n");
                     modified = true;
                 } else if (line.contains("<item id=\"cover-image\"") && !line.contains("properties=\"cover-image\"")) {
-                    opfModBuffer.append(" <item id=\"cover-image\" href=\"images/cover.webp\"  media-type=\"image/webp\" properties=\"cover-image\"/>\n");
+                    opfModBuffer.append(" <item id=\"cover-image\" href=\"images/cover.png\"  media-type=\"image/png\" properties=\"cover-image\"/>\n");
                 } else {
                     opfModBuffer.append(line).append('\n');
                 }
@@ -489,10 +498,6 @@ public class AsbScraper {
                         zipFs.getPath("content.opf"), opfModBuffer.toString().getBytes(UTF_ENCODING),
                         StandardOpenOption.TRUNCATE_EXISTING);
             }
-
-            //replace the epub.css to increase font size
-            Path epubCssResPath = Paths.get(getClass().getResource("/com/ustadmobile/lib/contentscrapers/epub.css").toURI());
-            Files.copy(epubCssResPath, zipFs.getPath("epub.css"), StandardCopyOption.REPLACE_EXISTING);
 
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));

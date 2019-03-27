@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 
@@ -44,8 +41,8 @@ public class TestContentEntryStatusDao {
         ContentEntry subCat2Leaf = new ContentEntry("Leaf 2", "Leaf 2", true,
                 true);
 
-        ContentEntryFile subCat1LeafFile = new ContentEntryFile(1000);
-        ContentEntryFile subCat2LeafFile = new ContentEntryFile(1500);
+     //   ContentEntryFile subCat1LeafFile = new ContentEntryFile(1000);
+      //  ContentEntryFile subCat2LeafFile = new ContentEntryFile(1500);
 
         ContentEntryDao entryDao = appRepo.getContentEntryDao();
         rootEntry.setContentEntryUid(entryDao.insert(rootEntry));
@@ -61,7 +58,7 @@ public class TestContentEntryStatusDao {
                 new ContentEntryParentChildJoin(subCategory2, subCat2Leaf, 0)
         ));
 
-        ContentEntryFileDao entryFileDao = appRepo.getContentEntryFileDao();
+     /*   ContentEntryFileDao entryFileDao = appRepo.getContentEntryFileDao();
         subCat1LeafFile.setContentEntryFileUid(entryFileDao.insert(subCat1LeafFile));
         subCat2LeafFile.setContentEntryFileUid(entryFileDao.insert(subCat2LeafFile));
 
@@ -70,7 +67,7 @@ public class TestContentEntryStatusDao {
         ContentEntryContentEntryFileJoin subcat2LeafJoin = new ContentEntryContentEntryFileJoin(
                 subCat2Leaf, subCat2LeafFile);
         appRepo.getContentEntryContentEntryFileJoinDao().insertList(Arrays.asList(subcat1LeafJoin,
-                subcat2LeafJoin));
+                subcat2LeafJoin)); */
     }
 
     @Test

@@ -120,6 +120,9 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
                 List<Long> statusCheckResponse = bleMessageBytesToLong(response.getPayload());
 
                 long time = System.currentTimeMillis();
+                if(entryUidsToCheck == null)
+                    return;
+
                 for(int entryCounter = 0 ; entryCounter < entryUidsToCheck.size(); entryCounter++){
                     long containerUid = entryUidsToCheck.get(entryCounter);
 

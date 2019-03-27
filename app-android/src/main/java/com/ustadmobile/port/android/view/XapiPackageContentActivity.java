@@ -110,7 +110,7 @@ public class XapiPackageContentActivity extends ZippedContentActivity implements
     }
 
     @Override
-    public void showErrorNotification(String errorMessage) {
+    public void showErrorNotification(String errorMessage, Runnable action, int actionMessageId) {
         mProgressBar.setProgress(0);
         mProgressBar.setVisibility(View.GONE);
     }

@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
@@ -15,30 +16,35 @@ import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.ustadmobile.lib.contentscrapers.ContentScraperUtil.deleteETagOrModified;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 
@@ -63,7 +69,7 @@ public class IndexPrathamContentScraper {
 
     String prefixEPub = "https://storyweaver.org.in/v0/stories/download-story/";
 
-    String signIn = "https://storyweaver.org.in/users/sign_in";
+    String signIn = "https://storyweaver.org.in/api/v1/users/sign_in";
 
     private Gson gson;
     private ContentEntryDao contentEntryDao;
@@ -131,13 +137,14 @@ public class IndexPrathamContentScraper {
 
     private void downloadPrathamContentList(URL contentUrl, String cookie, File destinationDir) throws URISyntaxException, IOException {
 
-        BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), ScraperConstants.UTF_ENCODING), BooksResponse.class);
+        BooksResponse contentBooksList = gson.fromJson(IOUtils.toString(contentUrl.toURI(), UTF_ENCODING), BooksResponse.class);
 
         if (contentBooksList.data.size() == 0) {
             return;
         }
 
         int retry = 0;
+        UMLogUtil.logTrace("Found a new list of items: " + contentBooksList.data.size());
         for (int contentCount = 0; contentCount < contentBooksList.data.size(); contentCount++) {
             HttpURLConnection connection = null;
             File resourceFolder = null;
@@ -147,8 +154,7 @@ public class IndexPrathamContentScraper {
 
                 URL epubUrl = generatePrathamEPubFileUrl(data.slug);
 
-                connection = (HttpURLConnection) epubUrl.openConnection();
-                connection.setRequestProperty("Cookie", cookie);
+                UMLogUtil.logTrace("Start scrape for " + data.slug);
 
                 String lang = getLangCode(data.language);
                 Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, lang);
@@ -162,35 +168,79 @@ public class IndexPrathamContentScraper {
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
                         prathamParentEntry, contentEntry, contentCount);
 
-                File content = new File(resourceFolder, data.slug + EPUB_EXT);
-                boolean isUpdated = ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id));
-                File tmpDir = new File(UMFileUtil.stripExtensionIfPresent(content.getPath()));
+                connection = (HttpURLConnection) epubUrl.openConnection();
+                connection.setRequestProperty("Cookie", cookie);
+                connection.connect();
 
-                if (ContentScraperUtil.fileHasContent(tmpDir)) {
-                    isUpdated = false;
-                    FileUtils.deleteDirectory(content);
-                }
+                File content = new File(resourceFolder, data.slug + ZIP_EXT);
+                boolean isUpdated = ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id));
+
+                isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
                 }
+
+                File tmpDir = new File(UMFileUtil.stripExtensionIfPresent(content.getPath()));
+                if (ContentScraperUtil.fileHasContent(tmpDir)) {
+                    FileUtils.deleteDirectory(tmpDir);
+                }
+
                 try {
                     FileUtils.copyInputStreamToFile(connection.getInputStream(), content);
-                    File tmpFolder = ShrinkerUtil.shrinkEpub(content);
+
+                    UMLogUtil.logTrace("downloaded the zip: " + content.getPath());
+
+                    UmZipUtils.unzip(content, resourceFolder);
+
+                    UMLogUtil.logTrace("UnZipped the zip ");
+
+                    File epub = new File(resourceFolder, data.slug + EPUB_EXT);
+                    ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+                    options.styleElementHelper = styleElement -> {
+                        String text = styleElement.text();
+                        if (text.startsWith("@font-face") || text.startsWith(".english")) {
+                            return ShrinkerUtil.STYLE_OUTSOURCE_TO_LINKED_CSS;
+                        } else {
+                            return ShrinkerUtil.STYLE_DROP;
+                        }
+                    };
+                    options.editor = document -> {
+                        Elements elements = document.select("p");
+                        List<Element> elementsToRemove = new ArrayList<>();
+                        for (Element element : elements) {
+                            if (element.text().isEmpty()) {
+                                elementsToRemove.add(element);
+                            }
+                        }
+                        elementsToRemove.forEach(Node::remove);
+                        document.head().append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable-no\" />");
+                        return document;
+                    };
+                    options.linkHelper = () -> {
+                        try {
+                            return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING);
+                        } catch (IOException e) {
+                            return null;
+                        }
+                    };
+                    File tmpFolder = ShrinkerUtil.shrinkEpub(epub, options);
+                    UMLogUtil.logTrace("Shrunk the Epub");
                     ContentScraperUtil.insertContainer(containerDao, contentEntry,
                             true, ScraperConstants.MIMETYPE_EPUB,
                             tmpFolder.lastModified(), tmpFolder,
                             db, repository, containerDir);
+                    UMLogUtil.logTrace("Completed: Created Container");
                     ContentScraperUtil.deleteFile(content);
-                    FileUtils.deleteDirectory(tmpFolder);
+                    ContentScraperUtil.deleteFile(epub);
 
                 } catch (IOException io) {
                     cookie = loginPratham();
                     retry++;
                     deleteETagOrModified(resourceFolder, String.valueOf(data.id));
                     if (retry == 2) {
-                        UMLogUtil.logInfo(ExceptionUtils.getStackTrace(io));
                         UMLogUtil.logError("Error for book " + data.title + " with id " + data.slug);
+                        UMLogUtil.logInfo(ExceptionUtils.getStackTrace(io));
                         retry = 0;
                         continue;
                     }
@@ -203,8 +253,8 @@ public class IndexPrathamContentScraper {
 
 
             } catch (Exception e) {
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Error saving book " + contentBooksList.data.get(contentCount).slug);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 if (resourceFolder != null) {
                     deleteETagOrModified(resourceFolder, resourceFolder.getName());
                 }
@@ -235,29 +285,37 @@ public class IndexPrathamContentScraper {
     }
 
     public String loginPratham() {
-        ChromeDriver driver = ContentScraperUtil.setupChrome(false);
-
-        String cookie = "";
-        driver.get(signIn);
-        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
-        ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
-
-        driver.findElement(By.id("user_email")).sendKeys(GMAIL);
-        driver.findElement(By.id("user_password")).sendKeys(PASS);
-        driver.findElement(By.name("commit")).click();
-
-        for (Cookie ck : driver.manage().getCookies()) {
-
-            if (ck.getName().equalsIgnoreCase("_session_id")) {
-                cookie = ck.getName() + "=" + ck.getValue();
-                UMLogUtil.logDebug(cookie);
+        HttpURLConnection conn = null;
+        DataOutputStream out = null;
+        try {
+            Map<String, String> selectedParams = new HashMap<>();
+            selectedParams.put("api_v1_user[email]", GMAIL);
+            selectedParams.put("api_v1_user[password]", PASS);
+            selectedParams.put("api_v1_user[remember_me]", String.valueOf(false));
+            StringBuffer selectedRequestParams = ContentScraperUtil.convertMapToStringBuffer(selectedParams);
+            URL url = new URL(signIn);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            out = new DataOutputStream(conn.getOutputStream());
+            out.writeBytes(selectedRequestParams.toString());
+            out.flush();
+            out.close();
+            conn.connect();
+            String cookie = conn.getHeaderField("Set-Cookie");
+            return cookie.substring(cookie.indexOf("_session"), cookie.indexOf(";"));
+        } catch (ProtocolException e) {
+            UMLogUtil.logError("Protocol Error for login to Pratham");
+        } catch (IOException e) {
+            UMLogUtil.logError("IO Error for login to Pratham");
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
             }
+            UMIOUtils.closeQuietly(out);
         }
 
-        driver.close();
-        driver.quit();
-
-        return cookie;
+        return "";
     }
 
 
