@@ -14,6 +14,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
+import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
@@ -38,6 +39,9 @@ import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
+import com.ustadmobile.core.db.dao.StatementDao;
+import com.ustadmobile.core.db.dao.VerbDao;
+import com.ustadmobile.core.db.dao.XObjectDao;
 import com.ustadmobile.lib.database.UmDbBuilder;
 import com.ustadmobile.lib.database.annotation.UmClearAll;
 import com.ustadmobile.lib.database.annotation.UmDatabase;
@@ -66,6 +70,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
+import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
@@ -90,6 +95,9 @@ import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 import com.ustadmobile.lib.db.entities.ScrapeRun;
+import com.ustadmobile.lib.db.entities.StatementEntity;
+import com.ustadmobile.lib.db.entities.VerbEntity;
+import com.ustadmobile.lib.db.entities.XObjectEntity;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 import com.ustadmobile.lib.db.sync.dao.SyncStatusDao;
 import com.ustadmobile.lib.db.sync.dao.SyncablePrimaryKeyDao;
@@ -101,7 +109,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 18, entities = {
+@UmDatabase(version = 20, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -116,7 +124,8 @@ import java.util.Random;
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
         ContentEntryStatus.class, ConnectivityStatus.class,
-        Container.class, ContainerEntry.class, ContainerEntryFile.class
+        Container.class, ContainerEntry.class, ContainerEntryFile.class,
+        VerbEntity.class, XObjectEntity.class, StatementEntity.class, ContextXObjectStatementJoin.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -622,6 +631,56 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             }
         });
 
+        builder.addMigration(new UmDbMigration(18, 20) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+
+                        int deviceBits = Integer.parseInt(
+                                db.selectSingleValue("SELECT deviceBits FROM SyncDeviceBits"));
+
+                        //BEGIN Create VerbEntity (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_53 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  VerbEntity  ( verbUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_53') ,  urlId  TEXT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (53, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_53_fn() RETURNS trigger AS $$ BEGIN UPDATE VerbEntity SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 53) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 53) ELSE NEW.verbMasterChangeSeqNum END) WHERE verbUid = NEW.verbUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 53; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_53_trig AFTER UPDATE OR INSERT ON VerbEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_53_fn()");
+                        //END Create VerbEntity (PostgreSQL)
+
+                        //BEGIN Create XObjectEntity (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_54 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  XObjectEntity  ( XObjectUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_54') ,  objectType  TEXT,  objectId  TEXT,  definitionType  TEXT,  interactionType  TEXT,  correctResponsePattern  TEXT,  XObjectMasterChangeSeqNum  BIGINT,  XObjectocalChangeSeqNum  BIGINT,  XObjectLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (54, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_54_fn() RETURNS trigger AS $$ BEGIN UPDATE XObjectEntity SET XObjectocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.XObjectocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 54) END),XObjectMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 54) ELSE NEW.XObjectMasterChangeSeqNum END) WHERE XObjectUid = NEW.XObjectUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 54; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_54_trig AFTER UPDATE OR INSERT ON XObjectEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_54_fn()");
+                        //END Create XObjectEntity (PostgreSQL)
+
+                        //BEGIN Create StatementEntity (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_52 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  StatementEntity  ( statementUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_52') ,  statementId  TEXT,  personUid  BIGINT,  verbUid  BIGINT,  XObjectUid  BIGINT,  subStatementUid  BIGINT,  resultCompletion  BOOL,  resultSuccess  BOOL,  resultScoreScaled  BIGINT,  resultScoreRaw  BIGINT,  resultScoreMin  BIGINT,  resultScoreMax  BIGINT,  resultDuration  BIGINT,  resultResponse  TEXT,  timestamp  BIGINT,  stored  BIGINT,  contextRegistration  TEXT,  contextPlatform  TEXT,  contextStatementUid  BIGINT,  fullStatement  TEXT,  statementMasterChangeSeqNum  BIGINT,  statementLocalChangeSeqNum  BIGINT,  statementLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (52, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_52_fn() RETURNS trigger AS $$ BEGIN UPDATE StatementEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 52) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 52) ELSE NEW.statementMasterChangeSeqNum END) WHERE statementUid = NEW.statementUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 52; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_52_trig AFTER UPDATE OR INSERT ON StatementEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_52_fn()");
+                        //END Create StatementEntity (PostgreSQL)
+
+                        //BEGIN Create ContextXObjectStatementJoin (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_55 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContextXObjectStatementJoin  ( contextXObjectStatementJoinUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_55') ,  contextActivityFlag  INTEGER,  contextStatementUid  BIGINT,  contextXObjectUid  BIGINT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (55, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_55_fn() RETURNS trigger AS $$ BEGIN UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 55) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 55) ELSE NEW.verbMasterChangeSeqNum END) WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 55; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_55_trig AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_55_fn()");
+                        //END Create ContextXObjectStatementJoin (PostgreSQL)
+                        break;
+
+
+                }
+            }
+        });
+
         return builder;
     }
 
@@ -708,6 +767,14 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract ContainerEntryDao getContainerEntryDao();
 
     public abstract ContainerEntryFileDao getContainerEntryFileDao();
+
+    public abstract VerbDao getVerbDao();
+
+    public abstract XObjectDao getXObjectDao();
+
+    public abstract StatementDao getStatementDao();
+
+    public abstract ContextXObjectStatementJoinDao getContextXObjectStatementJoinDao();
 
     @UmDbContext
     public abstract Object getContext();
