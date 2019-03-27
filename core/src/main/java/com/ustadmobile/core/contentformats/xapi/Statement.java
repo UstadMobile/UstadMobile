@@ -1,11 +1,9 @@
 package com.ustadmobile.core.contentformats.xapi;
 
 import com.google.gson.Gson;
-import com.google.gson.annotations.JsonAdapter;
 
 import java.util.List;
 
-@JsonAdapter(StatementDeserializer.class)
 public class Statement {
 
     private Actor actor;

@@ -18,7 +18,7 @@ public class XContext {
 
     private Actor team;
 
-    private Statement statement;
+    private XObject statement;
 
     private ContextActivity contextActivities;
 
@@ -72,11 +72,11 @@ public class XContext {
         this.authority = authority;
     }
 
-    public Statement getStatement() {
+    public XObject getStatement() {
         return statement;
     }
 
-    public void setStatement(Statement statement) {
+    public void setStatement(XObject statement) {
         this.statement = statement;
     }
 

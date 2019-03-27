@@ -18,12 +18,11 @@ public class Actor {
 
     private Account account;
 
-    private class Account {
+    public class Account {
 
         private String name;
 
         private String homePage;
-
 
         public String getName() {
             return name;

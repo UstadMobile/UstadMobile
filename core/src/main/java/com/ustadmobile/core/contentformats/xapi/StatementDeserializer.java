@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class StatementDeserializer implements JsonDeserializer<Statement> {
 
-    private final Type listType = new TypeToken<ArrayList<Attachment>>() {
+    public static final Type listType = new TypeToken<ArrayList<Attachment>>() {
     }.getType();
 
 
