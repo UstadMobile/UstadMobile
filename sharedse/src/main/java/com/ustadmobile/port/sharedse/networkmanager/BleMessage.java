@@ -22,8 +22,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  * This class converts bytes
  *
  * <p>
- * Use {@link BleMessage#BleMessage(byte, byte[])} to send message
- * from one peer device to another
  * <p>
  * Use {@link BleMessage#BleMessage(byte[][])} to receive message
  * sent by peer device.
@@ -63,21 +61,12 @@ public class BleMessage {
 
     private byte messageId;
 
-    private static final int requestTypeStartIndex = 0;
-    private static final int mtuStartIndex = 1;
     private static final int payloadLengthStartIndex = 3;
+
     private static final int payLoadStartIndex = 7;
 
     public static final int HEADER_SIZE = 1 + 2 + 4;//Request type (byte - 1byte), mtu (short - 2 byts), length (int - 4bytes)
 
-    public static final int HEADER_REQUEST_TYPE_POS = 0;
-
-    public static final int HEADER_MTU_POS = 1;
-
-    public static final int HEADER_SIZE_POS = 3;
-
-    @Deprecated
-    private ByteArrayOutputStream packetReceivedOutputStream;
 
     private byte[][] packetReceiveBuffer;
 
@@ -353,19 +342,9 @@ public class BleMessage {
 
 
     /**
-     * Check if received request type is one of the pre defined request types.
-     */
-    private boolean isValidRequestType(byte requestType){
-        return ENTRY_STATUS_REQUEST == requestType || ENTRY_STATUS_RESPONSE == requestType ||
-                WIFI_GROUP_REQUEST == requestType ||
-                WIFI_GROUP_CREATION_RESPONSE == requestType;
-    }
-
-    /**
      * Reset a message
      */
     public void reset(){
-        packetReceivedOutputStream = null;
         requestType = 0;
         length = 0;
         mtu = DEFAULT_MTU_SIZE;

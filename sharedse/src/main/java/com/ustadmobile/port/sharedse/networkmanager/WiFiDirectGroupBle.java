@@ -16,6 +16,8 @@ public class WiFiDirectGroupBle{
 
     private String endpoint;
 
+    private String ipAddress;
+
     /**
      * Create Wi-Fi Direct group
      * @param ssid Group SSID
@@ -44,6 +46,22 @@ public class WiFiDirectGroupBle{
      */
     public String getEndpoint() {
         return endpoint;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
     /**

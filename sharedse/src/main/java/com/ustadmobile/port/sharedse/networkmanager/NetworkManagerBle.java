@@ -570,4 +570,19 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
     }
+
+    public static int convertIpAddressToInteger(String address){
+        int result = 0;
+        String[] ipAddressInArray = address.split("\\.");
+        for (int i = 3; i >= 0; i--){
+            int ip = Integer.parseInt(ipAddressInArray[3 - i]);
+            result |= ip << (i * 8);
+        }
+        return result;
+    }
+
+    public static  String convertIpAddressToString(int ip){
+        return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "."
+                + ((ip >> 8) & 0xFF) + "." + (ip & 0xFF);
+    }
 }

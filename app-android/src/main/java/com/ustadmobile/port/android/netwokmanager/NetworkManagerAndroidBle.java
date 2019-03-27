@@ -152,7 +152,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     private static class WifiDirectGroupAndroid extends WiFiDirectGroupBle {
         private WifiDirectGroupAndroid(WifiP2pGroup group, int endpointPort) {
             super(group.getNetworkName(), group.getPassphrase());
-            setEndpoint("http://192.168.49.1:" + endpointPort + "/");
+            setPort(endpointPort);
+            setIpAddress("192.168.49.1");
         }
     }
 
@@ -987,7 +988,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+            UstadMobileSystemImpl.l(UMLog.INFO, 699,
                     "Method was invoked using reflection  "+method.getName());
             return null;
         }
