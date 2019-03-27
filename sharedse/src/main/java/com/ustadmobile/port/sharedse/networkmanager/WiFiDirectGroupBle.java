@@ -14,8 +14,6 @@ public class WiFiDirectGroupBle{
 
     private int port;
 
-    private String endpoint;
-
     private String ipAddress;
 
     /**
@@ -42,16 +40,15 @@ public class WiFiDirectGroupBle{
     }
 
     /**
-     * @return current endpoint to serve requests from peer devices
+     * @return Node ip address
      */
-    public String getEndpoint() {
-        return endpoint;
-    }
-
     public String getIpAddress() {
         return ipAddress;
     }
 
+    /**
+     * @return Node listening port
+     */
     public int getPort() {
         return port;
     }
@@ -64,11 +61,4 @@ public class WiFiDirectGroupBle{
         this.ipAddress = ipAddress;
     }
 
-    /**
-     * Setting endpoint which will serve peer requests
-     * @param endpoint group endpoint
-     */
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
 }

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
@@ -74,6 +73,8 @@ public class BleGattServerTest {
 
         gattServer = spy(BleGattServer.class);
         wiFiDirectGroupBle = new WiFiDirectGroupBle("NetworkSsId","@@@1234");
+        wiFiDirectGroupBle.setIpAddress("127.0.0.1");
+        wiFiDirectGroupBle.setPort(0);
         gattServer.setNetworkManager(mockedNetworkManager);
 
 
@@ -123,8 +124,8 @@ public class BleGattServerTest {
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
-        WiFiDirectGroupBle groupBle = new Gson().fromJson(new String(responseMessage.getPayload()),
-                WiFiDirectGroupBle.class);
+        WiFiDirectGroupBle groupBle =
+                mockedNetworkManager.getWifiGroupInfoFromBytes(responseMessage.getPayload());
 
         //Verify that wifi direct group creation was initiated
         verify(mockedNetworkManager).awaitWifiDirectGroupReady(anyLong(),any());
