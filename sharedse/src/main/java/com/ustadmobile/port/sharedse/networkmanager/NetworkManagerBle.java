@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
@@ -17,6 +18,12 @@ import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -571,7 +578,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         entryStatusTaskExecutorService.shutdown();
     }
 
-    public static int convertIpAddressToInteger(String address){
+    /**
+     * Convert IP address to decimals
+     * @param address IPV4 address
+     * @return decimal representation of an IP address
+     */
+    private int convertIpAddressToInteger(String address){
         int result = 0;
         String[] ipAddressInArray = address.split("\\.");
         for (int i = 3; i >= 0; i--){
@@ -581,8 +593,66 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         return result;
     }
 
-    public static  String convertIpAddressToString(int ip){
+    /**
+     * Convert decimal representation of an ip address back to IPV4 format.
+     * @param ip decimal representation
+     * @return IPV4 address
+     */
+    private  String convertIpAddressToString(int ip){
         return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "."
                 + ((ip >> 8) & 0xFF) + "." + (ip & 0xFF);
     }
+
+
+    /**
+     * Convert group information to bytes so that they can be transmitted using {@link BleMessage}
+     * @param group WiFiDirectGroupBle
+     * @return constructed bytes  array from the group info.
+     */
+
+    public byte [] getWifiGroupInfoAsBytes(WiFiDirectGroupBle group){
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte [] infoAsbytes = new byte[]{};
+        DataOutputStream outputStream = new DataOutputStream(bos);
+        try {
+            outputStream.writeUTF(group.getSsid());
+            outputStream.writeUTF(group.getPassphrase());
+            outputStream.writeInt(convertIpAddressToInteger(group.getIpAddress()));
+            outputStream.writeChar((char)(group.getPort() + 'a'));
+            infoAsbytes = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            UMIOUtils.closeQuietly(outputStream);
+            UMIOUtils.closeQuietly(bos);
+        }
+        return  infoAsbytes;
+    }
+
+
+    /**
+     * Construct WiFiDirectGroupBle from received message payload
+     * @param payload received payload
+     * @return constructed WiFiDirectGroupBle
+     */
+    public WiFiDirectGroupBle getWifiGroupInfoFromBytes(byte [] payload){
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(payload);
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        WiFiDirectGroupBle groupBle = null;
+        try {
+            groupBle = new WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF());
+            groupBle.setIpAddress(convertIpAddressToString(dataInputStream.readInt()));
+            groupBle.setPort(dataInputStream.readChar() - 'a');
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            UMIOUtils.closeQuietly(inputStream);
+            UMIOUtils.closeQuietly(dataInputStream);
+        }
+
+        UstadMobileSystemImpl.l(UMLog.INFO, 699,
+                "Group information received with ssid = " + groupBle.getSsid());
+        return groupBle;
+    }
+
 }

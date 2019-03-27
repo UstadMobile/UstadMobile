@@ -2,11 +2,6 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.core.util.UMIOUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +12,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENT
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.convertIpAddressToInteger;
 
 /**
  * This is an abstract class which is used to implement platform specific BleGattServer.
@@ -38,8 +32,6 @@ public abstract class BleGattServer {
     private NetworkManagerBle networkManager;
 
     private Object context;
-
-    static final int GROUP_CREATION_TIMEOUT = 5;
 
     public BleGattServer (Object context){
         this.context = context;
@@ -87,25 +79,8 @@ public abstract class BleGattServer {
             case WIFI_GROUP_REQUEST:
                 WiFiDirectGroupBle group = networkManager.awaitWifiDirectGroupReady(5000,
                         TimeUnit.MILLISECONDS);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                byte [] messageToSend = new byte[]{};
-                DataOutputStream outputStream = new DataOutputStream(bos);
-                try {
-                    outputStream.writeUTF(group.getSsid());
-                    outputStream.writeUTF(group.getPassphrase());
-                    outputStream.writeInt(convertIpAddressToInteger(group.getIpAddress()));
-                    outputStream.writeChar((char)(group.getPort() + 'a'));
-                    messageToSend = bos.toByteArray();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }finally {
-                    UMIOUtils.closeQuietly(outputStream);
-                    UMIOUtils.closeQuietly(bos);
-                }
-
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,messageToSend);
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,
+                        networkManager.getWifiGroupInfoAsBytes(group));
             default: return null;
         }
     }

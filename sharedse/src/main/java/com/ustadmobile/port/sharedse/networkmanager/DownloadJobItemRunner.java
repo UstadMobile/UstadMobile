@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
@@ -17,8 +16,6 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,7 +43,6 @@ import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_CLOUD;
 import static com.ustadmobile.lib.db.entities.DownloadJobItemHistory.MODE_LOCAL;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.convertIpAddressToString;
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -415,7 +411,7 @@ public class DownloadJobItemRunner implements Runnable {
             history.setUrl(downloadEndpoint);
 
             UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
-                    " starting download from" + downloadEndpoint + " FromCloud=" + isFromCloud +
+                    " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                     " Attempts remaining= " + attemptsRemaining);
 
             try {
@@ -549,13 +545,16 @@ public class DownloadJobItemRunner implements Runnable {
                             && response != null
                             && response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
                         connectionRequestActive.set(false);
-                        WiFiDirectGroupBle lWifiDirectGroup = getGroupInfoFromResponse(response.getPayload());
+                        WiFiDirectGroupBle lWifiDirectGroup =
+                                networkManager.getWifiGroupInfoFromBytes(response.getPayload());
                         wiFiDirectGroupBle.set(lWifiDirectGroup);
-                        currentNetworkNode.setEndpointUrl(lWifiDirectGroup.getEndpoint());
-                        String endPoint = "http://" + lWifiDirectGroup.getIpAddress() + ":"
+
+                        String acquiredEndPoint = "http://" + lWifiDirectGroup.getIpAddress() + ":"
                                 + lWifiDirectGroup.getPort() +"/";
+                        currentNetworkNode.setEndpointUrl(acquiredEndPoint);
                         appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
-                                lWifiDirectGroup.getSsid(), endPoint);
+                                lWifiDirectGroup.getSsid(), acquiredEndPoint);
+
                         UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
                                 "Connecting to P2P group network with SSID "+lWifiDirectGroup.getSsid());
                     }
@@ -607,31 +606,6 @@ public class DownloadJobItemRunner implements Runnable {
 
         waitingForLocalConnection.set(false);
         return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get());
-    }
-
-    /**
-     * Construct WiFiDirectGroupBle from received message payload
-     * @param payload received payload
-     * @return constructed WiFiDirectGroupBle
-     */
-    private WiFiDirectGroupBle getGroupInfoFromResponse(byte [] payload){
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(payload);
-        DataInputStream dataInputStream = new DataInputStream(inputStream);
-        WiFiDirectGroupBle groupBle = null;
-        try {
-           groupBle = new WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF());
-           groupBle.setIpAddress(convertIpAddressToString(dataInputStream.readInt()));
-           groupBle.setPort(dataInputStream.readChar() - 'a');
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            UMIOUtils.closeQuietly(inputStream);
-            UMIOUtils.closeQuietly(dataInputStream);
-        }
-
-        UstadMobileSystemImpl.l(UMLog.INFO, 699,
-                "Group information received with ssid = " + groupBle.getSsid());
-        return groupBle;
     }
 
 
