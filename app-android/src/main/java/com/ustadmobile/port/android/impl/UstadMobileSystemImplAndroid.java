@@ -527,21 +527,22 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             }
         } else {
             Intent startIntent = new Intent(ctx, androidImplClass);
-            if (ctx instanceof Activity) {
-                String referrer = "";
-                if (((Activity) ctx).getIntent().getExtras() != null) {
-                    referrer = ((Activity) ctx).getIntent().getExtras().getString(ARG_REFERRER, "");
-                }
-
-                if((flags & GO_FLAG_CLEAR_TOP) > 0) {
-                    referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
-                            referrer);
-                }else {
-                    referrer += "/" + viewName + "?" + UMFileUtil.hashtableToQueryString(args);
-                }
-
-                startIntent.putExtra(ARG_REFERRER, referrer);
-            }
+            //TODO: fix arguments as strings
+//            if (ctx instanceof Activity) {
+//                String referrer = "";
+//                if (((Activity) ctx).getIntent().getExtras() != null) {
+//                    referrer = ((Activity) ctx).getIntent().getExtras().getString(ARG_REFERRER, "");
+//                }
+//
+//                if((flags & GO_FLAG_CLEAR_TOP) > 0) {
+//                    referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
+//                            referrer);
+//                }else {
+//                    referrer += "/" + viewName + "?" + UMFileUtil.hashtableToQueryString(args);
+//                }
+//
+//                startIntent.putExtra(ARG_REFERRER, referrer);
+//            }
             startIntent.setFlags(flags);
             if (args != null)
                 startIntent.putExtras(argsBundle);
