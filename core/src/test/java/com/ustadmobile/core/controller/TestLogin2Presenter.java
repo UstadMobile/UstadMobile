@@ -1,11 +1,13 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.CoreTestConfig;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.PersonAuthDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.UmAccount;
@@ -48,6 +50,9 @@ public class TestLogin2Presenter {
 
     @Before
     public void setUp() {
+        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+                CoreTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
+        
         mainImpl = UstadMobileSystemImpl.getInstance();
         systemImplSpy = Mockito.spy(mainImpl);
         UstadMobileSystemImpl.setMainInstance(systemImplSpy);

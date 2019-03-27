@@ -1,29 +1,39 @@
 package com.ustadmobile.port.android.view;
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -36,11 +46,17 @@ import java.util.Locale;
  *
  * Created by mike on 10/15/15.
  */
-public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
+public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
+        UstadViewWithNotifications {
 
     private UstadBaseController baseController;
 
     protected Toolbar umToolbar;
+
+    /**
+     * Currently running instance of NetworkManagerBle
+     */
+    protected NetworkManagerBle networkManagerBle;
 
     private List<WeakReference<Fragment>> fragmentList;
 
@@ -51,6 +67,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private boolean isStarted = false;
 
     public static final String ATTACHMENTS_DIR = "attachments";
+
+    private static final int RUN_TIME_REQUEST_CODE = 111;
+
+    private boolean permissionRequestRationalesShown = false;
+
+    private Runnable afterPermissionMethodRunner;
+
+    private String permissionDialogTitle;
+
+    private String permissionDialogMessage;
+
+    private String permission;
+
+
 
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
@@ -64,7 +94,26 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }
     };
 
+    /**
+     * Ble service connection
+     */
+    private ServiceConnection bleServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            networkManagerBle = ((NetworkManagerBleAndroidService.LocalServiceBinder)service)
+                    .getService().getNetworkManagerBle();
+            bleServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            bleServiceBound = false;
+        }
+    };
+
     private boolean mSyncServiceBound = false;
+
+    private volatile boolean bleServiceBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,10 +131,13 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
 
 
-
-
         Intent syncServiceIntent = new Intent(this, UmAppDatabaseSyncService.class);
         bindService(syncServiceIntent, mSyncServiceConnection,
+                Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
+
+        //bind ble service
+        Intent bleServiceIntent = new Intent(this, NetworkManagerBleAndroidService.class);
+        bindService(bleServiceIntent,bleServiceConnection,
                 Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
     }
 
@@ -94,12 +146,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         super.onResume();
         if(localeChanged) {
             if(UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        recreate();
-                    }
-                }, 200);
+                new Handler().postDelayed(this::recreate, 200);
             }
         }
     }
@@ -166,13 +213,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStart() {
         isStarted = true;
         super.onStart();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
     }
 
     public void onStop() {
         isStarted = false;
         super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 
     /**
@@ -184,14 +229,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         return isStarted;
     }
 
+    @Override
     public void onDestroy() {
-        super.onDestroy();
+        if(bleServiceBound){
+            unbindService(bleServiceConnection);
+        }
+
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
-
         if(mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
         }
+
+        super.onDestroy();
     }
 
     public Object getContext() {
@@ -203,7 +253,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         switch(item.getItemId()) {
             case android.R.id.home:
                 UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, this), this);
+                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
+                        this), this);
                 return true;
 
 
@@ -257,6 +308,82 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             super.attachBaseContext(newBase.createConfigurationContext(config));
         }else {
             super.attachBaseContext(newBase);
+        }
+    }
+
+
+    @Override
+    public void showNotification(String notification, int length) {
+        runOnUiThread(() ->Toast.makeText(this, notification, length).show());
+    }
+
+    /**
+     * Responsible for running task after checking permissions
+     * @param permission Permission to be checked
+     * @param runnable Future task to be executed
+     * @param dialogTitle Permission dialog title
+     * @param dialogMessage Permission dialog message
+     */
+    protected void runAfterGrantingPermission(String permission, Runnable runnable,
+                                           String dialogTitle,String dialogMessage){
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+            afterPermissionMethodRunner.run();
+            return;
+        }
+
+        this.afterPermissionMethodRunner = runnable;
+        this.permissionDialogMessage = dialogMessage;
+        this.permissionDialogTitle = dialogTitle;
+        this.permission = permission;
+
+        if(ContextCompat.checkSelfPermission(this, permission)
+                != PackageManager.PERMISSION_GRANTED){
+            if(!permissionRequestRationalesShown){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(permissionDialogTitle)
+                        .setMessage(permissionDialogMessage)
+                        .setNegativeButton(getString(android.R.string.cancel),
+                                (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton(getString(android.R.string.ok), (dialog, which) ->
+                                runAfterGrantingPermission(permission,afterPermissionMethodRunner,
+                                permissionDialogTitle,permissionDialogMessage));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                permissionRequestRationalesShown = true;
+            }else{
+                permissionRequestRationalesShown = false;
+                ActivityCompat.requestPermissions(this, new String[]{permission}, RUN_TIME_REQUEST_CODE);
+            }
+        }else{
+            afterPermissionMethodRunner.run();
+            afterPermissionMethodRunner = null;
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode){
+            case RUN_TIME_REQUEST_CODE:
+                boolean allPermissionGranted = grantResults.length == permissions.length;
+                for(int result : grantResults) {
+                    allPermissionGranted &= result == PackageManager.PERMISSION_GRANTED;
+                }
+
+                if(!allPermissionGranted &&
+                        permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                    afterPermissionMethodRunner.run();
+                    afterPermissionMethodRunner = null;
+                }
+
+                if(allPermissionGranted){
+                    afterPermissionMethodRunner.run();
+                    afterPermissionMethodRunner = null;
+                    return;
+                }
+                break;
+
         }
     }
 }

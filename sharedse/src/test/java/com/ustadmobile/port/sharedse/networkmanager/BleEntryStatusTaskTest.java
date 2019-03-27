@@ -3,7 +3,9 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
+import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.NetworkNode;
+import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Before;
@@ -37,6 +39,8 @@ public class BleEntryStatusTaskTest {
 
     @Before
     public void setUp(){
+        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
+                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         Object context =  PlatformTestUtil.getTargetContext();
         UmAppDatabase umAppDatabase = UmAppDatabase.getInstance(context);
         umAppDatabase.clearAllTables();
@@ -60,6 +64,7 @@ public class BleEntryStatusTaskTest {
         mockedEntryStatusTask.onResponseReceived(networkNode.getBluetoothMacAddress(),responseMessage);
 
         assertNotNull("entry check status response will be saved to the database",
-                entryStatusResponseDao.findByEntryIdAndNetworkNode(entries.get(0), networkNode.getNodeId()));
+                entryStatusResponseDao.findByEntryIdAndNetworkNode(entries.get(0),
+                        networkNode.getNodeId()));
     }
 }

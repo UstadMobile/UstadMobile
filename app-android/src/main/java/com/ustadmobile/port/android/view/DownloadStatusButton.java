@@ -81,6 +81,10 @@ public class DownloadStatusButton extends RelativeLayout {
         mImageView.setImageResource(resId);
     }
 
+    public ImageView getImageResource(){
+        return mImageView;
+    }
+
     /**
      * Sets whether or not the progress elements of the download status are visible, so that these
      * components are only visible if a download is in progress

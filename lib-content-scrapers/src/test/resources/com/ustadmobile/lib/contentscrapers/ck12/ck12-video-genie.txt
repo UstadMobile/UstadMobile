@@ -30,7 +30,7 @@ Add to 10 with Images ( Video ) | Arithmetic
   <meta name="description" content="">
   <meta property="og:title" content="Add to 10 with Images">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://s3.amazonaws.com/ck12bg.ck12.org/curriculum/107522/thumb_540_50.jpg">
+  <meta property="og:image" content="/media/test1picture.png">
   <meta property="og:url" content="https://www.ck12.org/c/elementary-math-grade-1/add-to-10-with-images/enrichment/Overview-of-Addition-Sums-to-10/">
   <meta property="og:description" content="Overview">
   <meta name="viewport" content="width=device-width">

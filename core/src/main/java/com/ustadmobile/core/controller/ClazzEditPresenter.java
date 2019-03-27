@@ -64,7 +64,7 @@ public class ClazzEditPresenter
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
             initFromClazz(currentClazzUid);
-        }else if(getArguments().containsKey(UstadView.ARG_NEW)){
+        }else if(getArguments().containsKey(ClazzEditView.ARG_NEW)){
             repository.getLocationDao().insertAsync(new Location("Clazz Location",
                     "Clazz Location", TimeZone.getDefault().getID()), new UmCallback<Long>() {
                 @Override

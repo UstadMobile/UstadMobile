@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
@@ -56,36 +57,72 @@ public class TestPhetContentScraper {
 
             try {
 
-                if (request.getPath().startsWith("/api/simulation")) {
+                if (request.getPath().startsWith("/en/api/simulation")) {
 
-                    return new MockResponse().setBody(readFile(HTML_FILE_LOCATION));
+                    Buffer buffer = readFile(HTML_FILE_LOCATION);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + HTML_FILE_LOCATION).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
 
                 } else if (request.getPath().contains(PHET_MAIN_CONTENT)) {
 
-                    return new MockResponse().setBody(readFile(PHET_MAIN_CONTENT));
+                    Buffer buffer = readFile(PHET_MAIN_CONTENT);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + HTML_FILE_LOCATION).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+
 
                 } else if (request.getPath().equals("/media/simulation_en.html?download")) {
 
-                    MockResponse mock = new MockResponse();
-                    mock.setBody(readFile(EN_LOCATION_FILE));
-                    mock.addHeader("ETag", "16adca-5717010854ac0");
-                    mock.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    Buffer buffer = readFile(EN_LOCATION_FILE);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
 
-                    return mock;
+                    return response;
+
                 } else if (request.getPath().contains("/media/simulation_es.html?download")) {
 
-                    MockResponse mock = new MockResponse();
-                    mock.setBody(readFile(ES_LOCATION_FILE));
-                    mock.addHeader("ETag", "16adca-5717010854ac0");
-                    mock.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    Buffer buffer = readFile(ES_LOCATION_FILE);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
 
-                    return mock;
+                    return response;
+
                 } else if (request.getPath().contains("flash")) {
 
-                    return new MockResponse().setBody(readFile(FLASH_FILE_LOCATION));
+                    Buffer buffer = readFile(FLASH_FILE_LOCATION);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
+
                 } else if (request.getPath().contains("jar")) {
 
-                    return new MockResponse().setBody(readFile(JAR_FILE_LOCATION));
+                    Buffer buffer = readFile(JAR_FILE_LOCATION);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.addHeader("ETag", "16adca-5717010854ac0");
+                    response.addHeader("Last-Modified", "Fri, 20 Jul 2018 15:36:51 GMT");
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
                 }
 
             } catch (IOException e) {
@@ -153,7 +190,7 @@ public class TestPhetContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String mockServerUrl = mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString();
+        String mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString();
         PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
         scraper.scrapeContent();
 
@@ -167,7 +204,7 @@ public class TestPhetContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String mockServerUrl = mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString();
+        String mockServerUrl = mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString();
         PhetContentScraper scraper = new PhetContentScraper(mockServerUrl, tmpDir);
         scraper.scrapeContent();
         File englishLocation = new File(tmpDir, "en");
@@ -230,33 +267,35 @@ public class TestPhetContentScraper {
         ContentEntryContentCategoryJoinDao categoryJoinDao = repo.getContentEntryContentCategoryJoinDao();
         ContentEntryRelatedEntryJoinDao relatedJoin = repo.getContentEntryRelatedEntryJoinDao();
 
+        String urlPrefix = "http://" + mockWebServer.getHostName() + ":" + mockWebServer.getPort();
+
         ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://phet.colorado.edu/");
         Assert.assertEquals("Main parent content entry exsits", true, parentEntry.getEntryId().equalsIgnoreCase("https://phet.colorado.edu/"));
 
-        ContentEntry categoryEntry = contentEntryDao.findBySourceUrl("/en/simulations/category/math");
+        ContentEntry categoryEntry = contentEntryDao.findBySourceUrl(urlPrefix + "/en/simulations/category/math");
         ContentEntryParentChildJoin parentChildJoinEntry = parentChildDaoJoin.findParentByChildUuids(categoryEntry.getContentEntryUid());
         Assert.assertEquals("Category Math entry exists", true, parentChildJoinEntry.getCepcjParentContentEntryUid() == parentEntry.getContentEntryUid());
 
-        ContentEntry englishSimulationEntry = contentEntryDao.findBySourceUrl("/api/simulation/test");
-        Assert.assertEquals("Simulation entry english exists", true, englishSimulationEntry.getEntryId().equalsIgnoreCase("/api/simulation/test"));
+        ContentEntry englishSimulationEntry = contentEntryDao.findBySourceUrl(urlPrefix + "/en/api/simulation/test");
+        Assert.assertEquals("Simulation entry english exists", true, englishSimulationEntry.getEntryId().equalsIgnoreCase("/en/api/simulation/test"));
 
         List<ContentEntryParentChildJoin> categorySimulationEntryLists = parentChildDaoJoin.findListOfParentsByChildUuid(englishSimulationEntry.getContentEntryUid());
         boolean hasMathCategory = false;
-        for(ContentEntryParentChildJoin category : categorySimulationEntryLists){
+        for (ContentEntryParentChildJoin category : categorySimulationEntryLists) {
 
-            if(category.getCepcjParentContentEntryUid() == categoryEntry.getContentEntryUid()){
+            if (category.getCepcjParentContentEntryUid() == categoryEntry.getContentEntryUid()) {
                 hasMathCategory = true;
                 break;
             }
         }
-        Assert.assertEquals("Parent child join between category and simulation exists",true, hasMathCategory);
+        Assert.assertEquals("Parent child join between category and simulation exists", true, hasMathCategory);
 
-        ContentEntry spanishEntry = contentEntryDao.findBySourceUrl("es/test");
-        Assert.assertEquals("Simulation entry spanish exists", true, spanishEntry.getEntryId().equalsIgnoreCase("es/test"));
+        ContentEntry spanishEntry = contentEntryDao.findBySourceUrl(urlPrefix + "/es/api/simulation/test");
+        Assert.assertEquals("Simulation entry spanish exists", true, spanishEntry.getEntryId().equalsIgnoreCase("/es/api/simulation/test"));
 
         ContentEntryRelatedEntryJoin spanishEnglishJoin = relatedJoin.findPrimaryByTranslation(spanishEntry.getContentEntryUid());
-        Assert.assertEquals("Related Join with Simulation Exists - Spanish Match",true, spanishEnglishJoin.getCerejRelatedEntryUid() == spanishEntry.getContentEntryUid());
-        Assert.assertEquals("Related Join with Simulation Exists - English Match",true, spanishEnglishJoin.getCerejContentEntryUid() == englishSimulationEntry.getContentEntryUid());
+        Assert.assertEquals("Related Join with Simulation Exists - Spanish Match", true, spanishEnglishJoin.getCerejRelatedEntryUid() == spanishEntry.getContentEntryUid());
+        Assert.assertEquals("Related Join with Simulation Exists - English Match", true, spanishEnglishJoin.getCerejContentEntryUid() == englishSimulationEntry.getContentEntryUid());
 
         List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(englishSimulationEntry.getContentEntryUid());
         Assert.assertEquals(true, listOfFiles.size() > 0);
@@ -271,6 +310,7 @@ public class TestPhetContentScraper {
     public void givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() throws IOException {
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
+        UmAppDatabase repo = db.getRepository("https://localhost", "");
         db.clearAllTables();
 
         File tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile();
@@ -278,10 +318,10 @@ public class TestPhetContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
+        PhetContentScraper scraper = new PhetContentScraper(mockWebServer.url("/en/api/simulation/equality-explorer-two-variables").toString(), tmpDir);
         scraper.scrapeContent();
 
-        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, db.getContentEntryDao(), "", db.getLanguageDao(), db.getLanguageVariantDao());
+        ArrayList<ContentEntry> translationList = scraper.getTranslations(tmpDir, repo.getContentEntryDao(), "", repo.getLanguageDao(), db.getLanguageVariantDao());
 
     }
 

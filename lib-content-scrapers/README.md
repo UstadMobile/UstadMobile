@@ -11,6 +11,23 @@ Open local.properties and add the following line of code:
 
 scraper.chrome_driver_path= path_to_file
 
+
+## Setup WEbp Lossy
+
+if using ubuntu:
+use apt-get install webp
+
+and for other os use:
+Download the latest webp compressor for your operating system from https://developers.google.com/speed/webp/docs/precompiled
+Unzip the file and copy the filepath to cwebp.exe which is found in the bin folder
+Open local.properties and add the following line:
+
+shrinker.webp = path_to_file
+
+or for ubuntu only
+use apt-get install webp
+
+
 ###Find and Scrap Edraak K12 Content
 
 ####To Find All Edraak Content
@@ -141,3 +158,22 @@ Download all ddl content for all 3 languages
 
 >$ gradlew scrapeContent -PfindDdlUrl="https://www.ddl.af/en/resources" -PfindDdlDir="C:\ddl\"
 
+#### Find all Khan Academy Content
+
+Download all content from Khan Academy 
+
+>$ gradlew scrapeContent -PfindKhanUrl="https://www.khanacademy.org/" -PfindKhanDir="C:\khan\"
+
+
+#### Find All VOA Content
+
+>$ gradlew scrapeContent -PfindVoaUrl="https://learningenglish.voanews.com/" -PfindVoaDir="C:\voa\"
+
+#### Find All Etekkato Content
+
+>$ gradlew scrapeContent -PfindEtekUrl="http://www.etekkatho.org/subjects/" -PfindEtekDir="C:\etek\"
+
+
+### Find All Epub in Folder 
+
+>$ gradlew scrapeContent -PfindFolderName="Asafeer" -PfindFolderDir="C:\asafeer\"

@@ -31,7 +31,7 @@ History of Life ( Video ) | Biology
   <meta property="ck12:content_div_id" content="modality_content">
   <meta property="og:title" content="History of Life">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://i1.ytimg.com/vi/8SgnnV8nV9g/hqdefault.jpg">
+  <meta property="og:image" content="/media/test1picture.png">
   <meta property="og:url" content="https://www.ck12.org/c/biology/history-of-life/lecture/Origin-and-Evolution-of-Life/">
   <meta property="og:description" content="Describes what the atmosphere of the earth was like long ago and how life first started.">
   <meta name="viewport" content="width=device-width">

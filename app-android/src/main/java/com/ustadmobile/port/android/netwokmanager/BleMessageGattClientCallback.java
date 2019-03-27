@@ -30,7 +30,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *<p>
  * - When a device is connected to a BLE node, if it  has android version 5 and above
  * it will request for the MTU change and upon receiving a call back on
- * {{@link BleMessageGattClientCallback#onMtuChanged}} it will update MTU and request for
+ * {{@link BleMessageGattClientCallback#onMtuChanged}} it will updateState MTU and request for
  * all available services from the GATT otherwise it will request for available services.
  * This will be achieved by calling {@link BluetoothGatt#discoverServices()}.
  * Once services are found, all characteristics in those services will be listed.
@@ -83,7 +83,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     @Override
     public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
         super.onMtuChanged(gatt, mtu, status);
-        //Successfully changed the MTU, update message and notify to start discovering service
+        //Successfully changed the MTU, updateState message and notify to start discovering service
         this.defaultMtuSize = mtu;
         mLatch.countDown();
     }

@@ -31,9 +31,9 @@ public abstract class HttpCachedEntryDao {
     public abstract HttpCachedEntry findByUrlAndMethod(String url, int method);
 
     /**
-     * Update method - update the given entry. Has no effect if it has not already been inserted
+     * Update method - updateState the given entry. Has no effect if it has not already been inserted
      *
-     * @param entry Entry to update
+     * @param entry Entry to updateState
      */
     @UmUpdate
     public abstract void update(HttpCachedEntry entry);
@@ -47,7 +47,7 @@ public abstract class HttpCachedEntryDao {
     public abstract void insert(HttpCachedEntry entry);
 
     /**
-     * Get a list of the file uris for a given list of urls. Useful when it's time to delete the entries from the disk.
+     * Get a list of the file uris for a given list of urls. Useful when it's time to deleteByDownloadSetUid the entries from the disk.
      *
      * @param urls URLs to find entries for
      *

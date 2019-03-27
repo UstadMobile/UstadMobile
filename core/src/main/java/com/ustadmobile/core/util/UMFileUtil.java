@@ -40,102 +40,102 @@ import java.util.Vector;
 
 /**
  * Assorted cross platform file utility methods
- * 
+ *
  * @author mike
  */
 public class UMFileUtil {
-    
-    public static final char FILE_SEP  = '/';
-    
+
+    public static final char FILE_SEP = '/';
+
     /**
      * Constant string - the file:/// protocol
      */
     public static final String PROTOCOL_FILE = "file:///";
-    
+
     /**
-     * Join multiple paths - make sure there is just one FILE_SEP character 
+     * Join multiple paths - make sure there is just one FILE_SEP character
      * between them.  Only handles situations where there could be a single extra
-     * slash - e.g. "path1/" + "/somefile.txt" - does not look inside the 
+     * slash - e.g. "path1/" + "/somefile.txt" - does not look inside the
      * path components and does not deal with double // inside a single component
-     * 
+     *
      * @param paths Array of paths to join
      * @return path components joined with a single FILE_SEP character between
      */
     public static String joinPaths(String... paths) {
         StringBuffer result = new StringBuffer();
-        for(int i = 0; i < paths.length; i++) {
+        for (int i = 0; i < paths.length; i++) {
             String pathComp = paths[i];
-            
+
             //If not the first component in the path - remove leading slash
-            if(i > 0 && pathComp.length() > 0 && pathComp.charAt(0) == FILE_SEP) {
+            if (i > 0 && pathComp.length() > 0 && pathComp.charAt(0) == FILE_SEP) {
                 pathComp = pathComp.substring(1);
             }
             result.append(pathComp);
-            
+
             //If not the final component - make sure it ends with a slash
-            if(i < paths.length - 1 && pathComp.charAt(pathComp.length()-1) != FILE_SEP) {
+            if (i < paths.length - 1 && pathComp.charAt(pathComp.length() - 1) != FILE_SEP) {
                 result.append(FILE_SEP);
             }
         }
-        
+
         return result.toString();
     }
-    
+
     /**
      * Resolve a link relative to an absolute base.  The path to resolve could
      * itself be absolute or relative.
-     * 
+     * <p>
      * e.g.
      * resolvePath("http://www.server.com/some/dir", "../img.jpg");
-     *  returns http://www.server.com/some/img.jpg
-     * 
+     * returns http://www.server.com/some/img.jpg
+     *
      * @param base The absolute base path
      * @param link The link given relative to the base
-     * @return 
+     * @return
      */
     public static String resolveLink(String base, String link) {
         String linkLower = link.toLowerCase();
         int charFoundIndex;
-        
+
         charFoundIndex = linkLower.indexOf("://");
-        if(charFoundIndex != -1) {
+        if (charFoundIndex != -1) {
             boolean isAllChars = true;
             char cc;
-            for(int i = 0; i < charFoundIndex; i++) {
+            for (int i = 0; i < charFoundIndex; i++) {
                 cc = linkLower.charAt(i);
                 isAllChars &= ((cc > 'a' && cc < 'z') || (cc > '0' && cc < '9') || cc == '+' || cc == '.' || cc == '-');
             }
-            
+
             //we found :// and all valid scheme name characters before; path itself is absolute
-            if(isAllChars) {
+            if (isAllChars) {
                 return link;
             }
         }
-        
+
         //Check if this is actually a data: link which should not be resolved
-        if(link.startsWith("data:")) {
+        if (link.startsWith("data:")) {
             return link;
         }
-        
-        if(link.length() > 2 && link.charAt(0) == '/' && link.charAt(1) == '/'){
+
+        if (link.length() > 2 && link.charAt(0) == '/' && link.charAt(1) == '/') {
             //we want the protocol only from the base
-            String resolvedURL = base.substring(0, base.indexOf(':')+1) + link;
+            String resolvedURL = base.substring(0, base.indexOf(':') + 1) + link;
             return resolvedURL;
         }
-        
-        if(link.length() > 1 && link.charAt(0) == '/') {
+
+        if (link.length() > 1 && link.charAt(0) == '/') {
             //we should start from the end of the server
-            int serverStartPos = base.indexOf("://")+3;
-            int serverFinishPos = base.indexOf('/', serverStartPos+1);
+            int serverStartPos = base.indexOf("://") + 3;
+            int serverFinishPos = base.indexOf('/', serverStartPos + 1);
             return base.substring(0, serverFinishPos) + link;
         }
-        
+
         //get rid of query if it's present in the base path
         charFoundIndex = base.indexOf('?');
-        if(charFoundIndex != -1) {
+        if (charFoundIndex != -1) {
             base = base.substring(0, charFoundIndex);
         }
-        
+
         //remove the filename component if present in base path
         //if the base path ends with a /, remove that, because it will be joined to the path using a /
         charFoundIndex = base.lastIndexOf(FILE_SEP);
@@ -143,58 +143,57 @@ public class UMFileUtil {
         //Check if this is not a relative link but has no actual folder structure in the base. E.g.
         // base = somefile.txt href=path/to/somewhere.text . As there is no folder structure there is
         // nothing to resolve against
-        if(charFoundIndex == -1) {
+        if (charFoundIndex == -1) {
             return link;
         }
 
         base = base.substring(0, charFoundIndex);
 
-        
-        
+
         String[] baseParts = splitString(base, FILE_SEP);
         String[] linkParts = splitString(link, FILE_SEP);
-        
+
         Vector resultVector = new Vector();
-        for(int i = 0; i < baseParts.length; i++) {
+        for (int i = 0; i < baseParts.length; i++) {
             resultVector.addElement(baseParts[i]);
         }
-        
-        for(int i = 0; i < linkParts.length; i++) {
-            if(linkParts[i].equals(".")) {
+
+        for (int i = 0; i < linkParts.length; i++) {
+            if (linkParts[i].equals(".")) {
                 continue;
             }
-            
-            if(linkParts[i].equals("..")) {
-                resultVector.removeElementAt(resultVector.size()-1);
-            }else {
+
+            if (linkParts[i].equals("..")) {
+                resultVector.removeElementAt(resultVector.size() - 1);
+            } else {
                 resultVector.addElement(linkParts[i]);
             }
         }
-        
+
         StringBuffer resultSB = new StringBuffer();
         int numElements = resultVector.size();
-        for(int i = 0; i < numElements; i++) {
+        for (int i = 0; i < numElements; i++) {
             resultSB.append(resultVector.elementAt(i));
-            if(i < numElements -1) {
+            if (i < numElements - 1) {
                 resultSB.append(FILE_SEP);
             }
         }
-        
+
         return resultSB.toString();
     }
 
     private static boolean isUriAbsoluteLcase(String uriLower) {
         int charFoundIndex = uriLower.indexOf("://");
-        if(charFoundIndex != -1) {
+        if (charFoundIndex != -1) {
             boolean isAllChars = true;
             char cc;
-            for(int i = 0; i < charFoundIndex; i++) {
+            for (int i = 0; i < charFoundIndex; i++) {
                 cc = uriLower.charAt(i);
                 isAllChars &= ((cc > 'a' && cc < 'z') || (cc > '0' && cc < '9') || cc == '+' || cc == '.' || cc == '-');
             }
 
             //we found :// and all valid scheme name characters before; path itself is absolute
-            if(isAllChars) {
+            if (isAllChars) {
                 return true;
             }
         }
@@ -206,14 +205,14 @@ public class UMFileUtil {
         return isUriAbsoluteLcase(uri.toLowerCase());
     }
 
-    
+
     /**
      * Split a string into an array of Strings at each instance of splitChar
-     * 
-     * This is roughly the same as using String.split : Unfortunately 
+     * <p>
+     * This is roughly the same as using String.split : Unfortunately
      * String.split is not available in J2ME
-     * 
-     * @param str Whole string e.g. some/path/file.jpg
+     *
+     * @param str       Whole string e.g. some/path/file.jpg
      * @param splitChar Character to split by - e.g. /
      * @return Array of Strings split e.g. "some", "path", "file.jpg"
      */
@@ -222,63 +221,62 @@ public class UMFileUtil {
         String[] splitStr = new String[numParts + 1];
         StringBuffer buffer = new StringBuffer();
         int partCounter = 0;
-        
+
         char currentChar;
-        for(int i = 0; i < str.length(); i++) {
+        for (int i = 0; i < str.length(); i++) {
             currentChar = str.charAt(i);
-            if(currentChar == splitChar) {
+            if (currentChar == splitChar) {
                 splitStr[partCounter] = buffer.toString();
                 partCounter++;
                 buffer = new StringBuffer();
-            }else {
+            } else {
                 buffer.append(currentChar);
             }
         }
-        
+
         //catch the last part
         splitStr[partCounter] = buffer.toString();
-        
+
         return splitStr;
     }
-
 
     private static int countChar(String str, char c) {
         int count = 0;
         int strLen = str.length();
-        for(int i = 0; i < strLen; i++) {
-            if(str.charAt(i) == c) {
+        for (int i = 0; i < strLen; i++) {
+            if (str.charAt(i) == c) {
                 count++;
             }
         }
-        
+
         return count;
     }
-    
+
     /**
-     * Gets the end filename (e.g. basename) from a url or path string.  Will chop off query 
+     * Gets the end filename (e.g. basename) from a url or path string.  Will chop off query
      * and preceeding directories: e.g
      * "/some/path/file.ext" returns "file.ext"
      * "http://server.com/path/thing.php?foo=bar" returns "thing.php"
-     * 
+     *
      * @param url
-     * @return 
+     * @return
      */
     public static String getFilename(String url) {
-        if(url.length() == 1) {
+        if (url.length() == 1) {
             return url.equals("/") ? "" : url;
         }
-        
-        int charPos = url.lastIndexOf('/', url.length() -2);
-        
-        if(charPos != -1) {
-            url = url.substring(charPos+1);
+
+        int charPos = url.lastIndexOf('/', url.length() - 2);
+
+        if (charPos != -1) {
+            url = url.substring(charPos + 1);
         }
-        
+
         charPos = url.indexOf("?");
-        if(charPos != -1) {
+        if (charPos != -1) {
             url = url.substring(0, charPos);
         }
-        
+
         return url;
     }
 
@@ -290,17 +288,16 @@ public class UMFileUtil {
      *
      * @param filename The filename as given
      * @param mimeType The mimetype of the file
-     *
      * @return The filename with the correct extension for the mime type as above.
      */
     public static String appendExtensionToFilenameIfNeeded(String filename, String mimeType) {
         String expectedExtension = UstadMobileSystemImpl.getInstance().getExtensionFromMimeType(
-            mimeType);
+                mimeType);
 
-        if(expectedExtension == null)
+        if (expectedExtension == null)
             return filename;
 
-        if(!filename.endsWith('.' + expectedExtension)) {
+        if (!filename.endsWith('.' + expectedExtension)) {
             filename += '.' + expectedExtension;
         }
 
@@ -313,262 +310,243 @@ public class UMFileUtil {
      * no-cache in which case the no-cache key will be in the hashtable with a
      * blank string value.  It can also have an = sign with quoted or unquoted
      * text e.g. maxage=600 or maxage="600"
-     * 
-     * @param str String to parse
-     * @param deliminator deliminator character 
+     *
+     * @param str         String to parse
+     * @param deliminator deliminator character
      * @return Hashtable of parameters and values found
      */
     public static Hashtable<String, String> parseParams(String str, char deliminator) {
         String paramName = null;
         Hashtable<String, String> params = new Hashtable<>();
         boolean inQuotes = false;
-        
+
         int strLen = str.length();
         StringBuffer sb = new StringBuffer();
         char c;
-        
+
         char lastChar = 0;
-        for(int i = 0; i < strLen; i++) {
+        for (int i = 0; i < strLen; i++) {
             c = str.charAt(i);
-            if(c == '"') {
-                if(!inQuotes) {
+            if (c == '"') {
+                if (!inQuotes) {
                     inQuotes = true;
-                }else if(inQuotes && lastChar != '\\') {
+                } else if (inQuotes && lastChar != '\\') {
                     inQuotes = false;
                 }
-                
+
             }
 
-            if((isWhiteSpace(c) && !inQuotes) || (c == '"' && i < strLen-1)) {
+            if ((isWhiteSpace(c) && !inQuotes) || (c == '"' && i < strLen - 1)) {
                 //do nothing more
-            }else if((c == deliminator || i == strLen-1)){
+            } else if ((c == deliminator || i == strLen - 1)) {
                 //check if we are here because it's the end... then we add this to bufer
-                if(i == strLen-1 && c != '"') {
+                if (i == strLen - 1 && c != '"') {
                     sb.append(c);
                 }
-                
-                if(paramName != null) {
+
+                if (paramName != null) {
                     //this is a parameter with a value
                     params.put(paramName, sb.toString());
-                }else {
+                } else {
                     //this is a parameter on its own
                     params.put(sb.toString(), "");
                 }
-                
+
                 sb = new StringBuffer();
                 paramName = null;
-            }else if(c == '='){
+            } else if (c == '=') {
                 paramName = sb.toString();
                 sb = new StringBuffer();
-            }else {
+            } else {
                 sb.append(c);
             }
-            
+
             lastChar = c;
         }
-        
+
         return params;
     }
 
     /**
-     *
-     * @param params
-     * @param deliminator
-     * @return
-     */
-    public static String buildParamString(Map<String, String> params, char deliminator) {
-        StringBuilder result = new StringBuilder();
-        boolean isFirst = true;
-        for(String key : params.keySet()) {
-            if(!isFirst)
-                result.append(deliminator);
-
-            result.append(key).append("=").append(params.get(key));
-            isFirst = false;
-        }
-
-        return result.toString();
-    }
-    
-    /**
-     * 
      * @param urlQuery
-     * @return 
+     * @return
      */
     public static Hashtable parseURLQueryString(String urlQuery) {
         int queryPos = urlQuery.indexOf('?');
-        if(queryPos != -1) {
-            urlQuery = urlQuery.substring(queryPos+1);
+        if (queryPos != -1) {
+            urlQuery = urlQuery.substring(queryPos + 1);
         }
-        
+
         Hashtable parsedParams = parseParams(urlQuery, '&');
         Hashtable decodedParams = new Hashtable();
         Enumeration e = parsedParams.keys();
         String key;
-        while(e.hasMoreElements()) {
-            key = (String)e.nextElement();
-            decodedParams.put(URLTextUtil.urlDecodeUTF8(key), 
-                URLTextUtil.urlDecodeUTF8((String)parsedParams.get(key)));
+        while (e.hasMoreElements()) {
+            key = (String) e.nextElement();
+            decodedParams.put(URLTextUtil.urlDecodeUTF8(key),
+                    URLTextUtil.urlDecodeUTF8((String) parsedParams.get(key)));
         }
-        
+
         return decodedParams;
     }
-    
+
     /**
      * Turns a hashtable into a URL encoded query string
-     * 
+     *
      * @param ht Hashtable of param keys to values (keys and values must be strings)
-     * 
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
     public static String hashtableToQueryString(Hashtable ht) {
         StringBuffer sb = new StringBuffer();
-        
+
+        if (ht == null) {
+            return "";
+        }
+
         Enumeration keys = ht.keys();
         String key;
         boolean firstEl = true;
-        while(keys.hasMoreElements()) {
-            if(!firstEl) {
+        while (keys.hasMoreElements()) {
+            if (!firstEl) {
                 sb.append('&');
-            }else {
+            } else {
                 firstEl = false;
             }
-            
-            key = (String)keys.nextElement();
+
+            key = (String) keys.nextElement();
             sb.append(URLTextUtil.urlEncodeUTF8(key)).append('=');
-            sb.append(URLTextUtil.urlEncodeUTF8((String)ht.get(key)));
+            sb.append(URLTextUtil.urlEncodeUTF8((String) ht.get(key)));
         }
-        
+
         return sb.toString();
     }
-    
-    
+
+
     /**
      * Parse type with params header fields (Content-Disposition; Content-Type etc). E.g. given
-     *  application/atom+xml;type=entry;profile=opds-catalog
-     *
-     *  It will return an object with the mime type "application/atom+xml" and a hashtable of parameters
-     *  with type=entry and profile=opds-catalog .
-     * 
+     * application/atom+xml;type=entry;profile=opds-catalog
+     * <p>
+     * It will return an object with the mime type "application/atom+xml" and a hashtable of parameters
+     * with type=entry and profile=opds-catalog .
+     * <p>
      * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
-     * 
-     * @return 
+     *
+     * @return
      */
     public static TypeWithParamHeader parseTypeWithParamHeader(String header) {
         TypeWithParamHeader result = null;
-        
+
         int semiPos = header.indexOf(';');
         String typeStr = null;
         Hashtable params = null;
-        
-        if(semiPos == -1) {
+
+        if (semiPos == -1) {
             typeStr = header.trim();
-        }else {
+        } else {
             typeStr = header.substring(0, semiPos).trim();
         }
-        
-        if(semiPos != -1 && semiPos < header.length()-1) {
+
+        if (semiPos != -1 && semiPos < header.length() - 1) {
             params = parseParams(header.substring(semiPos), ';');
         }
-        
+
         return new TypeWithParamHeader(typeStr, params);
     }
-    
+
     /**
      * Filter filenames for characters that could be nasty attacks (e.g. /sdcard/absolutepath etc)
-     * 
+     *
      * @param filename Filename from an untrusted source (e.g. http header)
-     * 
      * @return Filename with sensitive characters (: / \ * > < ? ) removed
      */
     public static String filterFilename(String filename) {
         StringBuffer newStr = new StringBuffer(filename.length());
         char c;
-        
-        for(int i = 0; i < filename.length(); i++) {
+
+        for (int i = 0; i < filename.length(); i++) {
             c = filename.charAt(i);
-            if(!(c == ':' || c == '/' || c == '\\' || c == '*' || c == '>' || c == '<' || c == '?')) {
+            if (!(c == ':' || c == '/' || c == '\\' || c == '*' || c == '>' || c == '<' || c == '?')) {
                 newStr.append(c);
             }
         }
-        
+
         return newStr.toString();
     }
-    
+
     /**
      * Simple wrapper class that represents a haeder field with a type
      * and parameters.
      */
     public static class TypeWithParamHeader {
-        
-       /**
-        * The first parameter: e.g. the mime type; content disposition etc.
-        */
-       public String typeName;
 
-       /**
-        * Hashtable of parameters found (case sensitive)
-        */
-       public Hashtable params;
+        /**
+         * The first parameter: e.g. the mime type; content disposition etc.
+         */
+        public String typeName;
 
-       public TypeWithParamHeader(String typeName, Hashtable params) {
-           this.typeName = typeName;
-           this.params = params;
-       }
-       
-       public String getParam(String paramName) {
-           if(params != null && params.containsKey(paramName)) {
-               return (String)params.get(paramName);
-           }else {
-               return null;
-           }
-       }
+        /**
+         * Hashtable of parameters found (case sensitive)
+         */
+        public Hashtable params;
+
+        public TypeWithParamHeader(String typeName, Hashtable params) {
+            this.typeName = typeName;
+            this.params = params;
+        }
+
+        public String getParam(String paramName) {
+            if (params != null && params.containsKey(paramName)) {
+                return (String) params.get(paramName);
+            } else {
+                return null;
+            }
+        }
     }
-    
+
     public static final boolean isWhiteSpace(char c) {
-        if(c == ' ' || c == '\n' || c == '\t' || c == '\r') {
+        if (c == ' ' || c == '\n' || c == '\t' || c == '\r') {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
 
-    
+
     /**
-     * Returns the parent filename of a given string uri 
-     * 
+     * Returns the parent filename of a given string uri
+     *
      * @param uri e.g. /some/file/path or http://server.com/some/file.txt
      * @return The parent e.g. /some/file or http://server.com/some/, null in case of no parent in the path
      */
     public static String getParentFilename(String uri) {
-        if(uri.length() == 1) {
+        if (uri.length() == 1) {
             return null;
         }
-        
-        int charPos = uri.lastIndexOf('/', uri.length() -2);
-        if(charPos != -1) {
+
+        int charPos = uri.lastIndexOf('/', uri.length() - 2);
+        if (charPos != -1) {
             return uri.substring(0, charPos + 1);
-        }else {
+        } else {
             return null;
         }
     }
-    
-    
+
+
     /**
      * Gets the extension from a url or path string.  Will chop off the query
      * and preceeding directories, and then get the file extension.  Is returned
      * without the .
-     * 
-     * @param uri the path or URL that we want the extension of 
+     *
+     * @param uri the path or URL that we want the extension of
      * @return the extension - the last characters after the last . if there is a . in the name
      * null if no extension is found
      */
     public static String getExtension(String uri) {
         String filename = getFilename(uri);
         int lastDot = filename.lastIndexOf('.');
-        if(lastDot != -1 && lastDot != filename.length() -1) {
-            return filename.substring(lastDot+1);
-        }else {
+        if (lastDot != -1 && lastDot != filename.length() - 1) {
+            return filename.substring(lastDot + 1);
+        } else {
             return null;
         }
     }
@@ -581,9 +559,9 @@ public class UMFileUtil {
      */
     public static String[] splitFilename(String filename) {
         int dotIndex = filename.lastIndexOf('.');
-        if(dotIndex != -1)
+        if (dotIndex != -1)
             return new String[]{filename.substring(0, dotIndex),
-                filename.substring(dotIndex+1)};
+                    filename.substring(dotIndex + 1)};
         else
             return new String[]{filename, null};
     }
@@ -594,82 +572,90 @@ public class UMFileUtil {
      * e.g. without the path or url query strings. This can be obtained using getFilename if needed.
      *
      * @param filename Input filename without path or query string components e.g. file.txt
-     *
      * @return filename without the extension, e.g. file
      */
     public static String removeExtension(String filename) {
         int lastDot = filename.lastIndexOf('.');
 
-        if(lastDot != -1 && lastDot != filename.length() -1) {
+        if (lastDot != -1 && lastDot != filename.length() - 1) {
             return filename.substring(0, lastDot);
-        }else {
+        } else {
             return filename;
         }
     }
-    
+
     /**
      * Ensure a given path has a given prefix (e.g. file:///) - if it doesn't
      * then join the prefix to the string, otherwise return it as is
-     * 
-     * @param 
+     *
+     * @param
      */
     public static String ensurePathHasPrefix(String prefix, String path) {
-        if(path.startsWith(prefix)) {
+        if (path.startsWith(prefix)) {
             return path;
-        }else {
+        } else {
             return joinPaths(new String[]{prefix, path});
         }
     }
-    
+
     /**
      * Remove a prefix if it is present (e.g. starting file:// in the case
      * of android)
      */
     public static String stripPrefixIfPresent(String prefix, String path) {
-        if(!path.startsWith(prefix)) {
+        if (!path.startsWith(prefix)) {
             return path;
-        }else {
+        } else {
             return path.substring(prefix.length());
         }
     }
-    
-    /**
-     * Remove the anchor section of a link if present (e.g. for index.html#foo
-     * remove #foo)
-     * 
-     * @param uri The complete URI e.g. some/path.html#foo
-     * 
-     * @return the given uri without the anchor if it was found in the uri
-     */
-    public static String stripAnchorIfPresent(String uri) {
-        int charPos = uri.lastIndexOf('#');
-        if(charPos != -1) {
-            return uri.substring(0, charPos);
+
+    public static String stripExtensionIfPresent(String uri) {
+        int lastSlashPos = uri.lastIndexOf('/');
+        int lastDotPos = uri.lastIndexOf('.');
+        if(lastDotPos != -1 && lastDotPos > lastSlashPos) {
+            return uri.substring(0,lastDotPos);
         }else {
             return uri;
         }
     }
-    
+
+
+    /**
+     * Remove the anchor section of a link if present (e.g. for index.html#foo
+     * remove #foo)
+     *
+     * @param uri The complete URI e.g. some/path.html#foo
+     * @return the given uri without the anchor if it was found in the uri
+     */
+    public static String stripAnchorIfPresent(String uri) {
+        int charPos = uri.lastIndexOf('#');
+        if (charPos != -1) {
+            return uri.substring(0, charPos);
+        } else {
+            return uri;
+        }
+    }
+
     /**
      * Make sure that the given path has the given suffix; if it doesn't
      * add the suffix.
-     * 
+     *
      * @param suffix the suffix that the path must end with
-     * @param path The path to add the suffix to if missing
-     * 
+     * @param path   The path to add the suffix to if missing
      * @return The path with the suffix added if it was originally missing
      */
     public static String ensurePathHasSuffix(String suffix, String path) {
-        if(!path.endsWith(suffix)) {
+        if (!path.endsWith(suffix)) {
             return path + suffix;
-        }else {
+        } else {
             return path;
         }
     }
-    
+
     /**
-     * Strip out mime type parameters if they are present 
-     * 
+     * Strip out mime type parameters if they are present
+     *
      * @param mimeType Mime type e.g. application/atom+xml;profile=opds
      * @return Mime type without any params e.g. application/atom+xml
      */
@@ -679,47 +665,45 @@ public class UMFileUtil {
     }
 
 
-    private static final long UNIT_GB = (long)Math.pow(1024, 3);
+    private static final long UNIT_GB = (long) Math.pow(1024, 3);
 
-    private static final long UNIT_MB = (long)Math.pow(1024, 2);
+    private static final long UNIT_MB = (long) Math.pow(1024, 2);
 
     private static final long UNIT_KB = 1024;
 
     /**
      * Return a String formatted to show the file size in a user friendly format
-     *
+     * <p>
      * If < 1024 (kb) : size 'bytes'
      * if 1024 < size < 1024^2 : size/1024 kB
      * if 1024^ < size < 1023^3 : size/1024^2 MB
      *
      * @param fileSize Size of the file in bytes
-     *
      * @return Formatted string as above
      */
     public static String formatFileSize(long fileSize) {
         String unit;
         long factor;
-        if(fileSize > UNIT_GB){
+        if (fileSize > UNIT_GB) {
             factor = UNIT_GB;
             unit = "GB";
-        }else if(fileSize > UNIT_MB){
+        } else if (fileSize > UNIT_MB) {
             factor = UNIT_MB;
             unit = "MB";
-        }else if (fileSize > UNIT_KB){
+        } else if (fileSize > UNIT_KB) {
             factor = UNIT_KB;
             unit = "kB";
-        }else {
+        } else {
             factor = 1;
             unit = "bytes";
         }
 
-        double unitSize = (double)fileSize / (double)factor;
+        double unitSize = (double) fileSize / (double) factor;
         unitSize = Math.round(unitSize * 100) / 100d;
         return unitSize + " " + unit;
     }
 
     /**
-     *
      * @param args
      * @param prefix
      * @return
@@ -731,26 +715,26 @@ public class UMFileUtil {
         String currentKey, argName;
         int index, indexStart, indexEnd;
         Hashtable indexArgs;
-        while(allArgsKeys.hasMoreElements()) {
-            currentKey = (String)allArgsKeys.nextElement();
-            if(currentKey.startsWith(prefix)) {
+        while (allArgsKeys.hasMoreElements()) {
+            currentKey = (String) allArgsKeys.nextElement();
+            if (currentKey.startsWith(prefix)) {
                 indexStart = currentKey.indexOf(argDelmininator) + 1;
                 indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1);
                 try {
                     index = Integer.parseInt(currentKey.substring(indexStart, indexEnd));
-                    if(result.size() < index + 1)
+                    if (result.size() < index + 1)
                         result.setSize(index + 1);
 
                     argName = currentKey.substring(indexEnd + 1);
-                    if(result.elementAt(index) != null) {
-                        indexArgs = (Hashtable)result.elementAt(index);
-                    }else {
+                    if (result.elementAt(index) != null) {
+                        indexArgs = (Hashtable) result.elementAt(index);
+                    } else {
                         indexArgs = new Hashtable();
                         result.setElementAt(indexArgs, index);
                     }
 
                     indexArgs.put(argName, args.get(currentKey));
-                }catch(NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 680, currentKey, e);
                 }
             }
@@ -761,7 +745,7 @@ public class UMFileUtil {
 
     /**
      * Make a rough guess if the given uri is a file or not.
-     *
+     * <p>
      * Will return true if the uri starts with file:/// or just /
      *
      * @param uri the uri to check to determine if it is a file uri or not. Should be an absolute
@@ -769,7 +753,7 @@ public class UMFileUtil {
      * @return True if it looks like a file as above, false otherwise
      */
     public static boolean isFileUri(String uri) {
-        if(uri.startsWith("file:/") || uri.startsWith("/"))
+        if (uri.startsWith("file:/") || uri.startsWith("/"))
             return true;
         else
             return false;
@@ -779,23 +763,33 @@ public class UMFileUtil {
     /**
      * Given a referrer path e.g. /View1?arg=1/View2?arg=2/View2?arg=3/View3?arg=3 this will provide
      * the argument portion for the most recent (e.g. rightmost) instance of that view name.
-     *
+     * <p>
      * E.g. if viewname = View2, then "arg=3". If View1, then "arg=1".
      *
-     * @param viewname The viewname to look for in the referrer path
+     * @param viewname     The viewname to look for in the referrer path
      * @param referrerPath The referrer path in the form of /Viewname?argname=argvalue
-     *
      * @return String with the arguments for the last instance of this viewname, or null if not found
      */
     public static String getLastReferrerArgsByViewname(String viewname, String referrerPath) {
-        int lastIndex = referrerPath.lastIndexOf("/" + viewname);
-        if(lastIndex != -1) {
+        int lastIndex = referrerPath.lastIndexOf("/" + viewname + "?");
+        if (lastIndex != -1) {
             int nextSlash = referrerPath.indexOf("/", lastIndex + 1);
             int qPos = referrerPath.indexOf("?", lastIndex + 1);
-            return  (qPos != -1 && qPos < nextSlash) ?
+            return (qPos != -1 && qPos < nextSlash) ?
                     referrerPath.substring(qPos + 1, nextSlash) : "";
-        }else {
+        } else {
             return null;
         }
     }
+
+
+    public static String clearTopFromReferrerPath(String viewname, Hashtable args, String referrerPath) {
+        int lastIndex = referrerPath.lastIndexOf("/" + viewname + "?");
+        if(lastIndex != -1) {
+            return referrerPath.substring(0, referrerPath.indexOf("/", lastIndex));
+        }else {
+            return "/" + viewname + "?" + hashtableToQueryString(args);
+        }
+    }
+
 }

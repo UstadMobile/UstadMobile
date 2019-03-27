@@ -14,7 +14,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -165,8 +164,9 @@ public class JdbcDatabaseUtils {
     public static void handleTablesChanged(Map<DbChangeListener, DbChangeListenerRequest> listeners,
                                            String... tablesChanged) {
         List<String> tablesChangedList = Arrays.asList(tablesChanged);
+        List<DbChangeListenerRequest> listenerList = new ArrayList<>(listeners.values());
 
-        for(DbChangeListenerRequest request : listeners.values()) {
+        for(DbChangeListenerRequest request : listenerList) {
             if(!Collections.disjoint(tablesChangedList, request.getTableNames())){
                 request.getListener().onTablesChanged(tablesChangedList);
             }

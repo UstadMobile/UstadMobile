@@ -13,9 +13,9 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class DownloadJob {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int downloadJobId;
+    private long djUid;
 
-    private int downloadSetId;
+    private long djDsUid;
 
     private long timeCreated;
 
@@ -23,12 +23,14 @@ public class DownloadJob {
 
     private long timeCompleted;
 
-    private boolean allowMeteredDataUsage;
+    private long totalBytesToDownload;
+
+    private long bytesDownloadedSoFar;
 
     /**
      * Status as per flags on NetworkTask
      */
-    private int status;
+    private int djStatus;
 
 
     /**
@@ -38,142 +40,71 @@ public class DownloadJob {
 
     }
 
-    /**
-     * Constructor
-     *
-     * @param downloadSet The DownloadSet that this DownloadJob is related to
-     * @param timeRequested The time to mark as the timeRequested (in ms)
-     */
-    public DownloadJob(DownloadSet downloadSet, long timeRequested){
-        this.downloadSetId = downloadSet.getId();
-        this.timeRequested = timeRequested;
-        this.timeCreated = System.currentTimeMillis();
+    public DownloadJob(DownloadSet downloadSet) {
+        this.djDsUid = downloadSet.getDsUid();
     }
 
-
-    /**
-     * Getter for downloadJobId property
-     *
-     * @return The DownloadJobId (primary key)
-     */
-    public int getDownloadJobId() {
-        return downloadJobId;
+    public long getDjUid() {
+        return djUid;
     }
 
-    /**
-     * Setter for downloadJobId property
-     *
-     * @param downloadJobId The DownloadJobId (primary key)
-     */
-    public void setDownloadJobId(int downloadJobId) {
-        this.downloadJobId = downloadJobId;
+    public void setDjUid(long djUid) {
+        this.djUid = djUid;
     }
 
-    /**
-     * Getter for the downloadSetId proeprty
-     *
-     * @return The id (primary key) of the related DownloadSet
-     */
-    public int getDownloadSetId() {
-        return downloadSetId;
+    public long getDjDsUid() {
+        return djDsUid;
     }
 
-    /**
-     * Setter for the downloadSetId property
-     *
-     * @param downloadSetId The id (primary key) of the related DownloadSet
-     */
-    public void setDownloadSetId(int downloadSetId) {
-        this.downloadSetId = downloadSetId;
+    public void setDjDsUid(long djDsUid) {
+        this.djDsUid = djDsUid;
     }
 
-    /**
-     * Getter for the timeCreated property
-     *
-     * @return The time this downloadJob was created (in ms)
-     */
     public long getTimeCreated() {
         return timeCreated;
     }
 
-    /**
-     * Setter for the timeCreated property
-     *
-     * @param timeCreated The time this downloadJob was created (in ms)
-     */
     public void setTimeCreated(long timeCreated) {
         this.timeCreated = timeCreated;
     }
 
-    /**
-     * Getter for the timeRequested property
-     *
-     * @return The time this download was requested (e.g. queued)
-     */
     public long getTimeRequested() {
         return timeRequested;
     }
 
-    /**
-     * Setter for the timeRequested property
-     *
-     * @param timeRequested The time this download was requested (e.g. queued)
-     */
     public void setTimeRequested(long timeRequested) {
         this.timeRequested = timeRequested;
     }
 
-    /**
-     * Getter for the timeCompleted property
-     *
-     * @return The time this DownloadJob was completed (in ms)
-     */
     public long getTimeCompleted() {
         return timeCompleted;
     }
 
-    /**
-     * Setter for the timeCompleted property
-     *
-     * @param timeCompleted The time this DownloadJob was completed (in ms)
-     */
     public void setTimeCompleted(long timeCompleted) {
         this.timeCompleted = timeCompleted;
     }
 
-    /**
-     * Getter for the status property
-     *
-     * @return The status of this DownloadJob as per the NetworkTask status flags
-     */
-    public int getStatus() {
-        return status;
+    public int getDjStatus() {
+        return djStatus;
     }
 
-    /**
-     * Setter for the status property
-     *
-     * @param status The status of this DownloadJob as per the NetworkTask status flags
-     */
-    public void setStatus(int status) {
-        this.status = status;
+    public void setDjStatus(int djStatus) {
+        this.djStatus = djStatus;
     }
 
-    /**
-     * Get if the usage of metered data is enabled for this download job.
-     *
-     * @return true if the usage of metered data is enabled for this download job.
-     */
-    public boolean isAllowMeteredDataUsage() {
-        return allowMeteredDataUsage;
+    public long getTotalBytesToDownload() {
+        return totalBytesToDownload;
     }
 
-    /**
-     * Set if the usage of metered data is enabled for this download job.
-     *
-     * @param allowMeteredDataUsage if the usage of metered data is enabled for this download job.
-     */
-    public void setAllowMeteredDataUsage(boolean allowMeteredDataUsage) {
-        this.allowMeteredDataUsage = allowMeteredDataUsage;
+    public void setTotalBytesToDownload(long totalBytesToDownload) {
+        this.totalBytesToDownload = totalBytesToDownload;
+    }
+
+    public long getBytesDownloadedSoFar() {
+        return bytesDownloadedSoFar;
+    }
+
+    public void setBytesDownloadedSoFar(long bytesDownloadedSoFar) {
+        this.bytesDownloadedSoFar = bytesDownloadedSoFar;
     }
 }

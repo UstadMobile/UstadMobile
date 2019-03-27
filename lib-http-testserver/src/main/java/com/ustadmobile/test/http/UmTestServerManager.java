@@ -5,7 +5,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -62,20 +61,29 @@ public class UmTestServerManager extends NanoHTTPD{
             String cmd = parameters.get("cmd").get(0);
             if(CMD_NEWSERVER.equals(cmd)) {
                 //start a new server - return the port number in JSON
-                int newPortNum = findNextPort();
-                UmTestServer testServer = new UmTestServer(newPortNum, httpDir, bindAddress);
-                testServers.put(newPortNum, testServer);
-                try {
-                    testServer.start();
-                    System.out.println("UmTestServerManager: started new server on port " + newPortNum);
-                }catch(IOException e) {
-                    System.err.println("UmTestServerManager: Exception starting new server");
-                    e.printStackTrace();
-                    newPortNum = -1;
-                }
+                UmTestServer testServer = null;
+                int fromPort = this.fromPort;
+                int newPortNum;
+                do {
+                    newPortNum = findNextPort(fromPort);
+                    try {
+                        testServer = new UmTestServer(newPortNum, httpDir, bindAddress);
+                        testServer.start();
+                        testServers.put(newPortNum, testServer);
+                    }catch(IOException e) {
+                        System.err.println("Could not bind to " + bindAddress + ":" +
+                                newPortNum);
+                        if(e.getMessage().contains("Cannot assign requested address")) {
+                            System.err.println("Seems like the wrong IP. Is this really your IP " +
+                                    "address? Check your buildconfig");
+                        }
+                        fromPort++;
+                    }
+
+                }while(testServer.getPort() == -1 && findNextPort(fromPort) != -1);
 
                 JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("port", newPortNum);
+                jsonResponse.put("port", testServer.getPort());
                 response =  NanoHTTPD.newFixedLengthResponse(
                         newPortNum > 0 ? NanoHTTPD.Response.Status.OK  : Response.Status.INTERNAL_ERROR,
                         "application/json", jsonResponse.toString());
@@ -96,8 +104,10 @@ public class UmTestServerManager extends NanoHTTPD{
                 if(testServer != null) {
                     long bytesPerSecond = Long.parseLong(parameters.get("bytespersecond").get(0));
                     testServer.throttle(bytesPerSecond, 1, TimeUnit.SECONDS);
+                    JSONObject jsonResponse = new JSONObject();
+                    jsonResponse.put("port", testServer.getPort());
                     response = NanoHTTPD.newFixedLengthResponse(Response.Status.NO_CONTENT,
-                            "application/json", "");
+                            "application/json", jsonResponse.toString());
                 }else {
                     response = NanoHTTPD.newFixedLengthResponse(Response.Status.BAD_REQUEST,
                             "text/plain", "No such port in operation");
@@ -115,13 +125,19 @@ public class UmTestServerManager extends NanoHTTPD{
         return response;
     }
 
-    private int findNextPort() {
+    private int findNextPort(int fromPort) {
         for(int i = fromPort; i < endPort; i++) {
-            if(!testServers.containsKey(i))
+            if(!testServers.containsKey(i)) {
                 return i;
+            }
+
         }
 
         return -1;
+    }
+
+    private int findNextPort() {
+        return findNextPort(this.fromPort);
     }
 
     public static void main(String[] args) {

@@ -36,6 +36,7 @@ import com.ustadmobile.core.view.UstadView;
 
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -55,7 +56,21 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
 
     private Hashtable arguments;
 
-    private volatile int lifecycleState;
+    private AtomicInteger lifecycleStatus = new AtomicInteger(0);
+
+    public static final int NOT_CREATED = 0;
+
+    public static final int CREATED = 1;
+
+    public static final int STARTED = 2;
+
+    public static final int RESUMED = 3;
+
+    public static final int PAUSED = 4;
+
+    public static final int STOPPED = 5;
+
+    public static final int DESTROYED = 6;
 
     /**
      * Create a new controller with the given context
@@ -112,7 +127,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             }
         }
 
-        lifecycleState  = UmLifecycleOwner.STATUS_CREATED;
+        lifecycleStatus.set(CREATED);
     }
 
     /**
@@ -125,7 +140,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             }
         }
 
-        lifecycleState  = UmLifecycleOwner.STATUS_STARTED;
+        lifecycleStatus.set(STARTED);
     }
 
     /**
@@ -138,7 +153,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             }
         }
 
-        lifecycleState = UmLifecycleOwner.STATUS_RESUMED;
+        lifecycleStatus.set(RESUMED);
     }
 
     /**
@@ -151,7 +166,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             }
         }
 
-        lifecycleState  = UmLifecycleOwner.STATUS_STOPPED;
+        lifecycleStatus.set(STOPPED);
     }
 
     /**
@@ -164,7 +179,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
             }
         }
 
-        lifecycleState = UmLifecycleOwner.STATUS_DESTROYED;
+        lifecycleStatus.set(DESTROYED);
     }
 
 
@@ -179,6 +194,32 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     @Override
     public void addLifecycleListener(UmLifecycleListener listener) {
         lifecycleListeners.add(listener);
+
+        switch(lifecycleStatus.get()) {
+            case CREATED:
+                listener.onLifecycleCreate(this);
+                break;
+
+            case STARTED:
+                listener.onLifecycleStart(this);
+                break;
+
+            case RESUMED:
+                listener.onLifecycleResume(this);
+                break;
+
+            case PAUSED:
+                listener.onLifecyclePause(this);
+                break;
+
+            case STOPPED:
+                listener.onLifecycleStop(this);
+                break;
+
+            case DESTROYED:
+                listener.onLifecycleDestroy(this);
+                break;
+        }
     }
 
     @Override
@@ -186,8 +227,4 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
         lifecycleListeners.remove(listener);
     }
 
-    @Override
-    public int getCurrentStatus() {
-        return lifecycleState;
-    }
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
@@ -20,6 +21,8 @@ public class ContentEntryContentCategoryJoin {
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long ceccjUid;
 
+    //TODO: Migration
+    @UmIndexField
     private long ceccjContentEntryUid;
 
     private long ceccjContentCategoryUid;

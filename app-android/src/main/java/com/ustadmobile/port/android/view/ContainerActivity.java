@@ -1,10 +1,8 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.ComponentName;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -32,7 +30,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
+import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -46,7 +44,8 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener,
+public class ContainerActivity extends ZippedContentActivity implements
+        ContainerPageFragment.OnFragmentInteractionListener,
         ContainerView, AppViewChoiceListener, ListView.OnItemClickListener,
         TocListView.OnItemClickListener{
 
@@ -59,8 +58,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private String onpageSelectedJS = "";
 
-
-    private NetworkServiceAndroid mNetworkService;
 
     private ContainerController mContainerController;
 
@@ -150,28 +147,12 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
         tocList = (TocListView)findViewById(R.id.activity_container_epubpager_toclist);
         coverImageView = (ImageView)findViewById(R.id.item_basepoint_cover_img);
-    }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder iBinder) {
-        super.onServiceConnected(name, iBinder);
-        if(name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
-            mNetworkService = ((NetworkServiceAndroid.LocalServiceBinder)iBinder).getService();
-            onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__",
-                mNetworkService.getNetworkManager().getHttpAndroidAssetsUrl());
-            mContainerController = new ContainerController(this, this);
-            mContainerController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
-                    null);
-        }
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        if(name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
-            mNetworkService = null;
-        }
-
-        super.onServiceDisconnected(name);
+        onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__",
+                EmbeddedHttpdService.ANDROID_ASSETS_PATH);
+        mContainerController = new ContainerController(this, this);
+        mContainerController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
+                null);
     }
 
     public String getBaseURL() {
@@ -256,16 +237,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         return onpageSelectedJS;
     }
 
-    public void onStart() {
-        super.onStart();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-    }
-
-    public void onStop() {
-        super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
-    }
-
     public void handlePageTitleUpdated(int index, String title) {
         if(mPager != null && mPager.getCurrentItem() == index && mContainerController != null) {
             mContainerController.handlePageTitleUpdated(title);
@@ -285,10 +256,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     }
 
     public void onDestroy() {
-        if(mMountedPath != null) {
-            mNetworkService.getNetworkManager().unmountZipFromHttp(mMountedPath);
-        }
-
         mSavedPosition = -1;
 
         super.onDestroy();

@@ -5,14 +5,12 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
-import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
@@ -25,7 +23,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -37,13 +34,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.concurrent.Executors;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -63,8 +59,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     private final OkHttpClient client = new OkHttpClient();
 
     private Properties appConfig;
-
-    private OpdsAtomFeedRepository atomFeedRepository;
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -106,6 +100,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return UMFileUtil.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
     }
 
+
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
@@ -142,6 +137,29 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
         dirList.toArray(retVal);
         return retVal;
+    }
+
+    @Override
+    public void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback) {
+
+        List<UMStorageDir> dirList = new ArrayList<>();
+        String systemBaseDir = getSystemBaseDir(context);
+        final String contentDirName = getContentDirName(context);
+
+        dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
+                false, true, false));
+
+        //Find external directories
+        String[] externalDirs = findRemovableStorage();
+        for(String extDir : externalDirs) {
+            dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+                    contentDirName}),
+                    getString(MessageID.memory_card, context),
+                    true, true, false, false));
+        }
+
+        callback.onDone(dirList);
+
     }
 
     /**
@@ -186,24 +204,10 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
     /**
-     * Return the network manager for this platform
-     *
-     * @return
-     */
-
-    @Deprecated
-    public abstract NetworkManager getNetworkManager();
-
-    /**
      * Get NetworkManagerBle instance
      * @return Instance of NetworkManagerBle
      */
     public abstract NetworkManagerBle getNetworkManagerBle();
-
-    @Override
-    public String formatInteger(int integer) {
-        return NumberFormat.getIntegerInstance().format(integer);
-    }
 
     @Override
     public UmHttpCall makeRequestAsync(UmHttpRequest request, final UmHttpResponseCallback callback) {
@@ -283,13 +287,4 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return appConfig.getProperty(key, defaultVal);
     }
 
-    @Override
-    public OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context) {
-        if(atomFeedRepository == null) {
-            atomFeedRepository = new OpdsAtomFeedRepositoryImpl(UmAppDatabase.getInstance(context),
-                    Executors.newCachedThreadPool());
-        }
-
-        return atomFeedRepository;
-    }
 }

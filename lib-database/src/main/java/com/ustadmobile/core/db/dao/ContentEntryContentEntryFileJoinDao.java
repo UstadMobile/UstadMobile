@@ -15,11 +15,19 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 public abstract class ContentEntryContentEntryFileJoinDao
         implements SyncableDao<ContentEntryContentEntryFileJoin, ContentEntryContentEntryFileJoinDao> {
 
-    @UmQuery("SELECT * from ContentEntryContentEntryFileJoin WHERE " +
+    @UmQuery("SELECT * FROM ContentEntryContentEntryFileJoin WHERE " +
             "cecefjContentEntryUid = :parentEntryContentUid")
     public abstract List<ContentEntryContentEntryFileJoin> findChildByParentUUid(long parentEntryContentUid);
 
     @UmUpdate
     public abstract void update(ContentEntryContentEntryFileJoin entity);
 
+    @UmQuery("SELECT ContentEntryContentEntryFileJoin.* FROM ContentEntryContentEntryFileJoin " +
+            "LEFT JOIN ContentEntry ON ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntry.publik")
+    public abstract List<ContentEntryContentEntryFileJoin> getPublicContentEntryContentEntryFileJoins();
+
+    @UmQuery("DELETE FROM ContentEntryContentEntryFileJoin WHERE cecefjContentEntryFileUid = :fileUid " +
+            "and cecefjContentEntryUid = :contentUid")
+    public abstract void deleteByUid(long fileUid, long contentUid);
 }
