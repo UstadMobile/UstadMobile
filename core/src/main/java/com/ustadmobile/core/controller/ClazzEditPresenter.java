@@ -201,10 +201,12 @@ public class ClazzEditPresenter
             mOriginalClazz = clazz;
 
         if(mUpdatedClazz == null || !mUpdatedClazz.equals(clazz)) {
-            //update class edit views
-            view.updateClazzEditView(mUpdatedClazz);
-            //Update the currently editing class object
-            mUpdatedClazz = clazz;
+            if(clazz!=null) {
+                //update class edit views
+                view.updateClazzEditView(mUpdatedClazz);
+                //Update the currently editing class object
+                mUpdatedClazz = clazz;
+            }
         }
     }
 
