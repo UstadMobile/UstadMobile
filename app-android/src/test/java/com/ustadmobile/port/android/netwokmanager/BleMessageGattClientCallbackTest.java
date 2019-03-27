@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.netwokmanager;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -52,7 +53,7 @@ public class BleMessageGattClientCallbackTest {
     public void setUp(){
         mockedGattClient = mock(BluetoothGatt.class);
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
-        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(entryList));
+        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte) 42,bleMessageLongToBytes(entryList));
 
         gattClientCallback = new BleMessageGattClientCallback(messageToSend);
 
@@ -61,9 +62,12 @@ public class BleMessageGattClientCallbackTest {
         mockedCharacteristic = mock(BluetoothGattCharacteristic.class);
         service.addCharacteristic(mockedCharacteristic);
 
+        BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         when(mockedGattClient.getServices()).thenReturn(Collections.singletonList(service));
         when(mockedGattClient.requestMtu(MAXIMUM_MTU_SIZE)).thenReturn(true);
         when(mockedCharacteristic.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
+        when(mockedGattClient.getDevice()).thenReturn(bluetoothDevice);
+        when(mockedGattClient.getDevice().getAddress()).thenReturn("00:11:22:33:FF:EE");
 
     }
 
@@ -76,6 +80,9 @@ public class BleMessageGattClientCallbackTest {
         //Verify that client was disconnected from the gatt server
         verify(mockedGattClient).disconnect();
 
+        //Verify that client closed the gatt after failure
+        verify(mockedGattClient).close();
+
     }
 
     @Test
@@ -85,6 +92,9 @@ public class BleMessageGattClientCallbackTest {
 
         //Verify that client was disconnected from the gatt server
         verify(mockedGattClient).disconnect();
+
+
+        verify(mockedGattClient).close();
     }
 
     @Test
@@ -92,19 +102,6 @@ public class BleMessageGattClientCallbackTest {
         gattClientCallback.onConnectionStateChange(mockedGattClient,
                 BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_CONNECTED);
 
-        //Verify that service discovery was started
-        verify(mockedGattClient).discoverServices();
-    }
-
-
-    @Test
-    public void givenOnMtuChangeRequested_whenReceivedChangeCallback_thenShouldDiscoverServices(){
-        gattClientCallback.onConnectionStateChange(mockedGattClient,
-                BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_CONNECTED);
-
-        //Verify that MTU change was requested
-        verify(mockedGattClient).requestMtu(MAXIMUM_MTU_SIZE);
-        gattClientCallback.onMtuChanged(mockedGattClient,MAXIMUM_MTU_SIZE,BluetoothGatt.GATT_SUCCESS);
         //Verify that service discovery was started
         verify(mockedGattClient).discoverServices();
     }
@@ -137,17 +134,5 @@ public class BleMessageGattClientCallbackTest {
             // that the process will repeat.
             verify(mockedGattClient, times(i + 1)).writeCharacteristic(mockedCharacteristic);
         }
-    }
-
-    @Test
-    public void givenOnConnectionStateChanged_whenMtuChangeRequested_thenShouldWaitAndDiscoverServices(){
-        gattClientCallback.onConnectionStateChange(mockedGattClient,
-                BluetoothGatt.GATT_SUCCESS, BluetoothProfile.STATE_CONNECTED);
-
-        gattClientCallback.onMtuChanged(mockedGattClient,DEFAULT_MTU_SIZE, BluetoothGatt.GATT_SUCCESS);
-
-        /*Verify that service discovery was started of which it might be dur to
-        the request timeout or successful MTU change*/
-        verify(mockedGattClient).discoverServices();
     }
 }

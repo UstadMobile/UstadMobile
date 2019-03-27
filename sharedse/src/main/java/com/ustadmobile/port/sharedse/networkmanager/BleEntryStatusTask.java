@@ -96,7 +96,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      * Set list of entry uuids , for test purpose
      * @param entryUidsToCheck List of uuids
      */
-    void setEntryUidsToCheck(List<Long> entryUidsToCheck){
+    protected void setEntryUidsToCheck(List<Long> entryUidsToCheck){
         this.entryUidsToCheck = entryUidsToCheck;
     }
 

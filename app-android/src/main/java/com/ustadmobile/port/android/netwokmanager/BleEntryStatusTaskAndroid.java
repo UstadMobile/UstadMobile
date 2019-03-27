@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
@@ -89,9 +90,11 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * Set bluetooth manager for BLE GATT communication
      * @param bluetoothManager BluetoothManager instance
      */
+    @VisibleForTesting
     void setBluetoothManager(BluetoothManager bluetoothManager){
         this.bluetoothManager = bluetoothManager;
     }
+
 
     /**
      * Start entry status check task

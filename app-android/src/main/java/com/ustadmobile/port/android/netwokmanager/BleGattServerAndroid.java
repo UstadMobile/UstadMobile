@@ -96,7 +96,7 @@ class BleGattServerAndroid extends BleGattServer {
                 if(messageReceived != null){
                     int currentMtuSize = messageReceived.getMtu();
 
-                    UstadMobileSystemImpl.l(UMLog.DEBUG,691,
+                    UstadMobileSystemImpl.l(UMLog.ERROR,691,
                             "Request received with default MTU size of " + currentMtuSize);
 
                     //Send back response
@@ -157,5 +157,10 @@ class BleGattServerAndroid extends BleGattServer {
      */
     BluetoothGattServer getGattServer() {
         return gattServer;
+    }
+
+    @VisibleForTesting
+    void setGattServer(BluetoothGattServer gattServer) {
+        this.gattServer = gattServer;
     }
 }
