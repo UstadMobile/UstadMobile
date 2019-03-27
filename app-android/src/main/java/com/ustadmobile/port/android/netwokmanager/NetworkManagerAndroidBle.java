@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.net.ConnectivityManagerCompat;
 
@@ -278,7 +279,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }
     };
 
-    private class WifiP2PGroupServiceManager extends AsyncServiceManager {
+    private static class WifiP2PGroupServiceManager extends AsyncServiceManager {
 
         private AtomicReference<WiFiDirectGroupBle> wiFiDirectGroup = new AtomicReference<>();
 
@@ -290,12 +291,14 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         private static final int TIMEOUT_CHECK_INTERVAL = 30 * 1000;
 
+        private final NetworkManagerAndroidBle networkManager;
+
         private class CheckTimeoutRunnable implements Runnable {
             public void run() {
                 long timeNow = System.currentTimeMillis();
-                boolean timedOut = numActiveRequests.get() == 0
-                        && (timeNow - wifiDirectGroupLastRequestedTime.get()) > TIMEOUT_AFTER_GROUP_CREATION
-                        && (timeNow - wifiDirectRequestLastCompletedTime.get()) > TIMEOUT_AFTER_LAST_REQUEST;
+                boolean timedOut = networkManager.numActiveRequests.get() == 0
+                        && (timeNow - networkManager.wifiDirectGroupLastRequestedTime.get()) > TIMEOUT_AFTER_GROUP_CREATION
+                        && (timeNow - networkManager.wifiDirectRequestLastCompletedTime.get()) > TIMEOUT_AFTER_LAST_REQUEST;
                 setEnabled(!timedOut);
 
                 if(getState() != STATE_STOPPED)
@@ -307,9 +310,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         private BroadcastReceiver wifiP2pBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                wifiP2pManager.requestGroupInfo(wifiP2pChannel, (group) -> {
+                networkManager.wifiP2pManager.requestGroupInfo(
+                        networkManager.wifiP2pChannel, (group) -> {
                     wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group,
-                            httpd.getListeningPort()) : null);
+                            networkManager.httpd.getListeningPort()) : null);
                     if((group == null && getState() == STATE_STARTING)
                         || (group != null && getState() == STATE_STOPPING)) {
                         return;//it's working on it, and hasn't failed yet, don't notify status change
@@ -320,9 +324,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             }
         };
 
-        private WifiP2PGroupServiceManager() {
+        private WifiP2PGroupServiceManager(NetworkManagerAndroidBle networkManager) {
             super(STATE_STOPPED,
-                    (runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS));
+                    (runnable, delay) -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS));
+            this.networkManager = networkManager;
         }
 
         protected BroadcastReceiver getWifiP2pBroadcastReceiver() {
@@ -332,11 +337,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void start() {
             timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(), TIMEOUT_CHECK_INTERVAL);
-            wifiP2pManager.requestGroupInfo(wifiP2pChannel,
+            networkManager.wifiP2pManager.requestGroupInfo(networkManager.wifiP2pChannel,
                     (wifiP2pGroup) -> {
                         if(wifiP2pGroup != null) {
                             wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
-                                    httpd.getListeningPort()));
+                                    networkManager.httpd.getListeningPort()));
                             notifyStateChanged(STATE_STARTED);
                         }else {
                             createNewGroup();
@@ -345,7 +350,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }
 
         private void createNewGroup() {
-            wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+            networkManager.wifiP2pManager.createGroup(networkManager.wifiP2pChannel,
+                    new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
                     UstadMobileSystemImpl.l(UMLog.INFO,692, "Group created successfully");
@@ -363,7 +369,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         @Override
         public void stop() {
-            wifiP2pManager.removeGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+            networkManager.wifiP2pManager.removeGroup(
+                    networkManager.wifiP2pChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
                     UstadMobileSystemImpl.l(UMLog.ERROR,693,
@@ -378,11 +385,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                             "Failed to remove a group with error code " + reason);
 
                     //check if the group is still active
-                    wifiP2pManager.requestGroupInfo(wifiP2pChannel,
+                    networkManager.wifiP2pManager.requestGroupInfo(
+                            networkManager.wifiP2pChannel,
                             (wifiP2pGroup) -> {
                                 if(wifiP2pGroup != null) {
                                     wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
-                                            httpd.getListeningPort()));
+                                            networkManager.httpd.getListeningPort()));
                                     notifyStateChanged(STATE_STARTED, STATE_STARTED);
                                 }else {
                                     wiFiDirectGroup.set(null);
@@ -484,13 +492,17 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         startMonitoringNetworkChanges();
     }
 
-
     @Override
     public void onCreate() {
-        wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
+        if(wifiManager == null){
+            wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        }
+
+        if(wifiP2pManager == null){
+            wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
+        }
         wifiP2PCapable.set(wifiP2pManager != null);
-        wifiP2pGroupServiceManager = new WifiP2PGroupServiceManager();
+        wifiP2pGroupServiceManager = new WifiP2PGroupServiceManager(this);
 
 
         if(wifiP2PCapable.get()) {
@@ -586,7 +598,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     @Override
     public boolean isBluetoothEnabled() {
         return bluetoothAdapter != null && bluetoothAdapter.isEnabled()
-                && bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
+                &&  bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
     }
 
     /**
@@ -932,6 +944,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     BluetoothManager getBluetoothManager(){
         return  ((BluetoothManager)bluetoothManager);
+    }
+
+    @VisibleForTesting
+    void setBluetoothManager(BluetoothManager manager){
+        this.bluetoothManager = manager;
     }
 
     @Override
