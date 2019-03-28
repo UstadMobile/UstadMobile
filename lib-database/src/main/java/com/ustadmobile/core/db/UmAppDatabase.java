@@ -1430,7 +1430,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
                         //db.execSql("CREATE SEQUENCE spk_seq_42 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //db.execSql("CREATE SEQUENCE spk_seq_3 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                        //db.execSql("CREATE SEQUENCE spk_seq_4 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_4 " +  DoorUtilsadmin .generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //db.execSql("CREATE SEQUENCE spk_seq_5 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //db.execSql("CREATE SEQUENCE spk_seq_7 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //db.execSql("CREATE SEQUENCE spk_seq_8 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
