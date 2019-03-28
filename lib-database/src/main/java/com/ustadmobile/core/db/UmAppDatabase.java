@@ -63,6 +63,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges;
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing;
 import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
 import com.ustadmobile.lib.db.DoorDbAdapter;
+import com.ustadmobile.lib.db.DoorUtils;
 import com.ustadmobile.lib.db.UmDbMigration;
 import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
@@ -232,10 +233,13 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             @Override
             public void migrate(DoorDbAdapter db) {
 
+                System.out.println("STARTING MIGRATIONS >>>");
+
                 switch (db.getDbType()) {
                     case UmDbType.TYPE_SQLITE:
 
-                        //db.execSql();
+                        //Bumping SyncablePrimaryKey
+                        db.execSql("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1");
 
                         /*
                         First of all SyncStatus needs changed
@@ -245,6 +249,18 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
                         //Add nextChangeSeqNum:
                         db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum INTEGER NOT NULL DEFAULT 0"); // OK
+                        /**
+                         *To remove localChangeSeqNum and masterChangeSeqNum
+                         *
+                         */
+                        db.execSql("BEGIN TRANSACTION");
+                        db.execSql("ALTER TABLE SyncStatus RENAME TO temp_SyncStatus");
+                        db.execSql("CREATE TABLE IF NOT EXISTS `SyncStatus` (`tableId` INTEGER NOT NULL, `nextChangeSeqNum` INTEGER NOT NULL, `syncedToMasterChangeNum` INTEGER NOT NULL, `syncedToLocalChangeSeqNum` INTEGER NOT NULL, PRIMARY KEY(`tableId`))");
+
+                        db.execSql("INSERT INTO SyncStatus SELECT tableId, localChangeSeqNum, " +
+                                "syncedToMasterChangeNum, syncedToLocalChangeSeqNum FROM temp_SyncStatus");
+                        db.execSql("DROP TABLE temp_SyncStatus");
+                        db.execSql("COMMIT");
 
                         //Last syncable PK entity
                         db.execSql("CREATE TABLE IF NOT EXISTS _lastsyncablepk(id INTEGER PRIMARY KEY AUTOINCREMENT, lastpk INTEGER)");
@@ -331,20 +347,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("DROP TRIGGER IF EXISTS update_csn_personpicture");
                         db.execSql("DROP TRIGGER IF EXISTS insert_csn_personpicture");
 
-
-
-                        /**
-                         *To remove localChangeSeqNum and masterChangeSeqNum
-                         *
-                         */
-                        db.execSql("BEGIN TRANSACTION");
-                        db.execSql("ALTER TABLE SyncStatus RENAME TO temp_SyncStatus");
-                        db.execSql("CREATE TABLE IF NOT EXISTS `SyncStatus` (`tableId` INTEGER NOT NULL, `nextChangeSeqNum` INTEGER NOT NULL, `syncedToMasterChangeNum` INTEGER NOT NULL, `syncedToLocalChangeSeqNum` INTEGER NOT NULL, PRIMARY KEY(`tableId`))");
-
-                        db.execSql("INSERT INTO SyncStatus SELECT tableId, localChangeSeqNum, " +
-                                "syncedToMasterChangeNum, syncedToLocalChangeSeqNum FROM temp_SyncStatus");
-                        db.execSql("DROP TABLE temp_SyncStatus");
-                        db.execSql("COMMIT");
 
 
                         /**
@@ -720,21 +722,571 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("CREATE TRIGGER ins_50 INSTEAD OF INSERT ON PersonPicture_spk_view BEGIN INSERT INTO _lastsyncablepk (lastpk) SELECT CASE WHEN NEW.personPictureUid = 0 OR NEW.personPictureUid IS NULL THEN (SELECT (SELECT deviceBits << 32 FROM SyncDeviceBits)  | (SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = 50)) ELSE NEW.personPictureUid END; INSERT INTO PersonPicture(personPictureUid, personPicturePersonUid, personPictureMasterCsn, personPictureLocalCsn, personPictureLastChangedBy, fileSize, picTimestamp, mimeType) VALUES ((SELECT lastPk FROM _lastsyncablepk ORDER BY id DESC LIMIT 1), NEW.personPicturePersonUid, (SELECT CASE WHEN  (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) ELSE NEW.personPictureMasterCsn END), (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personPictureLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) END), NEW.personPictureLastChangedBy, NEW.fileSize, NEW.picTimestamp, NEW.mimeType); UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE (NEW.personPictureUid = 0 OR NEW.personPictureUid IS NULL) AND tableId = 50; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 50; END");
 
 
+                        /**
+                         * There are situations where the SyncablePrimaryKey isn't created for
+                         * an entity.
+                         */
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 1, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 1)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 2, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 2)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 3, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 3)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 4, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 4)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 5, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 5)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 6, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 6)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 7, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 7)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 8, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 8)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 9, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 9)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 10, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 10)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 11, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 11)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 13, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 13)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 14, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 14)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 15, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 15)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 16, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 16)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 17, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 17)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 18, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 18)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 19, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 19)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 20, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 20)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 21, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 21)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 22, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 22)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 23, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 23)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 24, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 24)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 25, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 25)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 26, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 26)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 27, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 27)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 28, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 28)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 29, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 29)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 30, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 30)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 31, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 31)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 32, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 32)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 42, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 42)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 43, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 43)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 44, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 44)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 45, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 45)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 47, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 47)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 48, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 48)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 50, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 50)");
+                        db.execSql("INSERT INTO SyncablePrimaryKey(tableId, sequenceNumber) SELECT 52, 1 WHERE NOT EXISTS(SELECT 1 FROM SyncablePrimaryKey WHERE tableId = 52)");
 
                         break;
                     case UmDbType.TYPE_POSTGRES:
+
+                        System.out.println("RUNNING MIGRATIONS >>>");
+
+                        //For all entites: Drop all triggers and functions and re create them.
+
+                        //New Entities: Create sequence, table and upate syncstatus
+
+                        //Existing entities update: Create Seq, update def of pk to link with Sequence.
+
+                        //Other bits: Update SyncDeviceBits with new bits value
+
+
+                        /**
+                         * DROP All triggers and functions
+                         */
+                        //Functions
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_9_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_6_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_31_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_14_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_15_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_16_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_20_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_18_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_19_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_22_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_23_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_24_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_25_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_26_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_27_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_21_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_17_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_28_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_11_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_32_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_42_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_3_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_4_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_5_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_7_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_8_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_29_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_2_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_1_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_13_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_10_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_30_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_45_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_47_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_43_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_44_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_52_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_48_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS inc_csn_50_fn()");
+                        //triggers
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_9_trig ON Person");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_6_trig ON Clazz");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_31_trig ON ClazzMember");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_14_trig ON ClazzLog");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_15_trig ON ClazzLogAttendanceRecord");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_16_trig ON FeedEntry");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_20_trig ON PersonField");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_18_trig ON PersonCustomFieldValue");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_19_trig ON PersonDetailPresenterField");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_22_trig ON SelQuestion");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_23_trig ON SelQuestionResponse");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_24_trig ON SelQuestionResponseNomination");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_25_trig ON SelQuestionSet");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_26_trig ON SelQuestionSetRecognition");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_27_trig ON SelQuestionSetResponse");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_21_trig ON Schedule");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_17_trig ON Holiday");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_28_trig ON UMCalendar");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_11_trig ON ClazzActivity");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_32_trig ON ClazzActivityChange");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_42_trig ON ContentEntry");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_3_trig ON ContentEntryContentCategoryJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_4_trig ON ContentEntryContentEntryFileJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_5_trig ON ContentEntryFile");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_7_trig ON ContentEntryParentChildJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_8_trig ON ContentEntryRelatedEntryJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_29_trig ON Location");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_2_trig ON ContentCategorySchema");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_1_trig ON ContentCategory");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_13_trig ON Language");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_10_trig ON LanguageVariant");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_30_trig ON PersonAuth");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_45_trig ON Role");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_47_trig ON EntityRole");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_43_trig ON PersonGroup");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_44_trig ON PersonGroupMember");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_52_trig ON SelQuestionOption");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_48_trig ON PersonLocationJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS inc_csn_50_trig ON PersonPicture");
+
+
+                        /**
+                         * New device bits
+                         */
                         int deviceBits = new Random().nextInt();
+
+                        //Sync helper entities:
+
+                        /**
+                         * SyncDeviceBits has an extra boolean
+                         * private boolean master;*
+                         */
+                        db.execSql("ALTER TABLE SyncDeviceBits ADD COLUMN master BOOL");
+
+                        /**
+                         * Reset SyncDeviceBits
+                         */
+                        db.execSql("UPDATE SyncDeviceBits SET deviceBits = " + deviceBits +
+                                ", master = TRUE");
+
+
+
+                        /**
+                        First of all SyncStatus needs changed
+                        masterChangeSeqNum removed (always 1)
+                        localChangeSeqNum renamed to nextChangeSeqNum
+                         */
+                        db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT");
+                        db.execSql("ALTER TABLE SyncStatus DROP COLUMN masterchangeseqnum");
+                        db.execSql("ALTER TABLE SyncStatus DROP COLUMN localchangeseqnum ");
+                        db.execSql("DELETE FROM SyncStatus");
+
+                        /*
+                        SyncablePrimaryKey
+                         */
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SyncablePrimaryKey  " +
+                                "( tableId  INTEGER PRIMARY KEY  NOT NULL ,  " +
+                                "sequenceNumber  INTEGER)");
+
+
+
+                        //Sync entities:
+
+
+                        /*
+                        SocialNominationQuestion - removed
+                        SocialNominationQuestionResponse - removed
+                        SocialNominationQuestionResponseNomination - removed
+                        SocialNominationQuestionSet - removed
+                        SocialNominationQuestionSetRecognition - removed
+                        SocialNominationQuestionSetResponse - removed
+                        */
+                        //Check if we have to migrate first
+
+                        db.execSql("DROP TABLE SocialNominationQuestion");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 22");
+                        db.execSql("DROP TABLE SocialNominationQuestionResponse");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 23");
+                        db.execSql("DROP TABLE SocialNominationQuestionResponseNomination");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 24");
+                        db.execSql("DROP TABLE SocialNominationQuestionSet");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 25");
+                        db.execSql("DROP TABLE SocialNominationQuestionSetRecognition");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 26");
+                        db.execSql("DROP TABLE SocialNominationQuestionSetResponse");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 27");
+
 
                         /*ClazzLog : added two fields
                             private boolean canceled;
                             private long clazzLogScheduleUid;
                         */
-                        db.execSql("ALTER TABLE ClazzLog ADD canceled BOOL");
-                        db.execSql("ALTER TABLE ClazzLog ADD clazzLogScheduleUid BIGINT");
+                        db.execSql("ALTER TABLE ClazzLog ADD COLUMN canceled BOOL");
+                        db.execSql("ALTER TABLE ClazzLog ADD COLUMN clazzLogScheduleUid BIGINT");
+                        //Create sequence
+                        db.execSql("CREATE SEQUENCE spk_seq_14 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ClazzLog ALTER COLUMN clazzLogUid SET DEFAULT NEXTVAL('spk_seq_14')");
 
+
+                        /*
+                        FeedEntry : added three fields
+                            private long feedEntryClazzLogUid;
+                            private long dateCreated;
+                            private int feedEntryCheckType
+                        */
+                        db.execSql("ALTER TABLE FeedEntry ADD COLUMN feedEntryClazzLogUid BIGINT");
+                        db.execSql("ALTER TABLE FeedEntry ADD COLUMN dateCreated BIGINT");
+                        db.execSql("ALTER TABLE FeedEntry ADD COLUMN feedEntryCheckType INTEGER");
+                        //Create sequence
+                        db.execSql("CREATE SEQUENCE spk_seq_16 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE FeedEntry ALTER COLUMN feedEntryUid SET DEFAULT NEXTVAL('spk_seq_16') ");
+
+                        /*
+                        Location: added one fields
+                            private String timeZone;
+                        */
+                        db.execSql("ALTER TABLE Location ADD COLUMN timeZone TEXT");
+                        //Sequence
+                        db.execSql("CREATE SEQUENCE spk_seq_29 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));;
+                        //PK <-> Sequence
+                        db.execSql("ALTER TABLE Location ALTER COLUMN locationUid SET DEFAULT NEXTVAL ('spk_seq_29') ");
+
+                        /*
+                        ScheduledCheck : New entity
+                        */
+                        //BEGIN Create ScheduledCheck (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ScheduledCheck  ( scheduledCheckId  SERIAL PRIMARY KEY  NOT NULL ,  checkTime  BIGINT,  checkType  INTEGER,  checkUuid  TEXT,  checkParameters  TEXT,  scClazzLogUid  BIGINT)");
+                        //END Create ScheduledCheck (PostgreSQL)
+                        //TODO: Check: do we need to create Sequence, etc for ScheduledCheck ?
+
+                        /*
+                        SelQuestion - New entity
+                        */
+                        //BEGIN Create SelQuestion (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_22 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestion  ( selQuestionUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_22') ,  questionText  TEXT,  selQuestionSelQuestionSetUid  BIGINT,  questionIndex  INTEGER,  assignToAllClasses  BOOL,  multiNominations  BOOL,  questionType  INTEGER,  questionActive  BOOL,  selQuestionMasterChangeSeqNum  BIGINT,  selQuestionLocalChangeSeqNum  BIGINT,  selQuestionLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (22, 1, 0, 0)");
+                        //END Create SelQuestion (PostgreSQL)
+
+                        /*
+                        SelQuestionOption - New entity
+                        */
+                        //BEGIN Create SelQuestionOption (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_52 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionOption  ( selQuestionOptionUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_52') ,  optionText  TEXT,  selQuestionOptionQuestionUid  BIGINT,  selQuestionOptionMasterChangeSeqNum  BIGINT,  selQuestionOptionLocalChangeSeqNum  BIGINT,  selQuestionOptionLastChangedBy  INTEGER,  optionActive  BOOL)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (52, 1, 0, 0)");
+                        //END Create SelQuestionOption (PostgreSQL)
+
+                        /*
+                        SelQuestionResponse - New entity
+                        */
+                        //BEGIN Create SelQuestionResponse (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_23 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionResponse  ( selQuestionResponseUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_23') ,  selQuestionResponseSelQuestionSetResponseUid  BIGINT,  selQuestionResponseSelQuestionUid  BIGINT,  selQuestionResponseMasterChangeSeqNum  BIGINT,  selQuestionResponseLocalChangeSeqNum  BIGINT,  selQuestionResponseLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (23, 1, 0, 0)");
+                        //END Create SelQuestionResponse (PostgreSQL)
+
+                        /*
+                        SelQuestionResponseNomination - New entity
+                        */
+                        //BEGIN Create SelQuestionResponseNomination (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_24 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionResponseNomination  ( selQuestionResponseNominationUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_24') ,  selQuestionResponseNominationClazzMemberUid  BIGINT,  selQuestionResponseNominationSelQuestionResponseUId  BIGINT,  nominationActive  BOOL,  selQuestionResponseNominationMasterChangeSeqNum  BIGINT,  selQuestionResponseNominationLocalChangeSeqNum  BIGINT,  selQuestionResponseNominationLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (24, 1, 0, 0)");
+                        //END Create SelQuestionResponseNomination (PostgreSQL)
+
+                        /*
+                        SelQuestionSet - New entity
+                        */
+                        //BEGIN Create SelQuestionSet (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_25 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionSet  ( selQuestionSetUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_25') ,  title  TEXT,  selQuestionSetMasterChangeSeqNum  BIGINT,  selQuestionSetLocalChangeSeqNum  BIGINT,  selQuestionSetLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (25, 1, 0, 0)");
+                        //END Create SelQuestionSet (PostgreSQL)
+
+                        /*
+                        SelQuestionSetRecognition - New entity
+                        */
+                        //BEGIN Create SelQuestionSetRecognition (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_26 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionSetRecognition  ( selQuestionSetRecognitionUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_26') ,  selQuestionSetRecognitionSelQuestionSetResponseUid  BIGINT,  selQuestionSetRecognitionClazzMemberUid  BIGINT,  selQuestionSetRecognitionRecognized  BOOL,  selQuestionSetRecognitionMasterChangeSeqNum  BIGINT,  selQuestionSetRecognitionLocalChangeSeqNum  BIGINT,  selQuestionSetRecognitionLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (26, 1, 0, 0)");
+                        //END Create SelQuestionSetRecognition (PostgreSQL)
+
+                        /*
+                        SelQuestionSetResponse - New entity
+                        */
+                        //BEGIN Create SelQuestionSetResponse (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_27 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionSetResponse  ( selQuestionSetResposeUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_27') ,  selQuestionSetResponseSelQuestionSetUid  BIGINT,  selQuestionSetResponseClazzMemberUid  BIGINT,  selQuestionSetResponseStartTime  BIGINT,  selQuestionSetResponseFinishTime  BIGINT,  selQuestionSetResponseRecognitionPercentage  FLOAT,  selQuestionSetResponseMasterChangeSeqNum  BIGINT,  selQuestionSetResponseLocalChangeSeqNum  BIGINT,  selQuestionSetResponseLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (27, 1, 0, 0)");
+                        //END Create SelQuestionSetResponse (PostgreSQL)
+
+
+                        /*
+                         * Download Set
+                         */
+                        db.execSql("DROP TABLE IF EXISTS DownloadSet");
+                        //BEGIN Create DownloadSet (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSet  ( dsUid  SERIAL PRIMARY KEY  NOT NULL ,  destinationDir  TEXT,  meteredNetworkAllowed  BOOL,  dsRootContentEntryUid  BIGINT)");
+                        //END Create DownloadSet (PostgreSQL)
+
+                        //BEGIN Create DownloadSetItem (PostgreSQL)
+                        db.execSql("DROP TABLE IF EXISTS DownloadSetItem");
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSetItem  ( dsiUid  SERIAL PRIMARY KEY  NOT NULL ,  dsiDsUid  BIGINT,  dsiContentEntryUid  BIGINT)");
+                        db.execSql("CREATE INDEX  index_DownloadSetItem_dsiContentEntryUid  ON  DownloadSetItem  ( dsiContentEntryUid  )");
+                        db.execSql("CREATE INDEX  index_DownloadSetItem_dsiDsUid  ON  DownloadSetItem  ( dsiDsUid  )");
+                        //END Create DownloadSetItem (PostgreSQL)
+
+                        /*
+                         * DownloadSetItem
+                         */
+                        db.execSql("DROP TABLE  IF EXISTS DownloadSetItem");
+                        //BEGIN Create DownloadSetItem (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadSetItem  ( dsiUid  SERIAL PRIMARY KEY  NOT NULL ,  dsiDsUid  BIGINT,  dsiContentEntryUid  BIGINT)");
+                        db.execSql("CREATE INDEX  index_DownloadSetItem_dsiContentEntryUid  ON  DownloadSetItem  ( dsiContentEntryUid  )");
+                        db.execSql("CREATE INDEX  index_DownloadSetItem_dsiDsUid  ON  DownloadSetItem  ( dsiDsUid  )");
+                        //END Create DownloadSetItem (PostgreSQL)
+
+                        /*
+                         * Network Node
+                         * Removed wifiDirectLastUpdated column
+                         */
+                        db.execSql("DROP TABLE IF EXISTS NetworkNode");
+                        //BEGIN Create NetworkNode (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  NetworkNode  ( nodeId  SERIAL PRIMARY KEY  NOT NULL ,  bluetoothMacAddress  TEXT,  ipAddress  TEXT,  wifiDirectMacAddress  TEXT,  deviceWifiDirectName  TEXT,  lastUpdateTimeStamp  BIGINT,  networkServiceLastUpdated  BIGINT,  nsdServiceName  TEXT,  port  INTEGER,  wifiDirectDeviceStatus  INTEGER)");
+                        //END Create NetworkNode (PostgreSQL)
+
+                        /*
+                         * EntryStatusResponse updated several columns, etc
+                         *
+                         */
+                        db.execSql("DROP TABLE IF EXISTS EntryStatusResponse");
+                        //BEGIN Create EntryStatusResponse (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  EntryStatusResponse  ( erId  SERIAL PRIMARY KEY  NOT NULL ,  erContentEntryFileUid  BIGINT,  responseTime  BIGINT,  erNodeId  BIGINT,  available  BOOL)");
+                        //END Create EntryStatusResponse (PostgreSQL)
+
+                        /*
+                         * Download job
+                         */
+                        db.execSql("DROP TABLE IF EXISTS DownloadJob");
+                        //BEGIN Create DownloadJob (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJob  ( djUid  SERIAL PRIMARY KEY  NOT NULL ,  djDsUid  BIGINT,  timeCreated  BIGINT,  timeRequested  BIGINT,  timeCompleted  BIGINT,  totalBytesToDownload  BIGINT,  bytesDownloadedSoFar  BIGINT,  djStatus  INTEGER)");
+                        //END Create DownloadJob (PostgreSQL)
+
+                        /*
+                         * DownloadJobItem
+                         */
+                        db.execSql("DROP TABLE IF EXISTS DownloadJobItem");
+                        //BEGIN Create DownloadJobItem (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  DownloadJobItem  ( djiUid  SERIAL PRIMARY KEY  NOT NULL ,  djiDsiUid  BIGINT,  djiDjUid  BIGINT,  djiContentEntryFileUid  BIGINT,  downloadedSoFar  BIGINT,  downloadLength  BIGINT,  currentSpeed  BIGINT,  timeStarted  BIGINT,  timeFinished  BIGINT,  djiStatus  INTEGER,  destinationFile  TEXT,  numAttempts  INTEGER)");
+                        db.execSql("CREATE INDEX  index_DownloadJobItem_timeStarted  ON  DownloadJobItem  ( timeStarted  )");
+                        db.execSql("CREATE INDEX  index_DownloadJobItem_djiStatus  ON  DownloadJobItem  ( djiStatus  )");
+                        //END Create DownloadJobItem (PostgreSQL)
+
+                        /*
+                         * Content Entry
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ContentEntry");
+                        //BEGIN Create ContentEntry (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_42 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntry  ( contentEntryUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_42') ,  title  TEXT,  description  TEXT,  entryId  TEXT,  author  TEXT,  publisher  TEXT,  licenseType  INTEGER,  licenseName  TEXT,  licenseUrl  TEXT,  sourceUrl  TEXT,  thumbnailUrl  TEXT,  lastModified  BIGINT,  primaryLanguageUid  BIGINT,  languageVariantUid  BIGINT,  leaf  BOOL,  publik  BOOL,  contentTypeFlag  INTEGER,  contentEntryLocalChangeSeqNum  BIGINT,  contentEntryMasterChangeSeqNum  BIGINT,  contentEntryLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (42, 1, 0, 0)");
+                        db.execSql("CREATE INDEX  index_ContentEntry_primaryLanguageUid  ON  ContentEntry  ( primaryLanguageUid  )");
+                        //END Create ContentEntry (PostgreSQL)
+
+                        /*
+                         * ContentEntryContentCategoryJoin
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ContentEntryContentCategoryJoin");
+                        //BEGIN Create ContentEntryContentCategoryJoin (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_3 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryContentCategoryJoin  ( ceccjUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_3') ,  ceccjContentEntryUid  BIGINT,  ceccjContentCategoryUid  BIGINT,  ceccjLocalChangeSeqNum  BIGINT,  ceccjMasterChangeSeqNum  BIGINT,  ceccjLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (3, 1, 0, 0)");
+                        //END Create ContentEntryContentCategoryJoin (PostgreSQL)
+
+
+                        /*
+                         * ContentEntryFile
+                         */
+
+                        //BEGIN Create ContentEntryFile (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_5 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryFile  ( contentEntryFileUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_5') ,  fileSize  BIGINT,  md5sum  TEXT,  lastModified  BIGINT,  mimeType  TEXT,  remarks  TEXT,  mobileOptimized  BOOL,  contentEntryFileLocalChangeSeqNum  BIGINT,  contentEntryFileMasterChangeSeqNum  BIGINT,  contentEntryFileLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (5, 1, 0, 0)");
+                        db.execSql("CREATE INDEX  index_ContentEntryFile_lastModified  ON  ContentEntryFile  ( lastModified  )");
+                        //END Create ContentEntryFile (PostgreSQL)
+
+                        /*
+                         * ContentEntryContentEntryFileJoin
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ContentEntryContentEntryFileJoin");
+                        //BEGIN Create ContentEntryContentEntryFileJoin (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_4 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryContentEntryFileJoin  ( cecefjUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_4') ,  cecefjContentEntryUid  BIGINT,  cecefjContentEntryFileUid  BIGINT,  cecefjLocalChangeSeqNum  BIGINT,  cecefjMasterChangeSeqNum  BIGINT,  cecefjLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (4, 1, 0, 0)");
+                        db.execSql("CREATE INDEX  index_ContentEntryContentEntryFileJoin_cecefjContentEntryFileUid  ON  ContentEntryContentEntryFileJoin  ( cecefjContentEntryFileUid  )");
+                        db.execSql("CREATE INDEX  index_ContentEntryContentEntryFileJoin_cecefjContentEntryUid  ON  ContentEntryContentEntryFileJoin  ( cecefjContentEntryUid  )");
+                        //END Create ContentEntryContentEntryFileJoin (PostgreSQL)
+
+                        /*
+                         * ContentEntryParentChildJoin
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ContentEntryParentChildJoin");
+                        //BEGIN Create ContentEntryParentChildJoin (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_7 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryParentChildJoin  ( cepcjUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_7') ,  cepcjChildContentEntryUid  BIGINT,  cepcjParentContentEntryUid  BIGINT,  childIndex  INTEGER,  cepcjLocalChangeSeqNum  BIGINT,  cepcjMasterChangeSeqNum  BIGINT,  cepcjLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (7, 1, 0, 0)");
+
+                        //END Create ContentEntryParentChildJoin (PostgreSQL)
+
+                        /*
+                         * ContentEntryRelatedEntryJoin
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ContentEntryRelatedEntryJoin");
+                        //BEGIN Create ContentEntryRelatedEntryJoin (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_8 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryRelatedEntryJoin  ( cerejUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_8') ,  cerejContentEntryUid  BIGINT,  cerejRelatedEntryUid  BIGINT,  cerejLastChangedBy  INTEGER,  relType  INTEGER,  comment  TEXT,  cerejRelLanguageUid  BIGINT,  cerejLocalChangeSeqNum  BIGINT,  cerejMasterChangeSeqNum  BIGINT)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (8, 1, 0, 0)");
+                        //END Create ContentEntryRelatedEntryJoin (PostgreSQL)
+
+                        /*
+                         * ScrapeQueueItem
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ScrapeQueueItem");
+                        //BEGIN Create ScrapeQueueItem (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ScrapeQueueItem  ( sqiUid  SERIAL PRIMARY KEY  NOT NULL ,  sqiContentEntryParentUid  BIGINT,  destDir  TEXT,  scrapeUrl  TEXT,  status  INTEGER,  runId  INTEGER,  itemType  INTEGER,  contentType  TEXT,  timeAdded  BIGINT,  timeStarted  BIGINT,  timeFinished  BIGINT)");
+                        //END Create ScrapeQueueItem (PostgreSQL)
+
+                        /*
+                         * ScrapeRun
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ScrapeRun");
+                        //BEGIN Create ScrapeRun (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ScrapeRun  ( scrapeRunUid  SERIAL PRIMARY KEY  NOT NULL ,  scrapeType  TEXT,  status  INTEGER)");
+                        //END Create ScrapeRun (PostgreSQL)
+
+                        /*
+                         * ContentEntryStatus
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ContentEntryStatus");
+                        //BEGIN Create ContentEntryStatus (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryStatus  ( cesUid  BIGINT PRIMARY KEY  NOT NULL ,  totalSize  BIGINT,  bytesDownloadSoFar  BIGINT,  downloadStatus  INTEGER,  localAvailability  INTEGER,  downloadSpeed  INTEGER,  invalidated  BOOL,  cesLeaf  BOOL)");
+                        //END Create ContentEntryStatus (PostgreSQL)
+
+                        /*
+                         * ConnectivityStatus
+                         */
+                        db.execSql("DROP TABLE IF EXISTS ConnectivityStatus");
+                        //BEGIN Create ConnectivityStatus (PostgreSQL)
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ConnectivityStatus  ( csUid  INTEGER PRIMARY KEY  NOT NULL ,  connectivityState  INTEGER,  wifiSsid  TEXT,  connectedOrConnecting  BOOL)");
+                        //END Create ConnectivityStatus (PostgreSQL)
+
+
+
+                        /**
+                         * Create triggers and functions for all
+                         */
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_9_fn() RETURNS trigger AS $$ BEGIN UPDATE Person SET personLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 9) END),personMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 9) ELSE NEW.personMasterChangeSeqNum END) WHERE personUid = NEW.personUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 9; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_9_trig AFTER UPDATE OR INSERT ON Person FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_9_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_6_fn() RETURNS trigger AS $$ BEGIN UPDATE Clazz SET clazzLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) END),clazzMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 6) ELSE NEW.clazzMasterChangeSeqNum END) WHERE clazzUid = NEW.clazzUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 6; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_6_trig AFTER UPDATE OR INSERT ON Clazz FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_6_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_31_fn() RETURNS trigger AS $$ BEGIN UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzMemberLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 31) END),clazzMemberMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 31) ELSE NEW.clazzMemberMasterChangeSeqNum END) WHERE clazzMemberUid = NEW.clazzMemberUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 31; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_31_trig AFTER UPDATE OR INSERT ON ClazzMember FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_31_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_14_fn() RETURNS trigger AS $$ BEGIN UPDATE ClazzLog SET clazzLogChangeLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzLogChangeLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 14) END),clazzLogChangeMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 14) ELSE NEW.clazzLogChangeMasterChangeSeqNum END) WHERE clazzLogUid = NEW.clazzLogUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 14; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_14_trig AFTER UPDATE OR INSERT ON ClazzLog FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_14_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_15_fn() RETURNS trigger AS $$ BEGIN UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 15) END),clazzLogAttendanceRecordMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 15) ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END) WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 15; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_15_trig AFTER UPDATE OR INSERT ON ClazzLogAttendanceRecord FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_15_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_16_fn() RETURNS trigger AS $$ BEGIN UPDATE FeedEntry SET feedEntryLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.feedEntryLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 16) END),feedEntryMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 16) ELSE NEW.feedEntryMasterChangeSeqNum END) WHERE feedEntryUid = NEW.feedEntryUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 16; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_16_trig AFTER UPDATE OR INSERT ON FeedEntry FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_16_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_20_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonField SET personFieldLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personFieldLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 20) END),personFieldMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 20) ELSE NEW.personFieldMasterChangeSeqNum END) WHERE personCustomFieldUid = NEW.personCustomFieldUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 20; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_20_trig AFTER UPDATE OR INSERT ON PersonField FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_20_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_18_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personCustomFieldValueLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 18) END),personCustomFieldValueMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 18) ELSE NEW.personCustomFieldValueMasterChangeSeqNum END) WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 18; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_18_trig AFTER UPDATE OR INSERT ON PersonCustomFieldValue FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_18_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_19_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 19) END),personDetailPresenterFieldMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 19) ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END) WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 19; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_19_trig AFTER UPDATE OR INSERT ON PersonDetailPresenterField FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_19_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_22_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestion SET selQuestionLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 22) END),selQuestionMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 22) ELSE NEW.selQuestionMasterChangeSeqNum END) WHERE selQuestionUid = NEW.selQuestionUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 22; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_22_trig AFTER UPDATE OR INSERT ON SelQuestion FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_22_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_23_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestionResponse SET selQuestionResponseLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionResponseLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 23) END),selQuestionResponseMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 23) ELSE NEW.selQuestionResponseMasterChangeSeqNum END) WHERE selQuestionResponseUid = NEW.selQuestionResponseUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 23; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_23_trig AFTER UPDATE OR INSERT ON SelQuestionResponse FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_23_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_24_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestionResponseNomination SET selQuestionResponseNominationLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionResponseNominationLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 24) END),selQuestionResponseNominationMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 24) ELSE NEW.selQuestionResponseNominationMasterChangeSeqNum END) WHERE selQuestionResponseNominationUid = NEW.selQuestionResponseNominationUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 24; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_24_trig AFTER UPDATE OR INSERT ON SelQuestionResponseNomination FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_24_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_25_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestionSet SET selQuestionSetLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionSetLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 25) END),selQuestionSetMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 25) ELSE NEW.selQuestionSetMasterChangeSeqNum END) WHERE selQuestionSetUid = NEW.selQuestionSetUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 25; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_25_trig AFTER UPDATE OR INSERT ON SelQuestionSet FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_25_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_26_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestionSetRecognition SET selQuestionSetRecognitionLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionSetRecognitionLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 26) END),selQuestionSetRecognitionMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 26) ELSE NEW.selQuestionSetRecognitionMasterChangeSeqNum END) WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 26; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_26_trig AFTER UPDATE OR INSERT ON SelQuestionSetRecognition FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_26_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_27_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestionSetResponse SET selQuestionSetResponseLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionSetResponseLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 27) END),selQuestionSetResponseMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 27) ELSE NEW.selQuestionSetResponseMasterChangeSeqNum END) WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 27; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_27_trig AFTER UPDATE OR INSERT ON SelQuestionSetResponse FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_27_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_21_fn() RETURNS trigger AS $$ BEGIN UPDATE Schedule SET scheduleLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.scheduleLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 21) END),scheduleMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 21) ELSE NEW.scheduleMasterChangeSeqNum END) WHERE scheduleUid = NEW.scheduleUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 21; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_21_trig AFTER UPDATE OR INSERT ON Schedule FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_21_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_17_fn() RETURNS trigger AS $$ BEGIN UPDATE Holiday SET holidayLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.holidayLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 17) END),holidayMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 17) ELSE NEW.holidayMasterChangeSeqNum END) WHERE holidayUid = NEW.holidayUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 17; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_17_trig AFTER UPDATE OR INSERT ON Holiday FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_17_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_28_fn() RETURNS trigger AS $$ BEGIN UPDATE UMCalendar SET personLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 28) END),personMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 28) ELSE NEW.personMasterChangeSeqNum END) WHERE umCalendarUid = NEW.umCalendarUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 28; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_28_trig AFTER UPDATE OR INSERT ON UMCalendar FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_28_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_11_fn() RETURNS trigger AS $$ BEGIN UPDATE ClazzActivity SET clazzActivityLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzActivityLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 11) END),clazzActivityMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 11) ELSE NEW.clazzActivityMasterChangeSeqNum END) WHERE clazzActivityUid = NEW.clazzActivityUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 11; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_11_trig AFTER UPDATE OR INSERT ON ClazzActivity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_11_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_32_fn() RETURNS trigger AS $$ BEGIN UPDATE ClazzActivityChange SET clazzActivityChangeLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.clazzActivityChangeLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 32) END),clazzActivityChangeMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 32) ELSE NEW.clazzActivityChangeMasterChangeSeqNum END) WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 32; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_32_trig AFTER UPDATE OR INSERT ON ClazzActivityChange FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_32_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_42_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntry SET contentEntryLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentEntryLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 42) END),contentEntryMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 42) ELSE NEW.contentEntryMasterChangeSeqNum END) WHERE contentEntryUid = NEW.contentEntryUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 42; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_42_trig AFTER UPDATE OR INSERT ON ContentEntry FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_42_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_3_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryContentCategoryJoin SET ceccjLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.ceccjLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 3) END),ceccjMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 3) ELSE NEW.ceccjMasterChangeSeqNum END) WHERE ceccjUid = NEW.ceccjUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 3; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_3_trig AFTER UPDATE OR INSERT ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_3_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_4_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryContentEntryFileJoin SET cecefjLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cecefjLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 4) END),cecefjMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 4) ELSE NEW.cecefjMasterChangeSeqNum END) WHERE cecefjUid = NEW.cecefjUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 4; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_4_trig AFTER UPDATE OR INSERT ON ContentEntryContentEntryFileJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_4_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_5_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryFile SET contentEntryFileLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentEntryFileLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 5) END),contentEntryFileMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 5) ELSE NEW.contentEntryFileMasterChangeSeqNum END) WHERE contentEntryFileUid = NEW.contentEntryFileUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 5; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_5_trig AFTER UPDATE OR INSERT ON ContentEntryFile FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_5_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_7_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryParentChildJoin SET cepcjLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cepcjLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 7) END),cepcjMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 7) ELSE NEW.cepcjMasterChangeSeqNum END) WHERE cepcjUid = NEW.cepcjUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 7; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_7_trig AFTER UPDATE OR INSERT ON ContentEntryParentChildJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_7_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_8_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryRelatedEntryJoin SET cerejLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cerejLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 8) END),cerejMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 8) ELSE NEW.cerejMasterChangeSeqNum END) WHERE cerejUid = NEW.cerejUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 8; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_8_trig AFTER UPDATE OR INSERT ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_8_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_29_fn() RETURNS trigger AS $$ BEGIN UPDATE Location SET locationLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.locationLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 29) END),locationMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 29) ELSE NEW.locationMasterChangeSeqNum END) WHERE locationUid = NEW.locationUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 29; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_29_trig AFTER UPDATE OR INSERT ON Location FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_29_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_2_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentCategorySchema SET contentCategorySchemaLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentCategorySchemaLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 2) END),contentCategorySchemaMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 2) ELSE NEW.contentCategorySchemaMasterChangeSeqNum END) WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 2; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_2_trig AFTER UPDATE OR INSERT ON ContentCategorySchema FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_2_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_1_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentCategory SET contentCategoryLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentCategoryLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 1) END),contentCategoryMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 1) ELSE NEW.contentCategoryMasterChangeSeqNum END) WHERE contentCategoryUid = NEW.contentCategoryUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 1; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_1_trig AFTER UPDATE OR INSERT ON ContentCategory FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_1_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_13_fn() RETURNS trigger AS $$ BEGIN UPDATE Language SET langLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.langLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 13) END),langMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 13) ELSE NEW.langMasterChangeSeqNum END) WHERE langUid = NEW.langUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 13; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_13_trig AFTER UPDATE OR INSERT ON Language FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_13_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_10_fn() RETURNS trigger AS $$ BEGIN UPDATE LanguageVariant SET langVariantLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.langVariantLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 10) END),langVariantMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 10) ELSE NEW.langVariantMasterChangeSeqNum END) WHERE langVariantUid = NEW.langVariantUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 10; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_10_trig AFTER UPDATE OR INSERT ON LanguageVariant FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_10_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_30_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonAuth SET personAuthLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personAuthLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 30) END),personAuthMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 30) ELSE NEW.personAuthMasterChangeSeqNum END) WHERE personAuthUid = NEW.personAuthUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 30; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_30_trig AFTER UPDATE OR INSERT ON PersonAuth FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_30_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_45_fn() RETURNS trigger AS $$ BEGIN UPDATE Role SET roleLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.roleLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 45) END),roleMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 45) ELSE NEW.roleMasterCsn END) WHERE roleUid = NEW.roleUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 45; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_45_trig AFTER UPDATE OR INSERT ON Role FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_45_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_47_fn() RETURNS trigger AS $$ BEGIN UPDATE EntityRole SET erLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.erLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 47) END),erMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 47) ELSE NEW.erMasterCsn END) WHERE erUid = NEW.erUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 47; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_47_trig AFTER UPDATE OR INSERT ON EntityRole FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_47_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_43_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonGroup SET groupLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.groupLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 43) END),groupMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 43) ELSE NEW.groupMasterCsn END) WHERE groupUid = NEW.groupUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 43; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_43_trig AFTER UPDATE OR INSERT ON PersonGroup FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_43_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_44_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonGroupMember SET groupMemberLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.groupMemberLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 44) END),groupMemberMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 44) ELSE NEW.groupMemberMasterCsn END) WHERE groupMemberUid = NEW.groupMemberUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 44; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_44_trig AFTER UPDATE OR INSERT ON PersonGroupMember FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_44_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_52_fn() RETURNS trigger AS $$ BEGIN UPDATE SelQuestionOption SET selQuestionOptionLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.selQuestionOptionLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 52) END),selQuestionOptionMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 52) ELSE NEW.selQuestionOptionMasterChangeSeqNum END) WHERE selQuestionOptionUid = NEW.selQuestionOptionUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 52; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_52_trig AFTER UPDATE OR INSERT ON SelQuestionOption FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_52_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_48_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonLocationJoin SET plLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.plLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 48) END),plMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 48) ELSE NEW.plMasterCsn END) WHERE personLocationUid = NEW.personLocationUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 48; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_48_trig AFTER UPDATE OR INSERT ON PersonLocationJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_48_fn()");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_50_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonPicture SET personPictureLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personPictureLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) END),personPictureMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) ELSE NEW.personPictureMasterCsn END) WHERE personPictureUid = NEW.personPictureUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 50; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_50_trig AFTER UPDATE OR INSERT ON PersonPicture FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_50_fn()");
 
 
                         break;
+
+
                 }
             }
         });
