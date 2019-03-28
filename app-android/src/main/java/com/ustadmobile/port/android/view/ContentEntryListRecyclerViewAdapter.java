@@ -238,7 +238,7 @@ public class ContentEntryListRecyclerViewAdapter extends
         List<Long> uidsToMonitor = new ArrayList<>();
         for (ContentEntryWithStatusAndMostRecentContainerUid entry : currentDisplayedEntryList) {
 
-            boolean canBeMonitored = (entry.getContentEntryStatus() == null ||
+            boolean canBeMonitored = entry != null && (entry.getContentEntryStatus() == null ||
                     entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE)
                     && !containerUidsToMonitor.contains(entry.getMostRecentContainer())
                     && entry.isLeaf();

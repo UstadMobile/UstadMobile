@@ -486,16 +486,27 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     }
 
 
+    /**
+     * Add listener to the list of local availability listeners
+     * @param listener listener object to be added.
+     */
     public void addLocalAvailabilityListener(LocalAvailabilityListener listener) {
         if(!localAvailabilityListeners.contains(listener)){
             localAvailabilityListeners.add(listener);
         }
     }
 
+    /**
+     * Remove a listener from a list of all available listeners
+     * @param listener listener to be removed
+     */
     public void removeLocalAvailabilityListener(LocalAvailabilityListener listener) {
         localAvailabilityListeners.remove(listener);
     }
 
+    /**
+     * Trigger availability status change event to all listening parts
+     */
     public void fireLocalAvailabilityChanged() {
         List<LocalAvailabilityListener> listenerList = new ArrayList<>(localAvailabilityListeners);
         for(LocalAvailabilityListener listener : listenerList) {
@@ -503,7 +514,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     }
 
-
+    /**
+     * All all availability statuses received from the peer node
+     * @param responses response received
+     */
     public void handleLocalAvailabilityResponsesReceived(List<EntryStatusResponse> responses) {
         if(responses.isEmpty())
             return;
