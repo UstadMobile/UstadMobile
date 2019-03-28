@@ -11,7 +11,7 @@ import static com.ustadmobile.lib.db.entities.VerbEntity.TABLE_ID;
 @UmEntity(tableId = TABLE_ID)
 public class VerbEntity {
 
-    public static final int TABLE_ID = 53;
+    public static final int TABLE_ID = 62;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long verbUid;

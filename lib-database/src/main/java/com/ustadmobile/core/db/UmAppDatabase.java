@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db;
 
 import com.ustadmobile.core.db.dao.AccessTokenDao;
+import com.ustadmobile.core.db.dao.AgentDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ConnectivityStatusDao;
@@ -57,6 +58,7 @@ import com.ustadmobile.lib.db.UmDbType;
 import com.ustadmobile.lib.db.UmDbWithAttachmentsDir;
 import com.ustadmobile.lib.db.UmDbWithAuthenticator;
 import com.ustadmobile.lib.db.entities.AccessToken;
+import com.ustadmobile.lib.db.entities.AgentEntity;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
@@ -125,7 +127,8 @@ import java.util.Random;
         PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
         ContentEntryStatus.class, ConnectivityStatus.class,
         Container.class, ContainerEntry.class, ContainerEntryFile.class,
-        VerbEntity.class, XObjectEntity.class, StatementEntity.class, ContextXObjectStatementJoin.class
+        VerbEntity.class, XObjectEntity.class, StatementEntity.class,
+        ContextXObjectStatementJoin.class, AgentEntity.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -644,36 +647,44 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                                 db.selectSingleValue("SELECT deviceBits FROM SyncDeviceBits"));
 
                         //BEGIN Create VerbEntity (PostgreSQL)
-                        db.execSql("CREATE SEQUENCE spk_seq_53 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                        db.execSql("CREATE TABLE IF NOT EXISTS  VerbEntity  ( verbUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_53') ,  urlId  TEXT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
-                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (53, 1, 0, 0)");
-                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_53_fn() RETURNS trigger AS $$ BEGIN UPDATE VerbEntity SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 53) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 53) ELSE NEW.verbMasterChangeSeqNum END) WHERE verbUid = NEW.verbUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 53; RETURN null; END $$LANGUAGE plpgsql");
-                        db.execSql("CREATE TRIGGER inc_csn_53_trig AFTER UPDATE OR INSERT ON VerbEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_53_fn()");
+                        db.execSql("CREATE SEQUENCE spk_seq_62 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  VerbEntity  ( verbUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_62') ,  urlId  TEXT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (62, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_62_fn() RETURNS trigger AS $$ BEGIN UPDATE VerbEntity SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 62) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 62) ELSE NEW.verbMasterChangeSeqNum END) WHERE verbUid = NEW.verbUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 62; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_62_trig AFTER UPDATE OR INSERT ON VerbEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_62_fn()");
                         //END Create VerbEntity (PostgreSQL)
 
                         //BEGIN Create XObjectEntity (PostgreSQL)
-                        db.execSql("CREATE SEQUENCE spk_seq_54 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                        db.execSql("CREATE TABLE IF NOT EXISTS  XObjectEntity  ( XObjectUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_54') ,  objectType  TEXT,  objectId  TEXT,  definitionType  TEXT,  interactionType  TEXT,  correctResponsePattern  TEXT,  XObjectMasterChangeSeqNum  BIGINT,  XObjectocalChangeSeqNum  BIGINT,  XObjectLastChangedBy  INTEGER)");
-                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (54, 1, 0, 0)");
-                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_54_fn() RETURNS trigger AS $$ BEGIN UPDATE XObjectEntity SET XObjectocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.XObjectocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 54) END),XObjectMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 54) ELSE NEW.XObjectMasterChangeSeqNum END) WHERE XObjectUid = NEW.XObjectUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 54; RETURN null; END $$LANGUAGE plpgsql");
-                        db.execSql("CREATE TRIGGER inc_csn_54_trig AFTER UPDATE OR INSERT ON XObjectEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_54_fn()");
+                        db.execSql("CREATE SEQUENCE spk_seq_64 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  XObjectEntity  ( XObjectUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_64') ,  objectType  TEXT,  objectId  TEXT,  definitionType  TEXT,  interactionType  TEXT,  correctResponsePattern  TEXT,  XObjectMasterChangeSeqNum  BIGINT,  XObjectocalChangeSeqNum  BIGINT,  XObjectLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (64, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_64_fn() RETURNS trigger AS $$ BEGIN UPDATE XObjectEntity SET XObjectocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.XObjectocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 64) END),XObjectMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 64) ELSE NEW.XObjectMasterChangeSeqNum END) WHERE XObjectUid = NEW.XObjectUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 64; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_64_trig AFTER UPDATE OR INSERT ON XObjectEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_64_fn()");
                         //END Create XObjectEntity (PostgreSQL)
 
                         //BEGIN Create StatementEntity (PostgreSQL)
-                        db.execSql("CREATE SEQUENCE spk_seq_52 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                        db.execSql("CREATE TABLE IF NOT EXISTS  StatementEntity  ( statementUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_52') ,  statementId  TEXT,  personUid  BIGINT,  verbUid  BIGINT,  XObjectUid  BIGINT,  subStatementUid  BIGINT,  resultCompletion  BOOL,  resultSuccess  BOOL,  resultScoreScaled  BIGINT,  resultScoreRaw  BIGINT,  resultScoreMin  BIGINT,  resultScoreMax  BIGINT,  resultDuration  BIGINT,  resultResponse  TEXT,  timestamp  BIGINT,  stored  BIGINT,  contextRegistration  TEXT,  contextPlatform  TEXT,  contextStatementUid  BIGINT,  fullStatement  TEXT,  statementMasterChangeSeqNum  BIGINT,  statementLocalChangeSeqNum  BIGINT,  statementLastChangedBy  INTEGER)");
-                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (52, 1, 0, 0)");
-                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_52_fn() RETURNS trigger AS $$ BEGIN UPDATE StatementEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 52) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 52) ELSE NEW.statementMasterChangeSeqNum END) WHERE statementUid = NEW.statementUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 52; RETURN null; END $$LANGUAGE plpgsql");
-                        db.execSql("CREATE TRIGGER inc_csn_52_trig AFTER UPDATE OR INSERT ON StatementEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_52_fn()");
+                        db.execSql("CREATE SEQUENCE spk_seq_60 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  StatementEntity  ( statementUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_60') ,  statementId  TEXT,  personUid  BIGINT,  verbUid  BIGINT,  XObjectUid  BIGINT,  subStatementActorUid  BIGINT,  substatementVerbUid  BIGINT,  subStatementObjectUid  BIGINT,  agentUid  BIGINT,  instructorUid  BIGINT,  authorityUid  BIGINT,  teamUid  BIGINT,  resultCompletion  BOOL,  resultSuccess  BOOL,  resultScoreScaled  BIGINT,  resultScoreRaw  BIGINT,  resultScoreMin  BIGINT,  resultScoreMax  BIGINT,  resultDuration  BIGINT,  resultResponse  TEXT,  timestamp  BIGINT,  stored  BIGINT,  contextRegistration  TEXT,  contextPlatform  TEXT,  contextStatementUid  BIGINT,  fullStatement  TEXT,  statementMasterChangeSeqNum  BIGINT,  statementLocalChangeSeqNum  BIGINT,  statementLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (60, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_60_fn() RETURNS trigger AS $$ BEGIN UPDATE StatementEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 60) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 60) ELSE NEW.statementMasterChangeSeqNum END) WHERE statementUid = NEW.statementUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 60; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_60_trig AFTER UPDATE OR INSERT ON StatementEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_60_fn()");
                         //END Create StatementEntity (PostgreSQL)
 
                         //BEGIN Create ContextXObjectStatementJoin (PostgreSQL)
-                        db.execSql("CREATE SEQUENCE spk_seq_55 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
-                        db.execSql("CREATE TABLE IF NOT EXISTS  ContextXObjectStatementJoin  ( contextXObjectStatementJoinUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_55') ,  contextActivityFlag  INTEGER,  contextStatementUid  BIGINT,  contextXObjectUid  BIGINT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
-                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (55, 1, 0, 0)");
-                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_55_fn() RETURNS trigger AS $$ BEGIN UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 55) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 55) ELSE NEW.verbMasterChangeSeqNum END) WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 55; RETURN null; END $$LANGUAGE plpgsql");
-                        db.execSql("CREATE TRIGGER inc_csn_55_trig AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_55_fn()");
+                        db.execSql("CREATE SEQUENCE spk_seq_66 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContextXObjectStatementJoin  ( contextXObjectStatementJoinUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_66') ,  contextActivityFlag  INTEGER,  contextStatementUid  BIGINT,  contextXObjectUid  BIGINT,  verbMasterChangeSeqNum  BIGINT,  verbLocalChangeSeqNum  BIGINT,  verbLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (66, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_66_fn() RETURNS trigger AS $$ BEGIN UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.verbLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 66) END),verbMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 66) ELSE NEW.verbMasterChangeSeqNum END) WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 66; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_66_trig AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_66_fn()");
                         //END Create ContextXObjectStatementJoin (PostgreSQL)
+
+                        //BEGIN Create AgentEntity (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_68 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  AgentEntity  ( agentUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_68') ,  agentMbox  TEXT,  agentMbox_sha1sum  TEXT,  agentOpenid  TEXT,  agentAccountName  TEXT,  statementMasterChangeSeqNum  BIGINT,  statementLocalChangeSeqNum  BIGINT,  statementLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (68, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_68_fn() RETURNS trigger AS $$ BEGIN UPDATE AgentEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 68) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 68) ELSE NEW.statementMasterChangeSeqNum END) WHERE agentUid = NEW.agentUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 68; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_68_trig AFTER UPDATE OR INSERT ON AgentEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_68_fn()");
+                        //END Create AgentEntity (PostgreSQL)
                         break;
 
 
@@ -775,6 +786,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract StatementDao getStatementDao();
 
     public abstract ContextXObjectStatementJoinDao getContextXObjectStatementJoinDao();
+
+    public abstract AgentDao getAgentDao();
 
     @UmDbContext
     public abstract Object getContext();

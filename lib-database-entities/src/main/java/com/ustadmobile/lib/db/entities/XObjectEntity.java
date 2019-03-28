@@ -11,7 +11,7 @@ import static com.ustadmobile.lib.db.entities.XObjectEntity.TABLE_ID;
 @UmEntity(tableId = TABLE_ID)
 public class XObjectEntity {
 
-    public static final int TABLE_ID = 54;
+    public static final int TABLE_ID = 64;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long XObjectUid;

@@ -11,7 +11,7 @@ import static com.ustadmobile.lib.db.entities.StatementEntity.TABLE_ID;
 @UmEntity(tableId = TABLE_ID)
 public class StatementEntity {
 
-    public static final int TABLE_ID = 52;
+    public static final int TABLE_ID = 60;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long statementUid;
@@ -24,7 +24,19 @@ public class StatementEntity {
 
     private long XObjectUid;
 
-    private long subStatementUid;
+    private long subStatementActorUid;
+
+    private long substatementVerbUid;
+
+    private long subStatementObjectUid;
+
+    private long agentUid;
+
+    private long instructorUid;
+
+    private long authorityUid;
+
+    private long teamUid;
 
     private boolean resultCompletion;
 
@@ -184,14 +196,6 @@ public class StatementEntity {
         this.stored = stored;
     }
 
-    public long getSubStatementUid() {
-        return subStatementUid;
-    }
-
-    public void setSubStatementUid(long subStatementUid) {
-        this.subStatementUid = subStatementUid;
-    }
-
     public String getFullStatement() {
         return fullStatement;
     }
@@ -249,4 +253,59 @@ public class StatementEntity {
         this.contextStatementUid = contextStatementUid;
     }
 
+    public long getAgentUid() {
+        return agentUid;
+    }
+
+    public void setAgentUid(long agentUid) {
+        this.agentUid = agentUid;
+    }
+
+    public long getInstructorUid() {
+        return instructorUid;
+    }
+
+    public void setInstructorUid(long instructorUid) {
+        this.instructorUid = instructorUid;
+    }
+
+    public long getAuthorityUid() {
+        return authorityUid;
+    }
+
+    public void setAuthorityUid(long authorityUid) {
+        this.authorityUid = authorityUid;
+    }
+
+    public long getTeamUid() {
+        return teamUid;
+    }
+
+    public void setTeamUid(long teamUid) {
+        this.teamUid = teamUid;
+    }
+
+    public long getSubStatementActorUid() {
+        return subStatementActorUid;
+    }
+
+    public void setSubStatementActorUid(long subStatementActorUid) {
+        this.subStatementActorUid = subStatementActorUid;
+    }
+
+    public long getSubstatementVerbUid() {
+        return substatementVerbUid;
+    }
+
+    public void setSubstatementVerbUid(long substatementVerbUid) {
+        this.substatementVerbUid = substatementVerbUid;
+    }
+
+    public long getSubStatementObjectUid() {
+        return subStatementObjectUid;
+    }
+
+    public void setSubStatementObjectUid(long subStatementObjectUid) {
+        this.subStatementObjectUid = subStatementObjectUid;
+    }
 }

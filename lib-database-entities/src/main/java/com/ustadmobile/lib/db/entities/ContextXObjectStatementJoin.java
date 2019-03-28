@@ -11,7 +11,7 @@ import static com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.TABLE_
 @UmEntity(tableId = TABLE_ID)
 public class ContextXObjectStatementJoin {
 
-    public static final int TABLE_ID = 55;
+    public static final int TABLE_ID = 66;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long contextXObjectStatementJoinUid;
