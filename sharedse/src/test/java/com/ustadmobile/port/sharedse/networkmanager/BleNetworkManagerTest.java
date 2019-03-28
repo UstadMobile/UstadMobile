@@ -57,7 +57,7 @@ public class BleNetworkManagerTest {
 
     private BleEntryStatusTask mockedEntryStatusTask;
 
-    private BleMessage messageToBeSent = new BleMessage((byte)0, new byte[]{});
+    private BleMessage messageToBeSent = new BleMessage((byte)0, (byte)42, new byte[]{});
 
     private BleMessageResponseListener mockedResponseListener;
 

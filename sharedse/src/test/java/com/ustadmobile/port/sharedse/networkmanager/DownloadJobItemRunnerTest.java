@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.google.gson.Gson;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
@@ -83,7 +82,7 @@ public class DownloadJobItemRunnerTest {
 
     private UmAppDatabase serverRepo;
 
-    private String cloudEndPoint, localEndPoint;
+    private String cloudEndPoint;
 
     private File webServerTmpDir;
 
@@ -282,9 +281,9 @@ public class DownloadJobItemRunnerTest {
             BleMessageResponseListener bleResponseListener = invocation.getArgument(3);
             startPeerWebServer();
             Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
-            groupBle.setEndpoint(localEndPoint);
-            wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE,
-                    new Gson().toJson(groupBle).getBytes());
+
+            wifiDirectGroupInfoMessage = new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,
+                    mockedNetworkManager.getWifiGroupInfoAsBytes(groupBle));
 
             bleResponseListener.onResponseReceived(networkNode.getBluetoothMacAddress(),
                     (mockedNetworkManagerBleWorking.get() ? wifiDirectGroupInfoMessage : null),
@@ -337,7 +336,8 @@ public class DownloadJobItemRunnerTest {
     private void startPeerWebServer() throws IOException {
         if(!peerServer.isAlive()) {
             peerServer.start();
-            localEndPoint = peerServer.getLocalHttpUrl();
+            groupBle.setPort(peerServer.getListeningPort());
+            groupBle.setIpAddress("127.0.0.1");
         }
     }
 

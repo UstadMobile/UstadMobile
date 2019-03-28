@@ -10,6 +10,8 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
@@ -94,7 +96,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      * Set list of entry uuids , for test purpose
      * @param entryUidsToCheck List of uuids
      */
-    void setEntryUidsToCheck(List<Long> entryUidsToCheck){
+    protected void setEntryUidsToCheck(List<Long> entryUidsToCheck){
         this.entryUidsToCheck = entryUidsToCheck;
     }
 

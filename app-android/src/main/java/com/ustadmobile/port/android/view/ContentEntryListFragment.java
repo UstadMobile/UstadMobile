@@ -209,18 +209,16 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> containerUidsToMonitor) {
-        new Thread(() -> {
-            if(managerAndroidBle != null){
-                managerAndroidBle.startMonitoringAvailability(monitor,containerUidsToMonitor);
-            }
-        }).start();
+//        if(managerAndroidBle != null){
+//            managerAndroidBle.startMonitoringAvailability(monitor,containerUidsToMonitor);
+//        }
     }
 
     @Override
     public void stopMonitoringAvailability(Object monitor) {
-        if(managerAndroidBle != null){
-            managerAndroidBle.stopMonitoringAvailability(monitor);
-        }
+//        if(managerAndroidBle != null){
+//            managerAndroidBle.stopMonitoringAvailability(monitor);
+//        }
     }
 
     @Override

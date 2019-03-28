@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
@@ -65,7 +66,9 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
         super(context,managerAndroidBle,entryUidsToCheck,peerToCheck);
         this.context = context;
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
-        this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload);
+        this.message = new BleMessage(ENTRY_STATUS_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(peerToCheck.getBluetoothMacAddress()),
+                messagePayload);
     }
 
     /**
@@ -87,9 +90,11 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * Set bluetooth manager for BLE GATT communication
      * @param bluetoothManager BluetoothManager instance
      */
+    @VisibleForTesting
     void setBluetoothManager(BluetoothManager bluetoothManager){
         this.bluetoothManager = bluetoothManager;
     }
+
 
     /**
      * Start entry status check task
@@ -106,7 +111,7 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
 
            managerBle.handleNodeConnectionHistory(destinationPeer.getAddress(),
-                   mGattClient == null);
+                   mGattClient != null);
 
            if(mGattClient == null){
                 UstadMobileSystemImpl.l(UMLog.ERROR,698,
