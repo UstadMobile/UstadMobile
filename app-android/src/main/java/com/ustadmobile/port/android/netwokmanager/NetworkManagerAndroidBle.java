@@ -149,7 +149,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }
     };
 
-
     private static class WifiDirectGroupAndroid extends WiFiDirectGroupBle {
         private WifiDirectGroupAndroid(WifiP2pGroup group, int endpointPort) {
             super(group.getNetworkName(), group.getPassphrase());
@@ -176,6 +175,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     private AsyncServiceManager scanningServiceManager = new AsyncServiceManager(
             AsyncServiceManager.STATE_STOPPED,
             ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
         public void start() {
             if(isBleCapable()){
@@ -193,6 +193,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             }
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
         public void stop() {
             bluetoothAdapter.stopLeScan(leScanCallback);
@@ -266,9 +267,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void stop() {
             try {
-                BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
-                mGattServer.clearServices();
-                mGattServer.close();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
+                    mGattServer.clearServices();
+                    mGattServer.close();
+                }
                 gattServerAndroid = null;
             }catch(Exception e) {
                 //maybe because bluetooth is actually off?
@@ -323,6 +326,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                 });
             }
         };
+
 
         private WifiP2PGroupServiceManager(NetworkManagerAndroidBle networkManager) {
             super(STATE_STOPPED,
@@ -406,46 +410,33 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }
     }
 
+
     /**
-     * Callback for the network connectivity changes
+     * Handle network state change events for android version < Lollipop
      */
+    private BroadcastReceiver networkStateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+            if((info != null && info.isConnected())){
+                handleNetworkAvailable(null);
+            }else{
+                handleDisconnected();
+            }
+        }
+    };
+
+
+    /**
+     * Callback for the network connectivity changes for android version >= Lollipop
+     */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private class UmNetworkCallback extends ConnectivityManager.NetworkCallback {
 
         @Override
         public void onAvailable(Network network) {
             super.onAvailable(network);
-
-            boolean isMeteredConnection =
-                    ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager);
-            int state = isMeteredConnection ?
-                    ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
-
-            NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
-                    prettyPrintNetwork(networkInfo));
-
-            String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
-            ConnectivityStatus status = new ConnectivityStatus(state, true,
-                    ssid);
-            connectivityStatusRef.set(status);
-
-            //get network SSID
-            if(ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)){
-                status.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
-                localConnectionOpener = network::openConnection;
-            }
-
-
-            umAppDatabase.getConnectivityStatusDao().insert(status, null);
-        }
-
-        private void handleDisconnected() {
-            localConnectionOpener = null;
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected");
-            connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
-                    false, null));
-            umAppDatabase.getConnectivityStatusDao()
-                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+           handleNetworkAvailable(network);
         }
 
 
@@ -464,6 +455,51 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             super.onUnavailable();
             handleDisconnected();
         }
+    }
+
+
+    private void handleDisconnected() {
+        localConnectionOpener = null;
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected");
+        connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+                false, null));
+        umAppDatabase.getConnectivityStatusDao()
+                .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+    }
+
+
+    private void handleNetworkAvailable(Network network){
+
+        boolean isMeteredConnection =
+                ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager);
+        int state = isMeteredConnection ?
+                ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
+
+        NetworkInfo networkInfo;
+
+        if(isLolliPopAndAboveDevice()){
+            networkInfo = connectivityManager.getNetworkInfo(network);
+        }else{
+            networkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
+                prettyPrintNetwork(networkInfo));
+
+        String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
+        ConnectivityStatus status = new ConnectivityStatus(state, true,
+                ssid);
+        connectivityStatusRef.set(status);
+
+        //get network SSID
+        if(ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)){
+            status.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
+            if(isLolliPopAndAboveDevice()){
+                localConnectionOpener = network::openConnection;
+            }
+        }
+
+
+        umAppDatabase.getConnectivityStatusDao().insert(status, null);
     }
 
 
@@ -511,7 +547,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     new IntentFilter(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION));
         }
 
-        if(isBleCapable()){
+        if(isBleDeviceSDKVersion() && isBleCapable()){
             //setting up bluetooth connection listener
             IntentFilter intentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -588,8 +624,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      */
     @Override
     public boolean isBleCapable() {
-        return BluetoothAdapter.getDefaultAdapter() != null && isBleDeviceSDKVersion()
-                && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+        if(isBleDeviceSDKVersion())
+            return  BluetoothAdapter.getDefaultAdapter() != null && mContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+            else return false;
+
     }
 
     /**
@@ -903,15 +942,25 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      * Start monitoring network changes
      */
     private void startMonitoringNetworkChanges() {
-        NetworkRequest networkRequest  = new NetworkRequest.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .build();
+
         connectivityManager = (ConnectivityManager)mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-       if(connectivityManager != null){
-           connectivityManager.requestNetwork(networkRequest,new UmNetworkCallback());
-       }
+
+        if (isLolliPopAndAboveDevice()) {
+            NetworkRequest networkRequest = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .build();
+            if(connectivityManager != null){
+                connectivityManager.requestNetwork(networkRequest,new UmNetworkCallback());
+            }
+        }else{
+            IntentFilter connectionFilter = new IntentFilter();
+            connectionFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+            connectionFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+            mContext.registerReceiver(networkStateChangeReceiver,connectionFilter);
+        }
+
     }
 
     /**
@@ -920,6 +969,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      */
     private boolean isBleDeviceSDKVersion(){
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+    }
+
+    private boolean isLolliPopAndAboveDevice(){
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 
     /**
@@ -988,6 +1041,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         if(isBleCapable()) {
             mContext.unregisterReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver);
+        }
+
+        if(!isLolliPopAndAboveDevice()){
+            mContext.unregisterReceiver(networkStateChangeReceiver);
         }
 
         if(wifiP2PCapable.get()) {

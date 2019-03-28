@@ -358,12 +358,15 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
      */
     protected void runAfterGrantingPermission(String permission, Runnable runnable,
                                               String dialogTitle, String dialogMessage) {
+        this.afterPermissionMethodRunner = runnable;
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             afterPermissionMethodRunner.run();
+            afterPermissionMethodRunner = null;
             return;
         }
 
-        this.afterPermissionMethodRunner = runnable;
+
         this.permissionDialogMessage = dialogMessage;
         this.permissionDialogTitle = dialogTitle;
         this.permission = permission;

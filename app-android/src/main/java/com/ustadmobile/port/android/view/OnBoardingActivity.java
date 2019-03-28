@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
@@ -130,6 +131,10 @@ public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingV
         pageIndicatorView.setAnimationType(AnimationType.WORM);
 
         getStartedBtn.setOnClickListener(v -> presenter.handleGetStarted());
+
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+            getStartedBtn.setBackgroundResource(R.drawable.onboarding_button_drawable);
+        }
 
     }
 
