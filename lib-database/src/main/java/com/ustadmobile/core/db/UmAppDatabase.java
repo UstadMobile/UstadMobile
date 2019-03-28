@@ -823,6 +823,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("DROP FUNCTION IF EXISTS inc_csn_52_fn()");
                         db.execSql("DROP FUNCTION IF EXISTS inc_csn_48_fn()");
                         db.execSql("DROP FUNCTION IF EXISTS inc_csn_50_fn()");
+
                         //triggers
                         db.execSql("DROP TRIGGER IF EXISTS inc_csn_9_trig ON Person");
                         db.execSql("DROP TRIGGER IF EXISTS inc_csn_6_trig ON Clazz");
@@ -863,6 +864,90 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("DROP TRIGGER IF EXISTS inc_csn_52_trig ON SelQuestionOption");
                         db.execSql("DROP TRIGGER IF EXISTS inc_csn_48_trig ON PersonLocationJoin");
                         db.execSql("DROP TRIGGER IF EXISTS inc_csn_50_trig ON PersonPicture");
+
+
+                        //Drop beta trigger and functions :
+
+                        //Beta trigger if they exist:
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_person_trigger ON Person");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_clazz_trigger ON Clazz");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_clazzmember_trigger ON ClazzMember");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_clazzlog_trigger ON ClazzLog");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_clazzlogattendancerecord_trigger ON ClazzLogAttendanceRecord");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_feedentry_trigger ON FeedEntry");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_personfield_trigger ON PersonField");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_personcustomfieldvalue_trigger ON PersonCustomFieldValue");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_persondetailpresenterfield_trigger ON PersonDetailPresenterField");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_socialnominationquestion_trigger ON SocialNominationQuestion");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_socialnominationquestionresponse_trigger ON SocialNominationQuestionResponse");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_socialnominationquestionresponsenomination_trigger ON SocialNominationQuestionResponseNomination");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_socialnominationquestionset_trigger ON SocialNominationQuestionSet");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_socialnominationquestionsetrecognition_trigger ON SocialNominationQuestionSetRecognition");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_socialnominationquestionsetresponse_trigger ON SocialNominationQuestionSetResponse");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_schedule_trigger ON Schedule");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_holiday_trigger ON Holiday");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_umcalendar_trigger ON UMCalendar");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_clazzactivity_trigger ON ClazzActivity");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_clazzactivitychange_trigger ON ClazzActivityChange");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententry_trigger ON ContentEntry");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententrycontentcategoryjoin_trigger ON ContentEntryContentCategoryJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententrycontententryfilejoin_trigger ON ContentEntryContentEntryFileJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententryfile_trigger ON ContentEntryFile");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententryparentchildjoin_trigger ON ContentEntryParentChildJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contententryrelatedentryjoin_trigger ON ContentEntryRelatedEntryJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_location_trigger ON Location");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contentcategoryschema_trigger ON ContentCategorySchema");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_contentcategory_trigger ON ContentCategory");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_language_trigger ON Language");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_languagevariant_trigger ON LanguageVariant");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_personauth_trigger ON PersonAuth");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_role_trigger ON Role");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_entityrole_trigger ON EntityRole");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_persongroup_trigger ON PersonGroup");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_persongroupmember_trigger ON PersonGroupMember");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_personlocationjoin_trigger ON PersonLocationJoin");
+                        db.execSql("DROP TRIGGER IF EXISTS increment_csn_personpicture_trigger ON PersonPicture");
+
+                        //Beta functions if they exist:
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_person_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazz_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazzmember_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazzlog_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazzlogattendancerecord_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_feedentry_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_personfield_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_personcustomfieldvalue_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_persondetailpresenterfield_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_socialnominationquestion_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_socialnominationquestionresponse_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_socialnominationquestionresponsenomination_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_socialnominationquestionset_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_socialnominationquestionsetrecognition_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_socialnominationquestionsetresponse_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_schedule_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_holiday_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_umcalendar_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazzactivity_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_clazzactivitychange_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententry_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententrycontentcategoryjoin_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententrycontententryfilejoin_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententryfile_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententryparentchildjoin_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contententryrelatedentryjoin_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_location_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contentcategoryschema_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_contentcategory_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_language_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_languagevariant_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_personauth_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_role_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_entityrole_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_persongroup_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_persongroupmember_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_personlocationjoin_fn()");
+                        db.execSql("DROP FUNCTION IF EXISTS increment_csn_personpicture_fn()");
+
 
 
                         /**
@@ -1282,6 +1367,119 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("CREATE TRIGGER inc_csn_48_trig AFTER UPDATE OR INSERT ON PersonLocationJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_48_fn()");
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_50_fn() RETURNS trigger AS $$ BEGIN UPDATE PersonPicture SET personPictureLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.personPictureLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) END),personPictureMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 50) ELSE NEW.personPictureMasterCsn END) WHERE personPictureUid = NEW.personPictureUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 50; RETURN null; END $$LANGUAGE plpgsql");
                         db.execSql("CREATE TRIGGER inc_csn_50_trig AFTER UPDATE OR INSERT ON PersonPicture FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_50_fn()");
+
+
+                        /**
+                         * Create Sequences and assign them to Primary keys for all not dealt with (updates and new ones above)
+                         */
+                        db.execSql("CREATE SEQUENCE spk_seq_9 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE Person ALTER COLUMN personUid SET DEFAULT NEXTVAL('spk_seq_9')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_6 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE Clazz ALTER COLUMN clazzUid SET DEFAULT NEXTVAL('spk_seq_6')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_31 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ClazzMember ALTER COLUMN clazzMemberUid SET DEFAULT NEXTVAL('spk_seq_31')");
+
+                        //db.execSql("CREATE SEQUENCE spk_seq_14 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE SEQUENCE spk_seq_15 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ClazzLogAttendanceRecord ALTER COLUMN clazzLogAttendanceRecordUid SET DEFAULT NEXTVAL('spk_seq_15')");
+
+                        //db.execSql("CREATE SEQUENCE spk_seq_16 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE SEQUENCE spk_seq_20 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonField ALTER COLUMN personCustomFieldUid SET DEFAULT NEXTVAL('spk_seq_20')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_18 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonCustomFieldValue ALTER COLUMN personCustomFieldValueUid SET DEFAULT NEXTVAL('spk_seq_18')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_19 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonDetailPresenterField ALTER COLUMN personDetailPresenterFieldUid SET DEFAULT NEXTVAL('spk_seq_19')");
+
+                        //db.execSql("CREATE SEQUENCE spk_seq_22 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_23 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_24 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_25 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_26 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_27 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE SEQUENCE spk_seq_21 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE Schedule ALTER COLUMN scheduleUid SET DEFAULT NEXTVAL('spk_seq_21')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_17 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE Holiday ALTER COLUMN holidayUid SET DEFAULT NEXTVAL('spk_seq_17')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_28 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE UMCalendar ALTER COLUMN umCalendarUid SET DEFAULT NEXTVAL('spk_seq_28')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_11 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ClazzActivity ALTER COLUMN clazzActivityUid SET DEFAULT NEXTVAL('spk_seq_11')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_32 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ClazzActivityChange ALTER COLUMN clazzActivityChangeUid SET DEFAULT NEXTVAL('spk_seq_32')");
+
+                        //db.execSql("CREATE SEQUENCE spk_seq_42 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_3 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_4 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_5 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_7 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_8 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //db.execSql("CREATE SEQUENCE spk_seq_29 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE SEQUENCE spk_seq_2 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ContentCategorySchema ALTER COLUMN contentCategorySchemaUid SET DEFAULT NEXTVAL('spk_seq_2')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_1 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE ContentCategory ALTER COLUMN contentCategoryUid SET DEFAULT NEXTVAL('spk_seq_1')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_13 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE Language ALTER COLUMN langUid SET DEFAULT NEXTVAL('spk_seq_13')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_10 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE LanguageVariant ALTER COLUMN langVariantUid SET DEFAULT NEXTVAL('spk_seq_10')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_30 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonAuth ALTER COLUMN personAuthUid SET DEFAULT NEXTVAL('spk_seq_30')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_45 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE Role ALTER COLUMN roleUid SET DEFAULT NEXTVAL('spk_seq_45')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_47 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE EntityRole ALTER COLUMN erUid SET DEFAULT NEXTVAL('spk_seq_47')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_43 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonGroup ALTER COLUMN groupUid SET DEFAULT NEXTVAL('spk_seq_43')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_44 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonGroupMember ALTER COLUMN groupMemberUid SET DEFAULT NEXTVAL('spk_seq_44')");
+
+                        //db.execSql("CREATE SEQUENCE spk_seq_52 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE SEQUENCE spk_seq_48 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonLocationJoin ALTER COLUMN personLocationUid SET DEFAULT NEXTVAL('spk_seq_48')");
+
+                        db.execSql("CREATE SEQUENCE spk_seq_50 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        //Update def of PK to link with Sequence
+                        db.execSql("ALTER TABLE PersonPicture ALTER COLUMN personPictureUid SET DEFAULT NEXTVAL('spk_seq_50')");
+
 
 
                         break;
