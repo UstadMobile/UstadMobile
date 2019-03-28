@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.contentscrapers.ddl;
 
-import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
@@ -58,10 +57,11 @@ public class DdlContentScraper {
     private final UmAppDatabase db;
     private final UmAppDatabase repository;
     private final File containerDir;
+    private final Language language;
     private Document doc;
-    ArrayList<ContentEntry> contentEntries;
+    ContentEntry contentEntry;
 
-    public DdlContentScraper(String url, File destination, File containerDir) throws MalformedURLException {
+    public DdlContentScraper(String url, File destination, File containerDir, String lang) throws MalformedURLException {
         this.urlString = url;
         this.destinationDirectory = destination;
         this.containerDir = containerDir;
@@ -74,19 +74,20 @@ public class DdlContentScraper {
         contentCategoryDao = repository.getContentCategoryDao();
         languageDao = repository.getLanguageDao();
         containerDao = repository.getContainerDao();
+        language = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, lang);
     }
 
 
     public static void main(String[] args) {
         if (args.length < 3) {
-            System.err.println("Usage: <ddl website url> <file destination><container destination><optional log{trace, debug, info, warn, error, fatal}>");
+            System.err.println("Usage: <ddl website url> <file destination><container destination><lang en or fa or ps><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
         UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         try {
-            new DdlContentScraper(args[0], new File(args[1]), new File(args[2])).scrapeContent();
+            new DdlContentScraper(args[0], new File(args[1]), new File(args[2]), args[3]).scrapeContent();
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Exception running scrapeContent ddl");
@@ -107,22 +108,22 @@ public class DdlContentScraper {
         Element imgTag = doc.selectFirst("aside img");
         String thumbnail = imgTag != null ? imgTag.attr("src") : EMPTY_STRING;
 
-        String lang = doc.select("html").attr("lang");
-        Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
         String description = doc.selectFirst("meta[name=description]").attr("content");
         Element authorTag = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p");
-        String author = authorTag != null ? authorTag.text() : EMPTY_STRING;
-        Element publisherTag = doc.selectFirst("article.resource-view-details h3:contains(Publisher) ~ p");
+        Element farsiAuthorTag = doc.selectFirst("article.resource-view-details h3:contains(نویسنده) ~ p");
+        Element pashtoAuthorTag = doc.selectFirst("article.resource-view-details h3:contains(لیکونکی) ~ p");
+        String author = authorTag != null ? authorTag.text() :
+                farsiAuthorTag != null ? farsiAuthorTag.text() :
+                        pashtoAuthorTag != null ? pashtoAuthorTag.text() : EMPTY_STRING;
+        Element publisherTag = doc.selectFirst("article.resource-view-details a[href*=publisher]");
         String publisher = publisherTag != null ? publisherTag.text() : EMPTY_STRING;
 
 
-        ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(urlString, doc.title(),
+        contentEntry = ContentScraperUtil.createOrUpdateContentEntry(urlString, doc.title(),
                 urlString, (publisher != null && !publisher.isEmpty() ? publisher : DDL),
-                LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null, description, true, author,
+                LICENSE_TYPE_CC_BY, language.getLangUid(), null, description, true, author,
                 thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-
-        contentEntries = new ArrayList<>();
         for (int downloadCount = 0; downloadCount < downloadList.size(); downloadCount++) {
 
             Element downloadItem = downloadList.get(downloadCount);
@@ -140,12 +141,9 @@ public class DdlContentScraper {
                 File resourceFile = new File(resourceFolder, FilenameUtils.getName(href));
                 String mimeType = Files.probeContentType(resourceFile.toPath());
 
-
                 boolean isUpdated = ContentScraperUtil.isFileModified(conn, resourceFolder, FilenameUtils.getName(href));
 
-                if (!ContentScraperUtil.fileHasContent(resourceFile)) {
-                    isUpdated = true;
-                }
+                isUpdated = true;
 
                 if (!isUpdated) {
                     continue;
@@ -156,7 +154,6 @@ public class DdlContentScraper {
                 ContentScraperUtil.insertContainer(containerDao, contentEntry, true, mimeType,
                         resourceFile.lastModified(), resourceFile, db, repository, containerDir);
 
-                contentEntries.add(contentEntry);
             } catch (Exception e) {
                 UMLogUtil.logError("Error downloading resource from url " + url + "/" + href);
                 if (modifiedFile != null) {
@@ -183,14 +180,14 @@ public class DdlContentScraper {
         return null;
     }
 
-    protected ArrayList<ContentEntry> getContentEntries() {
-        return contentEntries;
+    protected ContentEntry getContentEntries() {
+        return contentEntry;
     }
 
     public ArrayList<ContentEntry> getParentSubjectAreas() {
 
         ArrayList<ContentEntry> subjectAreaList = new ArrayList<>();
-        Elements subjectContainer = doc.select("article.resource-view-details h3:contains(Subject Area) ~ p");
+        Elements subjectContainer = doc.select("article.resource-view-details a[href*=subject_area]");
 
         Elements subjectList = subjectContainer.select("a");
         for (Element subject : subjectList) {
@@ -198,12 +195,8 @@ public class DdlContentScraper {
             String title = subject.attr("title");
             String href = subject.attr("href");
 
-            String lang = doc.select("html").attr("lang");
-            Language langEntity = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, LanguageCode.getByCode(lang).getName());
-
-
             ContentEntry contentEntry = ContentScraperUtil.createOrUpdateContentEntry(href, title, href,
-                    DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
+                    DDL, LICENSE_TYPE_CC_BY, language.getLangUid(), null,
                     EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                     EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -219,7 +212,7 @@ public class DdlContentScraper {
 
 
         ArrayList<ContentCategory> categoryRelations = new ArrayList<>();
-        Elements subjectContainer = doc.select("article.resource-view-details h3:contains(Resource Level) ~ p");
+        Elements subjectContainer = doc.select("article.resource-view-details a[href*=level]");
 
         ContentCategorySchema ddlSchema = ContentScraperUtil.insertOrUpdateSchema(categorySchemaDao, "DDL Resource Level", "ddl/resource-level/");
 

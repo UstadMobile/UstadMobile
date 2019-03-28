@@ -71,7 +71,8 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     public static final String NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype";
 
     public ContentEntryDetailPresenter(Object context, Hashtable arguments,
-                                       ContentEntryDetailView viewContract, LocalAvailabilityMonitor monitor) {
+                                       ContentEntryDetailView viewContract,
+                                       LocalAvailabilityMonitor monitor) {
         super(context, arguments, viewContract);
         this.monitor = monitor;
         this.impl = UstadMobileSystemImpl.getInstance();
@@ -230,8 +231,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                                 Collections.singletonList(containerUid));
                     }
 
-                    Set<Long> monitorSet = new HashSet<>();
+                    Set<Long> monitorSet = view.getAllKnowAvailabilityStatus();
                     monitorSet.add(localNetworkNode != null ? containerUid : 0L);
+
                     handleLocalAvailabilityStatus(monitorSet);
                 }
 

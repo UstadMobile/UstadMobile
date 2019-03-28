@@ -1,12 +1,9 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.google.gson.Gson;
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.impl.UmAccountManager;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
@@ -30,17 +27,11 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  *
  * @author kileha3
  */
-public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
+public abstract class BleGattServer {
 
     private NetworkManagerBle networkManager;
 
-    private CountDownLatch mLatch = new CountDownLatch(1);
-
-    private String message = null;
-
     private Object context;
-
-    static final int GROUP_CREATION_TIMEOUT = 5;
 
     public BleGattServer (Object context){
         this.context = context;
@@ -82,31 +73,16 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
                     entryStatusResponse.add(foundLocalContainerUid != null
                             && foundLocalContainerUid != 0 ? 1L: 0L);
                 }
-                return new BleMessage(ENTRY_STATUS_RESPONSE,
+                return new BleMessage(ENTRY_STATUS_RESPONSE, (byte)42,
                         bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_REQUEST:
-                networkManager.handleWiFiDirectGroupChangeRequest(this);
-                networkManager.createWifiDirectGroup();
-                try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
-                catch(InterruptedException e) {
-                    mLatch.countDown();
-                    e.printStackTrace();
-                }
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
+                WiFiDirectGroupBle group = networkManager.awaitWifiDirectGroupReady(5000,
+                        TimeUnit.MILLISECONDS);
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,
+                        networkManager.getWifiGroupInfoAsBytes(group));
             default: return null;
         }
     }
 
-    @Override
-    public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        group.setEndpoint("http://192.168.49.1:"+ networkManager.getHttpd().getListeningPort()+"/");
-        this.message = new Gson().toJson(group);
-        mLatch.countDown();
-    }
-
-    @Override
-    public void groupRemoved(boolean successful, Exception err) {
-
-    }
 }

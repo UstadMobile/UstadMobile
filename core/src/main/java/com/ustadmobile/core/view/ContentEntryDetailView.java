@@ -4,6 +4,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 public interface ContentEntryDetailView extends UstadView, ViewWithErrorNotifier {
 
@@ -51,5 +52,7 @@ public interface ContentEntryDetailView extends UstadView, ViewWithErrorNotifier
     void setDownloadButtonClickableListener(boolean isDownloadComplete);
 
     void showDownloadOptionsDialog(Hashtable hashtable);
+
+    Set<Long> getAllKnowAvailabilityStatus();
 
 }

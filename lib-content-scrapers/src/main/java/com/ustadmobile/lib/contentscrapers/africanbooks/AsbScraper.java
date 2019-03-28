@@ -311,8 +311,6 @@ public class AsbScraper {
 
                 boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, bookObj.date);
 
-                isUpdated = true;
-
                 if (!isUpdated) {
                     continue;
                 }

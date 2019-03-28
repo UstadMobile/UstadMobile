@@ -130,7 +130,7 @@ public class IndexPrathamContentScraper {
 
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        downloadPrathamContentList(generatePrathamUrl(String.valueOf(1)), cookie, destinationDir);
+        downloadPrathamContentList(generatePrathamUrl(String.valueOf(288)), cookie, destinationDir);
 
     }
 
