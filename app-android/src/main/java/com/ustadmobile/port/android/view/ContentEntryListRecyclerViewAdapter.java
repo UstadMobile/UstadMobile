@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -21,7 +24,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,11 +45,14 @@ public class ContentEntryListRecyclerViewAdapter extends
 
     private NetworkManagerAndroidBle managerAndroidBle;
 
-    ContentEntryListRecyclerViewAdapter(AdapterViewListener listener,
+    private FragmentActivity activity;
+
+    ContentEntryListRecyclerViewAdapter(FragmentActivity activity, AdapterViewListener listener,
                                         LocalAvailabilityMonitor monitor) {
         super(DIFF_CALLBACK);
         this.listener = listener;
         this.monitor = monitor;
+        this.activity = activity;
         viewHolderWeakHashMap = new WeakHashMap<>();
     }
 
@@ -61,7 +66,9 @@ public class ContentEntryListRecyclerViewAdapter extends
         List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
-            viewHolder.updateLocallyAvailabilityStatus(available);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Entry status check received  " + available);
+            activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
         }
     }
 
@@ -120,13 +127,15 @@ public class ContentEntryListRecyclerViewAdapter extends
 
             boolean available = false;
             if(managerAndroidBle != null)
-                available = managerAndroidBle.getLocalAvailabilityStatus(
+                available = managerAndroidBle.isEntryLocallyAvailable(
                         entry.getMostRecentContainer());
 
-            holder.updateLocallyAvailabilityStatus(available);
+            if(entry.isLeaf()){
+                holder.updateLocallyAvailabilityStatus(available);
+            }
 
             holder.setContainerUid(entry.getMostRecentContainer());
-            viewHolderWeakHashMap.put(entry.hashCode(),holder);
+
             holder.getView().setTag(entry.getContentEntryUid());
             holder.getEntryTitle().setText(entry.getTitle());
             holder.getEntryDescription().setText(entry.getDescription());
@@ -169,9 +178,6 @@ public class ContentEntryListRecyclerViewAdapter extends
                 holder.getDownloadView().setImageResource(R.drawable.ic_file_download_black_24dp);
             }
 
-            int viewVisibility = showLocallyAvailabilityViews ? View.VISIBLE: View.GONE;
-            holder.getAvailabilityIcon().setVisibility(viewVisibility);
-            holder.getAvailabilityStatus().setVisibility(viewVisibility);
 
             ImageView iconView = holder.getIconView();
             int iconFlag = entry.getContentTypeFlag();
@@ -199,16 +205,28 @@ public class ContentEntryListRecyclerViewAdapter extends
                 iconView.setVisibility(View.VISIBLE);
             }
 
+            int viewVisibility = showLocallyAvailabilityViews && entry.isLeaf()
+                    ? View.VISIBLE: View.GONE;
+            holder.getAvailabilityIcon().setVisibility(viewVisibility);
+            holder.getAvailabilityStatus().setVisibility(viewVisibility);
+
+            //add as a reference only if is a leaf entry
+            if(entry.isLeaf()){
+                viewHolderWeakHashMap.put(entry.hashCode(),holder);
+            }
+
+            List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
+            if(!containerUidList.isEmpty()){
+                containerUidsToMonitor.addAll(containerUidList);
+                monitor.startMonitoringAvailability(monitor,containerUidList);
+            }
 
             holder.getDownloadView().getImageResource().setContentDescription(contentDescription);
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
         }
 
-        List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
-        if(!containerUidList.isEmpty()){
-            monitor.startMonitoringAvailability(monitor,containerUidList);
-        }
+
     }
 
     /**
@@ -220,9 +238,10 @@ public class ContentEntryListRecyclerViewAdapter extends
         List<Long> uidsToMonitor = new ArrayList<>();
         for (ContentEntryWithStatusAndMostRecentContainerUid entry : currentDisplayedEntryList) {
 
-            boolean canBeMonitored = entry.getContentEntryStatus() == null ||
-                    entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE
-                    && !containerUidsToMonitor.contains(entry.getMostRecentContainer());
+            boolean canBeMonitored = (entry.getContentEntryStatus() == null ||
+                    entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE)
+                    && !containerUidsToMonitor.contains(entry.getMostRecentContainer())
+                    && entry.isLeaf();
             if (canBeMonitored) {
                 uidsToMonitor.add(entry.getMostRecentContainer());
             }

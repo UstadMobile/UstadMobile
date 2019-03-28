@@ -272,6 +272,11 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
+    public Set<Long> getAllKnowAvailabilityStatus() {
+        return managerAndroidBle.getLocallyAvailableContainerUids();
+    }
+
+    @Override
     public void selectContentEntryOfLanguage(long uid) {
         entryDetailPresenter.handleClickTranslatedEntry(uid);
     }

@@ -373,7 +373,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     networkManager.wifiP2pChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
-                    UstadMobileSystemImpl.l(UMLog.ERROR,693,
+                    UstadMobileSystemImpl.l(UMLog.INFO,693,
                             "Group removed successfully");
                     wiFiDirectGroup.set(null);
                     notifyStateChanged(STATE_STOPPED);

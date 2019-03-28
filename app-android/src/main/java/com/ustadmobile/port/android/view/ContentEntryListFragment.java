@@ -146,7 +146,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void setContentEntryProvider(UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> entryProvider) {
-        recyclerAdapter = new ContentEntryListRecyclerViewAdapter(this, this);
+        recyclerAdapter = new ContentEntryListRecyclerViewAdapter(getActivity(),this, this);
         DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid> factory =
                 (DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid>) entryProvider.getProvider();
         LiveData<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> data =
@@ -209,16 +209,18 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> containerUidsToMonitor) {
-//        if(managerAndroidBle != null){
-//            managerAndroidBle.startMonitoringAvailability(monitor,containerUidsToMonitor);
-//        }
+         new Thread(() -> {
+             if(managerAndroidBle != null){
+                 managerAndroidBle.startMonitoringAvailability(monitor,containerUidsToMonitor);
+             }
+         }).start();
     }
 
     @Override
     public void stopMonitoringAvailability(Object monitor) {
-//        if(managerAndroidBle != null){
-//            managerAndroidBle.stopMonitoringAvailability(monitor);
-//        }
+        if(managerAndroidBle != null){
+            managerAndroidBle.stopMonitoringAvailability(monitor);
+        }
     }
 
     @Override

@@ -25,7 +25,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -40,6 +39,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -133,6 +133,14 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     public static final int DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000;
 
+    private Map<String, Long> knownPeerNodes = new HashMap<>();
+
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
+
+    private UmAppDatabase umAppDatabase;
+
+    private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
+
     /**
      * Constructor to be used when creating new instance
      * @param context Platform specific application context
@@ -140,10 +148,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     public NetworkManagerBle(Object context) {
         this.mContext = context;
     }
-
-    private UmAppDatabase umAppDatabase;
-
-    private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
 
     /**
      * Constructor to be used for testing purpose (mocks)
@@ -174,6 +178,18 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     };
 
+    private Runnable nodeLastSeenTrackerTask = new Runnable() {
+        @Override
+        public void run() {
+            if(knownPeerNodes.size() > 0){
+                Map<String , Long> nodeMap = new HashMap<>(knownPeerNodes);
+                umAppDatabase.getNetworkNodeDao().updateNodeLastSeen(nodeMap);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Updating "
+                        + knownPeerNodes.size() + " nodes from the Db");
+            }
+        }
+    };
+
     /**
      * Start web server, advertising and discovery
      */
@@ -182,6 +198,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
+        scheduledExecutorService.scheduleAtFixedRate(nodeLastSeenTrackerTask,0,10,TimeUnit.SECONDS);
     }
 
     @Override
@@ -217,30 +234,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public abstract boolean canDeviceAdvertise();
 
-    private void handleNode(NetworkNodeDao networkNodeDao,
-                            NetworkNode node , long updateTime){
-        try{
-            List<Long> entryUidsToMonitor =
-                    new ArrayList<>(getAllUidsToBeMonitored());
-            if(!isStopMonitoring){
-                if(entryUidsToMonitor.size() > 0){
-                    BleEntryStatusTask entryStatusTask =
-                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
-                    entryStatusTasks.add(entryStatusTask);
-                    entryStatusTaskExecutorService.execute(entryStatusTask);
-                }
-                node.setNetworkNodeLastUpdated(updateTime);
-                networkNodeDao.insert(node);
-                UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                        "New node added to the database , address = "
-                                +node.getBluetoothMacAddress()
-                                + (entryUidsToMonitor.size() > 0 ? " monitor task created"
-                                : " no entriries to be monitored"));
-            }
-        }catch (RejectedExecutionException e){
-            e.printStackTrace();
-        }
-    }
 
     /**
      * This should be called by the platform implementation when BLE discovers a nearby device
@@ -248,24 +241,48 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     protected void handleNodeDiscovered(NetworkNode node) {
         synchronized (knownNodesLock){
-            long updateTime = Calendar.getInstance().getTimeInMillis();
 
             NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
-            networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),
-                    updateTime, new UmCallback<Integer>() {
-                        @Override
-                        public void onSuccess(Integer result) {
-                            if(result == 0){
-                                handleNode(networkNodeDao,node,updateTime);
+
+            if(!knownPeerNodes.containsKey(node.getBluetoothMacAddress())){
+
+                node.setLastUpdateTimeStamp(System.currentTimeMillis());
+
+                networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),
+                        node.getLastUpdateTimeStamp(), new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer result) {
+                        knownPeerNodes.put(node.getBluetoothMacAddress(),
+                                node.getLastUpdateTimeStamp());
+                        if(result == 0){
+                            networkNodeDao.insertAsync(node, null);
+                            UstadMobileSystemImpl.l(UMLog.DEBUG,694, "New node with address "
+                                    + node.getBluetoothMacAddress() + " found, added to the Db");
+
+                            List<Long> entryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
+
+                            if(!isStopMonitoring){
+                                if(entryUidsToMonitor.size() > 0){
+                                    BleEntryStatusTask entryStatusTask =
+                                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
+                                    entryStatusTasks.add(entryStatusTask);
+                                    entryStatusTaskExecutorService.execute(entryStatusTask);
+                                }
                             }
                         }
+                    }
 
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                    "NetworkNode updated failed",new Exception(exception));
-                        }
-            });
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
+            }else{
+                knownPeerNodes.put(node.getBluetoothMacAddress(),System.currentTimeMillis());
+                UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Existing node with address "
+                        + node.getBluetoothMacAddress() + " found, waiting for the Db update");
+            }
         }
     }
 
@@ -470,7 +487,9 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
 
     public void addLocalAvailabilityListener(LocalAvailabilityListener listener) {
-        localAvailabilityListeners.add(listener);
+        if(!localAvailabilityListeners.contains(listener)){
+            localAvailabilityListeners.add(listener);
+        }
     }
 
     public void removeLocalAvailabilityListener(LocalAvailabilityListener listener) {
@@ -504,6 +523,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
 
         fireLocalAvailabilityChanged();
+    }
+
+    //testing purpose
+    public void clearHistories(){
+        locallyAvailableContainerUids.clear();
+        knownPeerNodes.clear();
     }
 
     /**
@@ -552,6 +577,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                     "Bad node counter exceeded threshold (5), removing node with address "
                             +bluetoothAddress + " from the list");
             knownBadNodeTrackList.remove(bluetoothAddress);
+            knownPeerNodes.remove(bluetoothAddress);
             umAppDatabase.getNetworkNodeDao().deleteByBluetoothAddress(bluetoothAddress);
 
             UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Node with address "
@@ -568,8 +594,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         return knownBadNodeTrackList.get(bluetoothAddress);
     }
 
-    public boolean getLocalAvailabilityStatus(long containerUid){
+    public boolean isEntryLocallyAvailable(long containerUid){
         return locallyAvailableContainerUids.contains(containerUid);
+    }
+
+    public Set<Long> getLocallyAvailableContainerUids(){
+        return locallyAvailableContainerUids;
     }
 
 
