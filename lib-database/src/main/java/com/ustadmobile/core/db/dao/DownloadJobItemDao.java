@@ -80,6 +80,9 @@ public abstract class DownloadJobItemDao {
     @UmUpdate
     public abstract int update(DownloadJob downloadJob);
 
+    @UmUpdate
+    public abstract void updateList(List<DownloadJobItem> downloadJobList);
+
     /**
      * Insert a single DownloadJobItem
      *

@@ -154,9 +154,26 @@ public class TestDownloadJobItemTracker {
                 lastParentEntryVal.get().getDownloadLength());
     }
 
-    public void givenParentDownloadJobItemTracked_whenChildUpdatePosted_parentOnChangeShouldBeCalled() {
+    @Test
+    public void givenDownloadJobsAlreadyInDb_whenChildIsTrackedAndUpdatePosted_parentOnChangeShouldBeCalled() {
+        DownloadJobItemWithDownloadSetItem parentItem = new DownloadJobItemWithDownloadSetItem(
+                parentEntryDownloadSetItem, 1000);
+        parentItem.setDjiUid(db.getDownloadJobItemDao().insert(parentItem));
+        DownloadJobItemWithDownloadSetItem childItem = new DownloadJobItemWithDownloadSetItem(
+                subLeafDownloadSetItem, 1000);
+        childItem.setDjiUid(db.getDownloadJobItemDao().insert(childItem));
+
+
 
     }
+
+    @Test
+    public void givenNoMoreObserversLeft_whenCleanupIsCalled_updatesAreCommittedAndTrackerIsUnloadedFromMemory() {
+        //should be unloaded when there are no trackers of the item or any child item
+
+    }
+
+
 
 
 }

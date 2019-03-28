@@ -7,10 +7,13 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -31,17 +34,42 @@ public class DownloadJobItemTracker {
 
     private Map<Long, TrackedContentEntry> downloadJobItemUidToTrackedEntryMap = new HashMap<>();
 
+    private AtomicReference<Set<DownloadJobItemWithDownloadSetItem>> updatedItems =
+            new AtomicReference<>(new HashSet<>());
+
     static class TrackedContentEntry {
 
         private AtomicReference<DownloadJobItemWithDownloadSetItem> downloadJobItem =
                 new AtomicReference<>();
 
+        private AtomicBoolean changed = new AtomicBoolean(false);
+
         private TrackedContentEntry parent;
+
+        private List<TrackedContentEntry> children;
 
         private List<UmObserver<DownloadJobItemWithDownloadSetItem>> observers = new ArrayList<>();
 
-        TrackedContentEntry(DownloadJobItemWithDownloadSetItem downloadJobItem) {
+        private final AtomicReference<Set<DownloadJobItemWithDownloadSetItem>> updatedItemsRef;
+
+        TrackedContentEntry(DownloadJobItemWithDownloadSetItem downloadJobItem,
+                            AtomicReference<Set<DownloadJobItemWithDownloadSetItem>> updatedItemsRef) {
             this.downloadJobItem.set(downloadJobItem);
+            this.updatedItemsRef = updatedItemsRef;
+        }
+
+        void updateDownloadJob(DownloadJobItemWithDownloadSetItem newItem) {
+            updatedItemsRef.get().add(newItem);
+            downloadJobItem.set(newItem);
+            fireOnChanged();
+        }
+
+        void updateFromDelta(DownloadJobItem delta) {
+            DownloadJobItemWithDownloadSetItem item = downloadJobItem.get();
+            item.setDownloadedSoFar(item.getDownloadedSoFar() + delta.getDownloadedSoFar());
+            item.setDownloadLength(item.getDownloadLength() + delta.getDownloadLength());
+            updatedItemsRef.get().add(item);
+            fireOnChanged();
         }
 
         void addObserver(UmObserver<DownloadJobItemWithDownloadSetItem> observer) {
@@ -55,6 +83,28 @@ public class DownloadJobItemTracker {
             for(UmObserver<DownloadJobItemWithDownloadSetItem> observer : observersToNotify) {
                 observer.onChanged(downloadJobItem.get());
             }
+        }
+
+        private boolean hasActiveObservers() {
+            if(!observers.isEmpty())
+                return true;
+
+            List<TrackedContentEntry> childEntries = new ArrayList<>(children);
+            HashSet<Long> checkedIds = new HashSet<>();
+            do {
+                for(TrackedContentEntry entry : childEntries) {
+                    if(!entry.observers.isEmpty())
+                        return true;
+
+                    checkedIds.add(
+                            entry.downloadJobItem.get().getDownloadSetItem().getDsiContentEntryUid());
+                }
+
+
+
+            }while(!childEntries.isEmpty());
+
+            return false;
         }
 
     }
@@ -88,7 +138,7 @@ public class DownloadJobItemTracker {
                     trackedEntry.addObserver(observer);
                 return;
             }else {
-                trackedEntry = new TrackedContentEntry(downloadJobItem);
+                trackedEntry = new TrackedContentEntry(downloadJobItem, updatedItems);
                 contentEntryUidToTrackedEntryMap.put(currentContentEntryUid, trackedEntry);
 
                 //TODO: handle when downloadJobItem is set after we load the trackedentry
@@ -119,7 +169,17 @@ public class DownloadJobItemTracker {
         //commit their state to the database and remove them from memory
     }
 
+    /**
+     *
+     * @param update
+     */
     public void postUpdate(DownloadJobItemWithDownloadSetItem update) {
+        /*
+         * We rely on calculating the delta of download progress etc. between the object reference
+         * we have, and the one we last knew about. For that reason, we need to make a new object
+         * for each update.
+         */
+        final DownloadJobItemWithDownloadSetItem newItem = new DownloadJobItemWithDownloadSetItem(update);
         executor.execute(() -> {
             TrackedContentEntry entry = downloadJobItemUidToTrackedEntryMap.get(update.getDjiUid());
             if(entry == null) {
@@ -127,25 +187,17 @@ public class DownloadJobItemTracker {
             }
 
             DownloadJobItem lastItem = entry.downloadJobItem.get();
-            long deltaDownloaded = update.getDownloadedSoFar() -
-                    (lastItem != null ? lastItem.getDownloadedSoFar() : 0);
-            long deltaDownloadLength = update.getDownloadLength() -
-                    (lastItem != null ? lastItem.getDownloadLength() : 0);
+            DownloadJobItem deltaItem = new DownloadJobItem();
+            deltaItem.setDownloadedSoFar(newItem.getDownloadedSoFar() -
+                    (lastItem != null ? lastItem.getDownloadedSoFar() : 0));
+            deltaItem.setDownloadLength(newItem.getDownloadLength() -
+                    (lastItem != null ? lastItem.getDownloadLength() : 0));
 
-            entry.downloadJobItem.set(update);
-            entry.fireOnChanged();
-
+            entry.updateDownloadJob(newItem);
             TrackedContentEntry entryToUpdate = entry;
-            while((entryToUpdate = entryToUpdate.parent) != null){
-                DownloadJobItem downloadJobItem = entryToUpdate.downloadJobItem.get();
-                if(downloadJobItem != null) {
-                    downloadJobItem.setDownloadedSoFar(
-                            downloadJobItem.getDownloadedSoFar() + deltaDownloaded);
-                    downloadJobItem.setDownloadLength(
-                            downloadJobItem.getDownloadLength() + deltaDownloadLength);
-                    entryToUpdate.fireOnChanged();
-                }
 
+            while((entryToUpdate = entryToUpdate.parent) != null){
+                entryToUpdate.updateFromDelta(deltaItem);
                 entryToUpdate = entryToUpdate.parent;
             }
         });
@@ -165,5 +217,12 @@ public class DownloadJobItemTracker {
             loadTrackedEntry(newItem.getDownloadSetItem().getDsiContentEntryUid(), null);
             postUpdate(newItem);
         });
+    }
+
+    public void commit() {
+        Set<DownloadJobItemWithDownloadSetItem> itemsToCommit = updatedItems.getAndSet(new HashSet<>());
+        List<DownloadJobItem> itemsToCommitList = new ArrayList<>(itemsToCommit.size());
+        itemsToCommitList.addAll(itemsToCommit);
+        db.getDownloadJobItemDao().updateList(itemsToCommitList);
     }
 }
