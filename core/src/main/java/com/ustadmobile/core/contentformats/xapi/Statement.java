@@ -30,6 +30,8 @@ public class Statement {
 
     private List<Attachment> attachments;
 
+    private String objectType;
+
     public Actor getActor() {
         return actor;
     }
@@ -129,5 +131,13 @@ public class Statement {
     public static Statement loadObject(String json) {
 
         return new Gson().fromJson(json, Statement.class);
+    }
+
+    public String getObjectType() {
+        return objectType;
+    }
+
+    public void setObjectType(String objectType) {
+        this.objectType = objectType;
     }
 }

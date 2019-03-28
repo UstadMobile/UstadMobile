@@ -14,8 +14,6 @@ public class XContext {
 
     private String revision;
 
-    private Actor authority;
-
     private Actor team;
 
     private XObject statement;
@@ -62,14 +60,6 @@ public class XContext {
 
     public void setRevision(String revision) {
         this.revision = revision;
-    }
-
-    public Actor getAuthority() {
-        return authority;
-    }
-
-    public void setAuthority(Actor authority) {
-        this.authority = authority;
     }
 
     public XObject getStatement() {
