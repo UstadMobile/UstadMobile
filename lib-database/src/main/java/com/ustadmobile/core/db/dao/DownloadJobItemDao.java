@@ -1,18 +1,28 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.JobStatus;
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
+import com.ustadmobile.lib.db.entities.ContainerWithContentEntry;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
+import com.ustadmobile.lib.db.entities.DownloadSetItem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * DAO for the DownloadJobItem class
@@ -60,6 +70,59 @@ public abstract class DownloadJobItemDao {
 
         public void setContentEntryUid(long contentEntryUid) {
             this.contentEntryUid = contentEntryUid;
+        }
+    }
+
+    public static class DownloadJobItemToBeCreated2 {
+
+        long cepcjUid;
+
+        long contentEntryUid;
+
+        long containerUid;
+
+        long fileSize;
+
+        long parentEntryUid;
+
+        public long getContentEntryUid() {
+            return contentEntryUid;
+        }
+
+        public void setContentEntryUid(long contentEntryUid) {
+            this.contentEntryUid = contentEntryUid;
+        }
+
+        public long getContainerUid() {
+            return containerUid;
+        }
+
+        public void setContainerUid(long containerUid) {
+            this.containerUid = containerUid;
+        }
+
+        public long getFileSize() {
+            return fileSize;
+        }
+
+        public void setFileSize(long fileSize) {
+            this.fileSize = fileSize;
+        }
+
+        public long getParentEntryUid() {
+            return parentEntryUid;
+        }
+
+        public void setParentEntryUid(long parentEntryUid) {
+            this.parentEntryUid = parentEntryUid;
+        }
+
+        public long getCepcjUid() {
+            return cepcjUid;
+        }
+
+        public void setCepcjUid(long cepcjUid) {
+            this.cepcjUid = cepcjUid;
         }
     }
 
@@ -186,4 +249,63 @@ public abstract class DownloadJobItemDao {
             "WHERE DownloadSetItem.dsiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
     public abstract DownloadJobItemWithDownloadSetItem findByContentEntryUid(long contentEntryUid);
+
+
+    private DownloadJobItem generateDjiFromContainerWithContentEntry(
+            ContainerWithContentEntry containerWithContentEntry) {
+        return new DownloadJobItem();
+    }
+
+    @UmQuery("SELECT ")
+    public abstract List<DownloadJobItemToBeCreated2> findByParentContentEntryUuids(
+            List<Long> parentContentEntryUids);
+
+    @UmInsert
+    public abstract void insertDownloadJobItemParentChildJoin(DownloadJobItemParentChildJoin dj);
+
+
+    @UmTransaction
+    public void createJobItemsRecursively(long rootContentEntryUid, UmAppDatabase repo) {
+        List<DownloadJobItemToBeCreated2> childItemsToCreate;
+        DownloadJobItem rootDownlaodItem = new DownloadJobItem();
+        rootDownlaodItem.setDjiUid(insert(rootDownlaodItem));
+
+        Map<Long, Long> contentEntryUidToDjiUidMap = new HashMap<>();
+        List<Long> parentUids = new ArrayList<>();
+        parentUids.add(rootContentEntryUid);
+        contentEntryUidToDjiUidMap.put(rootContentEntryUid, rootDownlaodItem.getDjiUid());
+
+        List<DownloadJobItem> downloadJobItems = new ArrayList<>();
+        HashSet<Long> createdJoinCepjUids = new HashSet<>();
+
+        do {
+            childItemsToCreate = findByParentContentEntryUuids(parentUids);
+            parentUids.clear();
+
+            for(DownloadJobItemToBeCreated2 child : childItemsToCreate){
+                if(!contentEntryUidToDjiUidMap.containsKey(child.getContentEntryUid())) {
+                    DownloadJobItem newItem = new DownloadJobItem();
+                    //TODO: fill in the item
+                    newItem.setDjiUid(insert(newItem));
+
+                    contentEntryUidToDjiUidMap.put(child.getContentEntryUid(),
+                            newItem.getDjiUid());
+
+                    if(newItem.getDjiContainerUid() != 0)
+                        parentUids.add(child.getContentEntryUid());
+
+                    newItem.setDjiUid(insert(newItem));
+                }
+
+                if(!createdJoinCepjUids.contains(child.getCepcjUid())) {
+                    insertDownloadJobItemParentChildJoin(new DownloadJobItemParentChildJoin(
+                        contentEntryUidToDjiUidMap.get(child.getParentEntryUid()),
+                            contentEntryUidToDjiUidMap.get(child.getContentEntryUid()),
+                            child.getCepcjUid()));
+                    createdJoinCepjUids.add(child.getCepcjUid());
+                }
+            }
+        }while(!parentUids.isEmpty());
+    }
+
 }

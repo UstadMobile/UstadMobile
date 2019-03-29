@@ -101,7 +101,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 18, entities = {
+@UmDatabase(version = 20, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -615,6 +615,22 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("DROP TABLE ContentEntryFile");
                         db.execSql("DROP TABLE ContentEntryFileStatus");
                         db.execSql("DROP TABLE ContentEntryContentEntryFileJoin");
+                        break;
+
+
+                }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(18,20) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid BIGINT DEFAULT 0");
                         break;
 
 

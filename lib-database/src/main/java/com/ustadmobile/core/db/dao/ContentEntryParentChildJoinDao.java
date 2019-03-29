@@ -19,6 +19,8 @@ public abstract class ContentEntryParentChildJoinDao
     public static class ContentEntryParentChildJoinSummary {
         private boolean leaf;
 
+        private long parentContentEntryUid;
+
         private long childContentEntryUid;
 
         public boolean isLeaf() {
@@ -35,6 +37,14 @@ public abstract class ContentEntryParentChildJoinDao
 
         public void setChildContentEntryUid(long childContentEntryUid) {
             this.childContentEntryUid = childContentEntryUid;
+        }
+
+        public long getParentContentEntryUid() {
+            return parentContentEntryUid;
+        }
+
+        public void setParentContentEntryUid(long parentContentEntryUid) {
+            this.parentContentEntryUid = parentContentEntryUid;
         }
     }
 

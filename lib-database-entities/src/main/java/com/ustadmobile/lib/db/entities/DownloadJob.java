@@ -27,6 +27,8 @@ public class DownloadJob {
 
     private long bytesDownloadedSoFar;
 
+    private long djRootContentEntryUid;
+
     /**
      * Status as per flags on NetworkTask
      */
@@ -106,5 +108,13 @@ public class DownloadJob {
 
     public void setBytesDownloadedSoFar(long bytesDownloadedSoFar) {
         this.bytesDownloadedSoFar = bytesDownloadedSoFar;
+    }
+
+    public long getDjRootContentEntryUid() {
+        return djRootContentEntryUid;
+    }
+
+    public void setDjRootContentEntryUid(long djRootContentEntryUid) {
+        this.djRootContentEntryUid = djRootContentEntryUid;
     }
 }
