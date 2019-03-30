@@ -257,7 +257,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("ALTER TABLE SyncStatus RENAME TO temp_SyncStatus");
                         db.execSql("CREATE TABLE IF NOT EXISTS `SyncStatus` (`tableId` INTEGER NOT NULL, `nextChangeSeqNum` INTEGER NOT NULL, `syncedToMasterChangeNum` INTEGER NOT NULL, `syncedToLocalChangeSeqNum` INTEGER NOT NULL, PRIMARY KEY(`tableId`))");
 
-                        db.execSql("INSERT INTO SyncStatus SELECT tableId, localChangeSeqNum, " +
+                        db.execSql("INSERT INTO SyncStatus SELECT tableId, masterChangeSeqNum, " +
                                 "syncedToMasterChangeNum, syncedToLocalChangeSeqNum FROM temp_SyncStatus");
                         db.execSql("DROP TABLE temp_SyncStatus");
                         db.execSql("COMMIT");
@@ -976,10 +976,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         masterChangeSeqNum removed (always 1)
                         localChangeSeqNum renamed to nextChangeSeqNum
                          */
-                        db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT");
-                        db.execSql("ALTER TABLE SyncStatus DROP COLUMN masterchangeseqnum");
+                        //db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT");
+                        db.execSql("ALTER TABLE SyncStatus RENAME COLUMN masterchangeseqnum TO nextChangeSeqNum");
                         db.execSql("ALTER TABLE SyncStatus DROP COLUMN localchangeseqnum ");
-                        db.execSql("DELETE FROM SyncStatus");
+                        //db.execSql("DELETE FROM SyncStatus");
 
                         /*
                         SyncablePrimaryKey
@@ -1067,6 +1067,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestion (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_22 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestion  ( selQuestionUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_22') ,  questionText  TEXT,  selQuestionSelQuestionSetUid  BIGINT,  questionIndex  INTEGER,  assignToAllClasses  BOOL,  multiNominations  BOOL,  questionType  INTEGER,  questionActive  BOOL,  selQuestionMasterChangeSeqNum  BIGINT,  selQuestionLocalChangeSeqNum  BIGINT,  selQuestionLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 22");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (22, 1, 0, 0)");
                         //END Create SelQuestion (PostgreSQL)
 
@@ -1076,6 +1077,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestionOption (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_52 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionOption  ( selQuestionOptionUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_52') ,  optionText  TEXT,  selQuestionOptionQuestionUid  BIGINT,  selQuestionOptionMasterChangeSeqNum  BIGINT,  selQuestionOptionLocalChangeSeqNum  BIGINT,  selQuestionOptionLastChangedBy  INTEGER,  optionActive  BOOL)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 52");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (52, 1, 0, 0)");
                         //END Create SelQuestionOption (PostgreSQL)
 
@@ -1085,6 +1087,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestionResponse (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_23 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionResponse  ( selQuestionResponseUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_23') ,  selQuestionResponseSelQuestionSetResponseUid  BIGINT,  selQuestionResponseSelQuestionUid  BIGINT,  selQuestionResponseMasterChangeSeqNum  BIGINT,  selQuestionResponseLocalChangeSeqNum  BIGINT,  selQuestionResponseLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 23");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (23, 1, 0, 0)");
                         //END Create SelQuestionResponse (PostgreSQL)
 
@@ -1094,6 +1097,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestionResponseNomination (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_24 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionResponseNomination  ( selQuestionResponseNominationUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_24') ,  selQuestionResponseNominationClazzMemberUid  BIGINT,  selQuestionResponseNominationSelQuestionResponseUId  BIGINT,  nominationActive  BOOL,  selQuestionResponseNominationMasterChangeSeqNum  BIGINT,  selQuestionResponseNominationLocalChangeSeqNum  BIGINT,  selQuestionResponseNominationLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 24");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (24, 1, 0, 0)");
                         //END Create SelQuestionResponseNomination (PostgreSQL)
 
@@ -1103,6 +1107,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestionSet (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_25 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionSet  ( selQuestionSetUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_25') ,  title  TEXT,  selQuestionSetMasterChangeSeqNum  BIGINT,  selQuestionSetLocalChangeSeqNum  BIGINT,  selQuestionSetLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 25");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (25, 1, 0, 0)");
                         //END Create SelQuestionSet (PostgreSQL)
 
@@ -1112,6 +1117,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestionSetRecognition (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_26 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionSetRecognition  ( selQuestionSetRecognitionUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_26') ,  selQuestionSetRecognitionSelQuestionSetResponseUid  BIGINT,  selQuestionSetRecognitionClazzMemberUid  BIGINT,  selQuestionSetRecognitionRecognized  BOOL,  selQuestionSetRecognitionMasterChangeSeqNum  BIGINT,  selQuestionSetRecognitionLocalChangeSeqNum  BIGINT,  selQuestionSetRecognitionLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 26");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (26, 1, 0, 0)");
                         //END Create SelQuestionSetRecognition (PostgreSQL)
 
@@ -1121,6 +1127,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create SelQuestionSetResponse (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_27 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  SelQuestionSetResponse  ( selQuestionSetResposeUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_27') ,  selQuestionSetResponseSelQuestionSetUid  BIGINT,  selQuestionSetResponseClazzMemberUid  BIGINT,  selQuestionSetResponseStartTime  BIGINT,  selQuestionSetResponseFinishTime  BIGINT,  selQuestionSetResponseRecognitionPercentage  FLOAT,  selQuestionSetResponseMasterChangeSeqNum  BIGINT,  selQuestionSetResponseLocalChangeSeqNum  BIGINT,  selQuestionSetResponseLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 27");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (27, 1, 0, 0)");
                         //END Create SelQuestionSetResponse (PostgreSQL)
 
@@ -1193,6 +1200,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContentEntry (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_42 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntry  ( contentEntryUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_42') ,  title  TEXT,  description  TEXT,  entryId  TEXT,  author  TEXT,  publisher  TEXT,  licenseType  INTEGER,  licenseName  TEXT,  licenseUrl  TEXT,  sourceUrl  TEXT,  thumbnailUrl  TEXT,  lastModified  BIGINT,  primaryLanguageUid  BIGINT,  languageVariantUid  BIGINT,  leaf  BOOL,  publik  BOOL,  contentTypeFlag  INTEGER,  contentEntryLocalChangeSeqNum  BIGINT,  contentEntryMasterChangeSeqNum  BIGINT,  contentEntryLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 42");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (42, 1, 0, 0)");
                         db.execSql("CREATE INDEX  index_ContentEntry_primaryLanguageUid  ON  ContentEntry  ( primaryLanguageUid  )");
                         //END Create ContentEntry (PostgreSQL)
@@ -1204,6 +1212,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContentEntryContentCategoryJoin (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_3 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryContentCategoryJoin  ( ceccjUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_3') ,  ceccjContentEntryUid  BIGINT,  ceccjContentCategoryUid  BIGINT,  ceccjLocalChangeSeqNum  BIGINT,  ceccjMasterChangeSeqNum  BIGINT,  ceccjLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 3");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (3, 1, 0, 0)");
                         //END Create ContentEntryContentCategoryJoin (PostgreSQL)
 
@@ -1215,6 +1224,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContentEntryFile (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_5 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryFile  ( contentEntryFileUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_5') ,  fileSize  BIGINT,  md5sum  TEXT,  lastModified  BIGINT,  mimeType  TEXT,  remarks  TEXT,  mobileOptimized  BOOL,  contentEntryFileLocalChangeSeqNum  BIGINT,  contentEntryFileMasterChangeSeqNum  BIGINT,  contentEntryFileLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 5");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (5, 1, 0, 0)");
                         db.execSql("CREATE INDEX  index_ContentEntryFile_lastModified  ON  ContentEntryFile  ( lastModified  )");
                         //END Create ContentEntryFile (PostgreSQL)
@@ -1226,6 +1236,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContentEntryContentEntryFileJoin (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_4 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryContentEntryFileJoin  ( cecefjUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_4') ,  cecefjContentEntryUid  BIGINT,  cecefjContentEntryFileUid  BIGINT,  cecefjLocalChangeSeqNum  BIGINT,  cecefjMasterChangeSeqNum  BIGINT,  cecefjLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 4");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (4, 1, 0, 0)");
                         db.execSql("CREATE INDEX  index_ContentEntryContentEntryFileJoin_cecefjContentEntryFileUid  ON  ContentEntryContentEntryFileJoin  ( cecefjContentEntryFileUid  )");
                         db.execSql("CREATE INDEX  index_ContentEntryContentEntryFileJoin_cecefjContentEntryUid  ON  ContentEntryContentEntryFileJoin  ( cecefjContentEntryUid  )");
@@ -1238,6 +1249,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContentEntryParentChildJoin (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_7 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryParentChildJoin  ( cepcjUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_7') ,  cepcjChildContentEntryUid  BIGINT,  cepcjParentContentEntryUid  BIGINT,  childIndex  INTEGER,  cepcjLocalChangeSeqNum  BIGINT,  cepcjMasterChangeSeqNum  BIGINT,  cepcjLastChangedBy  INTEGER)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 7");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (7, 1, 0, 0)");
 
                         //END Create ContentEntryParentChildJoin (PostgreSQL)
@@ -1249,6 +1261,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ContentEntryRelatedEntryJoin (PostgreSQL)
                         db.execSql("CREATE SEQUENCE spk_seq_8 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         db.execSql("CREATE TABLE IF NOT EXISTS  ContentEntryRelatedEntryJoin  ( cerejUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_8') ,  cerejContentEntryUid  BIGINT,  cerejRelatedEntryUid  BIGINT,  cerejLastChangedBy  INTEGER,  relType  INTEGER,  comment  TEXT,  cerejRelLanguageUid  BIGINT,  cerejLocalChangeSeqNum  BIGINT,  cerejMasterChangeSeqNum  BIGINT)");
+                        db.execSql("DELETE FROM SyncStatus WHERE tableId = 8");
                         db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (8, 1, 0, 0)");
                         //END Create ContentEntryRelatedEntryJoin (PostgreSQL)
 
@@ -1341,8 +1354,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("CREATE TRIGGER inc_csn_7_trig AFTER UPDATE OR INSERT ON ContentEntryParentChildJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_7_fn()");
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_8_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentEntryRelatedEntryJoin SET cerejLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cerejLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 8) END),cerejMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 8) ELSE NEW.cerejMasterChangeSeqNum END) WHERE cerejUid = NEW.cerejUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 8; RETURN null; END $$LANGUAGE plpgsql");
                         db.execSql("CREATE TRIGGER inc_csn_8_trig AFTER UPDATE OR INSERT ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_8_fn()");
+                        //Location trigger and function
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_29_fn() RETURNS trigger AS $$ BEGIN UPDATE Location SET locationLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.locationLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 29) END),locationMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 29) ELSE NEW.locationMasterChangeSeqNum END) WHERE locationUid = NEW.locationUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 29; RETURN null; END $$LANGUAGE plpgsql");
                         db.execSql("CREATE TRIGGER inc_csn_29_trig AFTER UPDATE OR INSERT ON Location FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_29_fn()");
+
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_2_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentCategorySchema SET contentCategorySchemaLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentCategorySchemaLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 2) END),contentCategorySchemaMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 2) ELSE NEW.contentCategorySchemaMasterChangeSeqNum END) WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 2; RETURN null; END $$LANGUAGE plpgsql");
                         db.execSql("CREATE TRIGGER inc_csn_2_trig AFTER UPDATE OR INSERT ON ContentCategorySchema FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_2_fn()");
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_1_fn() RETURNS trigger AS $$ BEGIN UPDATE ContentCategory SET contentCategoryLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.contentCategoryLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 1) END),contentCategoryMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 1) ELSE NEW.contentCategoryMasterChangeSeqNum END) WHERE contentCategoryUid = NEW.contentCategoryUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 1; RETURN null; END $$LANGUAGE plpgsql");
@@ -1371,114 +1386,406 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
                         /**
                          * Create Sequences and assign them to Primary keys for all not dealt with (updates and new ones above)
+                         * Also create SyncStatus if they do not exist.
                          */
                         db.execSql("CREATE SEQUENCE spk_seq_9 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE Person ALTER COLUMN personUid SET DEFAULT NEXTVAL('spk_seq_9')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "9" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "9"
+                                +")");
+
 
                         db.execSql("CREATE SEQUENCE spk_seq_6 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE Clazz ALTER COLUMN clazzUid SET DEFAULT NEXTVAL('spk_seq_6')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "6" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "6"
+                                +")");
+
 
                         db.execSql("CREATE SEQUENCE spk_seq_31 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE ClazzMember ALTER COLUMN clazzMemberUid SET DEFAULT NEXTVAL('spk_seq_31')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "31" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "31"
+                                +")");
 
                         //db.execSql("CREATE SEQUENCE spk_seq_14 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "14" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "14"
+                                +")");
+
                         db.execSql("CREATE SEQUENCE spk_seq_15 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE ClazzLogAttendanceRecord ALTER COLUMN clazzLogAttendanceRecordUid SET DEFAULT NEXTVAL('spk_seq_15')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "15" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "15"
+                                +")");
 
                         //db.execSql("CREATE SEQUENCE spk_seq_16 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "16" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "16"
+                                +")");
+
                         db.execSql("CREATE SEQUENCE spk_seq_20 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonField ALTER COLUMN personCustomFieldUid SET DEFAULT NEXTVAL('spk_seq_20')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "20" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "20"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_18 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonCustomFieldValue ALTER COLUMN personCustomFieldValueUid SET DEFAULT NEXTVAL('spk_seq_18')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "18" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "18"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_19 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonDetailPresenterField ALTER COLUMN personDetailPresenterFieldUid SET DEFAULT NEXTVAL('spk_seq_19')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "19" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "19"
+                                +")");
 
                         //db.execSql("CREATE SEQUENCE spk_seq_22 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "22" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "22"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_23 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "23" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "23"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_24 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "24" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "24"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_25 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "25" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "25"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_26 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "26" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "26"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_27 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "27" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "27"
+                                +")");
+
                         db.execSql("CREATE SEQUENCE spk_seq_21 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE Schedule ALTER COLUMN scheduleUid SET DEFAULT NEXTVAL('spk_seq_21')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "21" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "21"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_17 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE Holiday ALTER COLUMN holidayUid SET DEFAULT NEXTVAL('spk_seq_17')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "17" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "17"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_28 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE UMCalendar ALTER COLUMN umCalendarUid SET DEFAULT NEXTVAL('spk_seq_28')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "28" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "28"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_11 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE ClazzActivity ALTER COLUMN clazzActivityUid SET DEFAULT NEXTVAL('spk_seq_11')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "11" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "11"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_32 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE ClazzActivityChange ALTER COLUMN clazzActivityChangeUid SET DEFAULT NEXTVAL('spk_seq_32')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "32" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "32"
+                                +")");
 
                         //db.execSql("CREATE SEQUENCE spk_seq_42 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "42" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "42"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_3 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "3" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "3"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_4 " +  DoorUtilsadmin .generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "4" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "4"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_5 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "5" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "5"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_7 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "7" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "7"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_8 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "8" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "8"
+                                +")");
+
                         //db.execSql("CREATE SEQUENCE spk_seq_29 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "29" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "29"
+                                +")");
+
                         db.execSql("CREATE SEQUENCE spk_seq_2 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE ContentCategorySchema ALTER COLUMN contentCategorySchemaUid SET DEFAULT NEXTVAL('spk_seq_2')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "2" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "2"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_1 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE ContentCategory ALTER COLUMN contentCategoryUid SET DEFAULT NEXTVAL('spk_seq_1')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "1" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "1"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_13 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE Language ALTER COLUMN langUid SET DEFAULT NEXTVAL('spk_seq_13')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "13" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "13"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_10 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE LanguageVariant ALTER COLUMN langVariantUid SET DEFAULT NEXTVAL('spk_seq_10')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "10" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "10"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_30 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonAuth ALTER COLUMN personAuthUid SET DEFAULT NEXTVAL('spk_seq_30')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "30" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "30"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_45 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE Role ALTER COLUMN roleUid SET DEFAULT NEXTVAL('spk_seq_45')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "45" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "45"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_47 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE EntityRole ALTER COLUMN erUid SET DEFAULT NEXTVAL('spk_seq_47')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "47" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "47"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_43 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonGroup ALTER COLUMN groupUid SET DEFAULT NEXTVAL('spk_seq_43')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "43" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "43"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_44 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonGroupMember ALTER COLUMN groupMemberUid SET DEFAULT NEXTVAL('spk_seq_44')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "44" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "44"
+                                +")");
 
                         //db.execSql("CREATE SEQUENCE spk_seq_52 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "52" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "52"
+                                +")");
+
                         db.execSql("CREATE SEQUENCE spk_seq_48 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonLocationJoin ALTER COLUMN personLocationUid SET DEFAULT NEXTVAL('spk_seq_48')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "48" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "48"
+                                +")");
 
                         db.execSql("CREATE SEQUENCE spk_seq_50 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
                         //Update def of PK to link with Sequence
                         db.execSql("ALTER TABLE PersonPicture ALTER COLUMN personPictureUid SET DEFAULT NEXTVAL('spk_seq_50')");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) " +
+                                "SELECT " +
+                                "50" +
+                                ", 1, 0, 0 WHERE NOT EXISTS ( SELECT tableId " +
+                                " FROM SyncStatus WHERE tableId = " +
+                                "50"
+                                +")");
 
 
 

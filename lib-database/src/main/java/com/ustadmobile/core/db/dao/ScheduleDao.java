@@ -102,7 +102,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
         for(ClazzWithTimeZone clazz : clazzList) {
             //Skipp classes that have no time zone
             if(clazz.getTimeZone() == null) {
-                System.err.println("Warning: cannot create schedules for clazz" +
+                System.err.println("Warning: cannot create schedules for clazz" + clazz.getClazzName() + ", uid:" +
                         clazz.getClazzUid() + " as it has no timezone");
                 continue;
             }
@@ -132,7 +132,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                     //TODO: Associate with weekend feature in the future
                     if(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY){
                         //skip
-                        System.out.println("Skipping");
+                        System.out.println("Today is a weekend. Skipping ClazzLog creation for today.");
 
                     }else {
 
