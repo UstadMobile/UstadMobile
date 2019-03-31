@@ -280,8 +280,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
             }else{
                 knownPeerNodes.put(node.getBluetoothMacAddress(),System.currentTimeMillis());
-                UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Existing node with address "
-                        + node.getBluetoothMacAddress() + " found, waiting for the Db update");
             }
         }
     }

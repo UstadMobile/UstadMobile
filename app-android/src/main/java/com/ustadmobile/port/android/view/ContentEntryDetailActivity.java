@@ -78,14 +78,15 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
         if(networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow()){
             downloadButton.setBackgroundResource(
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details);
-            managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
-            entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
-                    UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this,
-                    this);
-            entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
-            entryDetailPresenter.onStart();
-            managerAndroidBle.addLocalAvailabilityListener(this);
         }
+
+        managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
+        entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this,
+                this);
+        entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
+        entryDetailPresenter.onStart();
+        managerAndroidBle.addLocalAvailabilityListener(this);
 
     }
 
