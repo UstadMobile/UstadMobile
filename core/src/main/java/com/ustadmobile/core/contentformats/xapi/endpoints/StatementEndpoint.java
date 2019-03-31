@@ -114,14 +114,14 @@ public class StatementEndpoint {
 
             if (xobject != null) {
 
-                if (xobject.getObjectType() == null || !xobject.getObjectType().equals("Activity")) {
+                if (xobject.getObjectType() != null && !xobject.getObjectType().equals("Activity")) {
 
                     if (context.getRevision() != null) {
-                        throw new IllegalArgumentException("Invalid Context In Statement: Revision used in context with object activity");
+                        throw new IllegalArgumentException("Invalid Context In Statement: Revision can only be used when objectType is activity");
                     }
 
                     if (context.getPlatform() != null) {
-                        throw new IllegalArgumentException("Invalid Context In Statement: Revision used in context with object activity");
+                        throw new IllegalArgumentException("Invalid Context In Statement: Platform can only be used when objectType is activity");
                     }
 
 
@@ -268,6 +268,7 @@ public class StatementEndpoint {
 
             if (actor.getMembers() != null) {
                 for (Actor members : actor.getMembers()) {
+                    checkValidActor(members);
                     if (members.getMembers() != null && members.getMembers().size() > 0) {
                         throw new IllegalArgumentException("Members were found in the member group statement");
                     }
