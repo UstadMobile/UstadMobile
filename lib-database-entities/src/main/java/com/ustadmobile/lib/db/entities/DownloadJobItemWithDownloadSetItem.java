@@ -5,6 +5,7 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded;
 /**
  * Combined DownloadJobItem with it's related DownloadSetItem - useful when running a download
  */
+@Deprecated
 public class DownloadJobItemWithDownloadSetItem extends DownloadJobItem {
 
     @UmEmbedded

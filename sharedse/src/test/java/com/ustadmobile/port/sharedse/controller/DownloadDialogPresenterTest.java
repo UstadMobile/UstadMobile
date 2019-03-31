@@ -412,7 +412,7 @@ public class DownloadDialogPresenterTest {
                 allowed -> allowed != null && !allowed);
 
         assertFalse("Job is allowed to run on un metered connection only",
-                umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
+                umAppDatabase.getDownloadSetDao().findByUid((int)downloadSet.getDsUid())
                         .isMeteredNetworkAllowed());
     }
 
@@ -439,12 +439,12 @@ public class DownloadDialogPresenterTest {
         presenter.handleStorageOptionSelection(destDir);
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadSetDao()
-                        .getLiveDownloadSet(downloadSet.getDsUid()), MAX_LATCH_WAITING_TIME,
+                        .getLiveDownloadSet((int)downloadSet.getDsUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, downloadSet -> downloadSet.getDestinationDir().equals(destDir));
 
         assertEquals("DownloadSet destination directory changed successfully",
                 destDir,
-                umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
+                umAppDatabase.getDownloadSetDao().findByUid((int)downloadSet.getDsUid())
                 .getDestinationDir());
     }
 }

@@ -19,6 +19,11 @@ public class DownloadJobItemParentChildJoin {
 
     }
 
+    public DownloadJobItemParentChildJoin(DownloadJobItem parentItem, long cepcjUid) {
+        this.djiParentDjiUid = parentItem.getDjiUid();
+        this.djiCepcjUid = cepcjUid;
+    }
+
     public DownloadJobItemParentChildJoin(long djiParentDjiUid, long djiChildDjiUid, long djiCepcjUid) {
         this.djiParentDjiUid = djiParentDjiUid;
         this.djiChildDjiUid = djiChildDjiUid;

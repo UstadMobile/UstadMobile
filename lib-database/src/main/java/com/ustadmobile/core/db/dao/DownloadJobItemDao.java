@@ -14,8 +14,8 @@ import com.ustadmobile.lib.db.entities.ContainerWithContentEntry;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,6 +135,29 @@ public abstract class DownloadJobItemDao {
     @UmInsert
     public abstract void insert(List<DownloadJobItem> jobRunItems);
 
+    @UmTransaction
+    public void insertListAndSetIds(List<DownloadJobItem> jobItems) {
+        for(DownloadJobItem item : jobItems) {
+            item.setDjiUid(insert(item));
+        }
+    }
+
+    @UmTransaction
+    public void updateDownloadJobItemsProgress(List<DownloadJobItemStatus> statusList) {
+        for(DownloadJobItemStatus status : statusList) {
+           updateDownloadJobItemProgress(status.getJobItemUid(), status.getBytesSoFar(),
+                   status.getTotalBytes(), status.getState());
+        }
+    }
+
+    @UmQuery("UPDATE DownloadJobItem SET downloadedSoFar = :bytesSoFar, " +
+            "downloadLength = :totalLength," +
+            "djiStatus = :status WHERE djiUid = :djiUid")
+    public abstract void updateDownloadJobItemProgress(int djiUid, long bytesSoFar, long totalLength,
+                                                       int status);
+
+
+
     @UmQuery("SELECT DownloadJobItem.*, DownloadSetItem.* FROM DownloadJobItem " +
             "LEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid " +
             "WHERE DownloadJobItem.djiUid = :djiUid")
@@ -251,14 +274,28 @@ public abstract class DownloadJobItemDao {
     public abstract DownloadJobItemWithDownloadSetItem findByContentEntryUid(long contentEntryUid);
 
 
+    @UmQuery("SELECT * " +
+            "FROM DownloadJobItem " +
+            "WHERE djiContentEntryUid = :contentEntryUid " +
+            "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
+    public abstract DownloadJobItem findByContentEntryUid2(long contentEntryUid);
+
+
+    @UmQuery("SELECT DownloadJobItem.* " +
+            "FROM DownloadJobItem " +
+            "WHERE DownloadJobItem.djiUid IN (:contentEntryUids) " +
+            "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
+    public abstract List<DownloadJobItem> findByDjiUidsList(List<Long> contentEntryUids);
+
     private DownloadJobItem generateDjiFromContainerWithContentEntry(
             ContainerWithContentEntry containerWithContentEntry) {
         return new DownloadJobItem();
     }
 
-    @UmQuery("SELECT ")
-    public abstract List<DownloadJobItemToBeCreated2> findByParentContentEntryUuids(
-            List<Long> parentContentEntryUids);
+    public List<DownloadJobItemToBeCreated2> findByParentContentEntryUuids(
+            List<Long> parentContentEntryUids) {
+        return null;
+    }
 
     @UmInsert
     public abstract void insertDownloadJobItemParentChildJoin(DownloadJobItemParentChildJoin dj);

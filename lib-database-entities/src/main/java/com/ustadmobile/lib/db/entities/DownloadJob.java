@@ -42,6 +42,10 @@ public class DownloadJob {
 
     }
 
+    public DownloadJob(long djUid) {
+        this.djUid = djUid;
+    }
+
     public DownloadJob(DownloadSet downloadSet) {
         this.djDsUid = downloadSet.getDsUid();
     }

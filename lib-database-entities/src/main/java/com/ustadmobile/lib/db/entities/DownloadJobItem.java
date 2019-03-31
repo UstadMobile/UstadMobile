@@ -22,6 +22,8 @@ public class DownloadJobItem {
 
     private long djiContainerUid;
 
+    private long djiContentEntryUid;
+
     private long downloadedSoFar;
 
     private long downloadLength;
@@ -40,11 +42,35 @@ public class DownloadJobItem {
 
     private int numAttempts;
 
+    @Deprecated
     private long djiParentDjiUid;
 
 
     public DownloadJobItem() {
 
+    }
+
+    public DownloadJobItem(DownloadJobItem src) {
+        this.djiUid = src.djiUid;
+        this.downloadLength = src.downloadLength;
+        this.downloadedSoFar = src.downloadedSoFar;
+        this.djiContentEntryUid = src.djiContentEntryUid;
+        this.djiDjUid = src.djiDjUid;
+        this.djiStatus = src.djiStatus;
+        this.djiContainerUid = src.djiContainerUid;
+        this.currentSpeed = src.currentSpeed;
+        this.destinationFile = src.destinationFile;
+        this.numAttempts = src.numAttempts;
+    }
+
+    public DownloadJobItem(DownloadJob downloadJob, long djiContentEntryUid, long downloadLength) {
+        this(downloadJob.getDjUid(), djiContentEntryUid, downloadLength);
+    }
+
+    public DownloadJobItem(long djiDjUid, long djiContentEntryUid, long downloadLength) {
+        this.djiDjUid = djiDjUid;
+        this.djiContentEntryUid = djiContentEntryUid;
+        this.downloadLength = downloadLength;
     }
 
     public DownloadJobItem(DownloadJob downloadJob,DownloadSetItem downloadSetItem,
@@ -151,13 +177,22 @@ public class DownloadJobItem {
     }
 
 
+    @Deprecated
     public long getDjiParentDjiUid() {
         return djiParentDjiUid;
     }
 
+    @Deprecated
     public void setDjiParentDjiUid(long djiParentDjiUid) {
         this.djiParentDjiUid = djiParentDjiUid;
     }
 
 
+    public long getDjiContentEntryUid() {
+        return djiContentEntryUid;
+    }
+
+    public void setDjiContentEntryUid(long djiContentEntryUid) {
+        this.djiContentEntryUid = djiContentEntryUid;
+    }
 }

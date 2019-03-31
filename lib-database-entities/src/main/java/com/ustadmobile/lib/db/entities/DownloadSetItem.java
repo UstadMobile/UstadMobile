@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * Represents an item (linked to a ContentEntryFile) which is part of a specific DownloadSet.
  */
 @UmEntity
+@Deprecated
 public class DownloadSetItem {
 
     @UmPrimaryKey(autoIncrement = true)

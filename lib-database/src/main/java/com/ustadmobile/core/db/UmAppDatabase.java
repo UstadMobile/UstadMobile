@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
+import com.ustadmobile.core.db.dao.DownloadJobItemParentChildJoinDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
@@ -69,6 +70,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
+import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntityRole;
@@ -106,6 +108,7 @@ import java.util.Random;
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
+        DownloadJobItemParentChildJoin.class,
         Person.class, Clazz.class, ClazzMember.class,
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
@@ -627,10 +630,13 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             public void migrate(DoorDbAdapter db) {
                 switch (db.getDbType()) {
                     case UmDbType.TYPE_SQLITE:
-                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid");
+                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid INTEGER");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid INTEGER");
+                        break;
 
                     case UmDbType.TYPE_POSTGRES:
                         db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid BIGINT DEFAULT 0");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid BIGINT");
                         break;
 
 
@@ -658,6 +664,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract DownloadJobDao getDownloadJobDao();
 
     public abstract DownloadJobItemDao getDownloadJobItemDao();
+
+    public abstract DownloadJobItemParentChildJoinDao getDownloadJobItemParentChildJoinDao();
 
     public abstract DownloadJobItemHistoryDao getDownloadJobItemHistoryDao();
 
