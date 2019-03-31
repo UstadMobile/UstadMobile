@@ -36,6 +36,9 @@ import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
+import com.ustadmobile.core.db.dao.SaleDao;
+import com.ustadmobile.core.db.dao.SaleItemDao;
+import com.ustadmobile.core.db.dao.SalePaymentDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
 import com.ustadmobile.lib.database.UmDbBuilder;
@@ -90,6 +93,12 @@ import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.Sale;
+import com.ustadmobile.lib.db.entities.SaleCollection;
+import com.ustadmobile.lib.db.entities.SaleCollectionJoin;
+import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SalePayment;
+import com.ustadmobile.lib.db.entities.SaleProductPicture;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 import com.ustadmobile.lib.db.entities.ScrapeRun;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
@@ -103,7 +112,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 10, entities = {
+@UmDatabase(version = 13, entities = {
         ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -119,7 +128,10 @@ import java.util.Random;
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
-        ContentEntryStatus.class, ConnectivityStatus.class
+        ContentEntryStatus.class, ConnectivityStatus.class,
+        //Goldozi :
+        Sale.class, SaleItem.class, SalePayment.class, SaleCollection.class,
+        SaleCollectionJoin.class, SaleProductPicture.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -625,6 +637,15 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract ContentEntryStatusDao getContentEntryStatusDao();
 
     public abstract ConnectivityStatusDao getConnectivityStatusDao();
+
+    //Goldozi bit:
+
+    public abstract SaleItemDao getSaleItemDao();
+
+    public abstract SaleDao getSaleDao();
+
+    public abstract SalePaymentDao getSalePaymentDao();
+    //end of Goldozi bit.
 
     @UmDbContext
     public abstract Object getContext();

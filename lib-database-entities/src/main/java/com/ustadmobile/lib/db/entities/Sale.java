@@ -11,6 +11,8 @@ public class Sale {
     @UmPrimaryKey
     private long saleUid;
 
+    private String saleTitle;
+
     private boolean saleActive;
 
     private boolean saleLocationUid;
@@ -19,15 +21,22 @@ public class Sale {
 
     private long saleLastUpdateDate;
 
+    //Person who created this sale (the salesman usually)
     private long salePersonUid;
 
+    //any notes
     private String saleNotes;
 
+    //If created successfully - does NOT indicate payed / completed/ etc
+    //If false- effectively deleted and will not show up in reports/sales list
     private boolean saleDone;
 
+    //Deliberate cancelled option will mark this flag as true.
     private boolean saleCancelled;
 
     private boolean salePreOrder;
+
+    private boolean salePaymentDone;
 
     @UmSyncMasterChangeSeqNum
     private long saleMCSN;
@@ -37,6 +46,18 @@ public class Sale {
 
     @UmSyncLastChangedBy
     private int saleLCB;
+
+    public Sale(){
+        this.saleCancelled = false;
+        this.saleActive = true;
+        this.saleCreationDate = System.currentTimeMillis();
+        this.saleLastUpdateDate = this.saleCreationDate;
+        this.saleDone = false; // It gets done only when Save/Donw/Tick is clicked via presenter/
+        this.salePreOrder = false; //default to nope
+        this.salePaymentDone = true; //Defaulting to true. Unless marked as done via payment addition.
+        this.saleTitle = "";
+        //Ideally salePaymentDone should be triggerd from SaleItem and SalePayment
+    }
 
     public long getSaleUid() {
         return saleUid;
@@ -140,5 +161,21 @@ public class Sale {
 
     public void setSaleLCB(int saleLCB) {
         this.saleLCB = saleLCB;
+    }
+
+    public boolean isSalePaymentDone() {
+        return salePaymentDone;
+    }
+
+    public void setSalePaymentDone(boolean salePaymentDone) {
+        this.salePaymentDone = salePaymentDone;
+    }
+
+    public String getSaleTitle() {
+        return saleTitle;
+    }
+
+    public void setSaleTitle(String saleTitle) {
+        this.saleTitle = saleTitle;
     }
 }
