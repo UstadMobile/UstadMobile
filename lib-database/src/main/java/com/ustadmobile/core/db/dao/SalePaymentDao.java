@@ -26,7 +26,11 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
 
     //FIND ALL ACTIVE
 
-    public static final String ALL_ACTIVE_QUERY = "SELECT * FROM SalePayment WHERE salePaymentActive = 1";
+    public static final String ALL_ACTIVE_QUERY =
+            "SELECT * FROM SalePayment WHERE salePaymentActive = 1";
+    public static final String FIND_ALL_BY_SALE_UID_QUERY =
+            "SELECT * FROM SalePayment WHERE salePaymentSaleUid = :saleUid AND " +
+                    "salePaymentActive = 1";
 
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmLiveData<List<SalePayment>> findAllActiveLive();
@@ -40,9 +44,37 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmProvider<SalePayment> findAllActiveProvider();
 
+
+    @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
+    public abstract UmLiveData<List<SalePayment>> findBySaleUidLive(long saleUid);
+
+    @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
+    public abstract UmLiveData<SalePayment> findBySaleUidAsync(long saleUid,
+                           UmCallback<List<SalePayment>> allPaymentsBySaleCallback);
+
+    @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
+    public abstract List<SalePayment> findBySaleAsList(long saleUid);
+
+
+    @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
+    public abstract UmProvider<SalePayment> findBySaleProvider();
+
+    public static final String TOTAL_PAID_BY_SALE_UID =
+            "SELECT SUM(salePaymentPaidAmount) FROM SalePayment " +
+            "WHERE salePaymentSaleUid = :saleUid AND salePaymentActive = 1 " +
+            "AND salePaymentDone = 1";
+    @UmQuery(TOTAL_PAID_BY_SALE_UID)
+    public abstract long findTotalPaidPaymentsInASale(long saleUid);
+
+    @UmQuery(TOTAL_PAID_BY_SALE_UID)
+    public abstract void findTotalPaidBySaleAsync(long saleUid, UmCallback<Long> resultCallback);
+
+
     //LOOK UP
 
-    public static final String FIND_BY_UID_QUERY = "SELECT * FROM SalePayment WHERE salePaymentUid = :uid";
+    public static final String FIND_BY_UID_QUERY =
+            "SELECT * FROM SalePayment WHERE salePaymentUid = :uid";
+
 
     @UmQuery(FIND_BY_UID_QUERY)
     public abstract SalePayment findByUid(long uid);
@@ -52,6 +84,8 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
 
     @UmQuery(FIND_BY_UID_QUERY)
     public abstract UmLiveData<SalePayment> findByUidLive(long uid);
+
+
 
     //INACTIVATE:
 

@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities;
 /**
  * SaleItem 's POJO representing itself on the view (and recycler views)
  */
-public class SaleItemDetail {
+public class SaleItemListDetail {
 
     long saleItemPictureUid;
     String saleItemProductName;

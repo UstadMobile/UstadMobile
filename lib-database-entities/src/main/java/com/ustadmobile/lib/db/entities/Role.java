@@ -72,6 +72,14 @@ public class Role {
 
     public static final long PERMISSION_PERSON_PICTURE_UPDATE = 4194304;
 
+    public static final long PERMISSION_SALE_INSERT = 8388608;
+
+    public static final long PERMISSION_SALE_UPDATE = 16777216;
+
+    public static final long PERMISSION_SALE_SELECT = 33554432;
+
+
+
 
     public Role() {
 

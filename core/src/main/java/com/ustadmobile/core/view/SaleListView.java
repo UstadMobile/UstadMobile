@@ -1,7 +1,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Sale;
+import com.ustadmobile.lib.db.entities.SaleListDetail;
 
 
 /**
@@ -26,7 +26,7 @@ public interface SaleListView extends UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<Sale> listProvider);
+    void setListProvider(UmProvider<SaleListDetail> listProvider);
 
 
 }

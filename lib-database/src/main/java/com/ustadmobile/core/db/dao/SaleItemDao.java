@@ -9,6 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleItemListDetail;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
@@ -39,6 +40,54 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
 
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmProvider<SaleItem> findAllActiveProvider();
+
+
+    /**
+     *     long saleItemPictureUid;
+     *     String saleItemProductName;
+     *     int saleItemQuantityCount;
+     *     float saleItemPrice;
+     *     float saleItemDiscountPerItem;
+     *     boolean saleItemDelivered;
+     */
+    @UmQuery("SELECT SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+            " SaleProduct.saleProductName AS saleItemProductName, " +
+            " SaleItem.saleItemQuantity AS saleItemQuantityCount, " +
+            " SaleItem.saleItemPricePerPiece AS saleItemPrice," +
+            " SaleItem.saleItemDiscount AS saleItemDiscountPerItem, " +
+            " Sale.saleItemSold AS saleItemDelivered " +
+            "FROM SaleItem " +
+            " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
+            " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
+            "   SaleProduct.saleProductUid " +
+            "WHERE saleItemActive = 1")
+    public abstract UmLiveData<List<SaleItemListDetail>> findAllSaleItemListDetailActiveLive();
+
+
+    //Total amount of every sale per sale uid
+
+    public static final String TOTAL_PAID_BY_SALE_UID =
+            "SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem " +
+                    "WHERE saleItemSaleUid = :saleUid AND saleItemActive = 1 " +
+                    "AND saleItemSold = 1";
+    public static final String TOTAL_DISCOUNT_BY_SALE_UID =
+            "SELECT SUM(saleItemDiscount * saleItemQuantity) FROM SaleItem " +
+                    "WHERE saleItemSaleUid = :saleUid AND saleItemActive = 1 " +
+                    "AND saleItemSold = 1";
+
+    @UmQuery(TOTAL_PAID_BY_SALE_UID)
+    public abstract long findTotalPaidInASale(long saleUid);
+
+    @UmQuery(TOTAL_PAID_BY_SALE_UID)
+    public abstract void findTotalPaidBySaleAsync(long saleUid, UmCallback<Long> resultCallback);
+
+    @UmQuery(TOTAL_DISCOUNT_BY_SALE_UID)
+    public abstract long findTotalDiscountInASale(long saleUid);
+
+    @UmQuery(TOTAL_DISCOUNT_BY_SALE_UID)
+    public abstract void findTotalDiscountBySaleAsync(long saleUid, UmCallback<Long> resultCallback);
+
+
 
     //LOOK UP
 

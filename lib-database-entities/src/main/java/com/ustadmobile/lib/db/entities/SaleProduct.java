@@ -22,8 +22,6 @@ public class SaleProduct {
 
     private long saleProductPictureUid;
 
-    private long saleProductProductCategodyUid;
-
     private boolean saleProductActive;
 
     @UmSyncMasterChangeSeqNum
@@ -82,14 +80,6 @@ public class SaleProduct {
 
     public void setSaleProductPictureUid(long saleProductPictureUid) {
         this.saleProductPictureUid = saleProductPictureUid;
-    }
-
-    public long getSaleProductProductCategodyUid() {
-        return saleProductProductCategodyUid;
-    }
-
-    public void setSaleProductProductCategodyUid(long saleProductProductCategodyUid) {
-        this.saleProductProductCategodyUid = saleProductProductCategodyUid;
     }
 
     public boolean isSaleProductActive() {

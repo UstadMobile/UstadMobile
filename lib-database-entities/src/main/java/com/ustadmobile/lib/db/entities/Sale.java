@@ -19,6 +19,8 @@ public class Sale {
 
     private long saleCreationDate;
 
+    private long saleDueDate;
+
     private long saleLastUpdateDate;
 
     //Person who created this sale (the salesman usually)
@@ -177,5 +179,13 @@ public class Sale {
 
     public void setSaleTitle(String saleTitle) {
         this.saleTitle = saleTitle;
+    }
+
+    public long getSaleDueDate() {
+        return saleDueDate;
+    }
+
+    public void setSaleDueDate(long saleDueDate) {
+        this.saleDueDate = saleDueDate;
     }
 }

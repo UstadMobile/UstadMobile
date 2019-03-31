@@ -16,7 +16,7 @@ public class SalePayment {
     private long salePaymentPaidDate;
 
     //Paid amount
-    private float salePaymentPaidAmount;
+    private long salePaymentPaidAmount;
 
     //Currecy of paid amount
     private String salePaymentCurrency;
@@ -55,11 +55,11 @@ public class SalePayment {
         this.salePaymentPaidDate = salePaymentPaidDate;
     }
 
-    public float getSalePaymentPaidAmount() {
+    public long getSalePaymentPaidAmount() {
         return salePaymentPaidAmount;
     }
 
-    public void setSalePaymentPaidAmount(float salePaymentPaidAmount) {
+    public void setSalePaymentPaidAmount(long salePaymentPaidAmount) {
         this.salePaymentPaidAmount = salePaymentPaidAmount;
     }
 

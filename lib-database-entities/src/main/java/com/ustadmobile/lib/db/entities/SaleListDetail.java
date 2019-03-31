@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities;
 /**
  * Sale 's POJO for representing itself on the view (and recycler views)
  */
-public class SaleDetail {
+public class SaleListDetail {
     String saleTitle;
     String locationName;
     long saleDueDate;
@@ -11,6 +11,8 @@ public class SaleDetail {
     String saleCurrency;
     long saleCreationDate;
     int saleItemCount;
+    boolean preOrder;
+    boolean paymentDue;
 
     public String getSaleTitle() {
         return saleTitle;
