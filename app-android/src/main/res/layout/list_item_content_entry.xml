@@ -30,7 +30,9 @@
         app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
         app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Content Title" />
+        tools:text="Content Title"
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_4dp" />
 
     <TextView
         android:id="@+id/content_entry_item_description"
@@ -45,7 +47,9 @@
         app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
         app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
         app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
-        tools:text="Content Description" />
+        tools:text="Content Description"
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_4dp" />
 
     <ImageView
         android:id="@+id/content_entry_item_imageview"
@@ -57,7 +61,9 @@
         android:layout_marginBottom="@dimen/dimen_4dp"
         android:tint="@color/text_secondary"
         app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
-        app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
+        app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_4dp" />
 
     <TextView
         android:id="@+id/content_entry_item_library_size"
@@ -73,7 +79,9 @@
         app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
         app:layout_constraintStart_toEndOf="@id/content_entry_item_imageview"
         app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"
-        tools:text="Content Library (50 Mb)" />
+        tools:text="Content Library (50 Mb)"
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_4dp" />
 
     <ImageView
         android:visibility="gone"
@@ -82,14 +90,15 @@
         android:layout_marginEnd="@dimen/dimen_4dp"
         android:layout_marginBottom="@dimen/dimen_4dp"
         android:id="@+id/content_entry_local_availability_icon"
-        android:src="@drawable/ic_location_pin_24dp"
+        tools:src="@drawable/ic_location_pin_24dp"
         android:layout_width="@dimen/dimen_20dp"
         android:layout_height="@dimen/dimen_16dp"
         app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
         app:layout_constraintEnd_toStartOf="@id/content_entry_local_availability_status"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
-        />
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_4dp" />
 
     <TextView
         android:visibility="gone"
@@ -107,7 +116,9 @@
         app:layout_constraintStart_toEndOf="@id/content_entry_local_availability_icon"
         app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size" />
+        app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_4dp" />
 
     <com.ustadmobile.port.android.view.DownloadStatusButton
         android:id="@+id/content_entry_item_download"
