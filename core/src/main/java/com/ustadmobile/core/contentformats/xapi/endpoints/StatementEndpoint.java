@@ -316,21 +316,22 @@ public class StatementEndpoint {
         long subObjectUid = 0;
 
         if (statement.getSubStatement() != null) {
-            Person subActor = insertOrUpdatePerson(personDao, statement.getSubStatement().getActor());
+            Statement subStatement = statement.getSubStatement();
+            Person subActor = insertOrUpdatePerson(personDao, subStatement.getActor());
             if (subActor == null) {
                 AgentEntity agentEntity = insertOrUpdateAgent(agentDao, statement.getSubStatement().getActor());
                 subActorUid = agentEntity.getAgentUid();
             }
 
-            VerbEntity subVerb = insertOrUpdateVerb(verbDao, statement.getVerb().getId());
+            VerbEntity subVerb = insertOrUpdateVerb(verbDao, subStatement.getVerb().getId());
             subVerbUid = subVerb.getVerbUid();
 
-            XObjectEntity subObject = insertOrUpdateXObject(xobjectDao, statement.getObject());
+            XObjectEntity subObject = insertOrUpdateXObject(xobjectDao, subStatement.getObject());
             subObjectUid = subObject.getXObjectUid();
 
         }
 
-        long contextStatementUid = 0;
+        String contextStatementId = "";
         long instructorUid = 0;
         long teamUid = 0;
 
@@ -347,9 +348,7 @@ public class StatementEndpoint {
             }
 
             if (statement.getContext().getStatement() != null) {
-                String contextStatementId = statement.getContext().getStatement().getId();
-                StatementEntity entity = statementDao.findByStatementId(contextStatementId);
-                contextStatementUid = entity.getStatementUid();
+                contextStatementId = statement.getContext().getStatement().getId();
             }
         }
 
@@ -357,7 +356,7 @@ public class StatementEndpoint {
                 person != null ? person.getPersonUid() : 0,
                 verbEntity != null ? verbEntity.getVerbUid() : 0,
                 xObjectEntity != null ? xObjectEntity.getXObjectUid() : 0,
-                contextStatementUid, instructorUid,
+                contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid);
 
@@ -418,7 +417,7 @@ public class StatementEndpoint {
         if (verbEntity == null) {
             verbEntity = new VerbEntity();
             verbEntity.setUrlId(urlId);
-            dao.insert(verbEntity);
+            verbEntity.setVerbUid(dao.insert(verbEntity));
         }
         return verbEntity;
 
@@ -490,7 +489,7 @@ public class StatementEndpoint {
 
     public StatementEntity insertOrUpdateStatementEntity(StatementDao dao, Statement statement,
                                                          long personUid, long verbUid, long objectUid,
-                                                         long contextStatementUid,
+                                                         String contextStatementUid,
                                                          long instructorUid, long agentUid, long authorityUid, long teamUid,
                                                          long subActorUid, long subVerbUid, long subObjectUid) {
 
@@ -505,7 +504,7 @@ public class StatementEndpoint {
             statementEntity.setAuthorityUid(authorityUid);
             statementEntity.setInstructorUid(instructorUid);
             statementEntity.setTeamUid(teamUid);
-            statementEntity.setContextStatementUid(contextStatementUid);
+            statementEntity.setContextStatementId(contextStatementUid);
             statementEntity.setSubStatementActorUid(subActorUid);
             statementEntity.setSubstatementVerbUid(subVerbUid);
             statementEntity.setSubStatementObjectUid(subObjectUid);
@@ -528,6 +527,7 @@ public class StatementEndpoint {
                 statementEntity.setContextPlatform(statement.getContext().getPlatform());
                 statementEntity.setContextRegistration(statement.getContext().getRegistration());
             }
+            statementEntity.setStatementUid(dao.insert(statementEntity));
         }
         return statementEntity;
     }

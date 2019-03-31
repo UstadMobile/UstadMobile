@@ -57,7 +57,7 @@ public class Result {
         }
     }
 
-    private Map<String, Long> extensions;
+    private Map<String, Object> extensions;
 
     public boolean isCompletion() {
         return completion;
@@ -99,11 +99,11 @@ public class Result {
         this.response = response;
     }
 
-    public Map<String, Long> getExtensions() {
+    public Map<String, Object> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(Map<String, Long> extensions) {
+    public void setExtensions(Map<String, Object> extensions) {
         this.extensions = extensions;
     }
 }

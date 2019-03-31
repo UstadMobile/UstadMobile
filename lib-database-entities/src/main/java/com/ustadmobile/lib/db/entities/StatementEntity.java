@@ -62,7 +62,7 @@ public class StatementEntity {
 
     private String contextPlatform;
 
-    private long contextStatementUid;
+    private String contextStatementId;
 
     private String fullStatement;
 
@@ -245,12 +245,12 @@ public class StatementEntity {
         this.contextPlatform = contextPlatform;
     }
 
-    public long getContextStatementUid() {
-        return contextStatementUid;
+    public String getContextStatementId() {
+        return contextStatementId;
     }
 
-    public void setContextStatementUid(long contextStatementUid) {
-        this.contextStatementUid = contextStatementUid;
+    public void setContextStatementId(String contextStatementUid) {
+        this.contextStatementId = contextStatementUid;
     }
 
     public long getAgentUid() {

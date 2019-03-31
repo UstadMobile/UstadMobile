@@ -11,7 +11,7 @@ public class Definition {
 
     private String type;
 
-    private Map<String, String> extensions;
+    private Map<String, Object> extensions;
 
     private String moreInfo;
 
@@ -76,11 +76,11 @@ public class Definition {
         this.type = type;
     }
 
-    public Map<String, String> getExtensions() {
+    public Map<String, Object> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(Map<String, String> extensions) {
+    public void setExtensions(Map<String, Object> extensions) {
         this.extensions = extensions;
     }
 

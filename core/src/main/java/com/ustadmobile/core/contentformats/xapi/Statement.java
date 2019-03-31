@@ -1,7 +1,5 @@
 package com.ustadmobile.core.contentformats.xapi;
 
-import com.google.gson.Gson;
-
 import java.util.List;
 
 public class Statement {
@@ -126,11 +124,6 @@ public class Statement {
 
     public void setSubStatement(Statement subStatement) {
         this.subStatement = subStatement;
-    }
-
-    public static Statement loadObject(String json) {
-
-        return new Gson().fromJson(json, Statement.class);
     }
 
     public String getObjectType() {

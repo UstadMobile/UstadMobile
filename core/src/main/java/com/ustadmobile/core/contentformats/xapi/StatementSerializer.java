@@ -24,6 +24,7 @@ public class StatementSerializer implements JsonSerializer<Statement> {
         jsonObject.addProperty("version", src.getVersion());
         jsonObject.addProperty("id", src.getId());
         jsonObject.add("attachments", context.serialize(src.getAttachments(), StatementDeserializer.listType));
+        jsonObject.addProperty("objectType", src.getObjectType());
 
         if (src.getSubStatement() != null) {
             jsonObject.add("object", context.serialize(src.getSubStatement(), Statement.class));

@@ -32,9 +32,10 @@ public class StatementDeserializer implements JsonDeserializer<Statement> {
         statement.setVersion(jObject.has("version") ? jObject.get("version").getAsString() : null);
         statement.setId(jObject.has("id") ? jObject.get("id").getAsString() : null);
         statement.setAttachments(context.deserialize(jObject.get("attachments"), listType));
+        statement.setObjectType(jObject.has("objectType") ? jObject.get("objectType").getAsString() : null);
 
         XObject object = context.deserialize(jObject.get("object"), XObject.class);
-        if (object.getObjectType().equals("SubStatement")) {
+        if (object.getObjectType() != null && object.getObjectType().equals("SubStatement")) {
             statement.setSubStatement(context.deserialize(jObject.get("object"), Statement.class));
         } else {
             statement.setObject(object);
