@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -53,7 +54,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:layout_marginStart="116dp"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -104,13 +104,15 @@
                 app:layout_constraintTop_toBottomOf="@id/labelBarrier">
 
                 <Button
+                    android:clickable="true"
                     android:textStyle="bold"
                     android:id="@+id/entry_detail_button"
                     android:layout_width="match_parent"
                     android:padding="@dimen/dimen_16dp"
                     android:layout_height="wrap_content"
                     app:backgroundTint="@color/primary"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:focusable="true" />
 
                 <com.ustadmobile.port.android.view.DownloadProgressView
                     android:id="@+id/entry_detail_progress"
@@ -181,7 +183,8 @@
                 app:layout_constraintHorizontal_bias="0.973"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/image_content_size"
-                tools:text="Locally Available" />
+                tools:text="Locally Available"
+                android:layout_marginRight="@dimen/dimen_16dp" />
 
             <View
                 android:id="@+id/description_divider"
@@ -269,8 +272,8 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -281,17 +284,12 @@
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:titleEnabled="false">
-
             <include
                 android:id="@+id/entry_detail_toolbar"
                 layout="@layout/toolbar"
                 android:layout_width="wrap_content"
                 android:layout_height="56dp" />
-
         </android.support.design.widget.CollapsingToolbarLayout>
 
-
     </android.support.design.widget.AppBarLayout>
-
-
 </android.support.design.widget.CoordinatorLayout>

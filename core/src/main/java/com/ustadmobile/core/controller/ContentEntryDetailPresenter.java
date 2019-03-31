@@ -249,14 +249,12 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void handleClickTranslatedEntry(long uid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(uid));
         impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
     }
 
     public void handleUpNavigation() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListView.VIEW_NAME, navigation);
         if (lastEntryListArgs != null) {
             impl.go(ContentEntryListView.VIEW_NAME,
@@ -270,7 +268,6 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void handleDownloadButtonClick(boolean isDownloadComplete, Long entryUuid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid,

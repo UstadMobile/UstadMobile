@@ -326,7 +326,6 @@ public class DownloadNotificationService extends Service {
         builder.setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.ic_file_download_white_24dp)
                 .setColor(ContextCompat.getColor(this, R.color.primary))
                 .setOngoing(true)
                 .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
@@ -334,10 +333,12 @@ public class DownloadNotificationService extends Service {
                 .setContentIntent(mNotificationPendingIntent)
                 .setDefaults(Notification.DEFAULT_SOUND);
 
-        UmNotification umNotification = new UmNotification(notificationId,contentTitle,builder);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            builder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        if(isVersionLollipopOrAbove()){
+            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
 
+        UmNotification umNotification = new UmNotification(notificationId,contentTitle,builder);
         if(isGroupSummary){
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle()
                     .setBigContentTitle(contentTitle)
@@ -431,5 +432,9 @@ public class DownloadNotificationService extends Service {
         super.onDestroy();
         knownNotifications.clear();
         if(activeDownloadJobData != null)activeDownloadJobData.removeObserver(activeDownloadJobObserver);
+    }
+
+    private boolean isVersionLollipopOrAbove(){
+       return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 }

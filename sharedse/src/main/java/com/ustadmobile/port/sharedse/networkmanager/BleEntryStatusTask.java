@@ -38,7 +38,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
     private BleMessageResponseListener responseListener;
 
-    protected NetworkManagerBle managerBle;
+    private NetworkManagerBle managerBle;
 
     /**
      * Constructor which will be used when creating new instance of a task

@@ -703,4 +703,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         return groupBle;
     }
 
+    public abstract boolean isVersionLollipopOrAbove();
+
+    public abstract boolean isVersionKitKatOrBelow();
+
 }

@@ -69,7 +69,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
 import fi.iki.elonen.NanoHTTPD;
+
 import static android.os.Looper.getMainLooper;
 
 /**
@@ -95,6 +97,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     private BluetoothAdapter bluetoothAdapter;
 
     private Object bleServiceAdvertiser;
+
+    private Object bleScanCallback = null;
 
     /* Cast as required to avoid ClassNotFoundException on Android versions that dont support this */
     private Object gattServerAndroid;
@@ -164,11 +168,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      *
      * @see android.bluetooth.BluetoothAdapter.LeScanCallback
      */
-    private BluetoothAdapter.LeScanCallback leScanCallback = (device, rssi, scanRecord) -> {
-        NetworkNode networkNode = new NetworkNode();
-        networkNode.setBluetoothMacAddress(device.getAddress());
-        handleNodeDiscovered(networkNode);
-    };
+
+    //private BluetoothAdapter.LeScanCallback leScanCallback = nu
 
     private ScheduledExecutorService delayedExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -183,7 +184,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         "Starting BLE scanning");
                 notifyStateChanged(STATE_STARTED);
                 bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
-                        leScanCallback);
+                        (BluetoothAdapter.LeScanCallback) bleScanCallback);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,689,
                         "BLE Scanning started ");
             }else{
@@ -196,7 +197,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
         public void stop() {
-            bluetoothAdapter.stopLeScan(leScanCallback);
+            bluetoothAdapter.stopLeScan((BluetoothAdapter.LeScanCallback) bleScanCallback);
             notifyStateChanged(STATE_STOPPED);
         }
     };
@@ -477,7 +478,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         NetworkInfo networkInfo;
 
-        if(isLolliPopAndAboveDevice()){
+        if(isVersionLollipopOrAbove()){
             networkInfo = connectivityManager.getNetworkInfo(network);
         }else{
             networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -493,7 +494,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         //get network SSID
         if(ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)){
             status.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
-            if(isLolliPopAndAboveDevice()){
+            if(isVersionLollipopOrAbove()){
                 localConnectionOpener = network::openConnection;
             }
         }
@@ -548,6 +549,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }
 
         if(isBleDeviceSDKVersion() && isBleCapable()){
+
+            bleScanCallback = (BluetoothAdapter.LeScanCallback) (device, rssi, scanRecord) -> {
+                NetworkNode networkNode = new NetworkNode();
+                networkNode.setBluetoothMacAddress(device.getAddress());
+                handleNodeDiscovered(networkNode);
+            };
+
             //setting up bluetooth connection listener
             IntentFilter intentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -946,7 +954,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         connectivityManager = (ConnectivityManager)mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        if (isLolliPopAndAboveDevice()) {
+        if (isVersionLollipopOrAbove()) {
             NetworkRequest networkRequest = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -971,9 +979,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
     }
 
-    private boolean isLolliPopAndAboveDevice(){
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
 
     /**
      * Check if the device can advertise BLE service
@@ -1043,7 +1048,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             mContext.unregisterReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver);
         }
 
-        if(!isLolliPopAndAboveDevice()){
+        if(!isVersionLollipopOrAbove()){
             mContext.unregisterReceiver(networkStateChangeReceiver);
         }
 
@@ -1052,6 +1057,16 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }
 
         super.onDestroy();
+    }
+
+    @Override
+    public boolean isVersionLollipopOrAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    @Override
+    public boolean isVersionKitKatOrBelow() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
     }
 
     /**
