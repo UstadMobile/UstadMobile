@@ -74,6 +74,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      * time.
      *
      * Note: We always create ClazzLogs in the TimeZone.
+     * Note 2: the startTime and endTime are times in the phone's timezone.
      *
      * @param startTime             between start time
      * @param endTime               AND end time
@@ -232,6 +233,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      *  Called by ClazzLogScheduleWorker work manager to be run everyday 00:00
      */
     public void createClazzLogsForToday(long accountPersonUid, UmAppDatabase db) {
+
+        //Note this calendar is created on the device's time zone.
         Calendar dayCal = Calendar.getInstance();
         dayCal.set(Calendar.HOUR_OF_DAY, 0);
         dayCal.set(Calendar.MINUTE, 0);

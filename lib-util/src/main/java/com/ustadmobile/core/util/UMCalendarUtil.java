@@ -352,25 +352,40 @@ public class UMCalendarUtil {
      */
     public static Calendar copyCalendarAndAdvanceTo(Calendar calendar, String timeZone,
                                                     int dayOfWeek, boolean incToday) {
-        Calendar result = Calendar.getInstance();
-        result.setTimeZone(TimeZone.getTimeZone(timeZone));
-        result.setTimeInMillis(calendar.getTimeInMillis());
+
+        //Note: calendar is the calendar in the phone's time zone. The phone's timezone can be
+        // different from the Class's timezone. Since all times are in the Class's time zone,
+        // a phone 9 am is in fact intended to be Class TimeZone's 9 am. This is a flaw in how the
+        // calendar variable gets to us. While we are making a calendar below with the right time
+        // zone, we should consider calendar as the right time for checking not the one with
+        // time zone. I guess we could fix the originating calendar but the phone's time zone is
+        // unknown. I guess we could set the time zone from where this method is called
+        // ie: createClazzLogs but that process is to be run every midnight of every device.
+        // The solution might just be to ignore another timezone conversion and just look at
+        // the calendar object given to this method and assume that its in the right time zone.
+        Calendar comparisonCalendar = Calendar.getInstance();
+        comparisonCalendar.setTimeZone(TimeZone.getTimeZone(timeZone));
+        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());
+
+        //Hence, assuming:
+        comparisonCalendar = calendar;
 
         int today = calendar.get(Calendar.DAY_OF_WEEK);
 
         if(today == dayOfWeek) {
             if(!incToday) {
-                result.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
+                comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
             }
+
 
             //Addition:
             // Calendar without Time Zone's day = time zoned calendar's day = expected day of week
-            if(result.get(Calendar.DAY_OF_WEEK) == calendar.get(Calendar.DAY_OF_WEEK) &&
+            if(comparisonCalendar.get(Calendar.DAY_OF_WEEK) == calendar.get(Calendar.DAY_OF_WEEK) &&
                 calendar.get(Calendar.DAY_OF_WEEK) == dayOfWeek){
-                return result;
+                return comparisonCalendar;
             }
-            result.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-            return result;
+            comparisonCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+            return comparisonCalendar;
         }
 
 
@@ -381,9 +396,9 @@ public class UMCalendarUtil {
             deltaDays = (7 - today) + dayOfWeek;
         }
 
-        result.setTimeInMillis(calendar.getTimeInMillis() + (deltaDays * 1000 * 60 * 60 * 24));
+        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis() + (deltaDays * 1000 * 60 * 60 * 24));
 
-        return result;
+        return comparisonCalendar;
     }
 
     public static void normalizeSecondsAndMillis(Calendar calendar) {
