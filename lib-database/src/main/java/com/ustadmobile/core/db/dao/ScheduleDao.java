@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 @UmDao(inheritPermissionFrom = ClazzDao.class,
 inheritPermissionForeignKey = "scheduleClazzUid",
@@ -84,7 +85,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     public void
     createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
         //This method will usually be called from the Workmanager in Android every day. Making the
-        // start time 00:00 and end tim 23:59
+        // start time 00:00 and end tim 23:59 : Note: This is the device's timzone. (not class)
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTimeInMillis(startTime);
         UMCalendarUtil.normalizeSecondsAndMillis(startCalendar);
@@ -107,6 +108,9 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         clazz.getClazzUid() + " as it has no timezone");
                 continue;
             }
+
+            String timeZone = clazz.getTimeZone();
+
 
             //Get a list of schedules for the classes
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
@@ -140,7 +144,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         //This will get the next schedule for that day. For the same day, it will
                         //return itself if incToday is set to true, else it will go to next week.
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                                startCalendar, clazz.getTimeZone(),dayOfWeek, incToday);
+                                startCalendar, timeZone ,dayOfWeek, incToday);
 
                         //Set to 00:00
                         nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
@@ -164,7 +168,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                     }
 
                     nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                            startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
+                            startCalendar, timeZone, schedule.getScheduleDay(), incToday);
 
                     //Set to 00:00
                     nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
@@ -231,6 +235,9 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      *  automatically.
      *  Called when a new Schedule is created in AddScheduleDialogPresenter , AND
      *  Called by ClazzLogScheduleWorker work manager to be run everyday 00:00
+     *
+     *  The method creates ClazzLog from the device's time zone.
+     *  ie: today is device's 00:00 to device's 23:59.
      */
     public void createClazzLogsForToday(long accountPersonUid, UmAppDatabase db) {
 

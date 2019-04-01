@@ -363,12 +363,13 @@ public class UMCalendarUtil {
         // ie: createClazzLogs but that process is to be run every midnight of every device.
         // The solution might just be to ignore another timezone conversion and just look at
         // the calendar object given to this method and assume that its in the right time zone.
-        Calendar comparisonCalendar = Calendar.getInstance();
-        comparisonCalendar.setTimeZone(TimeZone.getTimeZone(timeZone));
-        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());
+//        Calendar comparisonCalendar = Calendar.getInstance();
+//        comparisonCalendar.setTimeZone(TimeZone.getTimeZone(timeZone));
+//        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());
 
-        //Hence, assuming:
-        comparisonCalendar = calendar;
+        Calendar comparisonCalendar = Calendar.getInstance();
+        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());
+        comparisonCalendar.setTimeZone(calendar.getTimeZone());
 
         int today = calendar.get(Calendar.DAY_OF_WEEK);
 
