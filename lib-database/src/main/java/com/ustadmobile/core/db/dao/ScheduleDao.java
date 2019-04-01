@@ -130,7 +130,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         dayOfWeek = today;
                     }
                     //TODO: Associate with weekend feature in the future
-                    if(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY){
+                    if(dayOfWeek == Calendar.SUNDAY){
                         //skip
                         System.out.println("Today is a weekend. Skipping ClazzLog creation for today.");
 
@@ -155,6 +155,12 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                     }
 
                 }else if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
+
+                    if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == schedule.getScheduleDay()){
+                        incToday = true;
+                    }else{
+                        incToday = false;
+                    }
 
                     nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                             startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);

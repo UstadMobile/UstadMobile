@@ -363,6 +363,12 @@ public class UMCalendarUtil {
                 result.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
             }
 
+            //Addition:
+            // Calendar without Time Zone's day = time zoned calendar's day = expected day of week
+            if(result.get(Calendar.DAY_OF_WEEK) == calendar.get(Calendar.DAY_OF_WEEK) &&
+                calendar.get(Calendar.DAY_OF_WEEK) == dayOfWeek){
+                return result;
+            }
             result.set(Calendar.DAY_OF_WEEK, dayOfWeek);
             return result;
         }
