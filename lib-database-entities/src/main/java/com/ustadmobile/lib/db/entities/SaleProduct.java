@@ -14,13 +14,15 @@ public class SaleProduct {
 
     private String saleProductName;
 
-    private String saleProcutDesc;
+    private String saleProductDesc;
 
     private long saleProductDateAdded;
 
     private long saleProductPersonAdded;
 
     private long saleProductPictureUid;
+
+    private long saleProductCategoryUid;
 
     private boolean saleProductActive;
 
@@ -50,12 +52,12 @@ public class SaleProduct {
         this.saleProductName = saleProductName;
     }
 
-    public String getSaleProcutDesc() {
-        return saleProcutDesc;
+    public String getSaleProductDesc() {
+        return saleProductDesc;
     }
 
-    public void setSaleProcutDesc(String saleProcutDesc) {
-        this.saleProcutDesc = saleProcutDesc;
+    public void setSaleProductDesc(String saleProductDesc) {
+        this.saleProductDesc = saleProductDesc;
     }
 
     public long getSaleProductDateAdded() {
@@ -112,5 +114,13 @@ public class SaleProduct {
 
     public void setSaleProductLCB(int saleProductLCB) {
         this.saleProductLCB = saleProductLCB;
+    }
+
+    public long getSaleProductCategoryUid() {
+        return saleProductCategoryUid;
+    }
+
+    public void setSaleProductCategoryUid(long saleProductCategoryUid) {
+        this.saleProductCategoryUid = saleProductCategoryUid;
     }
 }

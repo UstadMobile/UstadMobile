@@ -280,4 +280,42 @@
     <string name="download_storage_permission_title">File permissions required</string>
     <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
 
+    <!--Goldozi-->
+    <string name="sales">Sales</string>
+    <string name="all_sales">All sales</string>
+    <string name="pre_orders">Pre-orders</string>
+    <string name="payments_due">payments_due</string>
+    <string name="sort_by">Sort by</string>
+    <string name="sort_by_recent">recent</string>
+    <string name="sort_by_amount">amount</string>
+    <string name="sort_by_location">location</string>
+    <string name="record_sale">Record sale</string>
+    <string name="catalog">Catalog</string>
+    <string name="inventory">Inventory</string>
+    <string name="courses">Courses</string>
+    <string name="items">Items</string>
+    <string name="add_item">Add item</string>
+    <string name="select_producer">Select producer</string>
+    <string name="most_recent">Most recent</string>
+    <string name="more">More</string>
+    <string name="by_category">By category</string>
+    <string name="quantity">Quantity</string>
+    <string name="price_per_piece">Price per piece</string>
+    <string name="total">Total</string>
+    <string name="sold">Sold</string>
+    <string name="pre_order">Pre-order</string>
+    <string name="save">Save</string>
+    <string name="price">Price</string>
+    <string name="delivered">Delivered</string>
+    <string name="payments">payments</string>
+    <string name="add_payment">Add payment</string>
+    <string name="order_total">Order total</string>
+    <string name="discount">discount</string>
+    <string name="balance_due">Balance due</string>
+    <string name="order_notes">Order notes</string>
+    <string name="collections">Collections</string>
+    <string name="by_collection">By collection</string>
+    <string name="sale_product">Sale product</string>
+    <string name="currency_afs">Afs</string>
+
 </resources>

@@ -98,6 +98,7 @@ import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Sale;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.entities.SaleProductGroup;
 import com.ustadmobile.lib.db.entities.SaleProductGroupJoin;
 import com.ustadmobile.lib.db.entities.SaleItem;
@@ -135,7 +136,7 @@ import java.util.Random;
         ContentEntryStatus.class, ConnectivityStatus.class,
         //Goldozi :
         Sale.class, SaleItem.class, SalePayment.class, SaleProductGroup.class,
-        SaleProductGroupJoin.class, SaleProductPicture.class, SaleProductGroupJoin.class
+        SaleProductGroupJoin.class, SaleProductPicture.class, SaleProduct.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -590,7 +591,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract PersonCustomFieldDao getPersonCustomFieldDao();
 
     public abstract PersonCustomFieldValueDao getPersonCustomFieldValueDao();
-
 
     public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
 

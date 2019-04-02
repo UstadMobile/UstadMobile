@@ -55,7 +55,7 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
             " SaleItem.saleItemQuantity AS saleItemQuantityCount, " +
             " SaleItem.saleItemPricePerPiece AS saleItemPrice," +
             " SaleItem.saleItemDiscount AS saleItemDiscountPerItem, " +
-            " Sale.saleItemSold AS saleItemDelivered " +
+            " SaleItem.saleItemSold AS saleItemDelivered " +
             "FROM SaleItem " +
             " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
             " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +

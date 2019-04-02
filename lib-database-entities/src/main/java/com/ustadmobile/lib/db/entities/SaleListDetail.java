@@ -69,4 +69,20 @@ public class SaleListDetail {
     public void setSaleItemCount(int saleItemCount) {
         this.saleItemCount = saleItemCount;
     }
+
+    public boolean isPreOrder() {
+        return preOrder;
+    }
+
+    public void setPreOrder(boolean preOrder) {
+        this.preOrder = preOrder;
+    }
+
+    public boolean isPaymentDue() {
+        return paymentDue;
+    }
+
+    public void setPaymentDue(boolean paymentDue) {
+        this.paymentDue = paymentDue;
+    }
 }

@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @UmDao(hasAttachment = true,
-        permissionJoin = " LEFT JOIN SaleProduce ON SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid",
+        permissionJoin = " LEFT JOIN SaleProduct ON SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid",
         selectPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 public abstract class SaleProductPictureDao implements SyncableDao<SaleProductPicture, SaleProductPictureDao> {
@@ -32,7 +32,7 @@ public abstract class SaleProductPictureDao implements SyncableDao<SaleProductPi
     @UmDbSetAttachment
     public abstract void setAttachmentFromTmpFile(long uid, File tmpFile);
 
-    @UmQuery("SEECT * FROM SaleProductPicture where saleProductPictureSaleProductUid = :saleProduct ORDER BY saleProductPictureTimestamp DESC LIMIT 1")
+    @UmQuery("SELECT * FROM SaleProductPicture where saleProductPictureSaleProductUid = :saleProductUid ORDER BY saleProductPictureTimestamp DESC LIMIT 1")
     public abstract void findBySaleProductUidAsync(long saleProductUid, UmCallback<SaleProductPicture> findByUidCallback);
 
     @UmDbSetAttachment
