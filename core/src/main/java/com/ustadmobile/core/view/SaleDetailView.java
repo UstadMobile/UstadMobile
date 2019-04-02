@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.Sale;
 import com.ustadmobile.lib.db.entities.SaleItemListDetail;
 import com.ustadmobile.lib.db.entities.SalePayment;
 
@@ -37,6 +38,14 @@ public interface SaleDetailView extends UstadView {
      */
     void setPaymentProvider(UmProvider<SalePayment> paymentProvider);
 
+
+    void updateOrderTotal(long orderTotal);
+
+    void updateOrderDiscountTotal(long discountTotal);
+
+    void updateSaleOnView(Sale sale);
+
+    void updatePaymentTotal(long paymentTotal);
 
 }
 

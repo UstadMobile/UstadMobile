@@ -16,8 +16,8 @@ import java.io.InputStream;
 
 @UmDao(hasAttachment = true,
         permissionJoin = " LEFT JOIN SaleProduce ON SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid",
-        selectPermissionCondition = "",
-        updatePermissionCondition = "")
+        selectPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
+        updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 public abstract class SaleProductPictureDao implements SyncableDao<SaleProductPicture, SaleProductPictureDao> {
 
     @UmDbSetAttachment

@@ -1,18 +1,17 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Sale;
-import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 
 
 /**
- * Core View. Screen is for SaleItemDetail's View
+ * Core View. Screen is for SelectSaleProduct's View
  */
-public interface SaleItemDetailView extends UstadView {
+public interface SelectSaleProductView extends UstadView {
 
 
     // This defines the view name that is an argument value in the go() in impl.
-    String VIEW_NAME = "SaleItemDetail";
+    String VIEW_NAME = "SelectSaleProduct";
 
     //Any argument keys:
 
@@ -27,9 +26,7 @@ public interface SaleItemDetailView extends UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<SaleItem> listProvider);
-
-
+    void setListProvider(UmProvider<SaleProduct> listProvider);
 
 
 
