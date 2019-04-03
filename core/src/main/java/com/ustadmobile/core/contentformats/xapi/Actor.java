@@ -96,4 +96,34 @@ public class Actor {
     public void setAccount(Account account) {
         this.account = account;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Actor actor = (Actor) o;
+
+        if (name != null ? !name.equals(actor.name) : actor.name != null) return false;
+        if (mbox != null ? !mbox.equals(actor.mbox) : actor.mbox != null) return false;
+        if (mbox_sha1sum != null ? !mbox_sha1sum.equals(actor.mbox_sha1sum) : actor.mbox_sha1sum != null)
+            return false;
+        if (openid != null ? !openid.equals(actor.openid) : actor.openid != null) return false;
+        if (objectType != null ? !objectType.equals(actor.objectType) : actor.objectType != null)
+            return false;
+        if (member != null ? !member.equals(actor.member) : actor.member != null) return false;
+        return account != null ? account.equals(actor.account) : actor.account == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (mbox != null ? mbox.hashCode() : 0);
+        result = 31 * result + (mbox_sha1sum != null ? mbox_sha1sum.hashCode() : 0);
+        result = 31 * result + (openid != null ? openid.hashCode() : 0);
+        result = 31 * result + (objectType != null ? objectType.hashCode() : 0);
+        result = 31 * result + (member != null ? member.hashCode() : 0);
+        result = 31 * result + (account != null ? account.hashCode() : 0);
+        return result;
+    }
 }

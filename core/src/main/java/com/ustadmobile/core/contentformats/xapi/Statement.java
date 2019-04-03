@@ -133,4 +133,39 @@ public class Statement {
     public void setObjectType(String objectType) {
         this.objectType = objectType;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Statement statement = (Statement) o;
+
+        if (actor != null ? !actor.equals(statement.actor) : statement.actor != null) return false;
+        if (verb != null ? !verb.equals(statement.verb) : statement.verb != null) return false;
+        if (object != null ? !object.equals(statement.object) : statement.object != null)
+            return false;
+        if (subStatement != null ? !subStatement.equals(statement.subStatement) : statement.subStatement != null)
+            return false;
+        if (result != null ? !result.equals(statement.result) : statement.result != null)
+            return false;
+        if (context != null ? !context.equals(statement.context) : statement.context != null)
+            return false;
+        if (authority != null ? !authority.equals(statement.authority) : statement.authority != null)
+            return false;
+        return objectType != null ? objectType.equals(statement.objectType) : statement.objectType == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result1 = actor != null ? actor.hashCode() : 0;
+        result1 = 31 * result1 + (verb != null ? verb.hashCode() : 0);
+        result1 = 31 * result1 + (object != null ? object.hashCode() : 0);
+        result1 = 31 * result1 + (subStatement != null ? subStatement.hashCode() : 0);
+        result1 = 31 * result1 + (result != null ? result.hashCode() : 0);
+        result1 = 31 * result1 + (context != null ? context.hashCode() : 0);
+        result1 = 31 * result1 + (authority != null ? authority.hashCode() : 0);
+        result1 = 31 * result1 + (objectType != null ? objectType.hashCode() : 0);
+        return result1;
+    }
 }

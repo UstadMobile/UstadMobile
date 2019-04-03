@@ -31,4 +31,22 @@ public class XObject {
     public void setObjectType(String objectType) {
         this.objectType = objectType;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        XObject object = (XObject) o;
+
+        if (id != null ? !id.equals(object.id) : object.id != null) return false;
+        return objectType != null ? objectType.equals(object.objectType) : object.objectType == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (objectType != null ? objectType.hashCode() : 0);
+        return result;
+    }
 }

@@ -46,4 +46,28 @@ public class ContextActivity {
     public void setOther(List<XObject> other) {
         this.other = other;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContextActivity that = (ContextActivity) o;
+
+        if (parent != null ? !parent.equals(that.parent) : that.parent != null) return false;
+        if (grouping != null ? !grouping.equals(that.grouping) : that.grouping != null)
+            return false;
+        if (category != null ? !category.equals(that.category) : that.category != null)
+            return false;
+        return other != null ? other.equals(that.other) : that.other == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = parent != null ? parent.hashCode() : 0;
+        result = 31 * result + (grouping != null ? grouping.hashCode() : 0);
+        result = 31 * result + (category != null ? category.hashCode() : 0);
+        result = 31 * result + (other != null ? other.hashCode() : 0);
+        return result;
+    }
 }
