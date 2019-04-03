@@ -47,7 +47,7 @@ public class TestStatementParser {
     }
 
     @Test
-    public void givenValidStatement_parseAll() throws IOException {
+    public void givenValidStatement_whenParsed_thenDbAndStatementShouldMatch() throws IOException {
 
         Statement statement = gson.fromJson((UMIOUtils.readStreamToString(getClass().getResourceAsStream(simpleStatement))), Statement.class);
         StatementEndpoint endpoint = new StatementEndpoint(repo, gson);
@@ -69,7 +69,7 @@ public class TestStatementParser {
     }
 
     @Test
-    public void givenValidStatement_parseContext() throws IOException {
+    public void givenValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() throws IOException {
 
         Statement statement = gson.fromJson(UMIOUtils.readStreamToString(getClass().getResourceAsStream(contextWithObject)), Statement.class);
         StatementEndpoint endpoint = new StatementEndpoint(repo, gson);
@@ -99,7 +99,7 @@ public class TestStatementParser {
     }
 
     @Test
-    public void givenValidStatement_parseFull() throws IOException {
+    public void givenFullValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() throws IOException {
 
         Statement statement = gson.fromJson(UMIOUtils.readStreamToString(getClass().getResourceAsStream(fullstatement)), Statement.class);
         StatementEndpoint endpoint = new StatementEndpoint(repo, gson);
@@ -146,7 +146,7 @@ public class TestStatementParser {
     }
 
     @Test
-    public void givenValidStatement_parseSub() throws IOException {
+    public void givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() throws IOException {
 
         Statement statement = gson.fromJson(UMIOUtils.readStreamToString(getClass().getResourceAsStream(subStatement)), Statement.class);
         StatementEndpoint endpoint = new StatementEndpoint(repo, gson);
@@ -175,6 +175,9 @@ public class TestStatementParser {
 
 
     }
+
+
+
 
     @Test
     public void givenAgentEntity_daoReturnsTheCorrectAgent() {

@@ -24,6 +24,7 @@ import java.util.zip.ZipFile;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -91,7 +92,7 @@ public class TestXapiPackageContentPresenter {
 
 
         doAnswer(invocation -> {
-            new Thread((Runnable)invocation.getArgument(0)).start();
+            new Thread((Runnable) invocation.getArgument(0)).start();
             return null;
         }).when(mockXapiPackageContentView).runOnUiThread(any());
 
@@ -104,7 +105,7 @@ public class TestXapiPackageContentPresenter {
     }
 
     @Test
-    public void givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() throws InterruptedException{
+    public void givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() throws InterruptedException {
         Hashtable args = new Hashtable();
         args.put(XapiPackageContentView.ARG_CONTAINER_UID, String.valueOf(xapiContainer.getContainerUid()));
 
@@ -117,8 +118,8 @@ public class TestXapiPackageContentPresenter {
         verify(mockXapiPackageContentView).mountContainer(
                 eq(xapiContainer.getContainerUid()), any());
 
-        verify(mockXapiPackageContentView, timeout(5000)).loadUrl(
-                UMFileUtil.joinPaths(lastMountedUrl, "tetris.html"));
+        verify(mockXapiPackageContentView, timeout(5000)).loadUrl(startsWith(
+                UMFileUtil.joinPaths(lastMountedUrl, "tetris.html")));
 
         verify(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example");
     }
