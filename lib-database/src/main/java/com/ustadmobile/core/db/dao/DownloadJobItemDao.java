@@ -287,6 +287,15 @@ public abstract class DownloadJobItemDao {
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
     public abstract List<DownloadJobItem> findByDjiUidsList(List<Long> contentEntryUids);
 
+    @UmQuery("SELECT djiUid AS jobItemUid, " +
+            "djiContentEntryUid AS contentEntryUid, " +
+            "downloadedSoFar AS bytesSoFar, " +
+            "downloadLength AS totalBytes," +
+            "djiStatus AS state " +
+            "FROM DownloadJobItem " +
+            "WHERE DownloadJobItem.djiDjUid = :downloadJobUid")
+    public abstract List<DownloadJobItemStatus> findStatusByDownlaodJobUid(long downloadJobUid);
+
     private DownloadJobItem generateDjiFromContainerWithContentEntry(
             ContainerWithContentEntry containerWithContentEntry) {
         return new DownloadJobItem();

@@ -3,6 +3,8 @@ package com.ustadmobile.core.networkmanager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
@@ -13,12 +15,10 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -129,28 +129,44 @@ public class TestDownloadJobItemManager {
     @Test
     public void givenDownloadWithChildren_whenItemAdded_thenShouldIncreaseTotalLength()
             throws InterruptedException{
+        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Test: " +
+                "givenDownloadWithChildren_whenItemAdded_thenShouldIncreaseTotalLength");
         setupDb();
         DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
+        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<DownloadJobItemStatus> statusRef = new AtomicReference<>();
         manager.setOnDownloadJobItemChangeListener((status) -> {
             if(status.getContentEntryUid() == downloadJob.getDjRootContentEntryUid()
-                && status.getTotalBytes() == subLeafContainer.getFileSize())
+                && status.getTotalBytes() == subLeafContainer.getFileSize()) {
                 statusRef.set(status);
+                latch.countDown();
+            }
+
         });
 
         setupRootAndSubleaf(manager);
 
+        latch.await(5, TimeUnit.SECONDS);
+
         Assert.assertNotNull(statusRef.get());
+        Assert.assertEquals("Got an update for the root content entry uid",
+                parentEntry.getContentEntryUid(), statusRef.get().getContentEntryUid());
+        Assert.assertEquals("Total size includes child item added",
+                subLeafContainer.getFileSize(), statusRef.get().getTotalBytes());
     }
 
     @Test
     public void givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch()
             throws InterruptedException{
+        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Test: " +
+                "givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch");
         setupDb();
         DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
         setupRootAndSubleaf(manager);
 
-        manager.commit();
+        CountDownLatch latch = new CountDownLatch(1);
+        manager.commit((aVoid) -> latch.countDown());
+        latch.await(5, TimeUnit.SECONDS);
 
         Assert.assertEquals("Download root item size in database matches expected size",
                 subLeafContainer.getFileSize(),
@@ -158,17 +174,47 @@ public class TestDownloadJobItemManager {
                         .getDownloadLength());
     }
 
-
     @Test
-    public void given50000ObjectsCreated_whenMemoryCounted_memoryUsageShouldBeReasonable() {
-        System.gc();
-        Runtime runtime = Runtime.getRuntime();
-        long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
-        Map<Integer, DownloadJobItemStatus> statusMap = new HashMap<>();
+    public void givenStatusSavedToDatabase_whenReloaded_thenTotalsShouldMatch()
+            throws InterruptedException{
+        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Test: " +
+                "givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch");
+        setupDb();
+        DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
+        setupRootAndSubleaf(manager);
 
+        CountDownLatch latch = new CountDownLatch(1);
+        manager.commit((aVoid) -> latch.countDown());
+        latch.await(5, TimeUnit.SECONDS);
+        manager = null;
+
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        DownloadJobItemManager manager2 = new DownloadJobItemManager(db, (int)downloadJob.getDjUid(),
+                (aVoid) -> latch2.countDown());
+        latch2.await(5, TimeUnit.SECONDS);
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        AtomicReference<DownloadJobItemStatus> statusRef = new AtomicReference<>();
+        manager2.findStatusByContentEntryUid(parentEntry.getContentEntryUid(), (status) -> {
+            statusRef.set(status);
+            latch3.countDown();
+        });
+
+        latch3.await(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("Parent entry total size is set as before",
+                subLeafContainer.getFileSize(),
+                statusRef.get().getTotalBytes());
+    }
+
+
+    private Map<Integer, DownloadJobItemStatus> addItemsAndParents(int numItems) {
+        Map<Integer, DownloadJobItemStatus> statusMap = new HashMap<>();
         DownloadJobItemStatus lastItem = null;
-        for(int i = 0 ; i < 50000; i++) {
+        for(int i = 0 ; i < numItems; i++) {
             DownloadJobItemStatus status = new DownloadJobItemStatus();
+            status.setContentEntryUid(i);
 
             if(lastItem != null) {
                 status.addParent(lastItem);
@@ -178,9 +224,43 @@ public class TestDownloadJobItemManager {
             lastItem = status;
         }
 
+        return statusMap;
+    }
+
+    @Test
+    public void given50000ObjectsCreated_whenMemoryCounted_memoryUsageShouldBeReasonable() {
+        System.gc();
+        Runtime runtime = Runtime.getRuntime();
+        long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
+        Map<Integer, DownloadJobItemStatus> statusMap = addItemsAndParents(50000);
         System.gc();
         long memoryUsed = (runtime.totalMemory() - runtime.freeMemory()) - memoryBefore;
         Assert.assertTrue(memoryUsed < 1000 * 1000 * 1000 * 10);//10MB?
+    }
+
+    private DownloadJobItemStatus findInMapByContentEntryUid(long contentEntryUid,
+                                                             Map<Integer, DownloadJobItemStatus> map) {
+        for(DownloadJobItemStatus status : map.values()) {
+            if(status.getContentEntryUid() == contentEntryUid)
+                return status;
+        }
+
+        return null;
+    }
+
+    @Test
+    public void given50000ObjectsCreated_whenGettingItemByContentEntryUid_retrievalTimeShouldBeReasonable() {
+        System.gc();
+        Map<Integer, DownloadJobItemStatus> statusMap = addItemsAndParents(50000);
+        for(int i = 0; i < 10; i++) {
+            long entryUidToFind = (int)(Math.random() * 50000);
+            long startTime = System.currentTimeMillis();
+            DownloadJobItemStatus itemFound = findInMapByContentEntryUid(entryUidToFind, statusMap);
+            long lookupTime = System.currentTimeMillis() - startTime;
+            System.out.println("lookup time = " + lookupTime + "ms");
+            Assert.assertNotNull("Found item in table", itemFound);
+            Assert.assertTrue("Found item quickly enough", lookupTime < 50);
+        }
     }
 
 

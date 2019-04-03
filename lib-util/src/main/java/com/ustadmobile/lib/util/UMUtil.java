@@ -38,14 +38,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-
-/* $endif$ */
 
 /**
  * Misc utility methods
@@ -593,6 +588,25 @@ public class UMUtil {
     }
 
 
+    public static String debugPrintList(List<?> list) {
+        if(list == null)
+            return "[null list]";
+
+        boolean isFirst = true;
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for(Object obj : list) {
+            if(!isFirst)
+                sb.append(',');
+
+            sb.append(obj != null ? obj.toString() : null);
+
+            isFirst = false;
+        }
+        sb.append(']');
+
+        return sb.toString();
+    }
 
 
 }

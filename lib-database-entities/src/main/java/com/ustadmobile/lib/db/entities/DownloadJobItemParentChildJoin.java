@@ -81,4 +81,10 @@ public class DownloadJobItemParentChildJoin {
         result = 31 * result + (int) (djiChildDjiUid ^ (djiChildDjiUid >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "djiPcjUid=" + djiCepcjUid + ", djiParentDjiUid=" + djiParentDjiUid + ", " +
+                djiChildDjiUid;
+    }
 }

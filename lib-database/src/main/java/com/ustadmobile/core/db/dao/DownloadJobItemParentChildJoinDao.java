@@ -14,6 +14,11 @@ public abstract class DownloadJobItemParentChildJoinDao {
             "WHERE djiChildDjiUid = :childDjiUid ")
     public abstract List<DownloadJobItemParentChildJoin> findParentsByChildUid(long childDjiUid);
 
+    @UmQuery("SELECT DownloadJobItemParentChildJoin.* FROM DownloadJobItemParentChildJoin " +
+            " LEFT JOIN DownloadJobItem ON DownloadJobItemParentChildJoin.djiParentDjiUid = DownloadJobItem.djiUid " +
+            " WHERE DownloadJobItem.djiDjUid = :djUid")
+    public abstract List<DownloadJobItemParentChildJoin> findParentChildJoinsByDownloadJobUids(int djUid);
+
     @UmInsert
     public abstract void insertList(List<DownloadJobItemParentChildJoin> joins);
 

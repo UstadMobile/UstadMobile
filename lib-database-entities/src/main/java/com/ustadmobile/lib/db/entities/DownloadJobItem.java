@@ -195,4 +195,9 @@ public class DownloadJobItem {
     public void setDjiContentEntryUid(long djiContentEntryUid) {
         this.djiContentEntryUid = djiContentEntryUid;
     }
+
+    @Override
+    public String toString() {
+        return "DownloadJobItem djiUid #" + djiUid + " contentEntryUid=" + djiContentEntryUid;
+    }
 }
