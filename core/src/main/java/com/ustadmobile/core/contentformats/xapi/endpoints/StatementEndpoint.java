@@ -26,8 +26,11 @@ import com.ustadmobile.lib.db.entities.VerbEntity;
 import com.ustadmobile.lib.db.entities.XObjectEntity;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class StatementEndpoint {
@@ -44,10 +47,6 @@ public class StatementEndpoint {
     public StatementEndpoint(UmAppDatabase db, Gson gson) {
         this.db = db;
         this.gson = gson;
-    }
-
-
-    public void storeStatements(List<Statement> statements) {
 
         verbDao = db.getVerbDao();
         statementDao = db.getStatementDao();
@@ -55,10 +54,17 @@ public class StatementEndpoint {
         xobjectDao = db.getXObjectDao();
         contextJoinDao = db.getContextXObjectStatementJoinDao();
         agentDao = db.getAgentDao();
+    }
 
+
+    public List<String> storeStatements(List<Statement> statements) throws IllegalArgumentException{
+
+        List<String> statementUids = new ArrayList<>();
         for (Statement statement : statements) {
-            createStatement(statement);
+            StatementEntity entity = createStatement(statement);
+            statementUids.add(entity.getStatementId());
         }
+        return statementUids;
     }
 
     private void checkValidStatement(Statement statement, boolean isSubStatement) throws IllegalArgumentException {
@@ -278,7 +284,7 @@ public class StatementEndpoint {
 
     }
 
-    public StatementEntity createStatement(Statement statement) {
+    public StatementEntity createStatement(Statement statement) throws IllegalArgumentException {
 
         checkValidStatement(statement, false);
 
@@ -533,5 +539,45 @@ public class StatementEndpoint {
         return statementEntity;
     }
 
+    public boolean hasMultipleStatementWithSameId(List<Statement> statementList) {
+        Set<String> uniques = new HashSet<>();
+        for (Statement statement : statementList) {
 
+            if (statement.getId() != null) {
+                boolean added = uniques.add(statement.getId());
+                if (!added) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public boolean hasExistingStatements(List<Statement> statements) {
+
+        for (Statement statement : statements) {
+
+            if (statement.getId() == null || statement.getId().isEmpty()) {
+                continue;
+            }
+
+            StatementEntity statementEntity = statementDao.findByStatementId(statement.getId());
+            if (statementEntity == null) {
+                continue;
+            }
+
+            return true;
+
+            // TODO statements can be updated in certain places
+           /* Statement statementDb = gson.fromJson(statementEntity.getFullStatement(), Statement.class);
+
+            if (!statementDb.equals(statement)) {
+                return true;
+            } */
+
+        }
+
+        return false;
+    }
 }
