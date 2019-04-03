@@ -241,10 +241,11 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //Bumping SyncablePrimaryKey
                         db.execSql("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1");
 
-                        /*
-                        First of all SyncStatus needs changed
-                        masterChangeSeqNum removed (always 1)
-                        localChangeSeqNum renamed to nextChangeSeqNum
+
+                        /**
+                         First of all SyncStatus needs changed
+                         localChangeSeqNum removed (always 1)
+                         masterChangeSeqNum renamed to nextChangeSeqNum
                          */
 
                         //Add nextChangeSeqNum:
@@ -973,8 +974,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
                         /**
                         First of all SyncStatus needs changed
-                        masterChangeSeqNum removed (always 1)
-                        localChangeSeqNum renamed to nextChangeSeqNum
+                         localChangeSeqNum removed (always 1)
+                         masterChangeSeqNum renamed to nextChangeSeqNum
                          */
                         //db.execSql("ALTER TABLE SyncStatus ADD COLUMN nextChangeSeqNum BIGINT");
                         db.execSql("ALTER TABLE SyncStatus RENAME COLUMN masterchangeseqnum TO nextChangeSeqNum");
