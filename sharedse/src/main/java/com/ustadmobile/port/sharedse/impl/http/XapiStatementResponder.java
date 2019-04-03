@@ -102,12 +102,24 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
             } else {
                 statement = session.getQueryParameterString();
             }
-
+            Map<String, List<String>> queryParams = session.getParameters();
+            String statementId = "";
+            if (queryParams != null && queryParams.containsKey("statementId")) {
+                statementId = queryParams.get("statementId").get(0);
+            }
             if (content != null || statement != null) {
                 statement = content != null ? new String(content) : statement;
                 ArrayList<Statement> statements = new ArrayList<>();
                 if (statement.startsWith("{")) {
                     Statement obj = gson.fromJson(statement, Statement.class);
+
+                    if (statementId != null && !statementId.isEmpty()) {
+                        if (!statementId.equalsIgnoreCase(obj.getId())) {
+                            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
+                                    "application/octet", null);
+                        }
+                    }
+
                     statements.add(obj);
                 } else {
                     statements.addAll(gson.fromJson(statement, listType));

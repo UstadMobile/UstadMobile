@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -49,7 +51,6 @@ public class TestXapiStatementResponder {
         out.close();
         httpCon.connect();
 
-        String response = UMIOUtils.readToString(httpCon.getInputStream(), "UTF-8");
         int code = httpCon.getResponseCode();
 
         Assert.assertEquals(204, code);
@@ -108,7 +109,8 @@ public class TestXapiStatementResponder {
     @Test
     public void givenAValidStatement_whenPutRequestHasStatementIdParam_thenShouldReturn() throws IOException {
 
-        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/statements";
+        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/statements?statementId=" +
+                URLEncoder.encode("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", StandardCharsets.UTF_8.toString());
         String content = UMIOUtils.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8");
 
@@ -121,7 +123,6 @@ public class TestXapiStatementResponder {
         out.close();
         httpCon.connect();
 
-        String response = UMIOUtils.readToString(httpCon.getInputStream(), "UTF-8");
         int code = httpCon.getResponseCode();
 
         Assert.assertEquals(204, code);
