@@ -34,7 +34,10 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -339,9 +342,9 @@ public class UMFileUtil {
      * @param deliminator deliminator character
      * @return Hashtable of parameters and values found
      */
-    public static Hashtable parseParams(String str, char deliminator) {
+    public static Map<String, String> parseParams(String str, char deliminator) {
         String paramName = null;
-        Hashtable params = new Hashtable();
+        Map<String,String> params = new HashMap<>();
         boolean inQuotes = false;
 
         int strLen = str.length();
@@ -401,14 +404,14 @@ public class UMFileUtil {
             urlQuery = urlQuery.substring(queryPos + 1);
         }
 
-        Hashtable parsedParams = parseParams(urlQuery, '&');
+        Map<String, String> parsedParams = parseParams(urlQuery, '&');
         Hashtable decodedParams = new Hashtable();
-        Enumeration e = parsedParams.keys();
+        Iterator it = parsedParams.keySet().iterator();
         String key;
-        while (e.hasMoreElements()) {
-            key = (String) e.nextElement();
+        while (it.hasNext()) {
+            key = (String) it.next();
             decodedParams.put(URLTextUtil.urlDecodeUTF8(key),
-                    URLTextUtil.urlDecodeUTF8((String) parsedParams.get(key)));
+                    URLTextUtil.urlDecodeUTF8(parsedParams.get(key)));
         }
 
         return decodedParams;
@@ -462,7 +465,7 @@ public class UMFileUtil {
 
         int semiPos = header.indexOf(';');
         String typeStr = null;
-        Hashtable params = null;
+        Map<String, String> params = null;
 
         if (semiPos == -1) {
             typeStr = header.trim();
@@ -511,9 +514,9 @@ public class UMFileUtil {
         /**
          * Hashtable of parameters found (case sensitive)
          */
-        public Hashtable params;
+        public Map<String, String> params;
 
-        public TypeWithParamHeader(String typeName, Hashtable params) {
+        public TypeWithParamHeader(String typeName, Map<String,String> params) {
             this.typeName = typeName;
             this.params = params;
         }
@@ -732,15 +735,15 @@ public class UMFileUtil {
      * @param prefix
      * @return
      */
-    public static Vector splitCombinedViewArguments(Hashtable args, String prefix, char argDelmininator) {
+    public static Vector splitCombinedViewArguments(Map<String, String> args, String prefix, char argDelmininator) {
         Vector result = new Vector();
-        Enumeration allArgsKeys = args.keys();
+        Iterator allArgsKeys = args.keySet().iterator();
 
         String currentKey, argName;
         int index, indexStart, indexEnd;
-        Hashtable indexArgs;
-        while (allArgsKeys.hasMoreElements()) {
-            currentKey = (String) allArgsKeys.nextElement();
+        Map<String, String> indexArgs;
+        while (allArgsKeys.hasNext()) {
+            currentKey = (String) allArgsKeys.next();
             if (currentKey.startsWith(prefix)) {
                 indexStart = currentKey.indexOf(argDelmininator) + 1;
                 indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1);

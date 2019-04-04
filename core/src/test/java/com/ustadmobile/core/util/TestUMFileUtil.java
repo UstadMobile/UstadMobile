@@ -1,11 +1,11 @@
 package com.ustadmobile.core.util;
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
-import com.ustadmobile.core.util.UMFileUtil;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
@@ -43,13 +43,13 @@ public class TestUMFileUtil {
 
     @Test
     public void testSplitCombinedViewArguments() {
-        Hashtable combinedArgs = new Hashtable();
+        Map<String, String> combinedArgs = new HashMap<>();
         String catalogUrl0 = "http://www.ustadmobile.com/files/s4s/index.testnewcat.opds";
         combinedArgs.put("catalog-0-url", catalogUrl0);
         combinedArgs.put("catalog-1-url", "bar");
 
         Vector splitArgs = UMFileUtil.splitCombinedViewArguments(combinedArgs, "catalog", '-');
-        Hashtable args0 = (Hashtable)splitArgs.get(0);
+        Map<String, String> args0 = (Map<String, String>) splitArgs.get(0);
         assertEquals("Catalog 0 arg is as expected", args0.get("url"), catalogUrl0);
     }
 
@@ -114,7 +114,7 @@ public class TestUMFileUtil {
                 header.params);
 
         String cacheHeader = "private, community=UCI, maxage=600";
-        Hashtable cacheTable = UMFileUtil.parseParams(cacheHeader, ',');
+        Map<String, String> cacheTable = UMFileUtil.parseParams(cacheHeader, ',');
 
         assertEquals("Cache control parsed private", "",
                 cacheTable.get("private"));
