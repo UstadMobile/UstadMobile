@@ -44,7 +44,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     private int[] tabIconsIds = new int[]{R.drawable.selector_tab_resources,
             R.drawable.selector_tab_classes};
 
-
     protected boolean classListVisible;
 
     private ActionBarDrawerToggle mDrawerToggle;

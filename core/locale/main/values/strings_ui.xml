@@ -290,9 +290,7 @@
     <string name="sort_by_amount">amount</string>
     <string name="sort_by_location">location</string>
     <string name="record_sale">Record sale</string>
-    <string name="catalog">Catalog</string>
     <string name="inventory">Inventory</string>
-    <string name="courses">Courses</string>
     <string name="items">Items</string>
     <string name="add_item">Add item</string>
     <string name="select_producer">Select producer</string>
@@ -317,5 +315,7 @@
     <string name="by_collection">By collection</string>
     <string name="sale_product">Sale product</string>
     <string name="currency_afs">Afs</string>
-
+    <string name="location">Location</string>
+    <string name="courses">Courses</string>
+    <string name="due">Due</string>
 </resources>

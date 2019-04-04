@@ -117,6 +117,15 @@
             android:theme="@style/Theme.UstadTheme"
             />
 
+        <!--Goldozi-->
+        <activity android:name="com.ustadmobile.port.android.view.BasePoint2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"
+            />
+
+
+        <!--Services-->
         <service android:name="com.ustadmobile.port.android.netwokmanager.DownloadNotificationService"
             android:enabled="true"
             android:exported="true"/>

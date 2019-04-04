@@ -1,0 +1,305 @@
+package com.ustadmobile.port.android.view;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.Toast;
+
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BasePoint2Presenter;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePoint2View;
+import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.Objects;
+import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.WorkManager;
+
+import static com.ustadmobile.port.android.util.ColorUtil.getContextCompatColorFromColor;
+
+
+public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2View {
+
+    private Toolbar toolbar;
+
+    private ViewPager mPager;
+    private BasePointViewPagerAdapter mPagerAdapter;
+
+    //Share app alert dialog
+    private AlertDialog shareAppDialog;
+
+    private BasePoint2Presenter mPresenter;
+
+    private Menu mOptionsMenu;
+
+    private SaleListFragment saleListFragment;
+
+    public static final int VIEW_POSITION_POSITION_CATALOG = 0;
+    public static final int VIEW_POSITION_POSITION_INVENTORY = 1;
+    public static final int VIEW_POSITION_POSITION_SALES = 2;
+    public static final int VIEW_POSITION_POSITION_COURSES = 3;
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //Setting layout:
+        setContentView(R.layout.activity_basepoint2);
+
+        //set up view pager.
+        setUpViewPager();
+
+        //Set up Toolbar:
+        toolbar = findViewById(R.id.activity_basepoint2_toolbar);
+        toolbar.setTitle("Ustad Mobile");
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+
+        //Call the Presenter
+        mPresenter = new BasePoint2Presenter(this,
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+
+        //Get the bottom navigation component
+        AHBottomNavigation bottomNavigation = findViewById(R.id.activity_basepoint2_bottom_navigation);
+
+        //Style it
+        bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(R.color.primary, getApplicationContext()));
+        bottomNavigation.setAccentColor(getContextCompatColorFromColor(R.color.text_primary, getApplicationContext()));
+        bottomNavigation.setInactiveColor(getContextCompatColorFromColor(R.color.primary_dark, getApplicationContext()));
+        bottomNavigation.setBehaviorTranslationEnabled(false);
+        bottomNavigation.setUseElevation(true, 2L);
+
+        //Create the items to be added
+        AHBottomNavigationItem catalog_item =
+                new AHBottomNavigationItem(R.string.catalog,
+                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+        AHBottomNavigationItem inventory_item =
+                new AHBottomNavigationItem(R.string.inventory,
+                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+        AHBottomNavigationItem sales_item =
+                new AHBottomNavigationItem(R.string.sales,
+                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+        AHBottomNavigationItem courses_item =
+                new AHBottomNavigationItem(R.string.courses,
+                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+
+        bottomNavigation.addItem(catalog_item);
+        bottomNavigation.addItem(inventory_item);
+        bottomNavigation.addItem(sales_item);
+        bottomNavigation.addItem(courses_item);
+
+        //Telling navigation to always show the text on the items. Unlike Google's
+        // own implementation.
+        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
+
+        //Click listeners for the items.
+        bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
+
+            if (!wasSelected) {
+                mPagerAdapter.getItem(position);
+                mPager.setCurrentItem(position);
+            }
+
+            //Update title
+            switch(position){
+                case 0:
+                    updateTitle(getText(R.string.catalog).toString());
+                    break;
+                case 1:
+                    updateTitle(getText(R.string.inventory).toString());
+                    break;
+                case 2:
+                    updateTitle(getText(R.string.sales).toString());
+                    break;
+                case 3:
+                    updateTitle(getText(R.string.courses).toString());
+                    break;
+
+            }
+            return true;
+        });
+
+        // Setting the very 1st item as default home screen.
+        bottomNavigation.setCurrentItem(2);
+
+    }
+
+    private void setUpViewPager(){
+        mPager = findViewById(R.id.activity_basepoint2_viewpager);
+        mPagerAdapter = new BasePointViewPagerAdapter(getSupportFragmentManager());
+        mPager.setAdapter(mPagerAdapter);
+    }
+
+    /**
+     * Updates the toolbar's title
+     * @param title The string of the title to be set to the toolbar
+     */
+    public void updateTitle(String title){
+        toolbar.setTitle(title);
+    }
+
+    @Override
+    public void showCatalog(boolean show) {
+
+    }
+
+    @Override
+    public void showInventory(boolean show) {
+
+    }
+
+    @Override
+    public void showSales(boolean show) {
+
+    }
+
+    @Override
+    public void showCourses(boolean show) {
+
+    }
+
+    @Override
+    public void shareAppSetupFile(String filePath) {
+
+    }
+
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
+     * the activity goes back when the back button is pressed.
+     *
+     * @param item The item selected
+     * @return true if accounted for
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void forceSync() {
+
+        WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
+        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void sendToast(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String message = impl.getString(messageId, getContext());
+
+        runOnUiThread(() -> Toast.makeText(
+                getApplicationContext(),
+                message,
+                Toast.LENGTH_SHORT
+        ).show());
+
+    }
+
+    @Override
+    public void checkPermissions() {
+
+    }
+
+    @Override
+    public void showShareAppDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.share_application);
+        builder.setView(R.layout.fragment_share_app_dialog);
+        builder.setPositiveButton(R.string.share, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        shareAppDialog = builder.create();
+        shareAppDialog.setOnShowListener(dialogInterface -> {
+            Button okButton = shareAppDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            okButton.setOnClickListener(v -> mPresenter.handleConfirmShareApp());
+        });
+        shareAppDialog.show();
+    }
+
+    @Override
+    public void dismissShareAppDialog() {
+        shareAppDialog.dismiss();
+        shareAppDialog=null;
+    }
+
+    /**
+     * Feed view pager's Adapter
+     */
+    public class BasePointViewPagerAdapter extends FragmentStatePagerAdapter {
+
+        //Map of position and fragment
+        private WeakHashMap<Integer, UstadBaseFragment> positionMap;
+        private static final int BASEPOINT_ITEM_COUNT = 4;
+
+        private
+
+            //Constructor creates the adapter
+        BasePointViewPagerAdapter(FragmentManager fm) {
+            super(fm);
+            positionMap = new WeakHashMap<>();
+        }
+
+        /**
+         * Generate fragment for that page/position
+         *
+         * @param position  position of item
+         * @return  the fragment
+         */
+        @Override
+        public Fragment getItem(int position) {
+            UstadBaseFragment thisFragment = positionMap.get(position);
+            if(thisFragment != null){
+                return thisFragment;
+            }else{
+                switch(position){
+                    case 0:
+                        saleListFragment = SaleListFragment.newInstance();
+                        this.positionMap.put(position, saleListFragment);
+                        return saleListFragment;
+                    case 1:
+                        saleListFragment = SaleListFragment.newInstance();
+                        this.positionMap.put(position, saleListFragment);
+                        return saleListFragment;
+                    case 2:
+                        saleListFragment = SaleListFragment.newInstance();
+                        this.positionMap.put(position, saleListFragment);
+                        return saleListFragment;
+                    case 3:
+                        saleListFragment = SaleListFragment.newInstance();
+                        this.positionMap.put(position, saleListFragment);
+                        return saleListFragment;
+                    default:
+                        return null;
+
+                }
+            }
+
+        }
+
+        @Override
+        public int getCount() {
+
+            return BASEPOINT_ITEM_COUNT;
+        }
+    }
+}

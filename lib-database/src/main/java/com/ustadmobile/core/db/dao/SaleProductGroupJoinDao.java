@@ -18,7 +18,7 @@ import java.util.List;
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition =
         RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-public abstract class SaleProductGroupJoinDao implements SyncableDao<SaleProductGroupJoin, SaleProductGroupDao> {
+public abstract class SaleProductGroupJoinDao implements SyncableDao<SaleProductGroupJoin, SaleProductGroupJoinDao> {
 
     //INSERT
 

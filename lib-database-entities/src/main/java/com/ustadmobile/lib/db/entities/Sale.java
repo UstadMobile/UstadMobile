@@ -8,14 +8,14 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
 @UmEntity(tableId = 61)
 public class Sale {
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleUid;
 
     private String saleTitle;
 
     private boolean saleActive;
 
-    private boolean saleLocationUid;
+    private long saleLocationUid;
 
     private long saleCreationDate;
 
@@ -77,11 +77,11 @@ public class Sale {
         this.saleActive = saleActive;
     }
 
-    public boolean isSaleLocationUid() {
+    public long getSaleLocationUid() {
         return saleLocationUid;
     }
 
-    public void setSaleLocationUid(boolean saleLocationUid) {
+    public void setSaleLocationUid(long saleLocationUid) {
         this.saleLocationUid = saleLocationUid;
     }
 

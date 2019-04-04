@@ -2,8 +2,10 @@ package com.ustadmobile.core.util;
 
 import com.ustadmobile.lib.util.UMUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -135,6 +137,40 @@ public class UMCalendarUtil {
     }
 
 
+    /**
+     * Gets date in long plus/minus the days specified from today.
+     *
+     * @param days  The days (positive or negative) off from today
+     * @return  The date in long
+     */
+    public static long getDateInMilliPlusDays(int days){
+        // get a calendar instance, which defaults to "now"
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    /**
+     * Gets simple pretty looking date (eg; 23/Jan/89) from a long date specified.
+     *
+     * @param thisDate  The date in long for which we want a pretty simple date.
+     * @return  The pretty simple date for the long date specified as string.
+     */
+    public static String getPrettyDateSuperSimpleFromLong(long thisDate, Locale locale){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format;
+        if(locale != null) {
+            format = new SimpleDateFormat("dd/MMM/yy", locale);
+        }else{
+            format = new SimpleDateFormat("dd/MMM/yy");
+        }
+        return format.format(calendar.getTime());
+    }
 
     /**
      * Appends two digits for the integer i; if i < 10; prepend a leading 0

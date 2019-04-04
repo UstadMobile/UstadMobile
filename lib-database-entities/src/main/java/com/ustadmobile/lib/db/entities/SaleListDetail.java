@@ -3,24 +3,12 @@ package com.ustadmobile.lib.db.entities;
 /**
  * Sale 's POJO for representing itself on the view (and recycler views)
  */
-public class SaleListDetail {
-    String saleTitle;
+public class SaleListDetail extends Sale {
     String locationName;
-    long saleDueDate;
     float saleAmount;
     String saleCurrency;
-    long saleCreationDate;
     int saleItemCount;
-    boolean preOrder;
-    boolean paymentDue;
 
-    public String getSaleTitle() {
-        return saleTitle;
-    }
-
-    public void setSaleTitle(String saleTitle) {
-        this.saleTitle = saleTitle;
-    }
 
     public String getLocationName() {
         return locationName;
@@ -28,14 +16,6 @@ public class SaleListDetail {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
-    }
-
-    public long getSaleDueDate() {
-        return saleDueDate;
-    }
-
-    public void setSaleDueDate(long saleDueDate) {
-        this.saleDueDate = saleDueDate;
     }
 
     public float getSaleAmount() {
@@ -54,35 +34,11 @@ public class SaleListDetail {
         this.saleCurrency = saleCurrency;
     }
 
-    public long getSaleCreationDate() {
-        return saleCreationDate;
-    }
-
-    public void setSaleCreationDate(long saleCreationDate) {
-        this.saleCreationDate = saleCreationDate;
-    }
-
     public int getSaleItemCount() {
         return saleItemCount;
     }
 
     public void setSaleItemCount(int saleItemCount) {
         this.saleItemCount = saleItemCount;
-    }
-
-    public boolean isPreOrder() {
-        return preOrder;
-    }
-
-    public void setPreOrder(boolean preOrder) {
-        this.preOrder = preOrder;
-    }
-
-    public boolean isPaymentDue() {
-        return paymentDue;
-    }
-
-    public void setPaymentDue(boolean paymentDue) {
-        this.paymentDue = paymentDue;
     }
 }

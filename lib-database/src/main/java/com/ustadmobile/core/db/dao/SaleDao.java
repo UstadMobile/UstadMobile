@@ -49,6 +49,10 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             " AND salePaymentDone = 0")
     public abstract UmLiveData<List<Sale>> findAllActivePaymentDueSalesLive();
 
+    @UmQuery("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
+    public abstract void findAllSaleWithTitleAsync(String saleTitle, UmCallback<List<Sale>> resultCallback);
+
+
     /*
     String saleTitle;
     String locationName;
@@ -58,33 +62,39 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     long saleCreationDate;
     int saleItemCount;
      */
-
-    @UmQuery("SELECT Sale.saleTitle AS saleTitle, Location.title AS locationName, " +
-            " Sale.saleDueDate AS saleDueDate, 0 AS saleAmount, '' AS saleCurrency," +
-            " Sale.saleCreationDate AS saleCreationDate, 0 AS saleItemCount," +
-            " Sale.salePreOrder AS preOrder, Sale.salePreOrder AS paymentDue " +
+    public static final String ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY =
+            "SELECT Sale.*,  Location.title AS locationName, " +
+            " 0 AS saleAmount, '' AS saleCurrency,  0 AS saleItemCount " +
             "FROM Sale " +
             " LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid " +
-            "WHERE saleActive = 1")
-    public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetail();
+            "WHERE saleActive = 1 ";
 
-    @UmQuery("SELECT Sale.saleTitle AS saleTitle, Location.title AS locationName, " +
-            " Sale.saleDueDate AS saleDueDate, 0 AS saleAmount, '' AS saleCurrency," +
-            " Sale.saleCreationDate AS saleCreationDate, 0 AS saleItemCount," +
-            " Sale.salePreOrder AS preOrder, Sale.salePreOrder AS paymentDue " +
-            "FROM Sale " +
-            "LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid " +
-            "WHERE saleActive = 1 AND preOrder = 1")
-    public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetailPreOrders();
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+    public abstract UmLiveData<List<SaleListDetail>> findAllActiveAsSaleListDetailLive();
 
-    @UmQuery("SELECT Sale.saleTitle AS saleTitle, Location.title AS locationName, " +
-            " Sale.saleDueDate AS saleDueDate, 0 AS saleAmount, '' AS saleCurrency," +
-            " Sale.saleCreationDate AS saleCreationDate, 0 AS saleItemCount," +
-            " Sale.salePreOrder AS preOrder, Sale.salePreOrder AS paymentDue " +
-            "FROM Sale " +
-            " LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid " +
-            " WHERE saleActive = 1 AND paymentDue = 1")
-    public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetailPaymentDue();
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+    public abstract List<SaleListDetail> findAllActiveAsSaleListDetailList();
+
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+    public abstract void findAllActiveAsSaleListDetailAsync(UmCallback<List<SaleListDetail>> allActiveSalesCallback);
+
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+    public abstract UmProvider<SaleListDetail> findAllActiveAsSaleListDetailProvider();
+
+    //Filter
+
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePreOrder = 1")
+    public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetailPreOrdersLive();
+
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePreOrder = 1")
+    public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPreOrdersProvider();
+
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePaymentDone = 1")
+    public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetailPaymentDueLive();
+
+    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePaymentDone = 0")
+    public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPaymentDueProvider();
+
 
     //LOOK UP
 

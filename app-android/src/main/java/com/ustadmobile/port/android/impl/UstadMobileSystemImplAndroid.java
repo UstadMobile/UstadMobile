@@ -64,6 +64,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
@@ -82,6 +83,7 @@ import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
+import com.ustadmobile.port.android.view.BasePoint2Activity;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
@@ -167,6 +169,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
         viewNameToAndroidImplMap.put(WebChunkView.VIEW_NAME, WebChunkActivity.class);
         viewNameToAndroidImplMap.put(VideoPlayerView.VIEW_NAME, VideoPlayerActivity.class);
+        //Goldozi
+        viewNameToAndroidImplMap.put(BasePoint2View.VIEW_NAME, BasePoint2Activity.class);
+
     }
 
     /**

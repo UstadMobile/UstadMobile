@@ -8,14 +8,7 @@
     <android.support.design.widget.AppBarLayout android:id="@+id/activity_sale_list_appbar"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
-
-        <android.support.v7.widget.Toolbar android:id="@+id/activity_sale_list_toolbar"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
-            app:layout_scrollFlags="scroll|enterAlways" app:title="@string/sales"
-            tools:layout_editor_absoluteY="0dp" />
-    </android.support.design.widget.AppBarLayout>
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/fragment_clazz_log_list_line_chart_selector_ll"
@@ -31,7 +24,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_appbar">
 
         <Button
-            android:id="@+id/fragment_clazz_log_list_line_chart_selector_button_thisweek"
+            android:id="@+id/fragment_sale_list_filter_all_sales"
             style="@android:style/Widget.Material.Light.Button"
             android:layout_width="wrap_content"
             android:layout_height="25dp"
@@ -43,7 +36,7 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/fragment_clazz_log_list_line_chart_selector_button_thismonth"
+            android:id="@+id/fragment_sale_list_filter_pre_orders"
             style="@android:style/Widget.Material.Light.Button"
             android:layout_width="wrap_content"
             android:layout_height="25dp"
@@ -55,13 +48,13 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/fragment_clazz_log_list_line_chart_selector_button_lastyear"
+            android:id="@+id/fragment_sale_list_filter_payments_due"
             style="@android:style/Widget.Material.Light.Button"
             android:layout_width="wrap_content"
             android:layout_height="25dp"
-            android:layout_marginLeft="@dimen/dimen_2dp"
-            android:layout_marginRight="@dimen/dimen_2dp"
             android:background="@drawable/rounded_button_selector"
+            android:paddingLeft="@dimen/bottom_navigation_notification_radius"
+            android:paddingRight="@dimen/bottom_navigation_notification_radius"
             android:text="@string/payments_due"
             android:textColor="@color/icons"
             android:textSize="12sp" />

@@ -55,6 +55,12 @@ public class ClazzMember implements SyncableEntity {
         this.clazzMemberPersonUid = personUid;
     }
 
+    public ClazzMember(long clazzUid, long personUid, int role) {
+        this.clazzMemberClazzUid = clazzUid;
+        this.clazzMemberPersonUid = personUid;
+        this.role = role;
+    }
+
     public long getClazzMemberUid() {
         return clazzMemberUid;
     }

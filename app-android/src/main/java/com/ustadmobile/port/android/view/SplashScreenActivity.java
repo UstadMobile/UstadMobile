@@ -35,8 +35,18 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.LocationDao;
+import com.ustadmobile.core.db.dao.SaleDao;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.lib.db.entities.Location;
+import com.ustadmobile.lib.db.entities.Sale;
+import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.port.android.impl.DbInitialEntriesInserter;
+
+import java.util.List;
 
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -48,11 +58,14 @@ public class SplashScreenActivity extends UstadBaseActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-        OneTimeWorkRequest dbWork =
+        /*OneTimeWorkRequest dbWork =
                 new OneTimeWorkRequest.Builder(
                         DbInitialEntriesInserter.DbInitialEntriesInserterWorker.class)
                         .build();
         WorkManager.getInstance().enqueue(dbWork);
+        */
+        //Add dummy data
+        addDummyData();
 
     }
 
@@ -77,6 +90,164 @@ public class SplashScreenActivity extends UstadBaseActivity{
         return super.onOptionsItemSelected(item);
     }
 
+    public void addDummyData(){
+        UmAppDatabase repo  = UmAppDatabase.getInstance(getContext());
+        SaleDao saleDao = repo.getSaleDao();
+        LocationDao locationDao = repo.getLocationDao();
+
+
+        //Create a new location
+        Location newLocation = new Location();
+        newLocation.setTitle("Test location");
+        newLocation.setParentLocationUid(0);
+        newLocation.setDescription("Test location added from Dummy data");
+        locationDao.insertAsync(newLocation, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                newLocation.setLocationUid(result);
+
+
+                String pinkHatSaleTitle = "20x pink hat";
+                saleDao.findAllSaleWithTitleAsync(pinkHatSaleTitle, new UmCallback<List<Sale>>() {
+                    @Override
+                    public void onSuccess(List<Sale> result) {
+                        if (result.isEmpty()){
+                            Sale pinkHatSale = new Sale();
+                            pinkHatSale.setSaleTitle(pinkHatSaleTitle);
+                            pinkHatSale.setSaleActive(true);
+                            pinkHatSale.setSaleCancelled(false);
+                            pinkHatSale.setSalePreOrder(true);
+                            pinkHatSale.setSaleDone(true);
+                            pinkHatSale.setSalePaymentDone(false);
+                            pinkHatSale.setSaleLocationUid(newLocation.getLocationUid());
+                            pinkHatSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(0));
+                            pinkHatSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(-1));
+                            saleDao.insert(pinkHatSale);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
+
+
+                String tableClothTitle = "20x table Cloth";
+                saleDao.findAllSaleWithTitleAsync(tableClothTitle, new UmCallback<List<Sale>>() {
+                    @Override
+                    public void onSuccess(List<Sale> result) {
+                        if (result.isEmpty()){
+                            Sale tableClothSale = new Sale();
+                            tableClothSale.setSaleTitle(tableClothTitle);
+                            tableClothSale.setSaleActive(true);
+                            tableClothSale.setSaleCancelled(false);
+                            tableClothSale.setSaleDone(true);
+                            tableClothSale.setSalePreOrder(true);
+                            tableClothSale.setSaleLocationUid(newLocation.getLocationUid());
+                            tableClothSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(-2));
+                            tableClothSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(2));
+                            saleDao.insert(tableClothSale);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
+
+                String hatSaleTitle = "10x hat";
+                saleDao.findAllSaleWithTitleAsync(hatSaleTitle, new UmCallback<List<Sale>>() {
+                    @Override
+                    public void onSuccess(List<Sale> result) {
+
+                        if (result.isEmpty()){
+                            Sale hatSale = new Sale();
+                            hatSale.setSaleTitle(hatSaleTitle);
+                            hatSale.setSaleActive(true);
+                            hatSale.setSaleCancelled(false);
+                            hatSale.setSaleDone(true);
+                            hatSale.setSaleLocationUid(newLocation.getLocationUid());
+                            hatSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(-2));
+                            hatSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(2));
+                            saleDao.insert(hatSale);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+
+                String shawlSaleTitle = "20x shawl";
+                saleDao.findAllSaleWithTitleAsync(shawlSaleTitle, new UmCallback<List<Sale>>() {
+                    @Override
+                    public void onSuccess(List<Sale> result) {
+                        if (result.isEmpty()){
+                            Sale shawlSale = new Sale();
+                            shawlSale.setSaleTitle(shawlSaleTitle);
+                            shawlSale.setSaleActive(true);
+                            shawlSale.setSaleCancelled(false);
+                            shawlSale.setSaleDone(true);
+                            shawlSale.setSalePreOrder(true);
+                            shawlSale.setSalePaymentDone(false);
+                            shawlSale.setSaleLocationUid(newLocation.getLocationUid());
+                            shawlSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(-3));
+                            shawlSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(1));
+                            saleDao.insert(shawlSale);
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+
+                String pilloSaleTitle = "1x pillow case";
+                saleDao.findAllSaleWithTitleAsync(pilloSaleTitle, new UmCallback<List<Sale>>() {
+                    @Override
+                    public void onSuccess(List<Sale> result) {
+                        if (result.isEmpty()){
+                            Sale pillowSale = new Sale();
+                            pillowSale.setSaleTitle(pilloSaleTitle);
+                            pillowSale.setSaleActive(true);
+                            pillowSale.setSaleCancelled(false);
+                            pillowSale.setSaleDone(true);
+                            pillowSale.setSaleLocationUid(newLocation.getLocationUid());
+                            pillowSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(-4));
+                            pillowSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(3));
+                            saleDao.insert(pillowSale);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
+
+
+
+
+
+    }
 
 
 }

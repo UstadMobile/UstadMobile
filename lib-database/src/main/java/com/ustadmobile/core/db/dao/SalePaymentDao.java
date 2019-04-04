@@ -49,7 +49,7 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
     public abstract UmLiveData<List<SalePayment>> findBySaleUidLive(long saleUid);
 
     @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
-    public abstract UmLiveData<SalePayment> findBySaleUidAsync(long saleUid,
+    public abstract void findBySaleUidAsync(long saleUid,
                            UmCallback<List<SalePayment>> allPaymentsBySaleCallback);
 
     @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
@@ -57,7 +57,7 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
 
 
     @UmQuery(FIND_ALL_BY_SALE_UID_QUERY)
-    public abstract UmProvider<SalePayment> findBySaleProvider();
+    public abstract UmProvider<SalePayment> findBySaleProvider(long saleUid);
 
     public static final String TOTAL_PAID_BY_SALE_UID =
             "SELECT SUM(salePaymentPaidAmount) FROM SalePayment " +

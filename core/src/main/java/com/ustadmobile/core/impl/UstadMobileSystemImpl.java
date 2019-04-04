@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.UMUtil;
@@ -276,10 +277,12 @@ public abstract class UstadMobileSystemImpl {
 
         if(getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context)
                 && activeAccount == null) {
-            go(Login2View.VIEW_NAME, null, context);
+            //TODO: change
+            //go(Login2View.VIEW_NAME, null, context);
         }else {
-            go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
+            //go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
         }
+        go(BasePoint2View.VIEW_NAME, null, context);
     }
 
     /**

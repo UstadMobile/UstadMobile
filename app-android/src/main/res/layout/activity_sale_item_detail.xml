@@ -118,7 +118,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string_sold" />
+            android:text="@string/sold" />
 
         <RadioButton
             android:id="@+id/activity_sale_item_detail_radiobutton_preorder"

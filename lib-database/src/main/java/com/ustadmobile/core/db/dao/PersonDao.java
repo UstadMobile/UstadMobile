@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -216,4 +217,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmQuery("SELECT Count(*) FROM Person")
     public abstract long countAll();
+
+    @UmQuery("SELECT * From Person WHERE personUid = :uid")
+    public abstract UmLiveData<Person> findByUidLive(long uid);
 }

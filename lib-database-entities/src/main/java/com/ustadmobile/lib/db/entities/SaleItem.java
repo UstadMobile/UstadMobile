@@ -9,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 63)
 public class SaleItem {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleItemUid;
 
     // The Sale uid

@@ -4,8 +4,8 @@
     Helped by using:
     http://www.materialpalette.com/blue-grey/light-blue
     -->
-    <color name="primary">#009688</color>
-    <color name="primary_dark">#00796B</color>
+    <color name="primary">#FF9800</color>
+    <color name="primary_dark">#F57C00</color>
     <color name="primary_light">#B2DFDB</color>
     <color name="accent">#FF9800</color>
     <color name="primary_text">#FFFFFF</color>
@@ -17,6 +17,7 @@
     <color name="icons_light">#ABFFFFFF</color>
     <color name="divider">#BDBDBD</color>
 
+    <color name="color_gray">#FF888888</color>
     <color name="background_light">#E8EAED</color>
 
     <item name="umblue" type="color">#FF3F31B5</item>
