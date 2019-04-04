@@ -24,6 +24,8 @@ public class AgentEntity {
 
     private String agentAccountName;
 
+    private long agentPersonUid;
+
     @UmSyncMasterChangeSeqNum
     private long statementMasterChangeSeqNum;
 
@@ -71,6 +73,14 @@ public class AgentEntity {
 
     public void setAgentAccountName(String agentAccountName) {
         this.agentAccountName = agentAccountName;
+    }
+
+    public long getAgentPersonUid() {
+        return agentPersonUid;
+    }
+
+    public void setAgentPersonUid(long agentPersonUid) {
+        this.agentPersonUid = agentPersonUid;
     }
 
     public long getStatementMasterChangeSeqNum() {

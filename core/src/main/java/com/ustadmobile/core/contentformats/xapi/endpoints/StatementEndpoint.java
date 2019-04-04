@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.ustadmobile.core.contentformats.xapi.Actor;
 import com.ustadmobile.core.contentformats.xapi.Attachment;
 import com.ustadmobile.core.contentformats.xapi.ContextActivity;
-import com.ustadmobile.core.contentformats.xapi.Definition;
 import com.ustadmobile.core.contentformats.xapi.Statement;
 import com.ustadmobile.core.contentformats.xapi.Verb;
 import com.ustadmobile.core.contentformats.xapi.XContext;
@@ -16,10 +15,7 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.StatementDao;
 import com.ustadmobile.core.db.dao.VerbDao;
 import com.ustadmobile.core.db.dao.XObjectDao;
-import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.lib.db.entities.AgentEntity;
-import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.StatementEntity;
 import com.ustadmobile.lib.db.entities.VerbEntity;
@@ -32,6 +28,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateAgent;
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateContextStatementJoin;
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.getPerson;
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateStatementEntity;
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateVerb;
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateXObject;
 
 public class StatementEndpoint {
 
@@ -57,7 +60,7 @@ public class StatementEndpoint {
     }
 
 
-    public List<String> storeStatements(List<Statement> statements) throws IllegalArgumentException{
+    public List<String> storeStatements(List<Statement> statements) throws IllegalArgumentException {
 
         List<String> statementUids = new ArrayList<>();
         for (Statement statement : statements) {
@@ -243,7 +246,7 @@ public class StatementEndpoint {
 
     }
 
-    private void checkValidActor(Actor actor) {
+    public static void checkValidActor(Actor actor) throws IllegalArgumentException {
 
         boolean hasMbox = actor.getMbox() != null && !actor.getMbox().isEmpty();
         boolean hasSha = actor.getMbox_sha1sum() != null && !actor.getMbox_sha1sum().isEmpty();
@@ -289,12 +292,9 @@ public class StatementEndpoint {
         checkValidStatement(statement, false);
 
         VerbEntity verbEntity = insertOrUpdateVerb(verbDao, statement.getVerb().getId());
-        Person person = insertOrUpdatePerson(personDao, statement.getActor());
-        long agentUid = 0;
-        if (person == null) {
-            AgentEntity agentEntity = insertOrUpdateAgent(agentDao, statement.getActor());
-            agentUid = agentEntity.getAgentUid();
-        }
+        Person person = getPerson(personDao, statement.getActor());
+        AgentEntity agentEntity = insertOrUpdateAgent(agentDao, personDao, statement.getActor());
+        long agentUid = agentEntity.getAgentUid();
 
         long authorityUid = 0;
         if (statement.getAuthority() != null) {
@@ -309,13 +309,13 @@ public class StatementEndpoint {
                     }
                 }
             }
-            AgentEntity agentEntity = insertOrUpdateAgent(agentDao, authority);
-            authorityUid = agentEntity != null ? agentEntity.getAgentUid() : 0;
+            AgentEntity authorityEntity = insertOrUpdateAgent(agentDao, personDao, authority);
+            authorityUid = authorityEntity != null ? authorityEntity.getAgentUid() : 0;
         }
 
         XObjectEntity xObjectEntity = null;
         if (statement.getObject() != null) {
-            xObjectEntity = insertOrUpdateXObject(xobjectDao, statement.getObject());
+            xObjectEntity = insertOrUpdateXObject(xobjectDao, statement.getObject(), gson);
         }
 
         long subActorUid = 0;
@@ -324,16 +324,16 @@ public class StatementEndpoint {
 
         if (statement.getSubStatement() != null) {
             Statement subStatement = statement.getSubStatement();
-            Person subActor = insertOrUpdatePerson(personDao, subStatement.getActor());
+            Person subActor = getPerson(personDao, subStatement.getActor());
             if (subActor == null) {
-                AgentEntity agentEntity = insertOrUpdateAgent(agentDao, statement.getSubStatement().getActor());
-                subActorUid = agentEntity.getAgentUid();
+                AgentEntity subAgent = insertOrUpdateAgent(agentDao, personDao, statement.getSubStatement().getActor());
+                subActorUid = subAgent.getAgentUid();
             }
 
             VerbEntity subVerb = insertOrUpdateVerb(verbDao, subStatement.getVerb().getId());
             subVerbUid = subVerb.getVerbUid();
 
-            XObjectEntity subObject = insertOrUpdateXObject(xobjectDao, subStatement.getObject());
+            XObjectEntity subObject = insertOrUpdateXObject(xobjectDao, subStatement.getObject(), gson);
             subObjectUid = subObject.getXObjectUid();
 
         }
@@ -345,13 +345,13 @@ public class StatementEndpoint {
         if (statement.getContext() != null) {
 
             if (statement.getContext().getInstructor() != null) {
-                AgentEntity agentEntity = insertOrUpdateAgent(agentDao, statement.getContext().getInstructor());
-                instructorUid = agentEntity.getAgentUid();
+                AgentEntity instructorAgent = insertOrUpdateAgent(agentDao, personDao, statement.getContext().getInstructor());
+                instructorUid = instructorAgent.getAgentUid();
             }
 
             if (statement.getContext().getTeam() != null) {
-                AgentEntity agentEntity = insertOrUpdateAgent(agentDao, statement.getContext().getTeam());
-                teamUid = agentEntity.getAgentUid();
+                AgentEntity teamAgent = insertOrUpdateAgent(agentDao, personDao, statement.getContext().getTeam());
+                teamUid = teamAgent.getAgentUid();
             }
 
             if (statement.getContext().getStatement() != null) {
@@ -359,7 +359,7 @@ public class StatementEndpoint {
             }
         }
 
-        StatementEntity statementEntity = insertOrUpdateStatementEntity(statementDao, statement,
+        StatementEntity statementEntity = insertOrUpdateStatementEntity(statementDao, statement, gson,
                 person != null ? person.getPersonUid() : 0,
                 verbEntity != null ? verbEntity.getVerbUid() : 0,
                 xObjectEntity != null ? xObjectEntity.getXObjectUid() : 0,
@@ -394,149 +394,9 @@ public class StatementEndpoint {
 
     public void createAllContextActivities(List<XObject> list, long statementUid, int flag) {
         for (XObject object : list) {
-            XObjectEntity xobjectEntity = insertOrUpdateXObject(xobjectDao, object);
+            XObjectEntity xobjectEntity = insertOrUpdateXObject(xobjectDao, object, gson);
             insertOrUpdateContextStatementJoin(contextJoinDao, statementUid, xobjectEntity.getXObjectUid(), flag);
         }
-    }
-
-    public AgentEntity insertOrUpdateAgent(AgentDao dao, Actor actor) {
-        AgentEntity agentEntity = dao.getAgentByAnyId(
-                actor.getOpenid(),
-                actor.getMbox(),
-                actor.getAccount() != null ? actor.getAccount().getName() : null,
-                actor.getMbox_sha1sum());
-        if (agentEntity == null) {
-            agentEntity = new AgentEntity();
-            agentEntity.setAgentOpenid(actor.getOpenid());
-            agentEntity.setAgentMbox(actor.getMbox());
-            agentEntity.setAgentAccountName(actor.getAccount() != null ? actor.getAccount().getName() : null);
-            agentEntity.setAgentMbox_sha1sum(actor.getMbox_sha1sum());
-            agentEntity.setAgentUid(dao.insert(agentEntity));
-        }
-
-        return agentEntity;
-    }
-
-
-    public VerbEntity insertOrUpdateVerb(VerbDao dao, String urlId) {
-
-        VerbEntity verbEntity = dao.findByUrl(urlId);
-        if (verbEntity == null) {
-            verbEntity = new VerbEntity();
-            verbEntity.setUrlId(urlId);
-            verbEntity.setVerbUid(dao.insert(verbEntity));
-        }
-        return verbEntity;
-
-    }
-
-    public ContextXObjectStatementJoin insertOrUpdateContextStatementJoin(ContextXObjectStatementJoinDao dao, long statementUid, long objectUid, int flag) {
-
-        ContextXObjectStatementJoin join = dao.findByStatementAndObjectUid(statementUid, objectUid);
-        if (join == null) {
-            join = new ContextXObjectStatementJoin();
-            join.setContextActivityFlag(flag);
-            join.setContextStatementUid(statementUid);
-            join.setContextXObjectUid(objectUid);
-            join.setContextXObjectStatementJoinUid(dao.insert(join));
-        }
-        return join;
-    }
-
-    public Person insertOrUpdatePerson(PersonDao dao, Actor actor) {
-        Person person = null;
-        if (actor.getAccount() != null) {
-            person = dao.findByUsername(actor.getAccount().getName());
-            if (person == null) {
-                person = new Person();
-                person.setUsername(actor.getAccount().getName());
-                person.setPersonUid(dao.insert(person));
-            }
-        }
-        return person;
-    }
-
-    public XObjectEntity insertOrUpdateXObject(XObjectDao dao, XObject xobject) {
-
-        XObjectEntity entity = dao.findByObjectId(xobject.getId());
-        if (entity == null) {
-            entity = new XObjectEntity();
-            entity.setObjectId(xobject.getId());
-            entity.setObjectType(xobject.getObjectType());
-            if (xobject.getDefinition() != null) {
-                entity.setDefinitionType(xobject.getDefinition().getType());
-                entity.setInteractionType(xobject.getDefinition().getInteractionType());
-                entity.setCorrectResponsePattern(gson.toJson(xobject.getDefinition().getCorrectResponsePattern()));
-            }
-            entity.setXObjectUid(dao.insert(entity));
-        } else {
-            XObjectEntity xObjectEntity = new XObjectEntity();
-            xObjectEntity.setObjectId(xobject.getId());
-            xObjectEntity.setObjectType(xobject.getObjectType() != null ? xobject.getObjectType() : entity.getObjectType());
-            if (xobject.getDefinition() != null) {
-                Definition changedDefinition = xobject.getDefinition();
-                xObjectEntity.setDefinitionType(changedDefinition.getType() != null && !changedDefinition.getType().isEmpty() ?
-                        changedDefinition.getType() : entity.getDefinitionType());
-
-                xObjectEntity.setInteractionType(changedDefinition.getInteractionType() != null && !changedDefinition.getInteractionType().isEmpty() ?
-                        changedDefinition.getType() : entity.getInteractionType());
-
-                xObjectEntity.setCorrectResponsePattern(changedDefinition.getCorrectResponsePattern() != null &&
-                        changedDefinition.getCorrectResponsePattern().size() > 0 ?
-                        gson.toJson(changedDefinition.getCorrectResponsePattern()) : entity.getCorrectResponsePattern());
-            }
-
-            if (!xObjectEntity.equals(entity)) {
-                dao.update(xObjectEntity);
-                entity = xObjectEntity;
-            }
-        }
-        return entity;
-    }
-
-    public StatementEntity insertOrUpdateStatementEntity(StatementDao dao, Statement statement,
-                                                         long personUid, long verbUid, long objectUid,
-                                                         String contextStatementUid,
-                                                         long instructorUid, long agentUid, long authorityUid, long teamUid,
-                                                         long subActorUid, long subVerbUid, long subObjectUid) {
-
-        StatementEntity statementEntity = dao.findByStatementId(statement.getId());
-        if (statementEntity == null) {
-            statementEntity = new StatementEntity();
-            statementEntity.setPersonUid(personUid);
-            statementEntity.setStatementId(statement.getId());
-            statementEntity.setVerbUid(verbUid);
-            statementEntity.setXObjectUid(objectUid);
-            statementEntity.setAgentUid(agentUid);
-            statementEntity.setAuthorityUid(authorityUid);
-            statementEntity.setInstructorUid(instructorUid);
-            statementEntity.setTeamUid(teamUid);
-            statementEntity.setContextStatementId(contextStatementUid);
-            statementEntity.setSubStatementActorUid(subActorUid);
-            statementEntity.setSubstatementVerbUid(subVerbUid);
-            statementEntity.setSubStatementObjectUid(subObjectUid);
-            statementEntity.setTimestamp(UMCalendarUtil.parse8601Timestamp(statement.getTimestamp()).getTimeInMillis());
-            statementEntity.setStored(UMCalendarUtil.parse8601Timestamp(statement.getStored()).getTimeInMillis());
-            statementEntity.setFullStatement(gson.toJson(statement));
-            if (statement.getResult() != null) {
-                statementEntity.setResultCompletion(statement.getResult().isCompletion());
-                statementEntity.setResultDuration(UMTinCanUtil.parse8601Duration(statement.getResult().getDuration()));
-                statementEntity.setResultResponse(statement.getResult().getResponse());
-                statementEntity.setResultSuccess(statement.getResult().isSuccess());
-                if (statement.getResult().getScore() != null) {
-                    statementEntity.setResultScoreMax(statement.getResult().getScore().getMax());
-                    statementEntity.setResultScoreMin(statement.getResult().getScore().getMin());
-                    statementEntity.setResultScoreScaled(statement.getResult().getScore().getScaled());
-                    statementEntity.setResultScoreRaw(statement.getResult().getScore().getRaw());
-                }
-            }
-            if (statement.getContext() != null) {
-                statementEntity.setContextPlatform(statement.getContext().getPlatform());
-                statementEntity.setContextRegistration(statement.getContext().getRegistration());
-            }
-            statementEntity.setStatementUid(dao.insert(statementEntity));
-        }
-        return statementEntity;
     }
 
     public boolean hasMultipleStatementWithSameId(List<Statement> statementList) {

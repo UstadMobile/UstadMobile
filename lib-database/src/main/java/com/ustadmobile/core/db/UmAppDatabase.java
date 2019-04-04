@@ -40,6 +40,8 @@ import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
+import com.ustadmobile.core.db.dao.StateContentDao;
+import com.ustadmobile.core.db.dao.StateDao;
 import com.ustadmobile.core.db.dao.StatementDao;
 import com.ustadmobile.core.db.dao.VerbDao;
 import com.ustadmobile.core.db.dao.XObjectDao;
@@ -97,6 +99,8 @@ import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 import com.ustadmobile.lib.db.entities.ScrapeRun;
+import com.ustadmobile.lib.db.entities.StateContentEntity;
+import com.ustadmobile.lib.db.entities.StateEntity;
 import com.ustadmobile.lib.db.entities.StatementEntity;
 import com.ustadmobile.lib.db.entities.VerbEntity;
 import com.ustadmobile.lib.db.entities.XObjectEntity;
@@ -128,7 +132,8 @@ import java.util.Random;
         ContentEntryStatus.class, ConnectivityStatus.class,
         Container.class, ContainerEntry.class, ContainerEntryFile.class,
         VerbEntity.class, XObjectEntity.class, StatementEntity.class,
-        ContextXObjectStatementJoin.class, AgentEntity.class
+        ContextXObjectStatementJoin.class, AgentEntity.class,
+        StateEntity.class, StateContentEntity.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -685,6 +690,23 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         db.execSql("CREATE OR REPLACE FUNCTION inc_csn_68_fn() RETURNS trigger AS $$ BEGIN UPDATE AgentEntity SET statementLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.statementLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 68) END),statementMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 68) ELSE NEW.statementMasterChangeSeqNum END) WHERE agentUid = NEW.agentUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 68; RETURN null; END $$LANGUAGE plpgsql");
                         db.execSql("CREATE TRIGGER inc_csn_68_trig AFTER UPDATE OR INSERT ON AgentEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_68_fn()");
                         //END Create AgentEntity (PostgreSQL)
+
+                        //BEGIN Create StateEntity (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_70 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  StateEntity  ( stateUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_70') ,  stateId  TEXT,  agentUid  BIGINT,  activityId  TEXT,  registration  TEXT,  isactive  BOOL,  stateMasterChangeSeqNum  BIGINT,  stateLocalChangeSeqNum  BIGINT,  stateLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (70, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_70_fn() RETURNS trigger AS $$ BEGIN UPDATE StateEntity SET stateLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.stateLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 70) END),stateMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 70) ELSE NEW.stateMasterChangeSeqNum END) WHERE stateUid = NEW.stateUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 70; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_70_trig AFTER UPDATE OR INSERT ON StateEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_70_fn()");
+                        //END Create StateEntity (PostgreSQL)
+
+                        //BEGIN Create StateContentEntity (PostgreSQL)
+                        db.execSql("CREATE SEQUENCE spk_seq_72 " +  DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  StateContentEntity  ( stateContentUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_72') ,  stateContentStateUid  BIGINT,  stateContentKey  TEXT,  stateContentValue  TEXT,  isactive  BOOL,  stateContentMasterChangeSeqNum  BIGINT,  stateContentLocalChangeSeqNum  BIGINT,  stateContentLastChangedBy  INTEGER)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (72, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_72_fn() RETURNS trigger AS $$ BEGIN UPDATE StateContentEntity SET stateContentLocalChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.stateContentLocalChangeSeqNum ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 72) END),stateContentMasterChangeSeqNum = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 72) ELSE NEW.stateContentMasterChangeSeqNum END) WHERE stateContentUid = NEW.stateContentUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 72; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_72_trig AFTER UPDATE OR INSERT ON StateContentEntity FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_72_fn()");
+                        //END Create StateContentEntity (PostgreSQL)
+
                         break;
 
 
@@ -786,6 +808,10 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract StatementDao getStatementDao();
 
     public abstract ContextXObjectStatementJoinDao getContextXObjectStatementJoinDao();
+
+    public abstract StateDao getStateDao();
+
+    public abstract StateContentDao getStateContentDao();
 
     public abstract AgentDao getAgentDao();
 
