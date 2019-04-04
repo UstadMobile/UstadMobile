@@ -19,6 +19,7 @@ import com.ustadmobile.lib.database.annotation.UmDbSetAttachment;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -134,16 +135,19 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 .addJavadoc("Generated code - DO NOT EDIT!");
 
 
+        ParameterizedTypeName roomBuildTypeName = ParameterizedTypeName.get(
+                ClassName.get(ROOM_PKG_NAME, "RoomDatabase").nestedClass("Builder"),
+                ClassName.get(processingEnv.getElementUtils().getPackageOf(dbType).toString(), roomDbClassName));
+
         dbManagerImplSpec.addMethod(MethodSpec.constructorBuilder()
                     .addParameter(ClassName.get(Object.class), "context")
                     .addParameter(ClassName.get(String.class), "dbName")
+                    .addParameter(roomBuildTypeName, "roomBuilder")
                     .addModifiers(Modifier.PUBLIC)
                     .addCode("this.context = (Context)context;\n")
                     .addCode("this.dbExecutor = $T.newCachedThreadPool();\n", Executors.class)
                     .addCode("this._repositories = new $T<>();\n", Vector.class)
-                    .addCode("_roomDb = $T.databaseBuilder(this.context, " + roomDbClassName +
-                            ".class, dbName).addCallback(new DbManagerCallback()).build();\n",
-                            ClassName.get("android.arch.persistence.room", "Room"))
+                    .addCode("_roomDb = roomBuilder.addCallback(new DbManagerCallback()).build();\n")
                 .build())
             .addMethod(MethodSpec.methodBuilder("execute")
                     .addModifiers(Modifier.PUBLIC)
@@ -469,12 +473,13 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
         TypeName entityInsertionAdapterTypeName = ParameterizedTypeName.get(
                 ClassName.get("android.arch.persistence.room", "EntityInsertionAdapter"),
                 ClassName.get(entityComponentType));
+        UmInsert insertAnnotation = daoMethod.getAnnotation(UmInsert.class);
 
-
-
-
+        String onConflictStr = insertAnnotation != null && insertAnnotation.onConflict() ==
+                UmOnConflictStrategy.REPLACE ? "REPLACE" : "ABORT";
         CodeBlock.Builder insertQueryCodeBlock = CodeBlock.builder()
-                .add("return \"INSERT INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
+                .add("return \"INSERT OR " + onConflictStr +
+                        " INTO `$L_spk_view` (", entityComponentTypeEl.getSimpleName());
         CodeBlock.Builder bindCodeBlock = CodeBlock.builder();
         StringBuilder paramSection = new StringBuilder();
         int fieldCount = 0;
