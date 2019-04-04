@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.Language;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -34,13 +33,13 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     private Long parentUid;
 
-    public ContentEntryListPresenter(Object context, HashMap<String , String> arguments, ContentEntryListView viewContract) {
+    public ContentEntryListPresenter(Object context, Map<String , String> arguments, ContentEntryListView viewContract) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
 
     }
 
-    public void onCreate(Hashtable hashtable) {
+    public void onCreate(Map<String,String> map) {
         UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
 

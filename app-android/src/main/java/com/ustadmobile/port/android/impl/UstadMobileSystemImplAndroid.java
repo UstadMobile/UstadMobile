@@ -116,6 +116,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
@@ -145,7 +146,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     /**
      * Map of view names to the activity class that is implementing them on Android
      *
-     * @see UstadMobileSystemImplAndroid#go(String, HashMap, Object)
+     * @see UstadMobileSystemImplAndroid#go(String, Map, Object)
      */
     public static final HashMap<String, Class> viewNameToAndroidImplMap = new HashMap<>();
 
@@ -371,7 +372,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
-    public void go(String viewName, HashMap<String, String> args, Object context, int flags) {
+    public void go(String viewName, Map<String, String> args, Object context, int flags) {
         Class androidImplClass = viewNameToAndroidImplMap.get(viewName);
         Context ctx = (Context) context;
         Bundle argsBundle = UMAndroidUtil.mapToBundle(args);

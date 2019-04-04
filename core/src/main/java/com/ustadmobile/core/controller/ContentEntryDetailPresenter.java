@@ -28,8 +28,8 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,7 +70,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     public static final String NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype";
 
-    public ContentEntryDetailPresenter(Object context, HashMap<String , String> arguments,
+    public ContentEntryDetailPresenter(Object context, Map<String , String> arguments,
                                        ContentEntryDetailView viewContract,
                                        LocalAvailabilityMonitor monitor) {
         super(context, arguments, viewContract);
@@ -79,7 +79,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     }
 
-    public void onCreate(HashMap<String,String> hashtable) {
+    public void onCreate(Map<String,String> map) {
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
         ContentEntryRelatedEntryJoinDao contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();

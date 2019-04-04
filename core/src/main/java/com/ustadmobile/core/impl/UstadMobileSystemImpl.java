@@ -46,7 +46,6 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -222,7 +221,7 @@ public abstract class UstadMobileSystemImpl {
         }
     }
 
-    public void go(String viewName, HashMap<String,String> args, Object context) {
+    public void go(String viewName, Map<String,String> args, Object context) {
         go(viewName, args, context, 0);
     }
 
@@ -236,7 +235,7 @@ public abstract class UstadMobileSystemImpl {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    public abstract void go(String viewName, HashMap<String,String> args, Object context, int flags);
+    public abstract void go(String viewName, Map<String,String> args, Object context, int flags);
 
     /**
      * Provides the currently active locale

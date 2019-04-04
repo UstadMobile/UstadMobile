@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.AboutView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Created by mike on 12/27/16.
@@ -19,11 +19,11 @@ public class AboutController extends UstadBaseController<AboutView>  {
 
     private String aboutHTMLStr;
 
-    public AboutController(Object context, HashMap<String , String> args, AboutView view){
+    public AboutController(Object context, Map<String , String> args, AboutView view){
         super(context, args, view);
     }
 
-    public void onCreate(HashMap<String , String> savedState) {
+    public void onCreate(Map<String , String> savedState) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         impl.getAsset(context, "com/ustadmobile/core/about.html", new UmCallback<InputStream>() {

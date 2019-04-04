@@ -116,7 +116,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
         entryListPresenter = new ContentEntryListPresenter(getContext(),
                 bundleToMap(getArguments()), this);
-        entryListPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+        entryListPresenter.onCreate(bundleToMap(savedInstanceState));
 
         return rootContainer;
     }

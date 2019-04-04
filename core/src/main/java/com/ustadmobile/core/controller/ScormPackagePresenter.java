@@ -1,12 +1,12 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.contentformats.scorm.ScormManifest;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.contentformats.scorm.ScormManifest;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.UstadView;
@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.UstadViewWithNotifications;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  *
@@ -81,8 +81,8 @@ public class ScormPackagePresenter extends UstadBaseController {
         this.scormPackageView = view;
     }
 
-    public void onCreate(Hashtable args) {
-        scormPackageView.mountZip((String)args.get(UstadView.ARG_CONTAINER_UID),
+    public void onCreate(HashMap<String , String> args) {
+        scormPackageView.mountZip(args.get(UstadView.ARG_CONTAINER_UID),
                 zipMountedCallback);
     }
 

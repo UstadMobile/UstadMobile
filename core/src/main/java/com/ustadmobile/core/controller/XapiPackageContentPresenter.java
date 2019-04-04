@@ -20,7 +20,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Created by mike on 9/13/17.
@@ -82,11 +82,11 @@ public class XapiPackageContentPresenter extends UstadBaseController<XapiPackage
         }
     }
 
-    public XapiPackageContentPresenter(Object context, HashMap<String , String> args, XapiPackageContentView view) {
+    public XapiPackageContentPresenter(Object context, Map<String , String> args, XapiPackageContentView view) {
         super(context, args, view);
     }
 
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(Map<String,String> savedState) {
         registrationUUID = UMUUID.randomUUID().toString();
         long containerUid = Long.parseLong(getArguments().get(UstadView.ARG_CONTAINER_UID));
         view.mountContainer(containerUid, new ZipMountedCallbackHandler());

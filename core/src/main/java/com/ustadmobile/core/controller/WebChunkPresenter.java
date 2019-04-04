@@ -16,7 +16,7 @@ import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 import static com.ustadmobile.core.view.WebChunkView.ARG_CONTAINER_UID;
@@ -26,12 +26,12 @@ public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
 
     private String navigation;
 
-    public WebChunkPresenter(Object context, HashMap<String , String> arguments, WebChunkView view) {
+    public WebChunkPresenter(Object context, Map<String , String> arguments, WebChunkView view) {
         super(context, arguments, view);
     }
 
     @Override
-    public void onCreate(HashMap<String , String> savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         ContentEntryDao contentEntryDao = repoAppDatabase.getContentEntryDao();

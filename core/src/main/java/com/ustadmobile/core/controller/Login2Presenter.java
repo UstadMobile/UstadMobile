@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Login2Presenter extends UstadBaseController<Login2View> {
 
@@ -19,7 +20,7 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
 
     private String mNextDest;
 
-    public Login2Presenter(Object context, HashMap<String , String> arguments, Login2View view) {
+    public Login2Presenter(Object context, Map<String , String> arguments, Login2View view) {
         super(context, arguments, view);
         if(arguments != null && arguments.containsKey(ARG_NEXT)){
             mNextDest = arguments.get(ARG_NEXT);
@@ -30,7 +31,7 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
     }
 
     @Override
-    public void onCreate(HashMap<String , String> savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
 
 

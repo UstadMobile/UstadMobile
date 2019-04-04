@@ -62,20 +62,19 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
+import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument;
+import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
+import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument;
-import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
-import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.lib.util.UMUtil;
-import com.ustadmobile.core.impl.UmCallback;
-
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -84,7 +83,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -249,12 +248,12 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
         }
     };
 
-    public EpubContentPresenter(Object context, HashMap<String , String> args, EpubContentView view) {
+    public EpubContentPresenter(Object context, Map<String , String> args, EpubContentView view) {
         super(context, args, view);
         this.epubContentView = view;
     }
 
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(Map<String, String> map) {
         long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID));
         view.setProgressBarProgress(-1);
         view.setProgressBarVisible(true);

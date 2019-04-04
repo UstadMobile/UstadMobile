@@ -13,8 +13,8 @@ import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 import static com.ustadmobile.core.view.VideoPlayerView.ARG_CONTAINER_UID;
@@ -28,12 +28,12 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
     private String srtPath;
     private String videoPath;
 
-    public VideoPlayerPresenter(Object context, HashMap<String , String> arguments, VideoPlayerView view) {
+    public VideoPlayerPresenter(Object context, Map<String , String> arguments, VideoPlayerView view) {
         super(context, arguments, view);
     }
 
     @Override
-    public void onCreate(HashMap<String , String> savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
         UmAppDatabase db = UmAppDatabase.getInstance(getContext());
         UmAppDatabase dbRepo = UmAccountManager.getRepositoryForActiveAccount(getContext());

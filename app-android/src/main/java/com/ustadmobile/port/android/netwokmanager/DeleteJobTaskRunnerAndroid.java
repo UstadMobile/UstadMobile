@@ -1,17 +1,15 @@
 package com.ustadmobile.port.android.netwokmanager;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import androidx.work.Data;
@@ -40,7 +38,7 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
     public static final String TAG = "DeleteJobTaskWorker";
 
-    DeleteJobTaskRunnerAndroid(Object context, HashMap<String , String> args) {
+    DeleteJobTaskRunnerAndroid(Object context, Map<String , String> args) {
         super(context, args);
     }
 

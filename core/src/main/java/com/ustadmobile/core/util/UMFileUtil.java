@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -424,7 +425,7 @@ public class UMFileUtil {
      * @param map Hashmap of param keys to values (keys and values must be strings)
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
-    public static String mapToQueryString(HashMap<String, String> map) {
+    public static String mapToQueryString(Map<String, String> map) {
         StringBuffer sb = new StringBuffer();
 
         if (map == null) {
@@ -736,7 +737,7 @@ public class UMFileUtil {
      * @param prefix
      * @return
      */
-    public static Vector splitCombinedViewArguments(HashMap<String , String> args, String prefix, char argDelmininator) {
+    public static Vector splitCombinedViewArguments(Map<String , String> args, String prefix, char argDelmininator) {
         Vector result = new Vector();
         Iterator allArgsKeys = args.keySet().iterator();
 
@@ -811,7 +812,7 @@ public class UMFileUtil {
     }
 
 
-    public static String clearTopFromReferrerPath(String viewname, HashMap<String, String> args,
+    public static String clearTopFromReferrerPath(String viewname, Map<String, String> args,
                                                   String referrerPath) {
         int lastIndex = referrerPath.lastIndexOf("/" + viewname + "?");
         if(lastIndex != -1) {

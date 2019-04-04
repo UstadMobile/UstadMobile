@@ -12,10 +12,9 @@ import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.UstadView;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -54,7 +53,7 @@ public class BasePointController extends UstadBaseController {
 
     public static final int NUM_CATALOG_TABS = 1;
 
-    private HashMap<String, String> args;
+    private Map<String, String> args;
 
     private boolean welcomeScreenDisplayed = false;
 
@@ -71,13 +70,13 @@ public class BasePointController extends UstadBaseController {
         this.basePointView = view;
     }
 
-    public void onCreate(HashMap<String, String> args, Hashtable savedState) {
+    public void onCreate(Map<String, String> args, Map<String,String> savedState) {
         this.args = args;
         basePointView.setClassListVisible(false);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         if(savedState != null && savedState.containsKey(ARG_WELCOME_SCREEN_DISPLAYED)){
-            welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
+            welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).equals("true");
         }
 
         Vector catalogTabs = null;
@@ -93,7 +92,7 @@ public class BasePointController extends UstadBaseController {
         }
 
         for(int i = 0; i < catalogTabs.size(); i++) {
-            basePointView.addTab((Hashtable)catalogTabs.elementAt(i));
+            basePointView.addTab((Map<String, String>) catalogTabs.elementAt(i));
         }
     }
     
@@ -104,9 +103,9 @@ public class BasePointController extends UstadBaseController {
      * 
      * @return 
      */
-    public Hashtable getCatalogOPDSArguments(int position) {
+    public Map<String, String> getCatalogOPDSArguments(int position) {
         Iterator keys = args.keySet().iterator();
-        Hashtable result = new Hashtable();
+        Map<String , String> result = new HashMap<>();
         String keyVal;
         String prefix = position + OPDS_ARGS_PREFIX;
         int prefixLen = prefix.length();

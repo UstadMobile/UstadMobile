@@ -108,7 +108,7 @@ public class UMAndroidUtil {
         return bundle;
     }
 
-    public static HashMap<String, String> bundleToMap(Bundle bundle) {
+    public static Map<String, String> bundleToMap(Bundle bundle) {
         if (bundle == null)
             return null;
 

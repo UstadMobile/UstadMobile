@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Register2Presenter extends UstadBaseController<Register2View> {
 
@@ -24,7 +25,7 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     private UmAppDatabase repo;
 
-    public Register2Presenter(Object context, HashMap<String , String> arguments, Register2View view) {
+    public Register2Presenter(Object context, Map<String , String> arguments, Register2View view) {
         super(context, arguments, view);
         if(arguments.containsKey(ARG_NEXT)){
             mNextDest = arguments.get(ARG_NEXT);
@@ -32,7 +33,7 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
     }
 
     @Override
-    public void onCreate(HashMap<String , String> savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
 
         if(getArguments().containsKey(ARG_SERVER_URL)){
