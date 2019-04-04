@@ -5,10 +5,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.core.view.UstadView;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 /**
@@ -19,11 +19,11 @@ public class AboutController extends UstadBaseController<AboutView>  {
 
     private String aboutHTMLStr;
 
-    public AboutController(Object context, Hashtable args, AboutView view){
+    public AboutController(Object context, HashMap<String , String> args, AboutView view){
         super(context, args, view);
     }
 
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(HashMap<String , String> savedState) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         impl.getAsset(context, "com/ustadmobile/core/about.html", new UmCallback<InputStream>() {

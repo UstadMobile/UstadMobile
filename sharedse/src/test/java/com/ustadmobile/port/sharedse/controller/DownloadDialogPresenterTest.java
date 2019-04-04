@@ -25,6 +25,7 @@ import org.mockito.verification.VerificationMode;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -188,11 +189,11 @@ public class DownloadDialogPresenterTest {
             return null;
         }).when(mockedDialogView).setWifiOnlyOptionVisible(true);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
@@ -218,11 +219,11 @@ public class DownloadDialogPresenterTest {
             return null;
         }).when(mockedDialogView).setWifiOnlyOptionVisible(true);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
@@ -243,10 +244,10 @@ public class DownloadDialogPresenterTest {
 
         insertDownloadSetAndSetItems();
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         verify(mockedDialogView, timeout(2000)).setStackedOptions(any(),any());
@@ -264,11 +265,11 @@ public class DownloadDialogPresenterTest {
             return null;
         }).when(mockedDialogView).setWifiOnlyOptionVisible(true);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
@@ -295,11 +296,11 @@ public class DownloadDialogPresenterTest {
             return null;
         }).when(mockedDialogView).setWifiOnlyOptionVisible(true);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
@@ -322,7 +323,7 @@ public class DownloadDialogPresenterTest {
 
         insertDownloadSetAndSetItems(true, JobStatus.NOT_QUEUED);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
         WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
@@ -330,7 +331,7 @@ public class DownloadDialogPresenterTest {
                 allItems -> allItems.size() == 5);
 
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
@@ -358,14 +359,14 @@ public class DownloadDialogPresenterTest {
             return null;
         }).when(mockedDialogView).setWifiOnlyOptionVisible(true);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
         umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
                 JobStatus.COMPLETE,JobStatus.RUNNING_MIN);
 
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
@@ -389,7 +390,7 @@ public class DownloadDialogPresenterTest {
 
         insertDownloadSetAndSetItems(true,JobStatus.RUNNING);
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
 
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
@@ -399,7 +400,7 @@ public class DownloadDialogPresenterTest {
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
@@ -428,10 +429,10 @@ public class DownloadDialogPresenterTest {
 
         String destDir = "/sample/dir/public/ustadmobileContent/";
 
-        Hashtable args =  new Hashtable();
+        HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
         presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
-        presenter.onCreate(new Hashtable());
+        presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);

@@ -19,6 +19,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 /**
@@ -81,13 +82,13 @@ public class XapiPackageContentPresenter extends UstadBaseController<XapiPackage
         }
     }
 
-    public XapiPackageContentPresenter(Object context, Hashtable args, XapiPackageContentView view) {
+    public XapiPackageContentPresenter(Object context, HashMap<String , String> args, XapiPackageContentView view) {
         super(context, args, view);
     }
 
     public void onCreate(Hashtable savedState) {
         registrationUUID = UMUUID.randomUUID().toString();
-        long containerUid = Long.parseLong((String)getArguments().get(UstadView.ARG_CONTAINER_UID));
+        long containerUid = Long.parseLong(getArguments().get(UstadView.ARG_CONTAINER_UID));
         view.mountContainer(containerUid, new ZipMountedCallbackHandler());
     }
 

@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 public class DownloadDialogFragment extends UstadDialogFragment implements DownloadDialogView,
         DialogInterface.OnClickListener, View.OnClickListener,
         CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
@@ -69,7 +71,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         if (context instanceof UstadBaseActivity) {
             NetworkManagerBle managerBle = ((UstadBaseActivity)context).networkManagerBle;
             mPresenter = new DownloadDialogPresenter(getContext(),managerBle,
-                    UMAndroidUtil.bundleToHashtable(getArguments()),this);
+                    bundleToMap(getArguments()),this);
         }
 
         super.onAttach(context);
@@ -101,7 +103,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         builder.setView(rootView);
 
         mDialog = builder.create();
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+        mPresenter.onCreate(bundleToMap(savedInstanceState));
 
         wifiOnlyView.setOnCheckedChangeListener(this);
         wifiOnlyHolder.setOnClickListener(this);

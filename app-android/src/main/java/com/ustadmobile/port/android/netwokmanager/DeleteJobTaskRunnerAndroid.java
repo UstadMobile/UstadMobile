@@ -10,8 +10,9 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 
 import java.io.File;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
@@ -39,16 +40,17 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
     public static final String TAG = "DeleteJobTaskWorker";
 
-    DeleteJobTaskRunnerAndroid(Object context, Hashtable args) {
+    DeleteJobTaskRunnerAndroid(Object context, HashMap<String , String> args) {
         super(context, args);
     }
 
     @Override
     public void run() {
-        Bundle bundle = UMAndroidUtil.mapToBundle(args);
+
         Data.Builder requestData = new  Data.Builder();
-        if(bundle != null && bundle.getString(ARG_DOWNLOAD_SET_UID) != null){
-            requestData.putLong(ARG_DOWNLOAD_SET_UID,Long.parseLong(bundle.getString(ARG_DOWNLOAD_SET_UID)));
+        if(args != null && args.get(ARG_DOWNLOAD_SET_UID) != null){
+            requestData.putLong(ARG_DOWNLOAD_SET_UID,
+                    Long.parseLong(Objects.requireNonNull(args.get(ARG_DOWNLOAD_SET_UID))));
 
         }
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(DeleteJobTaskWorker.class)

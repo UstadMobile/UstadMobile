@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Hashtable;
  */
 public abstract class DeleteJobTaskRunner implements Runnable {
 
-    protected Hashtable args;
+    protected HashMap<String , String>  args;
 
     protected Object context;
 
@@ -23,7 +24,7 @@ public abstract class DeleteJobTaskRunner implements Runnable {
      * @param context Platform application context
      * @param args arguments to be passed.
      */
-    public DeleteJobTaskRunner(Object context,Hashtable args){
+    public DeleteJobTaskRunner(Object context, HashMap<String , String> args){
         this.args = args;
         this.context = context;
     }

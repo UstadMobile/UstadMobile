@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class Register2Presenter extends UstadBaseController<Register2View> {
 
@@ -24,19 +24,19 @@ public class Register2Presenter extends UstadBaseController<Register2View> {
 
     private UmAppDatabase repo;
 
-    public Register2Presenter(Object context, Hashtable arguments, Register2View view) {
+    public Register2Presenter(Object context, HashMap<String , String> arguments, Register2View view) {
         super(context, arguments, view);
         if(arguments.containsKey(ARG_NEXT)){
-            mNextDest = arguments.get(ARG_NEXT).toString();
+            mNextDest = arguments.get(ARG_NEXT);
         }
     }
 
     @Override
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(HashMap<String , String> savedState) {
         super.onCreate(savedState);
 
         if(getArguments().containsKey(ARG_SERVER_URL)){
-            view.setServerUrl((String)getArguments().get(ARG_SERVER_URL));
+            view.setServerUrl(getArguments().get(ARG_SERVER_URL));
         }else {
             view.setServerUrl(UstadMobileSystemImpl.getInstance().getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", getContext()));

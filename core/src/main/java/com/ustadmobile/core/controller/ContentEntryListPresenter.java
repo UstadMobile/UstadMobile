@@ -24,16 +24,17 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public static final String ARG_DOWNLOADED_CONTENT = "downloaded";
 
-    public static final String ARG_NAVIGATION = "navigation";
     private final ContentEntryListView viewContract;
+
     private ContentEntryDao contentEntryDao;
 
     private long filterByLang = 0;
 
     private long filterByCategory = 0;
+
     private Long parentUid;
 
-    public ContentEntryListPresenter(Object context, Hashtable arguments, ContentEntryListView viewContract) {
+    public ContentEntryListPresenter(Object context, HashMap<String , String> arguments, ContentEntryListView viewContract) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
 
@@ -51,7 +52,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
     }
 
     private void showContentByParent() {
-        parentUid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
+        parentUid = Long.valueOf(getArguments().get(ARG_CONTENT_ENTRY_UID));
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0));
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
             @Override

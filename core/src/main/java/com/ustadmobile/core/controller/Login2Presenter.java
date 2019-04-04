@@ -9,7 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class Login2Presenter extends UstadBaseController<Login2View> {
 
@@ -19,10 +19,10 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
 
     private String mNextDest;
 
-    public Login2Presenter(Object context, Hashtable arguments, Login2View view) {
+    public Login2Presenter(Object context, HashMap<String , String> arguments, Login2View view) {
         super(context, arguments, view);
         if(arguments != null && arguments.containsKey(ARG_NEXT)){
-            mNextDest = arguments.get(ARG_NEXT).toString();
+            mNextDest = arguments.get(ARG_NEXT);
         }else {
             mNextDest = UstadMobileSystemImpl.getInstance().getAppConfigString(
                     AppConfig.KEY_FIRST_DEST, "BasePoint", context);
@@ -30,12 +30,12 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
     }
 
     @Override
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(HashMap<String , String> savedState) {
         super.onCreate(savedState);
 
 
         if(getArguments() != null && getArguments().containsKey(ARG_SERVER_URL)){
-            view.setServerUrl((String)getArguments().get(ARG_SERVER_URL));
+            view.setServerUrl(getArguments().get(ARG_SERVER_URL));
         }else {
             view.setServerUrl(UstadMobileSystemImpl.getInstance().getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", getContext()));

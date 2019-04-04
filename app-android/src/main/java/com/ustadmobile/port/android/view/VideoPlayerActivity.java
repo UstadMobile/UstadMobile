@@ -36,6 +36,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlayerView {
 
@@ -82,8 +83,8 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
         }
 
         mPresenter = new VideoPlayerPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getIntent().getExtras()), this);
+        mPresenter.onCreate(bundleToMap(savedInstanceState));
     }
 
     private void clickUpNavigation() {

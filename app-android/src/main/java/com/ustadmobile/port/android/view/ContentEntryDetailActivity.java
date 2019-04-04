@@ -38,6 +38,7 @@ import java.util.Set;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
 import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class ContentEntryDetailActivity extends UstadBaseActivity implements
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
@@ -82,7 +83,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
         managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this,
+                bundleToMap(getIntent().getExtras()), this,
                 this);
         entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
         entryDetailPresenter.onStart();

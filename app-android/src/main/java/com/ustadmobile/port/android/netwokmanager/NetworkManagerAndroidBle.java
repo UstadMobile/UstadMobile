@@ -59,7 +59,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -941,7 +941,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     }
 
     @Override
-    public DeleteJobTaskRunner makeDeleteJobTask(Object object, Hashtable args) {
+    public DeleteJobTaskRunner makeDeleteJobTask(Object object, HashMap<String , String> args) {
         return new DeleteJobTaskRunnerAndroid(object,args);
     }
 

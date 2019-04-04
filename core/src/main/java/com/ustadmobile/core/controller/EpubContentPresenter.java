@@ -83,6 +83,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 /**
@@ -248,14 +249,13 @@ public class EpubContentPresenter extends UstadBaseController<EpubContentView> {
         }
     };
 
-    public EpubContentPresenter(Object context, Hashtable args, EpubContentView view) {
+    public EpubContentPresenter(Object context, HashMap<String , String> args, EpubContentView view) {
         super(context, args, view);
         this.epubContentView = view;
     }
 
     public void onCreate(Hashtable savedState) {
-        long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID)
-                .toString());
+        long containerUid = Long.parseLong(getArguments().get(EpubContentView.ARG_CONTAINER_UID));
         view.setProgressBarProgress(-1);
         view.setProgressBarVisible(true);
         view.mountContainer(containerUid, mountedCallbackHandler);

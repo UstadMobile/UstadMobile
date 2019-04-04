@@ -27,7 +27,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -70,7 +70,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     public static final String NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype";
 
-    public ContentEntryDetailPresenter(Object context, Hashtable arguments,
+    public ContentEntryDetailPresenter(Object context, HashMap<String , String> arguments,
                                        ContentEntryDetailView viewContract,
                                        LocalAvailabilityMonitor monitor) {
         super(context, arguments, viewContract);
@@ -88,8 +88,8 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         containerDao = repoAppDatabase.getContainerDao();
         networkNodeDao = appdb.getNetworkNodeDao();
 
-        entryUuid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
-        navigation = (String) getArguments().get(ARG_REFERRER);
+        entryUuid = Long.valueOf(getArguments().get(ARG_CONTENT_ENTRY_UID));
+        navigation = getArguments().get(ARG_REFERRER);
 
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override

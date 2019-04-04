@@ -29,8 +29,11 @@ import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
+
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 
 public class BasePointActivity extends UstadBaseActivity implements BasePointView,
@@ -70,7 +73,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_point);
-        Hashtable savedInstanceHt = UMAndroidUtil.bundleToHashtable(savedInstanceState);
+        HashMap<String , String> savedInstanceHt = bundleToMap(savedInstanceState);
         String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
