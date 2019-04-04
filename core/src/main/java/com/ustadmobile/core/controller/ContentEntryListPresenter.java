@@ -140,7 +140,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public void handleContentEntryClicked(ContentEntry entry) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        HashMap<String , String> args = new HashMap<>();
         Long entryUid = entry.getContentEntryUid();
 
         contentEntryDao.findByUid(entryUid, new UmCallback<ContentEntry>() {
@@ -188,7 +188,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public void handleDownloadStatusButtonClicked(ContentEntry entry) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable<String, String> args = new Hashtable<>();
+        HashMap<String, String> args = new HashMap<>();
         args.put("contentEntryUid", String.valueOf(entry.getContentEntryUid()));
         impl.go("DownloadDialog", args, getContext());
     }

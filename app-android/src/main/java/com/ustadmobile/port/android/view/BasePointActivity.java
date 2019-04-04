@@ -119,7 +119,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
         findViewById(R.id.activity_basepoint_fab).setOnClickListener(this);
 
         mBasePointController = new BasePointController(this, this);
-        mBasePointController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
+        mBasePointController.onCreate(bundleToMap(getIntent().getExtras()),
                 UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
     }

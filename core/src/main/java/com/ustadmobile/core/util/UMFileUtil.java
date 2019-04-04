@@ -33,8 +33,9 @@ package com.ustadmobile.core.util;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -339,9 +340,9 @@ public class UMFileUtil {
      * @param deliminator deliminator character
      * @return Hashtable of parameters and values found
      */
-    public static Hashtable parseParams(String str, char deliminator) {
+    public static HashMap<String,String> parseParams(String str, char deliminator) {
         String paramName = null;
-        Hashtable params = new Hashtable();
+        HashMap<String,String> params = new HashMap<>();
         boolean inQuotes = false;
 
         int strLen = str.length();
@@ -395,51 +396,54 @@ public class UMFileUtil {
      * @param urlQuery
      * @return
      */
-    public static Hashtable parseURLQueryString(String urlQuery) {
+    public static HashMap<String,String> parseURLQueryString(String urlQuery) {
         int queryPos = urlQuery.indexOf('?');
         if (queryPos != -1) {
             urlQuery = urlQuery.substring(queryPos + 1);
         }
 
-        Hashtable parsedParams = parseParams(urlQuery, '&');
-        Hashtable decodedParams = new Hashtable();
-        Enumeration e = parsedParams.keys();
+        HashMap<String,String> parsedParams = parseParams(urlQuery, '&');
+        HashMap<String,String> decodedParams = new HashMap<>();
+        Iterator it = parsedParams.keySet().iterator();
         String key;
-        while (e.hasMoreElements()) {
-            key = (String) e.nextElement();
+        while (it.hasNext()) {
+            key = (String) it.next();
             decodedParams.put(URLTextUtil.urlDecodeUTF8(key),
-                    URLTextUtil.urlDecodeUTF8((String) parsedParams.get(key)));
+                    URLTextUtil.urlDecodeUTF8(parsedParams.get(key)));
+            it.remove();
         }
 
         return decodedParams;
     }
 
+
+
     /**
-     * Turns a hashtable into a URL encoded query string
+     * Turns a hashmap into a URL encoded query string
      *
-     * @param ht Hashtable of param keys to values (keys and values must be strings)
+     * @param map Hashmap of param keys to values (keys and values must be strings)
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
-    public static String hashtableToQueryString(Hashtable ht) {
+    public static String mapToQueryString(HashMap<String, String> map) {
         StringBuffer sb = new StringBuffer();
 
-        if (ht == null) {
+        if (map == null) {
             return "";
         }
 
-        Enumeration keys = ht.keys();
+        Iterator keys = map.keySet().iterator();
         String key;
         boolean firstEl = true;
-        while (keys.hasMoreElements()) {
+        while (keys.hasNext()) {
             if (!firstEl) {
                 sb.append('&');
             } else {
                 firstEl = false;
             }
 
-            key = (String) keys.nextElement();
+            key = (String) keys.next();
             sb.append(URLTextUtil.urlEncodeUTF8(key)).append('=');
-            sb.append(URLTextUtil.urlEncodeUTF8((String) ht.get(key)));
+            sb.append(URLTextUtil.urlEncodeUTF8(map.get(key)));
         }
 
         return sb.toString();
@@ -462,7 +466,7 @@ public class UMFileUtil {
 
         int semiPos = header.indexOf(';');
         String typeStr = null;
-        Hashtable params = null;
+        HashMap<String,String> params = null;
 
         if (semiPos == -1) {
             typeStr = header.trim();
@@ -511,16 +515,16 @@ public class UMFileUtil {
         /**
          * Hashtable of parameters found (case sensitive)
          */
-        public Hashtable params;
+        public HashMap<String,String> params;
 
-        public TypeWithParamHeader(String typeName, Hashtable params) {
+        public TypeWithParamHeader(String typeName, HashMap<String,String> params) {
             this.typeName = typeName;
             this.params = params;
         }
 
         public String getParam(String paramName) {
             if (params != null && params.containsKey(paramName)) {
-                return (String) params.get(paramName);
+                return params.get(paramName);
             } else {
                 return null;
             }
@@ -732,15 +736,15 @@ public class UMFileUtil {
      * @param prefix
      * @return
      */
-    public static Vector splitCombinedViewArguments(Hashtable args, String prefix, char argDelmininator) {
+    public static Vector splitCombinedViewArguments(HashMap<String , String> args, String prefix, char argDelmininator) {
         Vector result = new Vector();
-        Enumeration allArgsKeys = args.keys();
+        Iterator allArgsKeys = args.keySet().iterator();
 
         String currentKey, argName;
         int index, indexStart, indexEnd;
         Hashtable indexArgs;
-        while (allArgsKeys.hasMoreElements()) {
-            currentKey = (String) allArgsKeys.nextElement();
+        while (allArgsKeys.hasNext()) {
+            currentKey = (String) allArgsKeys.next();
             if (currentKey.startsWith(prefix)) {
                 indexStart = currentKey.indexOf(argDelmininator) + 1;
                 indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1);
@@ -807,12 +811,13 @@ public class UMFileUtil {
     }
 
 
-    public static String clearTopFromReferrerPath(String viewname, Hashtable args, String referrerPath) {
+    public static String clearTopFromReferrerPath(String viewname, HashMap<String, String> args,
+                                                  String referrerPath) {
         int lastIndex = referrerPath.lastIndexOf("/" + viewname + "?");
         if(lastIndex != -1) {
             return referrerPath.substring(0, referrerPath.indexOf("/", lastIndex));
         }else {
-            return "/" + viewname + "?" + hashtableToQueryString(args);
+            return "/" + viewname + "?" + mapToQueryString(args);
         }
     }
 

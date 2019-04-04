@@ -13,7 +13,9 @@ import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -52,7 +54,7 @@ public class BasePointController extends UstadBaseController {
 
     public static final int NUM_CATALOG_TABS = 1;
 
-    private Hashtable args;
+    private HashMap<String, String> args;
 
     private boolean welcomeScreenDisplayed = false;
 
@@ -69,7 +71,7 @@ public class BasePointController extends UstadBaseController {
         this.basePointView = view;
     }
 
-    public void onCreate(Hashtable args, Hashtable savedState) {
+    public void onCreate(HashMap<String, String> args, Hashtable savedState) {
         this.args = args;
         basePointView.setClassListVisible(false);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -103,13 +105,13 @@ public class BasePointController extends UstadBaseController {
      * @return 
      */
     public Hashtable getCatalogOPDSArguments(int position) {
-        Enumeration keys = this.args.keys();
+        Iterator keys = args.keySet().iterator();
         Hashtable result = new Hashtable();
         String keyVal;
         String prefix = position + OPDS_ARGS_PREFIX;
         int prefixLen = prefix.length();
-        while(keys.hasMoreElements()) {
-            keyVal = (String)keys.nextElement();
+        while(keys.hasNext()) {
+            keyVal = (String)keys.next();
             if(keyVal.startsWith(prefix)) {
                 result.put(keyVal.substring(prefixLen), args.get(keyVal));
             }

@@ -79,7 +79,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     }
 
-    public void onCreate(Hashtable hashtable) {
+    public void onCreate(HashMap<String,String> hashtable) {
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
         ContentEntryRelatedEntryJoinDao contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
@@ -249,7 +249,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void handleClickTranslatedEntry(long uid) {
-        Hashtable args = new Hashtable();
+        HashMap<String,String> args = new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(uid));
         impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
     }
@@ -294,7 +294,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
 
         } else {
-            Hashtable args = new Hashtable();
+            HashMap<String,String> args = new HashMap<>();
 
             //hard coded strings because these are actually in sharedse
             args.put("contentEntryUid", String.valueOf(this.entryUuid));
