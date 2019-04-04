@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -211,7 +211,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             String responseCacheControlHeader = response.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL);
 
             if(responseCacheControlHeader != null) {
-                HashMap<String , String> responseCacheControl = UMFileUtil.parseParams(responseCacheControlHeader, ',');
+                Map<String, String> responseCacheControl = UMFileUtil.parseParams(responseCacheControlHeader, ',');
 
                 if(responseCacheControl.containsKey(CACHE_CONTROL_NO_CACHE)) {
                     AbstractCacheResponse noCacheResponse = new NoCacheResponse(response);
@@ -432,9 +432,9 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     public static final long calculateEntryExpirationTime(HttpCachedEntry cachedEntry) {
         String cacheControl = cachedEntry.getCacheControl();
         if(cacheControl != null) {
-            HashMap<String , String> ccParams = UMFileUtil.parseParams(cacheControl, ',');
+            Map<String, String> ccParams = UMFileUtil.parseParams(cacheControl, ',');
             if(ccParams.containsKey(CACHE_CONTROL_KEY_MAX_AGE)) {
-                long maxage = Integer.parseInt(ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
+                long maxage = Integer.parseInt((String)ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
                 return cachedEntry.getLastChecked() + (maxage * 1000);
             }
         }
