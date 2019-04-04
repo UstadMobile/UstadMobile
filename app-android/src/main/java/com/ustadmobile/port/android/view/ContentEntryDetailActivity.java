@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
@@ -27,17 +25,16 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
 import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class ContentEntryDetailActivity extends UstadBaseActivity implements
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
@@ -82,9 +79,9 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
         managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this,
+                bundleToMap(getIntent().getExtras()), this,
                 this);
-        entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
+        entryDetailPresenter.onCreate(bundleToMap(new Bundle()));
         entryDetailPresenter.onStart();
         managerAndroidBle.addLocalAvailabilityListener(this);
 
@@ -273,7 +270,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void showDownloadOptionsDialog(Hashtable args) {
+    public void showDownloadOptionsDialog(HashMap<String,String> args) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,

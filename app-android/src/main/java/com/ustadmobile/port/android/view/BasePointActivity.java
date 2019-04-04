@@ -26,11 +26,12 @@ import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.WeakHashMap;
+
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 
 public class BasePointActivity extends UstadBaseActivity implements BasePointView,
@@ -61,7 +62,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     private AlertDialog shareAppDialog;
 
-    private ArrayList<Hashtable> tabArgumentsList;
+    private ArrayList<Map<String, String>> tabArgumentsList;
 
     private TabLayout mTabLayout;
 
@@ -70,7 +71,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_point);
-        Hashtable savedInstanceHt = UMAndroidUtil.bundleToHashtable(savedInstanceState);
+        Map<String , String> savedInstanceHt = bundleToMap(savedInstanceState);
         String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
@@ -116,8 +117,8 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
         findViewById(R.id.activity_basepoint_fab).setOnClickListener(this);
 
         mBasePointController = new BasePointController(this, this);
-        mBasePointController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
-                UMAndroidUtil.bundleToHashtable(savedInstanceState));
+        mBasePointController.onCreate(bundleToMap(getIntent().getExtras()),
+                bundleToMap(savedInstanceState));
 
     }
 
@@ -349,8 +350,9 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
         shareAppDialog = null;
     }
 
+
     @Override
-    public void addTab(Hashtable tabArguments) {
+    public void addTab(Map<String, String> tabArguments) {
         tabArgumentsList.add(tabArguments);
         if(tabArgumentsList.size() > 1){
             mTabLayout.setVisibility(View.VISIBLE);

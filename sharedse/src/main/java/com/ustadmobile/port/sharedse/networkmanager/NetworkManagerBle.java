@@ -444,7 +444,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                                                            NetworkNode peerToSendMessageTo,
                                                            BleMessageResponseListener responseListener);
 
-    public abstract DeleteJobTaskRunner makeDeleteJobTask(Object object, Hashtable args);
+    public abstract DeleteJobTaskRunner makeDeleteJobTask(Object object, Map<String , String>  args);
 
     /**
      * Send message to a specific device
@@ -469,7 +469,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * Cancel all download set and set items
      * @param args Arguments to be passed to the task runner.
      */
-    public void cancelAndDeleteDownloadSet(Hashtable args) {
+    public void cancelAndDeleteDownloadSet(Map<String , String>  args) {
 
         long downloadSetUid = Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID)));
         List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().

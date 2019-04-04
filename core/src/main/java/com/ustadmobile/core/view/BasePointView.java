@@ -31,7 +31,8 @@
 
 package com.ustadmobile.core.view;
 
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * The base point view provides two tabs: the downloaded entries of that user
@@ -47,7 +48,7 @@ public interface BasePointView extends UstadView{
      * If true the view should add a third tab for class
      * management (e.g. user is a teacher)
      *
-     * @param viewable
+     * @param visible
      */
     public void setClassListVisible(boolean visible);
 
@@ -68,6 +69,6 @@ public interface BasePointView extends UstadView{
 
     void dismissShareAppDialog();
 
-    void addTab(Hashtable tabArguments);
+    void addTab(Map<String, String> tabArguments);
     
 }

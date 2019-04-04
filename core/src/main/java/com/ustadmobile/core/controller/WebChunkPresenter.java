@@ -16,7 +16,7 @@ import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
-import java.util.Hashtable;
+import java.util.Map;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 import static com.ustadmobile.core.view.WebChunkView.ARG_CONTAINER_UID;
@@ -26,23 +26,22 @@ public class WebChunkPresenter extends UstadBaseController<WebChunkView> {
 
     private String navigation;
 
-    public WebChunkPresenter(Object context, Hashtable arguments, WebChunkView view) {
+    public WebChunkPresenter(Object context, Map<String , String> arguments, WebChunkView view) {
         super(context, arguments, view);
     }
 
     @Override
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
-        UmAppDatabase appDatabase = UmAppDatabase.getInstance(getContext());
         ContentEntryDao contentEntryDao = repoAppDatabase.getContentEntryDao();
         ContainerDao containerDao = repoAppDatabase.getContainerDao();
 
-        long entryUuid = Long.parseLong((String) getArguments().get(ARG_CONTENT_ENTRY_ID));
-        long containerUid = Long.parseLong((String) getArguments().get(ARG_CONTAINER_UID));
+        long entryUuid = Long.parseLong(getArguments().get(ARG_CONTENT_ENTRY_ID));
+        long containerUid = Long.parseLong(getArguments().get(ARG_CONTAINER_UID));
 
 
-        navigation = (String) getArguments().get(ARG_REFERRER);
+        navigation = getArguments().get(ARG_REFERRER);
 
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override

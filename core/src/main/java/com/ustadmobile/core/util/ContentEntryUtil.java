@@ -69,7 +69,7 @@ public class ContentEntryUtil {
             dbRepo.getContainerDao().getMostRecentContainerForContentEntryAsync(entryStatus.getContentEntryUid(), new UmCallback<Container>() {
                 @Override
                 public void onSuccess(Container result) {
-                    Hashtable args = new Hashtable();
+                    HashMap<String , String> args = new HashMap<>();
                     String viewName = null;
                     switch (result.getMimeType()) {
                         case "application/zip":
@@ -138,7 +138,7 @@ public class ContentEntryUtil {
             });
 
         } else if (openEntryIfNotDownloaded) {
-            Hashtable<String, String> args = new Hashtable<>();
+            HashMap<String, String> args = new HashMap<>();
             args.put(ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID,
                     String.valueOf(entryStatus.getContentEntryUid()));
             impl.go(ContentEntryDetailView.VIEW_NAME, args, context);
@@ -188,9 +188,9 @@ public class ContentEntryUtil {
         viewDestination = viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?");
 
-        Hashtable params = UMFileUtil.parseURLQueryString(viewDestination);
+        HashMap<String , String> params = UMFileUtil.parseURLQueryString(viewDestination);
         if (params.containsKey("sourceUrl")) {
-            goToContentEntryBySourceUrl(params.get("sourceUrl").toString(), dbRepo,
+            goToContentEntryBySourceUrl(params.get("sourceUrl"), dbRepo,
                     impl, openEntryIfNotDownloaded, context,
                     callback);
         }
