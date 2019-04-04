@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
@@ -10,8 +11,9 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class NetworkNode {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int nodeId;
+    private long nodeId;
 
+    @UmIndexField
     private String bluetoothMacAddress;
 
     private String ipAddress;
@@ -20,7 +22,10 @@ public class NetworkNode {
 
     private String deviceWifiDirectName;
 
-    private long wifiDirectLastUpdated;
+    private String endpointUrl;
+
+    @UmIndexField
+    private long lastUpdateTimeStamp;
 
     private long networkServiceLastUpdated;
 
@@ -28,7 +33,11 @@ public class NetworkNode {
 
     private int port;
 
+    private int numFailureCount;
+
     private int wifiDirectDeviceStatus;
+
+    private String groupSsid;
 
     public static final int STATUS_CONNECTED = 0;
 
@@ -39,6 +48,7 @@ public class NetworkNode {
     public static final int STATUS_AVAILABLE = 3;
 
     public static final int STATUS_UNAVAILABLE = 4;
+
 
     /**
      * The timeout after which if we have heard nothing we consider a wifi direct node inactive.
@@ -67,12 +77,20 @@ public class NetworkNode {
 
     }
 
-    public int getNodeId() {
+    public long getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(int nodeId) {
+    public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
+    }
+
+    public void setEndpointUrl(String endpointUrl) {
+        this.endpointUrl = endpointUrl;
     }
 
     /**
@@ -162,8 +180,24 @@ public class NetworkNode {
      * Method which used to get last node update time by Wi-Fi Direct service.
      * @return long: Time in milliseconds
      */
-    public long getWifiDirectLastUpdated() {
-        return wifiDirectLastUpdated;
+    public long getLastUpdateTimeStamp() {
+        return lastUpdateTimeStamp;
+    }
+
+    /**
+     * Method which used to set last node update time by Wi-Fi Direct service.
+     */
+    public void setLastUpdateTimeStamp(long lastUpdateTimeStamp) {
+        this.lastUpdateTimeStamp = lastUpdateTimeStamp;
+    }
+
+
+    public int getNumFailureCount() {
+        return numFailureCount;
+    }
+
+    public void setNumFailureCount(int numFailureCount) {
+        this.numFailureCount = numFailureCount;
     }
 
     /**
@@ -171,17 +205,16 @@ public class NetworkNode {
      * @return
      */
     public long getTimeSinceWifiDirectLastUpdated() {
-        return System.currentTimeMillis() - wifiDirectLastUpdated;
+        return System.currentTimeMillis() - lastUpdateTimeStamp;
     }
 
 
     /**
      * Method which is responsible to set time when this node was last updated
-     * by Wi-Fi Direct service
-     * @param wifiDirectLastUpdated
+     * @param lastUpdateTimeStamp Update timestamp
      */
-    public void setWifiDirectLastUpdated(long wifiDirectLastUpdated) {
-        this.wifiDirectLastUpdated = wifiDirectLastUpdated;
+    public void setNetworkNodeLastUpdated(long lastUpdateTimeStamp) {
+        this.lastUpdateTimeStamp = lastUpdateTimeStamp;
     }
 
     /**
@@ -226,46 +259,13 @@ public class NetworkNode {
                         || ( ipAddress !=null && getIpAddress().equals(ipAddress)));
     }
 
-//    /**
-//     * Add the given acqusition history entry to the list of entries acquired from this node.
-//     *
-//     * @param entry
-//     */
-//    public void addAcquisitionHistoryEntry(AcquisitionTaskHistoryEntry entry) {
-//        if(acquisitionTaskHistory == null)
-//            acquisitionTaskHistory = new ArrayList<>();
-//
-//        acquisitionTaskHistory.add(entry);
-//    }
-//
-//    /**
-//     * Returns the history of acquisition entries downloaded from this node. If no entries have
-//     * been dowonloaded this will be null.
-//     *
-//     * @return List of AcquisitionTaskHistoryEntry downloaded from this node, null if no entries exist
-//     */
-//
-//    public List<AcquisitionTaskHistoryEntry> getAcquisitionHistory() {
-//        return acquisitionTaskHistory;
-//    }
+    public String getGroupSsid() {
+        return groupSsid;
+    }
 
-
-//    public int getNumFailures() {
-//        if(acquisitionTaskHistory == null)
-//            return 0;
-//
-//        int numFailures = 0;
-//        Iterator<AcquisitionTaskHistoryEntry> historyIterator = acquisitionTaskHistory.iterator();
-//        AcquisitionTaskHistoryEntry entry;
-//        while(historyIterator.hasNext()) {
-//            entry = historyIterator.next();
-//            if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED)
-//                numFailures++;
-//
-//        }
-//
-//        return numFailures;
-//    }
+    public void setGroupSsid(String groupSsid) {
+        this.groupSsid = groupSsid;
+    }
 
     public int getWifiDirectDeviceStatus() {
         return wifiDirectDeviceStatus;

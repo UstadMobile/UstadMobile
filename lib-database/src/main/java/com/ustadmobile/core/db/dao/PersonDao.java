@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
+import java.util.List;
 import java.util.Random;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
@@ -133,6 +134,10 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
         });
     }
 
+    @UmInsert
+    public abstract List<Long> insertListAndGetIds(List<Person> personList);
+
+
     protected long getAndIncrementPrimaryKey() {
         if(getDeviceBits() == 0)
             insertDeviceBits(new SyncDeviceBits(new Random().nextInt()));
@@ -206,4 +211,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void personHasPermission(long accountPersonUid, long personUid, long permission,
                                     UmCallback<Boolean> callback);
 
+    @UmQuery("SELECT Person.* FROM PERSON Where Person.username = :username")
+    public abstract Person findByUsername(String username);
+
+    @UmQuery("SELECT Count(*) FROM Person")
+    public abstract long countAll();
 }

@@ -195,7 +195,7 @@ public abstract class FileResponder {
             long lastModifiedTime = file.getLastModifiedTime();
             String fileName = file.getName();
             String etagNameInput = fileName;
-            String mimeType = EmbeddedHTTPD.getMimeType(fileName);
+            String mimeType = EmbeddedHTTPD.getMimeType(session.getUri());
 
 
 
@@ -218,7 +218,7 @@ public abstract class FileResponder {
                     retInputStream = isHeadRequest ? null : new RangeInputStream(retInputStream, range[0], range[1]);
                     long contentLength = (range[1]+1) - range[0];
                     NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
-                            EmbeddedHTTPD.getMimeType(fileName), retInputStream, contentLength);
+                            mimeType, retInputStream, contentLength);
 
                     r.addHeader("ETag", etag);
 
@@ -241,7 +241,7 @@ public abstract class FileResponder {
                 // see RangeInputStream.available
                 retInputStream = isHeadRequest ? null : retInputStream;
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                    EmbeddedHTTPD.getMimeType(fileName), retInputStream, totalLength);
+                    mimeType, retInputStream, totalLength);
 
                 r.addHeader("ETag", etag);
                 r.addHeader("Content-Length", String.valueOf(totalLength));

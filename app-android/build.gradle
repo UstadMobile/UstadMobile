@@ -8,6 +8,7 @@ if (keyStorePropertiesExists) {
 
 buildscript {
     repositories {
+        google()
         jcenter()
     }
 
@@ -49,10 +50,8 @@ afterEvaluate {
 }
 
 tasks.whenTaskAdded { task ->
- if (task.name == "installLocalconfigDebugAndroidTest") {
-        testEmulatorLocalconfigDebug.dependsOn task
-    } else if (task.name == "installLocalconfigDebug") {
-        testEmulatorLocalconfigDebug.dependsOn task
+    if (task.name.toLowerCase().endsWith("androidtest")) {
+        task.dependsOn(":lib-http-testserver:startDaemon")
     }
 }
 
@@ -69,6 +68,7 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            returnDefaultValues = true
         }
     }
 
@@ -99,11 +99,13 @@ android {
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
+        buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
+        buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
 
-        manifestPlaceholders = [applicationClass: "android.app.Application"]
 
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
     }
@@ -122,19 +124,25 @@ android {
 
         /*
          * Our main application does not exceed 64K methods, but it does exceed this limit with
-         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled
+         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled.
+         *
+         * Min SDK version = 18 as this is required by ui-automator
          */
         vanillamultidex {
             dimension "config"
+            minSdkVersion 18
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
             }
         }
 
+        /**
+         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
+         */
         devMinApi21 {
             dimension "config"
-            minSdkVersion 21
+            minSdkVersion 23
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
@@ -165,7 +173,9 @@ gradle.taskGraph.useFilter { task ->
     if(task.name.equals("connectedVanillaDebugAndroidTest")
         || task.name.equals("createVanillaDebugCoverageReport")
         || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")) {
+        || task.name.equals("testVanillaReleaseUnitTest")
+        || task.name.equals("processVanillaDebugAndroidTestManifest")
+        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 
@@ -291,8 +301,6 @@ dependencies {
 
 
     androidTestImplementation project(":core-tests")
-    androidTestImplementation project(":sharedse-tests")
-    androidTestImplementation project(":lib-core-fs-tests")
 
 
     /*
@@ -314,29 +322,29 @@ dependencies {
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
 
+    //Page indicator
+    implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+
     implementation 'de.hdodenhof:circleimageview:2.1.0'
+
+    implementation "com.google.android.exoplayer:exoplayer:$version_exo_player"
 
     //used for learner progress view
     implementation 'com.txusballesteros:FitChart:1.0'
 
     implementation "com.google.android:flexbox:$version_android_flexbox"
 
-    //Used for dns local network discovery on Android versions lower than 5.0
-    implementation 'org.jmdns:jmdns:3.5.2'
-
-    //ASCII 85 used to encode
-    implementation "com.github.fzakaria:ascii85:$version_ascii85"
+    //SVG support for Android
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
     //Support for encrypted zips
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
 
-    //Crash reporting
-    implementation "ch.acra:acra-http:$version_android_acra"
-    implementation "ch.acra:acra-dialog:$version_android_acra"
-
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
+
+    //Codec2 (low bitrate voice) Android library
+    implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: "com.android.support", name: "support-annotations", version: "$version_android_support_lib"
@@ -352,13 +360,22 @@ dependencies {
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
+
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+
+    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
+
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+
+    androidTestImplementation "commons-io:commons-io:$version_commons_io"
+
 
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
     testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 }
 
 task sourceJar(type: Jar) {

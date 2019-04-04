@@ -1,12 +1,16 @@
 package com.ustadmobile.lib.database.jdbc;
 
+import com.ustadmobile.lib.db.DoorUtils;
+import com.ustadmobile.lib.db.UmDbMigration;
+import com.ustadmobile.lib.db.UmDbType;
+import com.ustadmobile.lib.db.UmDbWithSyncableInsertLock;
 import com.ustadmobile.lib.db.sync.UmSyncableDatabase;
 
 import java.sql.Array;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -160,8 +164,9 @@ public class JdbcDatabaseUtils {
     public static void handleTablesChanged(Map<DbChangeListener, DbChangeListenerRequest> listeners,
                                            String... tablesChanged) {
         List<String> tablesChangedList = Arrays.asList(tablesChanged);
+        List<DbChangeListenerRequest> listenerList = new ArrayList<>(listeners.values());
 
-        for(DbChangeListenerRequest request : listeners.values()) {
+        for(DbChangeListenerRequest request : listenerList) {
             if(!Collections.disjoint(tablesChangedList, request.getTableNames())){
                 request.getListener().onTablesChanged(tablesChangedList);
             }
@@ -270,6 +275,69 @@ public class JdbcDatabaseUtils {
             }
         }
     }
+
+    /**
+     * Lock the database for syncable entity insert if this is an SQLite database. This is called by
+     * generated code.
+     *
+     * @param db database being used
+     */
+    @SuppressWarnings("unused")
+    public static void lockSyncableInsertsIfSqlite(UmJdbcDatabase db) {
+        if(db.getDbType() == UmDbType.TYPE_SQLITE)
+            ((UmDbWithSyncableInsertLock)db).lockSyncableInserts();
+    }
+
+    /**
+     * Unlock the database for syncable entity insert if this is an SQLite database. This is called
+     * by generated code
+     *
+     * @param db database being used
+     */
+    @SuppressWarnings("unused")
+    public static void unlockSyncableInsertsIfSqlite(UmJdbcDatabase db) {
+        if(db.getDbType() == UmDbType.TYPE_SQLITE)
+            ((UmDbWithSyncableInsertLock)db).unlockSyncableInserts();
+    }
+
+
+    /**
+     * Update the sequence that is used on Postgres for generating syncable primary keys. This
+     * method is called from generated code (specifically, the clearAll method). This should be
+     * done whenever the syncDeviceBits are changed.
+     *
+     * @param tableId table id for the entity to alter the sequence for
+     * @param syncDeviceBits the new value for syncdevicebits
+     * @param stmt JDBC statement object
+     * @throws SQLException if there is an SQLException when running the SQL
+     */
+    @SuppressWarnings("unused")
+    public static void updatePostgresSyncablePrimaryKeySequence(int tableId,
+                                                                int syncDeviceBits,
+                                                                Statement stmt) throws SQLException{
+        stmt.execute("ALTER SEQUENCE spk_seq_" +
+                tableId + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(syncDeviceBits));
+    }
+
+
+
+    public static UmDbMigration pickNextMigration(int currentVersion, List<UmDbMigration> migrations) {
+        List<UmDbMigration> candidateMigrations = new ArrayList<>();
+        for(UmDbMigration migration : migrations){
+            if(migration.getFromVersion() == currentVersion)
+                candidateMigrations.add(migration);
+        }
+
+        UmDbMigration bestMigration = null;
+        for(UmDbMigration migration : candidateMigrations){
+            if(bestMigration == null || migration.getToVersion() > bestMigration.getToVersion())
+                bestMigration = migration;
+        }
+
+        return bestMigration;
+    }
+
+
 
 
 }

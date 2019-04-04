@@ -3,11 +3,11 @@ package com.ustadmobile.lib.contentscrapers;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper;
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper;
-import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent;
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -25,6 +25,8 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -40,21 +42,30 @@ public class TestPrathamContentScraper {
 
                 if (request.getPath().contains("json")) {
 
-                    String fileName = request.getPath().substring(5,
-                            request.getPath().length());
+                    String fileName = request.getPath().substring(5);
                     String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
-                    return new MockResponse().setBody(body);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(body);
+
+                    return response;
 
                 } else if (request.getPath().contains("content")) {
 
-                    String fileLocation = request.getPath().substring(8,
-                            request.getPath().length());
+                    String fileLocation = request.getPath().substring(8);
                     InputStream videoIn = getClass().getResourceAsStream(fileLocation);
                     BufferedSource source = Okio.buffer(Okio.source(videoIn));
                     Buffer buffer = new Buffer();
                     source.readAll(buffer);
 
-                    return new MockResponse().setResponseCode(200).setBody(buffer);
+                    MockResponse response = new MockResponse().setResponseCode(200);
+                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                            + UTF_ENCODING).hashCode());
+                    if (!request.getMethod().equalsIgnoreCase("HEAD"))
+                        response.setBody(buffer);
+
+                    return response;
                 }
 
             } catch (IOException e) {
@@ -64,11 +75,18 @@ public class TestPrathamContentScraper {
         }
     };
 
+    @Before
+    public void clearDb() {
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
+    }
+
 
     @Test
     public void givenServerOnline_whenDdlSiteScraped_thenShouldFindConvertAndDownloadAllFiles() throws IOException, URISyntaxException {
 
         File tmpDir = Files.createTempDirectory("testindexPrathamcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -77,17 +95,15 @@ public class TestPrathamContentScraper {
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamonebook.txt").url()).when(scraper).generatePrathamUrl("1");
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamlist.txt").url()).when(scraper).generatePrathamUrl("2");
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamempty.txt").url()).when(scraper).generatePrathamUrl("3");
-        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.epub").url()).when(scraper).generatePrathamEPubFileUrl(Mockito.anyString());
+        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip").url()).when(scraper).generatePrathamEPubFileUrl(Mockito.anyString());
         doReturn("").when(scraper).loginPratham();
 
-        scraper.findContent(tmpDir);
+        scraper.findContent(tmpDir, containerDir);
 
-        File resourceFolder = new File(tmpDir, "5859");
+        File resourceFolder = new File(tmpDir, "24620");
         Assert.assertEquals(true, resourceFolder.isDirectory());
 
-        File contentFolder = new File(resourceFolder, "content");
-
-        File contentFile = new File(contentFolder, "5859-come-home-papa.epub");
+        File contentFile = new File(resourceFolder, "24620" + ETAG_TXT);
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
 
@@ -97,6 +113,7 @@ public class TestPrathamContentScraper {
     public void givenServerOnline_whenAsbSiteScraped_thenShouldFindConvertAndDownloadAllFiles() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testindexAsbcontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
@@ -109,9 +126,9 @@ public class TestPrathamContentScraper {
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asbreader.txt").url().toString()).when(scraper).generateReaderUrl(Mockito.any(), Mockito.anyString());
         doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asburl.txt").url().toString()).when(scraper).getAfricanStoryBookUrl();
 
-        scraper.findContent(tmpDir);
+        scraper.findContent(tmpDir, containerDir);
 
-        File contentFile = new File(tmpDir, "asb10674.epub");
+        File contentFile = new File(tmpDir, "10674" + LAST_MODIFIED_TXT);
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
     }
@@ -121,26 +138,24 @@ public class TestPrathamContentScraper {
     public void givenServerOnline_whenDdlEpubScraped_thenShouldConvertAndDownload() throws IOException {
 
         File tmpDir = Files.createTempDirectory("testindexDdlontentscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
         DdlContentScraper scraper = new DdlContentScraper(
                 mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString(),
-                tmpDir);
-        try {
-            scraper.scrapeContent();
-            scraper.getParentSubjectAreas();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+                tmpDir, containerDir, "en");
+        scraper.scrapeContent();
+        scraper.getParentSubjectAreas();
 
         File contentFolder = new File(tmpDir, "ddlcontent");
         Assert.assertEquals(true, contentFolder.isDirectory());
 
-        File contentFile = new File(contentFolder, "311.pdf");
+        File contentFile = new File(contentFolder, "311" + ETAG_TXT);
         Assert.assertEquals(true, ContentScraperUtil.fileHasContent(contentFile));
 
-
+        Assert.assertTrue("container has the file", containerDir.listFiles().length > 0);
     }
+
 }

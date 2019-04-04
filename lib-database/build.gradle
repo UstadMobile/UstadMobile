@@ -1,5 +1,6 @@
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
+apply plugin: "jacoco"
 
 
 compileJava {
@@ -37,6 +38,7 @@ dependencies {
     testRuntimeOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testRuntimeOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testRuntimeOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    testRuntimeOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
     testImplementation project(":lib-database-jdbc")
     testImplementation project(":lib-database-entities")

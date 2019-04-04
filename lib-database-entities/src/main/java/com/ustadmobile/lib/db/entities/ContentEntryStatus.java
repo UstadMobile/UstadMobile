@@ -1,49 +1,43 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
-import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 @UmEntity
 public class ContentEntryStatus {
 
+
+    public static final int LOCAL_STATUS_UNAVAILABLE = 0;
+
+    public static final int LOCAL_STATUS_AVAILABLE = 1;
+
+    //Always equals contentEntryUid
     @UmPrimaryKey
     private long cesUid;
 
-    @UmIndexField
-    private long cesContentEntryUid;
+    private long totalSize;
 
-    private long entryBytesDownloadedSoFar;
+    private long bytesDownloadSoFar;
 
-    private long bytesDownloadSoFarIncDescendants;
+    private int downloadStatus;
 
-    private long sizeIncDescendants;
+    private boolean locallyAvailable;
 
-    private long entrySize;
-
-    private int entriesWithContainerIncDescendants;
-
-    private int entryHasContainer;
-
-    private int containersDownloadedIncDescendants;
-
-    private int entryContainerDownloaded;
-
-    private int containersDownloadPendingIncAncestors;
-
-    private int entryContainerDownloadPending;
-
-    private long entryAcquisitionLinkLength;
-
-    private int activeDownloadsIncAncestors;
-
-    private int entryActiveDownload;
-
-    private int pausedDownloadsIncAncestors;
-
-    private int entryPausedDownload;
+    private int downloadSpeed;
 
     private boolean invalidated = false;
+
+    private boolean cesLeaf;
+
+    public ContentEntryStatus() {
+
+    }
+
+    public ContentEntryStatus(long contentEntryUid, boolean isLeaf, long totalSize) {
+        this.cesUid = contentEntryUid;
+        this.cesLeaf = isLeaf;
+        this.totalSize = totalSize;
+    }
 
     public long getCesUid() {
         return cesUid;
@@ -53,139 +47,86 @@ public class ContentEntryStatus {
         this.cesUid = cesUid;
     }
 
-    public long getCesContentEntryUid() {
-        return cesContentEntryUid;
-    }
-
-    public void setCesContentEntryUid(long cesContentEntryUid) {
-        this.cesContentEntryUid = cesContentEntryUid;
-    }
-
-    public long getEntryBytesDownloadedSoFar() {
-        return entryBytesDownloadedSoFar;
-    }
-
-    public void setEntryBytesDownloadedSoFar(long entryBytesDownloadedSoFar) {
-        this.entryBytesDownloadedSoFar = entryBytesDownloadedSoFar;
-    }
-
-    public long getBytesDownloadSoFarIncDescendants() {
-        return bytesDownloadSoFarIncDescendants;
-    }
-
-    public void setBytesDownloadSoFarIncDescendants(long bytesDownloadSoFarIncDescendants) {
-        this.bytesDownloadSoFarIncDescendants = bytesDownloadSoFarIncDescendants;
-    }
-
-    public long getSizeIncDescendants() {
-        return sizeIncDescendants;
-    }
-
-    public void setSizeIncDescendants(long sizeIncDescendants) {
-        this.sizeIncDescendants = sizeIncDescendants;
-    }
-
-    public long getEntrySize() {
-        return entrySize;
-    }
-
-    public void setEntrySize(long entrySize) {
-        this.entrySize = entrySize;
-    }
-
-    public int getEntriesWithContainerIncDescendants() {
-        return entriesWithContainerIncDescendants;
-    }
-
-    public void setEntriesWithContainerIncDescendants(int entriesWithContainerIncDescendants) {
-        this.entriesWithContainerIncDescendants = entriesWithContainerIncDescendants;
-    }
-
-    public int getEntryHasContainer() {
-        return entryHasContainer;
-    }
-
-    public void setEntryHasContainer(int entryHasContainer) {
-        this.entryHasContainer = entryHasContainer;
-    }
-
-    public int getContainersDownloadedIncDescendants() {
-        return containersDownloadedIncDescendants;
-    }
-
-    public void setContainersDownloadedIncDescendants(int containersDownloadedIncDescendants) {
-        this.containersDownloadedIncDescendants = containersDownloadedIncDescendants;
-    }
-
-    public int getEntryContainerDownloaded() {
-        return entryContainerDownloaded;
-    }
-
-    public void setEntryContainerDownloaded(int entryContainerDownloaded) {
-        this.entryContainerDownloaded = entryContainerDownloaded;
-    }
-
-    public int getContainersDownloadPendingIncAncestors() {
-        return containersDownloadPendingIncAncestors;
-    }
-
-    public void setContainersDownloadPendingIncAncestors(int containersDownloadPendingIncAncestors) {
-        this.containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors;
-    }
-
-    public int getEntryContainerDownloadPending() {
-        return entryContainerDownloadPending;
-    }
-
-    public void setEntryContainerDownloadPending(int entryContainerDownloadPending) {
-        this.entryContainerDownloadPending = entryContainerDownloadPending;
-    }
-
-    public long getEntryAcquisitionLinkLength() {
-        return entryAcquisitionLinkLength;
-    }
-
-    public void setEntryAcquisitionLinkLength(long entryAcquisitionLinkLength) {
-        this.entryAcquisitionLinkLength = entryAcquisitionLinkLength;
-    }
-
-    public int getActiveDownloadsIncAncestors() {
-        return activeDownloadsIncAncestors;
-    }
-
-    public void setActiveDownloadsIncAncestors(int activeDownloadsIncAncestors) {
-        this.activeDownloadsIncAncestors = activeDownloadsIncAncestors;
-    }
-
-    public int getEntryActiveDownload() {
-        return entryActiveDownload;
-    }
-
-    public void setEntryActiveDownload(int entryActiveDownload) {
-        this.entryActiveDownload = entryActiveDownload;
-    }
-
-    public int getPausedDownloadsIncAncestors() {
-        return pausedDownloadsIncAncestors;
-    }
-
-    public void setPausedDownloadsIncAncestors(int pausedDownloadsIncAncestors) {
-        this.pausedDownloadsIncAncestors = pausedDownloadsIncAncestors;
-    }
-
-    public int getEntryPausedDownload() {
-        return entryPausedDownload;
-    }
-
-    public void setEntryPausedDownload(int entryPausedDownload) {
-        this.entryPausedDownload = entryPausedDownload;
-    }
-
     public boolean isInvalidated() {
         return invalidated;
     }
 
     public void setInvalidated(boolean invalidated) {
         this.invalidated = invalidated;
+    }
+
+    public boolean isCesLeaf() {
+        return cesLeaf;
+    }
+
+    public void setCesLeaf(boolean cesLeaf) {
+        this.cesLeaf = cesLeaf;
+    }
+
+    public long getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(long totalSize) {
+        this.totalSize = totalSize;
+    }
+
+    public long getBytesDownloadSoFar() {
+        return bytesDownloadSoFar;
+    }
+
+    public void setBytesDownloadSoFar(long bytesDownloadSoFar) {
+        this.bytesDownloadSoFar = bytesDownloadSoFar;
+    }
+
+    public int getDownloadStatus() {
+        return downloadStatus;
+    }
+
+    public void setDownloadStatus(int downloadStatus) {
+        this.downloadStatus = downloadStatus;
+    }
+
+
+    public boolean isLocallyAvailable() {
+        return locallyAvailable;
+    }
+
+    public void setLocallyAvailable(boolean locallyAvailable) {
+        this.locallyAvailable = locallyAvailable;
+    }
+
+    public int getDownloadSpeed() {
+        return downloadSpeed;
+    }
+
+    public void setDownloadSpeed(int downloadSpeed) {
+        this.downloadSpeed = downloadSpeed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContentEntryStatus that = (ContentEntryStatus) o;
+
+        if (cesUid != that.cesUid) return false;
+        if (totalSize != that.totalSize) return false;
+        if (bytesDownloadSoFar != that.bytesDownloadSoFar) return false;
+        if (downloadStatus != that.downloadStatus) return false;
+        if (invalidated != that.invalidated) return false;
+        return cesLeaf == that.cesLeaf;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (cesUid ^ (cesUid >>> 32));
+        result = 31 * result + (int) (totalSize ^ (totalSize >>> 32));
+        result = 31 * result + (int) (bytesDownloadSoFar ^ (bytesDownloadSoFar >>> 32));
+        result = 31 * result + downloadStatus;
+        result = 31 * result + (invalidated ? 1 : 0);
+        result = 31 * result + (cesLeaf ? 1 : 0);
+        return result;
     }
 }

@@ -1,19 +1,19 @@
 package com.ustadmobile.lib.contentscrapers.ck12;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.Language;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,9 +34,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.text.AbstractDocument;
-
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_TINCAN;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC;
 
@@ -75,51 +77,58 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY_NC
  */
 public class IndexCategoryCK12Content {
 
-    public static final String CK_12 = "CK12";
+    private static final String CK_12 = "CK12";
     private final ContentEntryDao contentEntryDao;
     private final ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private final ContentEntryFileDao contentEntryFileDao;
-    private final ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao;
     private final LanguageDao languageDao;
+    private final ContainerDao containerDao;
+    private final UmAppDatabase db;
+    private final UmAppDatabase repository;
+    private final File containerDir;
     private Language englishLang;
     private ContentEntry ck12ParentEntry;
     URL url;
     private File destinationDirectory;
-    private ContentEntryFileStatusDao contentFileStatusDao;
 
-    public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: <ck12 url> <file destination>");
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.err.println("Usage: <ck12 url> <file destination><folder container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        new IndexCategoryCK12Content(args[0], new File(args[1])).findContent();
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
+
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
+        try {
+            new IndexCategoryCK12Content(args[0], new File(args[1]), new File(args[2])).findContent();
+        } catch (Exception e) {
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent CK12 Index Scraper");
+        }
     }
 
 
-    public IndexCategoryCK12Content(String urlString, File destinationDirectory) throws IOException {
+    public IndexCategoryCK12Content(String urlString, File destinationDirectory, File containerDir) throws IOException {
 
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
         destinationDirectory.mkdirs();
         this.destinationDirectory = destinationDirectory;
+        containerDir.mkdirs();
+        this.containerDir = containerDir;
 
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        containerDao = repository.getContainerDao();
         languageDao = repository.getLanguageDao();
 
         new LanguageList().addAllLanguages();
@@ -176,7 +185,7 @@ public class IndexCategoryCK12Content {
                 URL subjectUrl = new URL(url, hrefLink);
                 String title = subject.attr("title");
 
-                ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12,
+                ContentEntry subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subjectUrl.toString(), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
                         EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -198,10 +207,10 @@ public class IndexCategoryCK12Content {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(url.toString());
-            WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+            WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         } catch (TimeoutException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         Document doc = Jsoup.parse(driver.getPageSource());
@@ -223,7 +232,7 @@ public class IndexCategoryCK12Content {
                 File gradeFolder = new File(destinationDirectory, title);
                 gradeFolder.mkdirs();
 
-                ContentEntry gradeEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12, LICENSE_TYPE_CC_BY_NC,
+                ContentEntry gradeEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, subCategoryUrl.toString(), CK_12, LICENSE_TYPE_CC_BY_NC,
                         englishLang.getLangUid(), null, EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                         EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -238,7 +247,7 @@ public class IndexCategoryCK12Content {
         for (Element category : categoryList) {
 
             String level1CategoryTitle = category.select("span.concept-name").attr("title");
-            String fakePath = url.getPath() + "/" + level1CategoryTitle;
+            String fakePath = url.toString() + "/" + level1CategoryTitle;
 
             ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(fakePath, level1CategoryTitle, fakePath, CK_12,
                     LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
@@ -256,7 +265,7 @@ public class IndexCategoryCK12Content {
         }
 
         if (count == 0) {
-            System.err.println("No Topics were found to browse");
+            UMLogUtil.logInfo("No Topics were found to browse for url " + url.toString());
         }
 
     }
@@ -275,7 +284,7 @@ public class IndexCategoryCK12Content {
 
                 URL contentUrl = new URL(url, hrefLink);
 
-                ContentEntry lastTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, hrefLink, CK_12,
+                ContentEntry lastTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title, contentUrl.toString(), CK_12,
                         LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
                         EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -314,10 +323,10 @@ public class IndexCategoryCK12Content {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(subCategoryUrl.toString());
-            WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+            WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         } catch (TimeoutException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         Document doc = Jsoup.parse(driver.getPageSource());
@@ -329,7 +338,7 @@ public class IndexCategoryCK12Content {
 
             String headingTitle = header.select("div.topic-header span").attr("title");
 
-            String fakePathTopic = subCategoryUrl.getPath() + "/" + headingTitle;
+            String fakePathTopic = subCategoryUrl.toString() + "/" + headingTitle;
 
             String thumbnailUrl = doc.selectFirst("div.topic-wrapper[title*=" + headingTitle + "] img").attr("src");
 
@@ -367,7 +376,7 @@ public class IndexCategoryCK12Content {
                     topicDestination.mkdirs();
                     URL contentUrl = new URL(subCategoryUrl, hrefLink);
 
-                    ContentEntry subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, subTitle, hrefLink, CK_12,
+                    ContentEntry subTopicEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, subTitle, contentUrl.toString(), CK_12,
                             LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, EMPTY_STRING, false,
                             EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -389,11 +398,11 @@ public class IndexCategoryCK12Content {
         ChromeDriver driver = ContentScraperUtil.setupChrome(true);
         try {
             driver.get(contentUrl.toString());
-            WebDriverWait waitDriver = new WebDriverWait(driver, 10000);
+            WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
             ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
             waitDriver.until(ExpectedConditions.elementToBeClickable(By.cssSelector("i.icon-expand"))).click();
         } catch (TimeoutException | NoSuchElementException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
 
         List<WebElement> courseList = driver.findElements(By.cssSelector("div[class*=js-components-newspaper-Cards-Cards__cardsRow]"));
@@ -423,7 +432,7 @@ public class IndexCategoryCK12Content {
 
             URL url = new URL(contentUrl, hrefLink);
 
-            ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.getPath(), title, url.getPath(), CK_12,
+            ContentEntry topicEntry = ContentScraperUtil.createOrUpdateContentEntry(url.getPath(), title, url.toString().substring(0, url.toString().indexOf(("?"))), CK_12,
                     LICENSE_TYPE_CC_BY_NC, englishLang.getLangUid(), null, summary, true,
                     EMPTY_STRING, imageLink, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
@@ -431,6 +440,7 @@ public class IndexCategoryCK12Content {
 
             CK12ContentScraper scraper = new CK12ContentScraper(url.toString(), topicDestination);
             try {
+                String mimeType = MIMETYPE_TINCAN;
                 switch (groupType.toLowerCase()) {
 
                     case "video":
@@ -438,6 +448,7 @@ public class IndexCategoryCK12Content {
                         break;
                     case "plix":
                         scraper.scrapePlixContent();
+                        mimeType = MIMETYPE_WEB_CHUNK;
                         break;
                     case "practice":
                         scraper.scrapePracticeContent();
@@ -450,26 +461,22 @@ public class IndexCategoryCK12Content {
                         scraper.scrapeReadContent();
                         break;
                     default:
-                        System.out.println("found a group type not supported " + groupType);
+                        UMLogUtil.logError("found a group type not supported " + groupType + " for url " + url.toString());
                 }
+
+
+                File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()));
+                if (scraper.isContentUpdated()) {
+                    ContentScraperUtil.insertContainer(containerDao, topicEntry, true,
+                            mimeType, content.lastModified(), content, db, repository,
+                            containerDir);
+                }
+
             } catch (Exception e) {
-                System.err.println("Unable to scrape content from " + groupType + " at url " + url);
-                e.printStackTrace();
-                continue;
-            }
-
-            File content = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ZIP_EXT);
-
-            if (scraper.isContentUpdated()) {
-                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao,
-                        topicEntry, ContentScraperUtil.getMd5(content), contentEntryFileJoinDao, true,
-                        ScraperConstants.MIMETYPE_ZIP);
-
-            } else {
-
-                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, topicEntry, contentEntryFileDao,
-                        contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
+                UMLogUtil.logError("Unable to scrape content from " + groupType + " at url " + url);
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                File modifiedFile = new File(topicDestination, FilenameUtils.getBaseName(url.getPath()) + LAST_MODIFIED_TXT);
+                ContentScraperUtil.deleteFile(modifiedFile);
             }
 
         }

@@ -61,9 +61,6 @@ public class AbstractDaoTest {
     protected static final String TEST_CLAZZ_NAME = "Test Clazz";
 
     public void initDb() {
-        UmAppDatabase.setInstance(new UmAppDatabase_Jdbc(null, "UmAppDatabase"));
-        UmAppDatabase.setInstance(new UmAppDatabase_Jdbc(null, "db1"), "db1");
-
         serverDb = UmAppDatabase.getInstance(null);
         clientDb = UmAppDatabase.getInstance(null, "db1");
         serverDb.clearAllTables();

@@ -1,29 +1,30 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
 
-import java.io.IOException;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.WeakHashMap;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.CATALOG_HTTP_ENDPOINT_PREFIX;
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -36,9 +37,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.CATALO
  *
  * Created by mike on 8/14/15.
  */
-public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredInputStream.OnCloseListener{
-
-    //private HashMap<String, MountedZip> mountedEPUBs;
+public class EmbeddedHTTPD extends RouterNanoHTTPD {
 
     private int id;
 
@@ -46,15 +45,20 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
     public static final String PREFIX_MOUNT = "/mount/";
 
+    private UmAppDatabase appDatabase;
+
+    private UmAppDatabase repository;
+
+
     public interface ResponseListener {
 
-        void responseStarted(NanoHTTPD.Response response);
+        void responseStarted(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response);
 
-        void responseFinished(NanoHTTPD.Response response);
+        void responseFinished(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response);
 
     }
 
-    private Vector<ResponseListener> responseListeners = new Vector<>();
+    private final Vector<ResponseListener> responseListeners = new Vector<>();
 
     /**
      * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
@@ -64,6 +68,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
     private Hashtable<String, ZipFile> mountedZips = new Hashtable<>();
 
+    private Hashtable<String, ContainerManager> mountedContainers = new Hashtable<>();
+
     static
     {
         theMimeTypes.put("htm", "text/html");
@@ -71,6 +77,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         theMimeTypes.put("xhtml", "application/xhtml+xml");
         theMimeTypes.put("xml", "text/xml");
         theMimeTypes.put("txt", "text/plain");
+        theMimeTypes.put("webp", "image/webp");
+        theMimeTypes.put("webm", "video/webm");
 
         StringTokenizer st = new StringTokenizer(
                 "css		text/css "+
@@ -104,15 +112,36 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
 
 
-    public EmbeddedHTTPD(int portNum, Object context) {
+    public EmbeddedHTTPD(int portNum, Object context, UmAppDatabase appDatabase, UmAppDatabase repository) {
         super(portNum);
-        //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
+        addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder.class, appDatabase);
+        addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
+                ContainerEntryListResponder.class, appDatabase);
+        this.appDatabase = appDatabase;
+        this.repository = repository;
+    }
 
-        addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, context,
-                new WeakHashMap(), this);
-        //TODO: Setup 404 handling
+    public EmbeddedHTTPD(int portNum, Object context, UmAppDatabase appDatabase) {
+        this(portNum, context, appDatabase, appDatabase.getRepository("http://localhost/dummy/", ""));
+    }
+
+    public EmbeddedHTTPD(int portNum, Object context) {
+        this(portNum, context, UmAppDatabase.getInstance(context));
+    }
+
+
+    @Override
+    public Response serve(IHTTPSession session) {
+        final NanoHTTPD.Response response = super.serve(session);
+        if(!responseListeners.isEmpty() && response != null) {
+            fireResponseStarted(session, response);
+            response.setData(new InputStreamWithCloseListener(response.getData(),
+                    () -> fireResponseFinished(session, response)));
+        }
+
+        return response;
     }
 
     @Override
@@ -145,8 +174,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
      * @param mountPath The path to use after /mount .
      * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
      */
-    public String mountZip(String zipPath, String mountPath, boolean epubHtmlFilterEnabled,
-                           String epubScriptPath) {
+    @Deprecated
+    public String mountZip(String zipPath, String mountPath) {
         if(mountPath == null) {
             mountPath= UMFileUtil.getFilename(zipPath) + '-' +
                     new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
@@ -155,7 +184,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         try {
             ZipFile zipFile = new ZipFile(zipPath);
             addRoute(PREFIX_MOUNT + mountPath + "/" + MountedZipHandler.URI_ROUTE_POSTFIX,
-                    MountedZipHandler.class, zipFile, epubHtmlFilterEnabled, epubScriptPath);
+                    MountedZipHandler.class, zipFile);
             String fullPath = toFullZipMountPath(mountPath);
             mountedZips.put(fullPath, zipFile);
             return toFullZipMountPath(mountPath);
@@ -164,6 +193,33 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         }
 
         return null;
+    }
+
+    public String mountContainer(long containerUid, String mountPath,
+                                 List<MountedContainerResponder.MountedContainerFilter> filters) {
+        Container container = repository.getContainerDao().findByUid(containerUid);
+        if(container == null) {
+            return null;
+        }
+
+        ContainerManager containerManager = new ContainerManager(container, appDatabase, repository);
+        if(mountPath == null){
+            mountPath = "/container/" + container.getContainerUid() +"/" +
+                    System.currentTimeMillis() + "/";
+        }
+
+        addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
+                MountedContainerResponder.class, containerManager, filters);
+
+        return mountPath;
+    }
+
+    public String mountContainer(long containerUid, String mountPath) {
+        return mountContainer(containerUid, mountPath, new ArrayList<>());
+    }
+
+    public void unmountContainer(String mountPath) {
+        removeRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX);
     }
 
     private String toFullZipMountPath(String mountPath) {
@@ -234,35 +290,48 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         responseListeners.remove(listener);
     }
 
-    protected void fireResponseStarted(NanoHTTPD.Response response) {
+    protected void fireResponseStarted(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
         synchronized (responseListeners) {
             for(ResponseListener listener : responseListeners) {
-                listener.responseStarted(response);
+                listener.responseStarted(session, response);
             }
         }
     }
 
-    protected void fireResponseFinished(NanoHTTPD.Response response) {
+    protected void fireResponseFinished(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
         synchronized (responseListeners) {
             for(ResponseListener listener: responseListeners) {
-                listener.responseFinished(response);
+                listener.responseFinished(session, response);
             }
         }
     }
 
     /**
-     * Called when a response has started. Because NanoHTTPD's router will create a new
-     * CatalogUriResponder for each response, we provide this EmbeddedHTTP instance as a parameter to
-     * the responder, which in turn calls this method.
+     * Get the local HTTP server url with the URL as it is to be used for access over the loopback
+     * interface
      *
-     * @param response
+     * @return Local http server url e.g. http://127.0.0.1:PORT/
      */
-    protected void handleResponseStarted(NanoHTTPD.Response response) {
-        fireResponseStarted(response);
+    public String getLocalHttpUrl() {
+        return "http://127.0.0.1:" + getListeningPort() + "/";
     }
 
-    @Override
-    public void onStreamClosed(NanoHTTPD.Response response) {
-        fireResponseFinished(response);
+    /**
+     * Mount a Zip File to the http server.  Optionally specify a preferred mount point (useful if
+     * the activity is being created from a saved state)
+     *
+     * ***PORTED FROM NetworkManager***. TODO: refactor / clean this up somewhat.
+     *
+     * @param zipPath Path to the zip that should be mounted (mandatory)
+     * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp. Can be null
+     *
+     * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
+     */
+    public String mountZipOnHttp(String zipPath, String mountName) {
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
+                + this + "httpd server = " + this + " listening port = " + getListeningPort());
+
+        mountName = mountZip(zipPath, mountName);
+        return mountName;
     }
 }

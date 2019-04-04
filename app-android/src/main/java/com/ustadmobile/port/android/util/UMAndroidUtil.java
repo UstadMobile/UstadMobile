@@ -1,12 +1,13 @@
 package com.ustadmobile.port.android.util;
 
-import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +26,7 @@ public class UMAndroidUtil {
      * @param direction
      */
     public static void setDirectionIfSupported(View view, int direction) {
-        if(Build.VERSION.SDK_INT >= 17 ) {
+        if (Build.VERSION.SDK_INT >= 17) {
             view.setLayoutDirection(direction);
         }
     }
@@ -33,11 +34,12 @@ public class UMAndroidUtil {
 
     /**
      * Convert an Android bundle to a hashtable
+     *
      * @param bundle
      * @return
      */
     public static Hashtable bundleToHashtable(Bundle bundle) {
-        if(bundle == null)
+        if (bundle == null)
             return null;
 
         Hashtable retVal = new Hashtable();
@@ -46,17 +48,17 @@ public class UMAndroidUtil {
 
         String key;
         Object val;
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             key = iterator.next();
             val = bundle.get(key);
             //TODO: could this not simply be putAll?
-            if(val instanceof String) {
+            if (val instanceof String) {
                 retVal.put(key, val);
-            }else if(val instanceof Integer) {
+            } else if (val instanceof Integer) {
                 retVal.put(key, val);
-            }else if(val instanceof String[]) {
+            } else if (val instanceof String[]) {
                 retVal.put(key, val);
-            }else if(val instanceof  Long){
+            } else if (val instanceof Long) {
                 retVal.put(key, val);
             }
         }
@@ -65,7 +67,7 @@ public class UMAndroidUtil {
     }
 
     public static Bundle hashtableToBundle(Hashtable table) {
-        if(table == null)
+        if (table == null)
             return null;
 
         Bundle bundle = new Bundle();
@@ -73,16 +75,16 @@ public class UMAndroidUtil {
         Iterator iterator = table.keySet().iterator();
         String key;
         Object val;
-        while(iterator.hasNext()) {
-            key = (String)iterator.next();
+        while (iterator.hasNext()) {
+            key = (String) iterator.next();
             val = table.get(key);
-            if(val instanceof Integer) {
-                bundle.putInt(key, (Integer)val);
-            }else if(val instanceof String){
-                bundle.putString(key, (String)val);
-            }else if(val instanceof String[]) {
-                bundle.putStringArray(key, (String[])val);
-            }else if(val instanceof Long){
+            if (val instanceof Integer) {
+                bundle.putInt(key, (Integer) val);
+            } else if (val instanceof String) {
+                bundle.putString(key, (String) val);
+            } else if (val instanceof String[]) {
+                bundle.putStringArray(key, (String[]) val);
+            } else if (val instanceof Long) {
                 bundle.putLong(key, (Long) val);
             }
         }
@@ -90,26 +92,51 @@ public class UMAndroidUtil {
 
     }
 
+    /**
+     * @param map
+     * @return
+     */
+    public static Bundle mapToBundle(Map<String, String> map) {
+        if (map == null)
+            return null;
 
-
-    @SuppressLint("NewApi")
-    public static int generateViewId() {
-        if (Build.VERSION.SDK_INT < 17) {
-            for (;;) {
-                final int result = sNextGeneratedId.get();
-                // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
-                int newValue = result + 1;
-                if (newValue > 0x00FFFFFF)
-                    newValue = 1; // Roll over to 1, not 0.
-                if (sNextGeneratedId.compareAndSet(result, newValue)) {
-                    return result;
-                }
-            }
-        } else {
-            return View.generateViewId();
+        Bundle bundle = new Bundle();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            bundle.putString(entry.getKey(), entry.getValue());
         }
 
+        return bundle;
     }
 
+    public static Map<String, String> bundleToMap(Bundle bundle) {
+        if (bundle == null)
+            return null;
+
+        Set<String> keys = bundle.keySet();
+        Map<String, String> map = new HashMap<>();
+        for (String key : keys) {
+            Object val = bundle.get(key);
+            if (val instanceof String) {
+                map.put(key, (String) val);
+            }
+        }
+
+        return map;
+    }
+
+
+    /**
+     * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
+     * This method simply removes the quotes, if they are there. Will also handle null safely.
+     *
+     * @param ssid
+     * @return
+     */
+    public static String normalizeAndroidWifiSsid(String ssid) {
+        if (ssid == null)
+            return ssid;
+        else
+            return ssid.replace("\"", "");
+    }
 
 }

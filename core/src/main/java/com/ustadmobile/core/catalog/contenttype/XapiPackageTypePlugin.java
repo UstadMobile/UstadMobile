@@ -1,6 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.view.XapiPackageView;
+import com.ustadmobile.core.view.XapiPackageContentView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class XapiPackageTypePlugin extends ContentTypePlugin{
 
     @Override
     public String getViewName() {
-        return XapiPackageView.VIEW_NAME;
+        return XapiPackageContentView.VIEW_NAME;
     }
 
     @Override

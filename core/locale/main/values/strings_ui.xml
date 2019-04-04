@@ -208,7 +208,6 @@
     <string name="options_uni_kunduz" value="1029">Kunduz University</string>
 
 
-
     <string name="options_gender_female" value="1007">Female</string>
     <string name="options_gender_male" value="1008">Male</string>
 
@@ -253,7 +252,40 @@
     <string name="also_available_in">Also available in</string>
 
     <string name="content_entry_not_found">ContentEntry Not Found</string>
+    <string name="onboarding_get_started_label">Get Started</string>
+    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
+    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
+    <string name="onboarding_offline_sharing">Share offline</string>
+    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
+    <string name="location_permission_title">Location permissions required</string>
+    <string name="location_permission_message">This app requires location permissions to enable you to download and share content offline.</string>
 
-
+    <string name="download_pause_stacked_label">Pause download</string>
+    <string name="download_delete_btn_label">Delete</string>
+    <string name="download_cancel_stacked_label">Cancel download</string>
+    <string name="download_cancel_label">Cancel</string>
+    <string name="download_continue_stacked_label">Continue download</string>
+    <string name="download_continue_btn_label">Continue</string>
+    <string name="download_wifi_only">WiFi only</string>
+    <string name="download_calculating">Calculating...</string>
+    <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
+    <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
+    <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
+    <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
+    <string name="download_cancel_all">CANCEL ALL</string>
+    <string name="download_pause_all">PAUSE ALL</string>
+    <string name="download_pause_download">Pause</string>
+    <string name="download_storage_option_device">Use %1$s - %2$s free</string>
+    <string name="download_storage_permission_title">File permissions required</string>
+    <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
+    <string name="download_locally_availability">Available nearby</string>
+    <string name="download_cloud_availability">Available on cloud</string>
+    <string name="clear_history">Clear History</string>
+    <string name="download_entry_state_downloading">Downloading</string>
+    <string name="download_entry_state_paused">Paused</string>
+    <string name="download_entry_state_queued">Queued</string>
+    <string name="download_entry_state_downloaded">Downloaded</string>
+    <string name="get_app">Get app</string>
+    <string name="no_app_found">"No app found to open file"</string>
 
 </resources>

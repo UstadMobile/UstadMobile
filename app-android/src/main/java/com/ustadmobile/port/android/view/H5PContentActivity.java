@@ -1,9 +1,6 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.ComponentName;
 import android.os.Build;
-import android.os.IBinder;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -13,19 +10,21 @@ import android.webkit.WebViewClient;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.H5PContentPresenter;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmCallbackUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.H5PContentView;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
-import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
+import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-public class H5PContentActivity extends ZippedContentActivity implements H5PContentView {
+import java.util.concurrent.atomic.AtomicReference;
 
-    protected NetworkManagerAndroid networkManagerAndroid;
+public class H5PContentActivity extends ZippedContentActivity implements H5PContentView {
 
     private H5PContentPresenter mPresenter;
 
     private WebView mWebView;
+
+    private AtomicReference<String> mountedPath = new AtomicReference<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,28 +45,39 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
         setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mPresenter = new H5PContentPresenter(this, this);
+        runWhenHttpdReady(() ->
+                mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras())));
     }
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder iBinder) {
-        super.onServiceConnected(name, iBinder);
-        if (name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
-            networkManagerAndroid = ((NetworkServiceAndroid.LocalServiceBinder)iBinder).getService()
-                    .getNetworkManager();
-            mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()));
-        }
-    }
-
 
     @Override
     public void mountH5PDist(UmCallback<String> callback) {
-        callback.onSuccess(UMFileUtil.joinPaths(networkManagerAndroid.getHttpAndroidAssetsUrl(),
+        callback.onSuccess(UMFileUtil.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
                 "h5p/dist"));
     }
 
     @Override
     public void mountH5PFile(String zipFile, UmCallback<String> callback) {
-        new MountZipAsyncTask(networkManagerAndroid, callback).execute(zipFile);
+        mountZip(zipFile, new UmCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                mountedPath.set(result);
+                UmCallbackUtil.onSuccessIfNotNull(callback, result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                UmCallbackUtil.onFailIfNotNull(callback, exception);
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        String mountedPath = this.mountedPath.get();
+        if(mountedPath != null)
+            unmountZipFromHttp(mountedPath);
+
+        super.onDestroy();
     }
 
     @Override

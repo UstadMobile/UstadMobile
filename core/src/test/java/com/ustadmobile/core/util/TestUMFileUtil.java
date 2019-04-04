@@ -177,4 +177,14 @@ public class TestUMFileUtil {
 
     }
 
+    @Test
+    public void givenLastReferrerPath_whenGetLastReferrerCalled_thenArgsShouldMatch() {
+        String referralPath = "/DummyView?/ContentEntryList?entryid=40/ContentEntryList?entryid=41/" +
+                "ContentEntryDetail?entryid=42/ContentEntryDetail?entryid=43";
+        String lastListArgs = UMFileUtil.getLastReferrerArgsByViewname("ContentEntryList",
+                referralPath);
+        Assert.assertEquals("Last entry list id = 41", "entryid=41", lastListArgs);
+
+    }
+
 }

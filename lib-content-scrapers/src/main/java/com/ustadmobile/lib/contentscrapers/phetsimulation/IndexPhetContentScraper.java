@@ -1,11 +1,9 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
@@ -13,21 +11,19 @@ import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,7 +32,6 @@ import java.util.ArrayList;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE;
-import static com.ustadmobile.lib.db.entities.ContentEntry.ALL_RIGHTS_RESERVED;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
 /**
@@ -53,29 +48,30 @@ public class IndexPhetContentScraper {
     private URL url;
     private ContentEntryDao contentEntryDao;
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
-    private ContentEntryFileDao contentEntryFileDao;
-    private ContentEntryContentEntryFileJoinDao contentEntryFileJoin;
     private ContentEntryContentCategoryJoinDao contentEntryCategoryJoinDao;
     private ContentEntryRelatedEntryJoinDao contentEntryRelatedJoinDao;
-    private ContentEntryFileStatusDao contentFileStatusDao;
     private LanguageDao languageDao;
     private Language englishLang;
     private LanguageVariantDao languageVariantDao;
+    private ContainerDao containerDao;
+    private UmAppDatabase db;
+    private UmAppDatabase repository;
+    private File containerDir;
 
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: <phet html url> <file destination>");
+        if (args.length < 3) {
+            System.err.println("Usage: <phet html url> <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-
-        System.out.println(args[0]);
-        System.out.println(args[1]);
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
         try {
-            new IndexPhetContentScraper().findContent(args[0], new File(args[1]));
+            new IndexPhetContentScraper().findContent(args[0], new File(args[1]), new File(args[2]));
         } catch (IOException e) {
-            System.err.println("Exception running findContent");
-            e.printStackTrace();
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logFatal("Exception running findContent phet");
         }
     }
 
@@ -86,28 +82,27 @@ public class IndexPhetContentScraper {
      * @param destinationDir destination folder for phet content
      * @throws IOException
      */
-    public void findContent(String urlString, File destinationDir) throws IOException {
+    public void findContent(String urlString, File destinationDir, File containerDir) throws IOException {
 
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            System.out.println("Index Malformed url" + urlString);
+            UMLogUtil.logError("Index Malformed url" + urlString);
             throw new IllegalArgumentException("Malformed url" + urlString, e);
         }
 
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
+        containerDir.mkdirs();
+        this.containerDir = destinationDir;
 
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        db.setMaster(true);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
         contentEntryDao = repository.getContentEntryDao();
         contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        contentEntryFileDao = repository.getContentEntryFileDao();
-        contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
         contentEntryCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
         contentEntryRelatedJoinDao = repository.getContentEntryRelatedEntryJoinDao();
-        contentFileStatusDao = repository.getContentEntryFileStatusDao();
+        containerDao = repository.getContainerDao();
         languageDao = repository.getLanguageDao();
         languageVariantDao = repository.getLanguageVariantDao();
 
@@ -124,7 +119,7 @@ public class IndexPhetContentScraper {
 
         Elements simulationList = document.select("td.simulation-list-item span.sim-badge-html");
 
-        englishLang = ContentScraperUtil.insertOrUpdateLanguage(languageDao, "English");
+        englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English");
 
         ContentEntry masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
@@ -143,75 +138,67 @@ public class IndexPhetContentScraper {
 
             String path = simulation.parent().attr("href");
             String simulationUrl = new URL(url, path).toString();
-            String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1, simulationUrl.length());
+            String title = simulationUrl.substring(simulationUrl.lastIndexOf("/") + 1);
             String thumbnail = simulation.parent().selectFirst("img").attr("src");
 
-            PhetContentScraper scraper = new PhetContentScraper(simulationUrl, destinationDirectory);
+            PhetContentScraper scraper = new PhetContentScraper(simulationUrl,
+                    destinationDirectory, containerDir);
             try {
                 scraper.scrapeContent();
-
                 ContentEntry englishSimContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, title,
-                        path, PHET, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
+                        simulationUrl, PHET, LICENSE_TYPE_CC_BY, englishLang.getLangUid(), null,
                         scraper.getAboutDescription(), true, EMPTY_STRING,
                         thumbnail, EMPTY_STRING, EMPTY_STRING, contentEntryDao);
 
-                if (scraper.isAnyContentUpdated()) {
+                boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
+                File enLangLocation = new File(destinationDirectory, "en");
+                File englishContentFile = new File(enLangLocation, title);
+                if (isEnglishUpdated) {
+                    ContentScraperUtil.insertContainer(containerDao, englishSimContentEntry,
+                            true, ScraperConstants.MIMETYPE_TINCAN,
+                            englishContentFile.lastModified(),
+                            englishContentFile, db, repository, containerDir);
+                    FileUtils.deleteDirectory(englishContentFile);
 
-                    boolean isEnglishUpdated = scraper.getLanguageUpdatedMap().get("en");
-                    File enLangLocation = new File(destinationDirectory, "en");
-                    File englishContentFile = new File(enLangLocation, title + ScraperConstants.ZIP_EXT);
-                    if (isEnglishUpdated) {
+                }
 
-                        ContentScraperUtil.insertContentEntryFile(englishContentFile, contentEntryFileDao, contentFileStatusDao, englishSimContentEntry,
-                                ContentScraperUtil.getMd5(englishContentFile), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
+                ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao, englishLang);
+                ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail, languageDao, languageVariantDao);
 
+                // TODO remove all categories that no longer exist
+                // TODO remove all categories that dont belong in a phet simulation anymore
 
-                    } else {
-                        ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(englishContentFile, englishSimContentEntry, contentEntryFileDao,
-                                contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
+                int categoryCount = 0;
+                for (ContentEntry category : categoryList) {
 
-                    }
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
+                    ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
 
-                    ArrayList<ContentEntry> categoryList = scraper.getCategoryRelations(contentEntryDao, englishLang);
-                    ArrayList<ContentEntry> translationList = scraper.getTranslations(destinationDirectory, contentEntryDao, thumbnail, languageDao, languageVariantDao);
+                    int translationsCount = 1;
+                    for (ContentEntry translation : translationList) {
 
-                    // TODO remove all categories that no longer exist
-                    // TODO remove all categories that dont belong in a phet simulation anymore
+                        ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, translation, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
 
-                    int categoryCount = 0;
-                    for (ContentEntry category : categoryList) {
+                        String langCode = scraper.getContentEntryLangMap().get(translation.getContentEntryUid());
 
-                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, phetParentEntry, category, categoryCount++);
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, englishSimContentEntry, 0);
+                        File langLocation = new File(destinationDirectory, langCode);
+                        File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
+                        if (scraper.getLanguageUpdatedMap().get(langCode)) {
 
-                        int translationsCount = 1;
-                        for (ContentEntry translation : translationList) {
+                            ContentScraperUtil.insertContainer(containerDao, translation,
+                                    true, ScraperConstants.MIMETYPE_TINCAN,
+                                    content.lastModified(),
+                                    content, db, repository, containerDir);
 
-                            ContentScraperUtil.insertOrUpdateRelatedContentJoin(contentEntryRelatedJoinDao, translation, englishSimContentEntry, ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION);
-
-                            String langCode = scraper.getContentEntryLangMap().get(translation.getContentEntryUid());
-
-                            File langLocation = new File(destinationDirectory, langCode);
-                            File content = new File(langLocation, title + ScraperConstants.ZIP_EXT);
-                            if (scraper.getLanguageUpdatedMap().get(langCode)) {
-
-                                ContentScraperUtil.insertContentEntryFile(content, contentEntryFileDao, contentFileStatusDao, translation,
-                                        ContentScraperUtil.getMd5(content), contentEntryFileJoin, true, ScraperConstants.MIMETYPE_ZIP);
-
-
-                            } else {
-                                ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(content, translation, contentEntryFileDao,
-                                        contentEntryFileJoin, contentFileStatusDao, ScraperConstants.MIMETYPE_ZIP, true);
-
-                            }
-
-                            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
                         }
+
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, category, translation, translationsCount++);
                     }
                 }
 
             } catch (Exception e) {
-                System.out.println(e.getCause());
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+                UMLogUtil.logError("Failed to scrape Phet Content for url" + simulationUrl);
             }
         }
     }

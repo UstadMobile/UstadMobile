@@ -42,7 +42,9 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
         versionName "1.0"
-        manifestPlaceholders = [applicationClass : "android.app.Application"]
+        buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
+        buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
+        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -80,6 +82,7 @@ android {
 
         vanillamultidex {
             dimension "config"
+            minSdkVersion 18
             applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
@@ -91,7 +94,7 @@ android {
 
         devMinApi21 {
             dimension "config"
-            minSdkVersion 21
+            minSdkVersion 23
             applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
@@ -141,12 +144,22 @@ dependencies {
 
     api project(":app-android")
 
+    implementation project(":lib-database")
+    implementation project(":lib-database-runtime")
+
+    //Crash reporting
+
+    implementation "ch.acra:acra-http:$version_android_acra"
+    implementation "ch.acra:acra-dialog:$version_android_acra"
+
+
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
 
     api fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"
 }

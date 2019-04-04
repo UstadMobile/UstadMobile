@@ -256,7 +256,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 if(!entryFile.exists() || (entryFile.exists() && entryFile.delete())){
                     deletedFileUris.add(fileUri);
                 }else {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Failed to delete cache file: " +
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Failed to deleteByDownloadSetUid cache file: " +
                             fileUri);
                 }
             }
@@ -363,16 +363,16 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
     /**
      * Update the given HttpCachedEntry from the response received over the network. This can't be
-     * part of the entry  itself, because the entry is in the database module. This will only update
+     * part of the entry  itself, because the entry is in the database module. This will only updateState
      * the object itself and will NOT persist it to the database
      *
-     * @param cachedEntry The cached entry to update
+     * @param cachedEntry The cached entry to updateState
      * @param networkResponse The network response just received from the network
      */
     public static void updateCachedEntryFromNetworkResponse(HttpCachedEntry cachedEntry, UmHttpResponse networkResponse) {
         String headerVal;
         if(networkResponse.getStatus() != 304) {
-            //new entry was downloaded - update the length etc.
+            //new entry was downloaded - updateState the length etc.
             headerVal = networkResponse.getHeader(UmHttpRequest.HEADER_CONTENT_LENGTH);
             if(headerVal != null) {
                 try {

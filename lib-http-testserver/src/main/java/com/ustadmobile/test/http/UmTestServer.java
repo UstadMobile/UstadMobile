@@ -43,7 +43,6 @@ public class UmTestServer extends Dispatcher{
 
     public void start() throws IOException {
         mockWebServer.start(InetAddress.getByName(bindAddress), port);
-
     }
 
     public void stop() {
@@ -52,6 +51,15 @@ public class UmTestServer extends Dispatcher{
         }catch(IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Return the port as given by the mock web server
+     *
+     * @return port number being listened on (-1 if not started)
+     */
+    public int getPort() {
+        return mockWebServer.getPort();
     }
 
     @Override

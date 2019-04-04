@@ -31,18 +31,14 @@
 
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.util.UMUtil;
-import com.ustadmobile.core.view.AppView;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -120,6 +116,18 @@ public abstract class UstadMobileSystemImpl {
     public static final int STATUS_ACQUIRED = 0;
 
     public static final int STATUS_ACQUISITION_IN_PROGRESS = 1;
+
+    public static final String ARG_REFERRER = "ref";
+
+    /**
+     * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
+     */
+    public static final int GO_FLAG_SINGLE_TOP = 536870912;
+
+    /**
+     * As per Android Intent.FLAG_CLEAR_TOP
+     */
+    public static final int GO_FLAG_CLEAR_TOP = 67108864;
 
 
     static {
@@ -213,6 +221,10 @@ public abstract class UstadMobileSystemImpl {
         }
     }
 
+    public void go(String viewName, Hashtable args, Object context) {
+        go(viewName, args, context, 0);
+    }
+
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -223,7 +235,7 @@ public abstract class UstadMobileSystemImpl {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    public abstract void go(String viewName, Hashtable args, Object context);
+    public abstract void go(String viewName, Hashtable args, Object context, int flags);
 
     /**
      * Provides the currently active locale
@@ -289,8 +301,12 @@ public abstract class UstadMobileSystemImpl {
      *
      * @param mode bitmask flag of USER_RESOURCE or SHARED_RESOURCE
      * @return Array of storage
+     *
      */
+    @Deprecated
     public abstract UMStorageDir[] getStorageDirs(int mode, Object context);
+
+    public abstract void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback);
 
     /**
      * Provides the path to the shared content directory
@@ -394,19 +410,6 @@ public abstract class UstadMobileSystemImpl {
 
 
     /**
-     * Mount a container (e.g. epub, xapi package, etc) so it can be accessed using makeRequest. This
-     * normally means making the contents of a zip file accessible over http , e.g.
-     * mount /path/file.zip will provide a base url, e.g. http://127.0.0.1:65000/file.zip and contents
-     * can be accessed (e.g. http://127.0.0.1:65000/file.zip/some/file.xhtml )
-     *
-     * @param request The request to make
-     * @param id The id used provided when the callback is called
-     * @param callback Callback to call when the mount is completed or failed
-     */
-    public abstract void mountContainer(ContainerMountRequest request, int id, UmCallback callback);
-
-
-    /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
      * method in the implementation instead of using the factory API because
      * it enables the J2ME version to use the minimal jar
@@ -439,6 +442,7 @@ public abstract class UstadMobileSystemImpl {
 
 
 
+
     /**
      * Make a new XmlPullParser from a given inputstream assuming UTF-8 encoding
      * @param in InputStream to read from
@@ -448,14 +452,6 @@ public abstract class UstadMobileSystemImpl {
     public XmlPullParser newPullParser(InputStream in) throws XmlPullParserException {
         return newPullParser(in, UstadMobileConstants.UTF8);
     }
-
-    /**
-     * Get access to the App View to do common UI activities (e.g. show
-     * progress dialog, flash message, etc)
-     *
-     * @return Platform AppView
-     */
-    public abstract AppView getAppView(Object context);
 
     /**
      * Get access to the logger to use on this implementation
@@ -518,11 +514,6 @@ public abstract class UstadMobileSystemImpl {
     }
 
 
-    public NetworkManagerCore getNetworkManager() {
-
-        return null;
-    }
-
     /**
      * Returns whether or not the init method has already been run
      *
@@ -542,23 +533,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract void getAppSetupFile(Object context, boolean zip, UmCallback callback);
 
-
-
-    /**
-     * Provides a list of the content types which are supported on this platform.
-     *
-     * @return Array of Class objects representing the ContentTypePlugin
-     */
-    public abstract ContentTypePlugin[] getSupportedContentTypePlugins();
-
-    /**
-     * Format the given integer to use , seperators as per the locale in use
-     *
-     * @param integer
-     *
-     * @return
-     */
-    public abstract String formatInteger(int integer);
 
     /**
      * Wrapper to retrieve preference keys from the system Manifest.
@@ -671,19 +645,8 @@ public abstract class UstadMobileSystemImpl {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context);
     }
 
-    /**
-     * Delete a given set of entries from the system.
-     *
-     * @param context Context object
-     * @param entryId List of entry Ids that should be deleted
-     * @param recursive true if all children of the given entryIds should be deleted, false otherwise
-     * @param callback callback to be called when the operation is completed
-     */
-    public abstract void deleteEntriesAsync(Object context, List<String> entryId, boolean recursive,
-                                            UmCallback<Void> callback);
+    public abstract void openFileInDefaultViewer(Object context, String path, String mimeType,
+                                                 UmCallback<Void> callback);
 
-    public abstract void deleteEntries(Object context, List<String> entryId, boolean recursive);
-
-    public abstract OpdsAtomFeedRepository getOpdsAtomFeedRepository(Object context);
 
 }

@@ -15,6 +15,7 @@ dependencies {
 
     implementation "javax.ws.rs:javax.ws.rs-api:2.1"
 
+    implementation project(":core")
     implementation project(":lib-database-jdbc")
     implementation project(":lib-database-entities")
     implementation project(':lib-database')
@@ -28,6 +29,18 @@ dependencies {
     implementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
     implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
     implementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
+
+    //Used for testing purposes
+    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
+
+    testRuntimeOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testRuntimeOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testRuntimeOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    testRuntimeOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+    testImplementation "junit:junit:$version_junit"
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+    testImplementation "commons-io:commons-io:$version_commons_io"
 
 }
 
