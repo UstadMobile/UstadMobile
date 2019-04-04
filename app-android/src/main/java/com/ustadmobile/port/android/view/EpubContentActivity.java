@@ -32,6 +32,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 public class EpubContentActivity extends ZippedContentActivity implements
         EpubContentView, ListView.OnItemClickListener,
         TocListView.OnItemClickListener, EpubContentPageFragment.TapToHideToolbarHandler{
@@ -74,7 +76,7 @@ public class EpubContentActivity extends ZippedContentActivity implements
         coverImageView = (ImageView)findViewById(R.id.item_basepoint_cover_img);
 
         mEpubContentPresenter = new EpubContentPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+                bundleToMap(getIntent().getExtras()), this);
         Hashtable savedHt = UMAndroidUtil.bundleToHashtable(saved);
         mEpubContentPresenter.onCreate(savedHt);
     }

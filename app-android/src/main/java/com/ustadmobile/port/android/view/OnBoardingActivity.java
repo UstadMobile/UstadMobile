@@ -22,6 +22,8 @@ import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingView {
 
     private PageIndicatorView pageIndicatorView;
@@ -130,8 +132,8 @@ public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingV
         pageIndicatorView = findViewById(R.id.pageIndicatorView);
 
         presenter = new OnBoardingPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),this);
-        presenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getIntent().getExtras()),this);
+        presenter.onCreate(bundleToMap(savedInstanceState));
         pageIndicatorView.setAnimationType(AnimationType.WORM);
 
         getStartedBtn.setOnClickListener(v -> presenter.handleGetStarted());

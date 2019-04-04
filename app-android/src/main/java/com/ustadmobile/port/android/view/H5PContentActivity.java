@@ -46,7 +46,7 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mPresenter = new H5PContentPresenter(this, this);
         runWhenHttpdReady(() ->
-                mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras())));
+                mPresenter.onCreate(UMAndroidUtil.bundleToMap(getIntent().getExtras())));
     }
 
     @Override

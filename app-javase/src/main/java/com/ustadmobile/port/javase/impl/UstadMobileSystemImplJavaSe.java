@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Created by mike on 10/17/17.
@@ -41,7 +43,7 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void go(String viewName, Hashtable args, Object context, int flags) {
+    public void go(String viewName, Map<String, String> args, Object context, int flags) {
 
     }
 

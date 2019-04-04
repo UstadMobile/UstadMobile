@@ -34,7 +34,8 @@ import com.ustadmobile.core.impl.UmLifecycleListener;
 import com.ustadmobile.core.impl.UmLifecycleOwner;
 import com.ustadmobile.core.view.UstadView;
 
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,7 +55,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
 
     protected final Vector<UmLifecycleListener> lifecycleListeners = new Vector<>();
 
-    private Hashtable arguments;
+    private Map<String , String> arguments;
 
     private AtomicInteger lifecycleStatus = new AtomicInteger(0);
 
@@ -81,7 +82,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
         this.context = context;
     }
 
-    public UstadBaseController(Object context, Hashtable arguments, V view) {
+    public UstadBaseController(Object context, Map<String , String> arguments, V view) {
         this.context = context;
         this.arguments = arguments;
         this.view = view;
@@ -120,7 +121,7 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
      *
      * @param savedState savedState if any
      */
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(Map<String , String> savedState) {
         synchronized (lifecycleListeners) {
             for(UmLifecycleListener listener : lifecycleListeners) {
                 listener.onLifecycleCreate(this);
@@ -183,11 +184,11 @@ public abstract class UstadBaseController<V extends UstadView> implements UstadC
     }
 
 
-    public Hashtable getArguments() {
+    public Map<String, String> getArguments() {
         return arguments;
     }
 
-    protected void setArguments(Hashtable arguments) {
+    protected void setArguments(Map<String , String> arguments) {
         this.arguments = arguments;
     }
 

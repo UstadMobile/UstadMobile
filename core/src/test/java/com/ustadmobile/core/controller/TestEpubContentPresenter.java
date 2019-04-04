@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipFile;
@@ -109,8 +110,8 @@ public class TestEpubContentPresenter {
 
     @Test
     public void givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() throws IOException {
-        Hashtable args = new Hashtable();
-        args.put(EpubContentView.ARG_CONTAINER_UID, epubContainer.getContainerUid());
+        HashMap<String, String> args = new HashMap<>();
+        args.put(EpubContentView.ARG_CONTAINER_UID, String.valueOf(epubContainer.getContainerUid()));
 
         AtomicReference<Object> hrefListReference = new AtomicReference<>();
 
@@ -121,7 +122,7 @@ public class TestEpubContentPresenter {
 
         EpubContentPresenter presenter = new EpubContentPresenter(PlatformTestUtil.getTargetContext(),
                 args, mockEpubView);
-        presenter.onCreate(null);
+        presenter.onCreate(args);
 
         verify(mockEpubView, timeout(5000)).mountContainer(eq(epubContainer.getContainerUid()),
                 any());

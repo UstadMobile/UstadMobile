@@ -33,9 +33,7 @@ package com.ustadmobile.core.util;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
@@ -334,13 +332,13 @@ public class UMFileUtil {
     /**
      * Parse a deliminated string with keys and values like Content-Type parameters
      * and cache-control headers.  Keys can be present on their own e.g.
-     * no-cache in which case the no-cache key will be in the hashtable with a
+     * no-cache in which case the no-cache key will be in the map with a
      * blank string value.  It can also have an = sign with quoted or unquoted
      * text e.g. maxage=600 or maxage="600"
      *
      * @param str         String to parse
      * @param deliminator deliminator character
-     * @return Hashtable of parameters and values found
+     * @return Map of parameters and values found
      */
     public static Map<String, String> parseParams(String str, char deliminator) {
         String paramName = null;
@@ -398,14 +396,14 @@ public class UMFileUtil {
      * @param urlQuery
      * @return
      */
-    public static Hashtable parseURLQueryString(String urlQuery) {
+    public static Map<String, String> parseURLQueryString(String urlQuery) {
         int queryPos = urlQuery.indexOf('?');
         if (queryPos != -1) {
             urlQuery = urlQuery.substring(queryPos + 1);
         }
 
         Map<String, String> parsedParams = parseParams(urlQuery, '&');
-        Hashtable decodedParams = new Hashtable();
+        Map<String, String> decodedParams = new HashMap<>();
         Iterator it = parsedParams.keySet().iterator();
         String key;
         while (it.hasNext()) {
@@ -418,29 +416,29 @@ public class UMFileUtil {
     }
 
     /**
-     * Turns a hashtable into a URL encoded query string
+     * Turns a map into a URL encoded query string
      *
-     * @param ht Hashtable of param keys to values (keys and values must be strings)
+     * @param ht map of param keys to values (keys and values must be strings)
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
-    public static String hashtableToQueryString(Hashtable ht) {
+    public static String mapToQueryString(Map<String, String> ht) {
         StringBuffer sb = new StringBuffer();
 
         if (ht == null) {
             return "";
         }
 
-        Enumeration keys = ht.keys();
+        Iterator keys = ht.keySet().iterator();
         String key;
         boolean firstEl = true;
-        while (keys.hasMoreElements()) {
+        while (keys.hasNext()) {
             if (!firstEl) {
                 sb.append('&');
             } else {
                 firstEl = false;
             }
 
-            key = (String) keys.nextElement();
+            key = (String) keys.next();
             sb.append(URLTextUtil.urlEncodeUTF8(key)).append('=');
             sb.append(URLTextUtil.urlEncodeUTF8((String) ht.get(key)));
         }
@@ -453,7 +451,7 @@ public class UMFileUtil {
      * Parse type with params header fields (Content-Disposition; Content-Type etc). E.g. given
      * application/atom+xml;type=entry;profile=opds-catalog
      * <p>
-     * It will return an object with the mime type "application/atom+xml" and a hashtable of parameters
+     * It will return an object with the mime type "application/atom+xml" and a map of parameters
      * with type=entry and profile=opds-catalog .
      * <p>
      * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
@@ -512,7 +510,7 @@ public class UMFileUtil {
         public String typeName;
 
         /**
-         * Hashtable of parameters found (case sensitive)
+         * map of parameters found (case sensitive)
          */
         public Map<String, String> params;
 
@@ -754,9 +752,9 @@ public class UMFileUtil {
 
                     argName = currentKey.substring(indexEnd + 1);
                     if (result.elementAt(index) != null) {
-                        indexArgs = (Hashtable) result.elementAt(index);
+                        indexArgs = (Map<String, String>) result.elementAt(index);
                     } else {
-                        indexArgs = new Hashtable();
+                        indexArgs = new HashMap<>();
                         result.setElementAt(indexArgs, index);
                     }
 
@@ -810,12 +808,12 @@ public class UMFileUtil {
     }
 
 
-    public static String clearTopFromReferrerPath(String viewname, Hashtable args, String referrerPath) {
+    public static String clearTopFromReferrerPath(String viewname, Map<String, String> args, String referrerPath) {
         int lastIndex = referrerPath.lastIndexOf("/" + viewname + "?");
         if(lastIndex != -1) {
             return referrerPath.substring(0, referrerPath.indexOf("/", lastIndex));
         }else {
-            return "/" + viewname + "?" + hashtableToQueryString(args);
+            return "/" + viewname + "?" + mapToQueryString(args);
         }
     }
 

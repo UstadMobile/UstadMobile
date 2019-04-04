@@ -113,7 +113,7 @@ public class UMAndroidUtil {
             return null;
 
         Set<String> keys = bundle.keySet();
-        Map<String, String> map = new HashMap<>();
+        HashMap<String, String> map = new HashMap<>();
         for (String key : keys) {
             Object val = bundle.get(key);
             if (val instanceof String) {

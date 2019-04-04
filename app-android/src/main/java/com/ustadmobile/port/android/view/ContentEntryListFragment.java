@@ -33,6 +33,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.List;
 import java.util.Map;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 /**
  * A fragment representing a list of Items.
  * <p/>
@@ -113,8 +115,8 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         entryListPresenter = new ContentEntryListPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getArguments()), this);
-        entryListPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getArguments()), this);
+        entryListPresenter.onCreate(bundleToMap(savedInstanceState));
 
         return rootContainer;
     }

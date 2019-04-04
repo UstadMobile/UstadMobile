@@ -17,6 +17,7 @@ import com.ustadmobile.port.android.impl.WebChunkWebViewClient;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class WebChunkActivity extends UstadBaseActivity implements WebChunkView, ViewWithErrorNotifier {
 
@@ -42,8 +43,8 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView,
         mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
 
         mPresenter = new WebChunkPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getIntent().getExtras()), this);
+        mPresenter.onCreate(bundleToMap(savedInstanceState));
 
     }
 
