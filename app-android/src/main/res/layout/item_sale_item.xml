@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_sale_item_cl"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -13,13 +14,13 @@
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
         android:visibility="visible"
-        android:weightSum="4"
+        android:weightSum="5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/item_sale_item_image"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:layout_weight="1"
@@ -40,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"
                 app:layout_constraintTop_toBottomOf="@+id/item_sale_item_name" />
 
             <TextView
@@ -49,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Item name "
-                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </LinearLayout>
@@ -79,6 +80,33 @@
                 android:text="Quantity"
                 app:layout_constraintStart_toEndOf="@+id/textView19"
                 app:layout_constraintTop_toBottomOf="@+id/item_sale_item_quantity_title" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/item_sale_item_price_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/price"
+                app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity_title"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/item_sale_item_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Price"
+                app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"
+                app:layout_constraintTop_toBottomOf="@+id/textView23" />
 
         </LinearLayout>
 

@@ -74,6 +74,7 @@ import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Register2View;
+import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
@@ -94,6 +95,7 @@ import com.ustadmobile.port.android.view.H5PContentActivity;
 import com.ustadmobile.port.android.view.Login2Activity;
 import com.ustadmobile.port.android.view.OnBoardingActivity;
 import com.ustadmobile.port.android.view.Register2Activity;
+import com.ustadmobile.port.android.view.SaleDetailActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
 import com.ustadmobile.port.android.view.VideoPlayerActivity;
 import com.ustadmobile.port.android.view.WebChunkActivity;
@@ -171,6 +173,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(VideoPlayerView.VIEW_NAME, VideoPlayerActivity.class);
         //Goldozi
         viewNameToAndroidImplMap.put(BasePoint2View.VIEW_NAME, BasePoint2Activity.class);
+        viewNameToAndroidImplMap.put(SaleDetailView.VIEW_NAME, SaleDetailActivity.class);
 
     }
 

@@ -32,13 +32,14 @@ public interface SaleDetailView extends UstadView {
     void setListProvider(UmProvider<SaleItemListDetail> listProvider);
 
 
+    void setLocationPresets(String[] locationPresets, int selectedPosition);
+
     /**
      * Payment provider for this sale.
      *
      * @param paymentProvider   the provider to set to the view
      */
     void setPaymentProvider(UmProvider<SalePayment> paymentProvider);
-
 
     void updateOrderTotal(long orderTotal);
 

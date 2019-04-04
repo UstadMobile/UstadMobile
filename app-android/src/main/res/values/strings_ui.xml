@@ -318,4 +318,6 @@
     <string name="location">Location</string>
     <string name="courses">Courses</string>
     <string name="due">Due</string>
+    <string name="sale_details">Sale details</string>
+    <string name="sale_detail">Sale detail</string>
 </resources>

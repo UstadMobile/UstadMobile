@@ -50,18 +50,19 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
      *     float saleItemDiscountPerItem;
      *     boolean saleItemDelivered;
      */
-    @UmQuery("SELECT SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
-            " SaleProduct.saleProductName AS saleItemProductName, " +
-            " SaleItem.saleItemQuantity AS saleItemQuantityCount, " +
-            " SaleItem.saleItemPricePerPiece AS saleItemPrice," +
-            " SaleItem.saleItemDiscount AS saleItemDiscountPerItem, " +
-            " SaleItem.saleItemSold AS saleItemDelivered " +
+    public static final String ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY =
+            "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+            " SaleProduct.saleProductName AS saleItemProductName " +
             "FROM SaleItem " +
             " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
             " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
             "   SaleProduct.saleProductUid " +
-            "WHERE saleItemActive = 1")
+            "WHERE saleItemActive = 1";
+    @UmQuery(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
     public abstract UmLiveData<List<SaleItemListDetail>> findAllSaleItemListDetailActiveLive();
+
+    @UmQuery(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
+    public abstract UmProvider<SaleItemListDetail> findAllSaleItemListDetailActiveProvider();
 
 
     //Total amount of every sale per sale uid

@@ -121,8 +121,11 @@
         <activity android:name="com.ustadmobile.port.android.view.BasePoint2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/register"
-            android:theme="@style/Theme.UstadTheme"
-            />
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
 
 
         <!--Services-->
