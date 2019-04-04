@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 public class ContentEntryUtil {
 
@@ -188,7 +189,7 @@ public class ContentEntryUtil {
         viewDestination = viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?");
 
-        HashMap<String , String> params = UMFileUtil.parseURLQueryString(viewDestination);
+        Map<String , String> params = UMFileUtil.parseURLQueryString(viewDestination);
         if (params.containsKey("sourceUrl")) {
             goToContentEntryBySourceUrl(params.get("sourceUrl"), dbRepo,
                     impl, openEntryIfNotDownloaded, context,

@@ -224,7 +224,7 @@ public class HTTPResult {
 
     /**
      *
-     * @param value
+     * @param key
      * @return
      */
     public String getHeaderValue(String key) {
