@@ -87,6 +87,11 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
 
+    @UmQuery("SELECT djiDjUid FROM DownloadJob WHERE djiContentEntryUid = :contentEntryUid " +
+            "ORDER BY timeStarted DESC LIMIT 1")
+    public abstract long getLatestDownloadJobUidForContentEntryUid(long contentEntryUid);
+
+
 
     @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
     public abstract void update(long djUid, int djStatus);

@@ -50,6 +50,11 @@ public class DownloadJob {
         this.djDsUid = downloadSet.getDsUid();
     }
 
+    public DownloadJob(long contentEntryEntryUid, long timeCreated) {
+        this.djRootContentEntryUid = contentEntryEntryUid;
+        this.timeCreated = timeCreated;
+    }
+
     public long getDjUid() {
         return djUid;
     }
