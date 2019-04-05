@@ -20,6 +20,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 /**
  * Created by mike on 9/14/17.
  */
@@ -72,8 +74,8 @@ public class XapiPackageContentActivity extends ZippedContentActivity implements
         mMountedPath = new AtomicReference<>();
 
         mPresenter = new XapiPackageContentPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getIntent().getExtras()), this);
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState));
         mProgressBar.setIndeterminate(true);
         mProgressBar.setVisibility(View.VISIBLE);
     }

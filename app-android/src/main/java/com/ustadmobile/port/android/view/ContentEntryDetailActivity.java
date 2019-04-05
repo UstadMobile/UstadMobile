@@ -25,17 +25,16 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
 import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class ContentEntryDetailActivity extends UstadBaseActivity implements
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
@@ -73,12 +72,19 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle);
+        if(networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow()){
+            downloadButton.setBackgroundResource(
+                    R.drawable.pre_lollipop_btn_selector_bg_entry_details);
+        }
+
         managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this, this);
-        entryDetailPresenter.onCreate(UMAndroidUtil.bundleToHashtable(new Bundle()));
+                bundleToMap(getIntent().getExtras()), this,
+                this);
+        entryDetailPresenter.onCreate(bundleToMap(new Bundle()));
         entryDetailPresenter.onStart();
         managerAndroidBle.addLocalAvailabilityListener(this);
+
     }
 
     @Override
@@ -104,7 +110,9 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
         setUMToolbar(R.id.entry_detail_toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -262,7 +270,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void showDownloadOptionsDialog(Hashtable args) {
+    public void showDownloadOptionsDialog(HashMap<String,String> args) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -294,7 +302,9 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     public void onDestroy() {
         entryDetailPresenter.onDestroy();
-        networkManagerBle.removeLocalAvailabilityListener(this);
+       if(networkManagerBle != null){
+           networkManagerBle.removeLocalAvailabilityListener(this);
+       }
         super.onDestroy();
     }
 

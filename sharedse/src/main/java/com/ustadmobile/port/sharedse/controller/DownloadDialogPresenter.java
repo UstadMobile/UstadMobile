@@ -63,10 +63,10 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private NetworkManagerBle networkManagerBle;
 
-    private Hashtable args;
+    private Map<String , String>  args;
 
     public DownloadDialogPresenter(Object context, NetworkManagerBle networkManagerBle,
-                                   Hashtable arguments, DownloadDialogView view) {
+                                   Map<String , String>  arguments, DownloadDialogView view) {
         super(context, arguments, view);
         this.args = arguments;
         this.networkManagerBle = networkManagerBle;
@@ -74,7 +74,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     @Override
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
         umAppDatabase = UmAppDatabase.getInstance(context);
 

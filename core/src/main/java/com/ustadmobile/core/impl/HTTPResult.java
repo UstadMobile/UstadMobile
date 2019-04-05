@@ -34,9 +34,11 @@ package com.ustadmobile.core.impl;
     import com.ustadmobile.core.util.UMFileUtil;
 
     import java.util.Enumeration;
+    import java.util.HashMap;
     import java.util.Hashtable;
+    import java.util.Iterator;
 
-/**
+    /**
  *
  * @author mike
  */
@@ -97,16 +99,16 @@ public class HTTPResult {
         if(dataStarts > DATA_URI_PREFIX.length()) {
             String infoSection = dataURL.substring(DATA_URI_PREFIX.length(), 
                 dataStarts);
-            Hashtable params = UMFileUtil.parseParams(infoSection, ';');
-            Enumeration keys = params.keys();
+            HashMap<String,String> params = UMFileUtil.parseParams(infoSection, ';');
+            Iterator keys = params.keySet().iterator();
             String paramName;
             
             String charset = null;
             String mediaType = null;
-            while(keys.hasMoreElements()) {
-                paramName = (String)keys.nextElement();
+            while(keys.hasNext()) {
+                paramName = (String)keys.next();
                 if(paramName.equals("charset")) {
-                    charset = (String)params.get(paramName);
+                    charset = params.get(paramName);
                 }else if(paramName.equals("base64")) {
                     isBase64 = true;
                 }else {
@@ -222,7 +224,7 @@ public class HTTPResult {
     
     /**
      * 
-     * @param value
+     * @param key
      * @return 
      */
     public String getHeaderValue(String key) {

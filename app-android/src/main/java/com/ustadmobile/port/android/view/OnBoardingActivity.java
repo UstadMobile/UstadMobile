@@ -1,8 +1,10 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -18,6 +20,9 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.OnBoardingPresenter;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingView {
 
@@ -26,6 +31,8 @@ public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingV
     private OnBoardingPresenter presenter;
 
     private  ViewPager viewPager;
+
+    private Button getStartedBtn;
 
     /**
      * Model for the the onboarding screen
@@ -121,16 +128,26 @@ public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_on_boarding);
         viewPager = findViewById(R.id.onBoardPagerView);
-        Button getStartedBtn = findViewById(R.id.get_started_btn);
+        getStartedBtn = findViewById(R.id.get_started_btn);
         pageIndicatorView = findViewById(R.id.pageIndicatorView);
 
         presenter = new OnBoardingPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),this);
-        presenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getIntent().getExtras()),this);
+        presenter.onCreate(bundleToMap(savedInstanceState));
         pageIndicatorView.setAnimationType(AnimationType.WORM);
 
         getStartedBtn.setOnClickListener(v -> presenter.handleGetStarted());
 
+    }
+
+    @Override
+    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
+        super.onBleNetworkServiceBound(networkManagerBle);
+        if(networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow()){
+            getStartedBtn.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding);
+            getStartedBtn.setTextColor(getResources()
+                    .getColorStateList(R.color.pre_lollipop_btn_selector_txt_onboarding));
+        }
     }
 
     @Override

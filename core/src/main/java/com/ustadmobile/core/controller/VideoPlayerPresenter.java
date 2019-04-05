@@ -13,8 +13,8 @@ import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 import static com.ustadmobile.core.view.VideoPlayerView.ARG_CONTAINER_UID;
@@ -28,21 +28,21 @@ public class VideoPlayerPresenter extends UstadBaseController<VideoPlayerView> {
     private String srtPath;
     private String videoPath;
 
-    public VideoPlayerPresenter(Object context, Hashtable arguments, VideoPlayerView view) {
+    public VideoPlayerPresenter(Object context, Map<String , String> arguments, VideoPlayerView view) {
         super(context, arguments, view);
     }
 
     @Override
-    public void onCreate(Hashtable savedState) {
+    public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
         UmAppDatabase db = UmAppDatabase.getInstance(getContext());
         UmAppDatabase dbRepo = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = dbRepo.getContentEntryDao();
         ContainerEntryDao containerEntryDao = db.getContainerEntryDao();
 
-        navigation = (String) getArguments().get(ARG_REFERRER);
-        long entryUuid = Long.parseLong((String) getArguments().get(ARG_CONTENT_ENTRY_ID));
-        long containerUid = Long.parseLong((String) getArguments().get(ARG_CONTAINER_UID));
+        navigation = getArguments().get(ARG_REFERRER);
+        long entryUuid = Long.parseLong(getArguments().get(ARG_CONTENT_ENTRY_ID));
+        long containerUid = Long.parseLong(getArguments().get(ARG_CONTAINER_UID));
 
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override

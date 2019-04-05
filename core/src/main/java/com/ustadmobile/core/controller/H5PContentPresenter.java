@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  * Created by mike on 2/15/18.
@@ -113,8 +113,8 @@ public class H5PContentPresenter extends UstadBaseController {
         this.h5PContentView = h5PContentView;
     }
 
-    public void onCreate(Hashtable args) {
-        this.h5pFileUri = (String)args.get(UstadView.ARG_CONTAINER_UID);
+    public void onCreate(HashMap<String , String> args) {
+        this.h5pFileUri = args.get(UstadView.ARG_CONTAINER_UID);
         h5PContentView.mountH5PDist(mH5PDistMountedCallback);
     }
 
