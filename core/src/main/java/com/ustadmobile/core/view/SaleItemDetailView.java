@@ -16,21 +16,18 @@ public interface SaleItemDetailView extends UstadView {
 
     //Any argument keys:
     String ARG_SALE_ITEM_UID = "ArgSaleItemUid";
+    String ARG_SALE_ITEM_PRODUCT_UID = "ArgSaleItemProducerUid";
 
     /**
      * Method to finish the screen / view.
      */
     void finish();
 
+    void updateSaleItemOnView(SaleItem saleItem);
 
-    /**
-     * Sets the given provider to the view's provider adapter.
-     *
-     * @param listProvider The provider to set to the view
-     */
-    void setListProvider(UmProvider<SaleItem> listProvider);
+    void updateTotal(long total);
 
-
+    void updatePPP(long ppp);
 
 
 

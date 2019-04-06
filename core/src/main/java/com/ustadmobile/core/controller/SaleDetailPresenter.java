@@ -218,9 +218,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
                 }
 
                 @Override
-                public void onFailure(Throwable exception) {
-
-                }
+                public void onFailure(Throwable exception) {exception.printStackTrace();}
             });
         }
     }

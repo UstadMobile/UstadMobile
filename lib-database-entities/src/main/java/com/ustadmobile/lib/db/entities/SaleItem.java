@@ -49,7 +49,17 @@ public class SaleItem {
     private int saleItemLCB;
 
     public SaleItem(){
-
+        this.setSaleItemCreationDate(System.currentTimeMillis());
+        this.setSaleItemActive(false);
+        this.setSaleItemSold(false);
+        this.setSaleItemPreorder(false);
+    }
+    public SaleItem(long productUid){
+        this.setSaleItemCreationDate(System.currentTimeMillis());
+        this.setSaleItemActive(false);
+        this.setSaleItemSold(false);
+        this.setSaleItemPreorder(false);
+        this.setSaleItemProductUid(productUid);
     }
 
     public SaleItem(long productUid, int quantity, long ppp, long saleUid, long dueDate ){

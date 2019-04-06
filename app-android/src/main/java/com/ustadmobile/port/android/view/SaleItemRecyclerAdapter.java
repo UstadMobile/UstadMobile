@@ -70,7 +70,8 @@ public class SaleItemRecyclerAdapter extends
         itemTotal.setText(priceTotalString);
         dueDate.setText(dueString);
 
-        itemWhole.setOnClickListener(v -> mPresenter.handleClickSaleItemEdit(entity.getSaleItemUid()));
+        itemWhole.setOnClickListener(v ->
+                mPresenter.handleClickSaleItemEdit(entity.getSaleItemUid()));
 
 
 
