@@ -40,6 +40,8 @@ public class Sale {
 
     private boolean salePaymentDone;
 
+    private long saleDiscount;
+
     @UmSyncMasterChangeSeqNum
     private long saleMCSN;
 
@@ -51,14 +53,14 @@ public class Sale {
 
     public Sale(){
         this.saleCancelled = false;
-        this.saleActive = true;
+        this.saleActive = true; // false is essentially deleted.
         this.saleCreationDate = System.currentTimeMillis();
         this.saleLastUpdateDate = this.saleCreationDate;
-        this.saleDone = false; // It gets done only when Save/Donw/Tick is clicked via presenter/
+        this.saleDone = false; // It gets done only when Sale is delivered.
         this.salePreOrder = false; //default to nope
         this.salePaymentDone = true; //Defaulting to true. Unless marked as done via payment addition.
         this.saleTitle = "";
-        //Ideally salePaymentDone should be triggerd from SaleItem and SalePayment
+        //Ideally salePaymentDone should be triggered from SaleItem and SalePayment
     }
 
     public long getSaleUid() {
@@ -187,5 +189,13 @@ public class Sale {
 
     public void setSaleDueDate(long saleDueDate) {
         this.saleDueDate = saleDueDate;
+    }
+
+    public long getSaleDiscount() {
+        return saleDiscount;
+    }
+
+    public void setSaleDiscount(long saleDiscount) {
+        this.saleDiscount = saleDiscount;
     }
 }

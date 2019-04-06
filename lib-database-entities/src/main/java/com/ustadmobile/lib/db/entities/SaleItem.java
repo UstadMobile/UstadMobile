@@ -37,7 +37,6 @@ public class SaleItem {
 
     private long saleItemCreationDate;
 
-
     private long saleItemDueDate;
 
     @UmSyncMasterChangeSeqNum
@@ -48,6 +47,22 @@ public class SaleItem {
 
     @UmSyncLastChangedBy
     private int saleItemLCB;
+
+    public SaleItem(){
+
+    }
+
+    public SaleItem(long productUid, int quantity, long ppp, long saleUid, long dueDate ){
+        this.saleItemCurrency = "Afs";
+        this.saleItemActive = true;
+        this.saleItemCreationDate = System.currentTimeMillis();
+        this.saleItemProductUid = productUid;
+        this.saleItemQuantity = quantity;
+        this.saleItemPricePerPiece = ppp;
+        this.saleItemSaleUid = saleUid;
+        this.saleItemDueDate = dueDate;
+
+    }
 
     public long getSaleItemUid() {
         return saleItemUid;

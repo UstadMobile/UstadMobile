@@ -63,11 +63,15 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     int saleItemCount;
      */
     public static final String ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY =
-            "SELECT Sale.*,  Location.title AS locationName, " +
-            " 0 AS saleAmount, '' AS saleCurrency,  0 AS saleItemCount " +
-            "FROM Sale " +
-            " LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid " +
-            "WHERE saleActive = 1 ";
+    " SELECT s.*, Location.title AS locationName, " +
+    " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
+            "SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
+            "Sale.saleUid WHERE Sale.saleUid = s.saleUid) ,0) AS saleAmount, " +
+    " 'Afs' AS saleCurrency,  " +
+    " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = s.saleUid) AS saleItemCount " +
+    "FROM Sale s " +
+    " LEFT JOIN Location ON Location.locationUid = s.saleLocationUid WHERE s.saleActive = 1";
+
 
     @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
     public abstract UmLiveData<List<SaleListDetail>> findAllActiveAsSaleListDetailLive();

@@ -64,13 +64,27 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
     @UmQuery(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
     public abstract UmProvider<SaleItemListDetail> findAllSaleItemListDetailActiveProvider();
 
+    public static final String ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY =
+            "SELECT SaleItem.*, SaleProductPicture.saleProductPictureUid AS saleItemPictureUid, " +
+                    " SaleProduct.saleProductName AS saleItemProductName " +
+                    "FROM SaleItem " +
+                    " LEFT JOIN SaleProduct ON SaleItem.saleItemProductUid = SaleProduct.saleProductUid " +
+                    " LEFT JOIN SaleProductPicture ON SaleProductPicture.saleProductPictureSaleProductUid = " +
+                    "   SaleProduct.saleProductUid " +
+                    "WHERE saleItemActive = 1 AND SaleItem.saleItemSaleUid = :saleUid";
+
+    @UmQuery(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
+    public abstract UmLiveData<List<SaleItemListDetail>> findAllSaleItemListDetailActiveBySaleLive(long saleUid);
+
+    @UmQuery(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
+    public abstract UmProvider<SaleItemListDetail> findAllSaleItemListDetailActiveBySaleProvider(long saleUid);
 
     //Total amount of every sale per sale uid
 
     public static final String TOTAL_PAID_BY_SALE_UID =
             "SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem " +
                     "WHERE saleItemSaleUid = :saleUid AND saleItemActive = 1 " +
-                    "AND saleItemSold = 1";
+                    "";
     public static final String TOTAL_DISCOUNT_BY_SALE_UID =
             "SELECT SUM(saleItemDiscount * saleItemQuantity) FROM SaleItem " +
                     "WHERE saleItemSaleUid = :saleUid AND saleItemActive = 1 " +

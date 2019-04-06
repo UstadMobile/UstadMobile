@@ -41,9 +41,6 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmProvider<SaleProduct> findAllActiveProvider();
 
-    @UmQuery("SELECT * FROM SaleProduct WHERE saleProductCategoryUid = :categoryUid")
-    public abstract void findFirstProductInCategoryAsync(long categoryUid, UmCallback<SaleProduct> resultCallback);
-
     //LOOK UP
 
     public static final String FIND_BY_UID_QUERY =
@@ -57,6 +54,18 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
 
     @UmQuery(FIND_BY_UID_QUERY)
     public abstract UmLiveData<SaleProduct> findByUidLive(long uid);
+
+    public static final String FIND_BY_NAME_QUERY =
+        "SELECT * FROM SaleProduct WHERE saleProductName = :name AND saleProductActive = 1";
+
+    @UmQuery(FIND_BY_NAME_QUERY)
+    public abstract SaleProduct findByName(String name);
+
+    @UmQuery(FIND_BY_NAME_QUERY)
+    public abstract void findByNameAsync(String name, UmCallback<SaleProduct> findByUidCallback);
+
+    @UmQuery(FIND_BY_NAME_QUERY)
+    public abstract UmLiveData<SaleProduct> findByNameLive(String name);
 
     //INACTIVATE:
 

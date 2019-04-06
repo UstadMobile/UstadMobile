@@ -43,7 +43,9 @@ public interface SaleDetailView extends UstadView {
 
     void updateOrderTotal(long orderTotal);
 
-    void updateOrderDiscountTotal(long discountTotal);
+    void updateOrderTotalAfterDiscount(long discount);
+    void updateOrderTotalAfterDiscountTotalChanged(long total);
+
 
     void updateSaleOnView(Sale sale);
 

@@ -9,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 67)
 public class SaleProduct {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleProductUid;
 
     private String saleProductName;
@@ -22,8 +22,6 @@ public class SaleProduct {
 
     private long saleProductPictureUid;
 
-    private long saleProductCategoryUid;
-
     private boolean saleProductActive;
 
     @UmSyncMasterChangeSeqNum
@@ -35,6 +33,18 @@ public class SaleProduct {
     @UmSyncLastChangedBy
     private int saleProductLCB;
 
+    public SaleProduct(){
+
+    }
+
+    public SaleProduct(String name, String decs){
+        this.saleProductName = name;
+        this.saleProductDesc = decs;
+        this.saleProductActive = true;
+        //TODO:
+        //this.saleProductPictureUid = defaultProductPictureUid;
+
+    }
 
     public long getSaleProductUid() {
         return saleProductUid;
@@ -116,11 +126,4 @@ public class SaleProduct {
         this.saleProductLCB = saleProductLCB;
     }
 
-    public long getSaleProductCategoryUid() {
-        return saleProductCategoryUid;
-    }
-
-    public void setSaleProductCategoryUid(long saleProductCategoryUid) {
-        this.saleProductCategoryUid = saleProductCategoryUid;
-    }
 }

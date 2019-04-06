@@ -43,7 +43,10 @@ public class SaleItemRecyclerAdapter extends
 
         SaleItemListDetail entity = getItem(position);
 
+        //TODO: Get image of SaleProduct
+        long saleProductUid = entity.getSaleItemProductUid();
         ImageView itemImage = holder.itemView.findViewById(R.id.item_sale_item_image);
+
         TextView itemName = holder.itemView.findViewById(R.id.item_sale_item_name);
         TextView itemQuantity = holder.itemView.findViewById(R.id.item_sale_item_quantity);
         TextView itemPrice = holder.itemView.findViewById(R.id.item_sale_item_price);
@@ -56,13 +59,13 @@ public class SaleItemRecyclerAdapter extends
         float price = entity.getSaleItemPricePerPiece();
 
         String priceString = String.valueOf(price) + theActivity.getString(R.string.currency_afs);
-        String priceTotalString = String.valueOf(quantity*price);
+        String priceTotalString = String.valueOf(quantity*price) + theActivity.getString(R.string.currency_afs);
         String dueString = theActivity.getString(R.string.due) + " " +
                 UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                         entity.getSaleItemDueDate(), null);
 
         itemName.setText(entity.getSaleItemProductName());
-        itemQuantity.setText(quantity);
+        itemQuantity.setText(String.valueOf(quantity));
         itemPrice.setText(priceString);
         itemTotal.setText(priceTotalString);
         dueDate.setText(dueString);

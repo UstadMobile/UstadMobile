@@ -53,7 +53,9 @@ public class SaleListRecyclerAdapter extends
 
         assert entity != null;
         saleTitle.setText(entity.getSaleTitle());
-        saleAmount.setText(String.valueOf(entity.getSaleAmount()));
+        String saleAmountWithCurrency = String.valueOf(entity.getSaleAmount()) + " " +
+                entity.getSaleCurrency();
+        saleAmount.setText(saleAmountWithCurrency);
         saleLocation.setText(entity.getLocationName());
 
         String creationDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(entity.getSaleCreationDate(), null);

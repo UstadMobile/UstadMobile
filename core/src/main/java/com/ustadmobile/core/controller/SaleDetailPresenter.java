@@ -87,37 +87,32 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     }
 
-
-    public void getTotalSaleOrderAndDiscountAndUpdateView(){
-        if(currentSaleItem != null){
-            saleItemDao.findTotalPaidBySaleAsync(currentSaleItem.getSaleItemUid(),
-                    new UmCallback<Long>() {
-                @Override
-                public void onSuccess(Long result) {
-                    view.updateOrderTotal(result);
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            });
-
-            saleItemDao.findTotalDiscountBySaleAsync(currentSaleItem.getSaleItemUid(),
-                    new UmCallback<Long>() {
-                @Override
-                public void onSuccess(Long result) {
-                    view.updateOrderDiscountTotal(result);
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            });
-        }
+    private void updateSaleItemProvider(long saleUid){
+        //Get provider
+        umProvider = saleItemDao.findAllSaleItemListDetailActiveBySaleProvider(saleUid);
+        view.setListProvider(umProvider);
     }
 
+
+    public void getTotalSaleOrderAndDiscountAndUpdateView(long saleUid){
+        saleItemDao.findTotalPaidBySaleAsync(saleUid,
+                new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+
+                view.updateOrderTotal(result);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
+
+    }
+
+    //Next sprint
     public void getPaymentTotalAndUpdateView(){
         if(currentSaleItem != null){
             salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.getSaleItemUid(),
@@ -158,6 +153,11 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
                 exception.printStackTrace();
             }
         });
+
+        getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
+        updateSaleItemProvider(saleUid);
+        //Next sprint:
+        //getPaymentTotalAndUpdateView();
     }
 
     public void startObservingLocations(){
@@ -208,11 +208,21 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     }
 
-    public void handleClickPrimaryActionButton() {
+    public void handleClickSave() {
 
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
-        impl.go(SelectSaleProductView.VIEW_NAME, args, context);
+        if(updatedSale != null){
+            saleDao.updateAsync(updatedSale, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    view.finish();
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
+        }
     }
 
     public void handleClickSaleItemEdit(long saleItemUid){
@@ -224,4 +234,16 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     }
 
 
+    public void handleDiscountChanged(long discount){
+        updatedSale.setSaleDiscount(discount);
+        view.updateOrderTotalAfterDiscount(discount);
+    }
+
+    public void handleOrderNotesChanged(String notes){
+        updatedSale.setSaleNotes(notes);
+    }
+
+    public void handleSetDelivered(boolean delivered){
+        updatedSale.setSaleDone(delivered);
+    }
 }

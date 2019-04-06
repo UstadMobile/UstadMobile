@@ -67,15 +67,6 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_cl"
         tools:layout_editor_absoluteX="16dp" />
 
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton android:id="@+id/activity_sale_detail_fab"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center" android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp" android:layout_marginStart="8dp"
-        app:floating_background_color="@color/accent" app:floating_left_icon="@drawable/fab_add"
-        app:floating_title="@string/save" app:floating_title_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
         android:id="@+id/textView16"
         android:layout_width="0dp"
@@ -89,7 +80,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_appbar" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/activity_sale_detail_location_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -109,15 +100,14 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_location_spinner" />
 
     <TextView
-        android:id="@+id/textView20"
+        android:id="@+id/activity_sale_detail_order_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_recyclerview" />
 
@@ -127,19 +117,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toStartOf="@+id/textView20"
+        android:text="@string/order_total"
+        app:layout_constraintEnd_toEndOf="@+id/textView23"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_recyclerview" />
-
-    <TextView
-        android:id="@+id/textView22"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView20" />
 
     <TextView
         android:id="@+id/textView23"
@@ -147,8 +127,61 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toStartOf="@+id/textView22"
+        android:text="@string/discount"
+        app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_discount"
         app:layout_constraintTop_toBottomOf="@+id/textView21" />
+
+    <EditText
+        android:id="@+id/activity_sale_detail_discount"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView21" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/total"
+        app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_discount"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_discount" />
+
+    <TextView
+        android:id="@+id/activity_sale_detail_order_after_discount_tota"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_discount" />
+
+    <CheckBox
+        android:id="@+id/activity_sale_detail_delivered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/delivered"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <EditText
+        android:id="@+id/activity_sale_detail_order_notes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:ems="10"
+        android:hint="@string/order_notes"
+        android:inputType="textPersonName"
+        android:text="@string/order_notes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered" />
 
 </android.support.constraint.ConstraintLayout>

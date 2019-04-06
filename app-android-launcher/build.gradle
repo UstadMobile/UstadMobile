@@ -118,6 +118,15 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'x86', 'armeabi-v7a'
+            universalApk true
+        }
+    }
 }
 
 configurations.all {
@@ -136,6 +145,8 @@ configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
 }
+
+
 
 
 dependencies {

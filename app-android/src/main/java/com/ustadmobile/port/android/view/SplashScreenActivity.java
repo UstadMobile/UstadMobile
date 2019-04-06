@@ -38,11 +38,15 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.SaleDao;
+import com.ustadmobile.core.db.dao.SaleItemDao;
+import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Sale;
+import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.port.android.impl.DbInitialEntriesInserter;
 
@@ -94,24 +98,39 @@ public class SplashScreenActivity extends UstadBaseActivity{
         UmAppDatabase repo  = UmAppDatabase.getInstance(getContext());
         SaleDao saleDao = repo.getSaleDao();
         LocationDao locationDao = repo.getLocationDao();
+        SaleItemDao saleItemDao = repo.getSaleItemDao();
+        SaleProductDao saleProductDao = repo.getSaleProductDao();
 
 
         //Create a new location
-        Location newLocation = new Location();
-        newLocation.setTitle("Test location");
-        newLocation.setParentLocationUid(0);
-        newLocation.setDescription("Test location added from Dummy data");
-        locationDao.insertAsync(newLocation, new UmCallback<Long>() {
+        locationDao.findByTitleAsync("Test Location", new UmCallback<List<Location>>() {
             @Override
-            public void onSuccess(Long result) {
-                newLocation.setLocationUid(result);
+            public void onSuccess(List<Location> result) {
+                Location newLocation;
+                if (result.isEmpty()) {
+                    newLocation = new Location();
+                    newLocation.setTitle("Test location");
+                    newLocation.setParentLocationUid(0);
+                    newLocation.setDescription("Test location added from Dummy data");
+                    newLocation.setLocationUid(locationDao.insert(newLocation));
+                } else {
+                    newLocation = result.get(0);
+                }
 
+                //Insert Products
+                String pinkHatName = "Pink Hat";
+                SaleProduct pinkHatProduct = saleProductDao.findByName(pinkHatName);
+                if(pinkHatProduct == null){
+                    pinkHatProduct = new SaleProduct(pinkHatName, "Testing dummy data");
+                    pinkHatProduct.setSaleProductUid(saleProductDao.insert(pinkHatProduct));
+                }
 
                 String pinkHatSaleTitle = "20x pink hat";
+                SaleProduct finalPinkHatProduct = pinkHatProduct;
                 saleDao.findAllSaleWithTitleAsync(pinkHatSaleTitle, new UmCallback<List<Sale>>() {
                     @Override
                     public void onSuccess(List<Sale> result) {
-                        if (result.isEmpty()){
+                        if (result.isEmpty()) {
                             Sale pinkHatSale = new Sale();
                             pinkHatSale.setSaleTitle(pinkHatSaleTitle);
                             pinkHatSale.setSaleActive(true);
@@ -122,7 +141,16 @@ public class SplashScreenActivity extends UstadBaseActivity{
                             pinkHatSale.setSaleLocationUid(newLocation.getLocationUid());
                             pinkHatSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(0));
                             pinkHatSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(-1));
-                            saleDao.insert(pinkHatSale);
+                            pinkHatSale.setSaleUid(saleDao.insert(pinkHatSale));
+
+                            //Insert items.
+                            SaleItem thisSaleItem = new SaleItem(finalPinkHatProduct.getSaleProductUid(),
+                                    20, 500, pinkHatSale.getSaleUid(),
+                                    UMCalendarUtil.getDateInMilliPlusDays(-1));
+                            saleItemDao.insert(thisSaleItem);
+
+
+
                         }
                     }
 
@@ -133,12 +161,11 @@ public class SplashScreenActivity extends UstadBaseActivity{
                 });
 
 
-
                 String tableClothTitle = "20x table Cloth";
                 saleDao.findAllSaleWithTitleAsync(tableClothTitle, new UmCallback<List<Sale>>() {
                     @Override
                     public void onSuccess(List<Sale> result) {
-                        if (result.isEmpty()){
+                        if (result.isEmpty()) {
                             Sale tableClothSale = new Sale();
                             tableClothSale.setSaleTitle(tableClothTitle);
                             tableClothSale.setSaleActive(true);
@@ -164,7 +191,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     @Override
                     public void onSuccess(List<Sale> result) {
 
-                        if (result.isEmpty()){
+                        if (result.isEmpty()) {
                             Sale hatSale = new Sale();
                             hatSale.setSaleTitle(hatSaleTitle);
                             hatSale.setSaleActive(true);
@@ -188,7 +215,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                 saleDao.findAllSaleWithTitleAsync(shawlSaleTitle, new UmCallback<List<Sale>>() {
                     @Override
                     public void onSuccess(List<Sale> result) {
-                        if (result.isEmpty()){
+                        if (result.isEmpty()) {
                             Sale shawlSale = new Sale();
                             shawlSale.setSaleTitle(shawlSaleTitle);
                             shawlSale.setSaleActive(true);
@@ -215,7 +242,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                 saleDao.findAllSaleWithTitleAsync(pilloSaleTitle, new UmCallback<List<Sale>>() {
                     @Override
                     public void onSuccess(List<Sale> result) {
-                        if (result.isEmpty()){
+                        if (result.isEmpty()) {
                             Sale pillowSale = new Sale();
                             pillowSale.setSaleTitle(pilloSaleTitle);
                             pillowSale.setSaleActive(true);
@@ -233,19 +260,11 @@ public class SplashScreenActivity extends UstadBaseActivity{
                         exception.printStackTrace();
                     }
                 });
-
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
-
-
-
-
-
 
     }
 
