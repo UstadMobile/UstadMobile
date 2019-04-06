@@ -62,6 +62,7 @@ public class SelectProducerPresenter extends UstadBaseController<SelectProducerV
         args.put(ARG_PRODUCER_UID, String.valueOf(personUid));
         args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
         impl.go(SelectSaleProductView.VIEW_NAME, args, context);
+        view.finish();
     }
 
 }

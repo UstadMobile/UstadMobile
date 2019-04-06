@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
@@ -52,6 +53,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private CheckBox deliveredCB;
     private TextView orderTotal, totalAfterDiscount;
     private ConstraintLayout addItemCL;
+
+    private long saleUid;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -196,8 +199,18 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                         listProvider.getProvider();
         LiveData<PagedList<SaleItemListDetail>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
+
+        Observer customObserver = o -> {
+            recyclerAdapter.submitList((PagedList<SaleItemListDetail>) o);
+            mPresenter.getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
+
+        };
+
+
+
         //Observe the data:
-        data.observe(this, recyclerAdapter::submitList);
+        //data.observe(this, recyclerAdapter::submitList);
+        data.observe(this, customObserver);
 
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
@@ -216,8 +229,11 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     @Override
     public void updateOrderTotal(long orderTotalValue) {
-        orderTotal.setText(String.valueOf(orderTotalValue));
-        updateOrderTotalAfterDiscountTotalChanged(orderTotalValue);
+        runOnUiThread(() -> {
+            orderTotal.setText(String.valueOf(orderTotalValue));
+            updateOrderTotalAfterDiscountTotalChanged(orderTotalValue);
+        });
+
     }
 
     @Override
@@ -248,6 +264,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     public void updateSaleOnView(Sale sale) {
         runOnUiThread(() -> {
             if(sale != null){
+                saleUid = sale.getSaleUid();
                 deliveredCB.setChecked(sale.isSaleDone());
                 orderNotesET.setText(sale.getSaleNotes());
                 String discountValue = "0";

@@ -88,6 +88,7 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
         args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
 
         impl.go(SaleItemDetailView.VIEW_NAME, args, context);
+        view.finish();
     }
 
 

@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.view;
 
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.util.DiffUtil;
@@ -13,11 +15,15 @@ import android.app.Activity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleDetailPresenter;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.SaleItemListDetail;
+
+import java.io.File;
 
 public class SaleItemRecyclerAdapter extends
         PagedListAdapter<SaleItemListDetail,
@@ -26,6 +32,7 @@ public class SaleItemRecyclerAdapter extends
     Context theContext;
     Activity theActivity;
     SaleDetailPresenter mPresenter;
+    public static final int IMAGE_WITH = 52;
 
     @NonNull
     @Override
@@ -38,14 +45,41 @@ public class SaleItemRecyclerAdapter extends
 
     }
 
+    private static int dpToPxImagePerson() {
+        return (int) (IMAGE_WITH
+                * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    private void setPictureOnView(String imagePath, ImageView theImage) {
+
+        Uri imageUri = Uri.fromFile(new File(imagePath));
+
+        Picasso
+                .get()
+                .load(imageUri)
+                .resize(dpToPxImagePerson(), dpToPxImagePerson())
+                .noFade()
+                .into(theImage);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull SaleDetailViewHolder holder, int position) {
 
         SaleItemListDetail entity = getItem(position);
 
         //TODO: Get image of SaleProduct
-        long saleProductUid = entity.getSaleItemProductUid();
-        ImageView itemImage = holder.itemView.findViewById(R.id.item_sale_item_image);
+        long pictureUid = entity.getSaleItemPictureUid();
+        ImageView imageView = holder.itemView.findViewById(R.id.item_sale_item_image);
+        String imagePath = "";
+        if (pictureUid != 0) {
+            imagePath = UmAppDatabase.getInstance(theContext).getSaleProductPictureDao()
+                    .getAttachmentPath(pictureUid);
+        }
+
+        if(imagePath != null && !imagePath.isEmpty())
+            setPictureOnView(imagePath, imageView);
+        else
+            imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp);
 
         TextView itemName = holder.itemView.findViewById(R.id.item_sale_item_name);
         TextView itemQuantity = holder.itemView.findViewById(R.id.item_sale_item_quantity);

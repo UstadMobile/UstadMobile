@@ -81,9 +81,11 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         pppNP = findViewById(R.id.activity_sale_item_detail_price_per_piece_number_picker);
 
         quantityNP.setMinValue(1);
+        quantityNP.setValue(2);
         quantityNP.setMaxValue(99999);
 
         pppNP.setMinValue(0);
+        pppNP.setValue(0);
         pppNP.setMaxValue(999999);
 
         //Presenter
@@ -92,10 +94,18 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         quantityNP.setOnValueChangedListener((picker, oldVal, newVal) ->
-                mPresenter.handleChangeQuantity(newVal));
+        {
+            int ppp = pppNP.getValue();
+            mPresenter.handleChangeQuantity(newVal);
+            mPresenter.updateTotal(newVal, ppp);
+        });
 
         pppNP.setOnValueChangedListener((picker, oldVal, newVal) ->
-                mPresenter.handleChangePPP(newVal));
+        {
+            int q = quantityNP.getValue();
+            mPresenter.handleChangePPP(newVal);
+            mPresenter.updateTotal(q, newVal);
+        });
     }
 
     @Override

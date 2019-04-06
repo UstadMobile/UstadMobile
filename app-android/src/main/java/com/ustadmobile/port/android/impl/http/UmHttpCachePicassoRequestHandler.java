@@ -59,6 +59,9 @@ public class UmHttpCachePicassoRequestHandler extends RequestHandler{
 
         InputStream inputStream = response.getResponseAsStream();
 
-        return new Result(inputStream, loadedFrom);
+
+
+        return null;
+        //return new Result(inputStream, loadedFrom);
     }
 }

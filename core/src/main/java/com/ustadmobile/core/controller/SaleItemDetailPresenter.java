@@ -125,6 +125,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
 
     public void handleChangeQuantity(int quantity){
         updatedSaleItem.setSaleItemQuantity(quantity);
+
     }
 
     public void handleChangePPP(long ppp) {
@@ -132,7 +133,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     }
 
     public void updateTotal(int q, long p){
-        view.updateTotal(p*q);
+        view.runOnUiThread(() -> view.updateTotal(p*q));
     }
 
     public void setSold(boolean sold){

@@ -58,7 +58,7 @@ public class ContentEntryListRecyclerViewAdapter extends PagedListAdapter<Conten
             if (entry.getThumbnailUrl() == null || entry.getThumbnailUrl().isEmpty()) {
                 holder.getThumbnailView().setImageDrawable(null);
             } else {
-                Picasso.with(holder.getThumbnailView().getContext())
+                Picasso.get()
                         .load(entry.getThumbnailUrl())
                         .into(holder.getThumbnailView());
             }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SelectProducerView;
@@ -94,6 +95,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         //Get provider
         umProvider = saleItemDao.findAllSaleItemListDetailActiveBySaleProvider(saleUid);
         view.setListProvider(umProvider);
+
     }
 
 
@@ -239,6 +241,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
         SaleItem saleItem = new SaleItem();
         saleItem.setSaleItemSaleUid(updatedSale.getSaleUid());
+        saleItem.setSaleItemDueDate(UMCalendarUtil.getDateInMilliPlusDays(2));
         saleItemDao.insertAsync(saleItem, new UmCallback<Long>() {
             @Override
             public void onSuccess(Long saleItemUid) {

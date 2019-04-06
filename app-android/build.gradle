@@ -318,7 +318,7 @@ dependencies {
     implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Image loading library
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.squareup.picasso:picasso:$version_picasso"
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'

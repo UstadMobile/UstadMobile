@@ -80,7 +80,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements Con
 
 
             if (contentEntry.getThumbnailUrl() != null && !contentEntry.getThumbnailUrl().isEmpty()) {
-                new Handler(Looper.getMainLooper()).post(() -> Picasso.with(ContentEntryDetailActivity.this)
+                new Handler(Looper.getMainLooper()).post(() -> Picasso.get()
                         .load(contentEntry.getThumbnailUrl())
                         .into((ImageView) findViewById(R.id.entry_detail_thumbnail)));
             }
