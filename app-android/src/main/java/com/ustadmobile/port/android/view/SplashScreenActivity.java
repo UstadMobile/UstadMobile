@@ -315,7 +315,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                             shawlSale.setSalePaymentDone(false);
                             shawlSale.setSaleLocationUid(newLocation.getLocationUid());
                             shawlSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(-3));
-                            shawlSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(1));
+                            shawlSale.setSaleDueDate(UMCalendarUtil.getDateInMilliPlusDays(-2));
                             saleDao.insert(shawlSale);
 
                         }

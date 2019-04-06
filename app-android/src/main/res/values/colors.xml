@@ -10,6 +10,10 @@
     <color name="accent">#FF9800</color>
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
+    <color name="fab">#FF5722</color>
+
+    <color name="bottom_navigation_unselected">#FFDFB2</color>
+    <color name="bottom_navigation_selected">#FFFFFF</color>
 
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>

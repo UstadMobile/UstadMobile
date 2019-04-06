@@ -80,18 +80,18 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
         allSalesButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterAll();
-            getTintedDrawable(allSalesButton.getBackground(), R.color.primary);
+            getTintedDrawable(allSalesButton.getBackground(), R.color.fab);
 
         });
         preOrdersButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterPreOrder();
-            getTintedDrawable(preOrdersButton.getBackground(), R.color.primary);
+            getTintedDrawable(preOrdersButton.getBackground(), R.color.fab);
         });
         paymentsDueButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterPaymentDue();
-            getTintedDrawable(paymentsDueButton.getBackground(), R.color.primary);
+            getTintedDrawable(paymentsDueButton.getBackground(), R.color.fab);
         });
 
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());

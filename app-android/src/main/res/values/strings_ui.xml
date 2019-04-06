@@ -284,7 +284,7 @@
     <string name="sales">Sales</string>
     <string name="all_sales">All sales</string>
     <string name="pre_orders">Pre-orders</string>
-    <string name="payments_due">payments_due</string>
+    <string name="payments_due">Payments due</string>
     <string name="sort_by">Sort by</string>
     <string name="sort_by_recent">recent</string>
     <string name="sort_by_amount">amount</string>

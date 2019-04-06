@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingBottom="@dimen/bottom_navigation_height"
     xmlns:tools="http://schemas.android.com/tools">
 
 
@@ -32,8 +33,7 @@
             android:layout_marginRight="@dimen/dimen_2dp"
             android:background="@drawable/rounded_button_selector"
             android:text="@string/all_sales"
-            android:textColor="@color/icons"
-            android:textSize="12sp" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Inverse" />
 
         <Button
             android:id="@+id/fragment_sale_list_filter_pre_orders"
@@ -44,8 +44,7 @@
             android:layout_marginRight="@dimen/dimen_2dp"
             android:background="@drawable/rounded_button_selector"
             android:text="@string/pre_orders"
-            android:textColor="@color/icons"
-            android:textSize="12sp" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Inverse" />
 
         <Button
             android:id="@+id/fragment_sale_list_filter_payments_due"
@@ -56,8 +55,7 @@
             android:paddingLeft="@dimen/bottom_navigation_notification_radius"
             android:paddingRight="@dimen/bottom_navigation_notification_radius"
             android:text="@string/payments_due"
-            android:textColor="@color/icons"
-            android:textSize="12sp" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Inverse" />
 
 
     </LinearLayout>
@@ -77,13 +75,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_line_chart_selector_ll" />
 
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton android:id="@+id/activity_sale_list_fab"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center" android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp" android:layout_marginStart="8dp"
-        app:floating_background_color="@color/accent" app:floating_left_icon="@drawable/fab_add"
-        app:floating_title="@string/record_sale" app:floating_title_color="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_sale_list_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:floating_background_color="@color/fab"
+        app:floating_left_icon="@drawable/fab_add"
+        app:floating_title="@string/record_sale"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

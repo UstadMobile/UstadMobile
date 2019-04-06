@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
@@ -45,12 +46,26 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     private Menu mOptionsMenu;
 
     private SaleListFragment saleListFragment;
+    private ComingSoonFragment comingSoonFragment;
 
     public static final int VIEW_POSITION_POSITION_CATALOG = 0;
     public static final int VIEW_POSITION_POSITION_INVENTORY = 1;
     public static final int VIEW_POSITION_POSITION_SALES = 2;
     public static final int VIEW_POSITION_POSITION_COURSES = 3;
 
+
+
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_basepoint, menu);
+
+        return true;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +81,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         toolbar = findViewById(R.id.activity_basepoint2_toolbar);
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_account_circle_white_36dp);
 
 
         //Call the Presenter
@@ -81,23 +96,23 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         //Style it
         bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(R.color.primary, getApplicationContext()));
         bottomNavigation.setAccentColor(getContextCompatColorFromColor(R.color.text_primary, getApplicationContext()));
-        bottomNavigation.setInactiveColor(getContextCompatColorFromColor(R.color.primary_dark, getApplicationContext()));
+        bottomNavigation.setInactiveColor(getContextCompatColorFromColor(R.color.bottom_navigation_unselected, getApplicationContext()));
         bottomNavigation.setBehaviorTranslationEnabled(false);
         bottomNavigation.setUseElevation(true, 2L);
 
         //Create the items to be added
         AHBottomNavigationItem catalog_item =
                 new AHBottomNavigationItem(R.string.catalog,
-                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+                        R.drawable.ic_list_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem inventory_item =
                 new AHBottomNavigationItem(R.string.inventory,
-                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+                        R.drawable.ic_assignment_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem sales_item =
                 new AHBottomNavigationItem(R.string.sales,
-                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+                        R.drawable.ic_payment_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem courses_item =
                 new AHBottomNavigationItem(R.string.courses,
-                        R.drawable.ic_today_black_48dp, R.color.default_back_color);
+                        R.drawable.ic_collections_bookmark_black_24dp, R.color.default_back_color);
 
         bottomNavigation.addItem(catalog_item);
         bottomNavigation.addItem(inventory_item);
@@ -273,21 +288,21 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
             }else{
                 switch(position){
                     case 0:
-                        saleListFragment = SaleListFragment.newInstance();
-                        this.positionMap.put(position, saleListFragment);
-                        return saleListFragment;
+                        comingSoonFragment = ComingSoonFragment.newInstance();
+                        this.positionMap.put(position, comingSoonFragment);
+                        return comingSoonFragment;
                     case 1:
-                        saleListFragment = SaleListFragment.newInstance();
-                        this.positionMap.put(position, saleListFragment);
-                        return saleListFragment;
+                        comingSoonFragment = ComingSoonFragment.newInstance();
+                        this.positionMap.put(position, comingSoonFragment);
+                        return comingSoonFragment;
                     case 2:
                         saleListFragment = SaleListFragment.newInstance();
                         this.positionMap.put(position, saleListFragment);
                         return saleListFragment;
                     case 3:
-                        saleListFragment = SaleListFragment.newInstance();
-                        this.positionMap.put(position, saleListFragment);
-                        return saleListFragment;
+                        comingSoonFragment = ComingSoonFragment.newInstance();
+                        this.positionMap.put(position, comingSoonFragment);
+                        return comingSoonFragment;
                     default:
                         return null;
 

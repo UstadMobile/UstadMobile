@@ -65,7 +65,8 @@ public class SaleListRecyclerAdapter extends
         String dueString = theFragment.getText(R.string.due) + " " + String.valueOf(dueDatePretty);
         saleDueDate.setText(dueString);
 
-        if(entity.getSaleDueDate() < System.currentTimeMillis()){
+        if(entity.getSaleDueDate() != 0 &&
+                entity.getSaleDueDate() < System.currentTimeMillis()){
             saleDueDate.setVisibility(View.VISIBLE);
         }else{
             saleDueDate.setVisibility(View.GONE);

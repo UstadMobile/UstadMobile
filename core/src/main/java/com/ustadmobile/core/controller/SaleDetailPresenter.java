@@ -76,6 +76,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             initFromSale(Long.parseLong((String) getArguments().get(ARG_SALE_UID)));
         }else{
             updatedSale = new Sale();
+            updatedSale.setSaleActive(false);
+
             saleDao.insertAsync(updatedSale, new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long result) {

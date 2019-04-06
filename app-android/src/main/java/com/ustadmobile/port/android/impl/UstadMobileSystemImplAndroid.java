@@ -66,6 +66,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.ComingSoonView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
@@ -89,6 +90,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.BasePoint2Activity;
 import com.ustadmobile.port.android.view.BasePointActivity;
+import com.ustadmobile.port.android.view.ComingSoonFragment;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
 import com.ustadmobile.port.android.view.ContentEntryListActivity;
@@ -183,6 +185,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SaleItemDetailView.VIEW_NAME, SaleItemDetailActivity.class);
         viewNameToAndroidImplMap.put(SelectProducerView.VIEW_NAME, SelectProducerActivity.class);
         viewNameToAndroidImplMap.put(SelectSaleProductView.VIEW_NAME, SelectSaleProductActivity.class);
+        viewNameToAndroidImplMap.put(ComingSoonView.VIEW_NAME, ComingSoonFragment.class);
 
     }
 
