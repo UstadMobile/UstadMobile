@@ -11,12 +11,13 @@ public class SaleProductGroup {
 
     public static final int PRODUCT_GROUP_TYPE_CATEGORY = 1;
     public static final int PRODUCT_GROUP_TYPE_COLLECTION = 2;
+    public static final int PRODUCT_GROUP_TYPE_PRODUCT = 4;
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleProductGroupUid;
 
     //Name of collection. eg: Eid Collection or Toys
-    private long saleProductGroupName;
+    private String saleProductGroupName;
 
     //If collection is to be displayed from one start date
     private long saleProductGroupStartDate;
@@ -46,6 +47,13 @@ public class SaleProductGroup {
         this.saleProductGroupCreationDate = System.currentTimeMillis();
         this.saleProductGroupType  = PRODUCT_GROUP_TYPE_CATEGORY;
     }
+    public SaleProductGroup(String name){
+        this.saleProductGroupActive = true;
+        this.saleProductGroupCreationDate = System.currentTimeMillis();
+        this.saleProductGroupType  = PRODUCT_GROUP_TYPE_CATEGORY;
+        this.saleProductGroupName = name;
+    }
+
 
     public long getSaleProductGroupUid() {
         return saleProductGroupUid;
@@ -55,11 +63,11 @@ public class SaleProductGroup {
         this.saleProductGroupUid = saleProductGroupUid;
     }
 
-    public long getSaleProductGroupName() {
+    public String getSaleProductGroupName() {
         return saleProductGroupName;
     }
 
-    public void setSaleProductGroupName(long saleProductGroupName) {
+    public void setSaleProductGroupName(String saleProductGroupName) {
         this.saleProductGroupName = saleProductGroupName;
     }
 

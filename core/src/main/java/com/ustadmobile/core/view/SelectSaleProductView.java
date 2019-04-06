@@ -1,7 +1,9 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.lib.db.entities.SaleProduct;
+import com.ustadmobile.lib.db.entities.SaleProductWithPicture;
 
 
 /**
@@ -15,6 +17,7 @@ public interface SelectSaleProductView extends UstadView {
 
     //Any argument keys:
 
+
     /**
      * Method to finish the screen / view.
      */
@@ -24,9 +27,13 @@ public interface SelectSaleProductView extends UstadView {
     /**
      * Sets the given provider to the view's provider adapter.
      *
-     * @param listProvider The provider to set to the view
+     * @param recentProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<SaleProduct> listProvider);
+    void setRecentProvider(UmProvider<SaleNameWithImage> recentProvider);
+
+    void setCategoryProvider(UmProvider<SaleNameWithImage> categoryProvider);
+
+    void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider);
 
 
 

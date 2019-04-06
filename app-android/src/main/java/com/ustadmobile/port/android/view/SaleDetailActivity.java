@@ -7,6 +7,7 @@ import android.arch.paging.PagedList;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -49,7 +51,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private EditText discountET,orderNotesET;
     private CheckBox deliveredCB;
     private TextView orderTotal, totalAfterDiscount;
-
+    private ConstraintLayout addItemCL;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -114,6 +116,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         totalAfterDiscount = findViewById(R.id.activity_sale_detail_order_after_discount_tota);
         totalAfterDiscount.setText("0");
         orderNotesET = findViewById(R.id.activity_sale_detail_order_notes);
+        addItemCL = findViewById(R.id.activity_sale_detail_add_cl);
 
 
         //Call the Presenter
@@ -155,6 +158,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
         deliveredCB.setOnCheckedChangeListener((buttonView, isChecked) ->
                 mPresenter.handleSetDelivered(isChecked));
+
+        addItemCL.setOnClickListener(v -> mPresenter.handleClickAddSaleItem());
 
 
     }

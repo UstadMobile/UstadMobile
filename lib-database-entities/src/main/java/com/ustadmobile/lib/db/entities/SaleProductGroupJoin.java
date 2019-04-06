@@ -9,12 +9,12 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 71)
 public class SaleProductGroupJoin {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleProductGroupJoinUid;
 
     private long saleProductGroupJoinProductUid;
 
-    private long saleProductGroupJoinCollectionUid;
+    private long saleProductGroupJoinGroupUid;
 
     private boolean saleProductGroupJoinActive;
 
@@ -27,6 +27,16 @@ public class SaleProductGroupJoin {
 
     @UmSyncLastChangedBy
     private int saleProductGroupJoinLCB;
+
+    public SaleProductGroupJoin(){
+        this.saleProductGroupJoinActive = false;
+    }
+
+    public SaleProductGroupJoin(long productUid, long groupUid){
+        this.saleProductGroupJoinProductUid = productUid;
+        this.saleProductGroupJoinGroupUid = groupUid;
+        this.saleProductGroupJoinActive = true;
+    }
 
 
     public long getSaleProductGroupJoinUid() {
@@ -45,12 +55,12 @@ public class SaleProductGroupJoin {
         this.saleProductGroupJoinProductUid = saleProductGroupJoinProductUid;
     }
 
-    public long getSaleProductGroupJoinCollectionUid() {
-        return saleProductGroupJoinCollectionUid;
+    public long getSaleProductGroupJoinGroupUid() {
+        return saleProductGroupJoinGroupUid;
     }
 
-    public void setSaleProductGroupJoinCollectionUid(long saleProductGroupJoinCollectionUid) {
-        this.saleProductGroupJoinCollectionUid = saleProductGroupJoinCollectionUid;
+    public void setSaleProductGroupJoinGroupUid(long saleProductGroupJoinGroupUid) {
+        this.saleProductGroupJoinGroupUid = saleProductGroupJoinGroupUid;
     }
 
     public boolean isSaleProductGroupJoinActive() {

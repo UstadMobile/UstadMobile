@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -24,6 +26,40 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     private TextView totalTV;
     private RadioButton saleRB, preOrderRB;
     NumberPicker quantityNP, pppNP;
+
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_save, menu);
+
+        return true;
+    }
+
+    /**
+     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
+     * the activity goes back when the back button is pressed.
+     *
+     * @param item The item selected
+     * @return true if accounted for
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int i = item.getItemId();
+        if (i == android.R.id.home) {
+            onBackPressed();
+            return true;
+
+        } else if (i == R.id.menu_save) {
+            mPresenter.handleClickSave();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

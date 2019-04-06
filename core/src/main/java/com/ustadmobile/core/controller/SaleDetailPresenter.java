@@ -15,6 +15,7 @@ import java.util.List;
 
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
+import com.ustadmobile.core.view.SelectProducerView;
 import com.ustadmobile.core.view.SelectSaleProductView;
 
 import com.ustadmobile.core.db.UmProvider;
@@ -24,6 +25,8 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 
 import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.lib.db.entities.SaleItemListDetail;
+
+import jdk.nashorn.internal.runtime.UserAccessorProperty;
 
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
@@ -229,6 +232,30 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
         impl.go(SaleItemDetailView.VIEW_NAME, args, context);
 
+    }
+
+    public void handleClickAddSaleItem(){
+
+
+        SaleItem saleItem = new SaleItem();
+        saleItem.setSaleItemSaleUid(updatedSale.getSaleUid());
+        saleItemDao.insertAsync(saleItem, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long saleItemUid) {
+                saleItem.setSaleItemUid(saleItemUid);
+
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                Hashtable<String, String> args = new Hashtable<>();
+                args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
+                impl.go(SelectProducerView.VIEW_NAME, args, context);
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
 

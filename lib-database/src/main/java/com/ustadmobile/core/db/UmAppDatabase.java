@@ -654,9 +654,9 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract SalePaymentDao getSalePaymentDao();
 
-    public abstract SaleProductGroupDao getSaleCollectionDao();
+    public abstract SaleProductGroupDao getSaleProductGroupDao();
 
-    public abstract SaleProductGroupJoinDao getSaleCollectionJoinDao();
+    public abstract SaleProductGroupJoinDao getProductGroupJoinDao();
 
 
 

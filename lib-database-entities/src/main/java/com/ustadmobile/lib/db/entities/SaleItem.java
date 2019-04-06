@@ -54,6 +54,7 @@ public class SaleItem {
         this.setSaleItemSold(false);
         this.setSaleItemPreorder(false);
     }
+
     public SaleItem(long productUid){
         this.setSaleItemCreationDate(System.currentTimeMillis());
         this.setSaleItemActive(false);

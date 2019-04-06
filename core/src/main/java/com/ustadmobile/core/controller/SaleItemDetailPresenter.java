@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
+import static com.ustadmobile.core.view.SelectProducerView.ARG_PRODUCER_UID;
 
 
 /**
@@ -25,7 +26,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     private SaleItemDao saleItemDao;
 
     private SaleItem currentSaleItem, updatedSaleItem;
-    private long productUid;
+    private long productUid, producerUid;
 
     public SaleItemDetailPresenter(Object context, Hashtable arguments, SaleItemDetailView view) {
         super(context, arguments, view);
@@ -40,24 +41,31 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        if(getArguments().containsKey(ARG_SALE_ITEM_PRODUCT_UID)) {
+            productUid = Long.parseLong((String) getArguments().get(ARG_SALE_ITEM_PRODUCT_UID));
+        }
+
+        if(getArguments().containsKey(ARG_PRODUCER_UID)) {
+            producerUid = Long.parseLong((String) getArguments().get(ARG_PRODUCER_UID));
+        }
+
         if(getArguments().containsKey(ARG_SALE_ITEM_UID)){
             initFromSaleItem(Long.parseLong((String) getArguments().get(ARG_SALE_ITEM_UID)));
         }else{
-            if(getArguments().containsKey(ARG_SALE_ITEM_PRODUCT_UID)){
-                productUid = Long.parseLong((String) getArguments().get(ARG_SALE_ITEM_PRODUCT_UID));
-                //Create the new SaleItem
-                updatedSaleItem = new SaleItem(productUid);
-                saleItemDao.insertAsync(updatedSaleItem, new UmCallback<Long>() {
-                    @Override
-                    public void onSuccess(Long result) {
-                        initFromSaleItem(result);
-                    }
 
-                    @Override
-                    public void onFailure(Throwable exception) {exception.printStackTrace();}
-                });
-            }
+            //Create the new SaleItem
+            updatedSaleItem = new SaleItem(productUid);
+            saleItemDao.insertAsync(updatedSaleItem, new UmCallback<Long>() {
+                @Override
+                public void onSuccess(Long result) {
+                    initFromSaleItem(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {exception.printStackTrace();}
+            });
         }
+
 
     }
     private void initFromSaleItem(long saleItemUid){
@@ -96,6 +104,13 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     public void handleClickSave() {
 
         if(updatedSaleItem!= null){
+            updatedSaleItem.setSaleItemActive(true);
+
+            if(producerUid != 0 && productUid != 0){
+                updatedSaleItem.setSaleItemProductUid(productUid);
+                updatedSaleItem.setSaleItemProducerUid(producerUid);
+            }
+
             saleItemDao.updateAsync(updatedSaleItem, new UmCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {

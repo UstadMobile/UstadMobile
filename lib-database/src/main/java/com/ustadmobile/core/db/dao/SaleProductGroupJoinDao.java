@@ -44,7 +44,7 @@ public abstract class SaleProductGroupJoinDao implements SyncableDao<SaleProduct
 
     @UmQuery("SELECT SaleProduct.* FROM SaleProductGroupJoin LEFT JOIN SaleProduct ON " +
             "SaleProductGroupJoin.saleProductGroupJoinProductUid = SaleProduct.saleProductUid " +
-            "WHERE saleProductGroupJoinCollectionUid = :collectionUid")
+            "WHERE saleProductGroupJoinGroupUid = :collectionUid")
     public abstract UmLiveData<List<SaleProduct>> findListOfProductsInACollectionLive(long collectionUid);
 
 

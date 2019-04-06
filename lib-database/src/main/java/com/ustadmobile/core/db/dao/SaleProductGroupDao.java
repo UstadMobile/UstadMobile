@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.lib.db.entities.SaleProductGroup;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -56,6 +57,24 @@ public abstract class SaleProductGroupDao implements SyncableDao<SaleProductGrou
 
     @UmQuery(ALL_ACTIVE_TYPED_QUERY)
     public abstract UmProvider<SaleProductGroup> findAllTypedActiveProvider(int type);
+
+    public static final String ALL_ACTIVE_TYPED_SNWI_QUERY =
+            "SELECT '' as name, 0 as pictureUid, :type as type, " +
+            "  SaleProductGroup.saleProductGroupUid as productGroupUid, 0 as productUid " +
+            " FROM SaleProductGroup WHERE saleProductGroupActive = 1 AND " +
+            "  saleProductGroupType = :type";
+
+    @UmQuery(ALL_ACTIVE_TYPED_SNWI_QUERY)
+    public abstract UmLiveData<List<SaleNameWithImage>> findAllTypedActiveSNWILive(int type);
+
+    @UmQuery(ALL_ACTIVE_TYPED_SNWI_QUERY)
+    public abstract List<SaleNameWithImage> findAllTypedActiveSNWIList(int type);
+
+    @UmQuery(ALL_ACTIVE_TYPED_SNWI_QUERY)
+    public abstract void findAllTypedActiveSNWIAsync(int type, UmCallback<List<SaleNameWithImage>> allActiveCallback);
+
+    @UmQuery(ALL_ACTIVE_TYPED_SNWI_QUERY)
+    public abstract UmProvider<SaleNameWithImage> findAllTypedActiveSNWIProvider(int type);
 
     //LOOK UP
 

@@ -77,6 +77,8 @@ import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.SelectProducerView;
+import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageView;
@@ -99,6 +101,8 @@ import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.SaleDetailActivity;
 import com.ustadmobile.port.android.view.SaleItemDetailActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
+import com.ustadmobile.port.android.view.SelectProducerActivity;
+import com.ustadmobile.port.android.view.SelectSaleProductActivity;
 import com.ustadmobile.port.android.view.VideoPlayerActivity;
 import com.ustadmobile.port.android.view.WebChunkActivity;
 import com.ustadmobile.port.android.view.XapiPackageActivity;
@@ -177,6 +181,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(BasePoint2View.VIEW_NAME, BasePoint2Activity.class);
         viewNameToAndroidImplMap.put(SaleDetailView.VIEW_NAME, SaleDetailActivity.class);
         viewNameToAndroidImplMap.put(SaleItemDetailView.VIEW_NAME, SaleItemDetailActivity.class);
+        viewNameToAndroidImplMap.put(SelectProducerView.VIEW_NAME, SelectProducerActivity.class);
+        viewNameToAndroidImplMap.put(SelectSaleProductView.VIEW_NAME, SelectSaleProductActivity.class);
 
     }
 

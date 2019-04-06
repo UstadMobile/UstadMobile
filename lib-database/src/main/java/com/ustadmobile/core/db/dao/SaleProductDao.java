@@ -8,10 +8,13 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
+
+import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_PRODUCT;
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition =
         RoleDao.SELECT_ACCOUNT_IS_ADMIN )
@@ -40,6 +43,29 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
 
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmProvider<SaleProduct> findAllActiveProvider();
+
+    public static final String ALL_ACTIVE_NAME_WITH_IMAGE_QUERY =
+            "SELECT SaleProduct.saleProductName as name, " +
+            " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+            " SaleProductPicture.saleProductPictureUid as pictureUid, " +
+                    PRODUCT_GROUP_TYPE_PRODUCT + " as type " +
+            " FROM SaleProduct " +
+            "  LEFT JOIN SaleProductPicture on " +
+            " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+            " WHERE saleProductActive = 1";
+
+    @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
+    public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveSNWILive();
+
+    @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
+    public abstract List<SaleNameWithImage> findAllActiveSNWIList();
+
+    @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
+    public abstract void findAllActiveSNWIAsync(UmCallback<List<SaleNameWithImage>> allActiveCallback);
+
+    @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
+    public abstract UmProvider<SaleNameWithImage> findAllActiveSNWIProvider();
+
 
     //LOOK UP
 

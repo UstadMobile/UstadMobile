@@ -296,6 +296,7 @@
     <string name="select_producer">Select producer</string>
     <string name="most_recent">Most recent</string>
     <string name="more">More</string>
+    <string name="more_caps">MORE</string>
     <string name="by_category">By category</string>
     <string name="quantity">Quantity</string>
     <string name="price_per_piece">Price per piece</string>
@@ -320,4 +321,5 @@
     <string name="due">Due</string>
     <string name="sale_details">Sale details</string>
     <string name="sale_detail">Sale detail</string>
+    <string name="search">Search</string>
 </resources>

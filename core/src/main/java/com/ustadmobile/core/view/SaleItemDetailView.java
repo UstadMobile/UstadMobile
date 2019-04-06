@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Sale;
 import com.ustadmobile.lib.db.entities.SaleItem;
 
 
