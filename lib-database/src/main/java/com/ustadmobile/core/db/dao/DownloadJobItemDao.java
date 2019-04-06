@@ -242,6 +242,9 @@ public abstract class DownloadJobItemDao {
     @UmQuery("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
     public abstract int  getTotalDownloadJobItems(long djiDjUid);
 
+    @UmQuery("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
+    public abstract UmLiveData<Integer> countDownloadJobItems(long djiDjUid);
+
     @UmQuery("SELECT DownloadSetItem.dsiUid as downloadSetItemUid, Container.fileSize, \n" +
             "Container.containerContentEntryUid as contentEntryUid , Container.containerUid\n" +
             "FROM DownloadSetItem LEFT JOIN Container \n" +
@@ -281,6 +284,12 @@ public abstract class DownloadJobItemDao {
     public abstract DownloadJobItem findByContentEntryUid2(long contentEntryUid);
 
 
+    @UmQuery("SELECT * " +
+            "FROM DownloadJobItem " +
+            "WHERE djiContentEntryUid = :contentEntryUid " +
+            "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
+    public abstract UmLiveData<DownloadJobItem> findByContentEntryUidLive(long contentEntryUid);
+
     @UmQuery("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiUid IN (:contentEntryUids) " +
@@ -296,62 +305,67 @@ public abstract class DownloadJobItemDao {
             "WHERE DownloadJobItem.djiDjUid = :downloadJobUid")
     public abstract List<DownloadJobItemStatus> findStatusByDownlaodJobUid(long downloadJobUid);
 
-    private DownloadJobItem generateDjiFromContainerWithContentEntry(
-            ContainerWithContentEntry containerWithContentEntry) {
-        return new DownloadJobItem();
-    }
-
-    public List<DownloadJobItemToBeCreated2> findByParentContentEntryUuids(
-            List<Long> parentContentEntryUids) {
-        return null;
-    }
+    @UmQuery("SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid, " +
+            " ContentEntryParentChildJoin.cepcjChildContentEntryUid AS contentEntryUid," +
+            " Container.containerUid AS containerUid," +
+            " Container.fileSize AS fileSize," +
+            " ContentEntryParentChildJoin.cepcjParentContentEntryUid AS parentEntryUid " +
+            " FROM ContentEntryParentChildJoin " +
+            " LEFT JOIN Container ON Container.containerContentEntryUid = " +
+            "   ContentEntryParentChildJoin.cepcjChildContentEntryUid" +
+            "   AND Container.lastModified = " +
+            "   (SELECT MAX(lastModified) FROM Container WHERE containerContentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid) " +
+            "WHERE " +
+            "ContentEntryParentChildJoin.cepcjParentContentEntryUid in (:parentContentEntryUids)")
+    public abstract List<DownloadJobItemToBeCreated2> findByParentContentEntryUuids(
+            List<Long> parentContentEntryUids);
 
     @UmInsert
     public abstract void insertDownloadJobItemParentChildJoin(DownloadJobItemParentChildJoin dj);
 
 
-    @UmTransaction
-    public void createJobItemsRecursively(long rootContentEntryUid, UmAppDatabase repo) {
-        List<DownloadJobItemToBeCreated2> childItemsToCreate;
-        DownloadJobItem rootDownlaodItem = new DownloadJobItem();
-        rootDownlaodItem.setDjiUid(insert(rootDownlaodItem));
-
-        Map<Long, Long> contentEntryUidToDjiUidMap = new HashMap<>();
-        List<Long> parentUids = new ArrayList<>();
-        parentUids.add(rootContentEntryUid);
-        contentEntryUidToDjiUidMap.put(rootContentEntryUid, rootDownlaodItem.getDjiUid());
-
-        List<DownloadJobItem> downloadJobItems = new ArrayList<>();
-        HashSet<Long> createdJoinCepjUids = new HashSet<>();
-
-        do {
-            childItemsToCreate = findByParentContentEntryUuids(parentUids);
-            parentUids.clear();
-
-            for(DownloadJobItemToBeCreated2 child : childItemsToCreate){
-                if(!contentEntryUidToDjiUidMap.containsKey(child.getContentEntryUid())) {
-                    DownloadJobItem newItem = new DownloadJobItem();
-                    //TODO: fill in the item
-                    newItem.setDjiUid(insert(newItem));
-
-                    contentEntryUidToDjiUidMap.put(child.getContentEntryUid(),
-                            newItem.getDjiUid());
-
-                    if(newItem.getDjiContainerUid() != 0)
-                        parentUids.add(child.getContentEntryUid());
-
-                    newItem.setDjiUid(insert(newItem));
-                }
-
-                if(!createdJoinCepjUids.contains(child.getCepcjUid())) {
-                    insertDownloadJobItemParentChildJoin(new DownloadJobItemParentChildJoin(
-                        contentEntryUidToDjiUidMap.get(child.getParentEntryUid()),
-                            contentEntryUidToDjiUidMap.get(child.getContentEntryUid()),
-                            child.getCepcjUid()));
-                    createdJoinCepjUids.add(child.getCepcjUid());
-                }
-            }
-        }while(!parentUids.isEmpty());
-    }
+//    @UmTransaction
+//    public void createJobItemsRecursively(long rootContentEntryUid, UmAppDatabase repo) {
+//        List<DownloadJobItemToBeCreated2> childItemsToCreate;
+//        DownloadJobItem rootDownlaodItem = new DownloadJobItem();
+//        rootDownlaodItem.setDjiUid(insert(rootDownlaodItem));
+//
+//        Map<Long, Long> contentEntryUidToDjiUidMap = new HashMap<>();
+//        List<Long> parentUids = new ArrayList<>();
+//        parentUids.add(rootContentEntryUid);
+//        contentEntryUidToDjiUidMap.put(rootContentEntryUid, rootDownlaodItem.getDjiUid());
+//
+//        List<DownloadJobItem> downloadJobItems = new ArrayList<>();
+//        HashSet<Long> createdJoinCepjUids = new HashSet<>();
+//
+//        do {
+//            childItemsToCreate = findByParentContentEntryUuids(parentUids);
+//            parentUids.clear();
+//
+//            for(DownloadJobItemToBeCreated2 child : childItemsToCreate){
+//                if(!contentEntryUidToDjiUidMap.containsKey(child.getContentEntryUid())) {
+//                    DownloadJobItem newItem = new DownloadJobItem();
+//                    //TODO: fill in the item
+//                    newItem.setDjiUid(insert(newItem));
+//
+//                    contentEntryUidToDjiUidMap.put(child.getContentEntryUid(),
+//                            newItem.getDjiUid());
+//
+//                    if(newItem.getDjiContainerUid() != 0)
+//                        parentUids.add(child.getContentEntryUid());
+//
+//                    newItem.setDjiUid(insert(newItem));
+//                }
+//
+//                if(!createdJoinCepjUids.contains(child.getCepcjUid())) {
+//                    insertDownloadJobItemParentChildJoin(new DownloadJobItemParentChildJoin(
+//                        contentEntryUidToDjiUidMap.get(child.getParentEntryUid()),
+//                            contentEntryUidToDjiUidMap.get(child.getContentEntryUid()),
+//                            child.getCepcjUid()));
+//                    createdJoinCepjUids.add(child.getCepcjUid());
+//                }
+//            }
+//        }while(!parentUids.isEmpty());
+//    }
 
 }

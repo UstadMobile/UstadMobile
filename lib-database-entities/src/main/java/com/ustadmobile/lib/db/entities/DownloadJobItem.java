@@ -63,13 +63,16 @@ public class DownloadJobItem {
         this.numAttempts = src.numAttempts;
     }
 
-    public DownloadJobItem(DownloadJob downloadJob, long djiContentEntryUid, long downloadLength) {
-        this(downloadJob.getDjUid(), djiContentEntryUid, downloadLength);
+    public DownloadJobItem(DownloadJob downloadJob, long djiContentEntryUid, long djiContainerUid,
+                           long downloadLength) {
+        this(downloadJob.getDjUid(), djiContentEntryUid, djiContainerUid, downloadLength);
     }
 
-    public DownloadJobItem(long djiDjUid, long djiContentEntryUid, long downloadLength) {
+    public DownloadJobItem(long djiDjUid, long djiContentEntryUid, long djiContainerUid,
+                           long downloadLength) {
         this.djiDjUid = djiDjUid;
         this.djiContentEntryUid = djiContentEntryUid;
+        this.djiContainerUid = djiContainerUid;
         this.downloadLength = downloadLength;
     }
 

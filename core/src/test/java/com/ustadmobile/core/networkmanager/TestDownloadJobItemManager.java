@@ -110,11 +110,12 @@ public class TestDownloadJobItemManager {
     protected void setupRootAndSubleaf(DownloadJobItemManager manager) throws InterruptedException{
         CountDownLatch latch = new CountDownLatch(2);
         DownloadJobItem rootDjItem = new DownloadJobItem(downloadJob,
-                parentEntry.getContentEntryUid(), 0);
+                parentEntry.getContentEntryUid(), 0, 0);
         manager.insertDownloadJobItems(Arrays.asList(rootDjItem), (aVoid) -> latch.countDown());
 
         DownloadJobItem subLeafDjItem = new DownloadJobItem(downloadJob,
-                subLeaf.getContentEntryUid(), subLeafContainer.getFileSize());
+                subLeaf.getContentEntryUid(), subLeafContainer.getContainerUid(),
+                subLeafContainer.getFileSize());
         manager.insertDownloadJobItems(Arrays.asList(subLeafDjItem), (aVoid) -> latch.countDown());
 
         latch.await(5, TimeUnit.SECONDS);
@@ -190,8 +191,7 @@ public class TestDownloadJobItemManager {
 
 
         CountDownLatch latch2 = new CountDownLatch(1);
-        DownloadJobItemManager manager2 = new DownloadJobItemManager(db, (int)downloadJob.getDjUid(),
-                (aVoid) -> latch2.countDown());
+        DownloadJobItemManager manager2 = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
         latch2.await(5, TimeUnit.SECONDS);
 
         CountDownLatch latch3 = new CountDownLatch(1);

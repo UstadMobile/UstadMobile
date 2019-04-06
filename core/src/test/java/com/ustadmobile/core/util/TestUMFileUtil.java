@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
@@ -114,7 +115,7 @@ public class TestUMFileUtil {
                 header.params);
 
         String cacheHeader = "private, community=UCI, maxage=600";
-        Hashtable cacheTable = UMFileUtil.parseParams(cacheHeader, ',');
+        Map<String, String> cacheTable = UMFileUtil.parseParams(cacheHeader, ',');
 
         assertEquals("Cache control parsed private", "",
                 cacheTable.get("private"));

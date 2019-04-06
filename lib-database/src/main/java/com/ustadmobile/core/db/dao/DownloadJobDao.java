@@ -87,7 +87,7 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
 
-    @UmQuery("SELECT djiDjUid FROM DownloadJob WHERE djiContentEntryUid = :contentEntryUid " +
+    @UmQuery("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY timeStarted DESC LIMIT 1")
     public abstract long getLatestDownloadJobUidForContentEntryUid(long contentEntryUid);
 
@@ -151,5 +151,7 @@ public abstract class DownloadJobDao {
     public abstract void updateJobStatusToCompleteIfAllItemsAreCompleted(long downloadJobUid);
 
 
+    @UmQuery("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
+    public abstract long findDownloadJobUidByRootContentEntryUid(long rootContentEntryUid);
 
 }

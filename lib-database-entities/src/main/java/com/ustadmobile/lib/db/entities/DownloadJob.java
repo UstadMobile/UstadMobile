@@ -34,6 +34,8 @@ public class DownloadJob {
      */
     private int djStatus;
 
+    private boolean meteredNetworkAllowed;
+
 
     /**
      * Empty constructor
@@ -125,5 +127,13 @@ public class DownloadJob {
 
     public void setDjRootContentEntryUid(long djRootContentEntryUid) {
         this.djRootContentEntryUid = djRootContentEntryUid;
+    }
+
+    public boolean isMeteredNetworkAllowed() {
+        return meteredNetworkAllowed;
+    }
+
+    public void setMeteredNetworkAllowed(boolean meteredNetworkAllowed) {
+        this.meteredNetworkAllowed = meteredNetworkAllowed;
     }
 }

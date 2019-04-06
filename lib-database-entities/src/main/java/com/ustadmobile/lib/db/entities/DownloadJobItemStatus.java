@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This is used as a memory efficient summary of the status of a download
@@ -77,7 +78,7 @@ public class DownloadJobItemStatus {
         this.state = state;
     }
 
-    public LinkedList<DownloadJobItemStatus> getParents() {
+    public List<DownloadJobItemStatus> getParents() {
         return parents;
     }
 

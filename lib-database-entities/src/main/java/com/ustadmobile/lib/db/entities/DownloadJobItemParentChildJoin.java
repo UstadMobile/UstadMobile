@@ -6,7 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class DownloadJobItemParentChildJoin {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoIncrement = true)
     private long djiPcjUid;
 
     private long djiParentDjiUid;

@@ -7,7 +7,9 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -704,5 +706,31 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     public abstract boolean isVersionLollipopOrAbove();
 
     public abstract boolean isVersionKitKatOrBelow();
+
+    /**
+     * Inserts a DownloadJob into the database for a given
+     *
+     * @param newDownloadJob the new DownloadJob to be created (with properties set)
+     *
+     * @return
+     */
+    public DownloadJobItemManager createNewDownloadJobItemManager(DownloadJob newDownloadJob) {
+        newDownloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(newDownloadJob));
+        return new DownloadJobItemManager(umAppDatabase, (int)newDownloadJob.getDjUid());
+    }
+
+    public DownloadJobItemManager createNewDownloadJobItemManager(long rootContentEntryUid) {
+        return createNewDownloadJobItemManager(new DownloadJob(rootContentEntryUid,
+                System.currentTimeMillis()));
+    }
+
+
+    public DownloadJobItemManager getDownloadJobItemManager(int downloadJobId) {
+        return null;
+    }
+
+    public DownloadJobItemManager findDownloadJobItemManagerByContentEntryUid(long contentEntryUid) {
+        return null;
+    }
 
 }

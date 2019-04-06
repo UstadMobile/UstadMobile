@@ -2,21 +2,24 @@ package com.ustadmobile.core.networkmanager;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.lib.util.UMUtil;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class DownloadJobItemManager {
 
@@ -30,7 +33,7 @@ public class DownloadJobItemManager {
 
     private HashMap<Integer, DownloadJobItemStatus> jobItemUidToStatusMap = new HashMap<>();
 
-    Set<DownloadJobItemStatus> changedItems = new HashSet<>();
+    private Set<DownloadJobItemStatus> changedItems = new HashSet<>();
 
     private UmAppDatabase db;
 
@@ -38,21 +41,34 @@ public class DownloadJobItemManager {
 
     private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    public DownloadJobItemManager(UmAppDatabase db, int downloadJobUid, UmResultCallback<Void> loadCallback) {
-        this.db = db;
-        this.downloadJobUid = downloadJobUid;
-        executor.execute(() -> loadFromDb(loadCallback));
-    }
+    private volatile DownloadJobItemStatus rootItemStatus;
+
+    private volatile long rootContentEntryUid;
 
     public DownloadJobItemManager(UmAppDatabase db, int downloadJobUid) {
-        this(db, downloadJobUid, null);
+        this.db = db;
+        this.downloadJobUid = downloadJobUid;
+        executor.scheduleWithFixedDelay(this::doCommit, 1000, 1000, TimeUnit.MILLISECONDS);
+        try {
+            executor.schedule(() -> loadFromDb(), 0, TimeUnit.SECONDS).get();
+        }catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void loadFromDb(UmResultCallback<Void> loadCallback) {
+    private void loadFromDb() {
+        DownloadJob downloadJob = db.getDownloadJobDao().findByUid(downloadJobUid);
+        rootContentEntryUid = downloadJob.getDjRootContentEntryUid();
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadJobItemManager: load " +
+                "Download job uid " + downloadJobUid + " root content entry uid = " +
+                rootContentEntryUid);
+
         List<DownloadJobItemStatus> jobItems = db.getDownloadJobItemDao()
                 .findStatusByDownlaodJobUid(downloadJobUid);
         for(DownloadJobItemStatus status : jobItems) {
             jobItemUidToStatusMap.put(status.getJobItemUid(), status);
+            if(status.getContentEntryUid() == rootContentEntryUid)
+                rootItemStatus = status;
         }
 
         List<DownloadJobItemParentChildJoin> joinList = db.getDownloadJobItemParentChildJoinDao()
@@ -67,9 +83,6 @@ public class DownloadJobItemManager {
 
             childStatus.addParent(parentStatus);
         }
-
-        if(loadCallback != null)
-            loadCallback.onDone(null);
     }
 
     public void updateProgress(int djiUid, long bytesSoFar, long totalBytes, byte state) {
@@ -88,30 +101,35 @@ public class DownloadJobItemManager {
             if(onDownloadJobItemChangeListener != null)
                 onDownloadJobItemChangeListener.onDownloadJobItemChange(djStatus);
 
-            List<DownloadJobItemStatus> parents = djStatus.getParents();
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Updating ID #" +
-                    djiUid + " parents = " + UMUtil.debugPrintList(parents) +
-                    " deltaBytesSoFar=" + deltaBytesFoFar + ", deltaTotalBytes=" + deltaTotalBytes);
-            while(parents != null && !parents.isEmpty()) {
-                LinkedList<DownloadJobItemStatus> nextParents = new LinkedList<>();
-                for(DownloadJobItemStatus parent : parents) {
-                    UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "\tIncrement parent" +
-                            parent.getJobItemUid());
-                    parent.incrementTotalBytes(deltaTotalBytes);
-                    parent.incrementBytesSoFar(deltaBytesFoFar);
-                    changedItems.add(djStatus);
-                    if(onDownloadJobItemChangeListener != null)
-                        onDownloadJobItemChangeListener.onDownloadJobItemChange(djStatus);
-
-                    if(parent.getParents() != null)
-                        nextParents.addAll(parent.getParents());
-                }
-
-                parents = nextParents;
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "\tUpdating ID #" +
-                        djiUid + " next parents = " + UMUtil.debugPrintList(parents));
-            }
+            updateAllParents(djStatus.getJobItemUid(), djStatus.getParents(), deltaBytesFoFar,
+                    deltaTotalBytes);
         });
+    }
+
+    private void updateAllParents(int djiUid, List<DownloadJobItemStatus> parents, long deltaBytesFoFar,
+                                  long deltaTotalBytes) {
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Updating ID #" +
+                djiUid + " parents = " + UMUtil.debugPrintList(parents) +
+                " deltaBytesSoFar=" + deltaBytesFoFar + ", deltaTotalBytes=" + deltaTotalBytes);
+        while(parents != null && !parents.isEmpty()) {
+            LinkedList<DownloadJobItemStatus> nextParents = new LinkedList<>();
+            for(DownloadJobItemStatus parent : parents) {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "\tIncrement parent" +
+                        parent.getJobItemUid());
+                parent.incrementTotalBytes(deltaTotalBytes);
+                parent.incrementBytesSoFar(deltaBytesFoFar);
+                changedItems.add(parent);
+                if(onDownloadJobItemChangeListener != null)
+                    onDownloadJobItemChangeListener.onDownloadJobItemChange(parent);
+
+                if(parent.getParents() != null)
+                    nextParents.addAll(parent.getParents());
+            }
+
+            parents = nextParents;
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "\tUpdating ID #" +
+                    djiUid + " next parents = " + UMUtil.debugPrintList(parents));
+        }
     }
 
     public void insertDownloadJobItems(List<DownloadJobItem> items, UmResultCallback<Void> callback) {
@@ -122,13 +140,26 @@ public class DownloadJobItemManager {
 
             for(DownloadJobItem item : items) {
                 Integer uidIntObj = Integer.valueOf((int)item.getDjiUid());
-                jobItemUidToStatusMap.put(uidIntObj, new DownloadJobItemStatus(item));
 
+                DownloadJobItemStatus itemStatus = new DownloadJobItemStatus(item);
+                jobItemUidToStatusMap.put(uidIntObj, itemStatus);
+                if(item.getDjiContentEntryUid() == rootContentEntryUid)
+                    rootItemStatus = itemStatus;
             }
+
             if(callback !=null)
                 callback.onDone(null);
         });
     }
+
+    public void insertDownloadJobItemsSync(List<DownloadJobItem> items) {
+        CountDownLatch latch = new CountDownLatch(1);
+        insertDownloadJobItems(items, (aVoid) -> latch.countDown());
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        }catch(InterruptedException e) { /*should not happen */ }
+    }
+
 
     public void insertParentChildJoins(List<DownloadJobItemParentChildJoin> joins,
                                        UmResultCallback<Void> callback){
@@ -152,9 +183,8 @@ public class DownloadJobItemManager {
 
                 childStatus.addParent(parentStatus);
 
-                updateProgress((int)join.getDjiParentDjiUid(), childStatus.getBytesSoFar(),
-                        childStatus.getTotalBytes(),
-                        parentStatus.getState());
+                updateAllParents(childStatus.getJobItemUid(), Arrays.asList(parentStatus),
+                        childStatus.getBytesSoFar(), childStatus.getTotalBytes());
             }
 
             db.getDownloadJobItemParentChildJoinDao().insertList(joins);
@@ -195,5 +225,21 @@ public class DownloadJobItemManager {
 
     public void setOnDownloadJobItemChangeListener(OnDownloadJobItemChangeListener onDownloadJobItemChangeListener) {
         this.onDownloadJobItemChangeListener = onDownloadJobItemChangeListener;
+    }
+
+    public int getDownloadJobUid() {
+        return downloadJobUid;
+    }
+
+    public DownloadJobItemStatus getRootItemStatus() {
+        return rootItemStatus;
+    }
+
+    public long getRootContentEntryUid() {
+        return rootContentEntryUid;
+    }
+
+    public void close() {
+        executor.shutdownNow();
     }
 }
