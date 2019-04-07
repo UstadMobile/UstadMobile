@@ -85,7 +85,7 @@ public class DownloadJobItemManager {
         }
     }
 
-    public void updateProgress(int djiUid, long bytesSoFar, long totalBytes, byte state) {
+    public void updateProgress(int djiUid, long bytesSoFar, long totalBytes) {
         executor.execute(() -> {
             UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Updating ID #" +
                     djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes);
@@ -96,7 +96,6 @@ public class DownloadJobItemManager {
             djStatus.setBytesSoFar(bytesSoFar);
             djStatus.setTotalBytes(totalBytes);
             changedItems.add(djStatus);
-            djStatus.setState(state);
 
             if(onDownloadJobItemChangeListener != null)
                 onDownloadJobItemChangeListener.onDownloadJobItemChange(djStatus);

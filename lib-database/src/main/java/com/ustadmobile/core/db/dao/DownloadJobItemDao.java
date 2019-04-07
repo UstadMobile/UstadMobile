@@ -146,15 +146,13 @@ public abstract class DownloadJobItemDao {
     public void updateDownloadJobItemsProgress(List<DownloadJobItemStatus> statusList) {
         for(DownloadJobItemStatus status : statusList) {
            updateDownloadJobItemProgress(status.getJobItemUid(), status.getBytesSoFar(),
-                   status.getTotalBytes(), status.getState());
+                   status.getTotalBytes());
         }
     }
 
     @UmQuery("UPDATE DownloadJobItem SET downloadedSoFar = :bytesSoFar, " +
-            "downloadLength = :totalLength," +
-            "djiStatus = :status WHERE djiUid = :djiUid")
-    public abstract void updateDownloadJobItemProgress(int djiUid, long bytesSoFar, long totalLength,
-                                                       int status);
+            "downloadLength = :totalLength WHERE djiUid = :djiUid")
+    public abstract void updateDownloadJobItemProgress(int djiUid, long bytesSoFar, long totalLength);
 
 
 

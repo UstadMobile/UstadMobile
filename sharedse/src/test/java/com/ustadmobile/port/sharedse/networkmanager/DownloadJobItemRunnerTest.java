@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
@@ -17,8 +18,6 @@ import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
-import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
@@ -128,22 +127,15 @@ public class DownloadJobItemRunnerTest {
 
     private static final int MAX_THREAD_SLEEP_TIME = 2;
 
-
-    @BeforeClass
-    public static void setupDatabases() {
-//        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
-//                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
-//        DriverConnectionPoolInitializer.bindDataSource("clientdb",
-//                SharedSeTestConfig.TESTDB_JDBCURL_CLIENTUMAPPDATABASE, true);
-//        DriverConnectionPoolInitializer.bindDataSource("peerdb",
-//                SharedSeTestConfig.TESTDB_JDBCURL_PEERUMAPPDATABASE, true);
-    }
-
+    private DownloadJobItemManager downloadJobItemManager;
 
 
     @Before
     public void setup() throws IOException {
         context = PlatformTestUtil.getTargetContext();
+        UmAppDatabase.getInstance(context).clearAllTables();
+        clientDb = UmAppDatabase.getInstance(context, "clientdb");
+        clientDb.clearAllTables();
 
         webServerTmpDir = UmFileUtilSe.makeTempDir("webServerTmpDir",
                 ""+System.currentTimeMillis());
@@ -156,6 +148,7 @@ public class DownloadJobItemRunnerTest {
                 "" + System.currentTimeMillis());
 
         mockedNetworkManager = spy(NetworkManagerBle.class);
+        mockedNetworkManager.setDatabase(clientDb);
 
         mockedNetworkManagerBleWorking.set(true);
 
@@ -174,9 +167,6 @@ public class DownloadJobItemRunnerTest {
 
         clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis());
 
-        UmAppDatabase.getInstance(context).clearAllTables();
-        clientDb = UmAppDatabase.getInstance(context, "clientdb");
-        clientDb.clearAllTables();
         clientRepo = clientDb.getRepository("http://localhost/dummy/", "");
         networkNode = new NetworkNode();
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
@@ -206,22 +196,16 @@ public class DownloadJobItemRunnerTest {
         clientRepo.getContainerDao().insert(container);
 
 
-        DownloadSet downloadSet = new DownloadSet();
-        downloadSet.setDestinationDir(clientContainerDir.getAbsolutePath());
-        downloadSet.setDsRootContentEntryUid(0L);
-        downloadSet.setDsUid((int) clientDb.getDownloadSetDao().insert(downloadSet));
-
-        DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet, contentEntry);
-        downloadSetItem.setDsiUid((int) clientDb.getDownloadSetItemDao().insert(downloadSetItem));
-
-        DownloadJob downloadJob = new DownloadJob(downloadSet);
-        downloadJob.setTimeCreated(System.currentTimeMillis());
+        DownloadJob downloadJob = new DownloadJob(contentEntry.getContentEntryUid(),
+                System.currentTimeMillis());
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setDjStatus(JobStatus.QUEUED);
-        downloadJob.setDjUid((int) clientDb.getDownloadJobDao().insert(downloadJob));
+        downloadJob.setDjDestinationDir(clientContainerDir.getAbsolutePath());
 
-        downloadJobItem = new DownloadJobItem(downloadJob, downloadSetItem,
-                container);
+        downloadJobItemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob);
+
+        downloadJobItem = new DownloadJobItem(downloadJob, contentEntry.getContentEntryUid(),
+                container.getContainerUid(), container.getFileSize());
         downloadJobItem.setDjiStatus(JobStatus.QUEUED);
         downloadJobItem.setDownloadedSoFar(0);
         downloadJobItem.setDestinationFile(new File(clientContainerDir,

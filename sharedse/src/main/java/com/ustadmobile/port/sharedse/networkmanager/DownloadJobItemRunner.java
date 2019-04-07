@@ -7,11 +7,12 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService;
@@ -62,7 +63,9 @@ public class DownloadJobItemRunner implements Runnable {
 
     private UmAppDatabase appDbRepo;
 
-    private DownloadJobItemWithDownloadSetItem downloadItem;
+    private DownloadJobItem downloadItem;
+
+    private DownloadJobItemManager downloadJobItemManager;
 
     private String endpointUrl;
 
@@ -135,12 +138,8 @@ public class DownloadJobItemRunner implements Runnable {
             if(httpDownload != null && runnerStatus.get() == JobStatus.RUNNING) {
                 long bytesSoFar = completedEntriesBytesDownloaded.get() +
                         httpDownload.getDownloadedSoFar();
-                appDb.getDownloadJobItemDao().updateDownloadJobItemProgress(
-                        downloadItem.getDjiUid(), bytesSoFar,
-                        httpDownload.getCurrentDownloadSpeed());
-                appDb.getDownloadJobDao().updateBytesDownloadedSoFar
-                        (downloadItem.getDjiDjUid(),
-                                null);
+                downloadJobItemManager.updateProgress((int)downloadItem.getDjiUid(),
+                        bytesSoFar, downloadItem.getDownloadLength());
             }
         }
     }
@@ -153,11 +152,13 @@ public class DownloadJobItemRunner implements Runnable {
      * @param appDb Application database instance
      * @param endpointUrl Endpoint to get the file from.
      */
-    public DownloadJobItemRunner(Object context,DownloadJobItemWithDownloadSetItem downloadItem,
+    public DownloadJobItemRunner(Object context, DownloadJobItem downloadItem,
                                  NetworkManagerBle networkManager, UmAppDatabase appDb,
                                  UmAppDatabase appDbRepo,
                                  String endpointUrl, ConnectivityStatus initialConnectivityStatus) {
         this.networkManager = networkManager;
+        this.downloadJobItemManager = networkManager
+                .getDownloadJobItemManager((int)downloadItem.getDjiDjUid());
         this.downloadItem = downloadItem;
         this.appDb = appDb;
         this.appDbRepo = appDbRepo;
@@ -295,8 +296,7 @@ public class DownloadJobItemRunner implements Runnable {
     public void run() {
         runnerStatus.set(JobStatus.RUNNING);
         updateItemStatus(JobStatus.RUNNING);
-        long downloadJobId = appDb.getDownloadJobDao().getLatestDownloadJobUidForDownloadSet(
-                downloadItem.getDownloadSetItem().getDsiDsUid());
+        int downloadJobId = (int)downloadItem.getDjiDjUid();
         appDb.getDownloadJobDao().update(downloadJobId, JobStatus.RUNNING);
 
         networkManager.startMonitoringAvailability(this,
@@ -307,8 +307,7 @@ public class DownloadJobItemRunner implements Runnable {
 
         //get the download set
         downloadSetConnectivityData =
-                appDb.getDownloadSetDao().getLiveMeteredNetworkAllowed(downloadItem
-                        .getDownloadSetItem().getDsiDsUid());
+                appDb.getDownloadJobDao().getLiveMeteredNetworkAllowed(downloadJobId);
 
         //TODO: re-enable after basic p2p cases run
 //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
@@ -323,8 +322,7 @@ public class DownloadJobItemRunner implements Runnable {
         downloadSetConnectivityData.observeForever(downloadSetConnectivityObserver);
         //entryStatusLiveData.observeForever(entryStatusObserver);
 
-        destinationDir = appDb.getDownloadSetDao().getDestinationDir(downloadItem
-                .getDownloadSetItem().getDsiDsUid());
+        destinationDir = appDb.getDownloadJobDao().getDestinationDir(downloadJobId);
 
 //        currentEntryStatusResponse = appDb.getEntryStatusResponseDao()
 //                .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
@@ -470,14 +468,14 @@ public class DownloadJobItemRunner implements Runnable {
         if(downloaded){
             appDb.getDownloadJobDao().updateBytesDownloadedSoFar(downloadItem.getDjiDjUid(),
                     null);
-            long currentDownloadSpeed = httpDownload != null ? httpDownload.getCurrentDownloadSpeed() : 1;
             long totalDownloaded = completedEntriesBytesDownloaded.get() +
                     (httpDownload != null ? httpDownload.getDownloadedSoFar() : 0);
             long downloadTotalSize = httpDownload != null ? httpDownload.getTotalSize() : 0L;
 
-            appDb.getDownloadJobItemDao().updateDownloadJobItemStatus(downloadItem.getDjiUid(),
-                    JobStatus.COMPLETE, totalDownloaded,
-                    downloadTotalSize, currentDownloadSpeed);
+
+            downloadJobItemManager.updateProgress((int)downloadItem.getDjiUid(),
+                    totalDownloaded, downloadTotalSize);
+            appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), JobStatus.COMPLETE);
         }
 
         stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
@@ -617,7 +615,7 @@ public class DownloadJobItemRunner implements Runnable {
     private void updateItemStatus(int itemStatus) {
         appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
         appDb.getContentEntryStatusDao().updateDownloadStatus(
-                downloadItem.getDownloadSetItem().getDsiContentEntryUid(), itemStatus);
+                downloadItem.getDjiContentEntryUid(), itemStatus);
     }
 
     private boolean isExpectedWifiDirectGroup(ConnectivityStatus status){

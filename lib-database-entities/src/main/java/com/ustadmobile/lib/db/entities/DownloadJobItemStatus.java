@@ -19,8 +19,6 @@ public class DownloadJobItemStatus {
 
     private long totalBytes;
 
-    private byte state;
-
 
     public DownloadJobItemStatus() {
 
@@ -31,7 +29,6 @@ public class DownloadJobItemStatus {
         contentEntryUid = item.getDjiContentEntryUid();
         bytesSoFar = item.getDownloadedSoFar();
         totalBytes = item.getDownloadLength();
-        state = (byte)item.getDjiStatus();
     }
 
     public int getJobItemUid() {
@@ -44,10 +41,6 @@ public class DownloadJobItemStatus {
 
     public long getTotalBytes() {
         return totalBytes;
-    }
-
-    public byte getState() {
-        return state;
     }
 
     public void setJobItemUid(int jobItemUid) {
@@ -72,10 +65,6 @@ public class DownloadJobItemStatus {
 
     public final void incrementBytesSoFar(long increment) {
         bytesSoFar += increment;
-    }
-
-    public void setState(byte state) {
-        this.state = state;
     }
 
     public List<DownloadJobItemStatus> getParents() {

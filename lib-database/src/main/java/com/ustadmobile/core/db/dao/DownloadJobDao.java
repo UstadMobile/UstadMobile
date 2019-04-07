@@ -157,6 +157,10 @@ public abstract class DownloadJobDao {
     @UmQuery("UPDATE DownloadJob SET djDestinationDir = :destinationDir WHERE djUid = :djUid")
     public abstract void updateDestinationDirectory(int djUid, String destinationDir, UmCallback<Integer> callback);
 
+    @UmQuery("SELECT djDestinationDir FROM DownloadJob WHERE djUid = :djUid")
+    public abstract String getDestinationDir(int djUid);
+
+
     @UmQuery("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
     public abstract void setMeteredConnectionAllowedByJobUid(int djUid, boolean meteredNetworkAllowed,
                                                       UmCallback<Integer> callback);

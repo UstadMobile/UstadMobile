@@ -141,6 +141,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
 
+    private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
+
     /**
      * Constructor to be used when creating new instance
      * @param context Platform specific application context
@@ -532,10 +534,20 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         fireLocalAvailabilityChanged();
     }
 
-    //testing purpose
+    //testing purpose only
     public void clearHistories(){
         locallyAvailableContainerUids.clear();
         knownPeerNodes.clear();
+    }
+
+    /**
+     * Used for unit testing purposes only.
+     *
+     * @hide
+     * @param database
+     */
+    public void setDatabase(UmAppDatabase database) {
+        this.umAppDatabase = database;
     }
 
     /**
@@ -709,7 +721,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public DownloadJobItemManager createNewDownloadJobItemManager(DownloadJob newDownloadJob) {
         newDownloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(newDownloadJob));
-        return new DownloadJobItemManager(umAppDatabase, (int)newDownloadJob.getDjUid());
+        DownloadJobItemManager manager =  new DownloadJobItemManager(umAppDatabase,
+                (int)newDownloadJob.getDjUid());
+        downloadJobItemManagerMap.put((int)newDownloadJob.getDjUid(), manager);
+        return manager;
     }
 
     public DownloadJobItemManager createNewDownloadJobItemManager(long rootContentEntryUid) {
@@ -719,7 +734,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
 
     public DownloadJobItemManager getDownloadJobItemManager(int downloadJobId) {
-        return null;
+        return downloadJobItemManagerMap.get(downloadJobId);
     }
 
     public DownloadJobItemManager findDownloadJobItemManagerByContentEntryUid(long contentEntryUid) {
