@@ -51,6 +51,7 @@
                 android:layout_weight="1"
                 android:text="Item name "
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -71,6 +72,7 @@
                 android:layout_weight="1"
                 android:text="@string/quantity"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/item_sale_item_name"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -81,6 +83,7 @@
                 android:layout_weight="1"
                 android:text="Quantity"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/textView19"
                 app:layout_constraintTop_toBottomOf="@+id/item_sale_item_quantity_title" />
 
@@ -100,6 +103,7 @@
                 android:layout_weight="1"
                 android:text="@string/price"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity_title"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -110,6 +114,7 @@
                 android:layout_weight="1"
                 android:text="Price"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"
                 app:layout_constraintTop_toBottomOf="@+id/textView23" />
 
@@ -130,6 +135,7 @@
                 android:layout_weight="1"
                 android:text="@string/total"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity_title"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -140,6 +146,7 @@
                 android:layout_weight="1"
                 android:text="Total"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"
                 app:layout_constraintTop_toBottomOf="@+id/textView23" />
 
