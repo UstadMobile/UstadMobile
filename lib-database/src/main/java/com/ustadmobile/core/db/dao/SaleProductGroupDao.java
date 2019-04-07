@@ -59,10 +59,22 @@ public abstract class SaleProductGroupDao implements SyncableDao<SaleProductGrou
     public abstract UmProvider<SaleProductGroup> findAllTypedActiveProvider(int type);
 
     public static final String ALL_ACTIVE_TYPED_SNWI_QUERY =
-            "SELECT '' as name, 0 as pictureUid, :type as type, " +
-            "  SaleProductGroup.saleProductGroupUid as productGroupUid, 0 as productUid " +
-            " FROM SaleProductGroup WHERE saleProductGroupActive = 1 AND " +
-            "  saleProductGroupType = :type";
+            "SELECT SaleProductGroup.saleProductGroupName as name, " +
+            " (SELECT SaleProductPicture.saleProductPictureUid FROM SaleProductPicture " +
+            "  WHERE saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+            "  ORDER BY saleProductPictureTimestamp DESC LIMIT 1) as pictureUid, " +
+            "  SaleProductGroup.saleProductGroupUid as productGroupUid, " +
+            "  SaleProduct.saleProductUid as productUid, " +
+            "  :type AS type " +
+            " FROM SaleProductGroup  " +
+            "   LEFT JOIN SaleProduct ON " +
+            "  SaleProduct.saleProductUid = " +
+            "  (SELECT SaleProductGroupJoin.saleProductGroupJoinProductUid " +
+            "   FROM SaleProductGroupJoin " +
+            "   WHERE SaleProductGroupJoin.saleProductGroupJoinGroupUid = " +
+            "   SaleProductGroup.saleProductGroupUid " +
+            "    ORDER BY SaleProductGroupJoin.saleProductGroupJoinDateCreated DESC LIMIT 1) " +
+            "WHERE SaleProductGroup.saleProductGroupActive = 1 AND saleProductGroupType = :type";
 
     @UmQuery(ALL_ACTIVE_TYPED_SNWI_QUERY)
     public abstract UmLiveData<List<SaleNameWithImage>> findAllTypedActiveSNWILive(int type);

@@ -220,7 +220,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     public void setLocationPresets(String[] locationPresets, int selectedPosition) {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
-                android.R.layout.simple_spinner_item, locationPresets);
+                R.layout.item_simple_spinner, locationPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(adapter);
         locationSpinner.setSelection(selectedPosition);

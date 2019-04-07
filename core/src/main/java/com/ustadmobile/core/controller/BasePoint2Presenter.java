@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
@@ -23,10 +24,13 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
 
     Long loggedInPersonUid;
 
+    SaleDao saleDao;
+
     public BasePoint2Presenter(Object context, Hashtable arguments, BasePoint2View view) {
         super(context, arguments, view);
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        saleDao = repository.getSaleDao();
     }
 
     /**
@@ -125,8 +129,20 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
+    }
 
+    public void updateDueCountOnView(){
+        saleDao.getOverDueSaleCountAsync(System.currentTimeMillis(), new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                view.updateNotificationForSales(result);
+            }
 
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
 

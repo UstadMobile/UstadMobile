@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePoint2Presenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -52,6 +53,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     public static final int VIEW_POSITION_POSITION_INVENTORY = 1;
     public static final int VIEW_POSITION_POSITION_SALES = 2;
     public static final int VIEW_POSITION_POSITION_COURSES = 3;
+
+    AHBottomNavigation bottomNavigation;
 
 
 
@@ -91,7 +94,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
 
         //Get the bottom navigation component
-        AHBottomNavigation bottomNavigation = findViewById(R.id.activity_basepoint2_bottom_navigation);
+        bottomNavigation = findViewById(R.id.activity_basepoint2_bottom_navigation);
 
         //Style it
         bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(R.color.primary, getApplicationContext()));
@@ -118,6 +121,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         bottomNavigation.addItem(inventory_item);
         bottomNavigation.addItem(sales_item);
         bottomNavigation.addItem(courses_item);
+
+
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
@@ -152,6 +157,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
         // Setting the very 1st item as default home screen.
         bottomNavigation.setCurrentItem(2);
+
+        mPresenter.updateDueCountOnView();
 
     }
 
@@ -255,6 +262,13 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     public void dismissShareAppDialog() {
         shareAppDialog.dismiss();
         shareAppDialog=null;
+    }
+
+    @Override
+    public void updateNotificationForSales(int number) {
+        //Send notification to 2nd last item (sales)
+        bottomNavigation.setNotification(String.valueOf(number),
+                bottomNavigation.getItemsCount() - 2);
     }
 
     /**

@@ -18,6 +18,7 @@ public class SaleProductGroupJoin {
 
     private boolean saleProductGroupJoinActive;
 
+    private long saleProductGroupJoinDateCreated;
 
     @UmSyncMasterChangeSeqNum
     private long saleProductGroupJoinMCSN;
@@ -30,12 +31,14 @@ public class SaleProductGroupJoin {
 
     public SaleProductGroupJoin(){
         this.saleProductGroupJoinActive = false;
+        this.saleProductGroupJoinDateCreated = System.currentTimeMillis();
     }
 
     public SaleProductGroupJoin(long productUid, long groupUid){
         this.saleProductGroupJoinProductUid = productUid;
         this.saleProductGroupJoinGroupUid = groupUid;
         this.saleProductGroupJoinActive = true;
+        this.saleProductGroupJoinDateCreated = System.currentTimeMillis();
     }
 
 
@@ -93,5 +96,13 @@ public class SaleProductGroupJoin {
 
     public void setSaleProductGroupJoinLCB(int saleProductGroupJoinLCB) {
         this.saleProductGroupJoinLCB = saleProductGroupJoinLCB;
+    }
+
+    public long getSaleProductGroupJoinDateCreated() {
+        return saleProductGroupJoinDateCreated;
+    }
+
+    public void setSaleProductGroupJoinDateCreated(long saleProductGroupJoinDateCreated) {
+        this.saleProductGroupJoinDateCreated = saleProductGroupJoinDateCreated;
     }
 }
