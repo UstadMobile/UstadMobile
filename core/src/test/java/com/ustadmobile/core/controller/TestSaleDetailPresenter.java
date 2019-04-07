@@ -2,23 +2,22 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.SaleListView;
-import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
+import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import static com.ustadmobile.core.util.SetUpUtil.addDummyData;
+
 import static com.ustadmobile.test.core.util.CoreTestUtil.TEST_URI;
 import static com.ustadmobile.test.core.util.CoreTestUtil.startServer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
-public class TestSaleListPresenter {
+public class TestSaleDetailPresenter {
 
     UstadMobileSystemImpl mainImpl;
 
@@ -30,12 +29,11 @@ public class TestSaleListPresenter {
 
     private UmAppDatabase repo;
 
-    private SaleListView mockView;
+    private SaleDetailView mockView;
 
 
     @Before
-    public void setUp(){
-
+    public void setUp() {
 
         mainImpl = UstadMobileSystemImpl.getInstance();
         systemImplSpy = Mockito.spy(mainImpl);
@@ -49,17 +47,16 @@ public class TestSaleListPresenter {
 
         addDummyData(repo);
 
-        mockView = Mockito.mock(SaleListView.class);
+        mockView = Mockito.mock(SaleDetailView.class);
         doAnswer((invocationOnMock) -> {
-            new Thread(((Runnable)invocationOnMock.getArgument(0))).start();
+            new Thread(((Runnable) invocationOnMock.getArgument(0))).start();
             return null;
         }).when(mockView).runOnUiThread(any());
     }
 
     @Test
-    public void givenWhenSaleEntriesCreated_whenViewAndPresenterLoads_shouldReturnData(){
+    public void given_when_should() {
 
-        Assert.assertTrue(true);
     }
 
 }

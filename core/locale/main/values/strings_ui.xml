@@ -281,6 +281,7 @@
     <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
 
     <!--Goldozi-->
+    <string name="app_name_goldozi">Goldozi</string>
     <string name="sales">Sales</string>
     <string name="all_sales">All sales</string>
     <string name="pre_orders">Pre-orders</string>
