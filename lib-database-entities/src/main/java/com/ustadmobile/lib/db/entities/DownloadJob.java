@@ -36,6 +36,8 @@ public class DownloadJob {
 
     private boolean meteredNetworkAllowed;
 
+    private String djDestinationDir;
+
 
     /**
      * Empty constructor
@@ -135,5 +137,13 @@ public class DownloadJob {
 
     public void setMeteredNetworkAllowed(boolean meteredNetworkAllowed) {
         this.meteredNetworkAllowed = meteredNetworkAllowed;
+    }
+
+    public String getDjDestinationDir() {
+        return djDestinationDir;
+    }
+
+    public void setDjDestinationDir(String djDestinationDir) {
+        this.djDestinationDir = djDestinationDir;
     }
 }

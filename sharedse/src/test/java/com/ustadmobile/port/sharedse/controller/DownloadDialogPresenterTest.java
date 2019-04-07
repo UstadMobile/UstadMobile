@@ -162,7 +162,7 @@ public class DownloadDialogPresenterTest {
         Assert.assertNotEquals(0, rootEntry.getContentEntryUid());
         UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadDialogPresenterTest " +
                 "root entry uid = " + rootEntry.getContentEntryUid());
-        DownloadJob downloadJob = new DownloadJob(rootEntry.getContentEntryUid(),
+        downloadJob = new DownloadJob(rootEntry.getContentEntryUid(),
                 System.currentTimeMillis());
         downloadJob.setMeteredNetworkAllowed(meteredNetworkAllowed);
         downloadJob.setDjStatus(status);
@@ -170,27 +170,6 @@ public class DownloadDialogPresenterTest {
                 .createNewDownloadJobItemManager(downloadJob);
         new DownloadJobPreparer(itemManager, umAppDatabase, umAppDatabaseRepo).run();
         System.out.println("job prepared");
-//        downloadSet = new DownloadSet();
-//        downloadSet.setMeteredNetworkAllowed(meteredNetworkAllowed);
-//        downloadSet.setDsUid(89);
-//        umAppDatabase.getDownloadSetDao().insert(downloadSet);
-//
-//        DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet,rootEntry);
-//        downloadSetItem.setDsiUid(umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
-//
-//        downloadJob = new DownloadJob(downloadSet);
-//        downloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(downloadJob));
-//
-//
-//        for(int i = 0 ; i < 5; i++){
-//            DownloadJobItem downloadJobItem = new DownloadJobItem(downloadJob,downloadSetItem,container);
-//            downloadJobItem.setDjiUid(i * 1000);
-//            umAppDatabase.getDownloadJobItemDao().insert(downloadJobItem);
-//        }
-//
-//        totalBytesToDownload = totalBytesToDownload + container.getFileSize();
-//        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
-//                status,-1);
     }
 
     private void insertDownloadJobAndJobItems() {
@@ -439,17 +418,18 @@ public class DownloadDialogPresenterTest {
         presenter.handleWiFiOnlyOption(true);
 
         WaitForLiveData.observeUntil(
-                umAppDatabase.getDownloadSetDao().getLiveMeteredNetworkAllowed(downloadSet.getDsUid()),
-                MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
-                allowed -> allowed != null && !allowed);
+                umAppDatabase.getDownloadJobDao().getLiveMeteredNetworkAllowed(
+                        (int)downloadJob.getDjUid()),
+                        MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                        allowed -> allowed != null && !allowed);
 
         assertFalse("Job is allowed to run on un metered connection only",
-                umAppDatabase.getDownloadSetDao().findByUid((int)downloadSet.getDsUid())
+                umAppDatabase.getDownloadJobDao().findByUid((int)downloadJob.getDjUid())
                         .isMeteredNetworkAllowed());
     }
 
     @Test
-    public void givenDownloadOptionsAreShown_whenStorageLocationChanged_shouldUpdateDestinationDirOnDownloadSet() throws InterruptedException {
+    public void givenDownloadOptionsAreShown_whenStorageLocationChanged_shouldUpdateDestinationDirOnDownloadJob() throws InterruptedException {
         insertDownloadJobAndJobItems();
 
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
@@ -471,13 +451,14 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleStorageOptionSelection(destDir);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadSetDao()
-                        .getLiveDownloadSet((int)downloadSet.getDsUid()), MAX_LATCH_WAITING_TIME,
-                TimeUnit.SECONDS, downloadSet -> downloadSet.getDestinationDir().equals(destDir));
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+                        .getJobLive((int)downloadJob.getDjUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS, downloadJob -> downloadJob != null &&
+                        downloadJob.getDjDestinationDir() != null &&
+                        downloadJob.getDjDestinationDir().equals(destDir));
 
         assertEquals("DownloadSet destination directory changed successfully",
                 destDir,
-                umAppDatabase.getDownloadSetDao().findByUid((int)downloadSet.getDsUid())
-                .getDestinationDir());
+                umAppDatabase.getDownloadJobDao().findByUid((int)downloadJob.getDjUid()).getDjDestinationDir());
     }
 }

@@ -16,37 +16,6 @@ import java.util.List;
 public abstract class ContentEntryParentChildJoinDao
         implements SyncableDao<ContentEntryParentChildJoin, ContentEntryParentChildJoinDao> {
 
-    public static class ContentEntryParentChildJoinSummary {
-        private boolean leaf;
-
-        private long parentContentEntryUid;
-
-        private long childContentEntryUid;
-
-        public boolean isLeaf() {
-            return leaf;
-        }
-
-        public void setLeaf(boolean leaf) {
-            this.leaf = leaf;
-        }
-
-        public long getChildContentEntryUid() {
-            return childContentEntryUid;
-        }
-
-        public void setChildContentEntryUid(long childContentEntryUid) {
-            this.childContentEntryUid = childContentEntryUid;
-        }
-
-        public long getParentContentEntryUid() {
-            return parentContentEntryUid;
-        }
-
-        public void setParentContentEntryUid(long parentContentEntryUid) {
-            this.parentContentEntryUid = parentContentEntryUid;
-        }
-    }
 
     @UmQuery("SELECT * FROM ContentEntryParentChildJoin WHERE " +
            "cepcjChildContentEntryUid = :childEntryContentUid LIMIT 1")
@@ -59,15 +28,6 @@ public abstract class ContentEntryParentChildJoinDao
     @UmQuery("SELECT * FROM ContentEntryParentChildJoin WHERE " +
             "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid LIMIT 1")
     public abstract ContentEntryParentChildJoin findJoinByParentChildUuids(long parentUid, long childUid);
-
-
-    @UmQuery("SELECT cepcjChildContentEntryUid AS childContentEntryUid," +
-            "ContentEntry.leaf AS leaf " +
-            "FROM ContentEntryParentChildJoin " +
-            "LEFT JOIN ContentEntry ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE cepcjParentContentEntryUid IN (:parentUids) ")
-    public abstract List<ContentEntryParentChildJoinSummary> findChildEntriesByParents(List<Long> parentUids);
-
 
     @UmUpdate
     public abstract void update(ContentEntryParentChildJoin entity);

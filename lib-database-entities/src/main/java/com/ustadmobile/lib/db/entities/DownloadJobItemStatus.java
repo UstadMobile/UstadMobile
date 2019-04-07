@@ -9,17 +9,17 @@ import java.util.List;
  */
 public class DownloadJobItemStatus {
 
-    int jobItemUid;
+    private int jobItemUid;
 
-    LinkedList<DownloadJobItemStatus> parents;
+    private transient LinkedList<DownloadJobItemStatus> parents;
 
-    long contentEntryUid;
+    private long contentEntryUid;
 
-    long bytesSoFar;
+    private long bytesSoFar;
 
-    long totalBytes;
+    private long totalBytes;
 
-    byte state;
+    private byte state;
 
 
     public DownloadJobItemStatus() {

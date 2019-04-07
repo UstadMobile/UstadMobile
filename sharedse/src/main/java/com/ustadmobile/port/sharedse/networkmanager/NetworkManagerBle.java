@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
@@ -15,6 +14,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -45,8 +45,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -469,20 +467,15 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     /**
      * Cancel all download set and set items
-     * @param args Arguments to be passed to the task runner.
+     * @param downloadJobUid The download job uid that should be canceled and deleted
      */
-    public void cancelAndDeleteDownloadSet(Map<String , String>  args) {
-
-        long downloadSetUid = Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID)));
-        List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().
-                findBySetUid(downloadSetUid);
-
-        for(DownloadJob downloadJob : downloadJobs){
-            umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
+    public void cancelAndDeleteDownloadJob(int downloadJobUid) {
+        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
                     JobStatus.CANCELED, -1, JobStatus.CANCELED);
-        }
+        Map<String, String> taskArgs = new HashMap<>();
+        taskArgs.put(DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID, String.valueOf(downloadJobUid));
 
-        makeDeleteJobTask(mContext,args).run();
+        makeDeleteJobTask(mContext,taskArgs).run();
     }
 
 

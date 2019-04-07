@@ -103,7 +103,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 20, entities = {
+@UmDatabase(version = 22, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -630,15 +630,18 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             public void migrate(DoorDbAdapter db) {
                 switch (db.getDbType()) {
                     case UmDbType.TYPE_SQLITE:
-                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid INTEGER");
-                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid INTEGER");
+                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid INTEGER NOT NULL");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid INTEGER NOT NULL");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN meteredNetworkAllowed INTEGER NOT NULL");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djDestinationDir TEXT");
                         break;
 
                     case UmDbType.TYPE_POSTGRES:
                         db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid BIGINT DEFAULT 0");
-                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid BIGINT");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid BIGINT DEFAULT 0");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN meteredNetworkAllowed BOOL DEFAULT FALSE");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djDestinationDir TEXT");
                         break;
-
 
                 }
             }

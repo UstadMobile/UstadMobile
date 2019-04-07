@@ -144,14 +144,38 @@ public abstract class DownloadJobDao {
             "SET djStatus = " + JobStatus.COMPLETE + " WHERE " +
             "djUid = :downloadJobUid AND " +
             "(SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid " +
-            "AND djiContentEntryFileUid != 0) = " +
+            "AND djiContainerUid != 0) = " +
             "(SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid " +
-            "AND djiContentEntryFileUid != 0 " +
+            "AND djiContainerUid != 0 " +
             "AND djiStatus >= " + JobStatus.COMPLETE_MIN + ") ")
     public abstract void updateJobStatusToCompleteIfAllItemsAreCompleted(long downloadJobUid);
 
 
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
     public abstract long findDownloadJobUidByRootContentEntryUid(long rootContentEntryUid);
+
+    @UmQuery("UPDATE DownloadJob SET djDestinationDir = :destinationDir WHERE djUid = :djUid")
+    public abstract void updateDestinationDirectory(int djUid, String destinationDir, UmCallback<Integer> callback);
+
+    @UmQuery("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
+    public abstract void setMeteredConnectionAllowedByJobUid(int djUid, boolean meteredNetworkAllowed,
+                                                      UmCallback<Integer> callback);
+
+    @UmQuery("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
+    public abstract UmLiveData<Boolean> getLiveMeteredNetworkAllowed(int djUid);
+
+    @UmTransaction
+    public void cleanupUnused(int downloadJobUid){
+        deleteUnusedDownloadJobItems(downloadJobUid);
+        deleteUnusedDownloadJob(downloadJobUid);
+    }
+
+    @UmQuery("DELETE FROM DownloadJobItem " +
+            "WHERE djiDjUid = :downloadJobUid " +
+            "AND djiStatus = " + JobStatus.NOT_QUEUED)
+    public abstract void deleteUnusedDownloadJobItems(int downloadJobUid);
+
+    @UmQuery("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = " + JobStatus.NOT_QUEUED)
+    public abstract void deleteUnusedDownloadJob(int downloadJobUid);
 
 }
