@@ -131,7 +131,7 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
 
 
     //Get overdue sale count
-    @UmQuery("select count(*) from sale where Sale.saleDueDate < :today ")
+    @UmQuery("select count(*) from sale where Sale.saleDueDate < :today and Sale.saleDueDate != 0")
     public abstract void getOverDueSaleCountAsync(long today, UmCallback<Integer> resultCallback);
 
 }
