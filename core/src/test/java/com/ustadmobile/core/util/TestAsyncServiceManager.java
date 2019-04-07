@@ -30,7 +30,7 @@ public class TestAsyncServiceManager {
                 lastStartTime.set(System.currentTimeMillis());
                 try { Thread.sleep(startDelay); }
                 catch(InterruptedException e) {}
-                asyncServiceManager.notifyStateChanged(AsyncServiceManager.STATE_STARTED);
+                asyncServiceManager.notifyStateChanged(AsyncServiceManager.Companion.getSTATE_STARTED());
             }).start();
             return null;
         }).when(asyncServiceManager).start();
@@ -40,7 +40,7 @@ public class TestAsyncServiceManager {
                 lastStopTime.set(System.currentTimeMillis());
                 try { Thread.sleep(stopDelay); }
                 catch(InterruptedException e) {}
-                asyncServiceManager.notifyStateChanged(AsyncServiceManager.STATE_STOPPED);
+                asyncServiceManager.notifyStateChanged(AsyncServiceManager.Companion.getSTATE_STOPPED());
             }).start();
             return null;
         }).when(asyncServiceManager).stop();
@@ -103,10 +103,10 @@ public class TestAsyncServiceManager {
     public void givenServiceStarting_whenAwaitCalled_shouldWaitForStarting() throws InterruptedException {
         AsyncServiceManager serviceManager = setupAsyncServiceManagerMock(200, 1000);
         serviceManager.setEnabled(true);
-        serviceManager.await(state -> state == AsyncServiceManager.STATE_STARTED, 2000,
+        serviceManager.await(state -> state == AsyncServiceManager.Companion.getSTATE_STARTED(), 2000,
                 TimeUnit.MILLISECONDS);
         verify(serviceManager, times(1)).start();
-        Assert.assertEquals(AsyncServiceManager.STATE_STARTED, serviceManager.getState());
+        Assert.assertEquals(AsyncServiceManager.Companion.getSTATE_STARTED(), serviceManager.getState());
     }
 
     @Test
@@ -117,8 +117,8 @@ public class TestAsyncServiceManager {
                 lastStartTime.set(System.currentTimeMillis());
                 try { Thread.sleep(200); }
                 catch(InterruptedException e) {}
-                asyncServiceManager.notifyStateChanged(AsyncServiceManager.STATE_STOPPED,
-                        AsyncServiceManager.STATE_STOPPED);
+                asyncServiceManager.notifyStateChanged(AsyncServiceManager.Companion.getSTATE_STOPPED(),
+                        AsyncServiceManager.Companion.getSTATE_STOPPED());
             }).start();
             return null;
         }).when(asyncServiceManager).start();
@@ -130,11 +130,11 @@ public class TestAsyncServiceManager {
         });
 
         asyncServiceManager.setEnabled(true);
-        asyncServiceManager.await(state -> state == AsyncServiceManager.STATE_STOPPED,
+        asyncServiceManager.await(state -> state == AsyncServiceManager.Companion.getSTATE_STOPPED(),
                 5000, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals("When a service is asked to start, but fails, both the" +
-                "state and targe state can revert to stopped", AsyncServiceManager.STATE_STOPPED,
+                "state and targe state can revert to stopped", AsyncServiceManager.Companion.getSTATE_STOPPED(),
                 asyncServiceManager.getState());
     }
 

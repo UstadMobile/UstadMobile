@@ -35,7 +35,7 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
             mountedPath = result
             UstadMobileSystemImpl.getInstance().makeRequestAsync(UmHttpRequest(
                     getContext(),
-                    UMFileUtil.joinPaths(mountedPath, "imsmanifest.xml")),
+                    UMFileUtil.joinPaths(mountedPath!!, "imsmanifest.xml")),
                     manifestLoadedCallback)
         }
 
@@ -55,8 +55,8 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
                         defaultOrg.items[0].identifierRef!!)
                 scormPackageView.runOnUiThread {
                     scormPackageView.setTitle(scormManifest!!.defaultOrganization.title)
-                    scormPackageView.loadUrl(UMFileUtil.joinPaths(mountedPath,
-                            startRes.href))
+                    scormPackageView.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
+                            startRes.href!!))
                 }
             } catch (e: IOException) {
                 e.printStackTrace()

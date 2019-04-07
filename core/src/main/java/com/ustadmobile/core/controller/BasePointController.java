@@ -81,13 +81,13 @@ public class BasePointController extends UstadBaseController {
 
         Vector catalogTabs = null;
         if(args != null) {
-            catalogTabs = UMFileUtil.splitCombinedViewArguments(args, "catalog", '-');
+            catalogTabs = UMFileUtil.INSTANCE.splitCombinedViewArguments(args, "catalog", '-');
         }
 
         if(catalogTabs == null || catalogTabs.isEmpty()) {
             String defaultArgs = UstadMobileSystemImpl.getInstance().getAppConfigString(AppConfig.KEY_FIRST_DEST,
                     null, getContext());
-            catalogTabs = UMFileUtil.splitCombinedViewArguments(UMFileUtil.parseURLQueryString(defaultArgs),
+            catalogTabs = UMFileUtil.INSTANCE.splitCombinedViewArguments(UMFileUtil.INSTANCE.parseURLQueryString(defaultArgs),
                     "catalog", '-');
         }
 

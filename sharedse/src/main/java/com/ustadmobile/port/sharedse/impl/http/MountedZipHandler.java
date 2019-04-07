@@ -132,7 +132,7 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
         }
 
         IFileSource src = new ZipEntrySource(zipFile, pathInZip);
-        String extension = UMFileUtil.getExtension(pathInZip);
+        String extension = UMFileUtil.INSTANCE.getExtension(pathInZip);
 
         if(uriResource.initParameter(1, Boolean.class) && HTML_EXTENSIONS.contains(extension)) {
             src = new FilteredHtmlSource(src, uriResource.initParameter(2, String.class));

@@ -89,7 +89,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             AbstractCacheResponse cacheResponse = null;
 
             if(request.getUrl().startsWith(PROTOCOL_FILE)) {
-                String filePath = UMFileUtil.stripPrefixIfPresent("file://", request.getUrl());
+                String filePath = UMFileUtil.INSTANCE.stripPrefixIfPresent("file://", request.getUrl());
                 int zipSepPos = filePath.indexOf('!');
                 if(zipSepPos == -1) {
                     File responseFile = new File(filePath);
@@ -145,7 +145,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 }
                 if(entry.getLastModified() > 0) {
                     httpRequest.addHeader("if-modified-since",
-                            UMCalendarUtil.makeHTTPDate(entry.getLastModified()));
+                            UMCalendarUtil.INSTANCE.makeHTTPDate(entry.getLastModified()));
                 }
             }
 
@@ -211,7 +211,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             String responseCacheControlHeader = response.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL);
 
             if(responseCacheControlHeader != null) {
-                Map<String, String> responseCacheControl = UMFileUtil.parseParams(responseCacheControlHeader, ',');
+                Map<String, String> responseCacheControl = UMFileUtil.INSTANCE.parseParams(responseCacheControlHeader, ',');
 
                 if(responseCacheControl.containsKey(CACHE_CONTROL_NO_CACHE)) {
                     AbstractCacheResponse noCacheResponse = new NoCacheResponse(response);
@@ -432,7 +432,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     public static final long calculateEntryExpirationTime(HttpCachedEntry cachedEntry) {
         String cacheControl = cachedEntry.getCacheControl();
         if(cacheControl != null) {
-            Map<String, String> ccParams = UMFileUtil.parseParams(cacheControl, ',');
+            Map<String, String> ccParams = UMFileUtil.INSTANCE.parseParams(cacheControl, ',');
             if(ccParams.containsKey(CACHE_CONTROL_KEY_MAX_AGE)) {
                 long maxage = Integer.parseInt((String)ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
                 return cachedEntry.getLastChecked() + (maxage * 1000);
@@ -451,7 +451,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         String headerVal = response.getHeader(headerName);
         if(headerVal != null) {
             try {
-                return UMCalendarUtil.parseHTTPDate(headerVal);
+                return UMCalendarUtil.INSTANCE.parseHTTPDate(headerVal);
             }catch(NumberFormatException e) {
                 return -1L;
             }
@@ -490,10 +490,10 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                                               String dir) {
         File dirFile = new File(dir);
         File entryFile;
-        String filename = UMIOUtils.sanitizeIDForFilename(
-                UMFileUtil.getFilename(request.getUrl()));
+        String filename = UMIOUtils.INSTANCE.sanitizeIDForFilename(
+                UMFileUtil.INSTANCE.getFilename(request.getUrl()));
 
-        String[] filenameParts = UMFileUtil.splitFilename(filename);
+        String[] filenameParts = UMFileUtil.INSTANCE.splitFilename(filename);
         String contentType = response.getHeader(UmHttpRequest.HEADER_CONTENT_TYPE);
         if(contentType != null) {
             String expectedExtension = UstadMobileSystemImpl.getInstance().getExtensionFromMimeType(contentType);
@@ -515,7 +515,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 return entryFile.getAbsolutePath();
         }
 
-        return new File(dir, UMUUID.randomUUID().toString() + "." + filenameParts[1]).getAbsolutePath();
+        return new File(dir, UMUUID.Companion.randomUUID().toString() + "." + filenameParts[1]).getAbsolutePath();
     }
 
     /**

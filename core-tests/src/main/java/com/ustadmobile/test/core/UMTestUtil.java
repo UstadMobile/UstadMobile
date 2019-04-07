@@ -42,17 +42,17 @@ public class UMTestUtil {
                 new File(outDir).mkdirs();
             }
 
-            outPath = UMFileUtil.joinPaths(new String[]{outDir,
-                    UMFileUtil.getFilename(resourcePath)});
+            outPath = UMFileUtil.INSTANCE.joinPaths(new String[]{outDir,
+                    UMFileUtil.INSTANCE.getFilename(resourcePath)});
 
             fileOut = new FileOutputStream(new File(outPath));
-            UMIOUtils.readFully(entryIn, fileOut, 8*1024);
+            UMIOUtils.INSTANCE.readFully(entryIn, fileOut, 8*1024);
         }catch(IOException e) {
             ioe = e;
         }finally {
-            UMIOUtils.closeInputStream(entryIn);
+            UMIOUtils.INSTANCE.closeInputStream(entryIn);
             UMIOUtils.closeOutputStream(fileOut);
-            UMIOUtils.throwIfNotNullIO(ioe);
+            UMIOUtils.INSTANCE.throwIfNotNullIO(ioe);
         }
 
         return outPath;

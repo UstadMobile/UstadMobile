@@ -99,7 +99,7 @@ public class HTTPResult {
         if(dataStarts > DATA_URI_PREFIX.length()) {
             String infoSection = dataURL.substring(DATA_URI_PREFIX.length(),
                     dataStarts);
-            Map<String, String> params = UMFileUtil.parseParams(infoSection, ';');
+            Map<String, String> params = UMFileUtil.INSTANCE.parseParams(infoSection, ';');
             Iterator keys = params.keySet().iterator();
             String paramName;
 
@@ -187,16 +187,16 @@ public class HTTPResult {
         if(responseHeaders != null && responseHeaders.containsKey("content-disposition")) {
             Object dispositionHeaderStr = responseHeaders.get("content-disposition");
             UMFileUtil.TypeWithParamHeader dispositionHeader =
-                    UMFileUtil.parseTypeWithParamHeader((String)dispositionHeaderStr);
-            if(dispositionHeader.params != null && dispositionHeader.params.containsKey("filename")) {
-                suggestedFilename = UMFileUtil.filterFilename(
-                        (String)dispositionHeader.params.get("filename"));
+                    UMFileUtil.INSTANCE.parseTypeWithParamHeader((String)dispositionHeaderStr);
+            if(dispositionHeader.getParams() != null && dispositionHeader.getParams().containsKey("filename")) {
+                suggestedFilename = UMFileUtil.INSTANCE.filterFilename(
+                        (String) dispositionHeader.getParams().get("filename"));
             }
         }
 
 
         if(suggestedFilename == null){
-            suggestedFilename = UMFileUtil.getFilename(url);
+            suggestedFilename = UMFileUtil.INSTANCE.getFilename(url);
         }
 
         return suggestedFilename;

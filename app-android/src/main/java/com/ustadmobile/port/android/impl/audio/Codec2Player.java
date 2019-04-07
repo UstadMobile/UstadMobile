@@ -77,7 +77,7 @@ public class Codec2Player implements Runnable {
             if (codec2 != null) {
                 codec2.destroy();
             }
-            UMIOUtils.closeInputStream(is);
+            UMIOUtils.INSTANCE.closeInputStream(is);
         }
 
     }

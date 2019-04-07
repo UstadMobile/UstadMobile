@@ -246,13 +246,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                     zipOut = new ZipOutputStream(new FileOutputStream(outZipFile));
                     zipOut.putNextEntry(new ZipEntry(baseName + ".apk"));
                     apkFileIn = new FileInputStream(apkFile);
-                    UMIOUtils.readFully(apkFileIn, zipOut, 1024);
+                    UMIOUtils.INSTANCE.readFully(apkFileIn, zipOut, 1024);
                     zipOut.closeEntry();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
                     UMIOUtils.closeOutputStream(zipOut);
-                    UMIOUtils.closeInputStream(apkFileIn);
+                    UMIOUtils.INSTANCE.closeInputStream(apkFileIn);
                 }
 
                 return outZipFile.getAbsolutePath();
@@ -262,11 +262,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 try {
                     apkFileIn = new FileInputStream(apkFile);
                     fout = new FileOutputStream(outApkFile);
-                    UMIOUtils.readFully(apkFileIn, fout, 1024);
+                    UMIOUtils.INSTANCE.readFully(apkFileIn, fout, 1024);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    UMIOUtils.closeInputStream(apkFileIn);
+                    UMIOUtils.INSTANCE.closeInputStream(apkFileIn);
                     UMIOUtils.closeOutputStream(fout);
                 }
 
@@ -412,10 +412,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 }
 
                 if ((flags & GO_FLAG_CLEAR_TOP) > 0) {
-                    referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
+                    referrer = UMFileUtil.INSTANCE.clearTopFromReferrerPath(viewName, args,
                             referrer);
                 } else {
-                    referrer += "/" + viewName + "?" + UMFileUtil.mapToQueryString(args);
+                    referrer += "/" + viewName + "?" + UMFileUtil.INSTANCE.mapToQueryString(args);
                 }
 
                 startIntent.putExtra(ARG_REFERRER, referrer);

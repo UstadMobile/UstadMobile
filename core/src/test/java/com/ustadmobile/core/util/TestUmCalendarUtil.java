@@ -13,9 +13,9 @@ public class TestUmCalendarUtil {
 
     @Test
     public void testHttpDateParsing() {
-        long date1 = UMCalendarUtil.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
-        long date2 = UMCalendarUtil.parseHTTPDate("Sunday, 06-Nov-94 08:49:37 GMT");
-        long date3 = UMCalendarUtil.parseHTTPDate("Sun Nov  6 08:49:37 1994 ");
+        long date1 = UMCalendarUtil.INSTANCE.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
+        long date2 = UMCalendarUtil.INSTANCE.parseHTTPDate("Sunday, 06-Nov-94 08:49:37 GMT");
+        long date3 = UMCalendarUtil.INSTANCE.parseHTTPDate("Sun Nov  6 08:49:37 1994 ");
 
         //The time in milliseconds between the date given and the date calculated
         // accurate to within one second
@@ -24,6 +24,6 @@ public class TestUmCalendarUtil {
         Assert.assertTrue("Can parse date 3", Math.abs(784111777137L -date3) <= 1000);
 
         Assert.assertEquals("Can format HTTP Date", "Sun, 06 Nov 1994 08:49:37 GMT",
-                UMCalendarUtil.makeHTTPDate(784111777137L));
+                UMCalendarUtil.INSTANCE.makeHTTPDate(784111777137L));
     }
 }

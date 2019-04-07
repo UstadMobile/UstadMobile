@@ -51,7 +51,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             mountedPath = result
             UstadMobileSystemImpl.getInstance().makeRequestAsync(UmHttpRequest(
                     getContext(),
-                    UMFileUtil.joinPaths(mountedPath, "tincan.xml")),
+                    UMFileUtil.joinPaths(mountedPath!!, "tincan.xml")),
                     TinCanResponseCallback())
         }
     }
@@ -86,10 +86,10 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val xpp = UstadMobileSystemImpl.getInstance().newPullParser(
                 ByteArrayInputStream(tincanXmlBytes), "UTF-8")
         tinCanXml = TinCanXML.loadFromXML(xpp)
-        launchHref = tinCanXml!!.launchActivity.launchUrl
-        launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref)
+        launchHref = tinCanXml?.launchActivity?.launchUrl
+        launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
         getView().runOnUiThread {
-            getView().setTitle(tinCanXml!!.launchActivity.name)
+            getView().setTitle(tinCanXml!!.launchActivity?.name)
             getView().loadUrl(launchUrl)
         }
     }

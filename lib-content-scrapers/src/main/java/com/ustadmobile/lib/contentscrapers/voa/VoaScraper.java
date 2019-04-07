@@ -373,7 +373,7 @@ public class VoaScraper implements Runnable {
             out.flush();
             out.close();
         } finally {
-            UMIOUtils.closeQuietly(out);
+            UMIOUtils.INSTANCE.closeQuietly(out);
         }
         return conn;
     }

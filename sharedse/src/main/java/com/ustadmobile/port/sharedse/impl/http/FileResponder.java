@@ -202,7 +202,7 @@ public abstract class FileResponder {
             //Check to see if the etag provided by the client matches: in which case we can send 302 not modified
             String etag = Integer.toHexString((file.getName() + lastModifiedTime + "" +
                     totalLength).hashCode());
-            String extension = UMFileUtil.getExtension(fileName);
+            String extension = UMFileUtil.INSTANCE.getExtension(fileName);
             ifNoneMatchHeader = session.getHeaders().get("if-none-match");
             if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_MODIFIED,

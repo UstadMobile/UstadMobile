@@ -82,7 +82,7 @@ public class TestEpubContentPresenter {
 
         doAnswer((invocation -> {
             new Thread(() -> {
-                String mountedUrl = UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
+                String mountedUrl = UMFileUtil.INSTANCE.joinPaths(httpd.getLocalHttpUrl(),
                         httpd.mountContainer(invocation.getArgument(0), null));
                 UmCallbackUtil.onSuccessIfNotNull(invocation.getArgument(1), mountedUrl);
             }).start();

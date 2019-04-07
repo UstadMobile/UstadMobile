@@ -227,8 +227,8 @@ public class DownloadNotificationService extends Service {
                 int notificationId = notificationIdRef.incrementAndGet();
                 String contentTitle = String.format(impl.getString(
                         MessageID.download_downloading_placeholder,this),
-                        UMFileUtil.formatFileSize(job.getBytesDownloadedSoFar()),
-                        UMFileUtil.formatFileSize(job.getTotalBytesToDownload()));
+                        UMFileUtil.INSTANCE.formatFileSize(job.getBytesDownloadedSoFar()),
+                        UMFileUtil.INSTANCE.formatFileSize(job.getTotalBytesToDownload()));
                 umAppDatabase.getDownloadJobDao().getEntryTitleByJobUid(downloadJobId,
                         new UmCallback<String>() {
                     @Override
@@ -257,8 +257,8 @@ public class DownloadNotificationService extends Service {
                 timeLastUpdate = timeCurrentUpdate;
                 String contentTitle = String.format(impl.getString(
                         MessageID.download_downloading_placeholder,this),
-                        UMFileUtil.formatFileSize(job.getBytesDownloadedSoFar()),
-                        UMFileUtil.formatFileSize(job.getTotalBytesToDownload()));
+                        UMFileUtil.INSTANCE.formatFileSize(job.getBytesDownloadedSoFar()),
+                        UMFileUtil.INSTANCE.formatFileSize(job.getTotalBytesToDownload()));
                 updateDownloadJobNotification(downloadJobId, progress,contentTitle,
                         umNotification.getJobTitle(), umNotification.getJobTitle());
                 updateDownloadSummary();
@@ -407,8 +407,8 @@ public class DownloadNotificationService extends Service {
             String summaryLabel = impl.getString(MessageID.download_downloading_placeholder,
                     getApplicationContext());
             String title = String.format(summaryLabel,
-                    UMFileUtil.formatFileSize(totalBytesDownloadedSoFar),
-                    UMFileUtil.formatFileSize(totalBytesToBeDownloaded));
+                    UMFileUtil.INSTANCE.formatFileSize(totalBytesDownloadedSoFar),
+                    UMFileUtil.INSTANCE.formatFileSize(totalBytesToBeDownloaded));
             totalBytesDownloadedSoFar = 0L;
             umNotification.getBuilder().setSubText(title);
             mNotificationManager.notify(umNotification.getNotificationId(),

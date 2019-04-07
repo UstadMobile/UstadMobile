@@ -28,11 +28,11 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.tincan;
+package com.ustadmobile.core.tincan
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -42,60 +42,63 @@ import org.json.JSONObject;
 /**
  * A very small utility class for wrapping a TinCan Statement which in fact
  * simply a child class of JSONObject
- * 
+ *
  * @author mike
  */
-public class TinCanStatement extends JSONObject{
-    
-    private String registrationUUID;
-    
-    public TinCanStatement(String stmt) throws JSONException {
-        super(stmt);
+class TinCanStatement : JSONObject {
+
+    private var registrationUUID: String? = null
+
+    @Throws(JSONException::class)
+    constructor(stmt: String) : super(stmt) {
     }
-    
-    public TinCanStatement(JSONObject obj) throws JSONException {
-        super(obj, getNamesArray(obj));
+
+    @Throws(JSONException::class)
+    constructor(obj: JSONObject) : super(obj, getNamesArray(obj)!!) {
     }
-    
-    public static String[] getNamesArray(JSONObject obj) {
-        String[] arr = null;
-        try {
-            JSONArray jsonArr = obj.names();
-            final int numNames = jsonArr.length();
-            arr = new String[numNames];
-            for(int i = 0; i < numNames; i++) {
-                arr[i] = jsonArr.getString(i);
-            }
-        }catch(JSONException e) {
-            //This should almost never happen : we don't exceed the length of array etc - names are strings
-            e.printStackTrace();
-        }
-        
-        return arr;
-    }
-    
+
     /**
      * Get the registration UUID associated with this statement (if any)
-     * 
+     *
      * @return Registration UUID as a string; or null if there is none
      */
-    public String getRegistrationUUID() {
-        if(registrationUUID != null)
-            return registrationUUID;
-        
+    fun getRegistrationUUID(): String? {
+        if (registrationUUID != null)
+            return registrationUUID
+
         try {
-            if(has("context")) {
-                JSONObject ctx = getJSONObject("context");
-                if(ctx.has("registration")) {
-                    registrationUUID = ctx.getString("registration");
-                    return registrationUUID;
+            if (has("context")) {
+                val ctx = getJSONObject("context")
+                if (ctx.has("registration")) {
+                    registrationUUID = ctx.getString("registration")
+                    return registrationUUID
                 }
             }
-        }catch(JSONException e) {
-            e.printStackTrace();//can only happen if it has a context object that's not a json object...
+        } catch (e: JSONException) {
+            e.printStackTrace()//can only happen if it has a context object that's not a json object...
         }
-        
-        return null;
+
+        return null
     }
-    
+
+    companion object {
+
+        fun getNamesArray(obj: JSONObject): Array<String?> {
+            var arr: Array<String?> = emptyArray()
+            try {
+                val jsonArr = obj.names()
+                val numNames = jsonArr.length()
+                arr = arrayOfNulls(numNames)
+                for (i in 0 until numNames) {
+                    arr[i] = jsonArr.getString(i)
+                }
+            } catch (e: JSONException) {
+                //This should almost never happen : we don't exceed the length of array etc - names are strings
+                e.printStackTrace()
+            }
+
+            return arr
+        }
+    }
+
 }

@@ -28,33 +28,22 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.tincan;
+package com.ustadmobile.core.tincan
 
 /**
  *
  * @author mike
  */
-public class Registration {
-    
-    /**
-     * The UUID of this registration
-     */
-    public String uuid;
-    
-    /**
-     * The description of this registration (if any)
-     */
-    public String desc;
-    
-    /**
-     * The opening timestamp for this registration
-     */
-    public long dateStarted;
-
-    public Registration(String uuid, String desc, long dateStarted) {
-        this.uuid = uuid;
-        this.desc = desc;
-        this.dateStarted = dateStarted;
-    }   
-    
-}
+class Registration(
+        /**
+         * The UUID of this registration
+         */
+        var uuid: String,
+        /**
+         * The description of this registration (if any)
+         */
+        var desc: String,
+        /**
+         * The opening timestamp for this registration
+         */
+        var dateStarted: Long)

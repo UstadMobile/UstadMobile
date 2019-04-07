@@ -216,7 +216,7 @@ public abstract class UstadMobileSystemImpl {
         if(destinationQueryPos == -1) {
             go(destination, null, context);
         }else {
-            go(destination.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
+            go(destination.substring(0, destinationQueryPos), UMFileUtil.INSTANCE.parseURLQueryString(
                     destination), context);
         }
     }

@@ -79,7 +79,7 @@ public class TestXapiPackageContentPresenter {
         mockXapiPackageContentView = mock(XapiPackageContentView.class);
         doAnswer((invocation -> {
             new Thread(() -> {
-                lastMountedUrl = UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
+                lastMountedUrl = UMFileUtil.INSTANCE.joinPaths(httpd.getLocalHttpUrl(),
                         httpd.mountContainer(invocation.getArgument(0), null));
                 UmCallbackUtil.onSuccessIfNotNull(invocation.getArgument(1), lastMountedUrl);
                 mountLatch.countDown();
@@ -118,7 +118,7 @@ public class TestXapiPackageContentPresenter {
                 eq(xapiContainer.getContainerUid()), any());
 
         verify(mockXapiPackageContentView, timeout(5000)).loadUrl(
-                UMFileUtil.joinPaths(lastMountedUrl, "tetris.html"));
+                UMFileUtil.INSTANCE.joinPaths(lastMountedUrl, "tetris.html"));
 
         verify(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example");
     }

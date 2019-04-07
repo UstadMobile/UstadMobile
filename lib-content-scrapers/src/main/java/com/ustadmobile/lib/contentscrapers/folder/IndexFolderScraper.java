@@ -190,16 +190,16 @@ public class IndexFolderScraper {
                             ContentScraperUtil.insertContainer(containerDao, childEntry, true,
                                     ScraperConstants.MIMETYPE_EPUB, tmpFolder.lastModified(), tmpFolder, db, repository,
                                     containerDir);
-                            UMIOUtils.closeQuietly(opfFileInputStream);
-                            UMIOUtils.closeQuietly(ocfFileInputStream);
+                            UMIOUtils.INSTANCE.closeQuietly(opfFileInputStream);
+                            UMIOUtils.INSTANCE.closeQuietly(ocfFileInputStream);
                             FileUtils.deleteDirectory(tmpFolder);
                         }
                     } catch (Exception e) {
                         UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                         UMLogUtil.logError("Error while parsing a file " + folder.getName());
                     } finally {
-                        UMIOUtils.closeQuietly(opfFileInputStream);
-                        UMIOUtils.closeQuietly(ocfFileInputStream);
+                        UMIOUtils.INSTANCE.closeQuietly(opfFileInputStream);
+                        UMIOUtils.INSTANCE.closeQuietly(ocfFileInputStream);
                     }
 
                 }

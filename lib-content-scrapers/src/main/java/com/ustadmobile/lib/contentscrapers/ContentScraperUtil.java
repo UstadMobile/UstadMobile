@@ -187,11 +187,11 @@ public class ContentScraperUtil {
                 File destinationFile = contentFile;
                 String ext = FilenameUtils.getExtension(fileName);
                 if (ScraperConstants.IMAGE_EXTENSIONS.contains(ext)) {
-                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBP_EXT);
+                    destinationFile = new File(UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getPath()) + WEBP_EXT);
                 } else if (ScraperConstants.VIDEO_EXTENSIONS.contains(ext)) {
-                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + WEBM_EXT);
+                    destinationFile = new File(UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getPath()) + WEBM_EXT);
                 } else if (ScraperConstants.AUDIO_EXTENSIONS.contains(ext)) {
-                    destinationFile = new File(UMFileUtil.stripExtensionIfPresent(contentFile.getPath()) + OPUS_EXT);
+                    destinationFile = new File(UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getPath()) + OPUS_EXT);
                 }
 
                 content.attr("src", destinationDir.getName() + "/" + destinationFile.getName());

@@ -21,6 +21,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
@@ -33,7 +34,6 @@ import java.util.Set;
 
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
-import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
 import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class ContentEntryDetailActivity extends UstadBaseActivity implements
@@ -164,7 +164,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void setDownloadSize(long fileSize) {
-        downloadSize.setText(UMFileUtil.formatFileSize(fileSize));
+        downloadSize.setText(UMFileUtil.INSTANCE.formatFileSize(fileSize));
     }
 
     @Override
@@ -210,7 +210,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     public void showFileOpenError(String message, int actionMessageId, String mimeType) {
         showErrorNotification(message, () -> {
             Context ctx = (Context) getContext();
-            String appPackageName = mimeTypeToPlayStoreIdMap.get(mimeType);
+            String appPackageName = ContentEntryUtil.INSTANCE.getMimeTypeToPlayStoreIdMap().get(mimeType);
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng";
             }

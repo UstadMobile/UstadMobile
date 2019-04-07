@@ -41,7 +41,7 @@ public class ZipEntryCacheResponse extends AbstractCacheResponse {
         switch (headerName) {
             case UmHttpRequest.HEADER_CONTENT_TYPE:
                 return UstadMobileSystemImpl.getInstance().getMimeTypeFromExtension(
-                        UMFileUtil.getExtension(zipEntry.getFileName()));
+                        UMFileUtil.INSTANCE.getExtension(zipEntry.getFileName()));
             case UmHttpRequest.HEADER_CONTENT_LENGTH:
                 return String.valueOf(zipEntry.getUncompressedSize());
 

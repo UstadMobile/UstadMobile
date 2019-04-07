@@ -128,7 +128,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         for(UMStorageDir umStorageDir : storageDirs){
             String deviceStorageLabel = String.format(impl.getString(
                     MessageID.download_storage_option_device,getContext()),umStorageDir.getName(),
-                    UMFileUtil.formatFileSize(new File(umStorageDir.getDirURI()).getUsableSpace()));
+                    UMFileUtil.INSTANCE.formatFileSize(new File(umStorageDir.getDirURI()).getUsableSpace()));
             storageOptions.add(deviceStorageLabel);
         }
 

@@ -65,7 +65,7 @@ class H5PContentPresenter(context: Any, private val h5PContentView: H5PContentVi
                             subHtmlStr)
                 }
                 val h5PJsonRequest = UmHttpRequest(getContext(),
-                        UMFileUtil.joinPaths(h5pFileMountUrl, "h5p.json"))
+                        UMFileUtil.joinPaths(h5pFileMountUrl!!, "h5p.json"))
                 UstadMobileSystemImpl.getInstance().makeRequestAsync(h5PJsonRequest, h5pResponseCallback)
             } catch (e: IOException) {
                 e.printStackTrace()

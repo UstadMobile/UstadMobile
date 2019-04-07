@@ -124,7 +124,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Exception piping cache response to disk", e);
         }finally {
-            UMIOUtils.closeInputStream(networkIn);
+            UMIOUtils.INSTANCE.closeInputStream(networkIn);
             UMIOUtils.closeOutputStream(fout);
             UMIOUtils.closeOutputStream(bufferedPipeOut);
         }
@@ -166,7 +166,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             case UmHttpRequest.HEADER_ETAG:
                 return entry.getEtag();
             case UmHttpRequest.HEADER_EXPIRES:
-                return UMCalendarUtil.makeHTTPDate(entry.getExpiresTime());
+                return UMCalendarUtil.INSTANCE.makeHTTPDate(entry.getExpiresTime());
 
             default:
                 return null;

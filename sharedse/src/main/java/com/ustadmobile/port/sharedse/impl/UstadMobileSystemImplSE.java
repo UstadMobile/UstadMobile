@@ -97,7 +97,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
-        return UMFileUtil.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
+        return UMFileUtil.INSTANCE.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
     }
 
 
@@ -115,7 +115,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             //Find external directories
             String[] externalDirs = findRemovableStorage();
             for(String extDir : externalDirs) {
-                dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+                dirList.add(new UMStorageDir(UMFileUtil.INSTANCE.joinPaths(new String[]{extDir,
                         contentDirName}),
                         getString(MessageID.memory_card, context),
                         true, true, false, false));
@@ -125,7 +125,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         UmAccount account = UmAccountManager.getActiveAccount(context);
         if(account != null
                 && ((mode & UstadMobileSystemImpl.USER_RESOURCE) == UstadMobileSystemImpl.USER_RESOURCE)) {
-            String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-",
+            String userBase = UMFileUtil.INSTANCE.joinPaths(new String[]{systemBaseDir, "user-",
                     account.getUsername()});
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
                     false, true, true));
@@ -152,7 +152,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         //Find external directories
         String[] externalDirs = findRemovableStorage();
         for(String extDir : externalDirs) {
-            dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+            dirList.add(new UMStorageDir(UMFileUtil.INSTANCE.joinPaths(new String[]{extDir,
                     contentDirName}),
                     getString(MessageID.memory_card, context),
                     true, true, false, false));
@@ -280,7 +280,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 685, appPrefResource, e);
             }finally {
-                UMIOUtils.closeInputStream(prefIn);
+                UMIOUtils.INSTANCE.closeInputStream(prefIn);
             }
         }
 

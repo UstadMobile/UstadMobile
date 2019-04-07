@@ -155,7 +155,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
     }
 
     public static String getMimeType(String uri) {
-        String mimeResult = theMimeTypes.get(UMFileUtil.getExtension(uri));
+        String mimeResult = theMimeTypes.get(UMFileUtil.INSTANCE.getExtension(uri));
         return mimeResult != null ? mimeResult : "application/octet-stream";
     }
 
@@ -177,7 +177,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
     @Deprecated
     public String mountZip(String zipPath, String mountPath) {
         if(mountPath == null) {
-            mountPath= UMFileUtil.getFilename(zipPath) + '-' +
+            mountPath= UMFileUtil.INSTANCE.getFilename(zipPath) + '-' +
                     new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         }
 

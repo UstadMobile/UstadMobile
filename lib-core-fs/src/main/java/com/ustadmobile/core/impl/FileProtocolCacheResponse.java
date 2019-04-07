@@ -26,7 +26,7 @@ public class FileProtocolCacheResponse extends AbstractCacheResponse {
         switch (headerName) {
             case UmHttpRequest.HEADER_CONTENT_TYPE:
                 return UstadMobileSystemImpl.getInstance().getMimeTypeFromExtension(
-                        UMFileUtil.getExtension(file.getName()));
+                        UMFileUtil.INSTANCE.getExtension(file.getName()));
             case UmHttpRequest.HEADER_CONTENT_LENGTH:
                 return String.valueOf(file.length());
 

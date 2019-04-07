@@ -318,9 +318,9 @@ public class ResumableHttpDownload {
         }catch(IOException e) {
             ioe = e;
         }finally {
-            UMIOUtils.closeInputStream(propertiesIn);
+            UMIOUtils.INSTANCE.closeInputStream(propertiesIn);
             UMIOUtils.closeOutputStream(propertiesOut);
-            UMIOUtils.closeInputStream(httpIn);
+            UMIOUtils.INSTANCE.closeInputStream(httpIn);
             httpIn = null;
             try {
                 statusLock.lock();
@@ -362,7 +362,7 @@ public class ResumableHttpDownload {
             }
         }
 
-        UMIOUtils.throwIfNotNullIO(ioe);
+        UMIOUtils.INSTANCE.throwIfNotNullIO(ioe);
 
         return completed;
     }

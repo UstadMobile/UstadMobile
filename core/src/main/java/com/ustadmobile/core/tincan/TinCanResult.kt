@@ -28,12 +28,10 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.tincan;
+package com.ustadmobile.core.tincan
 
 /**
  *
  * @author mike
  */
-public class TinCanResult {
-    
-}
+class TinCanResult
