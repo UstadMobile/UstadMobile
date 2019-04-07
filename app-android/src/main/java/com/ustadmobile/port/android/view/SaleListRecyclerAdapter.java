@@ -53,7 +53,7 @@ public class SaleListRecyclerAdapter extends
 
         assert entity != null;
         saleTitle.setText(entity.getSaleTitle());
-        String saleAmountWithCurrency = String.valueOf(entity.getSaleAmount()) + " " +
+        String saleAmountWithCurrency = String.valueOf(Math.round(entity.getSaleAmount())) + " " +
                 entity.getSaleCurrency();
         saleAmount.setText(saleAmountWithCurrency);
         saleLocation.setText(entity.getLocationName());
