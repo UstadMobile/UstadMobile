@@ -98,7 +98,7 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Void> callback) {
+    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Object> callback) {
 
     }
 

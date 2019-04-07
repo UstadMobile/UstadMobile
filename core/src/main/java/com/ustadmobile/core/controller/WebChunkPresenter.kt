@@ -70,8 +70,8 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
                 sourceUrl,
                 repoAppDatabase, impl,
                 true,
-                getContext(), object : UmCallback<Void> {
-            override fun onSuccess(result: Void) {
+                getContext(), object : UmCallback<Any> {
+            override fun onSuccess(result: Any) {
 
             }
 

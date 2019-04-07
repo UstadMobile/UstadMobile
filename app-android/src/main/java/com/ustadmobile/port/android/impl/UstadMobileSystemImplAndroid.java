@@ -650,7 +650,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Void> callback) {
+    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Object> callback) {
         Context ctx = (Context) context;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

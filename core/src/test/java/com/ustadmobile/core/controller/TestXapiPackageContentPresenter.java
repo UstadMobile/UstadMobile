@@ -106,7 +106,7 @@ public class TestXapiPackageContentPresenter {
     @Test
     public void givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() throws InterruptedException{
         Hashtable args = new Hashtable();
-        args.put(XapiPackageContentView.Companion.getARG_CONTAINER_UID(), String.valueOf(xapiContainer.getContainerUid()));
+        args.put(XapiPackageContentView.ARG_CONTAINER_UID, String.valueOf(xapiContainer.getContainerUid()));
 
         XapiPackageContentPresenter xapiPresenter = new XapiPackageContentPresenter(
                 PlatformTestUtil.getTargetContext(), args, mockXapiPackageContentView);

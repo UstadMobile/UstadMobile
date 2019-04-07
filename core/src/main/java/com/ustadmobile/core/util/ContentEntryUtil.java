@@ -38,7 +38,7 @@ public class ContentEntryUtil {
     public static void goToContentEntry(long contentEntryUid, UmAppDatabase dbRepo,
                                         UstadMobileSystemImpl impl, boolean openEntryIfNotDownloaded,
                                         Object context,
-                                        UmCallback<Void> callback) {
+                                        UmCallback<Object> callback) {
 
         dbRepo.getContentEntryDao().findByUidWithContentEntryStatus(contentEntryUid, new UmCallback<ContentEntryWithContentEntryStatus>() {
 
@@ -62,7 +62,7 @@ public class ContentEntryUtil {
                                              UmAppDatabase dbRepo,
                                              UstadMobileSystemImpl impl, boolean openEntryIfNotDownloaded,
                                              Object context,
-                                             UmCallback<Void> callback) {
+                                             UmCallback<Object> callback) {
 
         if (entryStatus.getContentEntryStatus() != null
                 && entryStatus.getContentEntryStatus().getDownloadStatus() == JobStatus.COMPLETE) {
@@ -128,7 +128,7 @@ public class ContentEntryUtil {
                     }
                     if (viewName != null) {
                         impl.go(viewName, args, context);
-                        UmCallbackUtil.onSuccessIfNotNull(callback, null);
+                        UmCallbackUtil.onSuccessIfNotNull(callback, new Object());
                     }
                 }
 
@@ -151,7 +151,7 @@ public class ContentEntryUtil {
     public static void goToContentEntryBySourceUrl(String sourceUrl, UmAppDatabase dbRepo,
                                                    UstadMobileSystemImpl impl, boolean openEntryIfNotDownloaded,
                                                    Object context,
-                                                   UmCallback<Void> callback) {
+                                                   UmCallback<Object> callback) {
 
         dbRepo.getContentEntryDao().findBySourceUrlWithContentEntryStatus(sourceUrl, new UmCallback<ContentEntryWithContentEntryStatus>() {
             @Override
@@ -184,7 +184,7 @@ public class ContentEntryUtil {
      */
     public static void goToContentEntryByViewDestination(String viewDestination, UmAppDatabase dbRepo,
                                                          UstadMobileSystemImpl impl, boolean openEntryIfNotDownloaded,
-                                                         Object context, UmCallback<Void> callback) {
+                                                         Object context, UmCallback<Object> callback) {
         //substitute for previously scraped content
         viewDestination = viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?");

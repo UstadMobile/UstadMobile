@@ -26,12 +26,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.NetworkNode
 
-import java.util.Collections
-import java.util.HashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER
+import java.util.*
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                                   viewContract: ContentEntryDetailView,
@@ -226,14 +225,12 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
         }
     }
 
-    fun handleDownloadButtonClick(isDownloadComplete: Boolean, entryUuid: Long?) {
+    fun handleDownloadButtonClick(isDownloadComplete: Boolean ?, entryUuid: Long?) {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext())
-        if (isDownloadComplete) {
-            ContentEntryUtil.goToContentEntry(entryUuid!!,
-                    repoAppDatabase, impl,
-                    isDownloadComplete,
-                    getContext(), object : UmCallback<Void> {
-                override fun onSuccess(result: Void) {
+        if (isDownloadComplete!!) {
+            ContentEntryUtil.goToContentEntry(entryUuid!!, repoAppDatabase, impl, isDownloadComplete,
+                    getContext()!!, object : UmCallback<Any> {
+                override fun onSuccess(result: Any ?) {
 
                 }
 

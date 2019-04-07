@@ -646,7 +646,7 @@ public abstract class UstadMobileSystemImpl {
     }
 
     public abstract void openFileInDefaultViewer(Object context, String path, String mimeType,
-                                                 UmCallback<Void> callback);
+                                                 UmCallback<Object> callback);
 
 
 }
