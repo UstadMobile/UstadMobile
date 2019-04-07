@@ -28,64 +28,29 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.contentformats.epub.opf;
+package com.ustadmobile.core.contentformats.epub.opf
 
 /**
  *
  * @author varuna
  */
-public class OpfItem {
-    public String href;
+class OpfItem {
 
-    public String mediaType;
+    var href: String? = ""
 
-    public String properties;
+    var mediaType: String? = ""
 
-    public boolean linear;
+    var properties: String? = ""
 
-    public String id;
-    
-    public OpfItem(){
-        this.linear = true;
+    var isLinear: Boolean? = false
+
+    var id: String? = ""
+
+    init {
+        this.isLinear = true
     }
 
-    public String getHref() {
-        return href;
-    }
-
-    public void setHref(String href) {
-        this.href = href;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMimeType(String mediaType) {
-        this.mediaType = mediaType;
-    }
-
-    public String getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String properties) {
-        this.properties = properties;
-    }
-
-    public boolean isLinear() {
-        return linear;
-    }
-
-    public void setLinear(boolean linear) {
-        this.linear = linear;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    fun setMimeType(mediaType: String) {
+        this.mediaType = mediaType
     }
 }

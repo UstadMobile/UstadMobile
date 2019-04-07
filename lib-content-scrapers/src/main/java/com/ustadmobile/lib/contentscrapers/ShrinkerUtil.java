@@ -248,9 +248,9 @@ public class ShrinkerUtil {
                                             .toString().replaceAll(Pattern.quote("\\"), "/");
 
                                     OpfItem styleOpf = new OpfItem();
-                                    styleOpf.href = pathFromOpfToStyleFile;
-                                    styleOpf.mediaType = MIMETYPE_CSS;
-                                    styleOpf.id = "style_" + countStyle;
+                                    styleOpf.setHref(pathFromOpfToStyleFile);
+                                    styleOpf.setMediaType(MIMETYPE_CSS);
+                                    styleOpf.setId("style_" + countStyle);
                                     newOpfItems.add(styleOpf);
 
                                     styleMap.put(cssText, pathToStyleFile);
@@ -273,9 +273,9 @@ public class ShrinkerUtil {
                                     .toString().replaceAll(Pattern.quote("\\"), "/");
 
                             OpfItem styleOpf = new OpfItem();
-                            styleOpf.href = pathFromOpfToCssFile;
-                            styleOpf.mediaType = MIMETYPE_CSS;
-                            styleOpf.id = "cssHelper";
+                            styleOpf.setHref(pathFromOpfToCssFile);
+                            styleOpf.setMediaType(MIMETYPE_CSS);
+                            styleOpf.setId("cssHelper");
 
                             newOpfItems.add(styleOpf);
 
@@ -291,7 +291,7 @@ public class ShrinkerUtil {
             }
 
             for (OpfItem item : newOpfItems) {
-                manifestList.put(item.id, item);
+                manifestList.put(item.getId(), item);
             }
 
             if (newOpfItems.size() == 0 && replacedFiles.size() == 0 && styleMap.size() == 0) {

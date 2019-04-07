@@ -29,51 +29,53 @@
 
  */
 
-package com.ustadmobile.core.contentformats.epub.ocf;
+package com.ustadmobile.core.contentformats.epub.ocf
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.io.IOException
+import java.util.ArrayList
 
 
 /**
  * This class exists to quickly parse container.xml files that give a list
  * of root elements in the container (e.g. zip) file
- * 
+ *
  * @author mike
  */
-public class OcfDocument {
+class OcfDocument {
 
-    public OcfDocument() {
-        rootFiles = new ArrayList<>();
+    internal val rootFiles: MutableList<OcfRootFile>
+
+    init {
+        rootFiles = ArrayList()
     }
-    
-    private List<OcfRootFile> rootFiles;
-    
-    public static final String ROOTFILETAG = "rootfile";
 
 
-    public void loadFromParser(XmlPullParser xpp) throws XmlPullParserException, IOException{
-        int evtType;
+    @Throws(XmlPullParserException::class, IOException::class)
+    fun loadFromParser(xpp: XmlPullParser) {
+        var evtType: Int
 
         do {
-            evtType = xpp.next();
-            if(evtType == XmlPullParser.START_TAG) {
-                if(ROOTFILETAG.equals(xpp.getName())) {
-                    String fullPath = xpp.getAttributeValue(null, "full-path");
-                    String mediaType = xpp.getAttributeValue(null, "media-type");
-                    rootFiles.add(new OcfRootFile(fullPath, mediaType));
+            evtType = xpp.next()
+            if (evtType == XmlPullParser.START_TAG) {
+                if (ROOTFILETAG == xpp.name) {
+                    val fullPath = xpp.getAttributeValue(null, "full-path")
+                    val mediaType = xpp.getAttributeValue(null, "media-type")
+                    rootFiles.add(OcfRootFile(fullPath, mediaType))
                 }
             }
-        }while(evtType != XmlPullParser.END_DOCUMENT);
+        } while (evtType != XmlPullParser.END_DOCUMENT)
     }
 
-    public List<OcfRootFile> getRootFiles() {
-        return rootFiles;
+    fun getRootFiles(): List<OcfRootFile> {
+        return rootFiles
+    }
+
+    companion object {
+
+        val ROOTFILETAG = "rootfile"
     }
 }
 

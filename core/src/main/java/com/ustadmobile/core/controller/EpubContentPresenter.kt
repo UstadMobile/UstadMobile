@@ -169,14 +169,14 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                             linearSpineHrefsRelative[i])
                 }
 
-                val opfCoverImageItem = opf.getCoverImage(null)
+                val opfCoverImageItem = opf.getCoverImage("")
                 val authorNames = if (opf.numCreators > 0)
                     UMUtil.joinStrings(opf.creators, ", ")
                 else
                     null
 
                 epubContentView!!.runOnUiThread {
-                    epubContentView.setContainerTitle(opf.getTitle())
+                    epubContentView.setContainerTitle(opf.title)
                     epubContentView.setSpineUrls(linearSpineUrls)
                     if (opfCoverImageItem != null) {
                         epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl,
@@ -188,11 +188,11 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                     }
                 }
 
-                if (opf.getNavItem() == null)
+                if (opf.navItem == null)
                     return
 
                 val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
-                        mountedUrl, ocf!!.rootFiles[0].fullPath), opf.getNavItem().href)
+                        mountedUrl, ocf!!.rootFiles[0].fullPath), opf.navItem!!.href)
 
                 UstadMobileSystemImpl.getInstance().makeRequestAsync(UmHttpRequest(
                         getContext(), navXhtmlUrl), navCallbackHandler)

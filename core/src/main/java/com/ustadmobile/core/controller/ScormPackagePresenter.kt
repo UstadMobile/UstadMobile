@@ -52,7 +52,7 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
                 scormManifest!!.loadFromInputStream(response.responseAsStream)
                 val defaultOrg = scormManifest!!.defaultOrganization
                 val startRes = scormManifest!!.getResourceByIdentifier(
-                        defaultOrg.items[0].identifierRef)
+                        defaultOrg.items[0].identifierRef!!)
                 scormPackageView.runOnUiThread {
                     scormPackageView.setTitle(scormManifest!!.defaultOrganization.title)
                     scormPackageView.loadUrl(UMFileUtil.joinPaths(mountedPath,

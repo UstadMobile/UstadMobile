@@ -28,35 +28,10 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.contentformats.epub.ocf;
+package com.ustadmobile.core.contentformats.epub.ocf
 
 /**
  *
  * @author mike
  */
- public class OcfRootFile {
-    private String fullPath;
-
-    private String mediaType;
-
-    public OcfRootFile(String fullPath, String mediaType) {
-        this.fullPath = fullPath;
-        this.mediaType = mediaType;
-    }
-
-    public String getFullPath() {
-        return fullPath;
-    }
-
-    public void setFullPath(String fullPath) {
-        this.fullPath = fullPath;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
-    }
-}
+class OcfRootFile(var fullPath: String?, var mediaType: String?)

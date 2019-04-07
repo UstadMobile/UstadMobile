@@ -26,11 +26,11 @@ public class TestOpfDocument {
         parser.setInput(opfIn, "UTF-8");
         OpfDocument opf = new OpfDocument();
         opf.loadFromOPF(parser);
-        Assert.assertEquals("Title as expected", "The Little Chicks", opf.title);
-        Assert.assertEquals("Id as expected", "202b10fe-b028-4b84-9b84-852aa766607d", opf.id);
+        Assert.assertEquals("Title as expected", "The Little Chicks", opf.getTitle());
+        Assert.assertEquals("Id as expected", "202b10fe-b028-4b84-9b84-852aa766607d", opf.getId());
         Assert.assertTrue("Spine loaded", opf.getSpine().size() > 0);
         Assert.assertEquals("Language loaded", "en-US", opf.getLanguages().get(0));
-        Assert.assertEquals("Cover image as expected", "cover.png", opf.getCoverImage(null).href);
+        Assert.assertEquals("Cover image as expected", "cover.png", opf.getCoverImage("").getHref());
         Assert.assertEquals("Loaded author 1 as expected", "Benita Rowe",
                 opf.getCreator(0).getCreator());
         Assert.assertEquals("Loaded author 1 as expected -id", "author1",
