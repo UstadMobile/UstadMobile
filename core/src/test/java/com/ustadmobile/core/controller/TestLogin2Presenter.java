@@ -88,7 +88,7 @@ public class TestLogin2Presenter {
     @Test
     public void givenValidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSystemImplGo() {
         Hashtable args = new Hashtable();
-        args.put(Login2Presenter.ARG_NEXT, "somewhere");
+        args.put(Login2Presenter.Companion.getARG_NEXT(), "somewhere");
 
         Login2Presenter presenter = new Login2Presenter(PlatformTestUtil.getTargetContext(),
                 args, mockView);

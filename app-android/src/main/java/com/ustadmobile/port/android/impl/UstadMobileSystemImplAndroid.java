@@ -552,7 +552,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         } else {
             editor.remove(key);
         }
-        editor.commit();
+        editor.apply();
     }
 
 

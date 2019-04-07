@@ -74,7 +74,7 @@ public class TestRegister2Presenter {
 
 
         args = new Hashtable();
-        args.put(Login2Presenter.ARG_NEXT, DESTINATION);
+        args.put(Login2Presenter.Companion.getARG_NEXT(), DESTINATION);
 
         mockView = Mockito.mock(Register2View.class);
         doAnswer((invocationOnMock) -> {

@@ -62,7 +62,7 @@ public class XapiPackageContentActivityEspressoTest {
 
     public void launchActivity() {
         Intent launchIntent = new Intent();
-        launchIntent.putExtra(XapiPackageContentView.ARG_CONTAINER_UID,
+        launchIntent.putExtra(XapiPackageContentView.Companion.getARG_CONTAINER_UID(),
                 String.valueOf(tempXapiPackageContainer.getContainer().getContainerUid()));
         mActivityRule.launchActivity(launchIntent);
     }

@@ -75,16 +75,16 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     @Override
     public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
-        umAppDatabase = UmAppDatabase.getInstance(context);
+        umAppDatabase = UmAppDatabase.getInstance(getContext());
 
         impl = UstadMobileSystemImpl.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
-        view.setWifiOnlyOptionVisible(false);
+        getView().setWifiOnlyOptionVisible(false);
 
-        impl.getStorageDirs(context, result -> {
+        impl.getStorageDirs(getContext(), result -> {
             destinationDir = result.get(0).getDirURI();
-            view.runOnUiThread(() -> view.setUpStorageOptions(result));
+            getView().runOnUiThread(() -> getView().setUpStorageOptions(result));
             new Thread(this::setup).start();
         });
 
@@ -92,7 +92,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
 
     private void startObservingJob(){
-        view.runOnUiThread(() -> {
+        getView().runOnUiThread(() -> {
             downloadDownloadJobLive = umAppDatabase.getDownloadJobDao().getJobLive(downloadJobUid);
             downloadDownloadJobLive.observe(DownloadDialogPresenter.this,
                     this::handleDownloadJobStatusChange);
@@ -100,7 +100,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     private void startObservingDownloadSetMeteredState(){
-        view.runOnUiThread(() -> {
+        getView().runOnUiThread(() -> {
             allowedMeteredLive = umAppDatabase.getDownloadSetDao()
                     .getLiveMeteredNetworkAllowed(downloadSetUid);
             allowedMeteredLive.observe(DownloadDialogPresenter.this,
@@ -109,28 +109,28 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     private void handleDownloadSetMeteredStateChange(Boolean meteredConnection){
-        view.setDownloadOverWifiOnly(meteredConnection != null && !meteredConnection);
+        getView().setDownloadOverWifiOnly(meteredConnection != null && !meteredConnection);
     }
 
     private void handleDownloadJobStatusChange(DownloadJob downloadJob){
         if(downloadJob != null){
             int downloadStatus = downloadJob.getDjStatus();
-            view.setCalculatingViewVisible(false);
-            view.setWifiOnlyOptionVisible(true);
+            getView().setCalculatingViewVisible(false);
+            getView().setWifiOnlyOptionVisible(true);
             if(downloadStatus >= JobStatus.COMPLETE_MIN){
                 deleteFileOptions = true;
-                view.setStackOptionsVisible(false);
-                view.setBottomButtonsVisible(true);
+                getView().setStackOptionsVisible(false);
+                getView().setBottomButtonsVisible(true);
                 statusMessage = impl.getString(MessageID.download_state_downloaded,
                         getContext());
-                view.setBottomButtonPositiveText(impl.getString(
+                getView().setBottomButtonPositiveText(impl.getString(
                         MessageID.download_delete_btn_label,getContext()));
-                view.setBottomButtonNegativeText(impl.getString(
+                getView().setBottomButtonNegativeText(impl.getString(
                         MessageID.download_cancel_label,getContext()));
             }else if(downloadStatus >= JobStatus.RUNNING_MIN){
                 deleteFileOptions = false;
-                view.setStackOptionsVisible(true);
-                view.setBottomButtonsVisible(false);
+                getView().setStackOptionsVisible(true);
+                getView().setBottomButtonsVisible(false);
                 String [] optionTexts = new String[]{
                         impl.getString(MessageID.download_pause_stacked_label,getContext()),
                         impl.getString(MessageID.download_cancel_stacked_label,getContext()),
@@ -138,7 +138,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 };
                 statusMessage = impl.getString(MessageID.download_state_downloading,
                         getContext());
-                view.setStackedOptions(
+                getView().setStackedOptions(
                         new int[]{STACKED_BUTTON_PAUSE, STACKED_BUTTON_CANCEL,
                                 STACKED_BUTTON_CONTINUE},
                         optionTexts);
@@ -146,11 +146,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
                 deleteFileOptions = false;
                 statusMessage = impl.getString(MessageID.download_state_download,
                         getContext());
-                view.setStackOptionsVisible(false);
-                view.setBottomButtonsVisible(true);
-                view.setBottomButtonPositiveText(impl.getString(
+                getView().setStackOptionsVisible(false);
+                getView().setBottomButtonsVisible(true);
+                getView().setBottomButtonPositiveText(impl.getString(
                         MessageID.download_continue_btn_label,getContext()));
-                view.setBottomButtonNegativeText(impl.getString(
+                getView().setBottomButtonNegativeText(impl.getString(
                         MessageID.download_cancel_label,getContext()));
             }
 
@@ -158,7 +158,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             new Thread(() -> {
                 int totalDownloadJobItems = umAppDatabase.getDownloadJobItemDao()
                         .getTotalDownloadJobItems(downloadJobUid);
-                view.runOnUiThread(() -> view.setStatusText(statusMessage, totalDownloadJobItems,
+                getView().runOnUiThread(() -> getView().setStatusText(statusMessage, totalDownloadJobItems,
                         UMFileUtil.formatFileSize(downloadJob.getTotalBytesToDownload())));
             }).start();
 
@@ -312,7 +312,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     private void dismissDialog(){
-        view.runOnUiThread(() -> view.dismissDialog());
+        getView().runOnUiThread(() -> getView().dismissDialog());
     }
 
     private void cancelDownload(){
