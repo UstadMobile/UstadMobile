@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateAgent;
+import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.getAgent;
 import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateContextStatementJoin;
 import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.getPerson;
 import static com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateStatementEntity;
@@ -293,7 +293,7 @@ public class StatementEndpoint {
 
         VerbEntity verbEntity = insertOrUpdateVerb(verbDao, statement.getVerb().getId());
         Person person = getPerson(personDao, statement.getActor());
-        AgentEntity agentEntity = insertOrUpdateAgent(agentDao, personDao, statement.getActor());
+        AgentEntity agentEntity = getAgent(agentDao, personDao, statement.getActor());
         long agentUid = agentEntity.getAgentUid();
 
         long authorityUid = 0;
@@ -309,7 +309,7 @@ public class StatementEndpoint {
                     }
                 }
             }
-            AgentEntity authorityEntity = insertOrUpdateAgent(agentDao, personDao, authority);
+            AgentEntity authorityEntity = getAgent(agentDao, personDao, authority);
             authorityUid = authorityEntity != null ? authorityEntity.getAgentUid() : 0;
         }
 
@@ -326,7 +326,7 @@ public class StatementEndpoint {
             Statement subStatement = statement.getSubStatement();
             Person subActor = getPerson(personDao, subStatement.getActor());
             if (subActor == null) {
-                AgentEntity subAgent = insertOrUpdateAgent(agentDao, personDao, statement.getSubStatement().getActor());
+                AgentEntity subAgent = getAgent(agentDao, personDao, statement.getSubStatement().getActor());
                 subActorUid = subAgent.getAgentUid();
             }
 
@@ -345,12 +345,12 @@ public class StatementEndpoint {
         if (statement.getContext() != null) {
 
             if (statement.getContext().getInstructor() != null) {
-                AgentEntity instructorAgent = insertOrUpdateAgent(agentDao, personDao, statement.getContext().getInstructor());
+                AgentEntity instructorAgent = getAgent(agentDao, personDao, statement.getContext().getInstructor());
                 instructorUid = instructorAgent.getAgentUid();
             }
 
             if (statement.getContext().getTeam() != null) {
-                AgentEntity teamAgent = insertOrUpdateAgent(agentDao, personDao, statement.getContext().getTeam());
+                AgentEntity teamAgent = getAgent(agentDao, personDao, statement.getContext().getTeam());
                 teamUid = teamAgent.getAgentUid();
             }
 

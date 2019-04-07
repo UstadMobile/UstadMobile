@@ -14,11 +14,12 @@ public class State {
 
     private HashMap<String, Object> content;
 
-    public State(String stateId, Actor agent, String activityId,  HashMap<String, Object> contentMap) {
+    public State(String stateId, Actor agent, String activityId, HashMap<String, Object> contentMap, String registration) {
         this.agent = agent;
         this.stateId = stateId;
         this.activityId = activityId;
         this.content = contentMap;
+        this.registration = registration;
     }
 
     public Actor getAgent() {

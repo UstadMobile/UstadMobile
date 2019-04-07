@@ -26,15 +26,18 @@ public class StateEntity {
 
     private boolean isactive;
 
-    public StateEntity(String activityId, long agentUid, String registration, String stateId, boolean isActive) {
+    private long timestamp;
+
+    public StateEntity(String activityId, long agentUid, String registration, String stateId, boolean isActive, long timestamp) {
         this.activityId = activityId;
         this.agentUid = agentUid;
         this.registration = registration;
         this.isactive = isActive;
         this.stateId = stateId;
+        this.timestamp = timestamp;
     }
 
-    public StateEntity(){
+    public StateEntity() {
 
     }
 
@@ -117,6 +120,14 @@ public class StateEntity {
 
     public void setStateLastChangedBy(int stateLastChangedBy) {
         this.stateLastChangedBy = stateLastChangedBy;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

@@ -26,11 +26,10 @@ import com.ustadmobile.lib.db.entities.VerbEntity;
 import com.ustadmobile.lib.db.entities.XObjectEntity;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class XapiUtil {
 
-    public static AgentEntity insertOrUpdateAgent(AgentDao dao, PersonDao personDao, Actor actor) {
+    public static AgentEntity getAgent(AgentDao dao, PersonDao personDao, Actor actor) {
         Person person = getPerson(personDao, actor);
         AgentEntity agentEntity = dao.getAgentByAnyId(
                 actor.getOpenid(),
@@ -126,7 +125,7 @@ public class XapiUtil {
         StateEntity stateEntity = dao.findByStateId(state.getStateId());
 
         StateEntity changedState = new StateEntity(state.getActivityId(), agentUid,
-                state.getRegistration(), state.getStateId(), true);
+                state.getRegistration(), state.getStateId(), true, System.currentTimeMillis());
 
         if (stateEntity == null) {
             changedState.setStateUid(dao.insert(changedState));
@@ -141,31 +140,21 @@ public class XapiUtil {
 
     public static void insertOrUpdateStateContent(StateContentDao dao, HashMap<String, Object> contentMap, StateEntity stateEntity) {
 
-        List<StateContentEntity> contentList = dao.findAllStateContentWithStateUid(stateEntity.getStateUid());
         for (String key : contentMap.keySet()) {
 
             Object value = contentMap.get(key);
             StateContentEntity content = dao.findStateContentByKeyAndStateUid(key, stateEntity.getStateUid());
             if (content == null) {
-                StateContentEntity contentEntity = new StateContentEntity(key, stateEntity.getStateUid(), String.valueOf(value), true);
+                StateContentEntity contentEntity = new StateContentEntity(key, stateEntity.getStateUid(), String.valueOf(value));
                 contentEntity.setStateContentUid(dao.insert(contentEntity));
             } else {
-                StateContentEntity changedContent = new StateContentEntity(key, stateEntity.getStateUid(), String.valueOf(value), true);
+                StateContentEntity changedContent = new StateContentEntity(key, stateEntity.getStateUid(), String.valueOf(value));
                 changedContent.setStateContentUid(content.getStateContentUid());
                 if (!changedContent.equals(content)) {
                     dao.update(changedContent);
                 }
             }
         }
-
-        for (StateContentEntity entity : contentList) {
-
-            Object content = contentMap.get(entity.getStateContentKey());
-            if (content == null) {
-                dao.setInActiveState(entity.getStateContentKey(), stateEntity.getStateUid());
-            }
-        }
-
     }
 
     public static StatementEntity insertOrUpdateStatementEntity(StatementDao dao, Statement statement, Gson gson,

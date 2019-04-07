@@ -53,7 +53,7 @@ public class TestStateParser {
         Actor agent = gson.fromJson(agentJson, Actor.class);
         HashMap<String, Object> contentMap = gson.fromJson(content, contentMapToken);
 
-        State state = new State(stateId, agent, activityId, contentMap);
+        State state = new State(stateId, agent, activityId, contentMap, "");
         StateEndpoint endpoint = new StateEndpoint(repo, gson);
         endpoint.storeState(state);
 

@@ -17,7 +17,4 @@ public abstract class StateContentDao implements SyncableDao<StateContentEntity,
 
     @UmQuery("SELECT * FROM StateContentEntity WHERE stateContentStateUid = :stateUid AND stateContentKey = :key")
     public abstract StateContentEntity findStateContentByKeyAndStateUid(String key, long stateUid);
-
-    @UmQuery("UPDATE StateContentEntity SET isactive = 0 WHERE stateContentStateUid = :stateUid AND stateContentKey = :stateContentKey")
-    public abstract void setInActiveState(String stateContentKey, long stateUid);
 }
