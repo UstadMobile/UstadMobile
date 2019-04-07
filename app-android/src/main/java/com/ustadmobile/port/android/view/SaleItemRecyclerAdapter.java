@@ -67,7 +67,6 @@ public class SaleItemRecyclerAdapter extends
 
         SaleItemListDetail entity = getItem(position);
 
-        //TODO: Get image of SaleProduct
         long pictureUid = entity.getSaleItemPictureUid();
         ImageView imageView = holder.itemView.findViewById(R.id.item_sale_item_image);
         String imagePath = "";
@@ -93,7 +92,7 @@ public class SaleItemRecyclerAdapter extends
         float price = entity.getSaleItemPricePerPiece();
 
         String priceString = String.valueOf(price) + theActivity.getString(R.string.currency_afs);
-        String priceTotalString = String.valueOf(quantity*price) + theActivity.getString(R.string.currency_afs);
+        String priceTotalString = String.valueOf(Math.round(quantity*price)) + theActivity.getString(R.string.currency_afs);
         String dueString = theActivity.getString(R.string.due) + " " +
                 UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                         entity.getSaleItemDueDate(), null);
