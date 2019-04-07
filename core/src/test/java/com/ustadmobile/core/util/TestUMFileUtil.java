@@ -22,10 +22,10 @@ public class TestUMFileUtil {
     public void testAppendExtensionToFilenameIfNeeded() {
         assertEquals("Will append file extension when needed", "foo.bar.epub",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.bar",
-                        EPUBTypePlugin.MIME_TYPES[0]));
+                        EPUBTypePlugin.Companion.getMIME_TYPES()[0]));
         assertEquals("Will leave filename when extension is already there", "foo.epub",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.epub",
-                        EPUBTypePlugin.MIME_TYPES[0]));
+                        EPUBTypePlugin.Companion.getMIME_TYPES()[0]));
         assertEquals("Will leave filename when extension is unknown", "foo.bar",
                 UMFileUtil.appendExtensionToFilenameIfNeeded("foo.bar",
                 "application/x-foo-bar"));
