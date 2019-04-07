@@ -27,6 +27,11 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
 
     //FIND ALL ACTIVE
 
+    public static final String ALL_SALES_QUERY = "SELECT * FROM Sale";
+
+    @UmQuery(ALL_SALES_QUERY)
+    public abstract List<Sale> findAllList();
+
     public static final String ALL_SALES_ACTIVE_QUERY = "SELECT * FROM Sale WHERE saleActive = 1";
 
     @UmQuery(ALL_SALES_ACTIVE_QUERY)
@@ -51,6 +56,9 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
 
     @UmQuery("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
     public abstract void findAllSaleWithTitleAsync(String saleTitle, UmCallback<List<Sale>> resultCallback);
+
+    @UmQuery("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
+    public abstract List<Sale> findAllSaleWithTitle(String saleTitle);
 
 
     /*

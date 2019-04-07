@@ -37,10 +37,17 @@ public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingV
      */
     private enum OnBoardScreen {
 
-        SCREEN_1(R.string.onboarding_no_internet_headline,R.string.onboarding_no_internet_subheadline
-                ,R.layout.onboard_screen_view, R.drawable.downloading_data),
-        SCREEN_2(R.string.onboarding_offline_sharing,R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view, R.drawable.sharing_data);
+
+        SCREEN_1(R.string.onboarding_goldozi_1,R.string.onboarding_goldozi_1b
+                ,R.layout.onboard_screen_view, R.drawable.goldozi_logo1),
+        SCREEN_2(R.string.onboarding_goldozi_2,R.string.onboarding_empty,
+                R.layout.onboard_screen_view, R.drawable.goldozi_products1),
+        SCREEN_3(R.string.onboarding_goldozi_3,R.string.onboarding_empty,
+                R.layout.onboard_screen_view, R.drawable.goldozi_sales1),
+        SCREEN_4(R.string.onboarding_goldozi_4,R.string.onboarding_empty,
+                R.layout.onboard_screen_view, R.drawable.goldozi_courses1);
+
+
 
         private int headlineStringResId;
 

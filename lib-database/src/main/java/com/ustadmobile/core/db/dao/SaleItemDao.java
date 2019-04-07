@@ -24,8 +24,28 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
     @UmInsert
     public abstract void insertAsync(SaleItem entity, UmCallback<Long> insertCallback);
 
+    public static final String GENERATE_SALE_NAME = " SELECT (SELECT SaleItem.saleItemQuantity " +
+            "  FROM Sale s " +
+            "  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = s.saleUid " +
+            "  WHERE s.saleUid = :saleUid " +
+            "  ORDER BY s.saleCreationDate ASC LIMIT 1) || 'x ' || " +
+            "  (SELECT SaleProduct.saleProductName " +
+            "  FROM SaleItem i " +
+            "  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = i.saleItemProductUid" +
+            "  WHERE i.saleItemSaleUid = :saleUid" +
+            "  ORDER BY i.saleItemCreationDate ASC LIMIT 1) " +
+            "FROM Sale " +
+            "where Sale.saleUid = :saleUid ";
+    @UmQuery(GENERATE_SALE_NAME)
+    public abstract String getTitleForSaleUid(long saleUid);
+
+    @UmQuery(GENERATE_SALE_NAME)
+    public abstract void getTitleForSaleUidAsync(long saleUid, UmCallback<String> resultCallback);
 
     //FIND ALL ACTIVE
+
+    @UmQuery("SELECT * FROM SaleItem")
+    public abstract List<SaleItem> findAllList();
 
     public static final String ALL_ACTIVE_QUERY = "SELECT * FROM SaleItem WHERE saleItemActive = 1";
 

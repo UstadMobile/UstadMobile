@@ -318,7 +318,7 @@
     <string name="payments">payments</string>
     <string name="add_payment">Add payment</string>
     <string name="order_total">Order total</string>
-    <string name="discount">discount</string>
+    <string name="discount">Discount</string>
     <string name="balance_due">Balance due</string>
     <string name="order_notes">Order notes</string>
     <string name="collections">Collections</string>
@@ -331,4 +331,10 @@
     <string name="sale_details">Sale details</string>
     <string name="sale_detail">Sale detail</string>
     <string name="search">Search</string>
+    <string name="onboarding_goldozi_1">Welcome to Goldozi.</string>
+    <string name="onboarding_goldozi_1b">Swipe to learn more.</string>
+    <string name="onboarding_goldozi_2">Show products to customers.</string>
+    <string name="onboarding_goldozi_3">Track your stock and sales.</string>
+    <string name="onboarding_goldozi_4">Review your courses.</string>
+    <string name="onboarding_empty"> </string>
 </resources>

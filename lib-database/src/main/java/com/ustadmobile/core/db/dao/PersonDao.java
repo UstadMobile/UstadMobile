@@ -224,4 +224,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmQuery("SELECT * FROM Person WHERE active =1")
     public abstract UmProvider<Person> findAllPeopleProvider();
+
+    @UmQuery("Select * From Person WHERE active = 1")
+    public abstract List<Person> findAllPeople();
 }

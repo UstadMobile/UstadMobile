@@ -68,10 +68,6 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //Get provider 
-        umProvider = saleItemDao.findAllSaleItemListDetailActiveProvider();
-        view.setListProvider(umProvider);
-
         if(getArguments().containsKey(ARG_SALE_UID)){
             initFromSale(Long.parseLong((String) getArguments().get(ARG_SALE_UID)));
         }else{
@@ -218,15 +214,30 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     public void handleClickSave() {
 
         if(updatedSale != null){
-            saleDao.updateAsync(updatedSale, new UmCallback<Integer>() {
-                @Override
-                public void onSuccess(Integer result) {
-                    view.finish();
-                }
+            updatedSale.setSaleActive(true);
+            saleItemDao.getTitleForSaleUidAsync(updatedSale.getSaleUid(), new UmCallback<String>() {
+                        @Override
+                        public void onSuccess(String result) {
+                            updatedSale.setSaleTitle(result);
+                            saleDao.updateAsync(updatedSale, new UmCallback<Integer>() {
+                                @Override
+                                public void onSuccess(Integer result) {
+                                    view.finish();
+                                }
 
-                @Override
-                public void onFailure(Throwable exception) {exception.printStackTrace();}
-            });
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    exception.printStackTrace();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    });
+
         }
     }
 

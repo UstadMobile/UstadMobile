@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.OnBoardingView;
 
@@ -20,6 +21,7 @@ public class OnBoardingPresenter extends UstadBaseController<OnBoardingView> {
 
 
     public void handleGetStarted() {
-        UstadMobileSystemImpl.getInstance().go(DummyView.VIEW_NAME, getContext());
+        UstadMobileSystemImpl.getInstance().go(BasePoint2View.VIEW_NAME, getContext());
+
     }
 }

@@ -7,14 +7,20 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:layout_marginTop="90dp"
         android:id="@+id/drawable_res"
-        android:tint="@color/primary_dark"
+        android:layout_width="324dp"
+        android:layout_height="462dp"
         android:layout_above="@+id/heading"
-        android:layout_marginBottom="@dimen/dimen_40dp"
-        android:src="@drawable/downloading_data"
-        android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="@dimen/dimen_50dp"
+        android:layout_marginTop="@dimen/dimen_50dp"
+        android:layout_marginEnd="@dimen/dimen_50dp"
+        android:layout_marginRight="@dimen/dimen_50dp"
+        android:layout_marginBottom="@dimen/dimen_50dp"
+        android:src="@drawable/downloading_data" />
 
     <android.support.v7.widget.AppCompatTextView
         android:textColor="@color/text_primary"

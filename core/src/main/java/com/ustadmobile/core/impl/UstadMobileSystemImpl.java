@@ -280,9 +280,9 @@ public abstract class UstadMobileSystemImpl {
             //TODO: change
             //go(Login2View.VIEW_NAME, null, context);
         }else {
-            //go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
+            go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
         }
-        go(BasePoint2View.VIEW_NAME, null, context);
+        //go(BasePoint2View.VIEW_NAME, null, context);
     }
 
     /**
