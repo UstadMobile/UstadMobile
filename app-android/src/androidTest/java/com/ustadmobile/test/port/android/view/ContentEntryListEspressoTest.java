@@ -10,21 +10,19 @@ import android.support.test.runner.AndroidJUnit4;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
@@ -81,9 +79,8 @@ public class ContentEntryListEspressoTest {
 
         ContentEntryDao contentDao = repo.getContentEntryDao();
         ContentEntryParentChildJoinDao pcjdao = repo.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao contentFileDao = repo.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repo.getContentEntryContentEntryFileJoinDao();
         ContentEntryRelatedEntryJoinDao contentEntryRelatedEntryJoinDao = repo.getContentEntryRelatedEntryJoinDao();
+        ContainerDao containerDao = repo.getContainerDao();
         LanguageDao langDao = repo.getLanguageDao();
         ContentCategorySchemaDao schemaDao = repo.getContentCategorySchemaDao();
         ContentCategoryDao categoryDao = repo.getContentCategoryDao();
@@ -311,18 +308,12 @@ public class ContentEntryListEspressoTest {
         NumberQuizJoin.setCepcjUid(7);
         pcjdao.insert(NumberQuizJoin);
 
-        ContentEntryFile contentEntryFile = new ContentEntryFile();
+        Container contentEntryFile = new Container();
         contentEntryFile.setMimeType("application/zip");
         contentEntryFile.setFileSize(10000);
         contentEntryFile.setLastModified(1540728217);
-        contentEntryFile.setContentEntryFileUid(8);
-        contentFileDao.insert(contentEntryFile);
-
-        ContentEntryContentEntryFileJoin fileJoin = new ContentEntryContentEntryFileJoin();
-        fileJoin.setCecefjContentEntryFileUid(contentEntryFile.getContentEntryFileUid());
-        fileJoin.setCecefjContentEntryUid(quiz.getContentEntryUid());
-        fileJoin.setCecefjUid(9);
-        contentEntryFileJoinDao.insert(fileJoin);
+        contentEntryFile.setContainerContentEntryUid(8);
+        containerDao.insert(contentEntryFile);
 
         ContentEntryRelatedEntryJoin englishEnglishJoin = new ContentEntryRelatedEntryJoin();
         englishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
@@ -341,18 +332,12 @@ public class ContentEntryListEspressoTest {
         arabicQuiz.setAuthor("حفلة");
         contentDao.insert(arabicQuiz);
 
-        ContentEntryFile updatedFile = new ContentEntryFile();
+        Container updatedFile = new Container();
         updatedFile.setMimeType("application/zip");
         updatedFile.setFileSize(10);
         updatedFile.setLastModified(1540728218);
-        updatedFile.setContentEntryFileUid(11);
-        contentFileDao.insert(updatedFile);
-
-        ContentEntryContentEntryFileJoin sameFileJoin = new ContentEntryContentEntryFileJoin();
-        sameFileJoin.setCecefjContentEntryFileUid(updatedFile.getContentEntryFileUid());
-        sameFileJoin.setCecefjContentEntryUid(arabicQuiz.getContentEntryUid());
-        sameFileJoin.setCecefjUid(12);
-        contentEntryFileJoinDao.insert(sameFileJoin);
+        updatedFile.setContainerContentEntryUid(11);
+        containerDao.insert(updatedFile);
 
         ContentEntryRelatedEntryJoin arabicEnglishJoin = new ContentEntryRelatedEntryJoin();
         arabicEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());
@@ -371,18 +356,12 @@ public class ContentEntryListEspressoTest {
         spanishQuiz.setAuthor("borrachera");
         contentDao.insert(spanishQuiz);
 
-        ContentEntryFile spanishFile = new ContentEntryFile();
+        Container spanishFile = new Container();
         spanishFile.setMimeType("application/zip");
         spanishFile.setFileSize(10000);
         spanishFile.setLastModified(1540728218);
-        spanishFile.setContentEntryFileUid(15);
-        contentFileDao.insert(spanishFile);
-
-        ContentEntryContentEntryFileJoin spanishFileJoin = new ContentEntryContentEntryFileJoin();
-        spanishFileJoin.setCecefjContentEntryFileUid(spanishFile.getContentEntryFileUid());
-        spanishFileJoin.setCecefjContentEntryUid(spanishQuiz.getContentEntryUid());
-        spanishFileJoin.setCecefjUid(16);
-        contentEntryFileJoinDao.insert(spanishFileJoin);
+        spanishFile.setContainerContentEntryUid(15);
+        containerDao.insert(spanishFile);
 
         ContentEntryRelatedEntryJoin spanishEnglishJoin = new ContentEntryRelatedEntryJoin();
         spanishEnglishJoin.setCerejContentEntryUid(quiz.getContentEntryUid());

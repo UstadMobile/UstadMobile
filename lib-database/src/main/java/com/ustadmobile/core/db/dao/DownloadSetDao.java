@@ -26,6 +26,9 @@ public abstract class DownloadSetDao {
     @UmInsert
     public abstract long insert(DownloadSet set);
 
+    @UmQuery("DELETE FROM DownloadSet")
+    public abstract void deleteAll(UmCallback<Void> callback);
+
     /**
      * Find a DownloadSet by the primary key
      *
@@ -47,7 +50,6 @@ public abstract class DownloadSetDao {
 
     @UmQuery("SELECT dsUid FROM DownloadSet WHERE dsRootContentEntryUid = :contentEntryUid")
     public abstract long findDownloadSetUidByRootContentEntryUid(long contentEntryUid);
-
 
     @UmTransaction
     public void cleanupUnused(long downloadSetUid){
@@ -78,5 +80,8 @@ public abstract class DownloadSetDao {
 
     @UmQuery("UPDATE DownloadSet SET destinationDir = :destinationDir WHERE dsUid = :dsUid")
     public abstract void updateDestinationDirectory(long dsUid, String destinationDir, UmCallback<Integer> callback);
+
+    @UmQuery("SELECT destinationDir FROM DownloadSet WHERE dsUid = :dsUid")
+    public abstract String getDestinationDir(long dsUid);
 
 }

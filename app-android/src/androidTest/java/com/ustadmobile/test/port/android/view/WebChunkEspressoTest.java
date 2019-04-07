@@ -7,46 +7,37 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.espresso.web.webdriver.Locator;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
-import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.view.WebChunkView;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
-import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.view.WebChunkActivity;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
+import com.ustadmobile.port.sharedse.util.UmZipUtils;
 import com.ustadmobile.test.port.android.UmAndroidTestUtil;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.TimeUnit;
+import java.nio.file.Files;
+import java.util.HashMap;
 
 import static android.support.test.espresso.web.sugar.Web.onWebView;
-import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
-import static android.support.test.espresso.web.webdriver.DriverAtoms.webClick;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
-import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources;
+import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory;
 
 @RunWith(AndroidJUnit4.class)
 public class WebChunkEspressoTest {
@@ -60,60 +51,50 @@ public class WebChunkEspressoTest {
             GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION);
 
-    String path = "/DummyView?/ContentEntryList?entryid=40/ContentEntryList?entryid=41/ContentEntryDetail?entryid=42/ContentEntryDetail?entryid=43";
+    String path = "/DummyView?/ContentEntryList?entryid=40/ContentEntryList?entryid=41/ContentEntryDetail?entryid=10/ContentEntryDetail?entryid=11/webChunk?";
+    private File tmpDir;
+    private UmAppDatabase repo;
+    private UmAppDatabase db;
+    private File dir;
 
 
     public UmAppDatabase getDb() {
         Context context = InstrumentationRegistry.getTargetContext();
-        UmAppDatabase db = UmAppDatabase.getInstance(context);
+        db = UmAppDatabase.getInstance(context);
         db.clearAllTables();
         return db.getRepository("https://localhost", "");
     }
 
     public void createDummyContent() throws IOException {
-        UmAppDatabase repo = getDb();
+        repo = getDb();
 
         ContentEntryDao contentDao = repo.getContentEntryDao();
-        ContentEntryFileDao contentFileDao = repo.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repo.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileDao fileDao = repo.getContentEntryFileDao();
+        ContainerDao containerDao = repo.getContainerDao();
 
         UmAppDatabase app = UmAppDatabase.getInstance(null);
         ContentEntryStatusDao statusDao = app.getContentEntryStatusDao();
-        ContentEntryFileStatusDao fileStatusDao = app.getContentEntryFileStatusDao();
 
-        File targetFile = readFromTestResources(
-                "/com/ustadmobile/app/android/counting-out-1-20-objects.zip",
-                "counting-out-1-20-objects.zip");
+        dir = Environment.getExternalStorageDirectory();
+        tmpDir = Files.createTempDirectory("testWebChunk").toFile();
+        tmpDir.mkdirs();
 
-        ContentEntryFileStatus fileStatus = new ContentEntryFileStatus();
-        fileStatus.setCefsUid(1);
-        fileStatus.setCefsContentEntryFileUid(2);
-        fileStatus.setFilePath(targetFile.getPath());
-        fileStatusDao.insert(fileStatus);
+        File countingFolder = new File(tmpDir, "counting-out");
+        countingFolder.mkdirs();
+        File chunkCountingOut = new File(tmpDir, "counting-out.zip");
+        unZipAndCreateManager(countingFolder, chunkCountingOut, 1L, 10,
+                getClass().getResourceAsStream("/com/ustadmobile/app/android/counting-out-1-20-objects.zip"));
 
-        ContentEntryContentEntryFileJoin join = new ContentEntryContentEntryFileJoin();
-        join.setCecefjContentEntryFileUid(2);
-        join.setCecefjContentEntryUid(1);
-        join.setCecefjUid(3435);
-        contentEntryFileJoinDao.insert(join);
-
-        ContentEntryFile contentEntryTarget = new ContentEntryFile();
-        contentEntryTarget.setMimeType("application/webchunk+zip");
-        contentEntryTarget.setLastModified(System.currentTimeMillis());
-        contentEntryTarget.setContentEntryFileUid(2);
-        fileDao.insert(contentEntryTarget);
 
         ContentEntryStatus targetEntryStatusComplete = new ContentEntryStatus();
         targetEntryStatusComplete.setCesLeaf(true);
         targetEntryStatusComplete.setDownloadStatus(JobStatus.COMPLETE);
         targetEntryStatusComplete.setTotalSize(1000);
         targetEntryStatusComplete.setBytesDownloadSoFar(1000);
-        targetEntryStatusComplete.setCesUid(1);
+        targetEntryStatusComplete.setCesUid(1L);
         statusDao.insert(targetEntryStatusComplete);
 
         ContentEntry targetEntry = new ContentEntry();
-        targetEntry.setContentEntryUid(1);
+        targetEntry.setContentEntryUid(1L);
         targetEntry.setTitle("tiempo de prueba");
         targetEntry.setThumbnailUrl("https://www.africanstorybook.org/img/asb120.png");
         targetEntry.setDescription("todo el contenido");
@@ -123,30 +104,12 @@ public class WebChunkEspressoTest {
         targetEntry.setLeaf(true);
         contentDao.insert(targetEntry);
 
-        File countingObjects = readFromTestResources(
-                "/com/ustadmobile/app/android/counting-objects.zip",
-                "counting-objects.zip");
 
-
-        ContentEntryFileStatus countingFileStatus = new ContentEntryFileStatus();
-        countingFileStatus.setCefsUid(3);
-        countingFileStatus.setCefsContentEntryFileUid(4);
-        countingFileStatus.setFilePath(countingObjects.getPath());
-        fileStatusDao.insert(countingFileStatus);
-
-        ContentEntryContentEntryFileJoin secondFileJoin = new ContentEntryContentEntryFileJoin();
-        secondFileJoin.setCecefjContentEntryFileUid(4);
-        secondFileJoin.setCecefjContentEntryUid(3);
-        secondFileJoin.setCecefjUid(3434);
-        contentEntryFileJoinDao.insert(secondFileJoin);
-
-
-        ContentEntryFile contentEntryCounting = new ContentEntryFile();
-        contentEntryCounting.setMimeType("application/webchunk+zip");
-        contentEntryCounting.setFileSize(10);
-        contentEntryCounting.setLastModified(1540728218);
-        contentEntryCounting.setContentEntryFileUid(4);
-        contentFileDao.insert(contentEntryCounting);
+        File countingObjectsFolder = new File(tmpDir, "counting-objects");
+        countingObjectsFolder.mkdirs();
+        File chunkcountingObjects = new File(tmpDir, "counting-objects.zip");
+        unZipAndCreateManager(countingObjectsFolder, chunkcountingObjects, 3L, 11,
+                getClass().getResourceAsStream("/com/ustadmobile/app/android/counting-objects.zip"));
 
         ContentEntryStatus countingEntryStatusComplete = new ContentEntryStatus();
         countingEntryStatusComplete.setCesLeaf(true);
@@ -171,44 +134,39 @@ public class WebChunkEspressoTest {
 
     }
 
+    private void unZipAndCreateManager(File countingFolder, File chunkCountingOut, long contentEntryUid, int containerUid, InputStream resourceAsStream) throws IOException {
 
-    @Test
-    public void givenServerOffline_whenPlixZippedIsOpened_WebviewLoads() throws IOException {
-        Intent launchActivityIntent = new Intent();
+        FileUtils.copyInputStreamToFile(
+                resourceAsStream,
+                chunkCountingOut);
 
-        UmAndroidTestUtil.setAirplaneModeEnabled(true);
-        Bundle b = new Bundle();
+        UmZipUtils.unzip(chunkCountingOut, countingFolder);
+        HashMap<File, String> countingMap = new HashMap<>();
+        readAllFilesInDirectory(countingFolder, countingMap);
 
-        File targetFile = readFromTestResources(
-                "/com/ustadmobile/app/android/plix-scraped-content.zip",
-                "plix-scraped-content.zip");
+        Container container = new Container();
+        container.setMimeType("application/webchunk+zip");
+        container.setContainerContentEntryUid(contentEntryUid);
+        container.setContainerUid(containerUid);
+        repo.getContainerDao().insert(container);
 
-        b.putString(WebChunkView.ARG_CHUNK_PATH, targetFile.getPath());
-        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1l));
-        b.putString(ARG_REFERRER, path);
-        launchActivityIntent.putExtras(b);
-        mActivityRule.launchActivity(launchActivityIntent);
-
-        // the webview looks for an element "questionController" which is the start button of plix.
-        // This is only available once plix has fully loaded and displayed to the user
-        onWebView()
-                .withTimeout(1000000, TimeUnit.MILLISECONDS)
-                .withElement(findElement(Locator.CLASS_NAME, "questionController"))
-                .perform(webClick());
+        ContainerManager manager = new ContainerManager(container, db,
+                repo, dir.getAbsolutePath());
+        manager.addEntries(countingMap, true);
     }
+
 
     @Test
     public void givenServerOffline_whenKhanExerciseZippedIsOpened_WebviewLoads() throws IOException {
         Intent launchActivityIntent = new Intent();
 
+        createDummyContent();
+
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        File targetFile = readFromTestResources(
-                "/com/ustadmobile/app/android/counting-objects.zip",
-                "counting-objects.zip");
 
-        b.putString(WebChunkView.ARG_CHUNK_PATH, targetFile.getPath());
-        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1l));
+        b.putString(WebChunkView.ARG_CONTAINER_UID, String.valueOf(10L));
+        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1L));
         b.putString(ARG_REFERRER, path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
@@ -223,14 +181,19 @@ public class WebChunkEspressoTest {
     public void givenServerOffline_whenNewKhanExerciseZippedIsOpened_WebviewLoads() throws IOException {
         Intent launchActivityIntent = new Intent();
 
+        createDummyContent();
+
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        File targetFile = readFromTestResources(
-                "/com/ustadmobile/app/android/comparison-symbols-review.zip",
-                "comparison-symbols-review.zip");
+
+        File countingFolder = new File(tmpDir, "review");
+        countingFolder.mkdirs();
+        File chunkCountingOut = new File(tmpDir, "review-out.zip");
+        unZipAndCreateManager(countingFolder, chunkCountingOut, 1L, 12,
+                getClass().getResourceAsStream("/com/ustadmobile/app/android/comparison-symbols-review.zip"));
 
 
-        b.putString(WebChunkView.ARG_CHUNK_PATH, targetFile.getPath());
+        b.putString(WebChunkView.ARG_CONTAINER_UID, String.valueOf(12));
         b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1l));
         b.putString(ARG_REFERRER, path);
         launchActivityIntent.putExtras(b);
@@ -246,13 +209,12 @@ public class WebChunkEspressoTest {
         createDummyContent();
         Intent launchActivityIntent = new Intent();
 
+        createDummyContent();
+
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        File targetFile = readFromTestResources(
-                "/com/ustadmobile/app/android/counting-out-1-20-objects.zip",
-                "counting-out-1-20-objects.zip");
 
-        b.putString(WebChunkView.ARG_CHUNK_PATH, targetFile.getPath());
+        b.putString(WebChunkView.ARG_CONTAINER_UID, String.valueOf(11L));
         b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1l));
         b.putString(ARG_REFERRER, path);
         launchActivityIntent.putExtras(b);

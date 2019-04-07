@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
@@ -21,9 +20,6 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
@@ -37,7 +33,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
  * To scrape all content, we would need to go to each page and traverse the list
  * First we find our the max number of pages for each language by using the css selector on a.page-link
  * Once we found the max number, open each page on ddl website with the parameters /resources/list?page= and the page number until you hit the max
- *
+ * <p>
  * Every resource is found by searching the html with a[href] and checking if href url contains "resource/"
  * Traverse all the pages until you hit Max number and then move to next language
  */
@@ -55,40 +51,35 @@ public class IndexDdlContent {
     private ContentEntryParentChildJoinDao contentParentChildJoinDao;
     private ContentEntryContentCategoryJoinDao contentCategoryChildJoinDao;
     private LanguageDao languageDao;
+    private File containerDir;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
-        if (args.length < 2) {
-            System.err.println("Usage: <ddl website url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 3) {
+            System.err.println("Usage:<file destination><container destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
 
         UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
-        UMLogUtil.logError(args[0]);
-        UMLogUtil.logError(args[1]);
+        UMLogUtil.logTrace(args[0]);
+        UMLogUtil.logTrace(args[1]);
         try {
-            new IndexDdlContent().findContent(args[0], new File(args[1]));
-        }catch (Exception e){
+            new IndexDdlContent().findContent(new File(args[0]), new File(args[1]));
+        } catch (Exception e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logFatal("Exception running findContent DDL Scraper");
         }
     }
 
 
-
-    public void findContent(String urlString, File destinationDir) throws IOException {
-
-        try {
-            URL url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            UMLogUtil.logError("Index Malformed url" + urlString);
-            throw new IllegalArgumentException("Malformed url" + urlString, e);
-        }
+    public void findContent(File destinationDir, File containerDir) throws IOException {
 
         destinationDir.mkdirs();
         destinationDirectory = destinationDir;
+        containerDir.mkdirs();
+        this.containerDir = containerDir;
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repository = db.getRepository("https://localhost", "");
@@ -118,20 +109,23 @@ public class IndexDdlContent {
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, parentDdl, 5);
 
+        UMLogUtil.logTrace("browse English");
         browseLanguages("en", englishLang);
+        UMLogUtil.logTrace("browse Farsi");
         browseLanguages("fa", farsiLang);
+        UMLogUtil.logTrace("browse Pashto");
         browseLanguages("ps", pashtoLang);
 
     }
 
     private void browseLanguages(String lang, Language langEntity) throws IOException {
 
-        Document document = Jsoup.connect("https://www.darakhtdanesh.org/" + lang + "/resources/list")
+        Document document = Jsoup.connect("https://www.ddl.af/" + lang + "/resources/list")
                 .header("X-Requested-With", "XMLHttpRequest").get();
 
         Elements pageList = document.select("a.page-link");
 
-        langEntry = ContentScraperUtil.createOrUpdateContentEntry(lang + "/resources/list", lang,
+        langEntry = ContentScraperUtil.createOrUpdateContentEntry(lang + "/resources/list", langEntity.getName(),
                 "https://www.ddl.af/" + lang + "/resources/list", DDL, LICENSE_TYPE_CC_BY, langEntity.getLangUid(), null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, EMPTY_STRING, contentEntryDao);
@@ -150,6 +144,7 @@ public class IndexDdlContent {
             } catch (NumberFormatException ignored) {
             }
         }
+        UMLogUtil.logTrace("max number of pages: " + maxNumber);
 
         browseList(lang, 1);
         langCount++;
@@ -160,48 +155,46 @@ public class IndexDdlContent {
         if (count > maxNumber) {
             return;
         }
-
-        Document document = Jsoup.connect("https://www.darakhtdanesh.org/" + lang + "/resources/list?page=" + count)
+        UMLogUtil.logTrace("starting page: " + count);
+        Document document = Jsoup.connect("https://www.ddl.af/" + lang + "/resources/list?page=" + count)
                 .header("X-Requested-With", "XMLHttpRequest").get();
 
-        Elements resourceList = document.select("a[href]");
-
+        Elements resourceList = document.select("article a[href]");
+        UMLogUtil.logTrace("found " + resourceList.size() + " articles to download");
         for (Element resource : resourceList) {
 
             String url = resource.attr("href");
             if (url.contains("resource/")) {
 
-                DdlContentScraper scraper = new DdlContentScraper(url, destinationDirectory);
+                DdlContentScraper scraper = new DdlContentScraper(url, destinationDirectory, containerDir, lang);
                 try {
                     scraper.scrapeContent();
+                    UMLogUtil.logTrace("scraped url: " + url);
                     ArrayList<ContentEntry> subjectAreas = scraper.getParentSubjectAreas();
-                    ArrayList<ContentEntry> contentEntryArrayList = scraper.getContentEntries();
+                    ContentEntry contentEntry = scraper.getContentEntries();
                     ArrayList<ContentCategory> contentCategories = scraper.getContentCategories();
                     int subjectAreaCount = 0;
+                    UMLogUtil.logTrace("found " + subjectAreas.size() + " subjects in entry");
+                    UMLogUtil.logTrace("found " + contentCategories.size() + " categories in entry");
                     for (ContentEntry subjectArea : subjectAreas) {
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao,
                                 langEntry, subjectArea, subjectAreaCount++);
 
-                        int fileCount = 0;
-                        for (ContentEntry contentEntry : contentEntryArrayList) {
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao,
+                                subjectArea, contentEntry, 0);
+                    }
+                    for (ContentCategory category : contentCategories) {
 
-                            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao,
-                                    subjectArea, contentEntry, fileCount++);
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(
+                                contentCategoryChildJoinDao, category, contentEntry);
 
-                            for(ContentCategory category: contentCategories){
-
-                                ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(
-                                        contentCategoryChildJoinDao, category, contentEntry);
-
-                            }
-
-                        }
                     }
 
+
                 } catch (IOException e) {
-                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                     UMLogUtil.logError("Error downloading resource at " + url);
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 }
 
             }

@@ -28,6 +28,9 @@ public abstract class DownloadJobDao {
     @UmInsert
     public abstract long insert(DownloadJob job);
 
+    @UmQuery("DELETE FROM DownloadJob")
+    public abstract void deleteAll(UmCallback<Void> callback);
+
     /**
      * Mark the status in bulk of DownloadJob, useful for testing purposes to cancel other downloads
      *
@@ -68,8 +71,6 @@ public abstract class DownloadJobDao {
      *
      * @return A list of all DownloadJob entity objects
      */
-    @UmQuery("SELECT * From DownloadJob")
-    public abstract List<DownloadJob> findAll();
 
     @UmQuery("SELECT * FROM DownloadJob WHERE djUid = :djUid")
     public abstract UmLiveData<DownloadJob>  getJobLive(long djUid);
@@ -121,11 +122,6 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT count(*) > 0 From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
     public abstract UmLiveData<Boolean> getAnyActiveDownloadJob();
-
-    @UmQuery("UPDATE DownloadJob SET totalBytesToDownload = " +
-            "(SELECT SUM(downloadLength) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +
-            "WHERE djUid = :downloadJobId")
-    public abstract void updateTotalBytesToDownload(long downloadJobId);
 
     @UmQuery("UPDATE DownloadJob SET bytesDownloadedSoFar = " +
             "(SELECT SUM(downloadedSoFar) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +

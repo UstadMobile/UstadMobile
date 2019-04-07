@@ -1,19 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper;
-import com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader;
-import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -36,9 +23,7 @@ import okio.BufferedSource;
 import okio.Okio;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 public class TestCK12ContentScraper {
@@ -322,8 +307,6 @@ public class TestCK12ContentScraper {
         File indexJson = new File(plixFolder, "index.json");
         Assert.assertEquals("index json for all urls and thier path exists", true, ContentScraperUtil.fileHasContent(indexJson));
 
-        File zip = new File(tmpDir, "plix.zip");
-        Assert.assertEquals("zipped file exists", true, ContentScraperUtil.fileHasContent(zip));
 
     }
 

@@ -21,7 +21,7 @@ public class ContentEntryStatus {
 
     private int downloadStatus;
 
-    private int localAvailability;
+    private boolean locallyAvailable;
 
     private int downloadSpeed;
 
@@ -87,12 +87,13 @@ public class ContentEntryStatus {
         this.downloadStatus = downloadStatus;
     }
 
-    public int getLocalAvailability() {
-        return localAvailability;
+
+    public boolean isLocallyAvailable() {
+        return locallyAvailable;
     }
 
-    public void setLocalAvailability(int localAvailability) {
-        this.localAvailability = localAvailability;
+    public void setLocallyAvailable(boolean locallyAvailable) {
+        this.locallyAvailable = locallyAvailable;
     }
 
     public int getDownloadSpeed() {

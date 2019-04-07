@@ -24,8 +24,6 @@ import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.test.port.android.UmAndroidTestUtil;
@@ -214,7 +212,7 @@ public class DownloadDialogAndNotificationEspressoTest {
                 new ContentEntryParentChildJoin(rootEntry, entry4, 0)
         ));
 
-        ContentEntryFile entryFile = new ContentEntryFile();
+     /*   ContentEntryFile entryFile = new ContentEntryFile();
         entryFile.setLastModified(System.currentTimeMillis());
         entryFile.setFileSize(5100000);
         entryFile.setContentEntryFileUid(TEST_CONTENT_ENTRY_FILE_UID);
@@ -230,7 +228,7 @@ public class DownloadDialogAndNotificationEspressoTest {
         fileJoin3.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin3));
 
         ContentEntryContentEntryFileJoin fileJoin4 = new ContentEntryContentEntryFileJoin(entry4, entryFile);
-        fileJoin4.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin4));
+        fileJoin4.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin4)); */
 
     }
 

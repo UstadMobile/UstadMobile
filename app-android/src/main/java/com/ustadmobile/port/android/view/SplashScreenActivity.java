@@ -32,7 +32,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
-import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -53,13 +52,8 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.entities.SaleProductGroup;
 import com.ustadmobile.lib.db.entities.SaleProductGroupJoin;
-import com.ustadmobile.lib.db.sync.dao.SyncableDao;
-import com.ustadmobile.port.android.impl.DbInitialEntriesInserter;
 
 import java.util.List;
-
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
 
 public class SplashScreenActivity extends UstadBaseActivity{
@@ -86,20 +80,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
         UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_leavecontainer) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public static void addDummyData(UmAppDatabase repo){
 
@@ -358,6 +339,4 @@ public class SplashScreenActivity extends UstadBaseActivity{
         });
 
     }
-
-
 }

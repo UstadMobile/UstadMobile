@@ -1,9 +1,8 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -16,24 +15,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import fi.iki.elonen.router.RouterNanoHTTPD;
-
-import static com.ustadmobile.port.sharedse.networkmanager.BleGattServer.GROUP_CREATION_TIMEOUT;
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_DIRECT_GROUP_ACTIVE_STATUS;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,15 +43,13 @@ public class BleGattServerTest {
 
     private NetworkManagerBle mockedNetworkManager;
 
-    private List<Long> contentEntryFileUidList = new ArrayList<>();
+    private List<Long> containerUids = new ArrayList<>();
 
     private BleGattServer gattServer;
 
-    private List<ContentEntryFile> contentEntryList = new ArrayList<>();
+    private List<Container> containerList = new ArrayList<>();
 
     private WiFiDirectGroupBle wiFiDirectGroupBle;
-
-    private CountDownLatch mLatch = new CountDownLatch(1);
 
     static final int MAX_ENTITIES_NUMBER = 4;
 
@@ -75,7 +66,6 @@ public class BleGattServerTest {
         mockedNetworkManager.setContext(context);
         EmbeddedHTTPD httpd = new EmbeddedHTTPD(0,context);
         httpd.start();
-
         when(mockedNetworkManager.getHttpd()).thenReturn(httpd);
 
         umAppDatabase =  UmAppDatabase.getInstance(context);
@@ -83,23 +73,27 @@ public class BleGattServerTest {
 
         gattServer = spy(BleGattServer.class);
         wiFiDirectGroupBle = new WiFiDirectGroupBle("NetworkSsId","@@@1234");
+        wiFiDirectGroupBle.setIpAddress("127.0.0.1");
+        wiFiDirectGroupBle.setPort(0);
         gattServer.setNetworkManager(mockedNetworkManager);
+
+
 
         for(int i = 0; i < MAX_ENTITIES_NUMBER; i++){
             long currentTimeStamp = Calendar.getInstance().getTimeInMillis();
-            ContentEntryFile entryFile = new ContentEntryFile();
+            Container entryFile = new Container();
             entryFile.setLastModified(currentTimeStamp);
-            contentEntryList.add(entryFile);
+            containerList.add(entryFile);
         }
 
-        Long [] contentEntryFileUids = umAppDatabase.getContentEntryFileDao().insert(contentEntryList);
-        contentEntryFileUidList.addAll(Arrays.asList(contentEntryFileUids));
+        containerUids.addAll(Arrays.asList(umAppDatabase.getContainerDao().insert(containerList)));
 
     }
 
     @Test
     public void givenRequestMessageWithCorrectRequestHeader_whenHandlingIt_thenShouldReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte)42,
+                bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -110,7 +104,7 @@ public class BleGattServerTest {
 
     @Test
     public void givenRequestMessageWithWrongRequestHeader_whenHandlingIt_thenShouldNotReturnResponseMessage(){
-        BleMessage messageToSend = new BleMessage((byte) 0, bleMessageLongToBytes(contentEntryFileUidList));
+        BleMessage messageToSend = new BleMessage((byte) 0, (byte)42,bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
@@ -120,23 +114,21 @@ public class BleGattServerTest {
 
     @Test
     public void givenNoWifiDirectGroupExisting_whenWifiDirectGroupRequested_thenShouldCreateAGroupAndPassGroupDetails(){
-        doAnswer(invocation -> {
-            gattServer.groupCreated(wiFiDirectGroupBle,null);
-            return null;
-        }).when(mockedNetworkManager).createWifiDirectGroup();
 
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
+        doAnswer(invocation -> {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+            return wiFiDirectGroupBle;
+        }).when(mockedNetworkManager).awaitWifiDirectGroupReady(anyLong(), any());
+
+        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, (byte)42, bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
 
-        WiFiDirectGroupBle groupBle = new Gson().fromJson(new String(responseMessage.getPayload()),
-                WiFiDirectGroupBle.class);
+        WiFiDirectGroupBle groupBle =
+                mockedNetworkManager.getWifiGroupInfoFromBytes(responseMessage.getPayload());
 
         //Verify that wifi direct group creation was initiated
-        verify(mockedNetworkManager).createWifiDirectGroup();
-
-        assertEquals("Should return the right response",
-                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
+        verify(mockedNetworkManager).awaitWifiDirectGroupReady(anyLong(),any());
 
         assertTrue("Returned the right Wifi direct group information",
                 wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
@@ -144,107 +136,12 @@ public class BleGattServerTest {
 
     }
 
-    @Test
-    public void givenWifiDirectGroupUnderCreation_whenWifiDirectGroupRequested_thenShouldWaitAndProvideGroupDetails() {
-        doAnswer(invocation -> {
-            if(mockedNetworkManager.getWifiDirectGroupChangeStatus() ==
-                    WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
-
-                try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
-                catch(InterruptedException e) {
-                    e.printStackTrace();
-                    mLatch.countDown();
-                }
-                gattServer.groupCreated(wiFiDirectGroupBle,null);
-            }
-            return null;
-        }).when(mockedNetworkManager).createWifiDirectGroup();
-
-        mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS);
-
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
-        BleMessage responseMessage = gattServer.handleRequest(messageToSend);
-
-        WiFiDirectGroupBle groupBle = new Gson().fromJson(new String(responseMessage.getPayload()),
-                WiFiDirectGroupBle.class);
-
-        //Verify that wifi direct group creation was initiated
-        verify(mockedNetworkManager).createWifiDirectGroup();
-
-        assertEquals("Should return the right response",
-                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
-
-        assertTrue("Returned the right group information",
-                wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
-                        wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
-    }
-
-    @Test
-    public void givenWiFiDirectGroupExists_whenWifiDirectGroupRequested_thenShouldProvideGroupDetails(){
-
-        doAnswer(invocation -> {
-            if(mockedNetworkManager.getWifiDirectGroupChangeStatus() == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
-                gattServer.groupCreated(wiFiDirectGroupBle,null);
-            }
-            return null;
-        }).when(mockedNetworkManager).createWifiDirectGroup();
-
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
-        mockedNetworkManager.setWifiDirectGroupChangeStatus(WIFI_DIRECT_GROUP_ACTIVE_STATUS);
-
-        BleMessage responseMessage = gattServer.handleRequest(messageToSend);
-
-        WiFiDirectGroupBle groupBle = new Gson().fromJson(new String(responseMessage.getPayload()),
-                WiFiDirectGroupBle.class);
-
-        //Verify that wifi direct group creation was initiated
-        verify(mockedNetworkManager).createWifiDirectGroup();
-
-        assertEquals("Should return the right response",
-                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
-
-        assertTrue("Returned the right group information",
-                wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
-                        wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
-    }
-
-    @Test
-    public void givenWifiDirectGroupBeingRemoved_whenWifiDirectGroupRequested_thenShouldWaitAndCreateNewGroup() {
-        doAnswer(invocation -> {
-            try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
-            catch(InterruptedException e) {
-                e.printStackTrace();
-                mLatch.countDown();
-            }
-            gattServer.groupCreated(wiFiDirectGroupBle,null);
-            return null;
-        }).when(mockedNetworkManager).createWifiDirectGroup();
-
-        mockedNetworkManager.removeWifiDirectGroup();
-
-        BleMessage messageToSend = new BleMessage(WIFI_GROUP_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
-        BleMessage responseMessage = gattServer.handleRequest(messageToSend);
-
-        WiFiDirectGroupBle groupBle = new Gson().fromJson(new String(responseMessage.getPayload()),
-                WiFiDirectGroupBle.class);
-
-        //Verify that wifi direct group creation was initiated
-        verify(mockedNetworkManager).createWifiDirectGroup();
-
-        assertEquals("Should return the right response",
-                WIFI_GROUP_CREATION_RESPONSE,responseMessage.getRequestType());
-
-        assertTrue("Returned the right group information",
-                wiFiDirectGroupBle.getPassphrase().equals(groupBle.getPassphrase()) &&
-                        wiFiDirectGroupBle.getSsid().equals(groupBle.getSsid()));
-    }
-
 
     @Test
     public void givenRequestWithAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreAvailable(){
 
-
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte)42,
+                bleMessageLongToBytes(containerUids));
 
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());
@@ -256,14 +153,14 @@ public class BleGattServerTest {
         }
 
         assertEquals("All requested entry uuids status are available",
-                contentEntryFileUidList.size(), availabilityCounter);
+                containerUids.size(), availabilityCounter);
 
     }
 
     @Test
     public void givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable(){
 
-        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, bleMessageLongToBytes(contentEntryFileUidList));
+        BleMessage messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte)42, bleMessageLongToBytes(containerUids));
         umAppDatabase.clearAllTables();
         BleMessage responseMessage = gattServer.handleRequest(messageToSend);
         List<Long> responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage.getPayload());

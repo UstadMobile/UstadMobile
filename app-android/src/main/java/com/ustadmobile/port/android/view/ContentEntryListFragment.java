@@ -7,6 +7,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,11 +21,13 @@ import com.ustadmobile.core.controller.ContentEntryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.view.ContentEntryListView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;
@@ -37,7 +40,7 @@ import java.util.Map;
  * interface.
  */
 public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView,
-        ContentEntryListRecyclerViewAdapter.AdapterViewListener {
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
 
 
     private ContentEntryListPresenter entryListPresenter;
@@ -48,6 +51,9 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     private UstadBaseActivity ustadBaseActivity;
 
+    private NetworkManagerAndroidBle managerAndroidBle;
+
+    private ContentEntryListRecyclerViewAdapter recyclerAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -67,6 +73,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void clickUpNavigation() {
        entryListPresenter.handleUpNavigation();
     }
+
 
     public interface ContentEntryListener {
         void setTitle(String title);
@@ -93,7 +100,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootContainer = inflater.inflate(R.layout.fragment_contententry_list, container, false);
 
@@ -117,12 +124,16 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void onAttach(Context context) {
         if(context instanceof UstadBaseActivity){
             this.ustadBaseActivity = ((UstadBaseActivity)context);
+            ustadBaseActivity.runAfterServiceConnection( ()-> {
+                managerAndroidBle = (NetworkManagerAndroidBle)ustadBaseActivity
+                        .getNetworkManagerBle();
+                recyclerAdapter.setNetworkManager(managerAndroidBle);
+            });
         }
 
         if (context instanceof ContentEntryListener) {
             this.contentEntryListener = (ContentEntryListener) context;
         }
-
         super.onAttach(context);
     }
 
@@ -130,14 +141,15 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     public void onDetach() {
         super.onDetach();
         this.contentEntryListener = null;
+        this.ustadBaseActivity = null;
     }
 
     @Override
-    public void setContentEntryProvider(UmProvider<ContentEntryWithContentEntryStatus> entryProvider) {
-        ContentEntryListRecyclerViewAdapter recyclerAdapter = new ContentEntryListRecyclerViewAdapter(this);
-        DataSource.Factory<Integer, ContentEntryWithContentEntryStatus> factory =
-                (DataSource.Factory<Integer, ContentEntryWithContentEntryStatus>) entryProvider.getProvider();
-        LiveData<PagedList<ContentEntryWithContentEntryStatus>> data =
+    public void setContentEntryProvider(UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> entryProvider) {
+        recyclerAdapter = new ContentEntryListRecyclerViewAdapter(getActivity(),this, this);
+        DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid> factory =
+                (DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid>) entryProvider.getProvider();
+        LiveData<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
         data.observe(this, recyclerAdapter::submitList);
 
@@ -193,6 +205,28 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
                 () -> entryListPresenter.handleDownloadStatusButtonClicked(entry),
                 impl.getString(MessageID.download_storage_permission_title,getContext()),
                 impl.getString(MessageID.download_storage_permission_message,getContext()));
+    }
+
+    @Override
+    public void startMonitoringAvailability(Object monitor, List<Long> containerUidsToMonitor) {
+         new Thread(() -> {
+             if(managerAndroidBle != null){
+                 managerAndroidBle.startMonitoringAvailability(monitor,containerUidsToMonitor);
+             }
+         }).start();
+    }
+
+    @Override
+    public void stopMonitoringAvailability(Object monitor) {
+        if(managerAndroidBle != null){
+            managerAndroidBle.stopMonitoringAvailability(monitor);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        stopMonitoringAvailability(this);
+        super.onStop();
     }
 
 }

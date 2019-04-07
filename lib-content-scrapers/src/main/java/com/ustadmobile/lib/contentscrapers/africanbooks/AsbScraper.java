@@ -3,17 +3,16 @@ package com.ustadmobile.lib.contentscrapers.africanbooks;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LanguageList;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
@@ -27,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,9 +48,6 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,15 +90,15 @@ public class AsbScraper {
     private final String COVER_URL = "https://www.africanstorybook.org/illustrations/covers/";
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.err.println("Usage: <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 2) {
+            System.err.println("Usage: <file destination><file container destination><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 2 ? args[1] : "");
+        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
         UMLogUtil.logInfo(args[0]);
         try {
-            new AsbScraper().findContent(new File(args[0]));
+            new AsbScraper().findContent(new File(args[0]), new File(args[1]));
         } catch (IOException e) {
             UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logFatal("Exception running findContent AsbScraper");
@@ -109,7 +106,7 @@ public class AsbScraper {
     }
 
 
-    public void findContent(File destinationDir) throws IOException {
+    public void findContent(File destinationDir, File containerDir) throws IOException {
 
         URL africanBooksUrl = generateURL();
 
@@ -117,15 +114,14 @@ public class AsbScraper {
         UmAppDatabase repository = db.getRepository("https://localhost", EMPTY_STRING);
         ContentEntryDao contentEntryDao = repository.getContentEntryDao();
         ContentEntryParentChildJoinDao contentParentChildJoinDao = repository.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoinDao = repository.getContentEntryContentEntryFileJoinDao();
-        ContentEntryFileStatusDao contentFileStatusDao = db.getContentEntryFileStatusDao();
         ContentCategorySchemaDao categorySchemeDao = repository.getContentCategorySchemaDao();
         ContentCategoryDao categoryDao = repository.getContentCategoryDao();
         ContentEntryContentCategoryJoinDao contentCategoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
         LanguageDao languageDao = repository.getLanguageDao();
         LanguageVariantDao variantDao = repository.getLanguageVariantDao();
         ContentEntryRelatedEntryJoinDao relatedEntryJoinDao = repository.getContentEntryRelatedEntryJoinDao();
+
+        ContainerDao containerDao = repository.getContainerDao();
 
         new LanguageList().addAllLanguages();
 
@@ -200,7 +196,8 @@ public class AsbScraper {
             URL epubUrl = generateEPubUrl(africanBooksUrl, bookId);
             URL publishUrl = generatePublishUrl(africanBooksUrl, bookId);
             URL makeUrl = generateMakeUrl(africanBooksUrl, bookId);
-
+            File modifiedFile = new File(destinationDir, bookId + ScraperConstants.LAST_MODIFIED_TXT);
+            UMLogUtil.logTrace("Started with book id " + bookId);
             try {
 
                 driver.get(publishUrl.toString());
@@ -312,17 +309,22 @@ public class AsbScraper {
                 ContentCategory category = ContentScraperUtil.insertOrUpdateCategoryContent(categoryDao, schema, "Reading Level " + bookObj.level);
                 ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(contentCategoryJoinDao, category, childEntry);
 
+                boolean isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, bookObj.date);
 
-                if (ContentScraperUtil.fileHasContent(ePubFile) && ePubFile.lastModified() > Integer.parseInt(bookObj.date)) {
-
-                    ContentScraperUtil.checkAndUpdateDatabaseIfFileDownloadedButNoDataFound(ePubFile, childEntry, contentEntryFileDao,
-                            contentEntryFileJoinDao, contentFileStatusDao, ScraperConstants.MIMETYPE_EPUB, true);
+                if (!isUpdated) {
                     continue;
                 }
 
-                FileUtils.copyURLToFile(epubUrl, ePubFile);
+                File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
+                if (ContentScraperUtil.fileHasContent(tmpFolder)) {
+                    FileUtils.deleteDirectory(tmpFolder);
+                }
 
+
+                FileUtils.copyURLToFile(epubUrl, ePubFile);
+                UMLogUtil.logTrace("Got the epub");
                 if (ePubFile.length() == 0) {
+                    ContentScraperUtil.deleteFile(modifiedFile);
                     retry++;
                     if (retry == 3) {
                         retry = 0;
@@ -339,11 +341,24 @@ public class AsbScraper {
                     updateAsbEpub(bookObj, ePubFile);
                 }
 
-                ContentScraperUtil.insertContentEntryFile(ePubFile, contentEntryFileDao,
-                        contentFileStatusDao, childEntry, ContentScraperUtil.getMd5(ePubFile),
-                        contentEntryFileJoinDao, true, ScraperConstants.MIMETYPE_EPUB);
+                ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+                options.linkHelper = () -> {
+                    try {
+                        return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING);
+                    } catch (IOException e) {
+                        return null;
+                    }
+                };
+                File tmpDir = ShrinkerUtil.shrinkEpub(ePubFile, options);
+                UMLogUtil.logTrace("Shrunk Epub");
+                ContentScraperUtil.insertContainer(containerDao, childEntry, true,
+                        ScraperConstants.MIMETYPE_EPUB, ePubFile.lastModified(),
+                        tmpDir, db, repository, containerDir);
+                UMLogUtil.logTrace("Completed: Created Container");
+                ContentScraperUtil.deleteFile(ePubFile);
 
             } catch (Exception e) {
+                ContentScraperUtil.deleteFile(modifiedFile);
                 retry++;
                 if (retry == 3) {
                     retry = 0;
@@ -451,7 +466,7 @@ public class AsbScraper {
 
             zipFs = FileSystems.newFileSystem(epubFile.toPath(), ClassLoader.getSystemClassLoader());
             opfReader = new BufferedReader(
-                    new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), "UTF-8"));
+                    new InputStreamReader(Files.newInputStream(zipFs.getPath("content.opf")), UTF_ENCODING));
             StringBuffer opfModBuffer = new StringBuffer();
             String line;
             boolean modified = false;
@@ -478,15 +493,9 @@ public class AsbScraper {
 
             if (modified) {
                 Files.write(
-                        zipFs.getPath("content.opf"), opfModBuffer.toString().getBytes("UTF-8"),
+                        zipFs.getPath("content.opf"), opfModBuffer.toString().getBytes(UTF_ENCODING),
                         StandardOpenOption.TRUNCATE_EXISTING);
             }
-
-            //replace the epub.css to increase font size
-            Path epubCssResPath = Paths.get(getClass().getResource("/com/ustadmobile/lib/contentscrapers/epub.css").toURI());
-            Files.copy(epubCssResPath, zipFs.getPath("epub.css"), StandardCopyOption.REPLACE_EXISTING);
-
-            ShrinkerUtil.shrinkEpub(epubFile);
 
         } catch (Exception e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));

@@ -32,89 +32,90 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * Created by mike on 8/30/16.
  */
+@Deprecated
 public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
-    /**
-     * The string that is added
-     */
-    public static final String URI_ROUTE_POSTFIX = "(.)+";
+        /**
+         * The string that is added
+         */
+        public static final String URI_ROUTE_POSTFIX = "(.)+";
 
-    private static final ArrayList<String> HTML_EXTENSIONS = new ArrayList<>();
+        private static final ArrayList<String> HTML_EXTENSIONS = new ArrayList<>();
 
-    static {
-        HTML_EXTENSIONS.add("xhtml");
-        HTML_EXTENSIONS.add("html");
-        HTML_EXTENSIONS.add("htm");
-    }
-
-    public static class MountedZipFilter {
-
-        public MountedZipFilter(Pattern pattern, String replacement) {
-            this.pattern = pattern;
-            this.replacement = replacement;
+        static {
+            HTML_EXTENSIONS.add("xhtml");
+            HTML_EXTENSIONS.add("html");
+            HTML_EXTENSIONS.add("htm");
         }
 
-        public Pattern pattern;
+        public static class MountedZipFilter {
 
-        public String replacement;
-    }
-
-    public static class FilteredHtmlSource implements IFileSource {
-
-        private IFileSource src;
-
-        private ByteArrayInputStream inputStream;
-
-        private long length = -1;
-
-        private String scriptPath;
-
-        public FilteredHtmlSource(IFileSource src, String scriptPath) {
-            this.src = src;
-            this.scriptPath = scriptPath;
-        }
-
-        @Override
-        public long getLength() {
-            try { getInputStream(); }
-            catch(IOException e) {}
-            return length;
-        }
-
-        @Override
-        public long getLastModifiedTime() {
-            return src.getLastModifiedTime();
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            if(inputStream == null) {
-                //init and filter
-                InputStream srcIn = src.getInputStream();
-                try {
-                    EpubHtmlFilterSerializer filterSerializer = new EpubHtmlFilterSerializer();
-                    filterSerializer.setScriptSrcToAdd(scriptPath);
-                    filterSerializer.setIntput(srcIn);
-                    byte[] filteredBytes = filterSerializer.getOutput();
-                    length = filteredBytes.length;
-                    inputStream = new ByteArrayInputStream(filteredBytes);
-                }catch(XmlPullParserException x) {
-                    throw new IOException(x);
-                }
+            public MountedZipFilter(Pattern pattern, String replacement) {
+                this.pattern = pattern;
+                this.replacement = replacement;
             }
-            return inputStream;
+
+            public Pattern pattern;
+
+            public String replacement;
         }
 
-        @Override
-        public boolean exists() {
-            return src.exists();
-        }
+        public static class FilteredHtmlSource implements IFileSource {
 
-        @Override
-        public String getName() {
-            return src.getName();
+            private IFileSource src;
+
+            private ByteArrayInputStream inputStream;
+
+            private long length = -1;
+
+            private String scriptPath;
+
+            public FilteredHtmlSource(IFileSource src, String scriptPath) {
+                this.src = src;
+                this.scriptPath = scriptPath;
+            }
+
+            @Override
+            public long getLength() {
+                try { getInputStream(); }
+                catch(IOException e) {}
+                return length;
+            }
+
+            @Override
+            public long getLastModifiedTime() {
+                return src.getLastModifiedTime();
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                if(inputStream == null) {
+                    //init and filter
+                    InputStream srcIn = src.getInputStream();
+                    try {
+                        EpubHtmlFilterSerializer filterSerializer = new EpubHtmlFilterSerializer();
+                        filterSerializer.setScriptSrcToAdd(scriptPath);
+                        filterSerializer.setIntput(srcIn);
+                        byte[] filteredBytes = filterSerializer.getOutput();
+                        length = filteredBytes.length;
+                        inputStream = new ByteArrayInputStream(filteredBytes);
+                    }catch(XmlPullParserException x) {
+                        throw new IOException(x);
+                    }
+                }
+                return inputStream;
+            }
+
+            @Override
+            public boolean exists() {
+                return src.exists();
+            }
+
+            @Override
+            public String getName() {
+                return src.getName();
+            }
         }
-    }
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {

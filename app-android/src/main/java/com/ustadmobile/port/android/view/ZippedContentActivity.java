@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
+import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder;
 import com.ustadmobile.port.sharedse.util.RunnableQueue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +29,8 @@ public abstract class ZippedContentActivity extends UstadBaseActivity {
     private AtomicBoolean httpdBound = new AtomicBoolean(false);
 
     private RunnableQueue runWhenConnectedQueue = new RunnableQueue();
+
+    private volatile String mountedPath;
 
     private ServiceConnection httpdServiceConnection = new ServiceConnection() {
         @Override
@@ -57,7 +60,32 @@ public abstract class ZippedContentActivity extends UstadBaseActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-            String mountedUri = httpd.mountZipOnHttp(strings[0], null, false, null);
+            String mountedUri = httpd.mountZipOnHttp(strings[0], null);
+            return UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
+                    mountedUri);
+        }
+
+        @Override
+        protected void onPostExecute(String mountedPath) {
+            callback.onSuccess(mountedPath);
+        }
+    }
+
+    private static class MountContainerAsyncTask extends AsyncTask<Long, Void, String> {
+
+        private UmCallback<String> callback;
+
+        private EmbeddedHTTPD httpd;
+
+        protected MountContainerAsyncTask(UmCallback callback, EmbeddedHTTPD httpd) {
+            this.callback = callback;
+            this.httpd = httpd;
+        }
+
+        @Override
+        protected String doInBackground(Long... containerUid) {
+
+            String mountedUri = httpd.mountContainer(containerUid[0], null);
             return UMFileUtil.joinPaths(httpd.getLocalHttpUrl(),
                     mountedUri);
         }
@@ -90,6 +118,19 @@ public abstract class ZippedContentActivity extends UstadBaseActivity {
         runWhenConnectedQueue.runWhenReady(() -> {
             new MountZipAsyncTask(callback, httpdRef.get()).doInBackground(zipUri);
         });
+    }
+
+    public void mountContainer(long containerUid, UmCallback<String> callback){
+        runWhenConnectedQueue.runWhenReady(() -> {
+            new MountContainerAsyncTask(callback, httpdRef.get()).execute(containerUid);
+        });
+    }
+
+    public void unmountContainer(String mountedUrl) {
+        //note: use -1 so we don't chop off first ./ included in local httpurl from the mounted path
+        String mountedPath = mountedUrl.substring(httpdRef.get().getLocalHttpUrl().length() - 1)
+                + MountedContainerResponder.URI_ROUTE_POSTFIX;
+        httpdRef.get().unmountContainer(mountedPath);
     }
 
     public void unmountZipFromHttp(String mountedPath){

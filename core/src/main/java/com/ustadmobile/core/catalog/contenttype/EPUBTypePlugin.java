@@ -1,10 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.EpubContentView;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class EPUBTypePlugin extends ContentTypePlugin {
 
     @Override
     public String getViewName() {
-        return ContainerView.VIEW_NAME;
+        return EpubContentView.VIEW_NAME;
     }
 
     @Override

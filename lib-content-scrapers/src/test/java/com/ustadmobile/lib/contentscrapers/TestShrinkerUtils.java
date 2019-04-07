@@ -1,37 +1,41 @@
 package com.ustadmobile.lib.contentscrapers;
 
+import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument;
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
-import com.ustadmobile.lib.db.entities.ContentEntryFileWithFilePath;
+import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities;
+import org.jsoup.nodes.Node;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Enumeration;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class TestShrinkerUtils {
@@ -40,9 +44,7 @@ public class TestShrinkerUtils {
     private File tmpDir;
     private File firstepub;
     private File secondepub;
-    private ContentEntryFileDao contentFileDao;
     private File tmpFolder;
-    private UmAppDatabase repo;
 
     @Before
     public void before() {
@@ -78,10 +80,6 @@ public class TestShrinkerUtils {
     public void initDb() throws IOException {
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         db.clearAllTables();
-        repo = db.getRepository("https://localhost", "");
-        contentFileDao = repo.getContentEntryFileDao();
-        ContentEntryFileStatusDao statusDao = db.getContentEntryFileStatusDao();
-
 
         InputStream is = getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/test.epub");
         tmpDir = Files.createTempDirectory("testShrinkerUtils").toFile();
@@ -96,72 +94,34 @@ public class TestShrinkerUtils {
         is.close();
         is2.close();
 
-        ContentEntryFile firstfileentry = new ContentEntryFile();
-        firstfileentry.setContentEntryFileUid(242343);
-        firstfileentry.setFileSize(firstepub.length());
-        firstfileentry.setMimeType(MIMETYPE_EPUB);
-        firstfileentry.setMd5sum(ContentScraperUtil.getMd5(firstepub));
-        firstfileentry.setLastModified(firstepub.lastModified());
-        contentFileDao.insert(firstfileentry);
-
-        ContentEntryFileStatus firststatus = new ContentEntryFileStatus();
-        firststatus.setCefsContentEntryFileUid(242343);
-        firststatus.setFilePath(firstepub.getPath());
-        statusDao.insert(firststatus);
-
-        ContentEntryFile secondEntry = new ContentEntryFile();
-        secondEntry.setContentEntryFileUid(223);
-        secondEntry.setFileSize(secondepub.length());
-        secondEntry.setMimeType(MIMETYPE_EPUB);
-        secondEntry.setMd5sum(ContentScraperUtil.getMd5(secondepub));
-        secondEntry.setLastModified(secondepub.lastModified());
-        contentFileDao.insert(secondEntry);
-
-        ContentEntryFileStatus secondStatus = new ContentEntryFileStatus();
-        secondStatus.setCefsContentEntryFileUid(223);
-        secondStatus.setFilePath(secondepub.getPath());
-        statusDao.insert(secondStatus);
-
-    }
-
-    @Test
-    public void givenDabaseEntries_whenShrunk_shouldUpdateAllEpubInDb() {
-
-        List<ContentEntryFileWithFilePath> epublist = contentFileDao.findEpubsFiles();
-
-        ShrinkerUtil.shrinkAllEpubInDatabase(repo);
-
-        List<ContentEntryFileWithFilePath> updatedEpubList = contentFileDao.findEpubsFiles();
-
-        Assert.assertTrue(updatedEpubList.get(0).getFileSize() < epublist.get(0).getFileSize());
-
     }
 
 
     @Test
-    public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException {
+    public void givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() throws IOException, XmlPullParserException {
 
         ShrinkerUtil.shrinkEpub(firstepub);
 
-        Assert.assertEquals("Failed to delete the tmp Folder for epub test after shrinking", false, new File(tmpDir, "test").exists());
-        Assert.assertEquals("Failed to delete the tmp Folder for epub 13232 after shrinking", false, new File(tmpFolder, "13232").exists());
+        File tmpTest = new File(tmpDir, "test");
+        OcfDocument ocfDoc = new OcfDocument();
+        File ocfFile = new File(tmpTest, Paths.get("META-INF", "container.xml").toString());
+        FileInputStream ocfFileInputStream = new FileInputStream(ocfFile);
+        XmlPullParser ocfParser = UstadMobileSystemImpl.getInstance()
+                .newPullParser(ocfFileInputStream);
+        ocfDoc.loadFromParser(ocfParser);
 
-        ZipFile zipFile = new ZipFile(firstepub);
-        ZipEntry entry = zipFile.getEntry("META-INF/container.xml");
-        InputStream is = zipFile.getInputStream(entry);
-        Document document = Jsoup.parse(UMIOUtils.readStreamToString(is), "", Parser.xmlParser());
-        String path = document.selectFirst("rootfile").attr("full-path");
-
-        ZipEntry opfEntry = zipFile.getEntry(path);
-        InputStream opfis = zipFile.getInputStream(opfEntry);
-        Document opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser());
-        Elements manifestitems = opfdoc.select("manifest item");
+        File opfFile = new File(tmpTest, ocfDoc.getRootFiles().get(0).getFullPath());
+        OpfDocument document = new OpfDocument();
+        FileInputStream opfFileInputStream = new FileInputStream(opfFile);
+        XmlPullParser xmlPullParser = UstadMobileSystemImpl.getInstance()
+                .newPullParser(opfFileInputStream);
+        document.loadFromOPF(xmlPullParser);
 
         int countWebp = 0;
         int countCss = 0;
-        for (Element manifest : manifestitems) {
+        for (OpfItem manifest : document.getManifestItems().values()) {
 
-            String href = manifest.attr("href");
+            String href = manifest.getHref();
             Assert.assertFalse("File does not have png extension",
                     href.toLowerCase().endsWith(".png"));
 
@@ -177,29 +137,6 @@ public class TestShrinkerUtils {
 
         Assert.assertEquals("16 webp converted in manifest", 16, countWebp);
         Assert.assertEquals("16 css converted in manifest", 4, countCss);
-
-        countWebp = 0;
-        countCss = 0;
-        Enumeration<? extends ZipEntry> entryList = zipFile.entries();
-        while (entryList.hasMoreElements()) {
-
-            ZipEntry entryElement = entryList.nextElement();
-            String href = entryElement.getName();
-            Assert.assertEquals("png file still exists in epub", false, href.contains(".png"));
-
-            if (href.contains(".webp")) {
-                countWebp++;
-            }
-
-            if (href.contains(".css")) {
-                countCss++;
-            }
-
-        }
-
-        Assert.assertEquals("16 webp available in epub", 16, countWebp);
-        Assert.assertEquals("4 css available in epub", 4, countCss);
-
 
     }
 
@@ -388,6 +325,123 @@ public class TestShrinkerUtils {
         Element manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]");
 
         Assert.assertEquals("images/cover.png", manifestitem.attr("href"));
+    }
+
+    @Test
+    public void testInvalidText() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "epub.epub");
+        File testhtml = new File(tmpDir, "test.xhtml");
+
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/shrinker/invalidchars.epub"),
+                epub);
+
+        ZipFile zipFile = new ZipFile(epub.getPath());
+        ZipEntry index = zipFile.getEntry("OEBPS/5.xhtml");
+        InputStream inputIndex = zipFile.getInputStream(index);
+
+        String html = IOUtils.toString(inputIndex, UTF_ENCODING);
+
+        html = html.replaceAll("&nbsp;", "&#160;");
+        html = html.replaceAll("\\u2029", "");
+        html = html.replace("<!DOCTYPE html[<!ENTITY nbsp \"&#160;\">]>",
+                "<!DOCTYPE html>");
+        Document doc = Jsoup.parse(html, "", Parser.xmlParser());
+        doc.outputSettings().prettyPrint(false);
+
+        FileUtils.writeStringToFile(testhtml, doc.toString(), UTF_ENCODING);
+
+
+        Assert.assertTrue("Unicode removed", !html.contains("\\u2029"));
+
+        ZipFile z = new ZipFile(epub.getPath());
+        ZipEntry i = z.getEntry("OEBPS/2.xhtml");
+        InputStream iI = z.getInputStream(i);
+
+        String test = IOUtils.toString(iI, UTF_ENCODING);
+
+        test = test.replaceAll("&nbsp;", "&#160;");
+        test = test.replaceAll("\\u2029", "");
+        test = test.replace("<!DOCTYPE html[<!ENTITY nbsp \"&#160;\">]>",
+                "<!DOCTYPE html>");
+        Document d = Jsoup.parse(test, "", Parser.xmlParser());
+        d.outputSettings().prettyPrint(false);
+        d.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+
+        FileUtils.writeStringToFile(testhtml, d.toString(), UTF_ENCODING);
+
+        Assert.assertTrue("Unicode removed", !test.contains("&nbsp;"));
+
+    }
+
+    @Test
+    public void testAsbEpub() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File epub = new File(tmpDir, "epub.epub");
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub"),
+                epub);
+
+        ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+        options.linkHelper = () -> {
+            try {
+                return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING);
+            } catch (IOException e) {
+                return null;
+            }
+        };
+        ShrinkerUtil.shrinkEpub(epub, options);
+
+
+    }
+
+
+    @Test
+    public void testPrathamEpub() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("testShrinker").toFile();
+
+        File zip = new File(tmpDir, "epub.zip");
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip"),
+                zip);
+        File epub = new File(tmpDir, "24620-a-book-for-puchku.epub");
+        UmZipUtils.unzip(zip, tmpDir);
+
+        ShrinkerUtil.EpubShrinkerOptions options = new ShrinkerUtil.EpubShrinkerOptions();
+        options.styleElementHelper = styleElement -> {
+            String text = styleElement.text();
+            if (text.startsWith("@font-face") || text.startsWith(".english")) {
+                return ShrinkerUtil.STYLE_OUTSOURCE_TO_LINKED_CSS;
+            } else {
+                return ShrinkerUtil.STYLE_DROP;
+            }
+        };
+        options.editor = document -> {
+            Elements elements = document.select("p");
+            List<Element> elementsToRemove = new ArrayList<>();
+            for (Element element : elements) {
+                if (element.text().isEmpty()) {
+                    elementsToRemove.add(element);
+                }
+            }
+            elementsToRemove.forEach(Node::remove);
+            document.head().append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable-no\" />");
+            return document;
+        };
+        options.linkHelper = () -> {
+            try {
+                return IOUtils.toString(getClass().getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING);
+            } catch (IOException e) {
+                return null;
+            }
+        };
+        File epubFolder = ShrinkerUtil.shrinkEpub(epub, options);
+        ContentScraperUtil.zipDirectory(epubFolder, "fixed.epub", tmpDir);
+
+
     }
 
 

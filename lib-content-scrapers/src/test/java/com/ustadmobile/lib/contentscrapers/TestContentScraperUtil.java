@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers;
 
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
+import com.ustadmobile.port.sharedse.util.UmZipUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -15,7 +16,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -132,6 +135,24 @@ public class TestContentScraperUtil {
         Assert.assertTrue("SRT file Exists", ContentScraperUtil.fileHasContent(srtFile));
 
         String srt = FileUtils.readFileToString(srtFile, UTF_ENCODING);
+
+    }
+
+    @Test
+    public void givenZip() throws IOException {
+
+        File tmpDir = Files.createTempDirectory("exercisecontentscraper").toFile();
+        File contentFolder = new File(tmpDir, "content");
+        contentFolder.mkdirs();
+
+        File content = new File(tmpDir, "content.zip");
+        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub"), content);
+
+        UmZipUtils.unzip(content, contentFolder);
+
+        Map<File, String> hashmap = new HashMap<>();
+        ContentScraperUtil.createContainerFromDirectory(contentFolder, hashmap);
+
 
     }
 

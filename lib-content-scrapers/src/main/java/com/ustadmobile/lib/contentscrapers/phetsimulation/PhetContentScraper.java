@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation;
 
-import com.neovisionaries.i18n.LanguageCode;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
@@ -21,21 +20,17 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD;
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 import static com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper.PHET;
 import static com.ustadmobile.lib.db.entities.ContentEntry.LICENSE_TYPE_CC_BY;
 
@@ -64,6 +59,7 @@ public class PhetContentScraper {
     private final String url;
     private final File destinationDirectory;
     private final String title;
+    private final File containerDir;
     private Document simulationDoc;
     private String aboutText;
     private ArrayList<String> langugageList;
@@ -74,25 +70,26 @@ public class PhetContentScraper {
     private String aboutDescription;
     private URL simulationUrl;
 
-    public PhetContentScraper(String url, File destinationDir) {
+    public PhetContentScraper(String url, File destinationDir, File containerDir) {
         this.url = url;
         this.destinationDirectory = destinationDir;
         langugageList = new ArrayList<>();
         languageMapUpdate = new HashMap<>();
         languageUrlMap = new HashMap<>();
-        this.title = url.substring(url.lastIndexOf("/") + 1, url.length());
+        this.containerDir = containerDir;
+        this.title = url.substring(url.lastIndexOf("/") + 1);
     }
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Usage: <phet html url> <file destination><optional log{trace, debug, info, warn, error, fatal}>");
+        if (args.length < 3) {
+            System.err.println("Usage: <phet html url> <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
-        UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
         UMLogUtil.logInfo(args[0]);
         UMLogUtil.logInfo(args[1]);
         try {
-            new PhetContentScraper(args[0], new File(args[1])).scrapeContent();
+            new PhetContentScraper(args[0], new File(args[1]), new File(args[2])).scrapeContent();
         } catch (IOException e) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
             UMLogUtil.logError("Exception running scrapeContent phet");
@@ -140,7 +137,7 @@ public class PhetContentScraper {
 
                 if (hrefLink.contains("translated")) {
 
-                    String langCode = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.length());
+                    String langCode = hrefLink.substring(hrefLink.lastIndexOf("/") + 1);
                     langugageList.add(langCode);
                     languageLocation = new File(destinationDirectory, langCode);
                     languageLocation.mkdirs();
@@ -213,6 +210,7 @@ public class PhetContentScraper {
 
     private boolean downloadContent(URL simulationUrl, String hrefLink, File languageLocation) {
         HttpURLConnection conn = null;
+        String fileName = null;
         try {
             URL link = new URL(simulationUrl, hrefLink);
 
@@ -222,10 +220,16 @@ public class PhetContentScraper {
             conn = (HttpURLConnection) link.openConnection();
             conn.setRequestMethod(REQUEST_HEAD);
 
-            String fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
+            fileName = hrefLink.substring(hrefLink.lastIndexOf("/") + 1, hrefLink.lastIndexOf("?"));
             File simulationFile = new File(simulationLocation, fileName);
 
-            if (!ContentScraperUtil.isFileModified(conn, simulationLocation, fileName) && ContentScraperUtil.fileHasContent(simulationFile)) {
+            boolean isUpdated = ContentScraperUtil.isFileModified(conn, languageLocation, fileName);
+            if (ContentScraperUtil.fileHasContent(simulationLocation)) {
+                isUpdated = false;
+                FileUtils.deleteDirectory(simulationLocation);
+            }
+
+            if (!isUpdated) {
                 return false;
             }
 
@@ -243,10 +247,13 @@ public class PhetContentScraper {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                 UMLogUtil.logError("Tin can file not created for " + link.toString());
             }
-            ContentScraperUtil.zipDirectory(simulationLocation, title + ZIP_EXT, languageLocation);
+
         } catch (Exception e) {
             UMLogUtil.logError("Error download content for url " + simulationUrl + " with href " + hrefLink);
-        }finally {
+            if (fileName != null) {
+                ContentScraperUtil.deleteETagOrModified(languageLocation, fileName);
+            }
+        } finally {
             if (conn != null) {
                 conn.disconnect();
             }

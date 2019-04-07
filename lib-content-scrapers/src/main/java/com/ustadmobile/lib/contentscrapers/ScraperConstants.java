@@ -148,6 +148,9 @@ public class ScraperConstants {
     public static final String brainGenieLink = "braingenie.ck12.org";
     public static final String slideShareLink = "www.slideshare.net";
 
+    public static final String ASB_CSS_HELPER = "/com/ustadmobile/lib/contentscrapers/asb/cssHelper.css";
+    public static final String PRATHAM_CSS_HELPER = "/com/ustadmobile/lib/contentscrapers/pratham/cssHelper.css";
+
     public static final String MODULE_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/module";
     public static final String SIMULATION_TIN_CAN_FILE = "http://adlnet.gov/expapi/activities/simulation";
     public static final String VIDEO_TIN_CAN_FILE = "http://activitystrea.ms/schema/1.0/video";
@@ -158,7 +161,7 @@ public class ScraperConstants {
 
     public static final List<String> QUESTION_SET_HOLDER_TYPES = Arrays.asList(
             ComponentType.EXCERCISE.getType(), ComponentType.ONLINE.getType(),
-            ComponentType.TEST.getType());
+            ComponentType.TEST.getType(), ComponentType.QUESTIONSET.getType());
 
 
     public static final String ARABIC_FONT_REGULAR = "DroidNaskh-Regular.woff2";

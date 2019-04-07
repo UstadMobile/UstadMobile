@@ -24,10 +24,15 @@ public class TestFolderScraper {
     private File mathFolder;
     private File scienceFolder;
     private File scooterFile;
+    private File containerDir;
 
     @Before
     public void setupFolder() throws IOException {
+        UmAppDatabase db = UmAppDatabase.getInstance(null);
+        db.clearAllTables();
+
         tmpDir = Files.createTempDirectory("testIndexFolderScraper").toFile();
+        containerDir = Files.createTempDirectory("container").toFile();
         englishFolder = new File(tmpDir, "English");
         englishFolder.mkdirs();
 
@@ -39,9 +44,6 @@ public class TestFolderScraper {
 
         scienceFolder = new File(arabicFolder, "Science");
         scienceFolder.mkdirs();
-
-        FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.epub"),
-                new File(mathFolder, "puchku.epub"));
 
         FileUtils.copyToFile(getClass().getResourceAsStream("/com/ustadmobile/lib/contentscrapers/folder/313-Ruby And Emerald-AR.epub"),
                 new File(arabicFolder, "ruby-ar.epub"));
@@ -56,7 +58,7 @@ public class TestFolderScraper {
 
         IndexFolderScraper scraper = new IndexFolderScraper();
         scraper.findContent("3asafeer",
-                tmpDir);
+                tmpDir, containerDir);
 
         UmAppDatabase db = UmAppDatabase.getInstance(null);
         UmAppDatabase repo = db.getRepository("https://localhost", "");
@@ -78,7 +80,7 @@ public class TestFolderScraper {
         ContentEntry mathEntry = contentEntryDao.findBySourceUrl(filePrefix + mathFolder.getPath());
         Assert.assertEquals("Math content exists", true, mathEntry.getEntryId().equalsIgnoreCase("Math"));
 
-        ContentEntry scienceEpubEntry = contentEntryDao.findBySourceUrl(filePrefix +scooterFile.getPath());
+        ContentEntry scienceEpubEntry = contentEntryDao.findBySourceUrl(filePrefix + scooterFile.getPath());
         Assert.assertEquals("Epub in Science Folder content exists", true, scienceEpubEntry.getEntryId().equalsIgnoreCase("urn:uuid:29d919dd-24f5-4384-be78-b447c9dc299b"));
 
         ContentEntryParentChildJoin arabicScienceJoinEntry = parentChildDaoJoin.findParentByChildUuids(scienceEntry.getContentEntryUid());

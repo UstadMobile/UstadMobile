@@ -6,19 +6,16 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
@@ -83,9 +80,6 @@ public class ExportData {
         ContentCategoryDao categoryDao = repository.getContentCategoryDao();
         ContentEntryContentCategoryJoinDao categoryJoinDao = repository.getContentEntryContentCategoryJoinDao();
 
-        ContentEntryFileDao contentEntryFileDao = repository.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao contentEntryFileJoin = repository.getContentEntryContentEntryFileJoinDao();
-
         LanguageDao languageDao = repository.getLanguageDao();
         LanguageVariantDao variantDao = repository.getLanguageVariantDao();
 
@@ -111,11 +105,9 @@ public class ExportData {
         UMLogUtil.logDebug("size of langList is " + langList.size());
         UMLogUtil.logDebug("size of langVariantList is " + langVariantList.size());
 
-        List<ContentEntryFile> fileList = contentEntryFileDao.getPublicContentEntryFiles();
-        List<ContentEntryContentEntryFileJoin> fileJoinList = contentEntryFileJoin.getPublicContentEntryContentEntryFileJoins();
+        List<Container> containerList = repository.getContainerDao().findAllPublikContainers();
 
-        UMLogUtil.logDebug("size of fileList is " + fileList.size());
-        UMLogUtil.logDebug("size of fileJoinList is " + fileJoinList.size());
+        UMLogUtil.logDebug("size of container is " + containerList.size());
 
         saveListToJson(split(contentEntryList, size), "contentEntry.", destinationDirectory);
         saveListToJson(split(parentChildJoinList, size), "contentEntryParentChildJoin.", destinationDirectory);
@@ -128,8 +120,7 @@ public class ExportData {
         saveListToJson(split(langList, size), "language.", destinationDirectory);
         saveListToJson(split(langVariantList, size), "languageVariant.", destinationDirectory);
 
-        saveListToJson(split(fileList, size), "contentEntryFile.", destinationDirectory);
-        saveListToJson(split(fileJoinList, size), "contentEntryContentEntryFileJoin.", destinationDirectory);
+        saveListToJson(split(containerList, size), "container.", destinationDirectory);
 
         FileUtils.writeStringToFile(new File(destination, "index.json"), gson.toJson(pathList), UTF_ENCODING);
 

@@ -4,13 +4,13 @@ import com.ustadmobile.core.db.dao.AccessTokenDao;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
 import com.ustadmobile.core.db.dao.ConnectivityStatusDao;
+import com.ustadmobile.core.db.dao.ContainerDao;
+import com.ustadmobile.core.db.dao.ContainerEntryDao;
+import com.ustadmobile.core.db.dao.ContainerEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao;
 import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileStatusDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
@@ -36,12 +36,12 @@ import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.PersonLocationJoinDao;
 import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
-import com.ustadmobile.core.db.dao.SaleProductGroupDao;
-import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao;
 import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.core.db.dao.SalePaymentDao;
 import com.ustadmobile.core.db.dao.SaleProductDao;
+import com.ustadmobile.core.db.dao.SaleProductGroupDao;
+import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao;
 import com.ustadmobile.core.db.dao.SaleProductPictureDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
@@ -63,15 +63,13 @@ import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
-import com.ustadmobile.lib.db.entities.ContainerFile;
-import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContainerEntry;
+import com.ustadmobile.lib.db.entities.ContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContentCategory;
 import com.ustadmobile.lib.db.entities.ContentCategorySchema;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-import com.ustadmobile.lib.db.entities.ContentEntryFileStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
@@ -98,11 +96,11 @@ import com.ustadmobile.lib.db.entities.PersonLocationJoin;
 import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Sale;
+import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.entities.SaleProductGroup;
 import com.ustadmobile.lib.db.entities.SaleProductGroupJoin;
-import com.ustadmobile.lib.db.entities.SaleItem;
-import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.lib.db.entities.SaleProductPicture;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
 import com.ustadmobile.lib.db.entities.ScrapeRun;
@@ -117,23 +115,22 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 14, entities = {
-        ContainerFile.class, ContainerFileEntry.class, DownloadSet.class,
+@UmDatabase(version = 19, entities = {
+        DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         Person.class, Clazz.class, ClazzMember.class,
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
-        ContentEntryContentEntryFileJoin.class, ContentEntryFile.class,
         ContentEntryParentChildJoin.class, ContentEntryRelatedEntryJoin.class,
-        ContentEntryFileStatus.class, ContentCategorySchema.class,
-        ContentCategory.class, Language.class, LanguageVariant.class,
-        SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
+        ContentCategorySchema.class, ContentCategory.class, Language.class,
+        LanguageVariant.class, SyncStatus.class, SyncablePrimaryKey.class, SyncDeviceBits.class,
         AccessToken.class, PersonAuth.class, Role.class, EntityRole.class,
         PersonGroup.class, PersonGroupMember.class, Location.class, LocationAncestorJoin.class,
         PersonLocationJoin.class, PersonPicture.class, ScrapeQueueItem.class, ScrapeRun.class,
         ContentEntryStatus.class, ConnectivityStatus.class,
+        Container.class, ContainerEntry.class, ContainerEntryFile.class,
         //Goldozi :
         Sale.class, SaleItem.class, SalePayment.class, SaleProductGroup.class,
         SaleProductGroupJoin.class, SaleProductPicture.class, SaleProduct.class
@@ -555,6 +552,93 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             }
         });
 
+        builder.addMigration(new UmDbMigration(10, 12) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        int deviceBits = Integer.parseInt(
+                                db.selectSingleValue("SELECT deviceBits FROM SyncDeviceBits"));
+
+
+                        db.execSql("ALTER TABLE ContentEntryContentEntryFileJoin ADD COLUMN cecefjContainerUid BIGINT");
+                        db.execSql("CREATE INDEX  index_ContentEntryContentEntryFileJoin_cecefjContainerUid  ON  ContentEntryContentEntryFileJoin  ( cecefjContainerUid  )");
+
+
+                        // BEGIN Create Container
+                        db.execSql("CREATE SEQUENCE spk_seq_51 " + DoorUtils.generatePostgresSyncablePrimaryKeySequenceParameters(deviceBits));
+                        db.execSql("CREATE TABLE IF NOT EXISTS  Container  ( containerUid  BIGINT PRIMARY KEY  DEFAULT NEXTVAL('spk_seq_51') ,  cntLocalCsn  BIGINT,  cntMasterCsn  BIGINT,  cntLastModBy  INTEGER,  fileSize  BIGINT,  containerContentEntryUid  BIGINT,  lastModified  BIGINT,  mimeType  TEXT,  remarks  TEXT,  mobileOptimized  BOOL)");
+                        db.execSql("INSERT INTO SyncStatus(tableId, nextChangeSeqNum, syncedToMasterChangeNum, syncedToLocalChangeSeqNum) VALUES (51, 1, 0, 0)");
+                        db.execSql("CREATE OR REPLACE FUNCTION inc_csn_51_fn() RETURNS trigger AS $$ BEGIN UPDATE Container SET cntLocalCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN NEW.cntLocalCsn ELSE (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 51) END),cntMasterCsn = (SELECT CASE WHEN (SELECT master FROM SyncDeviceBits) THEN (SELECT nextChangeSeqNum FROM SyncStatus WHERE tableId = 51) ELSE NEW.cntMasterCsn END) WHERE containerUid = NEW.containerUid; UPDATE SyncStatus SET nextChangeSeqNum = nextChangeSeqNum + 1  WHERE tableId = 51; RETURN null; END $$LANGUAGE plpgsql");
+                        db.execSql("CREATE TRIGGER inc_csn_51_trig AFTER UPDATE OR INSERT ON Container FOR EACH ROW WHEN (pg_trigger_depth() = 0) EXECUTE PROCEDURE inc_csn_51_fn()");
+                        db.execSql("CREATE INDEX  index_Container_lastModified  ON  Container  ( lastModified  )");
+                        //END Create Container (
+
+                        //BEGIN Create ContainerEntry
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContainerEntry  ( ceUid  SERIAL PRIMARY KEY  NOT NULL ,  cePath  TEXT,  ceCefUid  BIGINT)");
+                        //END Create ContainerEntry (PostgreSQL)
+
+                        //BEGIN Create ContainerEntryFile
+                        db.execSql("CREATE TABLE IF NOT EXISTS  ContainerEntryFile  ( cefUid  SERIAL PRIMARY KEY  NOT NULL ,  cefMd5  TEXT,  cefPath  TEXT,  ceTotalSize  BIGINT,  ceCompressedSize  BIGINT,  compression  INTEGER)");
+                        //END Create ContainerEntryFile
+
+                }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(12, 14) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE ContainerEntry ADD COLUMN ceContainerUid BIGINT");
+                        db.execSql("CREATE INDEX  index_ContainerEntry_ceContainerUid  ON  ContainerEntry  ( ceContainerUid  )");
+
+
+                }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(14, 16) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE Container ADD COLUMN cntNumEntries INTEGER");
+                        break;
+
+
+                }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(16, 18) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        throw new RuntimeException("Not supported on SQLite");
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("DROP TABLE ContentEntryFile");
+                        db.execSql("DROP TABLE ContentEntryFileStatus");
+                        db.execSql("DROP TABLE ContentEntryContentEntryFileJoin");
+                        break;
+
+
+                }
+            }
+        });
+
         return builder;
     }
 
@@ -594,17 +678,11 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract ContentEntryContentCategoryJoinDao getContentEntryContentCategoryJoinDao();
 
-    public abstract ContentEntryContentEntryFileJoinDao getContentEntryContentEntryFileJoinDao();
-
-    public abstract ContentEntryFileDao getContentEntryFileDao();
-
     public abstract ContentEntryParentChildJoinDao getContentEntryParentChildJoinDao();
 
     public abstract ContentEntryRelatedEntryJoinDao getContentEntryRelatedEntryJoinDao();
 
     public abstract SyncStatusDao getSyncStatusDao();
-
-    public abstract ContentEntryFileStatusDao getContentEntryFileStatusDao();
 
     public abstract ContentCategorySchemaDao getContentCategorySchemaDao();
 
@@ -642,6 +720,7 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract ConnectivityStatusDao getConnectivityStatusDao();
 
+
     //Goldozi bit:
 
     public abstract SaleDao getSaleDao();
@@ -657,10 +736,13 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract SaleProductGroupDao getSaleProductGroupDao();
 
     public abstract SaleProductGroupJoinDao getProductGroupJoinDao();
-
-
-
     //end of Goldozi bit.
+
+    public abstract ContainerDao getContainerDao();
+
+    public abstract ContainerEntryDao getContainerEntryDao();
+
+    public abstract ContainerEntryFileDao getContainerEntryFileDao();
 
     @UmDbContext
     public abstract Object getContext();

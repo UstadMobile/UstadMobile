@@ -39,6 +39,8 @@ public class LiveDataWorkQueue<T> {
 
     private Set<Long> completedItems;
 
+    private OnQueueEmptyListener queueEmptyListener;
+
     /**
      * The adapter must convert the item type into a WorkQueueItemHolder
      *
@@ -49,6 +51,12 @@ public class LiveDataWorkQueue<T> {
         Runnable makeRunnable(T item);
 
         long getUid(T item);
+
+    }
+
+    public interface OnQueueEmptyListener {
+
+        void onQueueEmpty();
 
     }
 
@@ -138,6 +146,10 @@ public class LiveDataWorkQueue<T> {
                     activeItems.put(uid, wrapper);
                     executor.submit(wrapper);
                 }
+            }
+
+            if(activeItems.isEmpty() && queueEmptyListener != null) {
+                queueEmptyListener.onQueueEmpty();
             }
         }finally {
             lock.unlock();

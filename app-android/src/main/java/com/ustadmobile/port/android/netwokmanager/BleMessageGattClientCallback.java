@@ -14,12 +14,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.MAXIMUM_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 
 /**
@@ -55,18 +54,26 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
     private int packetIteration = 0;
 
-    private int defaultMtuSize = DEFAULT_MTU_SIZE;
+    private final AtomicBoolean serviceDiscoveryRef = new AtomicBoolean(false);
 
-    private final CountDownLatch mLatch = new CountDownLatch(1);
+    private AtomicBoolean mConnected = new AtomicBoolean(true);
 
+    private AtomicBoolean mClosed = new AtomicBoolean(false);
+
+    private volatile long lastActive;
+
+    private Runnable mTimeoutRunnable = () -> {
+
+    };
 
     /**
      * Constructor to be called when creating new callback
      * @param messageToSend Payload to be sent to the peer device (List of entry Id's)
      */
-    BleMessageGattClientCallback(BleMessage messageToSend){
+    public BleMessageGattClientCallback(BleMessage messageToSend){
         this.messageToSend = messageToSend;
         receivedMessage = new BleMessage();
+        lastActive = System.currentTimeMillis();
     }
 
     /**
@@ -78,17 +85,6 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     }
 
     /**
-     * Changing Maximum Transfer Unit
-     */
-    @Override
-    public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
-        super.onMtuChanged(gatt, mtu, status);
-        //Successfully changed the MTU, updateState message and notify to start discovering service
-        this.defaultMtuSize = mtu;
-        mLatch.countDown();
-    }
-
-    /**
      * Start discovering GATT services when peer device is connected or disconnects from GATT
      * when connection failed.
      */
@@ -96,32 +92,34 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         super.onConnectionStateChange(gatt, status, newState);
 
-        if (status != BluetoothGatt.GATT_SUCCESS) {
-            gatt.disconnect();
+        String remoteDeviceAddress = gatt.getDevice().getAddress();
+
+        if(status == BluetoothGatt.GATT_SUCCESS &&
+                newState == BluetoothProfile.STATE_CONNECTED) {
             UstadMobileSystemImpl.l(UMLog.DEBUG,698,
-                    "Connection failed with error code "+status);
-            return;
-        }
+                    "Device connected to " + remoteDeviceAddress);
 
-        if(newState == BluetoothProfile.STATE_CONNECTED) {
-            /*Check if the device has android version 5 or above and request for the MTU change,
-            MTU change is not supported on lower android version devices*/
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                if(gatt.requestMtu(MAXIMUM_MTU_SIZE)){
-                    try {
-                        mLatch.wait(TimeUnit.SECONDS.toMillis(2));
-                    } catch (InterruptedException e) {
-                        mLatch.countDown();
-                        e.printStackTrace();
-                    }
-                }
+            if(!serviceDiscoveryRef.get()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                        "Discovering services offered by " + remoteDeviceAddress);
+                serviceDiscoveryRef.set(true);
+                gatt.discoverServices();
             }
-            gatt.discoverServices();
-
-        } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            gatt.disconnect();
+        }else {
+            cleanup(gatt);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                    "Connection disconnected " + status + "from "
+                            + remoteDeviceAddress);
+            if(responseListener != null) {
+                responseListener.onResponseReceived(remoteDeviceAddress, null,
+                        new IOException("BLE onConnectionStateChange not successful." +
+                                "Status = " + status));
+            }
         }
+
     }
+
+
 
     /**
      * Enable notification to be sen't back when characteristics are modified
@@ -132,8 +130,16 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         super.onServicesDiscovered(gatt, status);
         BluetoothGattService service = findMatchingService(gatt.getServices());
         if(service == null){
+            UstadMobileSystemImpl.l(UMLog.ERROR,698,
+                    "ERROR Ustadmobile Service not found on " + gatt.getDevice().getAddress());
+            responseListener.onResponseReceived(gatt.getDevice().getAddress(), null,
+                    new IOException("UstadMobile service not found on device"));
+            cleanup(gatt);
             return;
         }
+
+        UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                "Ustadmobile Service found on " + gatt.getDevice().getAddress());
         List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
 
         BluetoothGattCharacteristic characteristic = characteristics.get(0);
@@ -152,14 +158,21 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onCharacteristicWrite(BluetoothGatt gatt,
                                       BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
-        byte[][] packets = messageToSend.getPackets(defaultMtuSize);
+        byte[][] packets = messageToSend.getPackets(DEFAULT_MTU_SIZE);
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if(packetIteration < packets.length){
                 characteristic.setValue(packets[packetIteration]);
                 gatt.writeCharacteristic(characteristic);
                 packetIteration++;
+                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                        "Transferring packet #" + packetIteration + " to "
+                                + gatt.getDevice().getAddress());
             }else{
                 packetIteration = 0;
+                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                        packets.length + " packet(s) transferred successfully to " +
+                                "the remote device =" + gatt.getDevice().getAddress());
+                //We now expect the server to send a response
             }
         }
     }
@@ -171,8 +184,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onCharacteristicRead(BluetoothGatt gatt,
                                      BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicRead(gatt, characteristic, status);
-
-        readCharacteristics(gatt.getDevice().getAddress(),characteristic);
+        readCharacteristics(gatt,characteristic);
     }
 
     /**
@@ -182,19 +194,21 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
     public void onCharacteristicChanged(BluetoothGatt gatt,
                                         BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
-        readCharacteristics(gatt.getDevice().getAddress(),characteristic);
+        readCharacteristics(gatt,characteristic);
     }
 
     /**
      * Read values from the service characteristic
-     * @param sourceDeviceAddress Peer device bluetooth MAC address from which is reading from.
+     * @param gatt Bluetooth Gatt object
      * @param characteristic Modified service characteristic to read that value from
      */
-    private void readCharacteristics(String sourceDeviceAddress,
+    private void readCharacteristics(BluetoothGatt gatt,
                                      BluetoothGattCharacteristic characteristic){
-        boolean isReceived = receivedMessage.onPackageReceived(characteristic.getValue());
-        if(isReceived){
-            responseListener.onResponseReceived(sourceDeviceAddress,receivedMessage);
+        boolean messageComplete = receivedMessage.onPackageReceived(characteristic.getValue());
+        if(messageComplete){
+            responseListener.onResponseReceived(gatt.getDevice().getAddress(), receivedMessage,
+                    null);
+            //The server should disconnect us shortly.
         }
     }
 
@@ -218,6 +232,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         return uuidMatches(serviceIdString, USTADMOBILE_BLE_SERVICE_UUID.toString());
     }
 
+
     private boolean uuidMatches(String uuidString, String... matches) {
         for (String match : matches) {
             if (uuidString.equalsIgnoreCase(match)) {
@@ -225,5 +240,25 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             }
         }
         return false;
+    }
+
+    private void cleanup(BluetoothGatt gatt) {
+        try {
+            if(mConnected.get()) {
+                gatt.disconnect();
+                mConnected.set(false);
+                UstadMobileSystemImpl.l(UMLog.INFO, 698, "GattClientCallback: disconnected");
+            }
+
+            if(!mClosed.get()) {
+                gatt.close();
+                mClosed.set(true);
+                UstadMobileSystemImpl.l(UMLog.INFO, 698, "GattClientCallback: closed");
+            }
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 698, "GattClientCallback: ERROR disconnecting");
+        }finally {
+            UstadMobileSystemImpl.l(UMLog.INFO, 698, "GattClientCallback: closed");
+        }
     }
 }

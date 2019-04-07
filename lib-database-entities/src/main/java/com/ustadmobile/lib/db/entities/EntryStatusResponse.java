@@ -7,14 +7,14 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 /**
  * Represents the response from a network node to whether or not a given entry is available locally
  */
-@UmEntity(indices = {@UmIndex(name="nodeId_fileUid_unique", unique = true,
-        value = {"erContentEntryFileUid", "erNodeId"})})
+@UmEntity(indices = {@UmIndex(name="containerUid_nodeId_unique", unique = true,
+        value = {"erContainerUid", "erNodeId"})})
 public class EntryStatusResponse {
 
     @UmPrimaryKey(autoIncrement = true)
     private int erId;
 
-    private long erContentEntryFileUid;
+    private long erContainerUid;
 
     private long responseTime;
 
@@ -22,17 +22,16 @@ public class EntryStatusResponse {
 
     private boolean available;
 
-    public EntryStatusResponse(long erContentEntryFileUid, long responseTime, long erNodeId,
+    public EntryStatusResponse(long erContainerUid, long responseTime, long erNodeId,
                                boolean available) {
-        this.erContentEntryFileUid = erContentEntryFileUid;
+        this.erContainerUid = erContainerUid;
         this.responseTime = responseTime;
         this.erNodeId = erNodeId;
         this.available = available;
     }
 
-    public EntryStatusResponse() {
 
-    }
+    public EntryStatusResponse() { }
 
     public int getErId() {
         return erId;
@@ -40,14 +39,6 @@ public class EntryStatusResponse {
 
     public void setErId(int erId) {
         this.erId = erId;
-    }
-
-    public long getErContentEntryFileUid() {
-        return erContentEntryFileUid;
-    }
-
-    public void setErContentEntryFileUid(long erContentEntryFileUid) {
-        this.erContentEntryFileUid = erContentEntryFileUid;
     }
 
     public long getResponseTime() {
@@ -72,5 +63,13 @@ public class EntryStatusResponse {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public long getErContainerUid() {
+        return erContainerUid;
+    }
+
+    public void setErContainerUid(long erContainerUid) {
+        this.erContainerUid = erContainerUid;
     }
 }

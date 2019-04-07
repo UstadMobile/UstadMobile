@@ -276,7 +276,6 @@ dependencies {
     api project(':core')
     api project(':sharedse')
     api project(":lib-core-fs")
-    api project(":libcodec2-android")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')
@@ -343,6 +342,9 @@ dependencies {
 
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
+
+    //Codec2 (low bitrate voice) Android library
+    implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: "com.android.support", name: "support-annotations", version: "$version_android_support_lib"

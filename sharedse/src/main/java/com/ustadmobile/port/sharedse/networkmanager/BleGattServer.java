@@ -1,13 +1,9 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.google.gson.Gson;
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
-
+import com.ustadmobile.core.db.dao.ContainerDao;
+import com.ustadmobile.core.impl.UmAccountManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
@@ -31,17 +27,11 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIF
  *
  * @author kileha3
  */
-public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
+public abstract class BleGattServer {
 
     private NetworkManagerBle networkManager;
 
-    private CountDownLatch mLatch = new CountDownLatch(1);
-
-    private String message = null;
-
     private Object context;
-
-    static final int GROUP_CREATION_TIMEOUT = 5;
 
     public BleGattServer (Object context){
         this.context = context;
@@ -69,43 +59,30 @@ public abstract class BleGattServer implements WiFiDirectGroupListenerBle{
      */
     public BleMessage handleRequest(BleMessage requestReceived) {
         byte requestType = requestReceived.getRequestType();
+
         switch (requestType){
             case ENTRY_STATUS_REQUEST:
-                ContentEntryFileDao contentEntryDao =
-                        UmAppDatabase.getInstance(context).getContentEntryFileDao();
                 List<Long> entryStatusResponse = new ArrayList<>();
 
-                for(long entryFileUid: bleMessageBytesToLong(requestReceived.getPayload())){
-                    ContentEntryFile contentEntryFile = contentEntryDao.findByUid(entryFileUid);
-                    entryStatusResponse.add(contentEntryFile == null ? 0L: 1L);
+                ContainerDao containerDao = UmAccountManager.getRepositoryForActiveAccount(context)
+                        .getContainerDao();
+                for(long containerUid: bleMessageBytesToLong(requestReceived.getPayload())){
+
+                    Long foundLocalContainerUid =
+                            containerDao.findLocalAvailabilityByUid(containerUid);
+                    entryStatusResponse.add(foundLocalContainerUid != null
+                            && foundLocalContainerUid != 0 ? 1L: 0L);
                 }
-                return new BleMessage(ENTRY_STATUS_RESPONSE,
+                return new BleMessage(ENTRY_STATUS_RESPONSE, (byte)42,
                         bleMessageLongToBytes(entryStatusResponse));
 
             case WIFI_GROUP_REQUEST:
-
-                networkManager.handleWiFiDirectGroupChangeRequest(this);
-                networkManager.createWifiDirectGroup();
-                try { mLatch.await(GROUP_CREATION_TIMEOUT, TimeUnit.SECONDS); }
-                catch(InterruptedException e) {
-                    mLatch.countDown();
-                    e.printStackTrace();
-                }
-                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE,message.getBytes());
+                WiFiDirectGroupBle group = networkManager.awaitWifiDirectGroupReady(5000,
+                        TimeUnit.MILLISECONDS);
+                return new BleMessage(WIFI_GROUP_CREATION_RESPONSE, (byte)42,
+                        networkManager.getWifiGroupInfoAsBytes(group));
             default: return null;
         }
     }
 
-    @Override
-    public void groupCreated(WiFiDirectGroupBle group, Exception err) {
-        //TODO: Put the actual endpoint which will be used to serve peer request
-        group.setEndpoint(""+ networkManager.getHttpd().getListeningPort());
-        this.message = new Gson().toJson(group);
-        mLatch.countDown();
-    }
-
-    @Override
-    public void groupRemoved(boolean successful, Exception err) {
-
-    }
 }

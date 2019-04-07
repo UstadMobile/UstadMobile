@@ -1,107 +1,88 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.Map;
+
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Created by mike on 12/25/17.
  */
 public class TestEmbeddedHTTPD {
 
-    static File epubToMount;
 
-    static EmbeddedHTTPD httpd;
+    static class EmbeddeHttpdResponder implements RouterNanoHTTPD.UriResponder {
 
-    static final String MOUNT_PATH = "thelittlechicks-test";
-
-    static final String TEST_ENTRY_PATH = "EPUB/package.opf";
-
-    static String mountedPath;
-
-    @BeforeClass
-    public static void mountZip() throws IOException {
-        InputStream in = null;
-        FileOutputStream fileOut = null;
-        IOException ioe = null;
-        try {
-            epubToMount = File.createTempFile("TestEmbeddedHTTPD", ".epub");
-            in = TestEmbeddedHTTPD.class.getResourceAsStream(
-                    "/com/ustadmobile/port/sharedse/networkmanager/thelittlechicks.epub");
-            fileOut=  new FileOutputStream(epubToMount);
-            UMIOUtils.readFully(in, fileOut, 8*1024);
-
-            httpd = new EmbeddedHTTPD(0, PlatformTestUtil.getTargetContext());
-            httpd.start();
-            mountedPath = httpd.mountZip(epubToMount.getAbsolutePath(), MOUNT_PATH,
-                    false, null);
-        }catch(IOException e) {
-            ioe = e;
-        }finally {
-            UMIOUtils.closeInputStream(in);
-            UMIOUtils.closeOutputStream(fileOut);
+        @Override
+        public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return NanoHTTPD.newFixedLengthResponse("Hello world");
         }
 
-        UMIOUtils.throwIfNotNullIO(ioe);
-    }
+        @Override
+        public NanoHTTPD.Response put(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return NanoHTTPD.newFixedLengthResponse("Hello world");
+        }
 
-    @AfterClass
-    public static void unmount() throws IOException {
-        httpd.stop();
-        httpd = null;
-        epubToMount.delete();
+        @Override
+        public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return NanoHTTPD.newFixedLengthResponse("Hello world");
+        }
+
+        @Override
+        public NanoHTTPD.Response delete(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return NanoHTTPD.newFixedLengthResponse("Hello world");
+        }
+
+        @Override
+        public NanoHTTPD.Response other(String method, RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return NanoHTTPD.newFixedLengthResponse("Hello world");
+        }
     }
 
     @Test
-    public void givenZipMounted_whenContentDownloadedOverHttp_shouldBeTheSameFile() throws IOException {
-        String fileUrl = UMFileUtil.joinPaths(new String[]{
-                "http://localhost:" + httpd.getListeningPort(), mountedPath, TEST_ENTRY_PATH});
-        HttpURLConnection urlConnection = (HttpURLConnection)new URL(fileUrl).openConnection();
-        InputStream in = urlConnection.getInputStream();
-        File tmpSaveFile = File.createTempFile("TestEmbeddedHTTPD-content-dl", "opf");
-        FileOutputStream fileOut = new FileOutputStream(tmpSaveFile);
+    public void givenResponseListenerAdded_whenRequestMade_shouldReceiveResponseStartAndFinishedEvent()
+            throws IOException{
+        Object context = PlatformTestUtil.getTargetContext();
+        EmbeddedHTTPD httpd = new EmbeddedHTTPD(0, context);
+        httpd.addRoute(".*", EmbeddeHttpdResponder.class);
+        httpd.start();
 
-        UMIOUtils.readFully(in, fileOut, 8*1024);
+        EmbeddedHTTPD.ResponseListener responseListener = mock(EmbeddedHTTPD.ResponseListener.class);
+        httpd.addResponseListener(responseListener);
 
-        UMIOUtils.closeInputStream(in);
-        UMIOUtils.closeOutputStream(fileOut);
+        UmHttpResponse response = UstadMobileSystemImpl.getInstance().makeRequestSync(
+                new UmHttpRequest(context, httpd.getLocalHttpUrl() + "dir/filename.txt"));
 
-        ZipFile zipFile = new ZipFile(epubToMount);
-        ZipEntry zipEntry = zipFile.getEntry(TEST_ENTRY_PATH);
-        Assert.assertEquals("File downloaded over http size = entry size from zip", zipEntry.getSize(),
-                tmpSaveFile.length());
+        ArgumentCaptor<NanoHTTPD.IHTTPSession> sessionArgumentCaptor = ArgumentCaptor.forClass(
+                NanoHTTPD.IHTTPSession.class);
+        ArgumentCaptor<NanoHTTPD.Response> responseArgumentCaptor = ArgumentCaptor.forClass(
+                NanoHTTPD.Response.class);
+        verify(responseListener).responseStarted(sessionArgumentCaptor.capture(),
+                responseArgumentCaptor.capture());
+        Assert.assertEquals("Received expected request on response started",
+                "/dir/filename.txt", sessionArgumentCaptor.getValue().getUri());
 
-        //close it
-        in.close();
-        fileOut.close();
-        urlConnection.disconnect();
+        verify(responseListener).responseFinished(sessionArgumentCaptor.capture(),
+                responseArgumentCaptor.capture());
+        Assert.assertEquals("Received expected request on response finished",
+                "/dir/filename.txt", sessionArgumentCaptor.getValue().getUri());
 
-
-        String dirListingUrl =UMFileUtil.joinPaths(new String[] {
-                "http://localhost:" + httpd.getListeningPort(), mountedPath, "EPUB/"});
-        urlConnection = (HttpURLConnection)new URL(dirListingUrl).openConnection();
-        in = urlConnection.getInputStream();
-
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        UMIOUtils.readFully(in, bout, 8*1024);
-        String result = new String(bout.toByteArray(), "UTF-8");
-        Assert.assertNotNull(result);
-
+        httpd.removeResponseListener(responseListener);
     }
+
+
 
 }

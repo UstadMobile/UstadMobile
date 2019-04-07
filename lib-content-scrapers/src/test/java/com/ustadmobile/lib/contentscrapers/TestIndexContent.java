@@ -2,22 +2,16 @@ package com.ustadmobile.lib.contentscrapers;
 
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.ContentEntryContentEntryFileJoinDao;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
-import com.ustadmobile.core.db.dao.ContentEntryFileDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
 import com.ustadmobile.core.db.dao.ScrapeRunDao;
-import com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper;
 import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.ScrapeRun;
 
 import org.apache.commons.io.IOUtils;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.List;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -35,7 +28,7 @@ import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;
 
-import static com.ustadmobile.lib.contentscrapers.ScraperConstants.*;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
 
 public class TestIndexContent {
 
@@ -116,13 +109,12 @@ public class TestIndexContent {
         mockWebServer.setDispatcher(indexDispatcher);
 
         File tmpDir = Files.createTempDirectory("testedxcontentindexscraper").toFile();
+        File containerDir = Files.createTempDirectory("container").toFile();
 
-        IndexEdraakK12Content.startScrape(mockWebServer.url("/api/component/" + MAIN_CONTENT_CONTENT_FILE).toString(), tmpDir, 943);
+        IndexEdraakK12Content.startScrape(mockWebServer.url("/api/component/" + MAIN_CONTENT_CONTENT_FILE).toString(), tmpDir, containerDir, 943);
 
         ContentEntryDao contentEntryDao = repo.getContentEntryDao();
         ContentEntryParentChildJoinDao parentChildDaoJoin = repo.getContentEntryParentChildJoinDao();
-        ContentEntryFileDao fileDao = repo.getContentEntryFileDao();
-        ContentEntryContentEntryFileJoinDao fileEntryJoin = repo.getContentEntryContentEntryFileJoinDao();
 
         ContentEntry parentEntry = contentEntryDao.findBySourceUrl("https://www.edraak.org/k12/");
 
@@ -140,13 +132,7 @@ public class TestIndexContent {
 
         Assert.assertEquals(true, courseEntry.getEntryId().equalsIgnoreCase("5a60a25f0ed49f0498cb201d"));
 
-        List<ContentEntryContentEntryFileJoin> listOfFiles = fileEntryJoin.findChildByParentUUid(courseEntry.getContentEntryUid());
 
-        Assert.assertEquals(true, listOfFiles.size() > 0);
-
-        ContentEntryFile file = fileDao.findByUid(listOfFiles.get(0).getCecefjContentEntryFileUid());
-
-        Assert.assertEquals(true, ScraperConstants.MIMETYPE_ZIP.equalsIgnoreCase(file.getMimeType()));
 
     }
 

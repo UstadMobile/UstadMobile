@@ -39,7 +39,8 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <application android:supportsRtl="true">
+    <application android:supportsRtl="true"
+        android:usesCleartextTraffic="true">
         <activity
             android:theme="@style/ThemeOnboarding"
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
@@ -47,7 +48,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:authorities="${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -56,12 +57,12 @@
         </provider>
 
         <activity
-            android:name="com.ustadmobile.port.android.view.ContainerActivity"
+            android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label=""
-            android:screenOrientation="portrait" />
+            android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.XapiPackageActivity"
+            android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label=""
             android:theme="@style/Theme.UstadTheme" />

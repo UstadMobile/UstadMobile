@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.db.entities.ContentEntryWithContentEntryStatus;
+import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
@@ -36,6 +37,11 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     public abstract UmProvider<ContentEntry> getChildrenByParentUid(long parentUid);
+
+    @UmQuery("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
+            "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
+    public abstract List<ContentEntry> getChildrenByParent(long parentUid);
 
     @UmQuery("SELECT COUNT(*) FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -76,13 +82,13 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQueryFindByPrimaryKey
     public abstract void findByUid(Long entryUid, UmCallback<ContentEntry> umCallback);
 
-    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+    @UmQuery("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.contentEntryUid = :contentEntryUid")
     public abstract void findByUidWithContentEntryStatus(long contentEntryUid,
                                                          UmCallback<ContentEntryWithContentEntryStatus> callback);
 
-    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+    @UmQuery("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.sourceUrl = :sourceUrl")
     public abstract void findBySourceUrlWithContentEntryStatus(String sourceUrl,
@@ -91,7 +97,10 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     @UmQuery("SELECT * FROM ContentEntry WHERE publik")
     public abstract List<ContentEntry> getPublicContentEntries();
 
-    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.* FROM ContentEntry " +
+    @UmQuery("SELECT ContentEntry.*,ContentEntryStatus.*, " +
+            "(SELECT containerUid FROM Container " +
+            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY lastModified DESC LIMIT 1) as mostRecentContainer " +
+            "FROM ContentEntry "+
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid " +
@@ -100,14 +109,16 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
             "AND " +
             "(:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin " +
             "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
-    public abstract UmProvider<ContentEntryWithContentEntryStatus> getChildrenByParentUidWithCategoryFilter(long parentUid, long langParam, long categoryParam0);
+    public abstract UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> getChildrenByParentUidWithCategoryFilter(long parentUid, long langParam, long categoryParam0);
 
 
-    @UmQuery("SELECT ContentEntry.*, ContentEntryStatus.*\n" +
+    @UmQuery("SELECT ContentEntry.*, ContentEntryStatus.*, " +
+            "(SELECT containerUid FROM Container  " +
+            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY lastModified DESC LIMIT 1) as mostRecentContainer " +
             "FROM DownloadSet \n" +
             "LEFT JOIN ContentEntry on  DownloadSet.dsRootContentEntryUid = ContentEntry.contentEntryUid\n" +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid \n ")
-    public abstract UmProvider<ContentEntryWithContentEntryStatus> getDownloadedRootItems();
+    public abstract UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> getDownloadedRootItems();
 
 
 }

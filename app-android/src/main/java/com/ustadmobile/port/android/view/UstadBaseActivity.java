@@ -1,4 +1,5 @@
 package com.ustadmobile.port.android.view;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -24,11 +26,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
+import com.ustadmobile.core.view.ViewWithErrorNotifier;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
@@ -41,11 +45,11 @@ import java.util.Locale;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
- *
+ * <p>
  * Created by mike on 10/15/15.
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
-        UstadViewWithNotifications {
+        UstadViewWithNotifications, ViewWithErrorNotifier {
 
     private UstadBaseController baseController;
 
@@ -69,6 +73,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private boolean permissionRequestRationalesShown = false;
 
     private Runnable afterPermissionMethodRunner;
+
+    private Runnable runAfterServiceConnection;
 
     private String permissionDialogTitle;
 
@@ -95,14 +101,21 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private ServiceConnection bleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            networkManagerBle = ((NetworkManagerBleAndroidService.LocalServiceBinder)service)
+            networkManagerBle = ((NetworkManagerBleAndroidService.LocalServiceBinder) service)
                     .getService().getNetworkManagerBle();
             bleServiceBound = true;
+            onBleNetworkServiceBound(networkManagerBle);
+
+            if(runAfterServiceConnection != null){
+                runAfterServiceConnection.run();
+                runAfterServiceConnection = null;
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             bleServiceBound = false;
+            onBleNetworkServiceUnbound();
         }
     };
 
@@ -125,19 +138,49 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         Intent syncServiceIntent = new Intent(this, UmAppDatabaseSyncService.class);
         bindService(syncServiceIntent, mSyncServiceConnection,
-                Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
+                Context.BIND_AUTO_CREATE | Context.BIND_ADJUST_WITH_ACTIVITY);
 
         //bind ble service
         Intent bleServiceIntent = new Intent(this, NetworkManagerBleAndroidService.class);
-        bindService(bleServiceIntent,bleServiceConnection,
-                Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
+        bindService(bleServiceIntent, bleServiceConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_ADJUST_WITH_ACTIVITY);
+    }
+
+
+    /**
+     * Display the snackbar at the bottom of the page
+     *
+     * @param errorMessage    message for the snackbar
+     * @param actionMessageId id of action name
+     * @param action          action listener
+     */
+    public void showErrorNotification(String errorMessage, Runnable action, int actionMessageId) {
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG);
+        if (action != null) {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            snackbar.setAction(impl.getString(actionMessageId, getContext()), view -> action.run());
+            snackbar.setActionTextColor(ContextCompat.getColor((Context) getContext(), R.color.accent));
+        }
+        snackbar.show();
+    }
+
+    /**
+     * All activities descending from UstadBaseActivity bind to the network manager. This method
+     * can be overriden when presenters need to use a reference to the networkmanager.
+     *
+     * @param networkManagerBle
+     */
+    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) { }
+
+    protected void onBleNetworkServiceUnbound() {
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(localeChanged) {
-            if(UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
+        if (localeChanged) {
+            if (UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
                 new Handler().postDelayed(this::recreate, 200);
             }
         }
@@ -150,7 +193,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private BroadcastReceiver mLocaleChangeBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch(intent.getAction()) {
+            switch (intent.getAction()) {
                 case UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE:
                     localeChanged = true;
                     break;
@@ -176,7 +219,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     }
 
     protected void setUMToolbar(int toolbarID) {
-        umToolbar = (Toolbar)findViewById(toolbarID);
+        umToolbar = (Toolbar) findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
     }
@@ -223,16 +266,15 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     public void onDestroy() {
-        if(bleServiceBound){
+        if (bleServiceBound) {
             unbindService(bleServiceConnection);
         }
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
-        if(mSyncServiceBound) {
+        if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
         }
-
         super.onDestroy();
     }
 
@@ -242,14 +284,12 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case android.R.id.home:
                 UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                 impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
                         this), this);
                 return true;
-
-
         }
 
         return super.onOptionsItemSelected(item);
@@ -262,22 +302,21 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     }
 
 
-
     /**
      * Handle our own delegation of back button presses.  This allows UstadBaseFragment child classes
      * to handle back button presses if they want to.
      */
     @Override
     public void onBackPressed() {
-        for(WeakReference<Fragment> fragmentReference : fragmentList) {
-            if(fragmentReference.get() == null)
+        for (WeakReference<Fragment> fragmentReference : fragmentList) {
+            if (fragmentReference.get() == null)
                 continue;
 
-            if(!fragmentReference.get().isVisible())
+            if (!fragmentReference.get().isVisible())
                 continue;
 
-            if(fragmentReference.get() instanceof UstadBaseFragment && ((UstadBaseFragment)fragmentReference.get()).canGoBack()) {
-                ((UstadBaseFragment)fragmentReference.get()).goBack();
+            if (fragmentReference.get() instanceof UstadBaseFragment && ((UstadBaseFragment) fragmentReference.get()).canGoBack()) {
+                ((UstadBaseFragment) fragmentReference.get()).goBack();
                 return;
             }
         }
@@ -293,12 +332,12 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
                 + languageSetting + "'");
 
-        if(Build.VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             Locale locale = languageSetting.equals(UstadMobileSystemImpl.LOCALE_USE_SYSTEM)
                     ? Locale.getDefault() : new Locale(languageSetting);
             config.setLocale(locale);
             super.attachBaseContext(newBase.createConfigurationContext(config));
-        }else {
+        } else {
             super.attachBaseContext(newBase);
         }
     }
@@ -306,47 +345,51 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     public void showNotification(String notification, int length) {
-        runOnUiThread(() ->Toast.makeText(this, notification, length).show());
+        runOnUiThread(() -> Toast.makeText(this, notification, length).show());
     }
 
     /**
      * Responsible for running task after checking permissions
-     * @param permission Permission to be checked
-     * @param runnable Future task to be executed
-     * @param dialogTitle Permission dialog title
+     *
+     * @param permission    Permission to be checked
+     * @param runnable      Future task to be executed
+     * @param dialogTitle   Permission dialog title
      * @param dialogMessage Permission dialog message
      */
     protected void runAfterGrantingPermission(String permission, Runnable runnable,
-                                           String dialogTitle,String dialogMessage){
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+                                              String dialogTitle, String dialogMessage) {
+        this.afterPermissionMethodRunner = runnable;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             afterPermissionMethodRunner.run();
+            afterPermissionMethodRunner = null;
             return;
         }
 
-        this.afterPermissionMethodRunner = runnable;
+
         this.permissionDialogMessage = dialogMessage;
         this.permissionDialogTitle = dialogTitle;
         this.permission = permission;
 
-        if(ContextCompat.checkSelfPermission(this, permission)
-                != PackageManager.PERMISSION_GRANTED){
-            if(!permissionRequestRationalesShown){
+        if (ContextCompat.checkSelfPermission(this, permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (!permissionRequestRationalesShown) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(permissionDialogTitle)
                         .setMessage(permissionDialogMessage)
                         .setNegativeButton(getString(android.R.string.cancel),
                                 (dialog, which) -> dialog.dismiss())
                         .setPositiveButton(getString(android.R.string.ok), (dialog, which) ->
-                                runAfterGrantingPermission(permission,afterPermissionMethodRunner,
-                                permissionDialogTitle,permissionDialogMessage));
+                                runAfterGrantingPermission(permission, afterPermissionMethodRunner,
+                                        permissionDialogTitle, permissionDialogMessage));
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 permissionRequestRationalesShown = true;
-            }else{
+            } else {
                 permissionRequestRationalesShown = false;
                 ActivityCompat.requestPermissions(this, new String[]{permission}, RUN_TIME_REQUEST_CODE);
             }
-        }else{
+        } else {
             afterPermissionMethodRunner.run();
             afterPermissionMethodRunner = null;
         }
@@ -356,20 +399,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode){
+        switch (requestCode) {
             case RUN_TIME_REQUEST_CODE:
                 boolean allPermissionGranted = grantResults.length == permissions.length;
-                for(int result : grantResults) {
+                for (int result : grantResults) {
                     allPermissionGranted &= result == PackageManager.PERMISSION_GRANTED;
                 }
 
-                if(!allPermissionGranted &&
-                        permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                if (!allPermissionGranted &&
+                        permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     afterPermissionMethodRunner.run();
                     afterPermissionMethodRunner = null;
                 }
 
-                if(allPermissionGranted){
+                if (allPermissionGranted) {
                     afterPermissionMethodRunner.run();
                     afterPermissionMethodRunner = null;
                     return;
@@ -377,5 +420,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                 break;
 
         }
+    }
+
+    /**
+     * Make sure NetworkManagerBle is not null when running a certain logic
+     * @param runnable Future task to be executed
+     */
+    public void runAfterServiceConnection(Runnable runnable){
+        this.runAfterServiceConnection = runnable;
+    }
+
+    /**
+     * @return Active NetworkManagerBle
+     */
+    public NetworkManagerBle getNetworkManagerBle() {
+        return networkManagerBle;
     }
 }

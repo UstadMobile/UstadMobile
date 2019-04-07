@@ -5,9 +5,8 @@ import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
-import com.ustadmobile.lib.db.entities.ContentEntryContentEntryFileJoin;
-import com.ustadmobile.lib.db.entities.ContentEntryFile;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -66,6 +65,8 @@ public class DownloadDialogPresenterTest {
 
     private DownloadSet downloadSet;
 
+    private Container container;
+
     private long totalBytesToDownload = 0L;
 
     private static final int MAX_LATCH_WAITING_TIME = 15;
@@ -109,6 +110,12 @@ public class DownloadDialogPresenterTest {
                 "Lorem ipsum description",false,true);
         rootEntry.setContentEntryUid(umAppDatabase.getContentEntryDao().insert(rootEntry));
 
+        container = new Container();
+        container.setContainerContentEntryUid(rootEntry.getContentEntryUid());
+        container.setLastModified(System.currentTimeMillis());
+        container.setFileSize(0);
+        container.setContainerUid(umAppDatabase.getContainerDao().insert(container));
+
         ContentEntry entry2 = new ContentEntry("title 2", "title 2", true, true);
         ContentEntry entry3 = new ContentEntry("title 2", "title 2", false, true);
         ContentEntry entry4 = new ContentEntry("title 4", "title 4", true, false);
@@ -117,6 +124,25 @@ public class DownloadDialogPresenterTest {
         entry3.setContentEntryUid(umAppDatabase.getContentEntryDao().insert(entry3));
         entry4.setContentEntryUid(umAppDatabase.getContentEntryDao().insert(entry4));
 
+        Container cEntry2 = new Container();
+        cEntry2.setContainerContentEntryUid(entry2.getContentEntryUid());
+        cEntry2.setLastModified(System.currentTimeMillis());
+        cEntry2.setFileSize(500);
+        cEntry2.setContainerUid(umAppDatabase.getContainerDao().insert(cEntry2));
+
+        Container cEntry3 = new Container();
+        cEntry3.setContainerContentEntryUid(entry3.getContentEntryUid());
+        cEntry3.setLastModified(System.currentTimeMillis());
+        cEntry3.setFileSize(500);
+        cEntry3.setContainerUid(umAppDatabase.getContainerDao().insert(cEntry3));
+
+        Container cEntry4 = new Container();
+        cEntry4.setContainerContentEntryUid(entry4.getContentEntryUid());
+        cEntry4.setLastModified(System.currentTimeMillis());
+        cEntry4.setFileSize(500);
+        cEntry4.setContainerUid(umAppDatabase.getContainerDao().insert(cEntry4));
+
+        totalBytesToDownload = cEntry2.getFileSize() + cEntry3.getFileSize() + cEntry4.getFileSize();
 
         umAppDatabase.getContentEntryParentChildJoinDao().insertList(Arrays.asList(
                 new ContentEntryParentChildJoin(rootEntry, entry2, 0),
@@ -124,22 +150,6 @@ public class DownloadDialogPresenterTest {
                 new ContentEntryParentChildJoin(entry3, entry4, 0)
         ));
 
-        ContentEntryFile entry2File = new ContentEntryFile();
-        entry2File.setLastModified(System.currentTimeMillis());
-        entry2File.setFileSize(2000);
-        entry2File.setContentEntryFileUid(umAppDatabase.getContentEntryFileDao().insert(entry2File));
-        ContentEntryContentEntryFileJoin fileJoin =
-                new ContentEntryContentEntryFileJoin(entry2, entry2File);
-        fileJoin.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin));
-
-        ContentEntryFile entry4File = new ContentEntryFile();
-        entry4File.setFileSize(3000);
-        entry4File.setContentEntryFileUid(umAppDatabase.getContentEntryFileDao().insert(entry4File));
-
-        umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(
-                new ContentEntryContentEntryFileJoin(entry4, entry4File));
-
-        totalBytesToDownload = entry2File.getFileSize() + entry4File.getFileSize();
     }
 
     private void insertDownloadSetAndSetItems(boolean meteredNetworkAllowed, int status){
@@ -154,17 +164,14 @@ public class DownloadDialogPresenterTest {
         downloadJob = new DownloadJob(downloadSet);
         downloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(downloadJob));
 
-        ContentEntryFile entryFile = new ContentEntryFile();
-        entryFile.setLastModified(System.currentTimeMillis());
-        entryFile.setFileSize(2000);
-        entryFile.setContentEntryFileUid(umAppDatabase.getContentEntryFileDao().insert(entryFile));
 
         for(int i = 0 ; i < 5; i++){
-            DownloadJobItem downloadJobItem = new DownloadJobItem(downloadJob,downloadSetItem,entryFile);
+            DownloadJobItem downloadJobItem = new DownloadJobItem(downloadJob,downloadSetItem,container);
             downloadJobItem.setDjiUid(i * 1000);
             umAppDatabase.getDownloadJobItemDao().insert(downloadJobItem);
         }
 
+        totalBytesToDownload = totalBytesToDownload + container.getFileSize();
         umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
                 status,-1);
     }
@@ -193,8 +200,8 @@ public class DownloadDialogPresenterTest {
         assertTrue(umAppDatabase.getDownloadSetDao()
                 .findDownloadSetUidByRootContentEntryUid(rootEntry.getContentEntryUid()) > 0);
 
-        assertEquals("Four DownloadJobItems were created ",
-                4, umAppDatabase.getDownloadJobItemDao().findAll().size());
+        assertEquals("3 DownloadJobItem were created ",
+                3, umAppDatabase.getDownloadJobItemDao().findAll().size());
 
         assertEquals("Total bytes to be downloaded was updated",
                 totalBytesToDownload,
@@ -440,6 +447,4 @@ public class DownloadDialogPresenterTest {
                 umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
                 .getDestinationDir());
     }
-
-
 }

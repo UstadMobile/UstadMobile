@@ -6,7 +6,9 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -16,6 +18,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
@@ -44,15 +47,15 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENT
  *  @author kileha3
  */
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
+public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
 
     private BleMessageGattClientCallback mCallback;
 
     private BluetoothManager bluetoothManager;
 
-    private NetworkNode peerToCheck;
+    private BluetoothGatt mGattClient;
 
-    private Context context;
+    private NetworkManagerAndroidBle managerBle;
 
     /**
      * Constructor to be used when creating platform specific instance of BleEntryStatusTask
@@ -60,13 +63,15 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    public BleEntryStatusTaskAndroid(Context context, List<Long> entryUidsToCheck,
-                              NetworkNode peerToCheck) {
-        super(context,entryUidsToCheck,peerToCheck);
+    public BleEntryStatusTaskAndroid(Context context,NetworkManagerAndroidBle managerAndroidBle,
+                                     List<Long> entryUidsToCheck, NetworkNode peerToCheck) {
+        super(context,managerAndroidBle,entryUidsToCheck,peerToCheck);
+        this.managerBle = managerAndroidBle;
         this.context = context;
-        this.peerToCheck = peerToCheck;
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
-        this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload);
+        this.message = new BleMessage(ENTRY_STATUS_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(peerToCheck.getBluetoothMacAddress()),
+                messagePayload);
     }
 
     /**
@@ -77,10 +82,10 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * @param peerToSendMessageTo peer to send message to
      * @param responseListener Message response listener object
      */
-    public BleEntryStatusTaskAndroid(Context context , BleMessage message,
+    public BleEntryStatusTaskAndroid(Context context ,NetworkManagerBle managerBle, BleMessage message,
                                      NetworkNode peerToSendMessageTo,
                                      BleMessageResponseListener responseListener){
-        super(context,message,peerToSendMessageTo, responseListener);
+        super(context,managerBle,message,peerToSendMessageTo, responseListener);
     }
 
 
@@ -88,9 +93,11 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * Set bluetooth manager for BLE GATT communication
      * @param bluetoothManager BluetoothManager instance
      */
+    @VisibleForTesting
     void setBluetoothManager(BluetoothManager bluetoothManager){
         this.bluetoothManager = bluetoothManager;
     }
+
 
     /**
      * Start entry status check task
@@ -101,19 +108,46 @@ public class    BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mCallback = new BleMessageGattClientCallback(message);
            mCallback.setOnResponseReceived(this);
            BluetoothDevice destinationPeer = bluetoothManager.getAdapter()
-                   .getRemoteDevice(peerToCheck.getBluetoothMacAddress());
-            BluetoothGatt gatt= destinationPeer.connectGatt(context,false,mCallback);
-            if(gatt == null){
-                UstadMobileSystemImpl.l(UMLog.ERROR,695,
-                        "Failed to connect to "+destinationPeer.getAddress());
+                   .getRemoteDevice(networkNode.getBluetoothMacAddress());
+
+           //For device below lollipop they require autoConnect flag to be
+           // TRUE otherwise they will always throw error 133.
+           mGattClient = destinationPeer.connectGatt(
+                   (Context) context,managerBle.isVersionKitKatOrBelow(), mCallback);
+
+           if(managerBle.isVersionLollipopOrAbove()){
+               mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+           }
+
+           managerBle.handleNodeConnectionHistory(destinationPeer.getAddress(),
+                   mGattClient != null);
+
+           if(mGattClient == null){
+                UstadMobileSystemImpl.l(UMLog.ERROR,698,
+                        "Failed to connect to " + destinationPeer.getAddress());
+
+                UmAppDatabase.getInstance(context).getNetworkNodeDao()
+                        .updateRetryCount(networkNode.getNodeId(),null);
+
+                onResponseReceived(networkNode.getBluetoothMacAddress(), null,
+                        new IOException("BLE failed on connectGatt to " +
+                                networkNode.getBluetoothMacAddress()));
             }else{
-                UstadMobileSystemImpl.l(UMLog.DEBUG,695,
-                        "Connecting to "+destinationPeer.getAddress());
+                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                        "Connecting to " + destinationPeer.getAddress());
             }
        }catch (IllegalArgumentException e){
-           UstadMobileSystemImpl.l(UMLog.ERROR,695,
+           UstadMobileSystemImpl.l(UMLog.ERROR,698,
                    "Wrong address format provided",e);
        }
+    }
+
+    @Override
+    public void onResponseReceived(String sourceDeviceAddress, BleMessage response, Exception error) {
+        super.onResponseReceived(sourceDeviceAddress, response, error);
+        //disconnect after finishing the task
+        if(mGattClient != null)
+            mGattClient.disconnect();
     }
 
     /**

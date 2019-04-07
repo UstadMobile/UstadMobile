@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
@@ -17,26 +18,8 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
         System.out.println("Update content entry status");
     }
 
-    @UmQuery("UPDATE ContentEntryStatus SET totalSize = \n" +
-            "\t(SELECT fileSize FROM ContentEntryFile  \n" +
-            "\tJOIN ContentEntryContentEntryFileJoin \n" +
-            "\tON ContentEntryFile.contentEntryFileUid =  ContentEntryContentEntryFileJoin.cecefjContentEntryFileUid  \n" +
-            "\tAND ContentEntryContentEntryFileJoin.cecefjContentEntryUid = ContentEntryStatus.cesUid  \n" +
-            "\tORDER BY ContentEntryFile.lastModified DESC LIMIT 1),\n" +
-            "bytesDownloadSoFar = \n" +
-            "\t(SELECT downloadedSoFar FROM DownloadJobItem \n" +
-            "\tLEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid \n" +
-            "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1),\n" +
-            "downloadStatus = \n" +
-            "\t(SELECT djiStatus FROM DownloadJobItem \n" +
-            "\tLEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid \n" +
-            "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1),\n" +
-            "downloadSpeed = \n" +
-            "\t(SELECT downloadSpeed FROM DownloadJobItem \n" +
-            "\tLEFT JOIN DownloadSetItem ON DownloadJobItem.djiDsiUid = DownloadSetItem.dsiUid \n" +
-            "\tWHERE DownloadSetItem.dsiContentEntryUid = ContentEntryStatus.cesUid LIMIT 1)\n" +
-            "WHERE cesUid = :contentEntryUid")
-    public abstract void updateLeaf(long contentEntryUid);
+    @UmQuery("DELETE FROM ContentEntryStatus")
+    public abstract void deleteAll(UmCallback<Void> callback);
 
     @UmQuery("UPDATE ContentEntryStatus SET bytesDownloadSoFar = :bytesDownloadSoFar " +
             "WHERE cesUid = :contentEntryUid")
@@ -59,5 +42,8 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insertOrAbort(List<ContentEntryStatus> statusList);
+
+    @UmQuery("DELETE FROM ContentEntryStatus WHERE cesUid = :cesUid")
+    public abstract void deleteByFileUids(long cesUid);
 
 }

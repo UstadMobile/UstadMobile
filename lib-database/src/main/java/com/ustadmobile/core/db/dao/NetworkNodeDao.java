@@ -7,14 +7,13 @@ import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
-import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import sun.nio.ch.Net;
 
 /**
  * Created by mike on 1/30/18.
@@ -37,7 +36,10 @@ public abstract class NetworkNodeDao {
     public abstract NetworkNode findNodeByBluetoothAddress(String bluetoothAddress);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
-    public abstract Long insert(NetworkNode node);
+    public abstract long insert(NetworkNode node);
+
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
+    public abstract void insertAsync(NetworkNode node, UmCallback<Long> callback);
 
     @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract Long [] insert(List<NetworkNode> nodeList);
@@ -45,38 +47,61 @@ public abstract class NetworkNodeDao {
     @UmUpdate
     public abstract void update(NetworkNode node);
 
-    @UmQuery("Select * From NetworkNode")
-    public abstract List<NetworkNode> findAllActiveNodes();
+    @UmQuery("DELETE FROM NetworkNode WHERE bluetoothMacAddress = :bluetoothAddress")
+    public abstract void deleteByBluetoothAddress(String bluetoothAddress);
 
-    @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp WHERE bluetoothMacAddress = :bluetoothAddress")
+    @UmQuery("DELETE FROM NetworkNode")
+    public abstract void deleteAll(UmCallback<Void> callback);
+
+    @UmQuery("SELECT * FROM NetworkNode")
+    public abstract List<NetworkNode> getAll();
+
+    @UmQuery("UPDATE NetworkNode SET numFailureCount = numFailureCount + 1 WHERE nodeId = :nodeId")
+    public abstract void updateRetryCount(long nodeId, UmCallback<Void> callback);
+
+    @UmQuery("Select * From NetworkNode WHERE lastUpdateTimeStamp >= :lastUpdatedTime" +
+            " AND numFailureCount <= :maxNumFailure")
+    public abstract List<NetworkNode> findAllActiveNodes(long lastUpdatedTime, int maxNumFailure);
+
+    @ UmQuery ("UPDATE NetworkNode set lastUpdateTimeStamp = :lastUpdateTimeStamp, numFailureCount = 0 " +
+            "WHERE bluetoothMacAddress = :bluetoothAddress")
     public abstract void updateLastSeen(String bluetoothAddress,long lastUpdateTimeStamp, UmCallback<Integer> numChanged);
-
 
     @UmQuery("SELECT NetworkNode.* FROM NetworkNode " +
             "LEFT JOIN EntryStatusResponse ON NetworkNode.nodeId = EntryStatusResponse.erNodeId " +
-            "WHERE EntryStatusResponse.erContentEntryFileUid = :contentEntryFileUid " +
+            "WHERE EntryStatusResponse.erContainerUid = :containerUid " +
             "AND EntryStatusResponse.available " +
             "AND NetworkNode.lastUpdateTimeStamp > :minLastSeenTimestamp " +
             "AND (Select COUNT(*) FROM DownloadJobItemHistory " +
             "WHERE DownloadJobItemHistory.networkNode = NetworkNode.nodeId " +
             "AND NOT successful AND startTime > :maxFailuresFromTimestamp) < :maxFailuresInPeriod " +
             "LIMIT 1")
-    public abstract NetworkNode findNodeWithContentFileEntry(long contentEntryFileUid,
-                                                             long minLastSeenTimestamp,
-                                                             int maxFailuresInPeriod,
-                                                             long maxFailuresFromTimestamp);
+    public abstract NetworkNode findLocalActiveNodeByContainerUid(long containerUid,
+                                                                  long minLastSeenTimestamp,
+                                                                  int maxFailuresInPeriod,
+                                                                  long maxFailuresFromTimestamp);
+
+    @UmQuery("DELETE FROM NetworkNode WHERE NetworkNode.lastUpdateTimeStamp < :minLastSeenTimestamp " +
+            "OR NetworkNode.numFailureCount >= :maxFailuresInPeriod")
+    public abstract void deleteOldAndBadNode(long minLastSeenTimestamp,
+                                             int maxFailuresInPeriod);
+
+
+    @UmQuery("UPDATE NetworkNode SET groupSsid = :groupSsid, endpointUrl = :endpointUrl  WHERE nodeId = :nodeId")
+    public abstract void updateNetworkNodeGroupSsid(long nodeId, String groupSsid, String endpointUrl);
+
+    @UmQuery("SELECT endpointUrl FROM NetworkNode WHERE groupSsid = :ssid")
+    public abstract String getEndpointUrlByGroupSsid(String ssid);
 
     @UmTransaction
-    public void insertInTransaction(Hashtable<NetworkNode,Long> networkNodeTrackList){
-        Iterator<Map.Entry<NetworkNode, Long>> iterator = networkNodeTrackList.entrySet().iterator();
-        List<NetworkNode> nodeList = new ArrayList<>();
-        while (iterator.hasNext()){
-            Map.Entry<NetworkNode, Long> entry = iterator.next();
-            NetworkNode networkNode = entry.getKey();
-            networkNode.setLastUpdateTimeStamp(entry.getValue());
-            nodeList.add(networkNode);
+    public void updateNodeLastSeen(Map<String , Long> knownNodes){
+        Iterator nodeIterator = knownNodes.entrySet().iterator();
+        while (nodeIterator.hasNext()) {
+            Map.Entry<String,Long> nodeUpdates = (Map.Entry<String, Long>) nodeIterator.next();
+            updateLastSeen(nodeUpdates.getKey(),nodeUpdates.getValue(),null);
+            nodeIterator.remove();
+
         }
-        insert(nodeList);
     }
 
 }
