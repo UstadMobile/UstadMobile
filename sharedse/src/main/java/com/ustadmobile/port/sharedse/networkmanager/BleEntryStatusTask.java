@@ -10,6 +10,8 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE;
@@ -36,7 +38,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
 
     private BleMessageResponseListener responseListener;
 
-    protected NetworkManagerBle managerBle;
+    private NetworkManagerBle managerBle;
 
     /**
      * Constructor which will be used when creating new instance of a task
@@ -54,7 +56,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
     }
 
     /**
-     * Constructor which will be used when creaating new instance for WiFi direct group creation request
+     * Constructor which will be used when creating new instance for WiFi direct group creation request
      * @param context Application context
      * @param message Message to be sent to the peer device (Carried WiFi group creation request)
      * @param peerToSendMessageTo Peer to send message to
@@ -94,7 +96,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
      * Set list of entry uuids , for test purpose
      * @param entryUidsToCheck List of uuids
      */
-    void setEntryUidsToCheck(List<Long> entryUidsToCheck){
+    protected void setEntryUidsToCheck(List<Long> entryUidsToCheck){
         this.entryUidsToCheck = entryUidsToCheck;
     }
 

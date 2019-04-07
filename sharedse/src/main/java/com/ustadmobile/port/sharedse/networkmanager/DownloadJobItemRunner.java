@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.google.gson.Gson;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
@@ -412,7 +411,7 @@ public class DownloadJobItemRunner implements Runnable {
             history.setUrl(downloadEndpoint);
 
             UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
-                    " starting download from" + downloadEndpoint + " FromCloud=" + isFromCloud +
+                    " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                     " Attempts remaining= " + attemptsRemaining);
 
             try {
@@ -529,6 +528,7 @@ public class DownloadJobItemRunner implements Runnable {
     private boolean connectToLocalNodeNetwork(){
         waitingForLocalConnection.set(true);
         BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(currentNetworkNode.getBluetoothMacAddress()),
                 BleMessageUtil.bleMessageLongToBytes(Collections.singletonList(1L)));
         UstadMobileSystemImpl.l(UMLog.DEBUG,699, mkLogPrefix() +
                 " connecting local network: requesting group credentials ");
@@ -545,12 +545,16 @@ public class DownloadJobItemRunner implements Runnable {
                             && response != null
                             && response.getRequestType() == WIFI_GROUP_CREATION_RESPONSE){
                         connectionRequestActive.set(false);
-                        WiFiDirectGroupBle lWifiDirectGroup = new Gson().fromJson(new String(response.getPayload()),
-                                WiFiDirectGroupBle.class);
+                        WiFiDirectGroupBle lWifiDirectGroup =
+                                networkManager.getWifiGroupInfoFromBytes(response.getPayload());
                         wiFiDirectGroupBle.set(lWifiDirectGroup);
-                        currentNetworkNode.setEndpointUrl(lWifiDirectGroup.getEndpoint());
+
+                        String acquiredEndPoint = "http://" + lWifiDirectGroup.getIpAddress() + ":"
+                                + lWifiDirectGroup.getPort() +"/";
+                        currentNetworkNode.setEndpointUrl(acquiredEndPoint);
                         appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
-                                lWifiDirectGroup.getSsid(), lWifiDirectGroup.getEndpoint());
+                                lWifiDirectGroup.getSsid(), acquiredEndPoint);
+
                         UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
                                 "Connecting to P2P group network with SSID "+lWifiDirectGroup.getSsid());
                     }
@@ -578,6 +582,9 @@ public class DownloadJobItemRunner implements Runnable {
                             && connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_UNMETERED);
             UstadMobileSystemImpl.l(UMLog.INFO, 699, "Disconnected existing wifi network");
         }
+
+        UstadMobileSystemImpl.l(UMLog.INFO, 699, "Connection initiated to "
+                + wiFiDirectGroupBle.get().getSsid());
 
         networkManager.connectToWiFi(wiFiDirectGroupBle.get().getSsid(),
                 wiFiDirectGroupBle.get().getPassphrase());

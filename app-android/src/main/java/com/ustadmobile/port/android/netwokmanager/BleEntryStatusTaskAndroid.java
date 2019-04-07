@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UMLog;
@@ -54,6 +55,8 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
 
     private BluetoothGatt mGattClient;
 
+    private NetworkManagerAndroidBle managerBle;
+
     /**
      * Constructor to be used when creating platform specific instance of BleEntryStatusTask
      * @param context Platform specific application context.
@@ -63,9 +66,12 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
     public BleEntryStatusTaskAndroid(Context context,NetworkManagerAndroidBle managerAndroidBle,
                                      List<Long> entryUidsToCheck, NetworkNode peerToCheck) {
         super(context,managerAndroidBle,entryUidsToCheck,peerToCheck);
+        this.managerBle = managerAndroidBle;
         this.context = context;
         byte [] messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck);
-        this.message = new BleMessage(ENTRY_STATUS_REQUEST,messagePayload);
+        this.message = new BleMessage(ENTRY_STATUS_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(peerToCheck.getBluetoothMacAddress()),
+                messagePayload);
     }
 
     /**
@@ -87,9 +93,11 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
      * Set bluetooth manager for BLE GATT communication
      * @param bluetoothManager BluetoothManager instance
      */
+    @VisibleForTesting
     void setBluetoothManager(BluetoothManager bluetoothManager){
         this.bluetoothManager = bluetoothManager;
     }
+
 
     /**
      * Start entry status check task
@@ -101,12 +109,18 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
            mCallback.setOnResponseReceived(this);
            BluetoothDevice destinationPeer = bluetoothManager.getAdapter()
                    .getRemoteDevice(networkNode.getBluetoothMacAddress());
+
+           //For device below lollipop they require autoConnect flag to be
+           // TRUE otherwise they will always throw error 133.
            mGattClient = destinationPeer.connectGatt(
-                    (Context) context,false, mCallback);
-           mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+                   (Context) context,managerBle.isVersionKitKatOrBelow(), mCallback);
+
+           if(managerBle.isVersionLollipopOrAbove()){
+               mGattClient.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+           }
 
            managerBle.handleNodeConnectionHistory(destinationPeer.getAddress(),
-                   mGattClient == null);
+                   mGattClient != null);
 
            if(mGattClient == null){
                 UstadMobileSystemImpl.l(UMLog.ERROR,698,

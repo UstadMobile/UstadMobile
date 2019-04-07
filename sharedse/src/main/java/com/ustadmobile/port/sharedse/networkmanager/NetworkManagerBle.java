@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
@@ -18,8 +19,12 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -34,11 +39,10 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
 
@@ -50,22 +54,7 @@ import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.A
  */
 
 public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
-        LiveDataWorkQueue.OnQueueEmptyListener, EmbeddedHTTPD.ClientActivityListener {
-
-    /**
-     * Flag to indicate wifi direct group is inactive and it is not under creation
-     */
-    public static final int WIFI_DIRECT_GROUP_INACTIVE_STATUS = 0;
-
-    /**
-     * Flag to indicate Wifi direct group is being created now
-     */
-    public static final int WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS = 1;
-
-    /**
-     * Flag to indicate Wifi direct group is active
-     */
-    public static final int WIFI_DIRECT_GROUP_ACTIVE_STATUS = 2;
+        LiveDataWorkQueue.OnQueueEmptyListener {
 
     /**
      * Flag to indicate entry status request
@@ -99,15 +88,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     public static final int MAXIMUM_MTU_SIZE = 512;
 
     /**
-     * Wifi direct change current status
-     */
-    protected int wifiDirectGroupChangeStatus = 0;
-
-    /**
      * Bluetooth Low Energy service UUID for our app
      */
     public static final UUID USTADMOBILE_BLE_SERVICE_UUID =
-            UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93e");
+            UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a");
 
     public static final String WIFI_DIRECT_GROUP_SSID_PREFIX="DIRECT-";
 
@@ -121,7 +105,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     private Map<Object, List<Long>> availabilityMonitoringRequests = new HashMap<>();
 
-    protected HashMap<String, AtomicInteger> badNodeTracker = new HashMap<>();
+    protected HashMap<String, AtomicInteger> knownBadNodeTrackList = new HashMap<>();
 
     private static final int MAX_THREAD_COUNT = 1;
 
@@ -149,6 +133,14 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     public static final int DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000;
 
+    private Map<String, Long> knownPeerNodes = new HashMap<>();
+
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
+
+    private UmAppDatabase umAppDatabase;
+
+    private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
+
     /**
      * Constructor to be used when creating new instance
      * @param context Platform specific application context
@@ -156,10 +148,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     public NetworkManagerBle(Object context) {
         this.mContext = context;
     }
-
-    private UmAppDatabase umAppDatabase;
-
-    private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
 
     /**
      * Constructor to be used for testing purpose (mocks)
@@ -190,6 +178,18 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     };
 
+    private Runnable nodeLastSeenTrackerTask = new Runnable() {
+        @Override
+        public void run() {
+            if(knownPeerNodes.size() > 0){
+                Map<String , Long> nodeMap = new HashMap<>(knownPeerNodes);
+                umAppDatabase.getNetworkNodeDao().updateNodeLastSeen(nodeMap);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Updating "
+                        + knownPeerNodes.size() + " nodes from the Db");
+            }
+        }
+    };
+
     /**
      * Start web server, advertising and discovery
      */
@@ -198,6 +198,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
+        scheduledExecutorService.scheduleAtFixedRate(nodeLastSeenTrackerTask,0,10,TimeUnit.SECONDS);
     }
 
     @Override
@@ -205,15 +206,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         if(connectivityStatusRef.get() != null
                 && connectivityStatusRef.get().getConnectivityState() == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
             new Thread(this::restoreWifi).start();
-        }
-    }
-
-    @Override
-    public void OnClientListChanged(Map<String, Long> clientIpToLastActiveMap) {
-        if(clientIpToLastActiveMap.isEmpty() && getWifiDirectGroup() != null){
-            UstadMobileSystemImpl.l(UMLog.INFO, 699,
-                    "No more clients, removing wifi direct group");
-            removeWifiDirectGroup();
         }
     }
 
@@ -242,54 +234,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public abstract boolean canDeviceAdvertise();
 
-    /**
-     * Start advertising BLE service to the peer devices
-     * <b>Use case</b>
-     * When this method called, it will create BLE service and start advertising it.
-     */
-    public abstract void startAdvertising();
-
-    /**
-     * Stop advertising the service which was created and advertised by
-     * {@link NetworkManagerBle#startAdvertising()}
-     */
-    public abstract void stopAdvertising();
-
-    /**
-     * Start scanning for the peer devices whose services are being advertised
-     */
-    public abstract void startScanning();
-
-    /**
-     * Stop scanning task which was started by {@link NetworkManagerBle#startScanning()}
-     */
-    public abstract void stopScanning();
-
-
-    private void handleNode(NetworkNodeDao networkNodeDao,
-                            NetworkNode node , long updateTime){
-        try{
-            List<Long> entryUidsToMonitor =
-                    new ArrayList<>(getAllUidsToBeMonitored());
-            if(!isStopMonitoring){
-                if(entryUidsToMonitor.size() > 0){
-                    BleEntryStatusTask entryStatusTask =
-                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
-                    entryStatusTasks.add(entryStatusTask);
-                    entryStatusTaskExecutorService.execute(entryStatusTask);
-                }
-                node.setNetworkNodeLastUpdated(updateTime);
-                networkNodeDao.insert(node);
-                UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                        "New node added to the database , address = "
-                                +node.getBluetoothMacAddress()
-                                + (entryUidsToMonitor.size() > 0 ? " monitor task created"
-                                : " no entriries to be monitored"));
-            }
-        }catch (RejectedExecutionException e){
-            e.printStackTrace();
-        }
-    }
 
     /**
      * This should be called by the platform implementation when BLE discovers a nearby device
@@ -297,26 +241,50 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     protected void handleNodeDiscovered(NetworkNode node) {
         synchronized (knownNodesLock){
-            long updateTime = Calendar.getInstance().getTimeInMillis();
 
             NetworkNodeDao networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao();
-            networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),
-                    updateTime, new UmCallback<Integer>() {
-                        @Override
-                        public void onSuccess(Integer result) {
-                            if(result == 0){
-                                handleNode(networkNodeDao,node,updateTime);
+
+            if(!knownPeerNodes.containsKey(node.getBluetoothMacAddress())){
+
+                node.setLastUpdateTimeStamp(System.currentTimeMillis());
+
+                networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),
+                        node.getLastUpdateTimeStamp(), new UmCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer result) {
+                        knownPeerNodes.put(node.getBluetoothMacAddress(),
+                                node.getLastUpdateTimeStamp());
+                        if(result == 0){
+                            networkNodeDao.insertAsync(node, null);
+                            UstadMobileSystemImpl.l(UMLog.DEBUG,694, "New node with address "
+                                    + node.getBluetoothMacAddress() + " found, added to the Db");
+
+                            List<Long> entryUidsToMonitor = new ArrayList<>(getAllUidsToBeMonitored());
+
+                            if(!isStopMonitoring){
+                                if(entryUidsToMonitor.size() > 0){
+                                    BleEntryStatusTask entryStatusTask =
+                                            makeEntryStatusTask(mContext,entryUidsToMonitor,node);
+                                    entryStatusTasks.add(entryStatusTask);
+                                    entryStatusTaskExecutorService.execute(entryStatusTask);
+                                }
                             }
                         }
+                    }
 
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                                    "NetworkNode updated failed",new Exception(exception));
-                        }
-            });
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
+            }else{
+                knownPeerNodes.put(node.getBluetoothMacAddress(),System.currentTimeMillis());
+            }
         }
     }
+
+    public abstract WiFiDirectGroupBle awaitWifiDirectGroupReady(long timeout, TimeUnit timeoutUnit);
 
     /**
      * Open bluetooth setting section from setting panel
@@ -331,76 +299,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public abstract boolean setWifiEnabled(boolean enabled);
 
-    /**
-     * Create a new WiFi direct group on this device. A WiFi direct group
-     * will create a new SSID and passphrase other devices can use to connect in "legacy" mode.
-     *
-     * The process is asynchronous and the {@link WiFiDirectGroupListenerBle} should be used to
-     * listen for group creation.
-     *
-     * If a WiFi direct group is already under creation this method has no effect.
-     */
-    public abstract void createWifiDirectGroup();
-
-    /**
-     * Get current active WiFi Direct group (if any)
-     *
-     * @return The active WiFi direct group (if any) - otherwise null
-     */
-    public abstract WiFiDirectGroupBle getWifiDirectGroup();
-
-    /**
-     * Remove a WiFi group from the device.The process is asynchronous and the
-     * {@link WiFiDirectGroupListenerBle} should be used to listen for
-     * group removal.
-     */
-    public abstract void removeWifiDirectGroup();
-
-    /**
-     * Get Wifi direct group change status
-     * @return Current status
-     */
-    int getWifiDirectGroupChangeStatus() {
-        return wifiDirectGroupChangeStatus;
-    }
-
-    /**
-     * Set Wifi direct group change status
-     * @param wifiDirectGroupChangeStatus Status to be changed to
-     */
-    void setWifiDirectGroupChangeStatus(int wifiDirectGroupChangeStatus) {
-        this.wifiDirectGroupChangeStatus = wifiDirectGroupChangeStatus;
-    }
-
-    /**
-     * Add all group change listeners to the list
-     * @param groupListenerBle Listener interface
-     *
-     * @see WiFiDirectGroupListenerBle
-     */
-    void handleWiFiDirectGroupChangeRequest(WiFiDirectGroupListenerBle groupListenerBle){
-        if(!wiFiDirectGroupListeners.contains(groupListenerBle)){
-            wiFiDirectGroupListeners.add(groupListenerBle);
-        }
-    }
-
-    /**
-     * Notify all listening object that Wifi direct group has been changed
-     * @param isCreated True if change was CREATION otherwise REMOVAL
-     * @param group Group information
-     *
-     * @see WiFiDirectGroupBle
-     */
-    protected void fireWiFiDirectGroupChanged(boolean isCreated, WiFiDirectGroupBle group){
-        for(WiFiDirectGroupListenerBle groupListenerBle : wiFiDirectGroupListeners){
-            if(isCreated){
-                groupListenerBle.groupCreated(group,null);
-            }else{
-                groupListenerBle.groupRemoved(true,null);
-            }
-        }
-    }
-
 
     /**
      * Start monitoring availability of specific entries from peer devices
@@ -410,6 +308,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     @Override
     public void startMonitoringAvailability(Object monitor, List<Long> entryUidsToMonitor) {
         try{
+            //isStopMonitoring = false;
             availabilityMonitoringRequests.put(monitor, entryUidsToMonitor);
             UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Registered a monitor with "
                     + entryUidsToMonitor.size() + " entry(s) to be monitored");
@@ -425,8 +324,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                     getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime,1));
 
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Found total of   " + uniqueEntryUidsToMonitor +
-                            " to check from entry status availability");
+                    "Found total of   " + uniqueEntryUidsToMonitor.size() +
+                            " uids to check their availability status");
 
             List<EntryStatusResponseDao.EntryWithoutRecentResponse> entryWithoutRecentResponses =
                     responseDao.findEntriesWithoutRecentResponse(
@@ -447,8 +346,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
             }
 
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
-                    "Created total of  "+nodeToCheckEntryList.entrySet().size()
-                            + "entry(s) to be checked from");
+                    "Created total of  " + nodeToCheckEntryList.entrySet().size()
+                            + " entry(s) to be checked from");
 
             //Make entryStatusTask as per node list and entryUuids found
             for(int nodeId : nodeToCheckEntryList.keySet()){
@@ -545,7 +444,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                                                            NetworkNode peerToSendMessageTo,
                                                            BleMessageResponseListener responseListener);
 
-    public abstract DeleteJobTaskRunner makeDeleteJobTask(Object object, Hashtable args);
+    public abstract DeleteJobTaskRunner makeDeleteJobTask(Object object, Map<String , String>  args);
 
     /**
      * Send message to a specific device
@@ -562,7 +461,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     /**
      * @return Active RouterNanoHTTPD
      */
-    public abstract RouterNanoHTTPD getHttpd();
+    public abstract EmbeddedHTTPD getHttpd();
 
 
 
@@ -570,7 +469,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * Cancel all download set and set items
      * @param args Arguments to be passed to the task runner.
      */
-    public void cancelAndDeleteDownloadSet(Hashtable args) {
+    public void cancelAndDeleteDownloadSet(Map<String , String>  args) {
 
         long downloadSetUid = Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID)));
         List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().
@@ -584,20 +483,28 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         makeDeleteJobTask(mContext,args).run();
     }
 
+
     /**
-     * Send p2p state changes to either stop or start p2p service advertising & broadcasting
+     * Add listener to the list of local availability listeners
+     * @param listener listener object to be added.
      */
-    public abstract void sendP2PStateChangeBroadcast();
-
-
     public void addLocalAvailabilityListener(LocalAvailabilityListener listener) {
-        localAvailabilityListeners.add(listener);
+        if(!localAvailabilityListeners.contains(listener)){
+            localAvailabilityListeners.add(listener);
+        }
     }
 
+    /**
+     * Remove a listener from a list of all available listeners
+     * @param listener listener to be removed
+     */
     public void removeLocalAvailabilityListener(LocalAvailabilityListener listener) {
         localAvailabilityListeners.remove(listener);
     }
 
+    /**
+     * Trigger availability status change event to all listening parts
+     */
     public void fireLocalAvailabilityChanged() {
         List<LocalAvailabilityListener> listenerList = new ArrayList<>(localAvailabilityListeners);
         for(LocalAvailabilityListener listener : listenerList) {
@@ -605,7 +512,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
     }
 
-
+    /**
+     * All all availability statuses received from the peer node
+     * @param responses response received
+     */
     public void handleLocalAvailabilityResponsesReceived(List<EntryStatusResponse> responses) {
         if(responses.isEmpty())
             return;
@@ -625,6 +535,12 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
 
         fireLocalAvailabilityChanged();
+    }
+
+    //testing purpose
+    public void clearHistories(){
+        locallyAvailableContainerUids.clear();
+        knownPeerNodes.clear();
     }
 
     /**
@@ -650,20 +566,34 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public void handleNodeConnectionHistory(String bluetoothAddress, boolean success){
 
-        AtomicInteger record = badNodeTracker.get(bluetoothAddress);
+        AtomicInteger record = knownBadNodeTrackList.get(bluetoothAddress);
 
         if(record == null || success){
             record = new AtomicInteger(0);
-            badNodeTracker.put(bluetoothAddress,record);
+            knownBadNodeTrackList.put(bluetoothAddress,record);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Connection succeeded bad node counter was set to " + record.get()
+                            + " for "+bluetoothAddress);
         }
 
         if(!success){
             record.set(record.incrementAndGet());
-            badNodeTracker.put(bluetoothAddress,record);
+            knownBadNodeTrackList.put(bluetoothAddress,record);
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Connection failed and bad node counter set to " + record.get()
+                            + " for "+bluetoothAddress);
         }
 
-        if(badNodeTracker.get(bluetoothAddress).get() == 5){
+        if(knownBadNodeTrackList.get(bluetoothAddress).get() > 5){
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+                    "Bad node counter exceeded threshold (5), removing node with address "
+                            +bluetoothAddress + " from the list");
+            knownBadNodeTrackList.remove(bluetoothAddress);
+            knownPeerNodes.remove(bluetoothAddress);
             umAppDatabase.getNetworkNodeDao().deleteByBluetoothAddress(bluetoothAddress);
+
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694, "Node with address "
+                            +bluetoothAddress + " removed from the list");
         }
     }
 
@@ -673,7 +603,15 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * @return bad node
      */
     public AtomicInteger getBadNodeTracker(String bluetoothAddress){
-        return badNodeTracker.get(bluetoothAddress);
+        return knownBadNodeTrackList.get(bluetoothAddress);
+    }
+
+    public boolean isEntryLocallyAvailable(long containerUid){
+        return locallyAvailableContainerUids.contains(containerUid);
+    }
+
+    public Set<Long> getLocallyAvailableContainerUids(){
+        return locallyAvailableContainerUids;
     }
 
 
@@ -685,4 +623,86 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         wiFiDirectGroupListeners.clear();
         entryStatusTaskExecutorService.shutdown();
     }
+
+    /**
+     * Convert IP address to decimals
+     * @param address IPV4 address
+     * @return decimal representation of an IP address
+     */
+    private int convertIpAddressToInteger(String address){
+        int result = 0;
+        String[] ipAddressInArray = address.split("\\.");
+        for (int i = 3; i >= 0; i--){
+            int ip = Integer.parseInt(ipAddressInArray[3 - i]);
+            result |= ip << (i * 8);
+        }
+        return result;
+    }
+
+    /**
+     * Convert decimal representation of an ip address back to IPV4 format.
+     * @param ip decimal representation
+     * @return IPV4 address
+     */
+    private  String convertIpAddressToString(int ip){
+        return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "."
+                + ((ip >> 8) & 0xFF) + "." + (ip & 0xFF);
+    }
+
+
+    /**
+     * Convert group information to bytes so that they can be transmitted using {@link BleMessage}
+     * @param group WiFiDirectGroupBle
+     * @return constructed bytes  array from the group info.
+     */
+
+    public byte [] getWifiGroupInfoAsBytes(WiFiDirectGroupBle group){
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte [] infoAsbytes = new byte[]{};
+        DataOutputStream outputStream = new DataOutputStream(bos);
+        try {
+            outputStream.writeUTF(group.getSsid());
+            outputStream.writeUTF(group.getPassphrase());
+            outputStream.writeInt(convertIpAddressToInteger(group.getIpAddress()));
+            outputStream.writeChar((char)(group.getPort() + 'a'));
+            infoAsbytes = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            UMIOUtils.closeQuietly(outputStream);
+            UMIOUtils.closeQuietly(bos);
+        }
+        return  infoAsbytes;
+    }
+
+
+    /**
+     * Construct WiFiDirectGroupBle from received message payload
+     * @param payload received payload
+     * @return constructed WiFiDirectGroupBle
+     */
+    public WiFiDirectGroupBle getWifiGroupInfoFromBytes(byte [] payload){
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(payload);
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        WiFiDirectGroupBle groupBle = null;
+        try {
+            groupBle = new WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF());
+            groupBle.setIpAddress(convertIpAddressToString(dataInputStream.readInt()));
+            groupBle.setPort(dataInputStream.readChar() - 'a');
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            UMIOUtils.closeQuietly(inputStream);
+            UMIOUtils.closeQuietly(dataInputStream);
+        }
+
+        UstadMobileSystemImpl.l(UMLog.INFO, 699,
+                "Group information received with ssid = " + groupBle.getSsid());
+        return groupBle;
+    }
+
+    public abstract boolean isVersionLollipopOrAbove();
+
+    public abstract boolean isVersionKitKatOrBelow();
+
 }

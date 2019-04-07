@@ -27,9 +27,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,15 +70,16 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     public static final String NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype";
 
-    public ContentEntryDetailPresenter(Object context, Hashtable arguments,
-                                       ContentEntryDetailView viewContract, LocalAvailabilityMonitor monitor) {
+    public ContentEntryDetailPresenter(Object context, Map<String , String> arguments,
+                                       ContentEntryDetailView viewContract,
+                                       LocalAvailabilityMonitor monitor) {
         super(context, arguments, viewContract);
         this.monitor = monitor;
         this.impl = UstadMobileSystemImpl.getInstance();
 
     }
 
-    public void onCreate(Hashtable hashtable) {
+    public void onCreate(Map<String,String> map) {
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         UmAppDatabase appdb = UmAppDatabase.getInstance(getContext());
         ContentEntryRelatedEntryJoinDao contentRelatedEntryDao = repoAppDatabase.getContentEntryRelatedEntryJoinDao();
@@ -87,8 +88,8 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         containerDao = repoAppDatabase.getContainerDao();
         networkNodeDao = appdb.getNetworkNodeDao();
 
-        entryUuid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
-        navigation = (String) getArguments().get(ARG_REFERRER);
+        entryUuid = Long.valueOf(getArguments().get(ARG_CONTENT_ENTRY_UID));
+        navigation = getArguments().get(ARG_REFERRER);
 
         contentEntryDao.getContentByUuid(entryUuid, new UmCallback<ContentEntry>() {
             @Override
@@ -230,8 +231,9 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                                 Collections.singletonList(containerUid));
                     }
 
-                    Set<Long> monitorSet = new HashSet<>();
+                    Set<Long> monitorSet = view.getAllKnowAvailabilityStatus();
                     monitorSet.add(localNetworkNode != null ? containerUid : 0L);
+
                     handleLocalAvailabilityStatus(monitorSet);
                 }
 
@@ -247,14 +249,12 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void handleClickTranslatedEntry(long uid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        HashMap<String,String> args = new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(uid));
         impl.go(ContentEntryDetailView.VIEW_NAME, args, view.getContext());
     }
 
     public void handleUpNavigation() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListView.VIEW_NAME, navigation);
         if (lastEntryListArgs != null) {
             impl.go(ContentEntryListView.VIEW_NAME,
@@ -268,7 +268,6 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
     }
 
     public void handleDownloadButtonClick(boolean isDownloadComplete, Long entryUuid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid,
@@ -295,7 +294,7 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
 
         } else {
-            Hashtable args = new Hashtable();
+            HashMap<String,String> args = new HashMap<>();
 
             //hard coded strings because these are actually in sharedse
             args.put("contentEntryUid", String.valueOf(this.entryUuid));

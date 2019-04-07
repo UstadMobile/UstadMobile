@@ -22,6 +22,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.HashMap;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 
 public class Register2Activity extends UstadBaseActivity implements Register2View {
 
@@ -83,8 +85,8 @@ public class Register2Activity extends UstadBaseActivity implements Register2Vie
         systemImpl = UstadMobileSystemImpl.getInstance();
 
         presenter = new Register2Presenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),this);
-        presenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+                bundleToMap(getIntent().getExtras()),this);
+        presenter.onCreate(bundleToMap(savedInstanceState));
 
         for(int fieldId: fieldToViewIdMap.values()){
             ((TextInputEditText)findViewById(fieldId)).addTextChangedListener(textWatcher);

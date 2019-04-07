@@ -25,14 +25,15 @@ import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.net.ConnectivityManagerCompat;
 
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -40,6 +41,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.util.AsyncServiceManager;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -57,14 +59,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import fi.iki.elonen.NanoHTTPD;
 
 import static android.os.Looper.getMainLooper;
 
@@ -74,22 +80,6 @@ import static android.os.Looper.getMainLooper;
  * Also, this is maintained as a singleton by all activities binding to NetworkServiceAndroid,
  * which is responsible to call the onCreate method of this class.
  *
- * <p>
- * Use {@link NetworkManagerAndroidBle#startAdvertising()} to start advertising
- * BLE services to the nearby peers.
- *<p>
- * Use {@link NetworkManagerAndroidBle#stopAdvertising()} to stop advertising
- * BLE services to the nearby peers.
- *<p>
- * Use {@link NetworkManagerAndroidBle#startScanning()} to start scanning for the BLE
- * services advertised from peer devices.
- *<p>
- * Use {@link NetworkManagerAndroidBle#stopScanning()} to stop scanning for the BLE
- * services advertised from peer devices.
- *<p>
- * Use {@link NetworkManagerAndroidBle#createWifiDirectGroup} to create WiFi direct
- * group for peer content downloading.
- *<p>
  * <b>Note:</b> Most of the scan / advertise methods here require
  * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
  *
@@ -97,7 +87,8 @@ import static android.os.Looper.getMainLooper;
  *
  *  @author kileha3
  */
-public class NetworkManagerAndroidBle extends NetworkManagerBle{
+public class NetworkManagerAndroidBle extends NetworkManagerBle
+        implements EmbeddedHTTPD.ResponseListener{
 
     private WifiManager wifiManager;
 
@@ -107,6 +98,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private Object bleServiceAdvertiser;
 
+    private Object bleScanCallback = null;
+
+    /* Cast as required to avoid ClassNotFoundException on Android versions that dont support this */
     private Object gattServerAndroid;
 
     private Context mContext;
@@ -117,31 +111,23 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
     private WifiP2pManager wifiP2pManager;
 
-    private WiFiDirectGroupBle wiFiDirectGroupBle;
-
     private EmbeddedHTTPD httpd;
 
     private UmAppDatabase umAppDatabase;
 
     private ConnectivityManager connectivityManager;
 
-    public static final String ACTION_UM_P2P_SERVICE_STATE_CHANGED =
-            "ACTION_UM_P2P_SERVICE_STATE_CHANGED";
-
-    public static final String UM_P2P_SERVICE_EXTRA = "UM_P2P_SERVICE_EXTRA";
-
-    public static final int EXTRA_UM_P2P_STATE_ON = 1;
-
-    public static final int EXTRA_UM_P2P_STATE_OFF = 2;
-
-
-    private AtomicBoolean bluetoothEnabled = new AtomicBoolean(false);
+    /**
+     * When we use BLE for advertising and scanning, we need wait a little bit after one starts
+     * before the other can start
+     */
+    public static final int BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000;
 
     private AtomicBoolean wifiP2PCapable = new AtomicBoolean(false);
 
-    private AtomicBoolean bluetoothP2pRunning = new AtomicBoolean(false);
-
     private AtomicReference<WifiManager.WifiLock> wifiLockReference = new AtomicReference<>();
+
+    private WifiP2PGroupServiceManager wifiP2pGroupServiceManager;
 
     /**
      * A list of wifi direct ssids that are connected to using connectToWifiDirectGroup, the
@@ -150,77 +136,30 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     private List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
+    private volatile long bleAdvertisingLastStartTime;
+
+    private AtomicLong wifiDirectGroupLastRequestedTime = new AtomicLong();
+
+    private AtomicLong wifiDirectRequestLastCompletedTime = new AtomicLong();
+
+    private AtomicInteger numActiveRequests = new AtomicInteger();
     /**
-     * Listeners for the WiFi-Direct group connections / states,
-     * invoked when WiFi Direct state/connection has changed
+     *
      */
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mBluetoothAndWifiStateChangeBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction() != null){
-
-                switch (intent.getAction()){
-                    case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
-                        NetworkInfo networkInfo =
-                                intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-                        if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS){
-                            requestGroupInfo();
-                        }else if(networkInfo.isConnected()){
-                            requestConnectionInfo();
-                        }
-                        break;
-
-                    case BluetoothAdapter.ACTION_STATE_CHANGED:
-                        sendP2PStateChangeBroadcast();
-                        break;
-                }
-            }
+            checkP2PBleServices();
         }
     };
 
-    /**
-     * Since bluetooth state change broadcast doesn't receive a first broadcast when registered,
-     * and it is protected with system access then this broadcast is a reflection of the system bluetooth
-     * broadcast which can be sent manually.
-     */
-    private BroadcastReceiver umP2PReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent != null){
-                int state =  intent.getIntExtra(UM_P2P_SERVICE_EXTRA,EXTRA_UM_P2P_STATE_OFF);
-
-                switch (state){
-                    case EXTRA_UM_P2P_STATE_ON:
-                        bluetoothEnabled.set(true);
-                        break;
-                    case EXTRA_UM_P2P_STATE_OFF:
-                        bluetoothEnabled.set(false);
-                        break;
-                }
-
-                //check if location permission is granted
-                boolean permissionGranted = ActivityCompat.checkSelfPermission(context,
-                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-                if(permissionGranted && bluetoothEnabled.get() && wifiP2PCapable.get()){
-
-                    initGattServer();
-
-                    if(!bluetoothP2pRunning.get()){
-                        startAdvertising();
-                    }
-
-                    new Handler().postDelayed(() ->
-                            startScanning(),TimeUnit.SECONDS.toMillis(2));
-
-                }else{
-                    stopScanning();
-                    stopAdvertising();
-                }
-
-            }
+    private static class WifiDirectGroupAndroid extends WiFiDirectGroupBle {
+        private WifiDirectGroupAndroid(WifiP2pGroup group, int endpointPort) {
+            super(group.getNetworkName(), group.getPassphrase());
+            setPort(endpointPort);
+            setIpAddress("192.168.49.1");
         }
-    };
+    }
 
 
     /**
@@ -229,52 +168,276 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      *
      * @see android.bluetooth.BluetoothAdapter.LeScanCallback
      */
-    private BluetoothAdapter.LeScanCallback leScanCallback = (device, rssi, scanRecord) -> {
-        NetworkNode networkNode = new NetworkNode();
-        networkNode.setBluetoothMacAddress(device.getAddress());
-        handleNodeDiscovered(networkNode);
+
+    //private BluetoothAdapter.LeScanCallback leScanCallback = nu
+
+    private ScheduledExecutorService delayedExecutor = Executors.newSingleThreadScheduledExecutor();
+
+    private AsyncServiceManager scanningServiceManager = new AsyncServiceManager(
+            AsyncServiceManager.STATE_STOPPED,
+            ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+        @Override
+        public void start() {
+            if(isBleCapable()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "Starting BLE scanning");
+                notifyStateChanged(STATE_STARTED);
+                bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
+                        (BluetoothAdapter.LeScanCallback) bleScanCallback);
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "BLE Scanning started ");
+            }else{
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                UstadMobileSystemImpl.l(UMLog.ERROR,689,
+                        "Not BLE capable, no need to start");
+            }
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+        @Override
+        public void stop() {
+            bluetoothAdapter.stopLeScan((BluetoothAdapter.LeScanCallback) bleScanCallback);
+            notifyStateChanged(STATE_STOPPED);
+        }
     };
 
+    private AsyncServiceManager advertisingServiceManager = new AsyncServiceManager(
+            AsyncServiceManager.STATE_STOPPED,
+            ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
+        @Override
+        public void start() {
+            if(canDeviceAdvertise()){
+                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                        "Starting BLE advertising service");
+                gattServerAndroid = new BleGattServerAndroid(mContext,
+                        NetworkManagerAndroidBle.this);
+                bleServiceAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
+
+                BluetoothGattService service = new BluetoothGattService(parcelServiceUuid.getUuid(),
+                        BluetoothGattService.SERVICE_TYPE_PRIMARY);
+
+                BluetoothGattCharacteristic writeCharacteristic = new BluetoothGattCharacteristic(
+                        parcelServiceUuid.getUuid(), BluetoothGattCharacteristic.PROPERTY_WRITE,
+                        BluetoothGattCharacteristic.PERMISSION_WRITE);
+
+                service.addCharacteristic(writeCharacteristic);
+                if(gattServerAndroid == null
+                    || ((BleGattServerAndroid)gattServerAndroid).getGattServer() == null
+                    || bleServiceAdvertiser == null) {
+                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                    return;
+                }
+
+                ((BleGattServerAndroid)gattServerAndroid).getGattServer().addService(service);
+
+                AdvertiseSettings settings = new AdvertiseSettings.Builder()
+                        .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                        .setConnectable(true)
+                        .setTimeout(0)
+                        .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
+                        .build();
+
+                AdvertiseData data = new AdvertiseData.Builder()
+                        .addServiceUuid(parcelServiceUuid).build();
+
+                ((BluetoothLeAdvertiser)bleServiceAdvertiser).startAdvertising(settings, data,
+                        new AdvertiseCallback() {
+                            @Override
+                            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                                super.onStartSuccess(settingsInEffect);
+                                bleAdvertisingLastStartTime = System.currentTimeMillis();
+                                notifyStateChanged(STATE_STARTED);
+                                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                                        "Service advertised successfully");
+                            }
+
+                            @Override
+                            public void onStartFailure(int errorCode) {
+                                super.onStartFailure(errorCode);
+                                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                                UstadMobileSystemImpl.l(UMLog.ERROR,689,
+                                        "Service could'nt start, with error code "+errorCode);
+                            }
+                        });
+            }else {
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+            }
+        }
+
+        @Override
+        public void stop() {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
+                    mGattServer.clearServices();
+                    mGattServer.close();
+                }
+                gattServerAndroid = null;
+            }catch(Exception e) {
+                //maybe because bluetooth is actually off?
+                UstadMobileSystemImpl.l(UMLog.ERROR, 689,
+                        "Exception trying to stop gatt server", e);
+            }
+            notifyStateChanged(STATE_STOPPED);
+        }
+    };
+
+    private static class WifiP2PGroupServiceManager extends AsyncServiceManager {
+
+        private AtomicReference<WiFiDirectGroupBle> wiFiDirectGroup = new AtomicReference<>();
+
+        private Handler timeoutCheckHandler = new Handler();
+
+        private static final int TIMEOUT_AFTER_GROUP_CREATION = 2* 60 * 1000;
+
+        private static final int TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000;
+
+        private static final int TIMEOUT_CHECK_INTERVAL = 30 * 1000;
+
+        private final NetworkManagerAndroidBle networkManager;
+
+        private class CheckTimeoutRunnable implements Runnable {
+            public void run() {
+                long timeNow = System.currentTimeMillis();
+                boolean timedOut = networkManager.numActiveRequests.get() == 0
+                        && (timeNow - networkManager.wifiDirectGroupLastRequestedTime.get()) > TIMEOUT_AFTER_GROUP_CREATION
+                        && (timeNow - networkManager.wifiDirectRequestLastCompletedTime.get()) > TIMEOUT_AFTER_LAST_REQUEST;
+                setEnabled(!timedOut);
+
+                if(getState() != STATE_STOPPED)
+                    timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(),
+                            TIMEOUT_CHECK_INTERVAL);
+            }
+        }
+
+        private BroadcastReceiver wifiP2pBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                networkManager.wifiP2pManager.requestGroupInfo(
+                        networkManager.wifiP2pChannel, (group) -> {
+                    wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group,
+                            networkManager.httpd.getListeningPort()) : null);
+                    if((group == null && getState() == STATE_STARTING)
+                        || (group != null && getState() == STATE_STOPPING)) {
+                        return;//it's working on it, and hasn't failed yet, don't notify status change
+                    }
+
+                    notifyStateChanged(group != null ? STATE_STARTED : STATE_STOPPED);
+                });
+            }
+        };
+
+
+        private WifiP2PGroupServiceManager(NetworkManagerAndroidBle networkManager) {
+            super(STATE_STOPPED,
+                    (runnable, delay) -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS));
+            this.networkManager = networkManager;
+        }
+
+        protected BroadcastReceiver getWifiP2pBroadcastReceiver() {
+            return wifiP2pBroadcastReceiver;
+        }
+
+        @Override
+        public void start() {
+            timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(), TIMEOUT_CHECK_INTERVAL);
+            networkManager.wifiP2pManager.requestGroupInfo(networkManager.wifiP2pChannel,
+                    (wifiP2pGroup) -> {
+                        if(wifiP2pGroup != null) {
+                            wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
+                                    networkManager.httpd.getListeningPort()));
+                            notifyStateChanged(STATE_STARTED);
+                        }else {
+                            createNewGroup();
+                        }
+                    });
+        }
+
+        private void createNewGroup() {
+            networkManager.wifiP2pManager.createGroup(networkManager.wifiP2pChannel,
+                    new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    UstadMobileSystemImpl.l(UMLog.INFO,692, "Group created successfully");
+                    /* wait for the broadcast. OnSuccess might be called before the group is really ready */
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                            "Failed to create a group with error code "+reason);
+                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                }
+            });
+        }
+
+        @Override
+        public void stop() {
+            networkManager.wifiP2pManager.removeGroup(
+                    networkManager.wifiP2pChannel, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    UstadMobileSystemImpl.l(UMLog.INFO,693,
+                            "Group removed successfully");
+                    wiFiDirectGroup.set(null);
+                    notifyStateChanged(STATE_STOPPED);
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR,693,
+                            "Failed to remove a group with error code " + reason);
+
+                    //check if the group is still active
+                    networkManager.wifiP2pManager.requestGroupInfo(
+                            networkManager.wifiP2pChannel,
+                            (wifiP2pGroup) -> {
+                                if(wifiP2pGroup != null) {
+                                    wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
+                                            networkManager.httpd.getListeningPort()));
+                                    notifyStateChanged(STATE_STARTED, STATE_STARTED);
+                                }else {
+                                    wiFiDirectGroup.set(null);
+                                    notifyStateChanged(STATE_STOPPED);
+                                }
+                            });
+                }
+            });
+        }
+
+        public WiFiDirectGroupBle getGroup() {
+            return wiFiDirectGroup.get();
+        }
+    }
+
+
     /**
-     * Callback for the network connectivity changes
+     * Handle network state change events for android version < Lollipop
      */
+    private BroadcastReceiver networkStateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+            if((info != null && info.isConnected())){
+                handleNetworkAvailable(null);
+            }else{
+                handleDisconnected();
+            }
+        }
+    };
+
+
+    /**
+     * Callback for the network connectivity changes for android version >= Lollipop
+     */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private class UmNetworkCallback extends ConnectivityManager.NetworkCallback {
 
         @Override
         public void onAvailable(Network network) {
             super.onAvailable(network);
-
-            boolean isMeteredConnection =
-                    ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager);
-            int state = isMeteredConnection ?
-                    ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
-
-            NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
-                    prettyPrintNetwork(networkInfo));
-
-            String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
-            ConnectivityStatus status = new ConnectivityStatus(state, true,
-                    ssid);
-            connectivityStatusRef.set(status);
-
-            //get network SSID
-            if(ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)){
-                status.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
-                localConnectionOpener = network::openConnection;
-            }
-
-
-            umAppDatabase.getConnectivityStatusDao().insert(status, null);
-        }
-
-        private void handleDisconnected() {
-            localConnectionOpener = null;
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected");
-            connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
-                    false, null));
-            umAppDatabase.getConnectivityStatusDao()
-                    .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+           handleNetworkAvailable(network);
         }
 
 
@@ -293,6 +456,51 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
             super.onUnavailable();
             handleDisconnected();
         }
+    }
+
+
+    private void handleDisconnected() {
+        localConnectionOpener = null;
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected");
+        connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+                false, null));
+        umAppDatabase.getConnectivityStatusDao()
+                .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+    }
+
+
+    private void handleNetworkAvailable(Network network){
+
+        boolean isMeteredConnection =
+                ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager);
+        int state = isMeteredConnection ?
+                ConnectivityStatus.STATE_METERED : ConnectivityStatus.STATE_UNMETERED;
+
+        NetworkInfo networkInfo;
+
+        if(isVersionLollipopOrAbove()){
+            networkInfo = connectivityManager.getNetworkInfo(network);
+        }else{
+            networkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
+                prettyPrintNetwork(networkInfo));
+
+        String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
+        ConnectivityStatus status = new ConnectivityStatus(state, true,
+                ssid);
+        connectivityStatusRef.set(status);
+
+        //get network SSID
+        if(ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)){
+            status.setConnectivityState(ConnectivityStatus.STATE_CONNECTED_LOCAL);
+            if(isVersionLollipopOrAbove()){
+                localConnectionOpener = network::openConnection;
+            }
+        }
+
+
+        umAppDatabase.getConnectivityStatusDao().insert(status, null);
     }
 
 
@@ -321,50 +529,94 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         startMonitoringNetworkChanges();
     }
 
-
     @Override
     public void onCreate() {
-        wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
-        wifiP2PCapable.set(wifiP2pManager != null);
-
-        if(wifiP2PCapable.get()){
-            wifiP2pChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
-
-            if(isBleCapable()){
-
-                //setting up WiFi Direct & bluetooth connection listener
-                IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-                intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-                mContext.registerReceiver(mReceiver, intentFilter);
-
-                //Register bluetooth reflection local broadcast
-                LocalBroadcastManager.getInstance(mContext).registerReceiver(umP2PReceiver,
-                        new IntentFilter(ACTION_UM_P2P_SERVICE_STATE_CHANGED));
-
-                bluetoothManager =  mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-                bluetoothAdapter = ((BluetoothManager)bluetoothManager).getAdapter();
-                initGattServer();
-                sendP2PStateChangeBroadcast();
-            }
-
+        if(wifiManager == null){
+            wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         }
+
+        if(wifiP2pManager == null){
+            wifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
+        }
+        wifiP2PCapable.set(wifiP2pManager != null);
+        wifiP2pGroupServiceManager = new WifiP2PGroupServiceManager(this);
+
+
+        if(wifiP2PCapable.get()) {
+            wifiP2pChannel = wifiP2pManager.initialize(mContext, getMainLooper(), null);
+            mContext.registerReceiver(wifiP2pGroupServiceManager.getWifiP2pBroadcastReceiver(),
+                    new IntentFilter(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION));
+        }
+
+        if(isBleDeviceSDKVersion() && isBleCapable()){
+
+            bleScanCallback = (BluetoothAdapter.LeScanCallback) (device, rssi, scanRecord) -> {
+                NetworkNode networkNode = new NetworkNode();
+                networkNode.setBluetoothMacAddress(device.getAddress());
+                handleNodeDiscovered(networkNode);
+            };
+
+            //setting up bluetooth connection listener
+            IntentFilter intentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+            intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+            mContext.registerReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver, intentFilter);
+
+            bluetoothManager =  mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+            bluetoothAdapter = ((BluetoothManager)bluetoothManager).getAdapter();
+
+            /**
+             * Android will not send an initial state on startup as happens for most other
+             * receivers, so we have to do that ourselves
+             */
+            if(bluetoothAdapter != null) {
+                Intent initialBluetoothIntent = new Intent(BluetoothAdapter.ACTION_STATE_CHANGED);
+                initialBluetoothIntent.putExtra(BluetoothAdapter.EXTRA_STATE,
+                        bluetoothAdapter.getState());
+                mBluetoothAndWifiStateChangeBroadcastReceiver.onReceive(mContext, initialBluetoothIntent);
+            }
+        }
+
         super.onCreate();
     }
 
-    private void initGattServer(){
-        if(isBluetoothEnabled()){
-            gattServerAndroid = new BleGattServerAndroid(mContext,this);
+    @Override
+    public void responseStarted(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
+        if(session.getRemoteIpAddress() != null && session.getRemoteIpAddress().startsWith("192.168.49")) {
+            numActiveRequests.incrementAndGet();
         }
     }
 
     @Override
-    public void sendP2PStateChangeBroadcast() {
-        Intent intent = new Intent(ACTION_UM_P2P_SERVICE_STATE_CHANGED);
-        intent.putExtra(UM_P2P_SERVICE_EXTRA, (isBluetoothEnabled()
-                ? EXTRA_UM_P2P_STATE_ON : EXTRA_UM_P2P_STATE_OFF));
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+    public void responseFinished(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
+        if(session.getRemoteIpAddress() != null && session.getRemoteIpAddress().startsWith("192.168.49")) {
+            numActiveRequests.decrementAndGet();
+            wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis());
+        }
+    }
+
+    /**
+     * Check that the required
+     */
+    public void checkP2PBleServices() {
+        boolean permissionGranted = ActivityCompat.checkSelfPermission(mContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean scanningEnabled = permissionGranted && isBluetoothEnabled() && isBleCapable() && wifiManager.isWifiEnabled();
+        boolean advertisingEnabled = scanningEnabled & canDeviceAdvertise();
+        boolean waitedLongEnoughToStartScanning = true;
+        long timeNow = System.currentTimeMillis();
+
+        if(advertisingEnabled) {
+            waitedLongEnoughToStartScanning = bleAdvertisingLastStartTime != 0
+                    && (timeNow - bleAdvertisingLastStartTime) > BLE_SCAN_WAIT_AFTER_ADVERTISING;
+        }
+
+        scanningServiceManager.setEnabled(scanningEnabled && waitedLongEnoughToStartScanning);
+        advertisingServiceManager.setEnabled(advertisingEnabled);
+
+        if(scanningEnabled && !waitedLongEnoughToStartScanning) {
+            delayedExecutor.schedule(this::checkP2PBleServices,
+                    BLE_SCAN_WAIT_AFTER_ADVERTISING + 1000, TimeUnit.MILLISECONDS);
+        }
     }
 
     /**
@@ -380,8 +632,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public boolean isBleCapable() {
-        return BluetoothAdapter.getDefaultAdapter() != null && isBleDeviceSDKVersion()
-                && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+        if(isBleDeviceSDKVersion())
+            return  BluetoothAdapter.getDefaultAdapter() != null && mContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+            else return false;
+
     }
 
     /**
@@ -390,7 +645,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public boolean isBluetoothEnabled() {
         return bluetoothAdapter != null && bluetoothAdapter.isEnabled()
-                && bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
+                &&  bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
     }
 
     /**
@@ -399,102 +654,6 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @Override
     public boolean canDeviceAdvertise() {
         return isAdvertiser() && bluetoothAdapter.isMultipleAdvertisementSupported();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void startAdvertising() {
-        if(canDeviceAdvertise()){
-            bleServiceAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
-
-            BluetoothGattService service = new BluetoothGattService(parcelServiceUuid.getUuid(),
-                    BluetoothGattService.SERVICE_TYPE_PRIMARY);
-
-            BluetoothGattCharacteristic writeCharacteristic = new BluetoothGattCharacteristic(
-                    parcelServiceUuid.getUuid(), BluetoothGattCharacteristic.PROPERTY_WRITE,
-                    BluetoothGattCharacteristic.PERMISSION_WRITE);
-
-            service.addCharacteristic(writeCharacteristic);
-            if(gattServerAndroid == null)
-                return;
-
-            if(((BleGattServerAndroid)gattServerAndroid).getGattServer() == null)
-                return;
-
-            ((BleGattServerAndroid)gattServerAndroid).getGattServer().addService(service);
-
-            if (bleServiceAdvertiser == null)
-                return;
-
-            AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                    .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
-                    .setConnectable(true)
-                    .setTimeout(0)
-                    .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
-                    .build();
-
-            AdvertiseData data = new AdvertiseData.Builder()
-                    .addServiceUuid(parcelServiceUuid).build();
-
-            ((BluetoothLeAdvertiser)bleServiceAdvertiser).startAdvertising(settings, data,
-                    new AdvertiseCallback() {
-                @Override public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                    super.onStartSuccess(settingsInEffect);
-                    bluetoothP2pRunning.set(true);
-                    UstadMobileSystemImpl.l(UMLog.DEBUG,689,
-                            "Service advertised successfully");
-                }
-
-                @Override public void onStartFailure(int errorCode) {
-                    super.onStartFailure(errorCode);
-                    bluetoothP2pRunning.set(false);
-                    UstadMobileSystemImpl.l(UMLog.ERROR,689,
-                            "Service could'nt start, with error code "+errorCode);
-                }
-            });
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stopAdvertising() {
-        if(bleServiceAdvertiser == null || ((BleGattServerAndroid)gattServerAndroid) == null)
-            return;
-
-        BluetoothGattServer mGattServer = ((BleGattServerAndroid)gattServerAndroid).getGattServer();
-        if (isBleDeviceSDKVersion() && mGattServer != null) {
-            mGattServer.clearServices();
-            mGattServer.close();
-            bluetoothP2pRunning.set(false);
-            gattServerAndroid = null;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void startScanning() {
-        if(isBleCapable() && !bluetoothAdapter.isDiscovering()){
-            bluetoothAdapter.startLeScan(new UUID[] { parcelServiceUuid.getUuid()}, leScanCallback);
-        }else{
-            UstadMobileSystemImpl.l(UMLog.ERROR,689,
-                    "Scanning already started, no need to start it again");
-        }
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stopScanning() {
-        if(isBleCapable() && bluetoothP2pRunning.get() && !bluetoothEnabled.get())
-        bluetoothAdapter.stopLeScan(leScanCallback);
     }
 
     /**
@@ -514,106 +673,18 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
         return wifiManager.setWifiEnabled(enabled);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void createWifiDirectGroup() {
-        if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_INACTIVE_STATUS){
-            wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
-            if(isWiFiEnabled()){
-                requestGroupInfo();
-            }else{
-                if(setWifiEnabled(true)){
-                    startCreatingAGroup();
-                }else{
-                    UstadMobileSystemImpl.l(UMLog.DEBUG,692,
-                            "Wifi is not enabled, enabling failed");
-                }
-            }
-        }else{
-            if(wifiDirectGroupChangeStatus == WIFI_DIRECT_GROUP_ACTIVE_STATUS){
-                fireWiFiDirectGroupChanged(true, getWifiDirectGroup());
-            }else {
-                UstadMobileSystemImpl.l(UMLog.DEBUG,692,
-                        "Wifi is being created, please wait for the callback");
-            }
-        }
-    }
 
     @Override
-    public WiFiDirectGroupBle getWifiDirectGroup() {
-        return wiFiDirectGroupBle;
+    public WiFiDirectGroupBle awaitWifiDirectGroupReady(long timeout, TimeUnit timeoutUnit) {
+        wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis());
+        wifiP2pGroupServiceManager.setEnabled(true);
+        wifiP2pGroupServiceManager.await(state ->
+                        state == AsyncServiceManager.STATE_STARTED
+                        || state == AsyncServiceManager.STATE_STOPPED,
+                timeout, timeoutUnit);
+        return wifiP2pGroupServiceManager.getGroup();
     }
 
-    /**
-     * Create a WiFi direct group
-     */
-    private void startCreatingAGroup(){
-        wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                UstadMobileSystemImpl.l(UMLog.INFO,692,
-                        "Group created successfully");
-                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_UNDER_CREATION_STATUS;
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                UstadMobileSystemImpl.l(UMLog.ERROR,692,
-                        "Failed to create a group with error code "+reason);
-                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
-            }
-        });
-    }
-
-    /**
-     * Request WiFi direct group information
-     */
-    private void requestGroupInfo(){
-        wifiP2pManager.requestGroupInfo(wifiP2pChannel, group -> {
-            if(group != null){
-                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_ACTIVE_STATUS;
-                wiFiDirectGroupBle = new WiFiDirectGroupBle(group.getNetworkName(),
-                        group.getPassphrase());
-                fireWiFiDirectGroupChanged(true, wiFiDirectGroupBle);
-            }else{
-                startCreatingAGroup();
-            }
-        });
-    }
-
-    private void requestConnectionInfo(){
-        wifiP2pManager.requestConnectionInfo(wifiP2pChannel, info -> {
-            if(info.groupFormed){
-                //TODO: Handle this properly according to connection change on device
-            }
-        });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removeWifiDirectGroup() {
-        wifiP2pManager.removeGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                fireWiFiDirectGroupChanged(false,null);
-                UstadMobileSystemImpl.l(UMLog.ERROR,693,
-                        "Group removed successfully");
-                wifiDirectGroupChangeStatus = WIFI_DIRECT_GROUP_INACTIVE_STATUS;
-                requestGroupInfo();
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                fireWiFiDirectGroupChanged(false,null);
-                UstadMobileSystemImpl.l(UMLog.ERROR,693,
-                        "Failed to remove a group with error code "+reason);
-            }
-        });
-    }
 
     /**
      * {@inheritDoc}
@@ -870,7 +941,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     }
 
     @Override
-    public DeleteJobTaskRunner makeDeleteJobTask(Object object, Hashtable args) {
+    public DeleteJobTaskRunner makeDeleteJobTask(Object object, Map<String , String> args) {
         return new DeleteJobTaskRunnerAndroid(object,args);
     }
 
@@ -879,15 +950,25 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      * Start monitoring network changes
      */
     private void startMonitoringNetworkChanges() {
-        NetworkRequest networkRequest  = new NetworkRequest.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .build();
+
         connectivityManager = (ConnectivityManager)mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-       if(connectivityManager != null){
-           connectivityManager.requestNetwork(networkRequest,new UmNetworkCallback());
-       }
+
+        if (isVersionLollipopOrAbove()) {
+            NetworkRequest networkRequest = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .build();
+            if(connectivityManager != null){
+                connectivityManager.requestNetwork(networkRequest,new UmNetworkCallback());
+            }
+        }else{
+            IntentFilter connectionFilter = new IntentFilter();
+            connectionFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+            connectionFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+            mContext.registerReceiver(networkStateChangeReceiver,connectionFilter);
+        }
+
     }
 
     /**
@@ -897,6 +978,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     private boolean isBleDeviceSDKVersion(){
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
     }
+
 
     /**
      * Check if the device can advertise BLE service
@@ -908,7 +990,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
 
     @Override
-    public RouterNanoHTTPD getHttpd() {
+    public EmbeddedHTTPD getHttpd() {
         return httpd;
     }
 
@@ -920,6 +1002,11 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     BluetoothManager getBluetoothManager(){
         return  ((BluetoothManager)bluetoothManager);
+    }
+
+    @VisibleForTesting
+    void setBluetoothManager(BluetoothManager manager){
+        this.bluetoothManager = manager;
     }
 
     @Override
@@ -953,15 +1040,33 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
      */
     @Override
     public void onDestroy() {
-        stopAdvertising();
-        stopScanning();
-        bluetoothP2pRunning.set(false);
-        bluetoothEnabled.set(false);
-        wifiP2PCapable.set(false);
-        if(wifiP2pManager != null)
-            try{ mContext.unregisterReceiver(mReceiver); }catch (Exception ignored){}
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(umP2PReceiver);
+        scanningServiceManager.setEnabled(false);
+        advertisingServiceManager.setEnabled(false);
+        wifiP2pGroupServiceManager.setEnabled(false);
+
+        if(isBleCapable()) {
+            mContext.unregisterReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver);
+        }
+
+        if(!isVersionLollipopOrAbove()){
+            mContext.unregisterReceiver(networkStateChangeReceiver);
+        }
+
+        if(wifiP2PCapable.get()) {
+            mContext.unregisterReceiver(wifiP2pGroupServiceManager.getWifiP2pBroadcastReceiver());
+        }
+
         super.onDestroy();
+    }
+
+    @Override
+    public boolean isVersionLollipopOrAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    @Override
+    public boolean isVersionKitKatOrBelow() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
     }
 
     /**
@@ -972,7 +1077,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle{
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+            UstadMobileSystemImpl.l(UMLog.INFO, 699,
                     "Method was invoked using reflection  "+method.getName());
             return null;
         }

@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.Language;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -24,22 +23,23 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public static final String ARG_DOWNLOADED_CONTENT = "downloaded";
 
-    public static final String ARG_NAVIGATION = "navigation";
     private final ContentEntryListView viewContract;
+
     private ContentEntryDao contentEntryDao;
 
     private long filterByLang = 0;
 
     private long filterByCategory = 0;
+
     private Long parentUid;
 
-    public ContentEntryListPresenter(Object context, Hashtable arguments, ContentEntryListView viewContract) {
+    public ContentEntryListPresenter(Object context, Map<String , String> arguments, ContentEntryListView viewContract) {
         super(context, arguments, viewContract);
         this.viewContract = viewContract;
 
     }
 
-    public void onCreate(Hashtable hashtable) {
+    public void onCreate(Map<String,String> map) {
         UmAppDatabase appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext());
         contentEntryDao = appDatabase.getContentEntryDao();
 
@@ -51,7 +51,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
     }
 
     private void showContentByParent() {
-        parentUid = Long.valueOf((String) getArguments().get(ARG_CONTENT_ENTRY_UID));
+        parentUid = Long.valueOf(getArguments().get(ARG_CONTENT_ENTRY_UID));
         viewContract.setContentEntryProvider(contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0));
         contentEntryDao.getContentByUuid(parentUid, new UmCallback<ContentEntry>() {
             @Override
@@ -139,7 +139,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public void handleContentEntryClicked(ContentEntry entry) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        HashMap<String , String> args = new HashMap<>();
         Long entryUid = entry.getContentEntryUid();
 
         contentEntryDao.findByUid(entryUid, new UmCallback<ContentEntry>() {
@@ -187,7 +187,7 @@ public class ContentEntryListPresenter extends UstadBaseController<ContentEntryL
 
     public void handleDownloadStatusButtonClicked(ContentEntry entry) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable<String, String> args = new Hashtable<>();
+        HashMap<String, String> args = new HashMap<>();
         args.put("contentEntryUid", String.valueOf(entry.getContentEntryUid()));
         impl.go("DownloadDialog", args, getContext());
     }

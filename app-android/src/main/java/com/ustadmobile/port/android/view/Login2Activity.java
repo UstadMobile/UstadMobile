@@ -11,6 +11,8 @@ import com.ustadmobile.core.controller.Login2Presenter;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+
 public class Login2Activity extends UstadBaseActivity implements Login2View {
 
     private Login2Presenter mPresenter;
@@ -33,9 +35,9 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
         setContentView(R.layout.activity_login2);
         setSupportActionBar(findViewById(R.id.um_toolbar));
 
-        mPresenter = new Login2Presenter(this, UMAndroidUtil.bundleToHashtable(
-                getIntent().getExtras()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+        mPresenter = new Login2Presenter(this, bundleToMap(getIntent().getExtras()),
+                this);
+        mPresenter.onCreate(bundleToMap(savedInstanceState));
         mUsernameTextView = findViewById(R.id.activity_login_username);
         mPasswordTextView = findViewById(R.id.activity_login_password);
         mLoginButton = findViewById(R.id.activity_login_button_login);

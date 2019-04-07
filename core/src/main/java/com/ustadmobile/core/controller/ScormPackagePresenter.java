@@ -1,12 +1,12 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.contentformats.scorm.ScormManifest;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.core.contentformats.scorm.ScormManifest;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.UstadView;
@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.UstadViewWithNotifications;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  *
@@ -38,7 +38,7 @@ public class ScormPackagePresenter extends UstadBaseController {
             mountedPath = result;
             UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(
                             getContext(),
-                            UMFileUtil.joinPaths(new String[]{mountedPath, "imsmanifest.xml"})),
+                            UMFileUtil.joinPaths(mountedPath, "imsmanifest.xml")),
                     manifestLoadedCallback);
         }
 
@@ -58,13 +58,10 @@ public class ScormPackagePresenter extends UstadBaseController {
                 ScormManifest.Organization defaultOrg = scormManifest.getDefaultOrganization();
                 final ScormManifest.Resource startRes = scormManifest.getResourceByIdentifier(
                         defaultOrg.getItems().get(0).getIdentifierRef());
-                scormPackageView.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        scormPackageView.setTitle(scormManifest.getDefaultOrganization().getTitle());
-                        scormPackageView.loadUrl(UMFileUtil.joinPaths(new String[]{mountedPath,
-                                startRes.getHref()}));
-                    }
+                scormPackageView.runOnUiThread(() -> {
+                    scormPackageView.setTitle(scormManifest.getDefaultOrganization().getTitle());
+                    scormPackageView.loadUrl(UMFileUtil.joinPaths(mountedPath,
+                            startRes.getHref()));
                 });
             }catch(IOException e) {
                 e.printStackTrace();
@@ -84,8 +81,8 @@ public class ScormPackagePresenter extends UstadBaseController {
         this.scormPackageView = view;
     }
 
-    public void onCreate(Hashtable args) {
-        scormPackageView.mountZip((String)args.get(UstadView.ARG_CONTAINER_UID),
+    public void onCreate(HashMap<String , String> args) {
+        scormPackageView.mountZip(args.get(UstadView.ARG_CONTAINER_UID),
                 zipMountedCallback);
     }
 

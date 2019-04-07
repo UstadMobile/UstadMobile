@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -29,18 +28,16 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
- * <p>
+ *
  * Mounted zips will be acessible under http://IP:PORT/mount/mountName
- * <p>
+ *
  * For performance reasons mounted zip files are served with cache headers with a max-age to prevent
  * additional requests - therefor the mountName should include a date or timestamp component to prevent
  * stale files being served.
- * <p>
+ *
  * Created by mike on 8/14/15.
  */
-public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredInputStream.OnCloseListener {
-
-    //private HashMap<String, MountedZip> mountedEPUBs;
+public class EmbeddedHTTPD extends RouterNanoHTTPD {
 
     private int id;
 
@@ -48,29 +45,20 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
     public static final String PREFIX_MOUNT = "/mount/";
 
-    private Map<String, Long> clientIpToLastActiveMap = new Hashtable<>();
-
     private UmAppDatabase appDatabase;
 
     private UmAppDatabase repository;
 
 
-    public interface ClientActivityListener {
-        void OnClientListChanged(Map<String, Long> clientIpToLastActiveMap);
-    }
-
-    private ClientActivityListener mClientActivityListener;
-
-
     public interface ResponseListener {
 
-        void responseStarted(NanoHTTPD.Response response);
+        void responseStarted(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response);
 
-        void responseFinished(NanoHTTPD.Response response);
+        void responseFinished(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response);
 
     }
 
-    private Vector<ResponseListener> responseListeners = new Vector<>();
+    private final Vector<ResponseListener> responseListeners = new Vector<>();
 
     /**
      * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
@@ -144,18 +132,14 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
     @Override
     public Response serve(IHTTPSession session) {
-        String clientIp = session.getRemoteIpAddress();
-        if (session.getUri().endsWith("/endsession")) {
-            clientIpToLastActiveMap.remove(clientIp);
-            return newFixedLengthResponse("OK");
-        } else {
-            clientIpToLastActiveMap.put(clientIp, System.currentTimeMillis());
+        final NanoHTTPD.Response response = super.serve(session);
+        if(!responseListeners.isEmpty() && response != null) {
+            fireResponseStarted(session, response);
+            response.setData(new InputStreamWithCloseListener(response.getData(),
+                    () -> fireResponseFinished(session, response)));
         }
 
-        if (mClientActivityListener != null)
-            mClientActivityListener.OnClientListChanged(clientIpToLastActiveMap);
-
-        return super.serve(session);
+        return response;
     }
 
     @Override
@@ -177,16 +161,16 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
     /**
      * Mount a zip to the given path.  The contents of the zip file will then be accessible by
      * HTTP using http://IP:PORT/mount/mountPath
-     * <p>
+     *
      * Zips should be unmounted when they are no longer needed.  Depending on how Android feels
      * this service may live on after an activity is finished.  The mounted zip keeps a cached
      * copy of the ZipFile object containing entry names, file sizes, data positions etc.
-     * <p>
+     *
      * For performance the mountPath should include a time/date component.  All files served will be
      * with cache a 1 year maxage cache header
      *
      * @param mountPath The path to use after /mount .
-     * @param zipPath   The local filesystem path to the zip file (e.g. /path/to/file.epub)
+     * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
      */
     @Deprecated
     public String mountZip(String zipPath, String mountPath) {
@@ -303,36 +287,20 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         responseListeners.remove(listener);
     }
 
-    protected void fireResponseStarted(NanoHTTPD.Response response) {
+    protected void fireResponseStarted(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
         synchronized (responseListeners) {
-            for (ResponseListener listener : responseListeners) {
-                listener.responseStarted(response);
+            for(ResponseListener listener : responseListeners) {
+                listener.responseStarted(session, response);
             }
         }
     }
 
-    protected void fireResponseFinished(NanoHTTPD.Response response) {
+    protected void fireResponseFinished(NanoHTTPD.IHTTPSession session, NanoHTTPD.Response response) {
         synchronized (responseListeners) {
-            for (ResponseListener listener : responseListeners) {
-                listener.responseFinished(response);
+            for(ResponseListener listener: responseListeners) {
+                listener.responseFinished(session, response);
             }
         }
-    }
-
-    /**
-     * Called when a response has started. Because NanoHTTPD's router will create a new
-     * CatalogUriResponder for each response, we provide this EmbeddedHTTP instance as a parameter to
-     * the responder, which in turn calls this method.
-     *
-     * @param response
-     */
-    protected void handleResponseStarted(NanoHTTPD.Response response) {
-        fireResponseStarted(response);
-    }
-
-    @Override
-    public void onStreamClosed(NanoHTTPD.Response response) {
-        fireResponseFinished(response);
     }
 
     /**
