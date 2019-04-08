@@ -77,14 +77,14 @@ public class ClazzEditPresenter
 
                         @Override
                         public void onFailure(Throwable exception) {
-
+                            exception.printStackTrace();
                         }
                     });
                 }
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             });
         }
@@ -104,6 +104,7 @@ public class ClazzEditPresenter
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
                 view.updateClazzEditView(result);
+
                 holidaysLiveData = repository.getUMCalendarDao()
                         .findAllUMCalendarsAsLiveDataList();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
@@ -150,7 +151,9 @@ public class ClazzEditPresenter
         if(mOriginalClazz == null){
             mOriginalClazz = new Clazz();
         }
-        if(mOriginalClazz.getClazzHolidayUMCalendarUid() > 0){
+
+        //TODO: Change this.
+        if(mOriginalClazz.getClazzHolidayUMCalendarUid() != 0){
             selectedPosition = (int) mOriginalClazz.getClazzHolidayUMCalendarUid();
         }
 
