@@ -16,13 +16,13 @@ public abstract class StateDao implements SyncableDao<StateEntity, StateDao> {
     public abstract StateEntity findByStateId(String id);
 
     @UmQuery("SELECT * FROM StateEntity WHERE agentUid = :agentUid AND activityId = :activityId " +
-            "AND registration = :registration AND isactive = 1 AND timestamp > :since")
+            "AND registration = :registration AND isactive AND timestamp > :since")
     public abstract List<StateEntity> findStateIdByAgentAndActivity(long agentUid, String activityId, String registration, String since);
 
-    @UmQuery("UPDATE StateEntity SET isactive = 0 WHERE agentUid = :agentUid AND activityId = :activityId " +
-            "AND registration = :registration AND isactive = 1 AND timestamp > :since")
-    public abstract void updateStateToInActive(long agentUid, String activityId, String registration, String since);
+    @UmQuery("UPDATE StateEntity SET isactive = :isActive WHERE agentUid = :agentUid AND activityId = :activityId " +
+            "AND registration = :registration AND isactive AND timestamp > :since")
+    public abstract void updateStateToInActive(long agentUid, String activityId, String registration, String since, boolean isActive);
 
-    @UmQuery("UPDATE StateEntity SET isactive = 0 WHERE stateId = :stateId")
-    public abstract void setStateInActive(String stateId);
+    @UmQuery("UPDATE StateEntity SET isactive = :isActive WHERE stateId = :stateId")
+    public abstract void setStateInActive(String stateId, boolean isActive);
 }

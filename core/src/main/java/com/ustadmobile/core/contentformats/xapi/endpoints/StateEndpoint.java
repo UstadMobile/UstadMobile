@@ -70,7 +70,7 @@ public class StateEndpoint {
 
     public void deleteStateContent(String stateId) {
 
-        stateDao.setStateInActive(stateId);
+        stateDao.setStateInActive(stateId, false);
     }
 
     public String getListOfStateId(String agentJson, String activityId, String registration, String since) {
@@ -96,6 +96,6 @@ public class StateEndpoint {
 
         AgentEntity agentEntity = getAgent(agentDao, personDao, agent);
 
-        stateDao.updateStateToInActive(agentEntity.getAgentUid(), activityId, registration, since);
+        stateDao.updateStateToInActive(agentEntity.getAgentUid(), activityId, registration, since, false);
     }
 }
