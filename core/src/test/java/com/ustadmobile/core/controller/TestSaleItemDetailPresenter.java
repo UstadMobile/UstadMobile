@@ -40,7 +40,6 @@ public class TestSaleItemDetailPresenter {
 
     private SaleItemDetailView mockView;
 
-
     @Before
     public void setUp() {
 
@@ -97,8 +96,8 @@ public class TestSaleItemDetailPresenter {
 
         SaleItem saleItem = repo.getSaleItemDao().findAllActiveList().get(0);
         long saleItemUid = saleItem.getSaleItemUid();
-        long productUid = repo.getSaleProductDao().findAllActiveList().get(0).getSaleProductUid();
-        long producerUid = repo.getPersonDao().findAllPeople().get(0).getPersonUid();
+        long productUid = repo.getSaleProductDao().findAllActiveList().get(1).getSaleProductUid();
+        long producerUid = repo.getPersonDao().findAllPeople().get(1).getPersonUid();
 
         int beforeSaleItemActiveCount = repo.getSaleItemDao().findAllActiveList().size();
         int beforeSaleItemAllCount = repo.getSaleItemDao().findAllList().size();
@@ -129,8 +128,8 @@ public class TestSaleItemDetailPresenter {
     public void givenSaleItem_whenSoldAndQuantityAndPPPChangedAndSaved_shouldPersist() throws InterruptedException {
         SaleItem saleItem = repo.getSaleItemDao().findAllActiveList().get(0);
         long saleItemUid = saleItem.getSaleItemUid();
-        long productUid = repo.getSaleProductDao().findAllActiveList().get(0).getSaleProductUid();
-        long producerUid = repo.getPersonDao().findAllPeople().get(0).getPersonUid();
+        long productUid = repo.getSaleProductDao().findAllActiveList().get(1).getSaleProductUid();
+        long producerUid = repo.getPersonDao().findAllPeople().get(1).getPersonUid();
 
         int beforeSaleItemActiveCount = repo.getSaleItemDao().findAllActiveList().size();
         int beforeSaleItemAllCount = repo.getSaleItemDao().findAllList().size();
@@ -151,13 +150,18 @@ public class TestSaleItemDetailPresenter {
         presenter.setSold(true);
         presenter.handleClickSave();
 
+        Thread.sleep(1000);
         SaleItem saleItemPost = repo.getSaleItemDao().findByUid(saleItemUid);
 
         Assert.assertNotEquals(saleItem.getSaleItemQuantity(), 42);
         Assert.assertNotEquals(saleItem.getSaleItemPricePerPiece(), 420);
         Assert.assertNotEquals(saleItem.isSaleItemSold(), true);
         Assert.assertEquals(saleItemPost.getSaleItemQuantity(), 42);
-        Assert.assertEquals(saleItemPost.getSaleItemPricePerPiece(), 420);
+        if(saleItemPost.getSaleItemPricePerPiece() == 420L){
+            Assert.assertTrue(true);
+        }else{
+            Assert.assertTrue(false);
+        }
         Assert.assertEquals(saleItemPost.isSaleItemSold(), true);
 
 

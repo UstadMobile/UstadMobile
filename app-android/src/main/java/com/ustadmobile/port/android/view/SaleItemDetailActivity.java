@@ -101,7 +101,6 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
             mPresenter.handleChangeQuantity(newVal);
             mPresenter.updateTotal(newVal, ppp);
         });
-
         
         pppNP.setOnValueChangedListener((picker, oldVal, newVal) ->
         {
