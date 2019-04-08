@@ -240,7 +240,10 @@ public class PersonWithEnrollmentRecyclerAdapter
         //Get person with enrollment and other info
         PersonWithEnrollment personWithEnrollment = getItem(position);
         assert personWithEnrollment != null;
-        boolean addStudentLast = false;
+
+        //Flag that says that complete recyclerview has only 1 item and its a teacher. Used to add
+        // "Add Students" as well before we finish onBindView for the teacher.
+        boolean onlyTeacherExists = false;
 
         TextView studentNameTextView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_title);
@@ -257,21 +260,19 @@ public class PersonWithEnrollmentRecyclerAdapter
         ImageView callImageView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_call_iv);
 
-        //NAME:
+        //Update person name :
         String firstName = "";
         String lastName = "";
-        if(personWithEnrollment == null){
-            return;
-        }
-        if(personWithEnrollment != null && personWithEnrollment.getFirstNames() != null){
+        if(personWithEnrollment.getFirstNames() != null){
             firstName = personWithEnrollment.getFirstNames();
         }
-        if(personWithEnrollment != null && personWithEnrollment.getLastName() != null){
+        if(personWithEnrollment.getLastName() != null){
             lastName = personWithEnrollment.getLastName();
         }
-
         String studentName = firstName + " " + lastName;
         studentNameTextView.setText(studentName);
+
+        //Name click listener:
         Long personUid = personWithEnrollment.getPersonUid();
         studentNameTextView.setOnClickListener(v -> mPresenter.handleCommonPressed(personUid));
 
@@ -411,10 +412,10 @@ public class PersonWithEnrollmentRecyclerAdapter
                         addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
                     }
 
-                    int nextPos = position + 1;
+                    //If first item is a teacher and there are no more items:
                     if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                            getItemCount() == nextPos) {
-                        addStudentLast = true;
+                            getItemCount() == 1) {
+                        onlyTeacherExists = true;
                     }
 
                 } else {
@@ -462,10 +463,14 @@ public class PersonWithEnrollmentRecyclerAdapter
             attendanceTextView.setVisibility(View.GONE);
         }
 
-        if(getItemCount() == position+1) {
-            if (addStudentLast) {
-                addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
-            }
+        //If we reached the end of the rv and there is only one teacher in it,
+        // add the "show Student" as well.
+        if (onlyTeacherExists) {
+            addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
+        }else{
+            //Don't add anything.
+            int x;
+
         }
 
     }
@@ -678,12 +683,24 @@ public class PersonWithEnrollmentRecyclerAdapter
             addCl.addView(addPersonImageView);
             if(showAdd)
                 addCl.addView(addClazzMemberTextView);
+            else{
+                View blankView = new View(theContext);
+                blankView.setVisibility(View.GONE);
+                addCl.addView(blankView);
+            }
             addCl.addView(horizontalLine);
         }
         if(role == ClazzMember.ROLE_TEACHER && showAddTeacher) {
             addCl.addView(addPersonImageView);
             if(showAdd)
                 addCl.addView(addClazzMemberTextView);
+            else{
+                View blankView = new View(theContext);
+                blankView.setVisibility(View.GONE);
+                addCl.addView(blankView);
+
+            }
+
             addCl.addView(horizontalLine);
         }
 
