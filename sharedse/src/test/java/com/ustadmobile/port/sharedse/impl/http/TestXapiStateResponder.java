@@ -38,14 +38,14 @@ public class TestXapiStateResponder {
         appRepo = appDatabase.getRepository("http://localhost/dummy/", "");
 
         httpd = new RouterNanoHTTPD(0);
-        httpd.addRoute("/xAPI/activities/state(.*)+", XapiStateResponder.class, appRepo);
+        httpd.addRoute("/xapi/activities/state(.*)+", XapiStateResponder.class, appRepo);
         httpd.start();
     }
 
     @Test
     public void testput() throws IOException {
 
-        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xAPI/activities/state";
+        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/activities/state";
 
         String content = UMIOUtils.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/state"), "UTF-8");
@@ -76,7 +76,7 @@ public class TestXapiStateResponder {
     @Test
     public void testPost() throws IOException {
 
-        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xAPI/activities/state";
+        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xpi/activities/state";
 
         String content = UMIOUtils.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/state"), "UTF-8");
@@ -107,7 +107,7 @@ public class TestXapiStateResponder {
 
     @Test
     public void testAll() throws IOException {
-        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xAPI/activities/state";
+        String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/activities/state";
 
         String content = UMIOUtils.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/state"), "UTF-8");

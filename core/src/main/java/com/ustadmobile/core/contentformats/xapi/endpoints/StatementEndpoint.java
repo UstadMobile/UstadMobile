@@ -324,11 +324,9 @@ public class StatementEndpoint {
 
         if (statement.getSubStatement() != null) {
             Statement subStatement = statement.getSubStatement();
-            Person subActor = getPerson(personDao, subStatement.getActor());
-            if (subActor == null) {
-                AgentEntity subAgent = getAgent(agentDao, personDao, statement.getSubStatement().getActor());
-                subActorUid = subAgent.getAgentUid();
-            }
+
+            AgentEntity subAgent = getAgent(agentDao, personDao, subStatement.getActor());
+            subActorUid = subAgent.getAgentUid();
 
             VerbEntity subVerb = insertOrUpdateVerb(verbDao, subStatement.getVerb().getId());
             subVerbUid = subVerb.getVerbUid();

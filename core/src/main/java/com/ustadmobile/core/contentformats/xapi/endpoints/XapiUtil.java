@@ -86,39 +86,21 @@ public class XapiUtil {
     public static XObjectEntity insertOrUpdateXObject(XObjectDao dao, XObject xobject, Gson gson) {
 
         XObjectEntity entity = dao.findByObjectId(xobject.getId());
+
+        Definition definition = xobject.getDefinition();
+        XObjectEntity changedXObject = new XObjectEntity(xobject.getId(), xobject.getObjectType(),
+                definition != null ? definition.getType() : "", definition != null ? definition.getInteractionType() : "",
+                definition != null ? gson.toJson(definition.getCorrectResponsePattern()) : "");
+
         if (entity == null) {
-            entity = new XObjectEntity();
-            entity.setObjectId(xobject.getId());
-            entity.setObjectType(xobject.getObjectType());
-            if (xobject.getDefinition() != null) {
-                entity.setDefinitionType(xobject.getDefinition().getType());
-                entity.setInteractionType(xobject.getDefinition().getInteractionType());
-                entity.setCorrectResponsePattern(gson.toJson(xobject.getDefinition().getCorrectResponsePattern()));
-            }
-            entity.setXObjectUid(dao.insert(entity));
+            changedXObject.setXObjectUid(dao.insert(changedXObject));
         } else {
-            XObjectEntity xObjectEntity = new XObjectEntity();
-            xObjectEntity.setObjectId(xobject.getId());
-            xObjectEntity.setObjectType(xobject.getObjectType() != null ? xobject.getObjectType() : entity.getObjectType());
-            if (xobject.getDefinition() != null) {
-                Definition changedDefinition = xobject.getDefinition();
-                xObjectEntity.setDefinitionType(changedDefinition.getType() != null && !changedDefinition.getType().isEmpty() ?
-                        changedDefinition.getType() : entity.getDefinitionType());
-
-                xObjectEntity.setInteractionType(changedDefinition.getInteractionType() != null && !changedDefinition.getInteractionType().isEmpty() ?
-                        changedDefinition.getType() : entity.getInteractionType());
-
-                xObjectEntity.setCorrectResponsePattern(changedDefinition.getCorrectResponsePattern() != null &&
-                        changedDefinition.getCorrectResponsePattern().size() > 0 ?
-                        gson.toJson(changedDefinition.getCorrectResponsePattern()) : entity.getCorrectResponsePattern());
-            }
-
-            if (!xObjectEntity.equals(entity)) {
-                dao.update(xObjectEntity);
-                entity = xObjectEntity;
+            changedXObject.setXObjectUid(entity.getXObjectUid());
+            if (!changedXObject.equals(entity)) {
+                dao.update(changedXObject);
             }
         }
-        return entity;
+        return changedXObject;
     }
 
     public static StateEntity insertOrUpdateState(StateDao dao, State state, long agentUid) {

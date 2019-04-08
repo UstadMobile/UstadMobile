@@ -35,6 +35,18 @@ public class XObjectEntity {
     @UmSyncLastChangedBy
     private int XObjectLastChangedBy;
 
+    public XObjectEntity(){
+
+    }
+
+    public XObjectEntity(String id, String objectType, String type, String interactionType, String responsePattern) {
+        this.objectId = id;
+        this.objectType = objectType;
+        this.definitionType = type;
+        this.interactionType = interactionType;
+        this.correctResponsePattern = responsePattern;
+    }
+
     public long getXObjectUid() {
         return XObjectUid;
     }

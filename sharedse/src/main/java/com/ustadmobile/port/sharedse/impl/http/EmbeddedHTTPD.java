@@ -115,8 +115,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
         addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder.class, appDatabase);
         addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
                 ContainerEntryListResponder.class, appDatabase);
-        addRoute("/xAPI/statements(.*)+", XapiStatementResponder.class, repository);
-        addRoute("/xAPI/activities/state(.*)+", XapiStateResponder.class, repository);
+        addRoute("/xapi/statements(.*)+", XapiStatementResponder.class, repository);
+        addRoute("/xapi/activities/state(.*)+", XapiStateResponder.class, repository);
         this.appDatabase = appDatabase;
         this.repository = repository;
     }
