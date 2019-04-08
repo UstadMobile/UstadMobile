@@ -271,7 +271,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void showDownloadOptionsDialog(HashMap<String,String> args) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 () -> impl.go("DownloadDialog", args, getContext()),

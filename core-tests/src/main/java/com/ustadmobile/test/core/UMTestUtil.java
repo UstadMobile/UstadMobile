@@ -25,7 +25,7 @@ public class UMTestUtil {
      * @return Complete path the resource was copied to
      */
     public static String copyResourceToStorageDir(String resourcePath) throws IOException{
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
 
         OutputStream fileOut = null;
         InputStream entryIn = null;
@@ -35,7 +35,7 @@ public class UMTestUtil {
             entryIn = UMTestUtil.class.getResourceAsStream(resourcePath);
 
             Object context = PlatformTestUtil.getTargetContext();
-            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
+            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.Companion.getSHARED_RESOURCE(),
                     context);
             String outDir = storageDirs[0].getDirURI();
             if(new File(outDir).isDirectory()) {

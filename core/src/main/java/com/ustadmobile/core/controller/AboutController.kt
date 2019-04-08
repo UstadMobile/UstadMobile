@@ -17,13 +17,13 @@ class AboutController(context: Any, args: Map<String, String>, view: AboutView) 
     private var aboutHTMLStr: String? = null
 
     override fun onCreate(savedState: Map<String, String>) {
-        val impl = UstadMobileSystemImpl.getInstance()
+        val impl = UstadMobileSystemImpl.instance
 
         impl.getAsset(context, "com/ustadmobile/core/about.html", object : UmCallback<InputStream> {
             override fun onSuccess(result: InputStream) {
                 try {
                     aboutHTMLStr = UMIOUtils.readStreamToString(result)
-                    view.setAboutHTML(aboutHTMLStr)
+                    view.setAboutHTML(aboutHTMLStr!!)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -41,7 +41,7 @@ class AboutController(context: Any, args: Map<String, String>, view: AboutView) 
 
         view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))
-        view.setAboutHTML(aboutHTMLStr)
+        view.setAboutHTML(aboutHTMLStr!!)
     }
 
 }

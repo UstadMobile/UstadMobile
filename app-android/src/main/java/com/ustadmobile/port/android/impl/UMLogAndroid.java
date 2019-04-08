@@ -16,22 +16,22 @@ public class UMLogAndroid  extends UMLog{
     public void l(int level, int code, String message) {
         String logMessage = code + " : " + message;
         switch(level) {
-            case UMLog.DEBUG:
+            case UMLog.Companion.getDEBUG():
                 Log.d(LOGTAG,logMessage);
                 break;
-            case UMLog.INFO:
+            case UMLog.Companion.getINFO():
                 Log.i(LOGTAG, logMessage);
                 break;
-            case UMLog.CRITICAL:
+            case UMLog.Companion.getCRITICAL():
                 Log.wtf(LOGTAG, logMessage);
                 break;
-            case UMLog.WARN:
+            case UMLog.Companion.getWARN():
                 Log.w(LOGTAG, logMessage);
                 break;
-            case UMLog.VERBOSE:
+            case UMLog.Companion.getVERBOSE():
                 Log.v(LOGTAG, logMessage);
                 break;
-            case UMLog.ERROR:
+            case UMLog.Companion.getERROR():
                 Log.e(LOGTAG, logMessage);
                 break;
 
@@ -42,22 +42,22 @@ public class UMLogAndroid  extends UMLog{
     public void l(int level, int code, String message, Exception exception) {
         String logMessage = code + " : " + message;
         switch(level) {
-            case UMLog.DEBUG:
+            case UMLog.Companion.getDEBUG():
                 Log.d(LOGTAG,logMessage, exception);
                 break;
-            case UMLog.INFO:
+            case UMLog.Companion.getINFO():
                 Log.i(LOGTAG, logMessage, exception);
                 break;
-            case UMLog.CRITICAL:
+            case UMLog.Companion.getCRITICAL():
                 Log.wtf(LOGTAG, logMessage, exception);
                 break;
-            case UMLog.WARN:
+            case UMLog.Companion.getWARN():
                 Log.w(LOGTAG, logMessage, exception);
                 break;
-            case UMLog.VERBOSE:
+            case UMLog.Companion.getVERBOSE():
                 Log.v(LOGTAG, logMessage, exception);
                 break;
-            case UMLog.ERROR:
+            case UMLog.Companion.getERROR():
                 Log.e(LOGTAG, logMessage, exception);
                 break;
 

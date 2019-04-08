@@ -5,14 +5,14 @@ import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER
+import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.core.view.WebChunkView
-import com.ustadmobile.core.view.WebChunkView.ARG_CONTAINER_UID
-import com.ustadmobile.core.view.WebChunkView.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 
@@ -34,7 +34,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry) {
-                view.runOnUiThread { view.setToolbarTitle(result.title) }
+                view.runOnUiThread(Runnable{ view.setToolbarTitle(result.title) })
             }
 
             override fun onFailure(exception: Throwable) {
@@ -63,7 +63,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
     }
 
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
-        val impl = UstadMobileSystemImpl.getInstance()
+        val impl = UstadMobileSystemImpl.instance
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext())
 
         ContentEntryUtil.goToContentEntryByViewDestination(
@@ -78,20 +78,20 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
             override fun onFailure(exception: Throwable) {
                 val message = exception.message
                 if (exception is NoAppFoundException) {
-                    view.runOnUiThread {
+                    view.runOnUiThread(Runnable {
                         view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
                                 MessageID.get_app,
-                                exception.mimeType)
-                    }
+                                exception.mimeType!!)
+                    })
                 } else {
-                    view.runOnUiThread { view.showError(message) }
+                    view.runOnUiThread(Runnable  { view.showError(message!!) })
                 }
             }
         })
     }
 
     fun handleUpNavigation() {
-        val impl = UstadMobileSystemImpl.getInstance()
+        val impl = UstadMobileSystemImpl.instance
         val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryDetailView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs !=
                 null) {

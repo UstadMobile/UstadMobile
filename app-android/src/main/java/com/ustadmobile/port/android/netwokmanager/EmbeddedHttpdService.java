@@ -49,7 +49,7 @@ public class EmbeddedHttpdService extends Service {
         try {
             httpd.start();
         }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.CRITICAL, 0, "Could not start httpd server");
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getCRITICAL(), 0, "Could not start httpd server");
             throw new RuntimeException("Could not start httpd server", e);
         }
     }

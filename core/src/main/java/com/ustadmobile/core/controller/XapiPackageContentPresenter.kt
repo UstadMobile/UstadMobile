@@ -13,13 +13,9 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
-
-import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
-
 import java.io.ByteArrayInputStream
 import java.io.IOException
-import java.util.HashMap
 
 /**
  * Created by mike on 9/13/17.
@@ -49,7 +45,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
         override fun onSuccess(result: String) {
             mountedPath = result
-            UstadMobileSystemImpl.getInstance().makeRequestAsync(UmHttpRequest(
+            UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
                     getContext(),
                     UMFileUtil.joinPaths(mountedPath!!, "tincan.xml")),
                     TinCanResponseCallback())
@@ -62,7 +58,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             super.onComplete(call, response)
             if (response.isSuccessful) {
                 try {
-                    handleTinCanXmlLoaded(response.responseBody)
+                    handleTinCanXmlLoaded(response.responseBody!!)
                 } catch (e: IOException) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e)
                     onFailure(call, IOException(e))
@@ -83,15 +79,15 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     @Throws(IOException::class, XmlPullParserException::class)
     private fun handleTinCanXmlLoaded(tincanXmlBytes: ByteArray) {
-        val xpp = UstadMobileSystemImpl.getInstance().newPullParser(
+        val xpp = UstadMobileSystemImpl.instance.newPullParser(
                 ByteArrayInputStream(tincanXmlBytes), "UTF-8")
         tinCanXml = TinCanXML.loadFromXML(xpp)
         launchHref = tinCanXml?.launchActivity?.launchUrl
         launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
-        getView().runOnUiThread {
-            getView().setTitle(tinCanXml!!.launchActivity?.name)
-            getView().loadUrl(launchUrl)
-        }
+        getView().runOnUiThread(Runnable {
+            getView().setTitle(tinCanXml!!.launchActivity?.name!!)
+            getView().loadUrl(launchUrl!!)
+        })
     }
 
 }

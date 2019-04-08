@@ -66,7 +66,7 @@ public class ContentEntryListRecyclerViewAdapter extends
         List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
-            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
         }

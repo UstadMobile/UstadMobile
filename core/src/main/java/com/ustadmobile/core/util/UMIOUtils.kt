@@ -60,6 +60,7 @@ object UMIOUtils {
      *
      * @param in An input stream to close
      */
+    @JvmStatic
     fun closeInputStream(`in`: InputStream?) {
         try {
             `in`?.close()

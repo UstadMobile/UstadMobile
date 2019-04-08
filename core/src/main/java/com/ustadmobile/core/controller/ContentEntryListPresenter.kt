@@ -39,14 +39,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
         contentEntryDao!!.getContentByUuid(parentUid!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
                 if (result == null) {
-                    viewContract.runOnUiThread { viewContract.showError() }
+                    viewContract.runOnUiThread(Runnable { viewContract.showError() })
                     return
                 }
                 viewContract.setToolbarTitle(result.title)
             }
 
             override fun onFailure(exception: Throwable) {
-                viewContract.runOnUiThread { viewContract.showError() }
+                viewContract.runOnUiThread(Runnable { viewContract.showError() })
             }
         })
 
@@ -64,7 +64,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
                     allLang.langUid = 0
                     languages.add(1, allLang)
 
-                    viewContract.setLanguageOptions(result)
+                    viewContract.setLanguageOptions(result!!)
                 }
             }
 
@@ -117,14 +117,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
 
 
     fun handleContentEntryClicked(entry: ContentEntry) {
-        val impl = UstadMobileSystemImpl.getInstance()
+        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         val entryUid = entry.contentEntryUid
 
         contentEntryDao!!.findByUid(entryUid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
                 if (result == null) {
-                    viewContract.runOnUiThread { viewContract.showError() }
+                    viewContract.runOnUiThread(Runnable { viewContract.showError() })
                     return
                 }
 
@@ -138,7 +138,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
             }
 
             override fun onFailure(exception: Throwable) {
-                viewContract.runOnUiThread { viewContract.showError() }
+                viewContract.runOnUiThread(Runnable { viewContract.showError() })
             }
         })
     }
@@ -154,14 +154,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
     }
 
     fun handleUpNavigation() {
-        val impl = UstadMobileSystemImpl.getInstance()
+        val impl = UstadMobileSystemImpl.instance
         impl.go(DummyView.VIEW_NAME, null, view.context,
                 UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
 
     }
 
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
-        val impl = UstadMobileSystemImpl.getInstance()
+        val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args["contentEntryUid"] = entry.contentEntryUid.toString()
         impl.go("DownloadDialog", args, getContext())

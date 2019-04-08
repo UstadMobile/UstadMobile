@@ -123,7 +123,7 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
                    mGattClient != null);
 
            if(mGattClient == null){
-                UstadMobileSystemImpl.l(UMLog.ERROR,698,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),698,
                         "Failed to connect to " + destinationPeer.getAddress());
 
                 UmAppDatabase.getInstance(context).getNetworkNodeDao()
@@ -133,11 +133,11 @@ public class BleEntryStatusTaskAndroid extends BleEntryStatusTask {
                         new IOException("BLE failed on connectGatt to " +
                                 networkNode.getBluetoothMacAddress()));
             }else{
-                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                         "Connecting to " + destinationPeer.getAddress());
             }
        }catch (IllegalArgumentException e){
-           UstadMobileSystemImpl.l(UMLog.ERROR,698,
+           UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),698,
                    "Wrong address format provided",e);
        }
     }

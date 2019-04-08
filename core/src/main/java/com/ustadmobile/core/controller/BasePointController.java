@@ -73,7 +73,7 @@ public class BasePointController extends UstadBaseController {
     public void onCreate(Map<String, String> args, Map<String,String> savedState) {
         this.args = args;
         basePointView.setClassListVisible(false);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
 
         if(savedState != null && savedState.containsKey(ARG_WELCOME_SCREEN_DISPLAYED)){
             welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).equals("true");
@@ -85,7 +85,7 @@ public class BasePointController extends UstadBaseController {
         }
 
         if(catalogTabs == null || catalogTabs.isEmpty()) {
-            String defaultArgs = UstadMobileSystemImpl.getInstance().getAppConfigString(AppConfig.KEY_FIRST_DEST,
+            String defaultArgs = UstadMobileSystemImpl.Companion.getInstance().getAppConfigString(AppConfig.INSTANCE.getKEY_FIRST_DEST(),
                     null, getContext());
             catalogTabs = UMFileUtil.INSTANCE.splitCombinedViewArguments(UMFileUtil.INSTANCE.parseURLQueryString(defaultArgs),
                     "catalog", '-');
@@ -138,7 +138,7 @@ public class BasePointController extends UstadBaseController {
      * @param item
      */
     public void handleClickBasePointMenuItem(BasePointMenuItem item) {
-        UstadMobileSystemImpl.getInstance().go(item.getDestination(), getContext());
+        UstadMobileSystemImpl.Companion.getInstance().go(item.getDestination(), getContext());
     }
 
     public void onResume() {
@@ -155,7 +155,7 @@ public class BasePointController extends UstadBaseController {
 
     public void onDestroy() {
         if(!keepTmpVariables) {
-            UstadMobileSystemImpl.getInstance().setAppPref("tmp" + ARG_WELCOME_SCREEN_DISPLAYED,
+            UstadMobileSystemImpl.Companion.getInstance().setAppPref("tmp" + ARG_WELCOME_SCREEN_DISPLAYED,
                     null, getContext());
         }
     }
@@ -165,7 +165,7 @@ public class BasePointController extends UstadBaseController {
     }
 
     public void handleClickReceive() {
-        UstadMobileSystemImpl.getInstance().go("ReceiveCourse", null, getContext());
+        UstadMobileSystemImpl.Companion.getInstance().go("ReceiveCourse", null, getContext());
     }
 
     public void handleClickConfirmShareApp(final boolean zip) {

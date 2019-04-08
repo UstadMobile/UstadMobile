@@ -66,7 +66,7 @@ public class EpubContentActivity extends ZippedContentActivity implements
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if(!UstadMobileSystemImpl.getInstance().getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
+        if(!UstadMobileSystemImpl.Companion.getInstance().getAppConfigBoolean(AppConfig.INSTANCE.getKEY_EPUB_TOC_ENABLED(),
                 getContext())) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         }

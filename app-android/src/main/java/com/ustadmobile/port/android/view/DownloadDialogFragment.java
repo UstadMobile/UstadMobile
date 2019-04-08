@@ -92,7 +92,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
         TextView calculateTextView = rootView.findViewById(R.id.download_dialog_calculating);
         wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder);
 
-        impl = UstadMobileSystemImpl.getInstance();
+        impl = UstadMobileSystemImpl.Companion.getInstance();
 
         ((TextView)rootView.findViewById(R.id.wifi_only_option_label))
                 .setText(impl.getString(MessageID.download_wifi_only , getContext()));

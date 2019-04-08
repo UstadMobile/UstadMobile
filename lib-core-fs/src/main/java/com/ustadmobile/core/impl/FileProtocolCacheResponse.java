@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,7 +26,7 @@ public class FileProtocolCacheResponse extends AbstractCacheResponse {
     public String getHeader(String headerName) {
         switch (headerName) {
             case UmHttpRequest.HEADER_CONTENT_TYPE:
-                return UstadMobileSystemImpl.getInstance().getMimeTypeFromExtension(
+                return UstadMobileSystemImpl.Companion.getInstance().getMimeTypeFromExtension(
                         UMFileUtil.INSTANCE.getExtension(file.getName()));
             case UmHttpRequest.HEADER_CONTENT_LENGTH:
                 return String.valueOf(file.length());
@@ -36,13 +37,23 @@ public class FileProtocolCacheResponse extends AbstractCacheResponse {
     }
 
     @Override
-    public byte[] getResponseBody() throws IOException {
-        return UMIOUtils.readStreamToByteArray(new FileInputStream(file));
+    public byte[] getResponseBody() {
+        try {
+            return UMIOUtils.readStreamToByteArray(new FileInputStream(file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
-    public InputStream getResponseAsStream() throws IOException {
-        return new FileInputStream(file);
+    public InputStream getResponseAsStream() {
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return  null;
     }
 
     @Override

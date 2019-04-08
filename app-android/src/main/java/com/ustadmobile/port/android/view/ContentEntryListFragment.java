@@ -30,6 +30,8 @@ import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +76,25 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     public void clickUpNavigation() {
        entryListPresenter.handleUpNavigation();
+    }
+
+    @Override
+    public void setCategorySchemaSpinner(@NotNull Map<Long, ? extends List<? extends DistinctCategorySchema>> spinnerData) {
+        runOnUiThread(() -> {
+            if (contentEntryListener != null) {
+                // TODO tell activiity to create the spinners
+                contentEntryListener.setFilterSpinner((Map<Long, List<DistinctCategorySchema>>) spinnerData);
+            }
+        });
+    }
+
+    @Override
+    public void setLanguageOptions(@NotNull List<? extends Language> result) {
+        runOnUiThread(() -> {
+            if (contentEntryListener != null) {
+                contentEntryListener.setLanguageFilterSpinner((List<Language>) result);
+            }
+        });
     }
 
 
@@ -171,24 +192,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         Toast.makeText(getContext(), R.string.content_entry_not_found, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void setCategorySchemaSpinner(Map<Long, List<DistinctCategorySchema>> spinnerData) {
-        runOnUiThread(() -> {
-            if (contentEntryListener != null) {
-                // TODO tell activiity to create the spinners
-                contentEntryListener.setFilterSpinner(spinnerData);
-            }
-        });
-    }
 
-    @Override
-    public void setLanguageOptions(List<Language> result) {
-        runOnUiThread(() -> {
-            if (contentEntryListener != null) {
-                contentEntryListener.setLanguageFilterSpinner(result);
-            }
-        });
-    }
 
     @Override
     public void contentEntryClicked(ContentEntry entry) {
@@ -201,7 +205,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void downloadStatusClicked(ContentEntry entry) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         ustadBaseActivity.runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 () -> entryListPresenter.handleDownloadStatusButtonClicked(entry),

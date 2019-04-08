@@ -33,7 +33,7 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
     private val zipMountedCallback = object : UmCallback<String> {
         override fun onSuccess(result: String) {
             mountedPath = result
-            UstadMobileSystemImpl.getInstance().makeRequestAsync(UmHttpRequest(
+            UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
                     getContext(),
                     UMFileUtil.joinPaths(mountedPath!!, "imsmanifest.xml")),
                     manifestLoadedCallback)
@@ -49,15 +49,15 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
         override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
             scormManifest = ScormManifest()
             try {
-                scormManifest!!.loadFromInputStream(response.responseAsStream)
+                scormManifest!!.loadFromInputStream(response.responseAsStream!!)
                 val defaultOrg = scormManifest!!.defaultOrganization
                 val startRes = scormManifest!!.getResourceByIdentifier(
                         defaultOrg.items[0].identifierRef!!)
-                scormPackageView.runOnUiThread {
-                    scormPackageView.setTitle(scormManifest!!.defaultOrganization.title)
+                scormPackageView.runOnUiThread(Runnable  {
+                    scormPackageView.setTitle(scormManifest!!.defaultOrganization.title!!)
                     scormPackageView.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
                             startRes.href!!))
-                }
+                })
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (x: XmlPullParserException) {
@@ -72,7 +72,7 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
     }
 
     fun onCreate(args: HashMap<String, String>) {
-        scormPackageView.mountZip(args[UstadView.ARG_CONTAINER_UID],
+        scormPackageView.mountZip(args[UstadView.ARG_CONTAINER_UID]!!,
                 zipMountedCallback)
     }
 

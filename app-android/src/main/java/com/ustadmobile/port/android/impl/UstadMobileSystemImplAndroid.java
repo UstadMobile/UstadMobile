@@ -153,21 +153,21 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private boolean initRan = false;
 
     static {
-        viewNameToAndroidImplMap.put(Login2View.VIEW_NAME, Login2Activity.class);
-        viewNameToAndroidImplMap.put(EpubContentView.VIEW_NAME, EpubContentActivity.class);
-        viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
-        viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToAndroidImplMap.put(XapiPackageContentView.VIEW_NAME, XapiPackageContentActivity.class);
-        viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
-        viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
+        viewNameToAndroidImplMap.put(Login2View.Companion.getVIEW_NAME(), Login2Activity.class);
+        viewNameToAndroidImplMap.put(EpubContentView.Companion.getVIEW_NAME(), EpubContentActivity.class);
+        viewNameToAndroidImplMap.put(BasePointView.Companion.getVIEW_NAME(), BasePointActivity.class);
+        viewNameToAndroidImplMap.put(AboutView.Companion.getVIEW_NAME(), AboutActivity.class);
+        viewNameToAndroidImplMap.put(XapiPackageContentView.Companion.getVIEW_NAME(), XapiPackageContentActivity.class);
+        viewNameToAndroidImplMap.put(ScormPackageView.Companion.getVIEW_NAME(), ScormPackageActivity.class);
+        viewNameToAndroidImplMap.put(H5PContentView.Companion.getVIEW_NAME(), H5PContentActivity.class);
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
-        viewNameToAndroidImplMap.put(ContentEntryListView.VIEW_NAME, ContentEntryListActivity.class);
-        viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
-        viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
-        viewNameToAndroidImplMap.put(OnBoardingView.VIEW_NAME, OnBoardingActivity.class);
-        viewNameToAndroidImplMap.put(Register2View.VIEW_NAME, Register2Activity.class);
-        viewNameToAndroidImplMap.put(WebChunkView.VIEW_NAME, WebChunkActivity.class);
-        viewNameToAndroidImplMap.put(VideoPlayerView.VIEW_NAME, VideoPlayerActivity.class);
+        viewNameToAndroidImplMap.put(ContentEntryListView.Companion.getVIEW_NAME(), ContentEntryListActivity.class);
+        viewNameToAndroidImplMap.put(ContentEntryDetailView.Companion.getVIEW_NAME(), ContentEntryDetailActivity.class);
+        viewNameToAndroidImplMap.put(DummyView.Companion.getVIEW_NAME(), DummyActivity.class);
+        viewNameToAndroidImplMap.put(OnBoardingView.Companion.getVIEW_NAME(), OnBoardingActivity.class);
+        viewNameToAndroidImplMap.put(Register2View.Companion.getVIEW_NAME(), Register2Activity.class);
+        viewNameToAndroidImplMap.put(WebChunkView.Companion.getVIEW_NAME(), WebChunkActivity.class);
+        viewNameToAndroidImplMap.put(VideoPlayerView.Companion.getVIEW_NAME(), VideoPlayerActivity.class);
     }
 
     /**
@@ -227,9 +227,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         protected String doInBackground(Boolean... booleans) {
             File apkFile = new File(context.getApplicationInfo().sourceDir);
             //TODO: replace this with something from appconfig.properties
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
 
-            String baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
+            String baseName = impl.getAppConfigString(AppConfig.INSTANCE.getKEY_APP_BASE_NAME(), "", context) + "-" +
                     impl.getVersion(context);
 
 
@@ -286,7 +286,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      * @return
      */
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
-        return (UstadMobileSystemImplAndroid) getInstance();
+        return (UstadMobileSystemImplAndroid) Companion.getInstance();
     }
 
     @Override
@@ -297,10 +297,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             File systemBaseDir = new File(getSystemBaseDir(context));
             if (!systemBaseDir.exists()) {
                 if (systemBaseDir.mkdirs()) {
-                    l(UMLog.INFO, 0, "Created base system dir: " +
+                    Companion.l(UMLog.Companion.getINFO(), 0, "Created base system dir: " +
                             systemBaseDir.getAbsolutePath());
                 } else {
-                    l(UMLog.CRITICAL, 0, "Failed to created system base dir" +
+                    Companion.l(UMLog.Companion.getCRITICAL(), 0, "Failed to created system base dir" +
                             systemBaseDir.getAbsolutePath());
                 }
             }
@@ -408,17 +408,17 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             if (ctx instanceof Activity) {
                 String referrer = "";
                 if (((Activity) ctx).getIntent().getExtras() != null) {
-                    referrer = ((Activity) ctx).getIntent().getExtras().getString(ARG_REFERRER, "");
+                    referrer = ((Activity) ctx).getIntent().getExtras().getString(Companion.getARG_REFERRER(), "");
                 }
 
-                if ((flags & GO_FLAG_CLEAR_TOP) > 0) {
+                if ((flags & Companion.getGO_FLAG_CLEAR_TOP()) > 0) {
                     referrer = UMFileUtil.INSTANCE.clearTopFromReferrerPath(viewName, args,
                             referrer);
                 } else {
                     referrer += "/" + viewName + "?" + UMFileUtil.INSTANCE.mapToQueryString(args);
                 }
 
-                startIntent.putExtra(ARG_REFERRER, referrer);
+                startIntent.putExtra(Companion.getARG_REFERRER(), referrer);
             }
             startIntent.setFlags(flags);
             if (args != null)
@@ -596,7 +596,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             versionInfo = 'v' + pInfo.versionName + " (#" + pInfo.versionCode + ')';
         } catch (PackageManager.NameNotFoundException e) {
-            l(UMLog.ERROR, 90, null, e);
+            Companion.l(UMLog.Companion.getERROR(), 90, null, e);
         }
         return versionInfo;
     }
@@ -608,22 +608,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return pInfo.lastUpdateTime;
         } catch (PackageManager.NameNotFoundException e) {
-            l(UMLog.ERROR, 90, null, e);
+            Companion.l(UMLog.Companion.getERROR(), 90, null, e);
         }
 
         return 0;
     }
 
-    @Override
-    public boolean isWiFiP2PSupported() {
-        //TODO: Use android specific code here to determine if this device supports wifi p2p
-        return true;
-    }
-
-    @Override
-    public NetworkManagerBle getNetworkManagerBle() {
-        return null;
-    }
 
     @Override
     public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
@@ -643,7 +633,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 return metaData.getString(key);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, UMLog.ERROR, key, e);
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), UMLog.Companion.getERROR(), key, e);
         }
 
         return null;

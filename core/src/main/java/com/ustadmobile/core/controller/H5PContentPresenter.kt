@@ -33,7 +33,7 @@ class H5PContentPresenter(context: Any, private val h5PContentView: H5PContentVi
     private val mH5PDistMountedCallback = object : UmCallback<String> {
         override fun onSuccess(h5pUrl: String) {
             h5pDistMountUrl = h5pUrl
-            h5PContentView.mountH5PFile(h5pFileUri, h5PFileMountedCallback)
+            h5PContentView.mountH5PFile(h5pFileUri!!, h5PFileMountedCallback)
         }
 
         override fun onFailure(exception: Throwable) {
@@ -44,7 +44,7 @@ class H5PContentPresenter(context: Any, private val h5PContentView: H5PContentVi
     private val h5PFileMountedCallback = object : UmCallback<String> {
         override fun onSuccess(result: String) {
             h5pFileMountUrl = result
-            UstadMobileSystemImpl.getInstance().getAsset(getContext(),
+            UstadMobileSystemImpl.instance.getAsset(getContext(),
                     "/com/ustadmobile/core/h5p/contentframe.html", contentFrameLoadedCallback)
         }
 
@@ -60,13 +60,13 @@ class H5PContentPresenter(context: Any, private val h5PContentView: H5PContentVi
                 var htmlStr = UMIOUtils.readStreamToString(result)
                 htmlStr = htmlStr.replace("\$DISTPATH", h5pDistMountUrl!!)
                 val subHtmlStr = htmlStr.replace("\$CONTENTPATH", h5pFileMountUrl!!)
-                h5PContentView.runOnUiThread {
-                    h5PContentView.setContentHtml(h5pFileMountUrl,
+                h5PContentView.runOnUiThread (Runnable {
+                    h5PContentView.setContentHtml(h5pFileMountUrl!!,
                             subHtmlStr)
-                }
+                })
                 val h5PJsonRequest = UmHttpRequest(getContext(),
                         UMFileUtil.joinPaths(h5pFileMountUrl!!, "h5p.json"))
-                UstadMobileSystemImpl.getInstance().makeRequestAsync(h5PJsonRequest, h5pResponseCallback)
+                UstadMobileSystemImpl.instance.makeRequestAsync(h5PJsonRequest, h5pResponseCallback)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -82,12 +82,12 @@ class H5PContentPresenter(context: Any, private val h5PContentView: H5PContentVi
         override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
             try {
                 if (response.isSuccessful) {
-                    val jsonStr = UMIOUtils.readStreamToString(response.responseAsStream)
+                    val jsonStr = UMIOUtils.readStreamToString(response.responseAsStream!!)
                     val jsonObj = JSONObject(jsonStr)
-                    h5PContentView.runOnUiThread {
+                    h5PContentView.runOnUiThread(Runnable  {
                         h5PContentView.setTitle(
                                 jsonObj.getString("title"))
-                    }
+                    })
                 }
             } catch (e: IOException) {
                 e.printStackTrace()

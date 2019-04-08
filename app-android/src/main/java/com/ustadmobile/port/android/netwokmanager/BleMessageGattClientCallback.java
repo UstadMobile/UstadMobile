@@ -96,18 +96,18 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
 
         if(status == BluetoothGatt.GATT_SUCCESS &&
                 newState == BluetoothProfile.STATE_CONNECTED) {
-            UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                     "Device connected to " + remoteDeviceAddress);
 
             if(!serviceDiscoveryRef.get()){
-                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                         "Discovering services offered by " + remoteDeviceAddress);
                 serviceDiscoveryRef.set(true);
                 gatt.discoverServices();
             }
         }else {
             cleanup(gatt);
-            UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                     "Connection disconnected " + status + "from "
                             + remoteDeviceAddress);
             if(responseListener != null) {
@@ -130,7 +130,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
         super.onServicesDiscovered(gatt, status);
         BluetoothGattService service = findMatchingService(gatt.getServices());
         if(service == null){
-            UstadMobileSystemImpl.l(UMLog.ERROR,698,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),698,
                     "ERROR Ustadmobile Service not found on " + gatt.getDevice().getAddress());
             responseListener.onResponseReceived(gatt.getDevice().getAddress(), null,
                     new IOException("UstadMobile service not found on device"));
@@ -138,7 +138,7 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             return;
         }
 
-        UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                 "Ustadmobile Service found on " + gatt.getDevice().getAddress());
         List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
 
@@ -164,12 +164,12 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
                 characteristic.setValue(packets[packetIteration]);
                 gatt.writeCharacteristic(characteristic);
                 packetIteration++;
-                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                         "Transferring packet #" + packetIteration + " to "
                                 + gatt.getDevice().getAddress());
             }else{
                 packetIteration = 0;
-                UstadMobileSystemImpl.l(UMLog.DEBUG,698,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),698,
                         packets.length + " packet(s) transferred successfully to " +
                                 "the remote device =" + gatt.getDevice().getAddress());
                 //We now expect the server to send a response
@@ -247,18 +247,18 @@ public class BleMessageGattClientCallback extends  BluetoothGattCallback{
             if(mConnected.get()) {
                 gatt.disconnect();
                 mConnected.set(false);
-                UstadMobileSystemImpl.l(UMLog.INFO, 698, "GattClientCallback: disconnected");
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 698, "GattClientCallback: disconnected");
             }
 
             if(!mClosed.get()) {
                 gatt.close();
                 mClosed.set(true);
-                UstadMobileSystemImpl.l(UMLog.INFO, 698, "GattClientCallback: closed");
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 698, "GattClientCallback: closed");
             }
         }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 698, "GattClientCallback: ERROR disconnecting");
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 698, "GattClientCallback: ERROR disconnecting");
         }finally {
-            UstadMobileSystemImpl.l(UMLog.INFO, 698, "GattClientCallback: closed");
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 698, "GattClientCallback: closed");
         }
     }
 }

@@ -48,7 +48,7 @@ public class UmHttpCachePicassoRequestHandler extends RequestHandler{
             umRequest.setOnlyIfCached(true);
         }
 
-        UmHttpResponse response = UstadMobileSystemImpl.getInstance().makeRequestSync(umRequest);
+        UmHttpResponse response = UstadMobileSystemImpl.Companion.getInstance().makeRequestSync(umRequest);
         Picasso.LoadedFrom loadedFrom = Picasso.LoadedFrom.NETWORK;
         if(uriStr.startsWith("file:/")){
             loadedFrom = Picasso.LoadedFrom.DISK;

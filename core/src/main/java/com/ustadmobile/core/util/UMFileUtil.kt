@@ -70,6 +70,7 @@ object UMFileUtil {
      * @param paths Array of paths to join
      * @return path components joined with a single FILE_SEP character between
      */
+    @JvmStatic
     fun joinPaths(vararg paths: String): String {
         val result = StringBuffer()
         for (i in paths.indices) {
@@ -329,7 +330,7 @@ object UMFileUtil {
      */
     fun appendExtensionToFilenameIfNeeded(filename: String, mimeType: String): String {
         var filename = filename
-        val expectedExtension = UstadMobileSystemImpl.getInstance().getExtensionFromMimeType(
+        val expectedExtension = UstadMobileSystemImpl.instance.getExtensionFromMimeType(
                 mimeType) ?: return filename
 
         if (!filename.endsWith(".$expectedExtension")) {
@@ -567,6 +568,7 @@ object UMFileUtil {
      * @return the extension - the last characters after the last . if there is a . in the name
      * null if no extension is found
      */
+    @JvmStatic
     fun getExtension(uri: String): String? {
         val filename = getFilename(uri)
         val lastDot = filename.lastIndexOf('.')

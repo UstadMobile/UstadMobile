@@ -77,7 +77,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         super.onCreate(savedState);
         umAppDatabase = UmAppDatabase.getInstance(getContext());
 
-        impl = UstadMobileSystemImpl.getInstance();
+        impl = UstadMobileSystemImpl.Companion.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
         getView().setWifiOnlyOptionVisible(false);

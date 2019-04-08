@@ -5,13 +5,13 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -52,10 +52,6 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
         return ""+messageCode;
     }
 
-    @Override
-    public NetworkManagerBle getNetworkManagerBle() {
-        return null;
-    }
 
     @Override
     public String getSharedContentDir(Object context) {
@@ -141,5 +137,11 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public long getBuildTimestamp(Object context) {
         return 0;//not implemented
+    }
+
+    @NotNull
+    @Override
+    public NetworkManagerBle getNetworkManagerBle() {
+        return null;
     }
 }

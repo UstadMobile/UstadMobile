@@ -167,7 +167,7 @@ public class WebChunkEspressoTest {
 
         b.putString(WebChunkView.Companion.getARG_CONTAINER_UID(), String.valueOf(10L));
         b.putString(WebChunkView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(1L));
-        b.putString(ARG_REFERRER, path);
+        b.putString(Companion.getARG_REFERRER(), path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
@@ -195,7 +195,7 @@ public class WebChunkEspressoTest {
 
         b.putString(WebChunkView.Companion.getARG_CONTAINER_UID(), String.valueOf(12));
         b.putString(WebChunkView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(1l));
-        b.putString(ARG_REFERRER, path);
+        b.putString(Companion.getARG_REFERRER(), path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
@@ -216,7 +216,7 @@ public class WebChunkEspressoTest {
 
         b.putString(WebChunkView.Companion.getARG_CONTAINER_UID(), String.valueOf(11L));
         b.putString(WebChunkView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(1l));
-        b.putString(ARG_REFERRER, path);
+        b.putString(Companion.getARG_REFERRER(), path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 

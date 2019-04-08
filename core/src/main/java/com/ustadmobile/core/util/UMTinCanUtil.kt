@@ -228,7 +228,7 @@ object UMTinCanUtil {
                     account.endpointUrl)
         } else {
             UMTinCanUtil.makeActorFromUserAccount("anonymous",
-                    UmAccountManager.getActiveEndpoint(context))
+                    UmAccountManager.getActiveEndpoint(context)!!)
         }
 
     }

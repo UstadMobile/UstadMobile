@@ -134,7 +134,7 @@ public class DownloadNotificationService extends Service {
             activeDownloadJobObserver = DownloadNotificationService.this::handleJobListChanged;
             activeDownloadJobData.observeForever(activeDownloadJobObserver);
         },TimeUnit.SECONDS.toMillis(1));
-        impl = UstadMobileSystemImpl.getInstance();
+        impl = UstadMobileSystemImpl.Companion.getInstance();
 
     }
 

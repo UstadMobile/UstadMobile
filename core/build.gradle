@@ -49,6 +49,7 @@ dependencies {
 
     implementation project(':lib-database')
     compileOnly project(':lib-database-entities')
+    compileOnly project(':core-compile-only')
     implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 

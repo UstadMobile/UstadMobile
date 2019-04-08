@@ -104,7 +104,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
         override fun onSuccess(result: String) {
             mountedUrl = result
             val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
-            UstadMobileSystemImpl.getInstance().makeRequestAsync(
+            UstadMobileSystemImpl.instance.makeRequestAsync(
                     UmHttpRequest(getContext(), containerUri), containerHttpCallbackHandler)
         }
 
@@ -123,14 +123,14 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                 ocf = OcfDocument()
 
                 try {
-                    val xpp = UstadMobileSystemImpl.getInstance().newPullParser(
+                    val xpp = UstadMobileSystemImpl.instance.newPullParser(
                             ByteArrayInputStream(response.responseBody))
                     ocf!!.loadFromParser(xpp)
 
                     //get and parse the first publication
                     val opfUrl = UMFileUtil.joinPaths(mountedUrl!!,
                             ocf!!.rootFiles[0].fullPath!!)
-                    UstadMobileSystemImpl.getInstance().makeRequestAsync(
+                    UstadMobileSystemImpl.instance.makeRequestAsync(
                             UmHttpRequest(getContext(), opfUrl), opfHttpCallbackHandler)
 
                 } catch (e: IOException) {
@@ -154,7 +154,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
         override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
             val opf = OpfDocument()
             try {
-                val xpp = UstadMobileSystemImpl.getInstance().newPullParser(
+                val xpp = UstadMobileSystemImpl.instance.newPullParser(
                         ByteArrayInputStream(response.responseBody))
                 opf.loadFromOPF(xpp)
                 val linearSpineHrefsRelative = opf.linearSpineHREFs
@@ -175,9 +175,9 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                 else
                     null
 
-                epubContentView!!.runOnUiThread {
-                    epubContentView.setContainerTitle(opf.title)
-                    epubContentView.setSpineUrls(linearSpineUrls)
+                epubContentView!!.runOnUiThread(Runnable  {
+                    epubContentView.setContainerTitle(opf.title!!)
+                    epubContentView.setSpineUrls(linearSpineUrls!!)
                     if (opfCoverImageItem != null) {
                         epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl!!,
                                 opfCoverImageItem.href!!))
@@ -186,7 +186,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                     if (authorNames != null) {
                         epubContentView.setAuthorName(authorNames)
                     }
-                }
+                })
 
                 if (opf.navItem == null)
                     return
@@ -194,7 +194,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                 val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
                         mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
 
-                UstadMobileSystemImpl.getInstance().makeRequestAsync(UmHttpRequest(
+                UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
                         getContext(), navXhtmlUrl), navCallbackHandler)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -213,12 +213,12 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
         override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
             val navDocument = EpubNavDocument()
             try {
-                val xpp = UstadMobileSystemImpl.getInstance().newPullParser(
+                val xpp = UstadMobileSystemImpl.instance.newPullParser(
                         ByteArrayInputStream(response.responseBody), "UTF-8")
                 xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
                 navDocument.load(xpp)
-                epubContentView!!.runOnUiThread { epubContentView.setTableOfContents(navDocument.toc) }
-                view.runOnUiThread { view.setProgressBarVisible(false) }
+                epubContentView!!.runOnUiThread(Runnable  { epubContentView.setTableOfContents(navDocument.toc!!) })
+                view.runOnUiThread(Runnable  { view.setProgressBarVisible(false) })
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (x: XmlPullParserException) {
@@ -256,7 +256,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
     override fun onDestroy() {
         super.onDestroy()
         if (mountedUrl != null) {
-            view.unmountContainer(mountedUrl)
+            view.unmountContainer(mountedUrl!!)
         }
     }
 

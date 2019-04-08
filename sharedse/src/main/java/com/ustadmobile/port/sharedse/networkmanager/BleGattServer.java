@@ -45,6 +45,10 @@ public abstract class BleGattServer {
         this.networkManager = networkManager;
     }
 
+    public void setContext(Object context) {
+        this.context = context;
+    }
+
     /**
      * Default constructor used by Mockito when spying this class
      */
@@ -64,7 +68,7 @@ public abstract class BleGattServer {
             case ENTRY_STATUS_REQUEST:
                 List<Long> entryStatusResponse = new ArrayList<>();
 
-                ContainerDao containerDao = UmAccountManager.getRepositoryForActiveAccount(context)
+                ContainerDao containerDao = UmAccountManager.INSTANCE.getRepositoryForActiveAccount(context)
                         .getContainerDao();
                 for(long containerUid: bleMessageBytesToLong(requestReceived.getPayload())){
 

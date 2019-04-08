@@ -145,7 +145,7 @@ class ScormManifest {
      */
     @Throws(IOException::class, XmlPullParserException::class)
     fun loadFromInputStream(`in`: InputStream) {
-        val xpp = UstadMobileSystemImpl.getInstance().newPullParser()
+        val xpp = UstadMobileSystemImpl.instance.newPullParser()
         xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
         xpp.setInput(`in`, "UTF-8")
         loadFromXpp(xpp)

@@ -18,9 +18,9 @@ import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
-import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
@@ -35,7 +35,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -66,7 +66,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      * @return Casted UstadMobileSystemImplSharedSE
      */
     public static UstadMobileSystemImplSE getInstanceSE() {
-        return (UstadMobileSystemImplSE)UstadMobileSystemImpl.getInstance();
+        return (UstadMobileSystemImplSE)Companion.getInstance();
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         super.init(context);
 
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
+            httpCache = new HttpCache(getCacheDir(Companion.getSHARED_RESOURCE(), context));
     }
 
     /**
@@ -97,7 +97,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
-        return UMFileUtil.INSTANCE.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
+        return UMFileUtil.joinPaths(systemBaseDir, UstadMobileConstants.CACHEDIR);
     }
 
 
@@ -105,28 +105,26 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
         String systemBaseDir = getSystemBaseDir(context);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = Companion.getInstance();
         final String contentDirName = getContentDirName(context);
 
-        if((mode & SHARED_RESOURCE) == SHARED_RESOURCE) {
+        if((mode & Companion.getSHARED_RESOURCE()) == Companion.getSHARED_RESOURCE()) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
                     false, true, false));
 
             //Find external directories
             String[] externalDirs = findRemovableStorage();
             for(String extDir : externalDirs) {
-                dirList.add(new UMStorageDir(UMFileUtil.INSTANCE.joinPaths(new String[]{extDir,
-                        contentDirName}),
+                dirList.add(new UMStorageDir(UMFileUtil.joinPaths(extDir, contentDirName),
                         getString(MessageID.memory_card, context),
                         true, true, false, false));
             }
         }
 
-        UmAccount account = UmAccountManager.getActiveAccount(context);
+        UmAccount account = UmAccountManager.INSTANCE.getActiveAccount(context);
         if(account != null
-                && ((mode & UstadMobileSystemImpl.USER_RESOURCE) == UstadMobileSystemImpl.USER_RESOURCE)) {
-            String userBase = UMFileUtil.INSTANCE.joinPaths(new String[]{systemBaseDir, "user-",
-                    account.getUsername()});
+                && ((mode & Companion.getUSER_RESOURCE()) ==  Companion.getUSER_RESOURCE())) {
+            String userBase = UMFileUtil.joinPaths(systemBaseDir, "user-", account.getUsername());
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
                     false, true, true));
         }
@@ -152,8 +150,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         //Find external directories
         String[] externalDirs = findRemovableStorage();
         for(String extDir : externalDirs) {
-            dirList.add(new UMStorageDir(UMFileUtil.INSTANCE.joinPaths(new String[]{extDir,
-                    contentDirName}),
+            dirList.add(new UMStorageDir(UMFileUtil.joinPaths(extDir, contentDirName),
                     getString(MessageID.memory_card, context),
                     true, true, false, false));
         }
@@ -197,7 +194,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
             serializer = xmlPullParserFactory.newSerializer();
         }catch(XmlPullParserException e) {
-            l(UMLog.ERROR, 92, null, e);
+            Companion.l(UMLog.Companion.getERROR(), 92, null, e);
         }
 
         return serializer;
@@ -213,11 +210,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     public UmHttpCall makeRequestAsync(UmHttpRequest request, final UmHttpResponseCallback callback) {
         Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
         if(request.getHeaders() != null) {
-            Enumeration allHeaders = request.getHeaders().keys();
+            Iterator allHeaders = request.getHeaders().keySet().iterator();
             String header;
-            while(allHeaders.hasMoreElements()) {
-                header = (String)allHeaders.nextElement();
-                httpRequest.addHeader(header, (String)request.getHeaders().get(header));
+            while(allHeaders.hasNext()) {
+                header = (String)allHeaders.next();
+                httpRequest.addHeader(header, request.getHeaders().get(header));
             }
         }
 
@@ -230,7 +227,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 callback.onComplete(umCall, new UmHttpResponseSe(response));
             }
         });
@@ -244,7 +241,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
     @Override
-    protected UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException{
+    public UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException{
         Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
         Call call = client.newCall(httpRequest.build());
         return new UmHttpResponseSe(call.execute());
@@ -258,7 +255,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public HttpCache getHttpCache(Object context) {
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
+            httpCache = new HttpCache(getCacheDir(Companion.getSHARED_RESOURCE(), context));
 
         return httpCache;
     }
@@ -278,9 +275,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
                 prefIn = getAssetSync(context, appPrefResource);
                 appConfig.load(prefIn);
             }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 685, appPrefResource, e);
+                Companion.l(UMLog.Companion.getERROR(), 685, appPrefResource, e);
             }finally {
-                UMIOUtils.INSTANCE.closeInputStream(prefIn);
+                UMIOUtils.closeInputStream(prefIn);
             }
         }
 

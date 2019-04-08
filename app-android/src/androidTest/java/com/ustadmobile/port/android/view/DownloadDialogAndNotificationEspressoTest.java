@@ -145,7 +145,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         UmAccount testAccount = new UmAccount(0, "test", "",
                 testEndpoint);
-        UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
+        UmAccountManager.INSTANCE.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
 
         prepareContentEntriesAndFiles();
         SystemClock.sleep(MIN_SLEEP_TIME);

@@ -39,12 +39,12 @@ public class AndroidAssetsHandler implements RouterNanoHTTPD.UriResponder {
             String extension = UMFileUtil.INSTANCE.getExtension(assetPath);
 
             response = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                    UstadMobileSystemImpl.getInstance().getMimeTypeFromExtension(extension),
+                    UstadMobileSystemImpl.Companion.getInstance().getMimeTypeFromExtension(extension),
                     new ByteArrayInputStream(assetBytes), assetBytes.length);
             response.addHeader("Cache-Control", "cache, max-age=86400");
             response.addHeader("Content-Length", String.valueOf(assetBytes.length));
         }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 88, session.getUri(), e);
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 88, session.getUri(), e);
         }finally {
             try {
                 if(assetIn != null) {
@@ -52,7 +52,7 @@ public class AndroidAssetsHandler implements RouterNanoHTTPD.UriResponder {
                 }
 
             }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 89, session.getUri(), e);
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 89, session.getUri(), e);
             }
         }
 

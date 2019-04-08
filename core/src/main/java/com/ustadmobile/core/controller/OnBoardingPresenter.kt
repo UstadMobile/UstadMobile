@@ -8,11 +8,11 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
 
     override fun onCreate(savedState: Map<String, String> ?) {
         super.onCreate(savedState)
-        view.runOnUiThread { view.setScreenList() }
+        view.runOnUiThread(Runnable  { view.setScreenList() })
     }
 
 
     fun handleGetStarted() {
-        UstadMobileSystemImpl.getInstance().go(DummyView.VIEW_NAME, getContext())
+        UstadMobileSystemImpl.instance.go(DummyView.VIEW_NAME, getContext())
     }
 }

@@ -153,7 +153,7 @@ public class ShrinkerUtil {
             OcfDocument ocfDoc = new OcfDocument();
             File ocfFile = new File(directory, Paths.get("META-INF", "container.xml").toString());
             ocfFileInputStream = new FileInputStream(ocfFile);
-            XmlPullParser ocfParser = UstadMobileSystemImpl.getInstance()
+            XmlPullParser ocfParser = UstadMobileSystemImpl.Companion.getInstance()
                     .newPullParser(ocfFileInputStream);
             ocfDoc.loadFromParser(ocfParser);
 
@@ -163,7 +163,7 @@ public class ShrinkerUtil {
             cleanXml(opfFile);
             OpfDocument document = new OpfDocument();
             opfFileInputStream = new FileInputStream(opfFile);
-            XmlPullParser xmlPullParser = UstadMobileSystemImpl.getInstance()
+            XmlPullParser xmlPullParser = UstadMobileSystemImpl.Companion.getInstance()
                     .newPullParser(opfFileInputStream);
             document.loadFromOPF(xmlPullParser);
 
@@ -298,7 +298,7 @@ public class ShrinkerUtil {
                 return false;
             }
 
-            XmlSerializer xmlSerializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+            XmlSerializer xmlSerializer = UstadMobileSystemImpl.Companion.getInstance().newXMLSerializer();
             opfFileOutputStream = new FileOutputStream(opfFile);
             xmlSerializer.setOutput(opfFileOutputStream, UTF_ENCODING);
             document.serialize(xmlSerializer);

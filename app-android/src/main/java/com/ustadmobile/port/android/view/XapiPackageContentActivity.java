@@ -98,7 +98,7 @@ public class XapiPackageContentActivity extends ZippedContentActivity implements
 
     @Override
     public void loadUrl(String url) {
-        UstadMobileSystemImpl.l(UMLog.INFO, 0, "Xapi: Loading: " +url);
+        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 0, "Xapi: Loading: " +url);
         mWebView.loadUrl(url);
     }
 

@@ -5,15 +5,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmLiveData
 import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryStatusDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
@@ -24,13 +22,9 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
-import com.ustadmobile.lib.db.entities.NetworkNode
-
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER
-import java.util.*
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                                   viewContract: ContentEntryDetailView,
@@ -53,7 +47,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
 
     private var statusUmObserver: UmObserver<ContentEntryStatus>? = null
 
-    private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.getInstance()
+    private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
     override fun onCreate(map: Map<String, String>) {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext())
@@ -70,7 +64,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
         contentEntryDao.getContentByUuid(entryUuid!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry) {
                 val licenseType = getLicenseType(result)
-                view.runOnUiThread {
+                view.runOnUiThread (Runnable{
                     view.setContentEntryLicense(licenseType)
                     view.setContentEntryAuthor(result.author)
                     view.setContentEntryTitle(result.title)
@@ -78,7 +72,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                     if (result.thumbnailUrl != null && !result.thumbnailUrl.isEmpty()) {
                         view.loadEntryDetailsThumbnail(result.thumbnailUrl)
                     }
-                }
+                })
             }
 
             override fun onFailure(exception: Throwable) {
@@ -88,13 +82,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
 
         containerDao!!.findFilesByContentEntryUid(entryUuid!!, object : UmCallback<List<Container>> {
             override fun onSuccess(result: List<Container>) {
-                view.runOnUiThread {
+                view.runOnUiThread(Runnable {
                     view.setDetailsButtonEnabled(!result.isEmpty())
                     if (!result.isEmpty()) {
                         val container = result[0]
                         view.setDownloadSize(container.fileSize)
                     }
-                }
+                })
             }
 
             override fun onFailure(exception: Throwable) {
@@ -106,11 +100,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                 object : UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>> {
 
                     override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>) {
-                        view.runOnUiThread {
+                        view.runOnUiThread(Runnable {
                             view.setTranslationLabelVisible(!result.isEmpty())
                             view.setFlexBoxVisible(!result.isEmpty())
                             view.setAvailableTranslations(result, entryUuid!!)
-                        }
+                        })
                     }
 
                     override fun onFailure(exception: Throwable) {
@@ -152,25 +146,25 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                 && status.downloadStatus >= JobStatus.RUNNING_MIN
                 && status.downloadStatus <= JobStatus.RUNNING_MAX)
 
-        view.runOnUiThread {
+        view.runOnUiThread(Runnable {
             view.setButtonTextLabel(buttonLabel)
             view.setDownloadButtonVisible(!isDownloading)
             view.setDownloadButtonClickableListener(isDownloadComplete)
             view.setDownloadProgressVisible(isDownloading)
             view.setDownloadProgressLabel(progressLabel)
             view.setLocalAvailabilityStatusViewVisible(isDownloading)
-        }
+        })
 
         if (isDownloading) {
 
-            view.runOnUiThread {
+            view.runOnUiThread(Runnable {
                 view.setDownloadButtonVisible(false)
                 view.setDownloadProgressVisible(true)
                 view.updateDownloadProgress(if (status!!.totalSize > 0)
                     status.bytesDownloadSoFar.toFloat() / status.totalSize.toFloat()
                 else
                     0f)
-            }
+            })
 
         }
 
@@ -194,8 +188,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                                 listOf(containerUid!!))
                     }
 
-                    val monitorSet = view.allKnowAvailabilityStatus
-                    monitorSet.add(if (localNetworkNode != null) containerUid else 0L)
+                    val monitorSet : MutableSet<Long> = view.allKnowAvailabilityStatus as MutableSet<Long>
+
+                    monitorSet.add((if (localNetworkNode != null) containerUid else 0L)!!)
 
                     handleLocalAvailabilityStatus(monitorSet)
                 }
@@ -237,13 +232,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                 override fun onFailure(exception: Throwable) {
                     val message = exception.message
                     if (exception is NoAppFoundException) {
-                        view.runOnUiThread {
+                        view.runOnUiThread (Runnable{
                             view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
                                     MessageID.get_app,
-                                    exception.mimeType)
-                        }
+                                    exception.mimeType!!)
+                        })
                     } else {
-                        view.runOnUiThread { view.showFileOpenError(message) }
+                        view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
                     }
                 }
             })
@@ -254,7 +249,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
 
             //hard coded strings because these are actually in sharedse
             args["contentEntryUid"] = this.entryUuid.toString()
-            view.runOnUiThread { view.showDownloadOptionsDialog(args) }
+            view.runOnUiThread(Runnable { view.showDownloadOptionsDialog(args) })
         }
 
     }
@@ -272,7 +267,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                 else
                     MessageID.download_cloud_availability, getContext())
 
-        view.runOnUiThread { view.updateLocalAvailabilityViews(icon, status) }
+        view.runOnUiThread (Runnable{ view.updateLocalAvailabilityViews(icon, status) })
     }
 
 
