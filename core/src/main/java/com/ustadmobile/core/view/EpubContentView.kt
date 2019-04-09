@@ -41,9 +41,9 @@ interface EpubContentView : UstadView {
 
     fun setContainerTitle(containerTitle: String)
 
-    fun setSpineUrls(urls: Array<String>)
+    fun setSpineUrls(urls: Array<String>?)
 
-    fun setPageTitle(pageTitle: String)
+    fun setPageTitle(pageTitle: String?)
 
     fun setTableOfContents(tocNavItem: EpubNavItem)
 
@@ -51,9 +51,9 @@ interface EpubContentView : UstadView {
 
     fun setAuthorName(authorName: String)
 
-    fun mountContainer(containerUid: Long, callback: UmCallback<String>?)
+    fun mountContainer(containerUid: Long?, callback: UmCallback<String>?)
 
-    fun unmountContainer(mountedUrl: String)
+    fun unmountContainer(mountedUrl: String?)
 
     /**
      * Set if the progress bar is visible or not

@@ -73,7 +73,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         setContentView(R.layout.activity_base_point);
         Map<String , String> savedInstanceHt = bundleToMap(savedInstanceState);
         String recreateWelcomeVal = UstadMobileSystemImpl.Companion.getInstance().getAppPref(
-                "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
+                "recreate-" + BasePointController.Companion.getARG_WELCOME_SCREEN_DISPLAYED(), this);
 
         /*
          * When
@@ -83,11 +83,11 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
          */
         if(recreateWelcomeVal != null) {
             UstadMobileSystemImpl.Companion.getInstance().setAppPref(
-                    "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, null, this);
+                    "recreate-" + BasePointController.Companion.getARG_WELCOME_SCREEN_DISPLAYED(), null, this);
         }
 
         if(savedInstanceHt == null && recreateWelcomeVal != null) {
-            savedInstanceHt.put(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, recreateWelcomeVal);
+            savedInstanceHt.put(BasePointController.Companion.getARG_WELCOME_SCREEN_DISPLAYED(), recreateWelcomeVal);
         }
 
         setUMToolbar(R.id.um_toolbar);
@@ -140,14 +140,14 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
          */
         String welcomeScreenDisplayed = String.valueOf(mBasePointController.isWelcomeScreenDisplayed());
         UstadMobileSystemImpl.Companion.getInstance().setAppPref("recreate-"
-                    + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, welcomeScreenDisplayed, this);
+                    + BasePointController.Companion.getARG_WELCOME_SCREEN_DISPLAYED(), welcomeScreenDisplayed, this);
         super.recreate();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED,
+        outState.putString(BasePointController.Companion.getARG_WELCOME_SCREEN_DISPLAYED(),
                 String.valueOf(mBasePointController.isWelcomeScreenDisplayed()));
     }
 
@@ -195,20 +195,18 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                if(!mDrawerLayout.isDrawerOpen(mDrawerNavigationView)){
-                    mDrawerLayout.openDrawer(mDrawerNavigationView);
-                }
-                return true;
-            case BasePointController.CMD_SHARE_APP:
-                mBasePointController.handleClickShareApp();
-                return true;
-
-            case BasePointController.CMD_RECEIVE_ENTRY:
-                mBasePointController.handleClickReceive();
-                return true;
-
+        int i = item.getItemId();
+        if (i == android.R.id.home) {
+            if (!mDrawerLayout.isDrawerOpen(mDrawerNavigationView)) {
+                mDrawerLayout.openDrawer(mDrawerNavigationView);
+            }
+            return true;
+        } else if (i == BasePointController.Companion.getCMD_SHARE_APP()) {
+            mBasePointController.handleClickShareApp();
+            return true;
+        } else if (i == BasePointController.Companion.getCMD_RECEIVE_ENTRY()) {
+            mBasePointController.handleClickReceive();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -216,8 +214,8 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
-        menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
+        menu.add(Menu.NONE, BasePointController.Companion.getCMD_SHARE_APP(), 0, R.string.share_application);
+        menu.add(Menu.NONE, BasePointController.Companion.getCMD_RECEIVE_ENTRY(), 1, R.string.receive);
         return super.onCreateOptionsMenu(menu);
     }
 

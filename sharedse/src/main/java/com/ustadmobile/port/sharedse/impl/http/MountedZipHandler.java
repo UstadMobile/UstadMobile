@@ -199,7 +199,7 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
 
     private void appendEntryLinksToBuffer(List<String> entries, StringBuffer buffer) {
         for(String entry : entries) {
-            buffer.append("<li><a href=\"").append(URLTextUtil.urlEncodeUTF8(entry))
+            buffer.append("<li><a href=\"").append(URLTextUtil.Companion.urlEncodeUTF8(entry))
                     .append("</a></li>\n");
         }
     }

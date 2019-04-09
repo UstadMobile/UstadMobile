@@ -85,7 +85,8 @@ import java.util.*
  *
  * @author mike
  */
-class EpubContentPresenter(context: Any, args: Map<String, String>, private val epubContentView: EpubContentView?) : UstadBaseController<EpubContentView>(context, args, epubContentView) {
+class EpubContentPresenter(context: Any, args: Map<String, String>?, private val epubContentView: EpubContentView?)
+    : UstadBaseController<EpubContentView>(context, args!!, epubContentView!!) {
 
     private var ocf: OcfDocument? = null
 
@@ -99,7 +100,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
      * First HTTP callback: run this once the container has been mounted to an http directory
      *
      */
-    private val mountedCallbackHandler = object : UmCallback<String> {
+    private val mountedCallbackHandler : UmCallback<String> ? = object : UmCallback<String> {
 
         override fun onSuccess(result: String) {
             mountedUrl = result
@@ -218,7 +219,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
                 xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
                 navDocument.load(xpp)
                 epubContentView!!.runOnUiThread(Runnable  { epubContentView.setTableOfContents(navDocument.toc!!) })
-                view.runOnUiThread(Runnable  { view.setProgressBarVisible(false) })
+                view?.runOnUiThread(Runnable  { view?.setProgressBarVisible(false) })
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (x: XmlPullParserException) {
@@ -232,11 +233,12 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
         }
     }
 
-    override fun onCreate(map: Map<String, String>) {
-        val containerUid = java.lang.Long.parseLong(arguments[EpubContentView.ARG_CONTAINER_UID])
-        view.setProgressBarProgress(-1)
-        view.setProgressBarVisible(true)
-        view.mountContainer(containerUid, mountedCallbackHandler)
+    override fun onCreate(map: Map<String, String>?) {
+        super.onCreate(map)
+        val containerUid = java.lang.Long.parseLong(arguments?.get(EpubContentView.ARG_CONTAINER_UID))
+        view?.setProgressBarProgress(-1)
+        view?.setProgressBarVisible(true)
+        view?.mountContainer(containerUid, mountedCallbackHandler!!)
     }
 
     fun handlePageTitleUpdated(pageTitle: String) {
@@ -256,7 +258,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>, private val 
     override fun onDestroy() {
         super.onDestroy()
         if (mountedUrl != null) {
-            view.unmountContainer(mountedUrl!!)
+            view?.unmountContainer(mountedUrl!!)
         }
     }
 

@@ -28,21 +28,15 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.controller;
+package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.core.view.UstadView
 
 /**
  *
  * @author mike
  */
-public interface UstadController<V extends UstadView> {
-    
-    void setView(V view);
-    
-    V getView();
-    
-    Object getContext();
-    
-    
+interface UstadController<V : UstadView> {
+
+    val view: V?
 }

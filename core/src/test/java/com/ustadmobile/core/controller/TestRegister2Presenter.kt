@@ -73,8 +73,8 @@ class TestRegister2Presenter {
         args!![Login2Presenter.ARG_NEXT] = DESTINATION
 
         mockView = Mockito.mock(Register2View::class.java)
-        doAnswer { invocationOnMock ->
-            Thread(invocationOnMock.getArgument<Any>(0) as Runnable).start()
+        doAnswer {
+            Thread(it.getArgument<Any>(0) as Runnable).start()
             null
         }.`when`<Register2View>(mockView).runOnUiThread(any())
     }

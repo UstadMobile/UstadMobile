@@ -64,8 +64,7 @@ dependencies {
     testImplementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     testImplementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
     testImplementation "junit:junit:$version_junit"
-    //testImplementation "org.mockito:mockito-core:$version_core_mockito"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
     //Jersey dependencies
     testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"

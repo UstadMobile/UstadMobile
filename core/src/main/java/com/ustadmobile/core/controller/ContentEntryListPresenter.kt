@@ -12,7 +12,8 @@ import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import java.util.*
 
-class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, private val viewContract: ContentEntryListView) : UstadBaseController<ContentEntryListView>(context, arguments, viewContract) {
+class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, private val viewContract: ContentEntryListView)
+    : UstadBaseController<ContentEntryListView>(context, arguments!!, viewContract) {
 
     private var contentEntryDao: ContentEntryDao? = null
 
@@ -23,18 +24,19 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
     private var parentUid: Long? = null
 
     override fun onCreate(map: Map<String, String> ?) {
+        super.onCreate(map)
         val appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext())
         contentEntryDao = appDatabase.contentEntryDao
 
-        if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {
+        if (arguments?.containsKey(ARG_CONTENT_ENTRY_UID)!!) {
             showContentByParent()
-        } else if (arguments.containsKey(ARG_DOWNLOADED_CONTENT)) {
+        } else if (arguments?.containsKey(ARG_DOWNLOADED_CONTENT)!!) {
             showDownloadedContent()
         }
     }
 
     private fun showContentByParent() {
-        parentUid = java.lang.Long.valueOf(arguments[ARG_CONTENT_ENTRY_UID])
+        parentUid = java.lang.Long.valueOf(arguments?.get(ARG_CONTENT_ENTRY_UID))
         viewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
         contentEntryDao!!.getContentByUuid(parentUid!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
@@ -130,10 +132,10 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
 
                 if (result.isLeaf) {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view?.context!!)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryListView.VIEW_NAME, args, view?.context!!)
                 }
             }
 
@@ -155,7 +157,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>, pr
 
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        impl.go(DummyView.VIEW_NAME, null, view.context,
+        impl.go(DummyView.VIEW_NAME, null, view?.context!!,
                 UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
 
     }

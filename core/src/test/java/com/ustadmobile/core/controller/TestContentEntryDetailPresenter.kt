@@ -65,7 +65,7 @@ class TestContentEntryDetailPresenter {
         presenter.handleUpNavigation()
 
 
-        verify(systemImplSpy, timeout(5000))?.go(ContentEntryListView.VIEW_NAME, argsresult , mockView!!.context, flags)
+        verify(systemImplSpy, timeout(5000))?.go(ContentEntryListView.VIEW_NAME, argsresult , PlatformTestUtil.targetContext, flags)
 
     }
 
@@ -83,8 +83,8 @@ class TestContentEntryDetailPresenter {
         args.remove(UstadMobileSystemImpl.ARG_REFERRER)
 
         presenter.handleUpNavigation()
-        verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go(DummyView.VIEW_NAME, null,
-                mockView!!.context, UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+        verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go(DummyView.VIEW_NAME, mutableMapOf(),
+                PlatformTestUtil.targetContext, UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
 
     }
 

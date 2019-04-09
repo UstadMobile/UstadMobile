@@ -175,8 +175,8 @@ object ContentEntryUtil {
                 ContentEntryDetailView.VIEW_NAME + "?")
 
         val params = UMFileUtil.parseURLQueryString(viewDestination)
-        if (params.containsKey("sourceUrl")) {
-            goToContentEntryBySourceUrl(params["sourceUrl"]!!, dbRepo,
+        if (params?.containsKey("sourceUrl")!!) {
+            goToContentEntryBySourceUrl(params.getValue("sourceUrl")!!, dbRepo,
                     impl, openEntryIfNotDownloaded, context,
                     callback)
         }

@@ -24,7 +24,8 @@ import java.util.HashMap
  *
  * Created by mike on 1/6/18.
  */
-class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPackageView) : UstadBaseController<ScormPackageView>(context) {
+class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPackageView)
+    : UstadBaseController<ScormPackageView>(context) {
 
     private var scormManifest: ScormManifest? = null
 

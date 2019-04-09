@@ -11,7 +11,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 
 import java.util.HashMap
 
-class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login2View) : UstadBaseController<Login2View>(context, arguments, view) {
+class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login2View)
+    : UstadBaseController<Login2View>(context, arguments!!, view) {
 
     private var mNextDest: String? = null
 
@@ -24,21 +25,19 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
         }
     }
 
-    override fun onCreate(savedState: Map<String, String>) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-
-        if (arguments != null && arguments.containsKey(ARG_SERVER_URL)) {
-            view.setServerUrl(arguments[ARG_SERVER_URL]!!)
+        if (arguments != null && arguments!!.containsKey(ARG_SERVER_URL)) {
+            view?.setServerUrl(arguments!!.getValue(ARG_SERVER_URL))
         } else {
-            view.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
+            view?.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", getContext())!!)
         }
     }
 
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
-        view.setInProgress(true)
-        view.setErrorMessage("")
+        view?.setInProgress(true)
+        view?.setErrorMessage("")
         val loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
                 "")
         val systemImpl = UstadMobileSystemImpl.instance
@@ -46,24 +45,24 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
             override fun onSuccess(result: UmAccount?) {
                 if (result != null) {
                     result.endpointUrl = serverUrl
-                    view.runOnUiThread (Runnable { view.setInProgress(false) })
+                    view?.runOnUiThread (Runnable { view?.setInProgress(false) })
                     UmAccountManager.setActiveAccount(result, getContext())
                     systemImpl.go(mNextDest, getContext())
                 } else {
-                    view.runOnUiThread(Runnable  {
-                        view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
+                    view?.runOnUiThread(Runnable  {
+                        view?.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
                                 getContext()))
-                        view.setPassword("")
-                        view.setInProgress(false)
+                        view?.setPassword("")
+                        view?.setInProgress(false)
                     })
                 }
             }
 
             override fun onFailure(exception: Throwable) {
-                view.runOnUiThread(Runnable  {
-                    view.setErrorMessage(systemImpl.getString(
+                view?.runOnUiThread(Runnable  {
+                    view?.setErrorMessage(systemImpl.getString(
                             MessageID.login_network_error, getContext()))
-                    view.setInProgress(false)
+                    view?.setInProgress(false)
                 })
             }
         })

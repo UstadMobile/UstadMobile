@@ -67,8 +67,8 @@ class TestLogin2Presenter {
         repo!!.personAuthDao.insert(testPersonAuth)
 
         mockView = Mockito.mock(Login2View::class.java)
-        doAnswer { invocationOnMock ->
-            Thread(invocationOnMock.getArgument<Any>(0) as Runnable).start()
+        doAnswer {
+            Thread(it.getArgument<Any>(0) as Runnable).start()
             null
         }.`when`<Login2View>(mockView).runOnUiThread(any())
     }

@@ -16,25 +16,26 @@ import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 
-class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView) : UstadBaseController<WebChunkView>(context, arguments, view) {
+class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: WebChunkView)
+    : UstadBaseController<WebChunkView>(context, arguments!!, view) {
 
     private var navigation: String? = null
 
-    override fun onCreate(savedState: Map<String, String>) {
+    internal fun onCreate(savedState: Map<String, String>) {
         super.onCreate(savedState)
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext())
         val contentEntryDao = repoAppDatabase.contentEntryDao
         val containerDao = repoAppDatabase.containerDao
 
-        val entryUuid = java.lang.Long.parseLong(arguments[ARG_CONTENT_ENTRY_ID])
-        val containerUid = java.lang.Long.parseLong(arguments[ARG_CONTAINER_UID])
+        val entryUuid = java.lang.Long.parseLong(arguments?.get(ARG_CONTENT_ENTRY_ID))
+        val containerUid = java.lang.Long.parseLong(arguments?.get(ARG_CONTAINER_UID))
 
 
-        navigation = arguments[ARG_REFERRER]
+        navigation = arguments?.get(ARG_REFERRER)
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry) {
-                view.runOnUiThread(Runnable{ view.setToolbarTitle(result.title) })
+                view?.runOnUiThread(Runnable{ view?.setToolbarTitle(result.title) })
             }
 
             override fun onFailure(exception: Throwable) {
@@ -45,9 +46,9 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
         containerDao.findByUid(containerUid, object : UmCallback<Container> {
 
             override fun onSuccess(result: Container) {
-                view.mountChunk(result, object : UmCallback<String> {
+                view?.mountChunk(result, object : UmCallback<String> {
                     override fun onSuccess(firstUrl: String) {
-                        view.loadUrl(firstUrl)
+                        view?.loadUrl(firstUrl)
                     }
 
                     override fun onFailure(exception: Throwable) {
@@ -78,13 +79,13 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
             override fun onFailure(exception: Throwable) {
                 val message = exception.message
                 if (exception is NoAppFoundException) {
-                    view.runOnUiThread(Runnable {
-                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                    view?.runOnUiThread(Runnable {
+                        view?.showErrorWithAction(impl.getString(MessageID.no_app_found, context!!),
                                 MessageID.get_app,
                                 exception.mimeType!!)
                     })
                 } else {
-                    view.runOnUiThread(Runnable  { view.showError(message!!) })
+                    view?.runOnUiThread(Runnable  { view?.showError(message!!) })
                 }
             }
         })
@@ -96,10 +97,10 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
         if (lastEntryListArgs !=
                 null) {
             impl.go(ContentEntryDetailView.VIEW_NAME,
-                    UMFileUtil.parseURLQueryString(lastEntryListArgs), view.context,
+                    UMFileUtil.parseURLQueryString(lastEntryListArgs) as Map<String, String>?, view?.context!!,
                     UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
         } else {
-            impl.go(DummyView.VIEW_NAME, null, view.context,
+            impl.go(DummyView.VIEW_NAME, null, view?.context!!,
                     UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
         }
 

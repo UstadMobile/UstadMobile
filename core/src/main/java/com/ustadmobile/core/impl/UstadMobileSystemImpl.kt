@@ -107,7 +107,7 @@ abstract class UstadMobileSystemImpl {
             go(destination, null, context)
         } else {
             go(destination.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
-                    destination), context)
+                    destination) as Map<String, String>?, context)
         }
     }
 

@@ -407,7 +407,7 @@ object UMFileUtil {
      * @param urlQuery
      * @return
      */
-    fun parseURLQueryString(urlQuery: String): Map<String, String> {
+    fun parseURLQueryString(urlQuery: String): Map<String, String?>? {
         var urlQuery = urlQuery
         val queryPos = urlQuery.indexOf('?')
         if (queryPos != -1) {
@@ -415,12 +415,12 @@ object UMFileUtil {
         }
 
         val parsedParams = parseParams(urlQuery, '&')
-        val decodedParams = HashMap<String, String>()
+        val decodedParams = mutableMapOf<String, String?>()
         val it = parsedParams.keys.iterator()
         var key: String
         while (it.hasNext()) {
             key = it.next()
-            decodedParams[URLTextUtil.urlDecodeUTF8(key)] = URLTextUtil.urlDecodeUTF8(parsedParams[key])
+            decodedParams[URLTextUtil.urlDecodeUTF8(key)!!] = URLTextUtil.urlDecodeUTF8(parsedParams[key])
         }
 
         return decodedParams
@@ -807,7 +807,7 @@ object UMFileUtil {
     }
 
 
-    fun clearTopFromReferrerPath(viewname: String, args: Map<String, String>, referrerPath: String): String {
+    fun clearTopFromReferrerPath(viewname: String, args: Map<String, String>?, referrerPath: String): String {
         val lastIndex = referrerPath.lastIndexOf("/$viewname?")
         return if (lastIndex != -1) {
             referrerPath.substring(0, referrerPath.indexOf("/", lastIndex))

@@ -110,7 +110,7 @@ public class UMAndroidUtil {
 
     public static Map<String, String> bundleToMap(Bundle bundle) {
         if (bundle == null)
-            return null;
+            return new HashMap<>();
 
         Set<String> keys = bundle.keySet();
         HashMap<String, String> map = new HashMap<>();

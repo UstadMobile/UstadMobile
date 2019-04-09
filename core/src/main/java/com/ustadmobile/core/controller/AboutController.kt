@@ -12,18 +12,20 @@ import java.io.InputStream
  * Created by mike on 12/27/16.
  */
 
-class AboutController(context: Any, args: Map<String, String>, view: AboutView) : UstadBaseController<AboutView>(context, args, view) {
+class AboutController(context: Any, args: Map<String, String>?, view: AboutView)
+    : UstadBaseController<AboutView>(context, args!!, view) {
 
     private var aboutHTMLStr: String? = null
 
-    override fun onCreate(savedState: Map<String, String>) {
+    override fun onCreate(savedState: Map<String, String>?) {
+        super.onCreate(savedState)
         val impl = UstadMobileSystemImpl.instance
 
-        impl.getAsset(context, "com/ustadmobile/core/about.html", object : UmCallback<InputStream> {
+        impl.getAsset(context!!, "com/ustadmobile/core/about.html", object : UmCallback<InputStream> {
             override fun onSuccess(result: InputStream) {
                 try {
                     aboutHTMLStr = UMIOUtils.readStreamToString(result)
-                    view.setAboutHTML(aboutHTMLStr!!)
+                    view?.setAboutHTML(aboutHTMLStr!!)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -36,12 +38,12 @@ class AboutController(context: Any, args: Map<String, String>, view: AboutView) 
         })
 
 
-        view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))
+        view?.setVersionInfo(impl.getVersion(context!!) + " - " +
+                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context!!)))
 
-        view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))
-        view.setAboutHTML(aboutHTMLStr!!)
+        view?.setVersionInfo(impl.getVersion(context!!) + " - " +
+                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context!!)))
+        view?.setAboutHTML(aboutHTMLStr!!)
     }
 
 }

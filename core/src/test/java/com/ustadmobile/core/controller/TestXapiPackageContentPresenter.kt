@@ -80,11 +80,11 @@ class TestXapiPackageContentPresenter {
         httpd!!.start()
 
         mockXapiPackageContentView = mock(XapiPackageContentView::class.java)
-        doAnswer { invocation ->
+        doAnswer {
             Thread {
                 lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                        httpd!!.mountContainer(invocation.getArgument(0), null))
-                UmCallbackUtil.onSuccessIfNotNull<String>(invocation.getArgument<UmCallback<String>>(1),
+                        httpd!!.mountContainer(it.getArgument(0), null))
+                UmCallbackUtil.onSuccessIfNotNull<String>(it.getArgument<UmCallback<String>>(1),
                         lastMountedUrl)
                 mountLatch.countDown()
             }.start()

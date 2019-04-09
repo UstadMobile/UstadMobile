@@ -100,8 +100,8 @@ class H5PContentPresenter(context: Any, private val h5PContentView: H5PContentVi
         }
     }
 
-    fun onCreate(args: HashMap<String, String>) {
-        this.h5pFileUri = args[UstadView.ARG_CONTAINER_UID]
+    fun onCreate(args: HashMap<String, String>?) {
+        this.h5pFileUri = args!![UstadView.ARG_CONTAINER_UID]
         h5PContentView.mountH5PDist(mH5PDistMountedCallback)
     }
 

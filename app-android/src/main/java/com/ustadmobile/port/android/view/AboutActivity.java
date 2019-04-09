@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.AboutView;
 import java.util.Objects;
 
 import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
+import static com.ustadmobile.port.android.util.UMAndroidUtil.mapToBundle;
 
 public class AboutActivity extends UstadBaseActivity implements AboutView {
 
@@ -28,7 +29,7 @@ public class AboutActivity extends UstadBaseActivity implements AboutView {
         mAboutController = new AboutController(this,
                 Objects.requireNonNull(bundleToMap(getIntent().getExtras())),
                 this);
-        mAboutController.onCreate(null);
+        mAboutController.onCreate(bundleToMap(savedInstanceState));
     }
 
     @Override

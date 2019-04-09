@@ -75,7 +75,7 @@ public class XapiPackageContentActivity extends ZippedContentActivity implements
 
         mPresenter = new XapiPackageContentPresenter(this,
                 bundleToMap(getIntent().getExtras()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState));
+        mPresenter.onCreate(bundleToMap(savedInstanceState));
         mProgressBar.setIndeterminate(true);
         mProgressBar.setVisibility(View.VISIBLE);
     }

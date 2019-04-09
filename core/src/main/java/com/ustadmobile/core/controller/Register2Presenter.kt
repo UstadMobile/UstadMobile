@@ -12,7 +12,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 
 import java.util.HashMap
 
-class Register2Presenter(context: Any, arguments: Map<String, String>, view: Register2View) : UstadBaseController<Register2View>(context, arguments, view) {
+class Register2Presenter(context: Any, arguments: Map<String, String>?, view: Register2View)
+    : UstadBaseController<Register2View>(context, arguments!!, view) {
 
     private var mNextDest: String? = null
 
@@ -21,18 +22,18 @@ class Register2Presenter(context: Any, arguments: Map<String, String>, view: Reg
     private var repo: UmAppDatabase? = null
 
     init {
-        if (arguments.containsKey(ARG_NEXT)) {
+        if (arguments!!.containsKey(ARG_NEXT)) {
             mNextDest = arguments[ARG_NEXT]
         }
     }
 
-    override fun onCreate(savedState: Map<String, String>) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        if (arguments.containsKey(ARG_SERVER_URL)) {
-            view.setServerUrl(arguments[ARG_SERVER_URL]!!)
+        if (arguments!!.containsKey(ARG_SERVER_URL)) {
+            view?.setServerUrl(arguments!!.getValue(ARG_SERVER_URL))
         } else {
-            view.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
+            view?.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", getContext())!!)
         }
     }
@@ -53,7 +54,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String>, view: Reg
      * @param serverUrl Server url where the account should be created
      */
     fun handleClickRegister(person: Person, password: String, serverUrl: String) {
-        view.runOnUiThread(Runnable { view.setInProgress(true) })
+        view?.runOnUiThread(Runnable { view?.setInProgress(true) })
 
         val systemImpl = UstadMobileSystemImpl.instance
         if (umAppDatabase == null) {
@@ -73,33 +74,33 @@ class Register2Presenter(context: Any, arguments: Map<String, String>, view: Reg
                             umAppDatabase!!.personDao.insertAsync(person, object : UmCallback<Long> {
                                 override fun onSuccess(personUid: Long?) {
                                     result.endpointUrl = serverUrl
-                                    view.runOnUiThread(Runnable { view.setInProgress(false) })
+                                    view?.runOnUiThread(Runnable { view?.setInProgress(false) })
                                     UmAccountManager.setActiveAccount(result, getContext())
                                     systemImpl.go(mNextDest, getContext())
                                 }
 
                                 override fun onFailure(exception: Throwable) {
                                     //simple insert - this should not happen
-                                    view.runOnUiThread(Runnable {
-                                        view.setErrorMessageView(systemImpl.getString(
+                                    view?.runOnUiThread(Runnable {
+                                        view?.setErrorMessageView(systemImpl.getString(
                                                 MessageID.err_registering_new_user, getContext()))
                                     })
                                 }
                             })
 
                         } else {
-                            view.runOnUiThread (Runnable{
-                                view.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
+                            view?.runOnUiThread (Runnable{
+                                view?.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
                                         getContext()))
-                                view.setInProgress(false)
+                                view?.setInProgress(false)
                             })
                         }
                     }
 
                     override fun onFailure(exception: Throwable) {
-                        view.runOnUiThread(Runnable {
-                            view.setInProgress(false)
-                            view.setErrorMessageView(systemImpl.getString(
+                        view?.runOnUiThread(Runnable {
+                            view?.setInProgress(false)
+                            view?.setErrorMessageView(systemImpl.getString(
                                     MessageID.login_network_error, getContext()))
                         })
                     }

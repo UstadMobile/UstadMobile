@@ -85,7 +85,7 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
 
         mPresenter = new VideoPlayerPresenter(getContext(),
                 Objects.requireNonNull(bundleToMap(getIntent().getExtras())), this);
-        mPresenter.onCreate(Objects.requireNonNull(bundleToMap(savedInstanceState)));
+        mPresenter.onCreate(bundleToMap(savedInstanceState));
     }
 
     private void clickUpNavigation() {

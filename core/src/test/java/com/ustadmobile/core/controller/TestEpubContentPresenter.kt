@@ -1,13 +1,14 @@
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.anyArray
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.db.entities.Container
@@ -15,27 +16,19 @@ import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.PlatformTestUtil
-
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.xmlpull.v1.XmlPullParserException
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.util.HashMap
-import java.util.Hashtable
-import java.util.concurrent.atomic.AtomicReference
-import java.util.zip.ZipFile
-
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.timeout
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
+import org.xmlpull.v1.XmlPullParserException
+import java.io.File
+import java.io.IOException
+import java.util.*
+import java.util.concurrent.atomic.AtomicReference
+import java.util.zip.ZipFile
 
 class TestEpubContentPresenter {
 
@@ -81,19 +74,20 @@ class TestEpubContentPresenter {
         httpd = EmbeddedHTTPD(0, PlatformTestUtil.targetContext, db, repo)
         httpd!!.start()
 
-        doAnswer { invocation ->
-            Thread {
+        doAnswer {
+            Thread{
                 val mountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                        httpd!!.mountContainer(invocation.getArgument(0), null))
-                UmCallbackUtil.onSuccessIfNotNull(invocation.getArgument<UmCallback<String>>(1), mountedUrl)
+                        httpd!!.mountContainer(it.getArgument(0), ""))
+                UmCallbackUtil.onSuccessIfNotNull(it.getArgument<UmCallback<String>>(1), mountedUrl)
             }.start()
-            null!!
-        }.`when`(mockEpubView)?.mountContainer(eq(epubContainer!!.containerUid),any()!!)
+            null
+        }.`when`(mockEpubView)?.mountContainer(eq(epubContainer!!.containerUid), any())
+
 
         doAnswer { invocation ->
             Thread(invocation.getArgument<Any>(0) as Runnable).start()
             null!!
-        }.`when`<EpubContentView>(mockEpubView).runOnUiThread(any())
+        }.`when`<EpubContentView>(mockEpubView).runOnUiThread(any<Runnable>())
 
         //Used for verification purposes
         val opfIn = containerManager.getInputStream(containerManager.getEntry("OEBPS/package.opf"))
@@ -116,10 +110,10 @@ class TestEpubContentPresenter {
 
         val hrefListReference = AtomicReference<Any>()
 
-        doAnswer { invocation ->
-            hrefListReference.set(invocation.getArgument(0))
+        doAnswer {
+            hrefListReference.set(it.getArgument(0))
             null!!
-        }.`when`(mockEpubView)?.setSpineUrls(any())
+        }.`when`(mockEpubView)?.setSpineUrls(anyArray())
 
         val presenter = EpubContentPresenter(PlatformTestUtil.targetContext,
                 args, mockEpubView)
@@ -128,6 +122,7 @@ class TestEpubContentPresenter {
         verify<EpubContentView>(mockEpubView, timeout(5000)).mountContainer(eq(epubContainer!!.containerUid),
                 any<UmCallback<String>>())
         verify<EpubContentView>(mockEpubView, timeout(5000)).setContainerTitle(opf!!.title!!)
+
         verify<EpubContentView>(mockEpubView, timeout(5000)).setSpineUrls(any())
 
         val linearSpineUrls = hrefListReference.get() as Array<String>

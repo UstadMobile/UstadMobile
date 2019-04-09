@@ -59,6 +59,7 @@ ext {
     version_sqlite_jdbc = "3.23.1"
     version_jsqlparser = "0.9"
     version_core_mockito = "2.13.0"
+    version_kotlin_mockito = "2.1.0"
     version_compressor = "2.1.0"
     version_apache_commons_pool2 = "2.6.0"
     version_jsoup = "1.11.3"
