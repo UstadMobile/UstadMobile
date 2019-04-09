@@ -175,19 +175,6 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
                 .into((ImageView) findViewById(R.id.entry_detail_thumbnail));
     }
 
-    @Override
-    public void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result,
-                                         long entryUuid) {
-
-        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
-        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
-        flexBox.setLayoutManager(flexboxLayoutManager);
-
-        ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result,
-                this, entryUuid);
-        flexBox.setAdapter(adapter);
-
-    }
 
     @Override
     public void updateDownloadProgress(float progressValue) {
@@ -311,5 +298,16 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     public void onLocalAvailabilityChanged(Set<Long> locallyAvailableEntries) {
         entryDetailPresenter.handleLocalAvailabilityStatus(locallyAvailableEntries);
+    }
+
+    @Override
+    public void setAvailableTranslations(List<? extends ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
+        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
+        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+        flexBox.setLayoutManager(flexboxLayoutManager);
+
+        ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter((List<ContentEntryRelatedEntryJoinWithLanguage>) result,
+                this, entryUuid);
+        flexBox.setAdapter(adapter);
     }
 }

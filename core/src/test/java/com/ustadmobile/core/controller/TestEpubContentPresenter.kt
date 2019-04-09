@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
@@ -46,7 +47,7 @@ class TestEpubContentPresenter {
 
     private var containerDirTmp: File? = null
 
-    private var mockEpubView: EpubContentView? = null
+    private var mockEpubView: EpubContentView? = mock()
 
     private var epubContainer: Container? = null
 
@@ -80,20 +81,18 @@ class TestEpubContentPresenter {
         httpd = EmbeddedHTTPD(0, PlatformTestUtil.targetContext, db, repo)
         httpd!!.start()
 
-        mockEpubView = mock(EpubContentView::class.java)
-
         doAnswer { invocation ->
             Thread {
                 val mountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
                         httpd!!.mountContainer(invocation.getArgument(0), null))
                 UmCallbackUtil.onSuccessIfNotNull(invocation.getArgument<UmCallback<String>>(1), mountedUrl)
             }.start()
-            null
-        }.`when`<EpubContentView>(mockEpubView).mountContainer(eq(epubContainer!!.containerUid), any<UmCallback<String>>())
+            null!!
+        }.`when`(mockEpubView)?.mountContainer(eq(epubContainer!!.containerUid),any()!!)
 
         doAnswer { invocation ->
             Thread(invocation.getArgument<Any>(0) as Runnable).start()
-            null
+            null!!
         }.`when`<EpubContentView>(mockEpubView).runOnUiThread(any())
 
         //Used for verification purposes
@@ -119,8 +118,8 @@ class TestEpubContentPresenter {
 
         doAnswer { invocation ->
             hrefListReference.set(invocation.getArgument(0))
-            null
-        }.`when`<EpubContentView>(mockEpubView).setSpineUrls(any())
+            null!!
+        }.`when`(mockEpubView)?.setSpineUrls(any())
 
         val presenter = EpubContentPresenter(PlatformTestUtil.targetContext,
                 args, mockEpubView)

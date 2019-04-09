@@ -17,6 +17,7 @@ import com.ustadmobile.core.controller.Register2Presenter;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.Register2View;
+import com.ustadmobile.core.view.Register2View.Companion;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -69,12 +70,17 @@ public class Register2Activity extends UstadBaseActivity implements Register2Vie
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
         }
-        fieldToViewIdMap.put(Companion.getFIELD_FIRST_NAME(), R.id.activity_create_account_firstname_text);
-        fieldToViewIdMap.put(Companion.getFIELD_LAST_NAME(), R.id.activity_create_account_lastname_text);
-        fieldToViewIdMap.put(Companion.getFIELD_EMAIL(), R.id.activity_create_account_email_text);
-        fieldToViewIdMap.put(Companion.getFIELD_USERNAME(), R.id.activity_create_account_username_text);
-        fieldToViewIdMap.put(Companion.getFIELD_PASSWORD(), R.id.activity_create_account_password_text);
-        fieldToViewIdMap.put(Companion.getFIELD_CONFIRM_PASSWORD(), R.id.activity_create_account_password_confirmpassword_text);
+        fieldToViewIdMap.put(Register2View.Companion.getFIELD_FIRST_NAME(),
+                R.id.activity_create_account_firstname_text);
+        fieldToViewIdMap.put(Register2View.Companion.getFIELD_LAST_NAME(),
+                R.id.activity_create_account_lastname_text);
+        fieldToViewIdMap.put(Register2View.Companion.getFIELD_EMAIL(),
+                R.id.activity_create_account_email_text);
+        fieldToViewIdMap.put(Register2View.Companion.getFIELD_USERNAME(),
+                R.id.activity_create_account_username_text);
+        fieldToViewIdMap.put(Register2View.Companion.getFIELD_PASSWORD(),
+                R.id.activity_create_account_password_text);
+        fieldToViewIdMap.put(Register2View.Companion.getFIELD_CONFIRM_PASSWORD(), R.id.activity_create_account_password_confirmpassword_text);
 
         registerUser = findViewById(R.id.activity_create_account_create_account_button);
         errorMessageView = findViewById(R.id.activity_create_account_error_text);
@@ -107,22 +113,23 @@ public class Register2Activity extends UstadBaseActivity implements Register2Vie
 
         checkRegisterButtonStatus();
 
-        if(getFieldValue(Companion.getFIELD_PASSWORD()).equals(getFieldValue(Companion.getFIELD_CONFIRM_PASSWORD()))){
+        if(getFieldValue(Register2View.Companion.getFIELD_PASSWORD())
+                .equals(getFieldValue(Register2View.Companion.getFIELD_CONFIRM_PASSWORD()))){
 
             String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
 
-            if(getFieldValue(Companion.getFIELD_EMAIL()).matches(emailPattern)){
-                if(getFieldValue(Companion.getFIELD_PASSWORD()).length() < 5){
+            if(getFieldValue(Register2View.Companion.getFIELD_EMAIL()).matches(emailPattern)){
+                if(getFieldValue(Register2View.Companion.getFIELD_PASSWORD()).length() < 5){
                     disableButton(true);
                     setErrorMessageView(systemImpl.getString(MessageID.field_password_error_min,this));
                 }else{
                     Person person = new Person();
-                    person.setFirstNames(getFieldValue(Companion.getFIELD_FIRST_NAME()));
-                    person.setLastName(getFieldValue(Companion.getFIELD_LAST_NAME()));
-                    person.setEmailAddr(getFieldValue(Companion.getFIELD_EMAIL()));
-                    person.setUsername(getFieldValue(Companion.getFIELD_USERNAME()));
+                    person.setFirstNames(getFieldValue(Register2View.Companion.getFIELD_FIRST_NAME()));
+                    person.setLastName(getFieldValue(Register2View.Companion.getFIELD_LAST_NAME()));
+                    person.setEmailAddr(getFieldValue(Register2View.Companion.getFIELD_EMAIL()));
+                    person.setUsername(getFieldValue(Register2View.Companion.getFIELD_USERNAME()));
                     new Thread(() -> presenter.handleClickRegister(person,
-                            getFieldValue(Companion.getFIELD_PASSWORD()),serverUrl)).start();
+                            getFieldValue(Register2View.Companion.getFIELD_PASSWORD()),serverUrl)).start();
                 }
             }else{
                 disableButton(true);

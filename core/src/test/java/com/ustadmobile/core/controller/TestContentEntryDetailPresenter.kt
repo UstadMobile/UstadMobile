@@ -63,8 +63,9 @@ class TestContentEntryDetailPresenter {
         argsresult.put(ARG_CONTENT_ENTRY_UID, 42L.toString())
 
         presenter.handleUpNavigation()
-        verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go(ContentEntryListView.VIEW_NAME, argsresult,
-                mockView!!.context, flags)
+
+
+        verify(systemImplSpy, timeout(5000))?.go(ContentEntryListView.VIEW_NAME, argsresult , mockView!!.context, flags)
 
     }
 

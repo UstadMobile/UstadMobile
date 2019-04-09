@@ -339,7 +339,7 @@ abstract class UstadMobileSystemImpl {
      *
      * @return The mime type if none; or null if it's not known
      */
-    fun getMimeTypeFromExtension(extension: String): String? {
+    open fun getMimeTypeFromExtension(extension: String): String? {
         return if (MIME_TYPES_REVERSE.containsKey(extension)) MIME_TYPES_REVERSE[extension] else null
 
     }
@@ -595,7 +595,7 @@ abstract class UstadMobileSystemImpl {
          * @param message message to log
          */
         fun l(level: Int, code: Int, message: String?) {
-            instance.logger.l(level, code, message!!)
+            instance.logger.l(level, code, message.toString())
         }
 
         /**

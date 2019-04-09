@@ -84,7 +84,8 @@ class TestXapiPackageContentPresenter {
             Thread {
                 lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
                         httpd!!.mountContainer(invocation.getArgument(0), null))
-                UmCallbackUtil.onSuccessIfNotNull<String>(invocation.getArgument<UmCallback<String>>(1), lastMountedUrl)
+                UmCallbackUtil.onSuccessIfNotNull<String>(invocation.getArgument<UmCallback<String>>(1),
+                        lastMountedUrl)
                 mountLatch.countDown()
             }.start()
             null

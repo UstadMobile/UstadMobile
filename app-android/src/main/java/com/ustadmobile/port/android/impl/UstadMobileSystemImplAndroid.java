@@ -562,6 +562,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
+    public NetworkManagerBle getNetworkManagerBle() {
+        return null;
+    }
+
+    @Override
     public UMLog getLogger() {
         return logger;
     }

@@ -28,9 +28,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContai
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -79,7 +76,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public void setCategorySchemaSpinner(@NotNull Map<Long, ? extends List<? extends DistinctCategorySchema>> spinnerData) {
+    public void setCategorySchemaSpinner(Map<Long, ? extends List<? extends DistinctCategorySchema>> spinnerData) {
         runOnUiThread(() -> {
             if (contentEntryListener != null) {
                 // TODO tell activiity to create the spinners
@@ -89,7 +86,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public void setLanguageOptions(@NotNull List<? extends Language> result) {
+    public void setLanguageOptions(List<? extends Language> result) {
         runOnUiThread(() -> {
             if (contentEntryListener != null) {
                 contentEntryListener.setLanguageFilterSpinner((List<Language>) result);

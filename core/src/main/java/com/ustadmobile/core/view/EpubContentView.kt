@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.impl.UmCallback
 
@@ -52,7 +51,7 @@ interface EpubContentView : UstadView {
 
     fun setAuthorName(authorName: String)
 
-    fun mountContainer(containerUid: Long, callback: UmCallback<String>)
+    fun mountContainer(containerUid: Long, callback: UmCallback<String>?)
 
     fun unmountContainer(mountedUrl: String)
 
