@@ -263,6 +263,9 @@ public class PersonWithEnrollmentRecyclerAdapter
         //Update person name :
         String firstName = "";
         String lastName = "";
+        if(personWithEnrollment == null){
+            return;
+        }
         if(personWithEnrollment.getFirstNames() != null){
             firstName = personWithEnrollment.getFirstNames();
         }
@@ -278,8 +281,9 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         //HEADING:
         //Remove previous add clazz member views
-        if(addCMCLS != 0 || addCMCLT != 0)
+        if(addCMCLS != 0 || addCMCLT != 0) {
             removeAllAddClazzMemberView(cl, holder);
+        }
 
         //PICTURE : Add picture to person
         String imagePath = "";
@@ -303,9 +307,11 @@ public class PersonWithEnrollmentRecyclerAdapter
 
             //Get current person's enrollment w.r.t. this class.
             // (Its either set or null (not enrolled))
-            boolean personWithEnrollmentBoolean = false;
+            boolean personWithEnrollmentBoolean;
             if (personWithEnrollment.getEnrolled() != null){
                 personWithEnrollmentBoolean = personWithEnrollment.getEnrolled();
+            }else{
+                personWithEnrollmentBoolean = false;
             }
 
             //To preserve checkboxes, add this enrollment to the Map.
@@ -393,45 +399,55 @@ public class PersonWithEnrollmentRecyclerAdapter
             callImageView.setVisibility(View.GONE);
         }
 
-        //IF IN STUDENTS LIST IN CLASS DETAIL:
-        if(!showEnrollment){
-            if(showAttendance){
-            }
-        }
-
         if(!showEnrollment && showAttendance){
 
-            //if(showAddStudent && showAddTeacher) {
-                if (position == 0) {//First Entry. Add Teacher and Add Teacher item
-                    if(!reportMode && !hideHeading)
-                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher);
-
-                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
-
-                        if(!reportMode && !hideHeading)
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
-                    }
-
-                    //If first item is a teacher and there are no more items:
-                    if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                            getItemCount() == 1) {
-                        onlyTeacherExists = true;
-                    }
-
-                } else {
-                    PersonWithEnrollment previousPerson = getItem(position - 1);
-                    assert previousPerson != null;
-
-                    if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
-                            personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
-
-                        //Add student
-                        if(!reportMode && !hideHeading)
-                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
-                    }
-
+            if (position == 0) {//First Entry. Add Teacher and Add Teacher item
+                if(!reportMode && !hideHeading) {
+                    addHeadingAndNew(cl, ClazzMember.ROLE_TEACHER, showAddTeacher, holder);
+                }else{
+                    int x;
                 }
-            //}
+
+                if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
+
+                    if(!reportMode && !hideHeading) {
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder);
+                    }
+                    else {
+                        int x;
+                    }
+
+                }else{
+                    int x;
+                }
+
+                //If first item is a teacher and there are no more items:
+                if (personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                        getItemCount() == 1) {
+                    onlyTeacherExists = true;
+                }else{
+                    int x;
+                }
+
+            } else {
+                PersonWithEnrollment previousPerson = getItem(position - 1);
+                assert previousPerson != null;
+
+                if (previousPerson.getClazzMemberRole() == ClazzMember.ROLE_TEACHER &&
+                        personWithEnrollment.getClazzMemberRole() == ClazzMember.ROLE_STUDENT) {
+
+                    //Add student
+                    if(!reportMode && !hideHeading) {
+                        addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder);
+                    }else{
+                        int x;
+                    }
+                }else{
+                    int x;
+                }
+
+            }
+
         }
 
         if(groupByClass){
@@ -461,18 +477,31 @@ public class PersonWithEnrollmentRecyclerAdapter
             //Disable attendance for Teachers
             trafficLight.setVisibility(View.GONE);
             attendanceTextView.setVisibility(View.GONE);
+        }else{
+            //Do nothing;
+            int x;
         }
 
         //If we reached the end of the rv and there is only one teacher in it,
         // add the "show Student" as well.
         if (onlyTeacherExists) {
-            addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent);
+            addHeadingAndNew(cl, ClazzMember.ROLE_STUDENT, showAddStudent, holder);
         }else{
             //Don't add anything.
             int x;
 
         }
 
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     private void setPictureOnView(String imagePath, ImageView theImage) {
@@ -510,12 +539,55 @@ public class PersonWithEnrollmentRecyclerAdapter
         cl.removeView(addCMCLViewS);
         cl.removeView(addCMCLViewT);
 
+
         //If view exists, set it to invisible/gone
         if(addCMCLViewS != null){
             addCMCLViewS.setVisibility(View.GONE);
         }
         if(addCMCLViewT != null){
             addCMCLViewT.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Removes old Add ClazzMember views
+     *
+     * @param cl    The constraint layout to search in
+     * @param holder    The holder that has the itemView
+     */
+    private void removeAddTeacherAddView(ConstraintLayout cl,
+                                             @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+
+        //Get Clazz Member layout for student and teacher
+        View addCMCLViewT = holder.itemView.findViewById(addCMCLT);
+
+        //Remove the views
+        cl.removeView(addCMCLViewT);
+
+        if(addCMCLViewT != null){
+            addCMCLViewT.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Removes old Add ClazzMember views
+     *
+     * @param cl    The constraint layout to search in
+     * @param holder    The holder that has the itemView
+     */
+    private void removeAddStudentView(ConstraintLayout cl,
+                                             @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+
+        //Get Clazz Member layout for student and teacher
+        View addCMCLViewS = holder.itemView.findViewById(addCMCLS);
+
+        //Remove the views
+        cl.removeView(addCMCLViewS);
+
+
+        //If view exists, set it to invisible/gone
+        if(addCMCLViewS != null){
+            addCMCLViewS.setVisibility(View.GONE);
         }
     }
 
@@ -609,7 +681,15 @@ public class PersonWithEnrollmentRecyclerAdapter
      * @param cl    The Constraint layout where the list will be in.
      * @param role  The role (Teacher or Student) as per ClazzMember.ROLE_*
      */
-    private void addHeadingAndNew(ConstraintLayout cl, int role, boolean showAdd){
+    private void addHeadingAndNew(ConstraintLayout cl, int role, boolean showAdd,
+                  @NonNull PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder holder){
+
+        //Testing if improves:
+        if(role == ClazzMember.ROLE_TEACHER){
+            removeAddStudentView(cl, holder);
+        }else{
+            removeAddTeacherAddView(cl, holder);
+        }
 
         ConstraintLayout addCl = new ConstraintLayout(theContext);
         int defaultPadding = getDp(DEFAULT_PADDING);
@@ -811,6 +891,8 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         if(role == ClazzMember.ROLE_TEACHER){
             teacherAdded = true;
+        }else{
+            teacherAdded = false;
         }
 
     }
