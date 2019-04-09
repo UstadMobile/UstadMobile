@@ -324,9 +324,6 @@ public class DownloadJobItemRunner implements Runnable {
 
         destinationDir = appDb.getDownloadJobDao().getDestinationDir(downloadJobId);
 
-//        currentEntryStatusResponse = appDb.getEntryStatusResponseDao()
-//                .findByContentEntryFileUid(downloadItem.getDjiContentEntryFileUid());
-
         startDownload();
     }
 
@@ -470,11 +467,9 @@ public class DownloadJobItemRunner implements Runnable {
                     null);
             long totalDownloaded = completedEntriesBytesDownloaded.get() +
                     (httpDownload != null ? httpDownload.getDownloadedSoFar() : 0);
-            long downloadTotalSize = httpDownload != null ? httpDownload.getTotalSize() : 0L;
-
 
             downloadJobItemManager.updateProgress((int)downloadItem.getDjiUid(),
-                    totalDownloaded, downloadTotalSize);
+                    totalDownloaded, totalDownloaded);
             appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), JobStatus.COMPLETE);
         }
 

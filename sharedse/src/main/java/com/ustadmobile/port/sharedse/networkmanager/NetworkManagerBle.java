@@ -7,14 +7,17 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -31,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +58,9 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 
 public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
-        LiveDataWorkQueue.OnQueueEmptyListener {
+        LiveDataWorkQueue.OnQueueEmptyListener,
+        DownloadJobItemManager.OnDownloadJobItemChangeListener,
+        DownloadJobItemStatusProvider {
 
     /**
      * Flag to indicate entry status request
@@ -142,6 +148,9 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
 
     private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
+
+    private final LinkedList<DownloadJobItemManager.OnDownloadJobItemChangeListener> downloadJobItemChangeListeners
+            = new LinkedList<>();
 
     /**
      * Constructor to be used when creating new instance
@@ -724,6 +733,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         DownloadJobItemManager manager =  new DownloadJobItemManager(umAppDatabase,
                 (int)newDownloadJob.getDjUid());
         downloadJobItemManagerMap.put((int)newDownloadJob.getDjUid(), manager);
+        manager.setOnDownloadJobItemChangeListener(this);
         return manager;
     }
 
@@ -737,8 +747,52 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         return downloadJobItemManagerMap.get(downloadJobId);
     }
 
-    public DownloadJobItemManager findDownloadJobItemManagerByContentEntryUid(long contentEntryUid) {
-        return null;
+    public void findDownloadJobItemStatusByContentEntryUid(long contentEntryUid,
+                                                            UmResultCallback<DownloadJobItemStatus> callback) {
+        final List<DownloadJobItemManager> managerList = new LinkedList<>(downloadJobItemManagerMap.values());
+        final AtomicInteger checksLeft = new AtomicInteger(managerList.size());
+        for(DownloadJobItemManager manager : managerList) {
+            manager.findStatusByContentEntryUid(contentEntryUid, (status) -> {
+                if(status != null) {
+                    callback.onDone(status);
+                    checksLeft.set(-1);
+                }else {
+                    checksLeft.decrementAndGet();
+                    if(checksLeft.get() == 0) {
+                        //all known managers checked, not found
+                        callback.onDone(null);
+                    }
+                }
+            });
+        }
     }
+
+    @Override
+    public void onDownloadJobItemChange(DownloadJobItemStatus status) {
+        LinkedList<DownloadJobItemManager.OnDownloadJobItemChangeListener> listenersToNotify =
+                new LinkedList<>();
+        synchronized (downloadJobItemChangeListeners) {
+            listenersToNotify.addAll(downloadJobItemChangeListeners);
+        }
+
+        for(DownloadJobItemManager.OnDownloadJobItemChangeListener listener
+                : listenersToNotify) {
+            listener.onDownloadJobItemChange(status);
+        }
+    }
+
+    public void addDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
+        synchronized (downloadJobItemChangeListeners) {
+            downloadJobItemChangeListeners.add(listener);
+        }
+    }
+
+    public void removeDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
+        synchronized (downloadJobItemChangeListeners) {
+            downloadJobItemChangeListeners.remove(listener);
+        }
+    }
+
+
 
 }

@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.lib.db.entities.Container;
+import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
 import com.ustadmobile.lib.util.UMUtil;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -66,7 +68,15 @@ public class DownloadJobPreparer implements Runnable {
         contentEntryUidToDjiUidMap.put(contentEntryUid, rootDownlaodJobItem.getDjiUid());
 
         HashSet<Long> createdJoinCepjUids = new HashSet<>();
+
+        appDatabase.getContentEntryStatusDao().insertOrAbort(Collections.singletonList(
+                new ContentEntryStatus(contentEntryUid,
+                rootEntryContainer == null,
+                rootEntryContainer != null ? rootEntryContainer.getFileSize() : 0)));
+
+        List<ContentEntryStatus> statusList = new LinkedList<>();
         do {
+            statusList.clear();
             childItemsToCreate = jobItemDao.findByParentContentEntryUuids(parentUids);
             UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadJobPreparer: found " +
                     childItemsToCreate.size() + " child items on from parents " +
@@ -78,14 +88,19 @@ public class DownloadJobPreparer implements Runnable {
                 if(!contentEntryUidToDjiUidMap.containsKey(child.getContentEntryUid())) {
                     DownloadJobItem newItem = new DownloadJobItem(downloadJobUid,
                             child.getContentEntryUid(), child.getContainerUid(), child.getFileSize());
-                    jobItemManager.insertDownloadJobItemsSync(Arrays.asList(newItem));
+                    jobItemManager.insertDownloadJobItemsSync(Collections.singletonList(newItem));
                     numItemsCreated++;
+                    statusList.add(new ContentEntryStatus(child.getContentEntryUid(),
+                            child.getFileSize() > 0, child.getFileSize()));
 
                     contentEntryUidToDjiUidMap.put(child.getContentEntryUid(),
                             newItem.getDjiUid());
 
                     if(newItem.getDjiContainerUid() == 0) //this item is a branch, not a leaf if containeruid = 0
                         parentUids.add(child.getContentEntryUid());
+
+                    statusList.add(new ContentEntryStatus(child.getContentEntryUid(),
+                            child.getFileSize() > 0, child.getFileSize()));
 
                 }
 
@@ -99,6 +114,7 @@ public class DownloadJobPreparer implements Runnable {
                 }
             }
 
+            appDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
         }while(!parentUids.isEmpty());
         UstadMobileSystemImpl.l(UMLog.VERBOSE, 420, "Created " + numItemsCreated +
                 " items. Time to prepare download job: " +

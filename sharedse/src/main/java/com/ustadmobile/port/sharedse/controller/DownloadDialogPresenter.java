@@ -192,7 +192,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
      */
     public void handleClickNegative(boolean dismissAfter) {
         //if the download has not been started
-        appDatabase.getDownloadJobDao().cleanupUnused((int)downloadJobUid);
+        new Thread(() -> appDatabase.getDownloadJobDao().cleanupUnused((int)downloadJobUid)).start();
         if(dismissAfter)
             dismissDialog();
     }

@@ -80,7 +80,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
         managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
                 bundleToMap(getIntent().getExtras()), this,
-                this);
+                this, networkManagerBle);
         entryDetailPresenter.onCreate(bundleToMap(new Bundle()));
         entryDetailPresenter.onStart();
         managerAndroidBle.addLocalAvailabilityListener(this);

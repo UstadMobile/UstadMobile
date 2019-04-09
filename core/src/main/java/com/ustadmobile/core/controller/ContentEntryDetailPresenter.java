@@ -14,6 +14,8 @@ import com.ustadmobile.core.impl.NoAppFoundException;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -24,6 +26,7 @@ import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.Collections;
@@ -36,7 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 
-public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView> {
+public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntryDetailView>
+    implements DownloadJobItemManager.OnDownloadJobItemChangeListener {
 
     public static final String ARG_CONTENT_ENTRY_UID = "entryid";
 
@@ -48,11 +52,15 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     private LocalAvailabilityMonitor monitor;
 
+    private DownloadJobItemStatusProvider statusProvider;
+
     private NetworkNodeDao networkNodeDao;
 
     private ContainerDao containerDao;
 
     private AtomicBoolean monitorStatus = new AtomicBoolean(false);
+
+    private AtomicBoolean isListeningToDownloadStatus = new AtomicBoolean(false);
 
     private UmLiveData<ContentEntryStatus> statusUmLiveData;
 
@@ -72,11 +80,12 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
     public ContentEntryDetailPresenter(Object context, Map<String , String> arguments,
                                        ContentEntryDetailView viewContract,
-                                       LocalAvailabilityMonitor monitor) {
+                                       LocalAvailabilityMonitor monitor,
+                                       DownloadJobItemStatusProvider statusProvider) {
         super(context, arguments, viewContract);
         this.monitor = monitor;
         this.impl = UstadMobileSystemImpl.getInstance();
-
+        this.statusProvider = statusProvider;
     }
 
     public void onCreate(Map<String,String> map) {
@@ -177,7 +186,6 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
 
 
     private void onEntryStatusChanged(ContentEntryStatus status) {
-
         boolean isDownloadComplete = status != null &&
                 status.getDownloadStatus() == JobStatus.COMPLETE;
 
@@ -190,6 +198,20 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
                 && status.getDownloadStatus() >= JobStatus.RUNNING_MIN
                 && status.getDownloadStatus() <= JobStatus.RUNNING_MAX;
 
+        if(isDownloading && !isListeningToDownloadStatus.get()) {
+            isListeningToDownloadStatus.set(true);
+            statusProvider.addDownloadChangeListener(this);
+            statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
+                    this::onDownloadJobItemChange);
+            view.setDownloadButtonVisible(false);
+            view.setDownloadProgressVisible(true);
+        }else if(!isDownloading && isListeningToDownloadStatus.get()) {
+            isListeningToDownloadStatus.set(false);
+            statusProvider.removeDownloadChangeListener(this);
+            view.setDownloadButtonVisible(true);
+            view.setDownloadProgressVisible(false);
+        }
+
         view.runOnUiThread(() -> {
             view.setButtonTextLabel(buttonLabel);
             view.setDownloadButtonVisible(!isDownloading);
@@ -198,17 +220,6 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             view.setDownloadProgressLabel(progressLabel);
             view.setLocalAvailabilityStatusViewVisible(isDownloading);
         });
-
-        if (isDownloading) {
-
-            view.runOnUiThread(() -> {
-                view.setDownloadButtonVisible(false);
-                view.setDownloadProgressVisible(true);
-                view.updateDownloadProgress(status.getTotalSize() > 0 ?
-                        (float) status.getBytesDownloadSoFar() / (float) status.getTotalSize() : 0f);
-            });
-
-        }
 
         if (!isDownloadComplete) {
             long currentTimeStamp = System.currentTimeMillis();
@@ -242,6 +253,14 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
         }
 
 
+    }
+
+    @Override
+    public void onDownloadJobItemChange(DownloadJobItemStatus status) {
+        if(status != null && status.getContentEntryUid() == entryUuid) {
+            view.runOnUiThread(() ->view.updateDownloadProgress(status.getTotalBytes() > 0 ?
+                    (float) status.getBytesSoFar() / (float) status.getTotalBytes() : 0f));
+        }
     }
 
     public Long getEntryUuid() {
@@ -321,7 +340,13 @@ public class ContentEntryDetailPresenter extends UstadBaseController<ContentEntr
             monitorStatus.set(false);
             monitor.stopMonitoringAvailability(this);
         }
+
         statusUmLiveData.removeObserver(statusUmObserver);
+
+        if(isListeningToDownloadStatus.getAndSet(false)) {
+            statusProvider.removeDownloadChangeListener(this);
+        }
+
         super.onDestroy();
     }
 
