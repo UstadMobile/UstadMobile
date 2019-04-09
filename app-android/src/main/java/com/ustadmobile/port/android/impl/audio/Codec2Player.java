@@ -48,7 +48,7 @@ public class Codec2Player implements Runnable {
                     AudioFormat.ENCODING_PCM_16BIT);
 
             track = new AudioTrack(
-                    AudioManager.STREAM_VOICE_CALL,
+                    AudioManager.STREAM_MUSIC,
                     8000,
                     AudioFormat.CHANNEL_OUT_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
