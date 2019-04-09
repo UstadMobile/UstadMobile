@@ -114,15 +114,16 @@ buildConfig {
  * Generate a class with constant integer flags for each string message ID. See localization docs
  * for further information.
  */
-task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+task prepareLocale () {
     inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
-    outputDir = new File("${projectDir}/src/main/java")
-    packageName = "com.ustadmobile.core.generated.locale"
+    File outFile = project.file("src/main/java/com/ustadmobile/core/generated/locale/MessageID.kt")
+    outFile.text = ''
+    outFile << 'package com.ustadmobile.core.generated.locale\n\n'
+    outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
+    outFile << 'object MessageID{\n\n'
+    outFile << '    const val  NAME = "' + project.ext.buildConfigProperties['appName'] + '"\n\n'
 
-    appName = project.ext.buildConfigProperties['appName']
-    clsName = "MessageID"
-
-    Map<String, Integer> messageIds = new HashMap<>();
+    Map<String, Integer> messageIds = new HashMap<>()
     AtomicInteger messageIdGenerator = new AtomicInteger(2000)
 
     rootProject.fileTree(dir : "core/locale/main/values", include: "*.xml").each() { File file ->
@@ -143,13 +144,14 @@ task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTa
         }
     }
 
-    Iterator<String> nameIterator = messageIds.keySet().iterator();
+    Iterator<String> nameIterator = messageIds.keySet().iterator()
+
     while(nameIterator.hasNext()) {
         String strName = nameIterator.next()
-        Integer value =messageIds.get(strName)
-
-        buildConfigField "int", strName, String.valueOf(value)
+        Integer value = messageIds.get(strName)
+        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) +'\n\n'
     }
+    outFile << '}'
 }
 compileJava.dependsOn(prepareLocale)
 

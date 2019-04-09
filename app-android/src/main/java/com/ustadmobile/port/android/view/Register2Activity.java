@@ -17,9 +17,7 @@ import com.ustadmobile.core.controller.Register2Presenter;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.Register2View;
-import com.ustadmobile.core.view.Register2View.Companion;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.HashMap;
 
