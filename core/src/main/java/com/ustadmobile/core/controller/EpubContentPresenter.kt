@@ -100,7 +100,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
      * First HTTP callback: run this once the container has been mounted to an http directory
      *
      */
-    private val mountedCallbackHandler : UmCallback<String> ? = object : UmCallback<String> {
+    private val mountedCallbackHandler : UmCallback<String> = object : UmCallback<String> {
 
         override fun onSuccess(result: String?) {
             mountedUrl = result
@@ -238,7 +238,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
         val containerUid = java.lang.Long.parseLong(arguments.get(EpubContentView.ARG_CONTAINER_UID))
         view.setProgressBarProgress(-1)
         view.setProgressBarVisible(true)
-        view.mountContainer(containerUid, mountedCallbackHandler!!)
+        view.mountContainer(containerUid, mountedCallbackHandler)
     }
 
     fun handleClickNavItem(navItem: EpubNavItem) {

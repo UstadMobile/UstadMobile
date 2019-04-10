@@ -214,9 +214,9 @@ public class WebChunkEspressoTest {
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
 
-        b.putString(WebChunkView.Companion.getARG_CONTAINER_UID(), String.valueOf(11L));
-        b.putString(WebChunkView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(1l));
-        b.putString(Companion.getARG_REFERRER(), path);
+        b.putString(WebChunkView.ARG_CONTAINER_UID, String.valueOf(11));
+        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1));
+        b.putString(ARG_REFERRER, path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 

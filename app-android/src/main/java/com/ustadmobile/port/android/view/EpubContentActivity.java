@@ -205,11 +205,6 @@ public class EpubContentActivity extends ZippedContentActivity implements
         mPager.setCurrentItem(spinePos, true);
     }
 
-    @Override
-    public void mountContainer(Long containerUid,UmCallback<String> callback) {
-
-    }
-
     private class ContainerTocListAdapter extends TocListView.TocListViewAdapter{
 
         private EpubNavItem rootItem;
