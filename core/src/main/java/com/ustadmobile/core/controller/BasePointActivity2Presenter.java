@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -129,5 +130,4 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
             }
         });
     }
-
 }

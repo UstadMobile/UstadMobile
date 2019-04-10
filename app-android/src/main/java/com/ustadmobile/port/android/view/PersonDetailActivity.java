@@ -81,6 +81,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
 
+    private LinearLayout enrollInClassLL, recordDropoutLL;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -114,6 +116,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
         updateImageButton = findViewById(R.id.activity_person_detail_student_image_button2);
 
         updateImageButton.setOnClickListener(view -> addImageFromCamera());
+
+        enrollInClassLL = findViewById(R.id.activity_person_detail_action_ll_enroll_in_class_ll);
+        recordDropoutLL = findViewById(R.id.activity_person_detail_action_ll_record_dropout_ll);
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
@@ -177,6 +182,16 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
             return;
         }
         startCameraIntent();
+    }
+
+    @Override
+    public void showEnrollInClass(boolean show) {
+        enrollInClassLL.setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    @Override
+    public void showDropout(boolean show) {
+        recordDropoutLL.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
 

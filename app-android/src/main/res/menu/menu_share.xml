@@ -48,5 +48,9 @@
         android:title="@string/force_sync"
         android:visible="true"/>
 
+    <item android:id="@+id/menu_testing_create_clazzlogs"
+        android:title="Test CreateLogsForToday"
+        android:visible="false"/>
+
 
 </menu>

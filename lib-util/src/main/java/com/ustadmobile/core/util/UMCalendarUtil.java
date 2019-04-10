@@ -355,17 +355,14 @@ public class UMCalendarUtil {
 
         //Note: calendar is the calendar in the phone's time zone. The phone's timezone can be
         // different from the Class's timezone. Since all times are in the Class's time zone,
-        // a phone 9 am is in fact intended to be Class TimeZone's 9 am. This is a flaw in how the
-        // calendar variable gets to us. While we are making a calendar below with the right time
-        // zone, we should consider calendar as the right time for checking not the one with
-        // time zone. I guess we could fix the originating calendar but the phone's time zone is
-        // unknown. I guess we could set the time zone from where this method is called
-        // ie: createClazzLogs but that process is to be run every midnight of every device.
-        // The solution might just be to ignore another timezone conversion and just look at
-        // the calendar object given to this method and assume that its in the right time zone.
-//        Calendar comparisonCalendar = Calendar.getInstance();
-//        comparisonCalendar.setTimeZone(TimeZone.getTimeZone(timeZone));
-//        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());
+        // a phone 9 am is in fact intended to be Class TimeZone's 9 am.
+        //
+        // The return Calendar is the calendar where the next occurence should be. This should
+        // match with the right day of the week. Hence this has to be in the Local time zone.
+        // (ie: to avoid situations where next occurence clazz timezone = previous day device.
+        // Since theis method is called every midnight of the phone device, we need the time to be
+        // the right day (ie phone device's timezone). For this purpose we will advance to the phone
+        // timezone and can set its timezone to Clazz outside this method.
 
         Calendar comparisonCalendar = Calendar.getInstance();
         comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());

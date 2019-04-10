@@ -11,6 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithTimeZone;
+import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.ScheduledCheck;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
@@ -167,8 +168,12 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         incToday = false;
                     }
 
+                    //Get the day of next occurence.
                     nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                             startCalendar, timeZone, schedule.getScheduleDay(), incToday);
+
+                    //Set the day's timezone to Clazz
+                    nextScheduleOccurence.setTimeZone(TimeZone.getTimeZone(timeZone));
 
                     //Set to 00:00
                     nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
@@ -180,7 +185,11 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                     nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, (int) (startTimeMins / 60));
                     nextScheduleOccurence.set(Calendar.MINUTE, (int) (startTimeMins % 60));
                     nextScheduleOccurence.set(Calendar.SECOND, 0);
+
                     nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
+
+
+
                 }
 
                 if (nextScheduleOccurence != null && nextScheduleOccurence.before(endCalendar)) {

@@ -287,6 +287,21 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                     }
                 }
             ));
+
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.showDropout(result);
+                        view.showEnrollInClass(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                }));
+
     }
 
 

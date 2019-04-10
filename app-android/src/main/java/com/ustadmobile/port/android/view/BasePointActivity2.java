@@ -27,6 +27,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointActivity2Presenter;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.port.android.impl.ClazzLogScheduleWorker;
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -243,8 +244,17 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         else if(i == R.id.menu_basepoint_sync){
             forceSync();
         }
+        //Testing. TODO: Remove
+        else if(i == R.id.menu_testing_create_clazzlogs){
+            testClazzLogs();
+        }
+        //End of testing.
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void testClazzLogs(){
+        ClazzLogScheduleWorker.queueClazzLogScheduleWorkerTesting(60000);
     }
 
     @Override
