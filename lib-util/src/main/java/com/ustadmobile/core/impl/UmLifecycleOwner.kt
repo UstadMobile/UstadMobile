@@ -28,17 +28,17 @@ interface UmLifecycleOwner {
 
     companion object {
 
-        val STATUS_CREATED = 1
+        const val STATUS_CREATED = 1
 
-        val STATUS_STARTED = 2
+        const val STATUS_STARTED = 2
 
-        val STATUS_RESUMED = 3
+        const val STATUS_RESUMED = 3
 
-        val STATUS_PAUSED = 4
+        const val STATUS_PAUSED = 4
 
-        val STATUS_STOPPED = 5
+        const val STATUS_STOPPED = 5
 
-        val STATUS_DESTROYED = 6
+        const val STATUS_DESTROYED = 6
     }
 
 }

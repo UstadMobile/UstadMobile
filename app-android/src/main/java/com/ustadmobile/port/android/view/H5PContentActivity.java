@@ -61,12 +61,12 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
             @Override
             public void onSuccess(String result) {
                 mountedPath.set(result);
-                UmCallbackUtil.onSuccessIfNotNull(callback, result);
+                UmCallbackUtil.INSTANCE.onSuccessIfNotNull(callback, result);
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                UmCallbackUtil.onFailIfNotNull(callback, exception);
+                UmCallbackUtil.INSTANCE.onFailIfNotNull(callback, exception);
             }
         });
     }

@@ -6,5 +6,5 @@ package com.ustadmobile.core.impl
  */
 interface UmResultCallback<T> {
 
-    fun onDone(result: T)
+    fun onDone(result: T?)
 }

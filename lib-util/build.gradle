@@ -1,9 +1,22 @@
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
+apply plugin: 'kotlin'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    }
+}
 
 dependencies {
-    implementation "net.sf.kxml:kxml2:$version_kxml";
+    implementation "net.sf.kxml:kxml2:$version_kxml"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 }
 
 sourceCompatibility = "1.8"

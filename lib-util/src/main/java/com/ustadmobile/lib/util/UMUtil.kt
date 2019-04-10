@@ -37,7 +37,6 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.Enumeration
-import java.util.Hashtable
 import java.util.Vector
 
 /* $if umplatform == 2  $
@@ -117,13 +116,12 @@ object UMUtil {
         var isDelim: Boolean
 
         var c: Char
-        var i: Int
+        var i: Int = start
         var j: Int
-        val tokens = Vector()
+        val tokens = Vector<String>()
         var tStart = 0
 
 
-        i = start
         while (i < end) {
             c = str[i]
             isDelim = false
@@ -151,14 +149,13 @@ object UMUtil {
         return tokens
     }
 
-    fun filterArrByPrefix(arr: Array<String>, prefix: String): Array<String> {
+    fun filterArrByPrefix(arr: Array<String>, prefix: String): Array<String?> {
         val matches = BooleanArray(arr.size)
 
-        var i: Int
+        var i: Int = 0
         var matchCount = 0
         val arrayLen = arr.size
 
-        i = 0
         while (i < arrayLen) {
             if (arr[i] != null && arr[i].startsWith(prefix)) {
                 matches[i] = true
@@ -202,14 +199,13 @@ object UMUtil {
      * @param enu Enumeration to convert
      * @return String array
      */
-    fun enumerationToStringArray(enu: Enumeration<*>): Array<String> {
-        val list: Array<String>
-        val listVector = Vector()
+    fun enumerationToStringArray(enu: Enumeration<Any>): MutableList<Int> {
+        val listVector = Vector<String>()
         while (enu.hasMoreElements()) {
-            listVector.addElement(enu.nextElement())
+            listVector.addElement(enu.nextElement() as String?)
         }
-        list = arrayOfNulls(listVector.size)
-        listVector.copyInto(list)
+        val list = mutableListOf(listVector.size)
+        listVector.copyInto(list.toTypedArray())
         return list
     }
 
@@ -220,7 +216,7 @@ object UMUtil {
      * @param v Vector
      * @return The same vector as was given as an argument
      */
-    fun addEnumerationToVector(e: Enumeration<*>, v: Vector<*>): Vector<*> {
+    fun addEnumerationToVector(e: Enumeration<Any>, v: Vector<Any>): Vector<*> {
         while (e.hasMoreElements()) {
             v.addElement(e.nextElement())
         }
@@ -234,7 +230,7 @@ object UMUtil {
      * @param toAdd The vector elements will be added from
      * @return the vector with all the elements (same as vector argument)
      */
-    fun addVectorToVector(vector: Vector<*>, toAdd: Vector<*>): Vector<*> {
+    fun addVectorToVector(vector: Vector<Any>, toAdd: Vector<Any>): Vector<Any> {
         val numElements = toAdd.size
         vector.ensureCapacity(vector.size + toAdd.size)
         for (i in 0 until numElements) {
@@ -263,11 +259,11 @@ object UMUtil {
      * @param src Source hashtable to copy from
      * @param dst Destination hashtable to copy into
      */
-    fun copyHashtable(src: Hashtable<*, *>, dst: Hashtable<*, *>) {
-        val keys = src.keys()
+    fun copyHashtable(src: Map<String, String>, dst: MutableMap<String, String?>) {
+        val keys = src.keys.iterator()
         var key: Any
-        while (keys.hasMoreElements()) {
-            key = keys.nextElement()
+        while (keys.hasNext()) {
+            key = keys.next()
             dst[key] = src[key]
         }
     }
@@ -385,9 +381,10 @@ object UMUtil {
                 XmlPullParser.END_TAG -> {
                     tagName = xpp.name
 
+                    val haystack = seperateEndTagRequiredElements
                     if (lastEvent == XmlPullParser.START_TAG
                             && seperateEndTagRequiredElements != null
-                            && UMUtil.indexInArray(seperateEndTagRequiredElements, tagName) != -1) {
+                            && UMUtil.indexInArray(haystack as Array<Any>, tagName) != -1) {
                         xs.text(" ")
                     }
 
@@ -421,11 +418,8 @@ object UMUtil {
         passXmlThrough(xpp, xs, seperateEndTagRequiredElements, object : PassXmlThroughFilter {
             @Throws(IOException::class, XmlPullParserException::class)
             override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
-                return if (evtType == XmlPullParser.END_TAG && parser.name != null
+                return !(evtType == XmlPullParser.END_TAG && parser.name != null
                         && parser.name == endTagName)
-                    false
-                else
-                    true
             }
 
             @Throws(IOException::class, XmlPullParserException::class)
@@ -579,7 +573,7 @@ object UMUtil {
      * @return
      */
     fun encodeBasicAuth(username: String, password: String): String {
-        return "Basic " + Base64Coder.encodeString(username +
+        return "Basic " + Base64Coder.encodeToString(username +
                 ':'.toString() + password)
     }
 

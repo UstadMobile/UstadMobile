@@ -49,7 +49,7 @@ public class EpubHtmlFilterSerializer {
 
         XmlPullParser xpp = UstadMobileSystemImpl.Companion.getInstance().newPullParser(in, "UTF-8");
         xs.startDocument("UTF-8", false);
-        UMUtil.passXmlThrough(xpp, xs, true, new UMUtil.PassXmlThroughFilter() {
+        UMUtil.INSTANCE.passXmlThrough(xpp, xs, true, new UMUtil.PassXmlThroughFilter() {
             @Override
             public boolean beforePassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer) throws IOException {
                 if(evtType == XmlPullParser.END_TAG && parser.getName().equals("head")) {

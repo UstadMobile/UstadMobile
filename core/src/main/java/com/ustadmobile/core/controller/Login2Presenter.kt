@@ -42,7 +42,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>?, view: Login
                 "")
         val systemImpl = UstadMobileSystemImpl.instance
         loginRepoDb.personDao.login(username, password, object : UmCallback<UmAccount> {
-            override fun onSuccess(result: UmAccount?) {
+            override fun onSuccess(result: UmAccount) {
                 if (result != null) {
                     result.endpointUrl = serverUrl
                     view?.runOnUiThread (Runnable { view?.setInProgress(false) })

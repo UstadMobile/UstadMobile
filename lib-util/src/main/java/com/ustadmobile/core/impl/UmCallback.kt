@@ -20,4 +20,5 @@ interface UmCallback<T> {
      */
     fun onFailure(exception: Throwable)
 
+    fun onSuccess(result: com.ustadmobile.lib.db.entities.UmAccount?)
 }

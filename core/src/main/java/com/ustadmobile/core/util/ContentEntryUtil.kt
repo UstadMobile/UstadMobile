@@ -40,10 +40,8 @@ object ContentEntryUtil {
 
         dbRepo.contentEntryDao.findByUidWithContentEntryStatus(contentEntryUid, object : UmCallback<ContentEntryWithContentEntryStatus> {
 
-            override fun onSuccess(result: ContentEntryWithContentEntryStatus?) {
-                if (result != null) {
-                    goToViewIfDownloaded(result, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
-                }
+            override fun onSuccess(result: ContentEntryWithContentEntryStatus) {
+                goToViewIfDownloaded(result, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             }
 
             override fun onFailure(exception: Throwable) {
@@ -129,7 +127,7 @@ object ContentEntryUtil {
             val args = HashMap<String, String>()
             args[ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID] = entryStatus.contentEntryUid.toString()
             impl.go(ContentEntryDetailView.VIEW_NAME, args, context)
-            UmCallbackUtil.onSuccessIfNotNull(callback, null)
+            UmCallbackUtil.onSuccessIfNotNull(callback, Any())
         }
 
     }
@@ -140,12 +138,8 @@ object ContentEntryUtil {
                                     callback: UmCallback<Any>) {
 
         dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatus(sourceUrl, object : UmCallback<ContentEntryWithContentEntryStatus> {
-            override fun onSuccess(result: ContentEntryWithContentEntryStatus?) {
-                if (result != null) {
-                    goToViewIfDownloaded(result, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
-                } else {
-                    UmCallbackUtil.onFailIfNotNull(callback, IllegalArgumentException("No such content entry"))
-                }
+            override fun onSuccess(result: ContentEntryWithContentEntryStatus) {
+                goToViewIfDownloaded(result, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             }
 
             override fun onFailure(exception: Throwable) {
@@ -169,12 +163,11 @@ object ContentEntryUtil {
     fun goToContentEntryByViewDestination(viewDestination: String, dbRepo: UmAppDatabase,
                                           impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                           context: Any, callback: UmCallback<Any>) {
-        var viewDestination = viewDestination
         //substitute for previously scraped content
-        viewDestination = viewDestination.replace("content-detail?",
+        val dest = viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?")
 
-        val params = UMFileUtil.parseURLQueryString(viewDestination)
+        val params = UMFileUtil.parseURLQueryString(dest)
         if (params?.containsKey("sourceUrl")!!) {
             goToContentEntryBySourceUrl(params.getValue("sourceUrl")!!, dbRepo,
                     impl, openEntryIfNotDownloaded, context,
@@ -182,6 +175,4 @@ object ContentEntryUtil {
         }
 
     }
-
-
 }
