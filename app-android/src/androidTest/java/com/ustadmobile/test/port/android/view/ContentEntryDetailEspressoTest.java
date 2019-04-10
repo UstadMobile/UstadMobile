@@ -225,7 +225,7 @@ public class ContentEntryDetailEspressoTest {
         createDummyContent();
 
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), String.valueOf(6l));
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, String.valueOf(6l));
         mActivityRule.launchActivity(launchActivityIntent);
 
         onView(allOf(withId(R.id.entry_detail_title), withText("Quiz Time")));
@@ -241,7 +241,7 @@ public class ContentEntryDetailEspressoTest {
         createDummyContent();
 
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), String.valueOf(6l));
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, String.valueOf(6l));
         mActivityRule.launchActivity(launchActivityIntent);
 
         onView(Matchers.allOf(isDisplayed(), withId(R.id.entry_detail_flex)))
@@ -267,7 +267,7 @@ public class ContentEntryDetailEspressoTest {
         createDummyContent();
 
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), String.valueOf(6l));
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, String.valueOf(6l));
         mActivityRule.launchActivity(launchActivityIntent);
 
         onView(withId(R.id.entry_detail_button))
@@ -282,7 +282,7 @@ public class ContentEntryDetailEspressoTest {
         createDummyContent();
 
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), String.valueOf(10l));
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, String.valueOf(10l));
         mActivityRule.launchActivity(launchActivityIntent);
 
         onView(withId(R.id.entry_detail_button))
@@ -296,7 +296,7 @@ public class ContentEntryDetailEspressoTest {
         createDummyContent();
 
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), String.valueOf(14l));
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, String.valueOf(14l));
         mActivityRule.launchActivity(launchActivityIntent);
 
         onView(withId(R.id.entry_detail_button))
@@ -311,7 +311,7 @@ public class ContentEntryDetailEspressoTest {
         createDummyContent();
 
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), String.valueOf(14l));
+        launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, String.valueOf(14l));
         mActivityRule.launchActivity(launchActivityIntent);
 
         onView(allOf(withId(R.id.entry_detail_button), withText("Open")))
@@ -321,7 +321,7 @@ public class ContentEntryDetailEspressoTest {
 
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity.class.getCanonicalName()),
-                hasExtra(equalTo(WebChunkView.Companion.getARG_CHUNK_PATH()),
+                hasExtra(equalTo(WebChunkView.ARG_CHUNK_PATH),
                         equalTo(String.valueOf(targetFile.getPath()))
                 )));
 

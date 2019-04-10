@@ -70,7 +70,7 @@ interface BasePointView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "BasePoint"
+        const val VIEW_NAME = "BasePoint"
     }
 
 }

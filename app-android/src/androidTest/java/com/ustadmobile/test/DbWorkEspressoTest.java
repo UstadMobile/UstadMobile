@@ -54,7 +54,7 @@ public class DbWorkEspressoTest {
 
     @Test
     public void givenBlankDatabase_whenInitialInsertDone_thenEntriesShouldBePresent() {
-        UmAppDatabase.getInstance(PlatformTestUtil.INSTANCE.getTargetContext()).clearAllTables();
+        UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext()).clearAllTables();
         DbInitialEntriesInserter worker = new DbInitialEntriesInserter(
                 InstrumentationRegistry.getTargetContext());
         ListenableWorker.Result result = worker.doWork();

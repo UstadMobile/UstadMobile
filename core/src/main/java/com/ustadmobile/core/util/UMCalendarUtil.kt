@@ -64,7 +64,7 @@ object UMCalendarUtil {
         val delimChars = charArrayOf(' ', ':', '-')
 
         val tokens = UMUtil.tokenize(httpDate, delimChars, 0, httpDate.length)
-        var cal: Calendar? = null
+        val cal: Calendar?
 
         if (tokens.size == 8) {//this includes the timezone
             cal = Calendar.getInstance(TimeZone.getTimeZone(

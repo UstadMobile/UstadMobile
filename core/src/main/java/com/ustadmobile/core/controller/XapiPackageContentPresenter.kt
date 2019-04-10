@@ -42,18 +42,18 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
 
     private var registrationUUID: String? = null
 
-    private inner class ZipMountedCallbackHandler : ShowErrorUmCallback<String>(this.getView()!!, MessageID.error_opening_file) {
+    private inner class ZipMountedCallbackHandler : ShowErrorUmCallback<String>(view, MessageID.error_opening_file) {
 
         override fun onSuccess(result: String) {
             mountedPath = result
             UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
-                    getContext(),
+                    context,
                     UMFileUtil.joinPaths(mountedPath!!, "tincan.xml")),
                     TinCanResponseCallback())
         }
     }
 
-    private inner class TinCanResponseCallback : ShowErrorUmHttpResponseCallback(getView()!!, MessageID.error_opening_file) {
+    private inner class TinCanResponseCallback : ShowErrorUmHttpResponseCallback(view, MessageID.error_opening_file) {
 
         override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
             super.onComplete(call, response)
@@ -72,11 +72,11 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
         }
     }
 
-    override fun onCreate(savedState: Map<String, String> ?) {
+    override fun onCreate(savedState: Map<String, String?> ?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
-        val containerUid = java.lang.Long.parseLong(arguments!![UstadView.ARG_CONTAINER_UID])
-        getView()!!.mountContainer(containerUid, ZipMountedCallbackHandler())
+        val containerUid = java.lang.Long.parseLong(arguments[UstadView.ARG_CONTAINER_UID]!!)
+        view.mountContainer(containerUid, ZipMountedCallbackHandler())
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
@@ -86,9 +86,9 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
         tinCanXml = TinCanXML.loadFromXML(xpp)
         launchHref = tinCanXml?.launchActivity?.launchUrl
         launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
-        getView()!!.runOnUiThread(Runnable {
-            getView()!!.setTitle(tinCanXml!!.launchActivity?.name!!)
-            getView()!!.loadUrl(launchUrl!!)
+        view.runOnUiThread(Runnable {
+            view.setTitle(tinCanXml!!.launchActivity?.name!!)
+            view.loadUrl(launchUrl!!)
         })
     }
 

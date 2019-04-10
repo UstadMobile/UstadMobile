@@ -5,6 +5,6 @@ interface OnBoardingView : UstadView {
     fun setScreenList()
 
     companion object {
-        val VIEW_NAME = "OnBoarding"
+        const val VIEW_NAME = "OnBoarding"
     }
 }

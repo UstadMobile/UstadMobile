@@ -51,7 +51,7 @@ interface EpubContentView : UstadView {
 
     fun setAuthorName(authorName: String)
 
-    fun mountContainer(containerUid: Long?, callback: UmCallback<String>?)
+    fun mountContainer(containerUid: Long, callback: UmCallback<String>?)
 
     fun unmountContainer(mountedUrl: String?)
 
@@ -80,9 +80,9 @@ interface EpubContentView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "Container"
+        const val VIEW_NAME = "Container"
 
-        val ARG_CONTAINER_UID = "containerUid"
+        const val ARG_CONTAINER_UID = "containerUid"
     }
 
 }

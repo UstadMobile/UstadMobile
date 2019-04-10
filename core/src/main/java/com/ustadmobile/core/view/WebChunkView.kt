@@ -17,9 +17,9 @@ interface WebChunkView : UstadView {
 
     companion object {
 
-        val ARG_CHUNK_PATH = "chunkpath"
-        val VIEW_NAME = "webChunk"
-        val ARG_CONTENT_ENTRY_ID = "entryId"
-        val ARG_CONTAINER_UID = "containerUid"
+        const val ARG_CHUNK_PATH = "chunkpath"
+        const val VIEW_NAME = "webChunk"
+        const val ARG_CONTENT_ENTRY_ID = "entryId"
+        const val ARG_CONTAINER_UID = "containerUid"
     }
 }

@@ -22,7 +22,7 @@ interface H5PContentView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "H5PContentView"
+        const val VIEW_NAME = "H5PContentView"
     }
 
 

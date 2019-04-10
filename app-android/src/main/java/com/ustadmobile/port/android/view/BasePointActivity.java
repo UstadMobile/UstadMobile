@@ -26,6 +26,7 @@ import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -116,7 +117,8 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
         findViewById(R.id.activity_basepoint_fab).setOnClickListener(this);
 
-        mBasePointController = new BasePointController(this, this);
+        mBasePointController = new BasePointController(this,
+                UMAndroidUtil.bundleToMap(getIntent().getExtras()), this);
         mBasePointController.onCreate(bundleToMap(getIntent().getExtras()),
                 bundleToMap(savedInstanceState));
 

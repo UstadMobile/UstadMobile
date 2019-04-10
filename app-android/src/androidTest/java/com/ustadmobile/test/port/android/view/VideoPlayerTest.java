@@ -119,8 +119,8 @@ public class VideoPlayerTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
-        b.putString(VideoPlayerView.Companion.getARG_CONTAINER_UID(), String.valueOf(containerUid));
-        b.putString(VideoPlayerView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(14L));
+        b.putString(VideoPlayerView.ARG_CONTAINER_UID, String.valueOf(containerUid));
+        b.putString(VideoPlayerView.ARG_CONTENT_ENTRY_ID, String.valueOf(14L));
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 

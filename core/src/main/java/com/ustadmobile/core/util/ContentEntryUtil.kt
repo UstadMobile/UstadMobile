@@ -102,10 +102,9 @@ object ContentEntryUtil {
                                 }
 
                                 val containerEntryWithContainerEntryFile = resultList[0]
-                                if (containerEntryWithContainerEntryFile != null) {
-                                    impl.openFileInDefaultViewer(context, containerEntryWithContainerEntryFile.containerEntryFile.cefPath,
-                                            result.mimeType, callback)
-                                }
+                                impl.openFileInDefaultViewer(context, containerEntryWithContainerEntryFile.containerEntryFile.cefPath,
+                                        result.mimeType, callback)
+
 
                             }
 
@@ -169,13 +168,12 @@ object ContentEntryUtil {
     fun goToContentEntryByViewDestination(viewDestination: String, dbRepo: UmAppDatabase,
                                           impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                           context: Any, callback: UmCallback<Any>) {
-        var viewDestination = viewDestination
         //substitute for previously scraped content
-        viewDestination = viewDestination.replace("content-detail?",
+        val viewDest= viewDestination.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?")
 
-        val params = UMFileUtil.parseURLQueryString(viewDestination)
-        if (params?.containsKey("sourceUrl")!!) {
+        val params = UMFileUtil.parseURLQueryString(viewDest)
+        if (params.containsKey("sourceUrl")) {
             goToContentEntryBySourceUrl(params.getValue("sourceUrl")!!, dbRepo,
                     impl, openEntryIfNotDownloaded, context,
                     callback)

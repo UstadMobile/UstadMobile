@@ -19,6 +19,6 @@ interface ContentEntryListView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "ContentEntryList"
+        const val VIEW_NAME = "ContentEntryList"
     }
 }

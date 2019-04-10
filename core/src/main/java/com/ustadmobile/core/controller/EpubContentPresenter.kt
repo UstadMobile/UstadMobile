@@ -100,13 +100,13 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
      * First HTTP callback: run this once the container has been mounted to an http directory
      *
      */
-    private val mountedCallbackHandler : UmCallback<String> ? = object : UmCallback<String> {
+    private val mountedCallbackHandler : UmCallback<String> = object : UmCallback<String> {
 
         override fun onSuccess(result: String) {
             mountedUrl = result
             val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
             UstadMobileSystemImpl.instance.makeRequestAsync(
-                    UmHttpRequest(getContext(), containerUri), containerHttpCallbackHandler)
+                    UmHttpRequest(context, containerUri), containerHttpCallbackHandler)
         }
 
         override fun onFailure(exception: Throwable) {
@@ -132,7 +132,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                     val opfUrl = UMFileUtil.joinPaths(mountedUrl!!,
                             ocf!!.rootFiles[0].fullPath!!)
                     UstadMobileSystemImpl.instance.makeRequestAsync(
-                            UmHttpRequest(getContext(), opfUrl), opfHttpCallbackHandler)
+                            UmHttpRequest(context, opfUrl), opfHttpCallbackHandler)
 
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -196,7 +196,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                         mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
 
                 UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
-                        getContext(), navXhtmlUrl), navCallbackHandler)
+                        context, navXhtmlUrl), navCallbackHandler)
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (x: XmlPullParserException) {
@@ -219,7 +219,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                 xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
                 navDocument.load(xpp)
                 epubContentView!!.runOnUiThread(Runnable  { epubContentView.setTableOfContents(navDocument.toc!!) })
-                view?.runOnUiThread(Runnable  { view?.setProgressBarVisible(false) })
+                view.runOnUiThread(Runnable  { view.setProgressBarVisible(false) })
             } catch (e: IOException) {
                 e.printStackTrace()
             } catch (x: XmlPullParserException) {
@@ -233,16 +233,12 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
         }
     }
 
-    override fun onCreate(map: Map<String, String>?) {
-        super.onCreate(map)
-        val containerUid = java.lang.Long.parseLong(arguments?.get(EpubContentView.ARG_CONTAINER_UID))
-        view?.setProgressBarProgress(-1)
-        view?.setProgressBarVisible(true)
-        view?.mountContainer(containerUid, mountedCallbackHandler!!)
-    }
-
-    fun handlePageTitleUpdated(pageTitle: String) {
-        epubContentView?.setPageTitle(pageTitle)
+    override fun onCreate(savedState: Map<String, String?>?) {
+        super.onCreate(savedState)
+        val containerUid = java.lang.Long.parseLong(arguments.get(EpubContentView.ARG_CONTAINER_UID))
+        view.setProgressBarProgress(-1)
+        view.setProgressBarVisible(true)
+        view.mountContainer(containerUid, mountedCallbackHandler)
     }
 
     fun handleClickNavItem(navItem: EpubNavItem) {
@@ -258,7 +254,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
     override fun onDestroy() {
         super.onDestroy()
         if (mountedUrl != null) {
-            view?.unmountContainer(mountedUrl!!)
+            view.unmountContainer(mountedUrl!!)
         }
     }
 
