@@ -1,23 +1,23 @@
-package com.ustadmobile.core.impl;
+package com.ustadmobile.core.impl
 
 /**
  * Generic callback wrapper
  */
 
-public interface UmCallback<T> {
+interface UmCallback<T> {
 
     /**
      * Called when the operation completes successfully
      *
      * @param result result of the operation
      */
-    void onSuccess(T result);
+    fun onSuccess(result: T)
 
     /**
      * Called when the operation has failed
      *
      * @param exception exception thrown (if any)
      */
-    void onFailure(Throwable exception);
+    fun onFailure(exception: Throwable)
 
 }
