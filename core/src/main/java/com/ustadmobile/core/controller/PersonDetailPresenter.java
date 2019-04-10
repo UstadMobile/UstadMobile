@@ -327,7 +327,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
                 view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid));

@@ -351,83 +351,93 @@ public class ScheduledCheckRunner implements Runnable{
                 String feedLinkTitle = "Record attendance (overdue)";
 
                 for(ClazzMemberWithPerson teacher:teachers){
-                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                            teacher.getPerson().getPersonUid(), currentClazzLog.getClazzLogUid(),
-                            ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+                    if(teacher.getPerson().getPersonUid() != 0){
+                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                teacher.getPerson().getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
-                            feedLinkDesc,
-                            feedLinkViewClass,
-                            clazzName,
-                            teacher.getClazzMemberPersonUid());
-                    thisEntry.setDeadline(currentClazzLog.getLogDate());
+                        FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                                feedLinkDesc,
+                                feedLinkViewClass,
+                                clazzName,
+                                teacher.getClazzMemberPersonUid());
+                        thisEntry.setDeadline(currentClazzLog.getLogDate());
 
-                    FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
-                    if(existingEntry != null){
-                        updateFeedEntries.add(thisEntry);
-                    }else{
-                        newFeedEntries.add(thisEntry);
+                        FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
+                        if(existingEntry != null){
+                            updateFeedEntries.add(thisEntry);
+                        }else{
+                            newFeedEntries.add(thisEntry);
+                        }
                     }
 
                 }
 
                 for(Person officer:officers){
-                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                            officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
-                            ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+                    if(officer.getPersonUid() != 0){
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
-                            feedLinkDesc,
-                            feedLinkViewClass,
-                            clazzName,
-                            officer.getPersonUid());
-                    thisEntry.setDeadline(currentClazzLog.getLogDate());
+                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                officer.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
-                    if(existingEntry != null){
-                        updateFeedEntries.add(thisEntry);
-                    }else{
-                        newFeedEntries.add(thisEntry);
+                        FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                                feedLinkDesc,
+                                feedLinkViewClass,
+                                clazzName,
+                                officer.getPersonUid());
+                        thisEntry.setDeadline(currentClazzLog.getLogDate());
+
+                        FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
+                        if(existingEntry != null){
+                            updateFeedEntries.add(thisEntry);
+                        }else{
+                            newFeedEntries.add(thisEntry);
+                        }
                     }
                 }
 
                 for(Person mne:mneofficers){
-                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                            mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
-                            ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+                    if(mne.getPersonUid() != 0) {
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
-                            feedLinkDesc,
-                            feedLinkViewClass,
-                            clazzName,
-                            mne.getPersonUid());
-                    thisEntry.setDeadline(currentClazzLog.getLogDate());
+                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                mne.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
-                    if(existingEntry != null){
-                        updateFeedEntries.add(thisEntry);
-                    }else{
-                        newFeedEntries.add(thisEntry);
+                        FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                                feedLinkDesc,
+                                feedLinkViewClass,
+                                clazzName,
+                                mne.getPersonUid());
+                        thisEntry.setDeadline(currentClazzLog.getLogDate());
+
+                        FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
+                        if (existingEntry != null) {
+                            updateFeedEntries.add(thisEntry);
+                        } else {
+                            newFeedEntries.add(thisEntry);
+                        }
                     }
                 }
 
                 for(Person admin:admins){
-                    long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
-                            admin.getPersonUid(), currentClazzLog.getClazzLogUid(),
-                            ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
+                    if(admin.getPersonUid() != 0) {
+                        long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
+                                admin.getPersonUid(), currentClazzLog.getClazzLogUid(),
+                                ScheduledCheck.TYPE_CHECK_CLAZZ_ATTENDANCE_BELOW_THRESHOLD_HIGH, feedLinkViewClass);
 
-                    FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
-                            feedLinkDesc,
-                            feedLinkViewClass,
-                            clazzName,
-                            admin.getPersonUid());
-                    thisEntry.setDeadline(currentClazzLog.getLogDate());
+                        FeedEntry thisEntry = new FeedEntry(feedEntryUid, feedLinkTitle,
+                                feedLinkDesc,
+                                feedLinkViewClass,
+                                clazzName,
+                                admin.getPersonUid());
+                        thisEntry.setDeadline(currentClazzLog.getLogDate());
 
-                    FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
-                    if(existingEntry != null){
-                        updateFeedEntries.add(thisEntry);
-                    }else{
-                        newFeedEntries.add(thisEntry);
+                        FeedEntry existingEntry = dbRepository.getFeedEntryDao().findByUid(feedEntryUid);
+                        if (existingEntry != null) {
+                            updateFeedEntries.add(thisEntry);
+                        } else {
+                            newFeedEntries.add(thisEntry);
+                        }
                     }
                 }
 
