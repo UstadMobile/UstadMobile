@@ -104,8 +104,8 @@ object UMFileUtil {
      * @param link The link given relative to the base
      * @return
      */
-    fun resolveLink(base: String, link: String): String {
-        var base = base
+    fun resolveLink(baseLink: String, link: String): String {
+        var base = baseLink
         val linkLower = link.toLowerCase()
         var charFoundIndex: Int
 
@@ -299,23 +299,23 @@ object UMFileUtil {
      * @return
      */
     fun getFilename(url: String): String {
-        var url = url
         if (url.length == 1) {
             return if (url == "/") "" else url
         }
 
         var charPos = url.lastIndexOf('/', url.length - 2)
 
+        var retVal = url
         if (charPos != -1) {
-            url = url.substring(charPos + 1)
+            retVal = url.substring(charPos + 1)
         }
 
-        charPos = url.indexOf("?")
+        charPos = retVal.indexOf("?")
         if (charPos != -1) {
-            url = url.substring(0, charPos)
+            retVal = url.substring(0, charPos)
         }
 
-        return url
+        return retVal
     }
 
     /**
@@ -329,15 +329,15 @@ object UMFileUtil {
      * @return The filename with the correct extension for the mime type as above.
      */
     fun appendExtensionToFilenameIfNeeded(filename: String, mimeType: String): String {
-        var filename = filename
+        var retVal = filename
         val expectedExtension = UstadMobileSystemImpl.instance.getExtensionFromMimeType(
                 mimeType) ?: return filename
 
         if (!filename.endsWith(".$expectedExtension")) {
-            filename += ".$expectedExtension"
+            retVal += ".$expectedExtension"
         }
 
-        return filename
+        return retVal
     }
 
     /**
@@ -407,14 +407,14 @@ object UMFileUtil {
      * @param urlQuery
      * @return
      */
-    fun parseURLQueryString(urlQuery: String): Map<String, String?>? {
-        var urlQuery = urlQuery
-        val queryPos = urlQuery.indexOf('?')
+    fun parseURLQueryString(urlQuery: String): Map<String, String?> {
+        var retVal = urlQuery
+        val queryPos = retVal.indexOf('?')
         if (queryPos != -1) {
-            urlQuery = urlQuery.substring(queryPos + 1)
+            retVal = retVal.substring(queryPos + 1)
         }
 
-        val parsedParams = parseParams(urlQuery, '&')
+        val parsedParams = parseParams(retVal, '&')
         val decodedParams = mutableMapOf<String, String?>()
         val it = parsedParams.keys.iterator()
         var key: String

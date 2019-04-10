@@ -8,7 +8,7 @@ package com.ustadmobile.core.impl
 </T> */
 class UmCallbackResultOverrider<T>(private val callback: UmCallback<T>?, private val resultOverride: T) : UmCallback<T> {
 
-    override fun onSuccess(result: T) {
+    override fun onSuccess(result: T?) {
         callback?.onSuccess(resultOverride)
     }
 

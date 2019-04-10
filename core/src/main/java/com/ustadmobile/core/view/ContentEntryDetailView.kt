@@ -54,7 +54,7 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
     companion object {
 
-        val VIEW_NAME = "ContentEntryDetail"
+        const val VIEW_NAME = "ContentEntryDetail"
     }
 
 }

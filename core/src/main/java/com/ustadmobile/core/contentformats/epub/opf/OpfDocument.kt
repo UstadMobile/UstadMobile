@@ -374,8 +374,9 @@ class OpfDocument {
      *
      * @return OpfItem representing the cover image
      */
+    @SuppressWarnings("unused")
     fun getCoverImage(mimeType: String): OpfItem? {
-        return if (coverImages == null || coverImages.isEmpty()) null else coverImages[0]
+        return if (coverImages.isEmpty()) null else coverImages[0]
 
     }
 

@@ -75,7 +75,7 @@ object UMUtil {
      */
     fun getIndexInArray(obj: Any, arr: Array<Any>): Int {
         for (i in arr.indices) {
-            if (arr[i] != null && arr[i] == obj) {
+            if (arr[i] == obj) {
                 return i
             }
         }
@@ -93,7 +93,7 @@ object UMUtil {
      */
     fun getIndexInArrayIgnoreCase(str: String, arr: Array<String>): Int {
         for (i in arr.indices) {
-            if (arr[i] != null && arr[i].equals(str, ignoreCase = true)) {
+            if (arr[i].equals(str, ignoreCase = true)) {
                 return i
             }
         }
@@ -157,7 +157,7 @@ object UMUtil {
         val arrayLen = arr.size
 
         while (i < arrayLen) {
-            if (arr[i] != null && arr[i].startsWith(prefix)) {
+            if (arr[i].startsWith(prefix)) {
                 matches[i] = true
                 matchCount++
             }
@@ -280,9 +280,7 @@ object UMUtil {
     @JvmOverloads
     fun indexInArray(haystack: Array<Any>, needle: Any?, from: Int = 0, to: Int = haystack.size): Int {
         for (i in from until to) {
-            if (haystack[i] == null && needle == null) {
-                return i
-            } else if (haystack[i] != null && haystack[i] == needle) {
+            if (haystack[i] == needle) {
                 return i
             }
         }

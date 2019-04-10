@@ -25,7 +25,7 @@ class TestAsyncServiceManager {
 
     private fun setupAsyncServiceManagerMock(startDelay: Int, stopDelay: Int): AsyncServiceManager {
         val asyncServiceManager = spy(AsyncServiceManager::class.java)
-        doAnswer { invocation ->
+        doAnswer {
             Thread {
                 lastStartTime.set(System.currentTimeMillis())
                 try {
@@ -38,7 +38,7 @@ class TestAsyncServiceManager {
             null
         }.`when`(asyncServiceManager).start()
 
-        doAnswer { invocation ->
+        doAnswer {
             Thread {
                 lastStopTime.set(System.currentTimeMillis())
                 try {
@@ -115,8 +115,8 @@ class TestAsyncServiceManager {
         val serviceManager = setupAsyncServiceManagerMock(200, 1000)
         serviceManager.setEnabled(true)
         serviceManager.await(object : AsyncServiceManager.AsyncAwaitChecker{
-            override fun stopWaiting(state: Int): Boolean {
-                return  state == AsyncServiceManager.STATE_STARTED;
+            override fun stopWaiting(newState: Int): Boolean {
+                return  newState == AsyncServiceManager.STATE_STARTED;
             }
 
         }, 2000,
@@ -129,7 +129,7 @@ class TestAsyncServiceManager {
     @Throws(InterruptedException::class)
     fun givenServiceStopped_whenStartingFails_shouldTargetStateStopped() {
         val asyncServiceManager = spy(AsyncServiceManager::class.java)
-        doAnswer { invocation ->
+        doAnswer {
             Thread {
                 lastStartTime.set(System.currentTimeMillis())
                 try {
@@ -152,8 +152,8 @@ class TestAsyncServiceManager {
         })
         asyncServiceManager.setEnabled(true)
         asyncServiceManager.await(object : AsyncServiceManager.AsyncAwaitChecker{
-            override fun stopWaiting(state: Int): Boolean {
-                return  state == AsyncServiceManager.STATE_STOPPED
+            override fun stopWaiting(newState: Int): Boolean {
+                return  newState == AsyncServiceManager.STATE_STOPPED
             }
 
         },

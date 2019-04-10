@@ -24,24 +24,24 @@ import java.util.HashMap
  *
  * Created by mike on 1/6/18.
  */
-class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPackageView)
-    : UstadBaseController<ScormPackageView>(context) {
+class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view: ScormPackageView)
+    : UstadBaseController<ScormPackageView>(context, arguments, view) {
 
     private var scormManifest: ScormManifest? = null
 
     private var mountedPath: String? = null
 
     private val zipMountedCallback = object : UmCallback<String> {
-        override fun onSuccess(result: String) {
+        override fun onSuccess(result: String?) {
             mountedPath = result
             UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
-                    getContext(),
+                    context,
                     UMFileUtil.joinPaths(mountedPath!!, "imsmanifest.xml")),
                     manifestLoadedCallback)
         }
 
         override fun onFailure(exception: Throwable) {
-            scormPackageView.showNotification("ERROR: failed to open package file",
+            view.showNotification("ERROR: failed to open package file",
                     UstadViewWithNotifications.LENGTH_LONG)
         }
     }
@@ -54,9 +54,9 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
                 val defaultOrg = scormManifest!!.defaultOrganization
                 val startRes = scormManifest!!.getResourceByIdentifier(
                         defaultOrg.items[0].identifierRef!!)
-                scormPackageView.runOnUiThread(Runnable  {
-                    scormPackageView.setTitle(scormManifest!!.defaultOrganization.title!!)
-                    scormPackageView.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
+                view.runOnUiThread(Runnable  {
+                    view.setTitle(scormManifest!!.defaultOrganization.title!!)
+                    view.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
                             startRes.href!!))
                 })
             } catch (e: IOException) {
@@ -73,7 +73,7 @@ class ScormPackagePresenter(context: Any, private val scormPackageView: ScormPac
     }
 
     fun onCreate(args: HashMap<String, String>) {
-        scormPackageView.mountZip(args[UstadView.ARG_CONTAINER_UID]!!,
+        view.mountZip(args[UstadView.ARG_CONTAINER_UID]!!,
                 zipMountedCallback)
     }
 

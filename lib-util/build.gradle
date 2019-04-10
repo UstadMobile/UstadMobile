@@ -1,4 +1,5 @@
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 apply plugin: "maven-publish"
 apply plugin: 'kotlin'
 
@@ -17,6 +18,8 @@ dependencies {
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
 }
 
 sourceCompatibility = "1.8"
@@ -46,5 +49,27 @@ publishing {
         maven {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
+    }
+}
+buildscript {
+    ext.kotlin_version = '1.3.21'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+repositories {
+    mavenCentral()
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }

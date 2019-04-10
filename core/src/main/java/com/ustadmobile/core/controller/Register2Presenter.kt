@@ -12,8 +12,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 
 import java.util.HashMap
 
-class Register2Presenter(context: Any, arguments: Map<String, String>?, view: Register2View)
-    : UstadBaseController<Register2View>(context, arguments!!, view) {
+class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View)
+    : UstadBaseController<Register2View>(context, arguments, view) {
 
     private var mNextDest: String? = null
 
@@ -22,19 +22,19 @@ class Register2Presenter(context: Any, arguments: Map<String, String>?, view: Re
     private var repo: UmAppDatabase? = null
 
     init {
-        if (arguments!!.containsKey(ARG_NEXT)) {
+        if (arguments.containsKey(ARG_NEXT)) {
             mNextDest = arguments[ARG_NEXT]
         }
     }
 
-    override fun onCreate(savedState: Map<String, String>?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        if (arguments!!.containsKey(ARG_SERVER_URL)) {
-            view?.setServerUrl(arguments!!.getValue(ARG_SERVER_URL))
+        if (arguments.containsKey(ARG_SERVER_URL)) {
+            view.setServerUrl(arguments[ARG_SERVER_URL]!!)
         } else {
-            view?.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
-                    AppConfig.KEY_API_URL, "http://localhost", getContext())!!)
+            view.setServerUrl(UstadMobileSystemImpl.instance.getAppConfigString(
+                    AppConfig.KEY_API_URL, "http://localhost", context)!!)
         }
     }
 
@@ -54,16 +54,16 @@ class Register2Presenter(context: Any, arguments: Map<String, String>?, view: Re
      * @param serverUrl Server url where the account should be created
      */
     fun handleClickRegister(person: Person, password: String, serverUrl: String) {
-        view?.runOnUiThread(Runnable { view?.setInProgress(true) })
+        view.runOnUiThread(Runnable { view.setInProgress(true) })
 
         val systemImpl = UstadMobileSystemImpl.instance
         if (umAppDatabase == null) {
-            umAppDatabase = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
+            umAppDatabase = UmAppDatabase.getInstance(context).getRepository(serverUrl,
                     "")
         }
 
         if (repo == null) {
-            repo = UmAccountManager.getRepositoryForActiveAccount(getContext())
+            repo = UmAccountManager.getRepositoryForActiveAccount(context)
         }
 
         repo!!.personDao
@@ -74,34 +74,34 @@ class Register2Presenter(context: Any, arguments: Map<String, String>?, view: Re
                             umAppDatabase!!.personDao.insertAsync(person, object : UmCallback<Long> {
                                 override fun onSuccess(personUid: Long?) {
                                     result.endpointUrl = serverUrl
-                                    view?.runOnUiThread(Runnable { view?.setInProgress(false) })
-                                    UmAccountManager.setActiveAccount(result, getContext())
-                                    systemImpl.go(mNextDest, getContext())
+                                    view.runOnUiThread(Runnable { view.setInProgress(false) })
+                                    UmAccountManager.setActiveAccount(result, context)
+                                    systemImpl.go(mNextDest, context)
                                 }
 
                                 override fun onFailure(exception: Throwable) {
                                     //simple insert - this should not happen
-                                    view?.runOnUiThread(Runnable {
-                                        view?.setErrorMessageView(systemImpl.getString(
-                                                MessageID.err_registering_new_user, getContext()))
+                                    view.runOnUiThread(Runnable {
+                                        view.setErrorMessageView(systemImpl.getString(
+                                                MessageID.err_registering_new_user, context))
                                     })
                                 }
                             })
 
                         } else {
-                            view?.runOnUiThread (Runnable{
-                                view?.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
-                                        getContext()))
-                                view?.setInProgress(false)
+                            view.runOnUiThread (Runnable{
+                                view.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
+                                        context))
+                                view.setInProgress(false)
                             })
                         }
                     }
 
                     override fun onFailure(exception: Throwable) {
-                        view?.runOnUiThread(Runnable {
-                            view?.setInProgress(false)
-                            view?.setErrorMessageView(systemImpl.getString(
-                                    MessageID.login_network_error, getContext()))
+                        view.runOnUiThread(Runnable {
+                            view.setInProgress(false)
+                            view.setErrorMessageView(systemImpl.getString(
+                                    MessageID.login_network_error, context))
                         })
                     }
                 })
@@ -109,8 +109,8 @@ class Register2Presenter(context: Any, arguments: Map<String, String>?, view: Re
 
     companion object {
 
-        val ARG_NEXT = "next"
+        const val ARG_NEXT = "next"
 
-        val ARG_SERVER_URL = "apiUrl"
+        const val ARG_SERVER_URL = "apiUrl"
     }
 }

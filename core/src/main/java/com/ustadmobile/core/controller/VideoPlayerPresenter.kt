@@ -27,20 +27,20 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
     var videoPath: String? = null
         private set
 
-     override fun onCreate(savedState: Map<String, String> ?) {
+     override fun onCreate(savedState: Map<String, String?> ?) {
         super.onCreate(savedState)
-        val db = UmAppDatabase.getInstance(getContext())
-        val dbRepo = UmAccountManager.getRepositoryForActiveAccount(getContext())
+        val db = UmAppDatabase.getInstance(context)
+        val dbRepo = UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = dbRepo.contentEntryDao
         val containerEntryDao = db.containerEntryDao
 
-        navigation = arguments?.get(ARG_REFERRER)
-        val entryUuid = java.lang.Long.parseLong(arguments?.get(ARG_CONTENT_ENTRY_ID))
-        val containerUid = java.lang.Long.parseLong(arguments?.get(ARG_CONTAINER_UID))
+        navigation = arguments.get(ARG_REFERRER)
+        val entryUuid = java.lang.Long.parseLong(arguments.get(ARG_CONTENT_ENTRY_ID))
+        val containerUid = java.lang.Long.parseLong(arguments.get(ARG_CONTAINER_UID))
 
         contentEntryDao!!.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
-            override fun onSuccess(result: ContentEntry) {
-                view?.setVideoInfo(result)
+            override fun onSuccess(result: ContentEntry?) {
+                view.setVideoInfo(result!!)
             }
 
             override fun onFailure(exception: Throwable) {
@@ -50,9 +50,9 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
 
 
         containerEntryDao.findByContainer(containerUid, object : UmCallback<List<ContainerEntryWithContainerEntryFile>> {
-            override fun onSuccess(result: List<ContainerEntryWithContainerEntryFile>) {
+            override fun onSuccess(result: List<ContainerEntryWithContainerEntryFile>?) {
 
-                for (entry in result) {
+                for (entry in result!!) {
 
                     val fileInContainer = entry.cePath
                     if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
@@ -64,7 +64,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     }
                 }
 
-                view?.runOnUiThread(Runnable { view?.setVideoParams(videoPath!!, audioPath!!, srtPath!!) })
+                view.runOnUiThread(Runnable { view.setVideoParams(videoPath!!, audioPath!!, srtPath!!) })
             }
 
             override fun onFailure(exception: Throwable) {
@@ -81,10 +81,10 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         if (lastEntryListArgs !=
                 null) {
             impl.go(ContentEntryDetailView.VIEW_NAME,
-                    UMFileUtil.parseURLQueryString(lastEntryListArgs) as Map<String, String>?, view?.context!!,
+                    UMFileUtil.parseURLQueryString(lastEntryListArgs), view.context,
                     UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
         } else {
-            impl.go(DummyView.VIEW_NAME, null, view?.context!!,
+            impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
                     UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
         }
 

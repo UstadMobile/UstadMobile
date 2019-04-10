@@ -10,6 +10,7 @@ import android.webkit.WebViewClient;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ScormPackagePresenter;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 public class ScormPackageActivity extends ZippedContentActivity implements ScormPackageView {
 
@@ -36,7 +37,8 @@ public class ScormPackageActivity extends ZippedContentActivity implements Scorm
 
         setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mPresenter = new ScormPackagePresenter(this, this);
+        mPresenter = new ScormPackagePresenter(this,
+                UMAndroidUtil.bundleToMap(getIntent().getExtras()), this);
     }
 
     @Override

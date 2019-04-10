@@ -114,7 +114,7 @@ class URLTextUtil {
                 throw IllegalArgumentException("Malformed UTF-8 string?")
             }
 
-            var processedPageName: String? = null
+            var processedPageName: String?
 
             try {
                 processedPageName = String(decodeBytes, 0, decodedByteCount, Charset.forName(encoding))
@@ -156,7 +156,7 @@ class URLTextUtil {
          * @return A plain, normal string.
          */
         fun urlDecodeUTF8(utf8: String?): String? {
-            var rs: String? = null
+            val rs: String?
 
             if (utf8 == null) return null
 

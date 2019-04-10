@@ -104,14 +104,14 @@ abstract class UstadMobileSystemImpl {
     fun go(destination: String?, context: Any) {
         val destinationQueryPos = destination!!.indexOf('?')
         if (destinationQueryPos == -1) {
-            go(destination, null, context)
+            go(destination, mapOf(), context)
         } else {
             go(destination.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
-                    destination) as Map<String, String>?, context)
+                    destination), context)
         }
     }
 
-    fun go(viewName: String, args: Map<String, String>?, context: Any) {
+    fun go(viewName: String, args: Map<String, String?>, context: Any) {
         go(viewName, args, context, 0)
     }
 
@@ -125,7 +125,7 @@ abstract class UstadMobileSystemImpl {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    abstract fun go(viewName: String, args: Map<String, String>?, context: Any, flags: Int)
+    abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int)
 
     /**
      * Provides the currently active locale
@@ -165,7 +165,7 @@ abstract class UstadMobileSystemImpl {
 
 
         if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(Login2View.VIEW_NAME, null, context)
+            go(Login2View.VIEW_NAME, mapOf(), context)
         } else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }
@@ -256,7 +256,7 @@ abstract class UstadMobileSystemImpl {
      * @param key preference that is being set
      * @param value value to be set
      */
-    abstract fun setAppPref(key: String, value: String, context: Any)
+    abstract fun setAppPref(key: String, value: String?, context: Any)
 
 
     /**
@@ -541,17 +541,17 @@ abstract class UstadMobileSystemImpl {
 
         val STATUS_ACQUISITION_IN_PROGRESS = 1
 
-        val ARG_REFERRER = "ref"
+        const val ARG_REFERRER = "ref"
 
         /**
          * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
          */
-        val GO_FLAG_SINGLE_TOP = 536870912
+        const val GO_FLAG_SINGLE_TOP = 536870912
 
         /**
          * As per Android Intent.FLAG_CLEAR_TOP
          */
-        val GO_FLAG_CLEAR_TOP = 67108864
+        const val GO_FLAG_CLEAR_TOP = 67108864
 
 
         init {
@@ -562,7 +562,7 @@ abstract class UstadMobileSystemImpl {
             MIME_TYPES["image/svg"] = "svg"
             MIME_TYPES["application/epub+zip"] = "epub"
 
-            MIME_TYPES_REVERSE = UMUtil.flipMap(MIME_TYPES, MIME_TYPES_REVERSE)
+            MIME_TYPES_REVERSE = UMUtil.flipMap(MIME_TYPES, MIME_TYPES_REVERSE as MutableMap<String, String>)
         }
 
         /**

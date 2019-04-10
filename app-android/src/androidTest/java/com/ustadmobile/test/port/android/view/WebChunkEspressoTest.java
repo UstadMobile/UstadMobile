@@ -165,9 +165,9 @@ public class WebChunkEspressoTest {
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
         Bundle b = new Bundle();
 
-        b.putString(WebChunkView.Companion.getARG_CONTAINER_UID(), String.valueOf(10L));
-        b.putString(WebChunkView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(1L));
-        b.putString(Companion.getARG_REFERRER(), path);
+        b.putString(WebChunkView.ARG_CONTAINER_UID, String.valueOf(10L));
+        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1L));
+        b.putString(ARG_REFERRER, path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 
@@ -193,9 +193,9 @@ public class WebChunkEspressoTest {
                 getClass().getResourceAsStream("/com/ustadmobile/app/android/comparison-symbols-review.zip"));
 
 
-        b.putString(WebChunkView.Companion.getARG_CONTAINER_UID(), String.valueOf(12));
-        b.putString(WebChunkView.Companion.getARG_CONTENT_ENTRY_ID(), String.valueOf(1l));
-        b.putString(Companion.getARG_REFERRER(), path);
+        b.putString(WebChunkView.ARG_CONTAINER_UID, String.valueOf(12));
+        b.putString(WebChunkView.ARG_CONTENT_ENTRY_ID, String.valueOf(1l));
+        b.putString(ARG_REFERRER, path);
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);
 

@@ -45,55 +45,20 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * @author mike
  */
-abstract class UstadBaseController<V : UstadView> : UstadController<V>, UmLifecycleOwner {
+abstract class UstadBaseController<V : UstadView> (override val context : Any,
+                                                   val arguments: Map<String, String?>, val view: V)
+    :  UmLifecycleOwner {
 
     private val lifecycleListeners = Vector<UmLifecycleListener>()
 
-    var arguments: Map<String, String>? = null
-        protected set
-
     private val lifecycleStatus = AtomicInteger(0)
-
-    override var view: V? = null
-
-    internal var context : Any? = null
-
-
-    /**
-     * Create a new controller with the given context
-     *
-     * @param context System dependent context objec
-     */
-    constructor(context: Any) {
-        this.context = context
-    }
-
-    constructor(context: Any, arguments: Map<String, String>, view: V) {
-        this.arguments = arguments
-        this.view = view
-        this.context = context
-    }
-
-
-    override fun getContext(): Any {
-        return this.context!!
-    }
-
-    internal open fun getView(): V? {
-        return this.view
-    }
-
-    internal open fun setView(view: V) {
-        this.view = view
-    }
-
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
      *
      * @param savedState savedState if any
      */
-    open fun onCreate(savedState: Map<String, String>?) {
+    open fun onCreate(savedState: Map<String, String?>?) {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleCreate(this)
@@ -179,19 +144,19 @@ abstract class UstadBaseController<V : UstadView> : UstadController<V>, UmLifecy
 
     companion object {
 
-        val NOT_CREATED = 0
+        const val NOT_CREATED = 0
 
-        val CREATED = 1
+        const val CREATED = 1
 
-        val STARTED = 2
+        const val STARTED = 2
 
-        val RESUMED = 3
+        const val RESUMED = 3
 
-        val PAUSED = 4
+        const val PAUSED = 4
 
-        val STOPPED = 5
+        const val STOPPED = 5
 
-        val DESTROYED = 6
+        const val DESTROYED = 6
     }
 
 }

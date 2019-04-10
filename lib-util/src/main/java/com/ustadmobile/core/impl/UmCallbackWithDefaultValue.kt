@@ -4,7 +4,7 @@ class UmCallbackWithDefaultValue<T>(private val defaultVal: T, callback: UmCallb
 
     private val callback: UmCallback<T> = callback as UmCallback<T>
 
-    override fun onSuccess(result: T) {
+    override fun onSuccess(result: T?) {
         if (result != null)
             UmCallbackUtil.onSuccessIfNotNull(callback, result)
         else

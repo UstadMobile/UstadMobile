@@ -11,7 +11,7 @@ interface UmCallback<T> {
      *
      * @param result result of the operation
      */
-    fun onSuccess(result: T)
+    fun onSuccess(result: T?)
 
     /**
      * Called when the operation has failed
@@ -19,6 +19,4 @@ interface UmCallback<T> {
      * @param exception exception thrown (if any)
      */
     fun onFailure(exception: Throwable)
-
-    fun onSuccess(result: com.ustadmobile.lib.db.entities.UmAccount?)
 }
