@@ -29,5 +29,8 @@ public interface SaleListView extends UstadView {
     void setListProvider(UmProvider<SaleListDetail> listProvider);
 
 
+    void updateSortSpinner(String[] presets);
+
+
 }
 

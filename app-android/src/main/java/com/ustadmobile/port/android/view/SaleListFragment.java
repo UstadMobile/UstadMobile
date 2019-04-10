@@ -16,7 +16,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleListPresenter;
@@ -36,6 +39,9 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
     private RecyclerView mRecyclerView;
     private SaleListPresenter mPresenter;
     private FloatingTextButton fab;
+
+    private Spinner sortSpinner;
+    String[] sortSpinnerPresets;
 
     private Button allSalesButton, preOrdersButton, paymentsDueButton;
 
@@ -67,6 +73,8 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
 
         fab = rootContainer.findViewById(R.id.activity_sale_list_fab);
 
+        sortSpinner = rootContainer.findViewById(R.id.fragment_sale_list_sort_by_spinner);
+
         //set up Presenter
         mPresenter = new SaleListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
@@ -97,11 +105,33 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
             getTintedDrawable(paymentsDueButton.getBackground(), R.color.fab);
         });
 
+        //Sort handler
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeSortOrder(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
         allSalesButton.callOnClick();
 
         return rootContainer;
+    }
+
+    @Override
+    public void updateSortSpinner(String[] presets) {
+        this.sortSpinnerPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
+                R.layout.item_simple_spinner, sortSpinnerPresets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
     }
 
     public void disableAllButtonSelected(){
