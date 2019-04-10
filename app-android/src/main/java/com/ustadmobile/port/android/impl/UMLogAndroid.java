@@ -15,22 +15,22 @@ public class UMLogAndroid  extends UMLog{
     @Override
     public void l(int level, int code, String message) {
         String logMessage = code + " : " + message;
-        if (level == UMLog.Companion.getDEBUG()) {
+        if (level == UMLog.DEBUG) {
             Log.d(LOGTAG, logMessage);
 
-        } else if (level == UMLog.Companion.getINFO()) {
+        } else if (level == UMLog.INFO) {
             Log.i(LOGTAG, logMessage);
 
-        } else if (level == UMLog.Companion.getCRITICAL()) {
+        } else if (level == UMLog.CRITICAL) {
             Log.wtf(LOGTAG, logMessage);
 
-        } else if (level == UMLog.Companion.getWARN()) {
+        } else if (level == UMLog.WARN) {
             Log.w(LOGTAG, logMessage);
 
-        } else if (level == UMLog.Companion.getVERBOSE()) {
+        } else if (level == UMLog.VERBOSE) {
             Log.v(LOGTAG, logMessage);
 
-        } else if (level == UMLog.Companion.getERROR()) {
+        } else if (level == UMLog.ERROR) {
             Log.e(LOGTAG, logMessage);
 
         }
@@ -39,22 +39,22 @@ public class UMLogAndroid  extends UMLog{
     @Override
     public void l(int level, int code, String message, Exception exception) {
         String logMessage = code + " : " + message;
-        if (level == UMLog.Companion.getDEBUG()) {
+        if (level == UMLog.DEBUG) {
             Log.d(LOGTAG, logMessage, exception);
 
-        } else if (level == UMLog.Companion.getINFO()) {
+        } else if (level == UMLog.INFO) {
             Log.i(LOGTAG, logMessage, exception);
 
-        } else if (level == UMLog.Companion.getCRITICAL()) {
+        } else if (level == UMLog.CRITICAL) {
             Log.wtf(LOGTAG, logMessage, exception);
 
-        } else if (level == UMLog.Companion.getWARN()) {
+        } else if (level == UMLog.WARN) {
             Log.w(LOGTAG, logMessage, exception);
 
-        } else if (level == UMLog.Companion.getVERBOSE()) {
+        } else if (level == UMLog.VERBOSE) {
             Log.v(LOGTAG, logMessage, exception);
 
-        } else if (level == UMLog.Companion.getERROR()) {
+        } else if (level == UMLog.ERROR) {
             Log.e(LOGTAG, logMessage, exception);
 
         }

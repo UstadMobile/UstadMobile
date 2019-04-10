@@ -117,7 +117,7 @@ public class EpubContentPageFragment extends Fragment {
                     container, false);
             webView = viewGroup.findViewById(R.id.fragment_container_page_webview);
         }else {
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(), 517, "Containerpage: recycled onCreateView");
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView");
         }
 
         webView.setTag(mPageIndex);
