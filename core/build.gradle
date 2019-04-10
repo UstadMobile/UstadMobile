@@ -114,7 +114,7 @@ buildConfig {
  * Generate a class with constant integer flags for each string message ID. See localization docs
  * for further information.
  */
-task prepareLocale () {
+task prepareLocale {
     inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
     File outFile = project.file("src/main/java/com/ustadmobile/core/generated/locale/MessageID.kt")
     outFile.text = ''
