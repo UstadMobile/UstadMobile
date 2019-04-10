@@ -526,7 +526,7 @@ public class DownloadJobItemRunnerTest {
 
 
 
-        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(), 699,
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 699,
                 " Running DownloadJobItemRunner for "+item.getDjiUid());
 
         new Thread(jobItemRunner).start();

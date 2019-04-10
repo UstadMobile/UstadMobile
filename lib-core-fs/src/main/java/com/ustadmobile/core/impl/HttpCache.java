@@ -114,7 +114,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 if(isFresh(entry, timeToLive) || request.isOnlyIfCached()) {
                     cacheResponse = new HttpCacheResponse(entry, request);
                     cacheResponse.setCacheResponse(HttpCacheResponse.HIT_DIRECT);
-                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 384, "Cache:HIT_DIRECT: "
+                    UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 384, "Cache:HIT_DIRECT: "
                             + request.getUrl());
 
                     //no validation required - directly return the cached response
@@ -127,7 +127,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             }else if(request.isOnlyIfCached() && entry == null) {
                 IOException ioe =  new FileNotFoundException(request.getUrl());
                 if(async) {
-                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 386,
+                    UstadMobileSystemImpl.Companion.l(UMLog.INFO, 386,
                             "Cache:onlyIfCached: Fail: not cached: " + request.getUrl());
                     responseCallback.onFailure(this, ioe);
                     return cacheResponse;
@@ -165,7 +165,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             try {
                 execute();
             }catch(IOException e) {
-                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 73, request.getUrl(), e);
+                UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 73, request.getUrl(), e);
             }
         }
 
@@ -256,7 +256,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 if(!entryFile.exists() || (entryFile.exists() && entryFile.delete())){
                     deletedFileUris.add(fileUri);
                 }else {
-                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 0, "Failed to deleteByDownloadSetUid cache file: " +
+                    UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, "Failed to deleteByDownloadSetUid cache file: " +
                             fileUri);
                 }
             }
@@ -346,10 +346,10 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         if(networkResponse.getStatus() == 304) {
             updateCacheIndex(cacheResponse);
             cacheResponse.setNetworkResponseNotModified(true);
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 387, "Cache:HIT_VALIDATED:"+ request.getUrl());
+            UstadMobileSystemImpl.Companion.l(UMLog.INFO, 387, "Cache:HIT_VALIDATED:"+ request.getUrl());
         }else if(responseHasBody){
             cacheResponse.setOnResponseCompleteListener(this);
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 385, "Cache:MISS - storing:"+ request.getUrl());
+            UstadMobileSystemImpl.Companion.l(UMLog.INFO, 385, "Cache:MISS - storing:"+ request.getUrl());
             if(forkSaveToDisk) {
                 cacheResponse.initPipe();
                 executorService.execute(cacheResponse);
@@ -378,7 +378,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 try {
                     cachedEntry.setContentLength(Integer.parseInt(headerVal));
                 }catch(IllegalArgumentException e) {
-                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 74, headerVal, e);
+                    UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 74, headerVal, e);
                 }
             }
 

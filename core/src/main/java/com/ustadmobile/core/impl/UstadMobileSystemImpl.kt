@@ -592,10 +592,12 @@ abstract class UstadMobileSystemImpl {
          * @see UMLog.l
          * @param level log level
          * @param code log code
-         * @param message message to log
+         * @param message log message
+         * @param exception exception that occurred to log
          */
-        fun l(level: Int, code: Int, message: String?) {
-            instance.logger.l(level, code, message.toString())
+        @JvmStatic
+        fun l(level: Int, code: Int, message: String?, exception: Exception) {
+            instance.logger.l(level, code, message!!, exception)
         }
 
         /**
@@ -603,11 +605,11 @@ abstract class UstadMobileSystemImpl {
          * @see UMLog.l
          * @param level log level
          * @param code log code
-         * @param message log message
-         * @param exception exception that occurred to log
+         * @param message message to log
          */
-        fun l(level: Int, code: Int, message: String?, exception: Exception) {
-            instance.logger.l(level, code, message!!, exception)
+        @JvmStatic
+        fun l(level: Int, code: Int, message: String?) {
+            instance.logger.l(level, code, message.toString())
         }
     }
 

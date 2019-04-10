@@ -90,7 +90,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             try {
                 pipeSize = Math.min(maxPipeBuffer, Integer.parseInt(networkLengthHeader));
             }catch(NumberFormatException e) {
-                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 0, networkLengthHeader, e);
+                UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, networkLengthHeader, e);
             }
         }
 
@@ -99,7 +99,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         try {
             bufferedPipeOut= new PipedOutputStream(bufferPipeIn);
         }catch(IOException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 0,
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0,
                     "HttpCacheResponse: Exception with pipe init");
         }
     }
@@ -123,7 +123,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             bufferedPipeOut.flush();
             responseCompleted = true;
         }catch(IOException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 0, "Exception piping cache response to disk", e);
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, "Exception piping cache response to disk", e);
         }finally {
             UMIOUtils.INSTANCE.closeInputStream(networkIn);
             UMIOUtils.closeOutputStream(fout);
@@ -144,7 +144,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             fout.flush();
             responseCompleted = true;
         }catch(IOException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 0, "Exception writing / buffering response", e);
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, "Exception writing / buffering response", e);
         }finally {
             UMIOUtils.closeOutputStream(fout);
         }

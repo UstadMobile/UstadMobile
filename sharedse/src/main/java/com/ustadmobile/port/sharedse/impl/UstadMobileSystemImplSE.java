@@ -194,7 +194,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
             serializer = xmlPullParserFactory.newSerializer();
         }catch(XmlPullParserException e) {
-            Companion.l(UMLog.Companion.getERROR(), 92, null, e);
+            Companion.l(UMLog.ERROR, 92, null, e);
         }
 
         return serializer;
@@ -275,7 +275,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
                 prefIn = getAssetSync(context, appPrefResource);
                 appConfig.load(prefIn);
             }catch(IOException e) {
-                Companion.l(UMLog.Companion.getERROR(), 685, appPrefResource, e);
+                Companion.l(UMLog.ERROR, 685, appPrefResource, e);
             }finally {
                 UMIOUtils.closeInputStream(prefIn);
             }
