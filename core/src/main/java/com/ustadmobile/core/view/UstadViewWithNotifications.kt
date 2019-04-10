@@ -18,14 +18,14 @@ interface UstadViewWithNotifications {
          *
          * http://developer.android.com/reference/android/widget/Toast.html#LENGTH_SHORT
          */
-        val LENGTH_SHORT = 0
+        const val LENGTH_SHORT = 0
 
         /**
          * Long duration to show a notification for - matches the android constnat
          *
          * http://developer.android.com/reference/android/widget/Toast.html#LENGTH_LONG
          */
-        val LENGTH_LONG = 1
+        const val LENGTH_LONG = 1
     }
 
 

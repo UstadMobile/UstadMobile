@@ -12,10 +12,10 @@ interface VideoPlayerView : UstadView {
 
     companion object {
 
-        val ARG_CONTENT_ENTRY_ID = "entryid"
+        const val ARG_CONTENT_ENTRY_ID = "entryid"
 
-        val ARG_CONTAINER_UID = "containerUid"
+        const val ARG_CONTAINER_UID = "containerUid"
 
-        val VIEW_NAME = "VideoPlayer"
+        const val VIEW_NAME = "VideoPlayer"
     }
 }

@@ -16,7 +16,7 @@ interface ScormPackageView : UstadView, UstadViewWithNotifications {
 
     companion object {
 
-        val VIEW_NAME = "ScormPackage"
+        const val VIEW_NAME = "ScormPackage"
     }
 
 }

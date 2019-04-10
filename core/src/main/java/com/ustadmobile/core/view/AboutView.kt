@@ -12,6 +12,6 @@ interface AboutView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "About"
+        const val VIEW_NAME = "About"
     }
 }

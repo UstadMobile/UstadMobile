@@ -541,17 +541,17 @@ abstract class UstadMobileSystemImpl {
 
         val STATUS_ACQUISITION_IN_PROGRESS = 1
 
-        val ARG_REFERRER = "ref"
+        const val ARG_REFERRER = "ref"
 
         /**
          * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
          */
-        val GO_FLAG_SINGLE_TOP = 536870912
+        const val GO_FLAG_SINGLE_TOP = 536870912
 
         /**
          * As per Android Intent.FLAG_CLEAR_TOP
          */
-        val GO_FLAG_CLEAR_TOP = 67108864
+        const val GO_FLAG_CLEAR_TOP = 67108864
 
 
         init {

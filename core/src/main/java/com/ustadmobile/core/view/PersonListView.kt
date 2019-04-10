@@ -13,7 +13,7 @@ interface PersonListView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "PersonList"
+        const val VIEW_NAME = "PersonList"
     }
 
 }
