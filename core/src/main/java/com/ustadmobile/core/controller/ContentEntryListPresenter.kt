@@ -23,20 +23,20 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
 
     private var parentUid: Long? = null
 
-    override fun onCreate(map: Map<String, String> ?) {
-        super.onCreate(map)
-        val appDatabase = UmAccountManager.getRepositoryForActiveAccount(getContext())
+    override fun onCreate(savedState: Map<String, String?> ?) {
+        super.onCreate(savedState)
+        val appDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = appDatabase.contentEntryDao
 
-        if (arguments?.containsKey(ARG_CONTENT_ENTRY_UID)!!) {
+        if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {
             showContentByParent()
-        } else if (arguments?.containsKey(ARG_DOWNLOADED_CONTENT)!!) {
+        } else if (arguments.containsKey(ARG_DOWNLOADED_CONTENT)) {
             showDownloadedContent()
         }
     }
 
     private fun showContentByParent() {
-        parentUid = java.lang.Long.valueOf(arguments?.get(ARG_CONTENT_ENTRY_UID))
+        parentUid = java.lang.Long.valueOf(arguments.get(ARG_CONTENT_ENTRY_UID))
         viewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
         contentEntryDao!!.getContentByUuid(parentUid!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
@@ -132,10 +132,10 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
 
                 if (result.isLeaf) {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view?.context!!)
+                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListView.VIEW_NAME, args, view?.context!!)
+                    impl.go(ContentEntryListView.VIEW_NAME, args, view.context)
                 }
             }
 
@@ -157,7 +157,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
 
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        impl.go(DummyView.VIEW_NAME, null, view?.context!!,
+        impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
                 UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
 
     }
@@ -166,7 +166,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()
         args["contentEntryUid"] = entry.contentEntryUid.toString()
-        impl.go("DownloadDialog", args, getContext())
+        impl.go("DownloadDialog", args, context)
     }
 
     companion object {

@@ -57,9 +57,9 @@ object UmAccountManager {
             impl.setAppPref(PREFKEY_ENDPOINT_URL, account.endpointUrl, context)
         } else {
             impl.setAppPref(PREFKEY_PERSON_ID, "0", context)
-            impl.setAppPref(PREFKEY_USERNAME, null!!, context)
-            impl.setAppPref(PREFKEY_ACCESS_TOKEN, null!!, context)
-            impl.setAppPref(PREFKEY_ENDPOINT_URL, null!!, context)
+            impl.setAppPref(PREFKEY_USERNAME, null, context)
+            impl.setAppPref(PREFKEY_ACCESS_TOKEN, null, context)
+            impl.setAppPref(PREFKEY_ENDPOINT_URL, null, context)
         }
     }
 

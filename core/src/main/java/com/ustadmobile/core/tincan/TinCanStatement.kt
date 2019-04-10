@@ -54,7 +54,7 @@ class TinCanStatement : JSONObject {
     }
 
     @Throws(JSONException::class)
-    constructor(obj: JSONObject) : super(obj, getNamesArray(obj)!!) {
+    constructor(obj: JSONObject) : super(obj, getNamesArray(obj)) {
     }
 
     /**

@@ -22,7 +22,8 @@ import java.util.Vector
  *
  * @author mike
  */
-class BasePointController(context: Any, private var basePointView: BasePointView?) : UstadBaseController<UstadView>(context) {
+class BasePointController(context: Any, arguments: Map<String, String?>, view: BasePointView)
+    : UstadBaseController<BasePointView>(context, arguments, view) {
 
     private var args: Map<String, String>? = null
 
@@ -32,8 +33,7 @@ class BasePointController(context: Any, private var basePointView: BasePointView
 
     fun onCreate(args: Map<String, String>?, savedState: Map<String, String>?) {
         this.args = args
-        basePointView!!.setClassListVisible(false)
-        val impl = UstadMobileSystemImpl.instance
+        view.setClassListVisible(false)
 
         if (savedState != null && savedState.containsKey(ARG_WELCOME_SCREEN_DISPLAYED)) {
             isWelcomeScreenDisplayed = savedState[ARG_WELCOME_SCREEN_DISPLAYED] == "true"
@@ -45,13 +45,13 @@ class BasePointController(context: Any, private var basePointView: BasePointView
         }
 
         if (catalogTabs == null || catalogTabs.isEmpty()) {
-            val defaultArgs = UstadMobileSystemImpl.instance.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, getContext())
+            val defaultArgs = UstadMobileSystemImpl.instance.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context)
             catalogTabs = UMFileUtil.splitCombinedViewArguments(UMFileUtil.parseURLQueryString(defaultArgs!!) as Map<String, String>,
                     "catalog", '-')
         }
 
         for (i in catalogTabs.indices) {
-            basePointView!!.addTab(catalogTabs.elementAt(i) as Map<String, String>)
+            view.addTab(catalogTabs.elementAt(i) as Map<String, String>)
         }
     }
 
@@ -78,15 +78,6 @@ class BasePointController(context: Any, private var basePointView: BasePointView
         return result
     }
 
-    override fun setView(view: UstadView) {
-        if (view is BasePointView) {
-            super.setView(view)
-            this.basePointView = view
-        } else {
-            throw IllegalArgumentException("Must be basepointview")
-        }
-    }
-
 
     /**
      * Handle when the user clicks one of the base point menu items.
@@ -97,7 +88,7 @@ class BasePointController(context: Any, private var basePointView: BasePointView
      * @param item
      */
     fun handleClickBasePointMenuItem(item: BasePointMenuItem) {
-        UstadMobileSystemImpl.instance.go(item.destination, getContext())
+        UstadMobileSystemImpl.instance.go(item.destination, context)
     }
 
     override fun onResume() {
@@ -107,16 +98,16 @@ class BasePointController(context: Any, private var basePointView: BasePointView
     override fun onDestroy() {
         if (!keepTmpVariables) {
             UstadMobileSystemImpl.instance.setAppPref("tmp$ARG_WELCOME_SCREEN_DISPLAYED",
-                    null!!, getContext())
+                    null!!, context)
         }
     }
 
     fun handleClickShareApp() {
-        basePointView!!.showShareAppDialog()
+        view.showShareAppDialog()
     }
 
     fun handleClickReceive() {
-        UstadMobileSystemImpl.instance.go("ReceiveCourse", null, getContext())
+        UstadMobileSystemImpl.instance.go("ReceiveCourse", mapOf(), context)
     }
 
     fun handleClickConfirmShareApp(zip: Boolean) {

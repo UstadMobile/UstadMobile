@@ -12,6 +12,6 @@ abstract class ShowErrorUmCallback<T>(private val view: ViewWithErrorNotifier, p
 
     override fun onFailure(exception: Throwable) {
         view.showErrorNotification(UstadMobileSystemImpl.instance.getString(
-                errorMessage, view.context), null!!, 0)
+                errorMessage, view.context), Runnable { }, 0)
     }
 }
