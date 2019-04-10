@@ -33,7 +33,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var navigation: String? = null
 
-    var entryUuid: Long? = null
+    var entryUuid: Long = 0
         private set
 
     private var containerUid: Long? = 0L
@@ -63,18 +63,21 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryUuid = java.lang.Long.valueOf(arguments.get(ARG_CONTENT_ENTRY_UID))
         navigation = arguments.get(ARG_REFERRER)
 
-        contentEntryDao.getContentByUuid(entryUuid!!, object : UmCallback<ContentEntry> {
-            override fun onSuccess(result: ContentEntry) {
-                val licenseType = getLicenseType(result)
-                view.runOnUiThread (Runnable{
-                    view.setContentEntryLicense(licenseType)
-                    view.setContentEntryAuthor(result.author)
-                    view.setContentEntryTitle(result.title)
-                    view.setContentEntryDesc(result.description)
-                    if (result.thumbnailUrl != null && !result.thumbnailUrl.isEmpty()) {
-                        view.loadEntryDetailsThumbnail(result.thumbnailUrl)
-                    }
-                })
+        contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry?> {
+            override fun onSuccess(result: ContentEntry?) {
+                if(result != null) {
+                    val licenseType = getLicenseType(result)
+                    view.runOnUiThread (Runnable{
+                        view.setContentEntryLicense(licenseType)
+                        view.setContentEntryAuthor(result.author)
+                        view.setContentEntryTitle(result.title)
+                        view.setContentEntryDesc(result.description)
+                        if (result.thumbnailUrl != null && !result.thumbnailUrl.isEmpty()) {
+                            view.loadEntryDetailsThumbnail(result.thumbnailUrl)
+                        }
+                    })
+                }
+                
             }
 
             override fun onFailure(exception: Throwable) {
@@ -82,7 +85,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             }
         })
 
-        containerDao!!.findFilesByContentEntryUid(entryUuid!!, object : UmCallback<List<Container>> {
+        containerDao!!.findFilesByContentEntryUid(entryUuid, object : UmCallback<List<Container>> {
             override fun onSuccess(result: List<Container>) {
                 view.runOnUiThread(Runnable {
                     view.setDetailsButtonEnabled(!result.isEmpty())
@@ -98,14 +101,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             }
         })
 
-        contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid!!,
+        contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid,
                 object : UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>> {
 
                     override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>) {
                         view.runOnUiThread(Runnable {
                             view.setTranslationLabelVisible(!result.isEmpty())
                             view.setFlexBoxVisible(!result.isEmpty())
-                            view.setAvailableTranslations(result, entryUuid!!)
+                            view.setAvailableTranslations(result, entryUuid)
                         })
                     }
 
@@ -114,7 +117,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     }
                 })
 
-        statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid!!)
+        statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
         statusUmObserver = UmObserver { this.onEntryStatusChanged(it) }
         statusUmLiveData!!.observe(this, statusUmObserver)
     }
@@ -178,7 +181,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
             Thread {
 
-                val container = containerDao!!.getMostRecentContainerForContentEntry(entryUuid!!)
+                val container = containerDao!!.getMostRecentContainerForContentEntry(entryUuid)
                 if (container != null) {
                     containerUid = container.containerUid
                     val localNetworkNode = networkNodeDao!!.findLocalActiveNodeByContainerUid(
@@ -222,10 +225,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    fun handleDownloadButtonClick(isDownloadComplete: Boolean ?, entryUuid: Long?) {
+    fun handleDownloadButtonClick(isDownloadComplete: Boolean , entryUuid: Long) {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-        if (isDownloadComplete!!) {
-            ContentEntryUtil.goToContentEntry(entryUuid!!, repoAppDatabase, impl, isDownloadComplete,
+        if (isDownloadComplete) {
+            ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
                     context, object : UmCallback<Any> {
                 override fun onSuccess(result: Any ?) {
 
