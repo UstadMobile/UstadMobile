@@ -49,7 +49,7 @@ public class ClazzLogScheduleWorker extends Worker {
     public static long getNextClazzLogScheduleDueTime() {
         Calendar nextTimeCal = Calendar.getInstance();
         nextTimeCal.setTimeInMillis(System.currentTimeMillis() + (1000 * 60 * 60 * 24));
-        nextTimeCal.set(Calendar.HOUR, 0);
+        nextTimeCal.set(Calendar.HOUR_OF_DAY, 0);
         nextTimeCal.set(Calendar.MINUTE, 0);
         nextTimeCal.set(Calendar.SECOND, 0);
         nextTimeCal.set(Calendar.MILLISECOND, 0);
@@ -63,19 +63,14 @@ public class ClazzLogScheduleWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        System.out.println("doWork()..");
         UmAppDatabase dbRepo = UmAccountManager.getRepositoryForActiveAccount(getApplicationContext());
-        System.out.println("doWork(): got database..");
         //Create ClazzLogs for Today (call SchduledDao ) -
         // -> loop over clazzes and schedules and create ClazzLogs
         dbRepo.getScheduleDao().createClazzLogsForToday(
                 UmAccountManager.getActivePersonUid(getApplicationContext()), dbRepo);
-        System.out.println("doWork(): 2..");
         //Queue next worker at 00:00
         queueClazzLogScheduleWorker(getNextClazzLogScheduleDueTime());
-        System.out.println("doWork(): 3..");
         UstadMobileSystemImpl.getInstance().scheduleChecks(getApplicationContext());
-        System.out.println("doWork(): 4..");
         return Result.success();
     }
 }
