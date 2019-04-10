@@ -77,6 +77,9 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
         preOrdersButton = rootContainer.findViewById(R.id.fragment_sale_list_filter_pre_orders);
         paymentsDueButton = rootContainer.findViewById(R.id.fragment_sale_list_filter_payments_due);
 
+        //Sprint 2:
+        //paymentsDueButton.setVisibility(View.VISIBLE);
+
         allSalesButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterAll();

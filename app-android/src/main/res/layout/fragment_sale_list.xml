@@ -55,7 +55,8 @@
             android:paddingLeft="@dimen/bottom_navigation_notification_radius"
             android:paddingRight="@dimen/bottom_navigation_notification_radius"
             android:text="@string/payments_due"
-            android:textAppearance="@style/TextAppearance.AppCompat.Inverse" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Inverse"
+            android:visibility="gone" />
 
 
     </LinearLayout>

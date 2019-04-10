@@ -24,7 +24,8 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
     @UmInsert
     public abstract void insertAsync(SaleItem entity, UmCallback<Long> insertCallback);
 
-    public static final String GENERATE_SALE_NAME = " SELECT (SELECT SaleItem.saleItemQuantity " +
+    public static final String GENERATE_SALE_NAME =
+            " SELECT (SELECT SaleItem.saleItemQuantity " +
             "  FROM Sale s " +
             "  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = s.saleUid " +
             "  WHERE s.saleUid = :saleUid " +
@@ -34,6 +35,13 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
             "  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = i.saleItemProductUid" +
             "  WHERE i.saleItemSaleUid = :saleUid" +
             "  ORDER BY i.saleItemCreationDate ASC LIMIT 1) " +
+            " || " +
+            " (select (case  " +
+            "  when  " +
+            "  (SELECT count(*) from SaleItem si where si.saleItemSaleUid = :saleUid) > 1 " +
+            "  then '...'  " +
+            "  else '' " +
+            "  end) from sale)" +
             "FROM Sale " +
             "where Sale.saleUid = :saleUid ";
     @UmQuery(GENERATE_SALE_NAME)

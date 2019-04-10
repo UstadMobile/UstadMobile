@@ -85,6 +85,7 @@ public class SaleItemRecyclerAdapter extends
         TextView itemPrice = holder.itemView.findViewById(R.id.item_sale_item_price);
         TextView itemTotal = holder.itemView.findViewById(R.id.item_sale_item_total);
         TextView dueDate = holder.itemView.findViewById(R.id.item_sale_item_due_date);
+        ImageView dueDateImage = holder.itemView.findViewById(R.id.item_sale_item_warning_image);
 
         ConstraintLayout itemWhole = holder.itemView.findViewById(R.id.item_sale_item_cl);
 
@@ -101,7 +102,11 @@ public class SaleItemRecyclerAdapter extends
         itemQuantity.setText(String.valueOf(quantity));
         itemPrice.setText(priceString);
         itemTotal.setText(priceTotalString);
-        dueDate.setText(dueString);
+
+        //Sprint 2:
+        //dueDate.setVisibility(View.VISIBLE);
+        //dueDateImage.setVisibility(View.VISIBLE);
+        //dueDate.setText(dueString);
 
         itemWhole.setOnClickListener(v ->
                 mPresenter.handleClickSaleItemEdit(entity.getSaleItemUid()));

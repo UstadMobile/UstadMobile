@@ -101,6 +101,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         bottomNavigation.setAccentColor(getContextCompatColorFromColor(R.color.text_primary, getApplicationContext()));
         bottomNavigation.setInactiveColor(getContextCompatColorFromColor(R.color.bottom_navigation_unselected, getApplicationContext()));
         bottomNavigation.setBehaviorTranslationEnabled(false);
+        bottomNavigation.setNotificationBackgroundColor(getContextCompatColorFromColor(R.color.text_primary, getApplicationContext()));
         bottomNavigation.setUseElevation(true, 2L);
 
         //Create the items to be added
@@ -112,7 +113,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                         R.drawable.ic_assignment_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem sales_item =
                 new AHBottomNavigationItem(R.string.sales,
-                        R.drawable.ic_payment_black_24dp, R.color.default_back_color);
+                        R.drawable.ic_payment_note_cash_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem courses_item =
                 new AHBottomNavigationItem(R.string.courses,
                         R.drawable.ic_collections_bookmark_black_24dp, R.color.default_back_color);
@@ -267,7 +268,11 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     @Override
     public void updateNotificationForSales(int number) {
         //Send notification to 2nd last item (sales)
-        bottomNavigation.setNotification(String.valueOf(number),
+        String nString = String.valueOf(number);
+        if (number == 0) {
+            nString = "";
+        }
+        bottomNavigation.setNotification(nString,
                 bottomNavigation.getItemsCount() - 2);
     }
 

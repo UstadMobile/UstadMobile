@@ -57,7 +57,7 @@ public class Sale {
         this.saleCreationDate = System.currentTimeMillis();
         this.saleLastUpdateDate = this.saleCreationDate;
         this.saleDone = false; // It gets done only when Sale is delivered.
-        this.salePreOrder = false; //default to nope
+        this.salePreOrder = true; //default to true
         this.salePaymentDone = true; //Defaulting to true. Unless marked as done via payment addition.
         this.saleTitle = "";
         //Ideally salePaymentDone should be triggered from SaleItem and SalePayment

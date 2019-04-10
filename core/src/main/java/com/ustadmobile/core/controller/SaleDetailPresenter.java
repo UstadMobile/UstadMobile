@@ -49,6 +49,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     private UmLiveData<List<Location>> locationLiveData;
 
+    private Hashtable<Integer, Long> positionToLocationUid;
+
 
 
     public SaleDetailPresenter(Object context, Hashtable arguments, SaleDetailView view) {
@@ -62,6 +64,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         saleDao = repository.getSaleDao();
         locationDao = repository.getLocationDao();
 
+        positionToLocationUid = new Hashtable<>();
+
     }
 
     @Override
@@ -72,6 +76,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             initFromSale(Long.parseLong((String) getArguments().get(ARG_SALE_UID)));
         }else{
             updatedSale = new Sale();
+            updatedSale.setSalePreOrder(true); //ie: Not delivered unless ticked.
+            updatedSale.setSaleDone(false);
             updatedSale.setSaleActive(false);
 
             saleDao.insertAsync(updatedSale, new UmCallback<Long>() {
@@ -195,9 +201,12 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             locationUid = updatedSale.getSaleLocationUid();
         }
 
+        positionToLocationUid = new Hashtable<>();
+
         ArrayList<String> locationList = new ArrayList<>();
         int spinnerId = 0;
         for(Location el : changedLocations){
+            positionToLocationUid.put(spinnerId, el.getLocationUid());
             locationList.add(el.getTitle());
             if(locationUid == el.getLocationUid()){
                 selectedPosition = spinnerId;
@@ -216,27 +225,27 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         if(updatedSale != null){
             updatedSale.setSaleActive(true);
             saleItemDao.getTitleForSaleUidAsync(updatedSale.getSaleUid(), new UmCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    updatedSale.setSaleTitle(result);
+                    saleDao.updateAsync(updatedSale, new UmCallback<Integer>() {
                         @Override
-                        public void onSuccess(String result) {
-                            updatedSale.setSaleTitle(result);
-                            saleDao.updateAsync(updatedSale, new UmCallback<Integer>() {
-                                @Override
-                                public void onSuccess(Integer result) {
-                                    view.finish();
-                                }
-
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
+                        public void onSuccess(Integer result) {
+                            view.finish();
                         }
 
                         @Override
                         public void onFailure(Throwable exception) {
-
+                            exception.printStackTrace();
                         }
                     });
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
 
         }
     }
@@ -286,5 +295,15 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     public void handleSetDelivered(boolean delivered){
         updatedSale.setSaleDone(delivered);
+        updatedSale.setSalePreOrder(!delivered);
+
+    }
+
+    public void handleLocationSelected(int position){
+        if(position >= 0 && !positionToLocationUid.isEmpty()
+                && positionToLocationUid.containsKey(position)) {
+            long locationUid = positionToLocationUid.get(position);
+            updatedSale.setSaleLocationUid(locationUid);
+        }
     }
 }

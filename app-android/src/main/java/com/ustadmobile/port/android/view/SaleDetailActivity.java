@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -163,6 +164,17 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                 mPresenter.handleSetDelivered(isChecked));
 
         addItemCL.setOnClickListener(v -> mPresenter.handleClickAddSaleItem());
+
+        //Location spinner
+        locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleLocationSelected(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
 
     }

@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.app.Activity;
 
@@ -50,6 +51,7 @@ public class SaleListRecyclerAdapter extends
         TextView saleLocation = holder.itemView.findViewById(R.id.item_sale_location);
         TextView saleOrderDate = holder.itemView.findViewById(R.id.item_sale_order_date);
         TextView saleDueDate = holder.itemView.findViewById(R.id.item_sale_order_due_date);
+        ImageView saleDueDateImage = holder.itemView.findViewById(R.id.item_sale_order_due_date_image);
 
         assert entity != null;
         saleTitle.setText(entity.getSaleTitle());
@@ -65,12 +67,15 @@ public class SaleListRecyclerAdapter extends
         String dueString = theFragment.getText(R.string.due) + " " + String.valueOf(dueDatePretty);
         saleDueDate.setText(dueString);
 
-        if(entity.getSaleDueDate() != 0 &&
-                entity.getSaleDueDate() < System.currentTimeMillis()){
-            saleDueDate.setVisibility(View.VISIBLE);
-        }else{
-            saleDueDate.setVisibility(View.GONE);
-        }
+        //Sprint 2:
+//        if(entity.getSaleDueDate() != 0 &&
+//                entity.getSaleDueDate() < System.currentTimeMillis()){
+//            saleDueDate.setVisibility(View.VISIBLE);
+//            saleDueDateImage.setVisibility(View.VISIBLE);
+//        }else{
+//            saleDueDate.setVisibility(View.GONE);
+//            saleDueDateImage.setVisibility(View.GONE);
+//        }
 
         ConstraintLayout item = holder.itemView.findViewById(R.id.item_sale_cl);
         item.setOnClickListener(v -> mPresenter.handleClickSale(entity.getSaleUid()));
