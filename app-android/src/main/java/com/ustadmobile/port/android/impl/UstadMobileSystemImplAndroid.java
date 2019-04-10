@@ -297,10 +297,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             File systemBaseDir = new File(getSystemBaseDir(context));
             if (!systemBaseDir.exists()) {
                 if (systemBaseDir.mkdirs()) {
-                    Companion.l(UMLog.Companion.getINFO(), 0, "Created base system dir: " +
+                    l(UMLog.INFO, 0, "Created base system dir: " +
                             systemBaseDir.getAbsolutePath());
                 } else {
-                    Companion.l(UMLog.Companion.getCRITICAL(), 0, "Failed to created system base dir" +
+                    l(UMLog.CRITICAL, 0, "Failed to created system base dir" +
                             systemBaseDir.getAbsolutePath());
                 }
             }
@@ -601,7 +601,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             versionInfo = 'v' + pInfo.versionName + " (#" + pInfo.versionCode + ')';
         } catch (PackageManager.NameNotFoundException e) {
-            Companion.l(UMLog.Companion.getERROR(), 90, null, e);
+            l(UMLog.ERROR, 90, null, e);
         }
         return versionInfo;
     }
@@ -613,7 +613,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return pInfo.lastUpdateTime;
         } catch (PackageManager.NameNotFoundException e) {
-            Companion.l(UMLog.Companion.getERROR(), 90, null, e);
+            l(UMLog.ERROR, 90, null, e);
         }
 
         return 0;
@@ -638,7 +638,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 return metaData.getString(key);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), UMLog.Companion.getERROR(), key, e);
+            UstadMobileSystemImpl.l(UMLog.ERROR, UMLog.ERROR, key, e);
         }
 
         return null;
@@ -657,9 +657,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         PackageManager pm = ctx.getPackageManager();
         if (intent.resolveActivity(pm) != null) {
             ctx.startActivity(intent);
-            UmCallbackUtil.onSuccessIfNotNull(callback, null);
+            UmCallbackUtil.INSTANCE.onSuccessIfNotNull(callback, null);
         } else {
-            UmCallbackUtil.onFailIfNotNull(callback,
+            UmCallbackUtil.INSTANCE.onFailIfNotNull(callback,
                     new NoAppFoundException("No activity found for mimetype", mimeType));
         }
     }

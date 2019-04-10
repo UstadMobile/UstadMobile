@@ -7,10 +7,7 @@ import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
@@ -79,7 +76,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                         }
                     })
                 }
-                
+
             }
 
             override fun onFailure(exception: Throwable) {
@@ -88,14 +85,16 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         })
 
         containerDao!!.findFilesByContentEntryUid(entryUuid, object : UmCallback<List<Container>> {
-            override fun onSuccess(result: List<Container>) {
-                view.runOnUiThread(Runnable {
-                    view.setDetailsButtonEnabled(!result.isEmpty())
-                    if (!result.isEmpty()) {
-                        val container = result[0]
-                        view.setDownloadSize(container.fileSize)
-                    }
-                })
+            override fun onSuccess(result: List<Container>?) {
+               if(result != null){
+                   view.runOnUiThread(Runnable {
+                       view.setDetailsButtonEnabled(!result.isEmpty())
+                       if (!result.isEmpty()) {
+                           val container = result[0]
+                           view.setDownloadSize(container.fileSize)
+                       }
+                   })
+               }
             }
 
             override fun onFailure(exception: Throwable) {
@@ -106,12 +105,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid,
                 object : UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>> {
 
-                    override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>) {
-                        view.runOnUiThread(Runnable {
-                            view.setTranslationLabelVisible(!result.isEmpty())
-                            view.setFlexBoxVisible(!result.isEmpty())
-                            view.setAvailableTranslations(result, entryUuid)
-                        })
+                    override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>?) {
+                        if(result != null){
+                            view.runOnUiThread(Runnable {
+                                view.setTranslationLabelVisible(!result.isEmpty())
+                                view.setFlexBoxVisible(!result.isEmpty())
+                                view.setAvailableTranslations(result, entryUuid)
+                            })
+                        }
                     }
 
                     override fun onFailure(exception: Throwable) {
@@ -120,8 +121,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 })
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
-        statusUmObserver = UmObserver { this.onEntryStatusChanged(it) }
-        statusUmLiveData!!.observe(this, statusUmObserver)
+
+        statusUmObserver = object : UmObserver<ContentEntryStatus> {
+            override fun onChanged(t: ContentEntryStatus) {
+                onEntryStatusChanged(t)
+            }
+        }
+        statusUmLiveData!!.observe(this, statusUmObserver!!)
     }
 
     private fun getLicenseType(result: ContentEntry): String {
@@ -157,7 +163,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             isListeningToDownloadStatus.set(true)
             statusProvider.addDownloadChangeListener(this)
             statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
-                    this::onDownloadJobItemChange)
+                    object : UmResultCallback<DownloadJobItemStatus?> {
+                        override fun onDone(result: DownloadJobItemStatus?) {
+                            onDownloadJobItemChange(result)
+                        }
+                    })
             view.setDownloadButtonVisible(false)
             view.setDownloadProgressVisible(true)
         }else if(!isDownloading && isListeningToDownloadStatus.get()) {
@@ -307,7 +317,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitorStatus.set(false)
             monitor.stopMonitoringAvailability(this)
         }
-        statusUmLiveData!!.removeObserver(statusUmObserver)
+
+        if(statusUmObserver != null) {
+            statusUmLiveData?.removeObserver(statusUmObserver!!)
+        }
 
         if(isListeningToDownloadStatus.getAndSet(false)) {
             statusProvider.removeDownloadChangeListener(this)

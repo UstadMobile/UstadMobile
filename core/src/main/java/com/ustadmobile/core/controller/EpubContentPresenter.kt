@@ -102,7 +102,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
      */
     private val mountedCallbackHandler : UmCallback<String> = object : UmCallback<String> {
 
-        override fun onSuccess(result: String) {
+        override fun onSuccess(result: String?) {
             mountedUrl = result
             val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
             UstadMobileSystemImpl.instance.makeRequestAsync(
@@ -172,7 +172,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
 
                 val opfCoverImageItem = opf.getCoverImage("")
                 val authorNames = if (opf.numCreators > 0)
-                    UMUtil.joinStrings(opf.creators, ", ")
+                    UMUtil.joinStrings(opf.creators!!, ", ")
                 else
                     null
 

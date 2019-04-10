@@ -445,7 +445,7 @@ public class DownloadJobItemRunnerTest {
 
         clientDb.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS,status-> status == JobStatus.WAITING_FOR_CONNECTION);
 
@@ -478,7 +478,7 @@ public class DownloadJobItemRunnerTest {
 
         clientDb.getDownloadJobItemDao().updateStatus(item.getDjiUid(),JobStatus.STOPPING);
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status == JobStatus.STOPPED);
 
@@ -510,12 +510,12 @@ public class DownloadJobItemRunnerTest {
 
 
 
-        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(), 699,
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 699,
                 " Running DownloadJobItemRunner for "+item.getDjiUid());
 
         new Thread(jobItemRunner).start();
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao()
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao()
                         .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status >= JobStatus.RUNNING_MIN);
 
@@ -524,7 +524,7 @@ public class DownloadJobItemRunnerTest {
         clientDb.getDownloadSetDao().setMeteredConnectionBySetUid(
                 item.getDownloadSetItem().getDsiDsUid(),false);
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao()
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao()
                         .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status == JobStatus.WAITING_FOR_CONNECTION);
 
@@ -558,7 +558,7 @@ public class DownloadJobItemRunnerTest {
         clientDb.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
 
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 status->status == JobStatus.WAITING_FOR_CONNECTION);
 
@@ -682,7 +682,7 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 status -> status == JobStatus.COMPLETE);
 
@@ -838,7 +838,7 @@ public class DownloadJobItemRunnerTest {
 
         new Thread(jobItemRunner).start();
 
-        WaitForLiveData.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
+        WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), 1000, TimeUnit.SECONDS,
                 status -> status != null && status == JobStatus.COMPLETE);
 

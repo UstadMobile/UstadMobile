@@ -30,11 +30,9 @@ GNU General Public License for more details.
 */
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.core.util.UMFileUtil
-
-import java.util.Enumeration
-import java.util.Hashtable
+import com.ustadmobile.lib.util.Base64Coder
+import java.util.*
 
 /**
  *
@@ -175,8 +173,7 @@ class HTTPResult {
                     charArr[p++] = c
                 }
             }
-
-            response = Base64Coder.decode(charArr, 0, p)
+            response = Base64Coder.decodeToByteArray(charArr.toString())
             status = 200
         }
 

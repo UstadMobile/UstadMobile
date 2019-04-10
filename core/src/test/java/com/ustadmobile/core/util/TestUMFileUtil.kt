@@ -49,7 +49,7 @@ class TestUMFileUtil {
         combinedArgs["catalog-1-url"] = "bar"
 
         val splitArgs = UMFileUtil.splitCombinedViewArguments(combinedArgs, "catalog", '-')
-        val args0 = splitArgs[0] as Map<String, String>
+        val args0 = splitArgs[0] as Map<*, *>
         assertEquals("Catalog 0 arg is as expected", args0["url"], catalogUrl0)
     }
 

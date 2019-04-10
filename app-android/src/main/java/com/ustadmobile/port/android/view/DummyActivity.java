@@ -43,6 +43,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
+
     }
 
     @Override

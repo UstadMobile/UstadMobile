@@ -314,7 +314,7 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao()
                         .getJobLive(downloadJob.getDjUid()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
                 downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.CANCELLING);
 

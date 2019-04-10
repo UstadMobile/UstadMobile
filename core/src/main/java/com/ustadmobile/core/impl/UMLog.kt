@@ -58,17 +58,17 @@ abstract class UMLog {
 
     companion object {
 
-        val CRITICAL = 0
+        const val CRITICAL = 0
 
-        val ERROR = 1
+        const val ERROR = 1
 
-        val WARN = 2
+        const val WARN = 2
 
-        val INFO = 3
+        const val INFO = 3
 
-        val VERBOSE = 4
+        const val VERBOSE = 4
 
-        val DEBUG = 5
+        const val DEBUG = 5
     }
 
 

@@ -53,7 +53,7 @@ public class UmFileUtilSe {
             if(childFile.isDirectory()) {
                 allDeleted &= deleteRecursively(childFile);
             }else if(!childFile.delete()) {
-                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getWARN(), 53, "WARN: delete recursively " +
+                UstadMobileSystemImpl.l(UMLog.WARN, 53, "WARN: delete recursively " +
                         "could not delete child file " + childFile.getAbsolutePath());
                 childFile.deleteOnExit();
                 allDeleted = false;
@@ -64,7 +64,7 @@ public class UmFileUtilSe {
         allDeleted &= thisFileDeleted;
         if(!thisFileDeleted) {
             file.deleteOnExit();
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getWARN(), 53, "WARN: delete recursively " +
+            UstadMobileSystemImpl.l(UMLog.WARN, 53, "WARN: delete recursively " +
                     "could not delete " + file.getAbsolutePath());
         }
 

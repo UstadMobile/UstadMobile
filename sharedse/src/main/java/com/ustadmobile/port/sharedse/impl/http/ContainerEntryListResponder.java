@@ -40,7 +40,7 @@ public class ContainerEntryListResponder implements RouterNanoHTTPD.UriResponder
                         new Gson().toJson(entryList));
             }
         }catch(NumberFormatException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getWARN(), 700,
+            UstadMobileSystemImpl.Companion.l(UMLog.WARN, 700,
                     "ContainerEntryListResponder received bad uid");
         }
 

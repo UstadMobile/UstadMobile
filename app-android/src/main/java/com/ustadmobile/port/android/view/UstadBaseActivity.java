@@ -329,7 +329,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         final Resources res = newBase.getResources();
         final Configuration config = res.getConfiguration();
         String languageSetting = UstadMobileSystemImpl.Companion.getInstance().getLocale(newBase);
-        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(), 652, "Base Activity: set language to  '"
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
                 + languageSetting + "'");
 
         if (Build.VERSION.SDK_INT >= 17) {

@@ -39,8 +39,8 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         val containerUid = java.lang.Long.parseLong(arguments.get(ARG_CONTAINER_UID))
 
         contentEntryDao!!.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
-            override fun onSuccess(result: ContentEntry) {
-                view.setVideoInfo(result)
+            override fun onSuccess(result: ContentEntry?) {
+                view.setVideoInfo(result!!)
             }
 
             override fun onFailure(exception: Throwable) {
@@ -50,9 +50,9 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
 
 
         containerEntryDao.findByContainer(containerUid, object : UmCallback<List<ContainerEntryWithContainerEntryFile>> {
-            override fun onSuccess(result: List<ContainerEntryWithContainerEntryFile>) {
+            override fun onSuccess(result: List<ContainerEntryWithContainerEntryFile>?) {
 
-                for (entry in result) {
+                for (entry in result!!) {
 
                     val fileInContainer = entry.cePath
                     if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {

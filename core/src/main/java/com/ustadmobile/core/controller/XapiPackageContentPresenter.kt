@@ -44,7 +44,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
 
     private inner class ZipMountedCallbackHandler : ShowErrorUmCallback<String>(view, MessageID.error_opening_file) {
 
-        override fun onSuccess(result: String) {
+        override fun onSuccess(result: String?) {
             mountedPath = result
             UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
                     context,

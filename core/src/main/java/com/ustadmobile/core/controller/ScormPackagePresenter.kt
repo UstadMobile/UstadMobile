@@ -32,7 +32,7 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
     private var mountedPath: String? = null
 
     private val zipMountedCallback = object : UmCallback<String> {
-        override fun onSuccess(result: String) {
+        override fun onSuccess(result: String?) {
             mountedPath = result
             UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
                     context,
