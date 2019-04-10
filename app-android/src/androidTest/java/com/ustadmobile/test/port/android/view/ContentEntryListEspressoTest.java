@@ -507,7 +507,7 @@ public class ContentEntryListEspressoTest {
 
         intended(allOf(
                 hasComponent(ContentEntryListActivity.class.getCanonicalName()),
-                hasExtra(equalTo(Companion.getARG_CONTENT_ENTRY_UID()),
+                hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
                         equalTo(String.valueOf(2l))
                 )));
     }
@@ -531,7 +531,7 @@ public class ContentEntryListEspressoTest {
 
         intended(allOf(
                 hasComponent(ContentEntryDetailActivity.class.getCanonicalName()),
-                hasExtra(equalTo(Companion.getARG_CONTENT_ENTRY_UID()),
+                hasExtra(equalTo(ARG_CONTENT_ENTRY_UID),
                         equalTo(String.valueOf(6l))
                 )));
 

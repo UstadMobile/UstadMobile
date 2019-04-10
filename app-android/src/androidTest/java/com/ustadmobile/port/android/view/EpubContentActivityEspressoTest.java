@@ -123,7 +123,7 @@ public class EpubContentActivityEspressoTest {
 
     public void launchActivity() {
         Intent launchIntent = new Intent();
-        launchIntent.putExtra(EpubContentView.Companion.getARG_CONTAINER_UID(),
+        launchIntent.putExtra(EpubContentView.ARG_CONTAINER_UID,
                 String.valueOf(epubContainer.getContainerUid()));
         mActivityRule.launchActivity(launchIntent);
     }

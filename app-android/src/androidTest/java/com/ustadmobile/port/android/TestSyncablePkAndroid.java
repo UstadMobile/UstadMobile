@@ -24,7 +24,7 @@ public class TestSyncablePkAndroid {
 
     @Test
     public void givenSyncableEntity_whenInserted_canBeLookedUp() {
-        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.INSTANCE.getTargetContext());
+        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         db.clearAllTables();
         String newUsername = "bob" + System.currentTimeMillis();
         Person newPerson = new Person(newUsername, "bob", "jones");
@@ -35,7 +35,7 @@ public class TestSyncablePkAndroid {
 
     @Test
     public void givenSyncableEntityList_whenInserted_canAllBeLookedUp() {
-        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.INSTANCE.getTargetContext());
+        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         db.clearAllTables();
         int numInsertsToRun = 100;
         long timestamp = System.currentTimeMillis();
@@ -55,7 +55,7 @@ public class TestSyncablePkAndroid {
     @Test
     public void givenEmptyDatabase_whenSyncableEntitiesAreInsertedConcurrently_thenAllShouldBeInsertedWithNoDuplicates() {
         int numItemsToAdd = 100;
-        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.INSTANCE.getTargetContext());
+        UmAppDatabase db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         db.clearAllTables();
 
         PersonDao dao = db.getPersonDao();
