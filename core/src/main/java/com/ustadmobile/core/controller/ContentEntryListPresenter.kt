@@ -54,7 +54,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
 
         contentEntryDao!!.findUniqueLanguagesInList(parentUid!!, object : UmCallback<List<Language>> {
             override fun onSuccess(result: List<Language>?) {
-                val languages = LinkedList(result);
+                val languages = LinkedList(result)
                 if (languages.size > 1) {
                     val selectLang = Language()
                     selectLang.name = "Language"

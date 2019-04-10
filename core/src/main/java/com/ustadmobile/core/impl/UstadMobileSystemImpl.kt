@@ -562,7 +562,7 @@ abstract class UstadMobileSystemImpl {
             MIME_TYPES["image/svg"] = "svg"
             MIME_TYPES["application/epub+zip"] = "epub"
 
-            MIME_TYPES_REVERSE = UMUtil.flipMap(MIME_TYPES, MIME_TYPES_REVERSE)
+            MIME_TYPES_REVERSE = UMUtil.flipMap(MIME_TYPES, MIME_TYPES_REVERSE as MutableMap<String, String>)
         }
 
         /**

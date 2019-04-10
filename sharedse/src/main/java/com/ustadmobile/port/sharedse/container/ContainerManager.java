@@ -83,8 +83,7 @@ public class ContainerManager {
         byte[] buf = new byte[8 * 1024];
 
         for (File inFile : fileToPathInContainerMap.keySet()) {
-            fileToMd5Map.put(inFile, new String(
-                    Base64Coder.encode(UmFileUtilSe.getMd5Sum(inFile, buf))));
+            fileToMd5Map.put(inFile, Base64Coder.encodeToString(UmFileUtilSe.getMd5Sum(inFile, buf)));
         }
 
         //now see if we already have these files

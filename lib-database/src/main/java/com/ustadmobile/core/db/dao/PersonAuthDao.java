@@ -31,7 +31,7 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
                 ITERATIONS, KEY_LENGTH);
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            return new String(Base64Coder.encode(keyFactory.generateSecret(keySpec).getEncoded()));
+            return Base64Coder.encodeToString(keyFactory.generateSecret(keySpec).getEncoded());
         }catch(NoSuchAlgorithmException|InvalidKeySpecException e) {
             //should not happen
             throw new AssertionError("Error hashing password" + e.getMessage(), e);

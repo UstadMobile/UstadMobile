@@ -77,7 +77,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                         }
                     })
                 }
-                
+
             }
 
             override fun onFailure(exception: Throwable) {
@@ -86,14 +86,16 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         })
 
         containerDao!!.findFilesByContentEntryUid(entryUuid, object : UmCallback<List<Container>> {
-            override fun onSuccess(result: List<Container>) {
-                view.runOnUiThread(Runnable {
-                    view.setDetailsButtonEnabled(!result.isEmpty())
-                    if (!result.isEmpty()) {
-                        val container = result[0]
-                        view.setDownloadSize(container.fileSize)
-                    }
-                })
+            override fun onSuccess(result: List<Container>?) {
+               if(result != null){
+                   view.runOnUiThread(Runnable {
+                       view.setDetailsButtonEnabled(!result.isEmpty())
+                       if (!result.isEmpty()) {
+                           val container = result[0]
+                           view.setDownloadSize(container.fileSize)
+                       }
+                   })
+               }
             }
 
             override fun onFailure(exception: Throwable) {
@@ -104,12 +106,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid,
                 object : UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>> {
 
-                    override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>) {
-                        view.runOnUiThread(Runnable {
-                            view.setTranslationLabelVisible(!result.isEmpty())
-                            view.setFlexBoxVisible(!result.isEmpty())
-                            view.setAvailableTranslations(result, entryUuid)
-                        })
+                    override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>?) {
+                        if(result != null){
+                            view.runOnUiThread(Runnable {
+                                view.setTranslationLabelVisible(!result.isEmpty())
+                                view.setFlexBoxVisible(!result.isEmpty())
+                                view.setAvailableTranslations(result, entryUuid)
+                            })
+                        }
                     }
 
                     override fun onFailure(exception: Throwable) {
@@ -118,8 +122,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 })
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
-        statusUmObserver = UmObserver { this.onEntryStatusChanged(it) }
-        statusUmLiveData!!.observe(this, statusUmObserver)
+
+        statusUmObserver = object : UmObserver<ContentEntryStatus> {
+            override fun onChanged(t: ContentEntryStatus) {
+                onEntryStatusChanged(t)
+            }
+        }
+        statusUmLiveData!!.observe(this, statusUmObserver!!)
     }
 
     private fun getLicenseType(result: ContentEntry): String {
@@ -281,7 +290,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitorStatus.set(false)
             monitor.stopMonitoringAvailability(this)
         }
-        statusUmLiveData!!.removeObserver(statusUmObserver)
+        statusUmLiveData!!.removeObserver(statusUmObserver!!)
         super.onDestroy()
     }
 

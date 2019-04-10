@@ -230,7 +230,7 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleClickPositive();
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao()
                         .getJobLive(presenter.getCurrentJobId()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
                 downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.QUEUED);
 
@@ -275,7 +275,7 @@ public class DownloadDialogPresenterTest {
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
 
         presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE);
-        WaitForLiveData.observeUntil(
+        WaitForLiveData.INSTANCE.observeUntil(
                 umAppDatabase.getDownloadJobDao().getJobLive(downloadJob.getDjUid()),
                 MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 job -> job != null && job.getDjStatus() == JobStatus.PAUSED);
@@ -307,7 +307,7 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao()
                         .getJobLive(downloadJob.getDjUid()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
                 downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.CANCELLING);
 
@@ -326,7 +326,7 @@ public class DownloadDialogPresenterTest {
         HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobItemDao()
                         .findAllLive(), MAX_LATCH_WAITING_TIME , TimeUnit.SECONDS,
                 allItems -> allItems.size() == 5);
 
@@ -339,7 +339,7 @@ public class DownloadDialogPresenterTest {
         presenter.handleClickNegative();
 
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobItemDao()
                 .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 allItems -> allItems.size() == 0);
 
@@ -407,7 +407,7 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleWiFiOnlyOption(true);
 
-        WaitForLiveData.observeUntil(
+        WaitForLiveData.INSTANCE.observeUntil(
                 umAppDatabase.getDownloadSetDao().getLiveMeteredNetworkAllowed(downloadSet.getDsUid()),
                 MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 allowed -> allowed != null && !allowed);
@@ -439,7 +439,7 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleStorageOptionSelection(destDir);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadSetDao()
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadSetDao()
                         .getLiveDownloadSet(downloadSet.getDsUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, downloadSet -> downloadSet.getDestinationDir().equals(destDir));
 

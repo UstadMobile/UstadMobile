@@ -34,8 +34,8 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
         navigation = arguments.get(ARG_REFERRER)
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
-            override fun onSuccess(result: ContentEntry) {
-                view.runOnUiThread(Runnable{ view.setToolbarTitle(result.title) })
+            override fun onSuccess(result: ContentEntry?) {
+                view.runOnUiThread(Runnable{ view.setToolbarTitle(result!!.title) })
             }
 
             override fun onFailure(exception: Throwable) {
@@ -45,10 +45,10 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
 
         containerDao.findByUid(containerUid, object : UmCallback<Container> {
 
-            override fun onSuccess(result: Container) {
-                view.mountChunk(result, object : UmCallback<String> {
-                    override fun onSuccess(firstUrl: String) {
-                        view.loadUrl(firstUrl)
+            override fun onSuccess(result: Container?) {
+                view.mountChunk(result!!, object : UmCallback<String> {
+                    override fun onSuccess(result: String?) {
+                        view.loadUrl(result!!)
                     }
 
                     override fun onFailure(exception: Throwable) {
@@ -72,7 +72,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
                 repoAppDatabase, impl,
                 true,
                 context, object : UmCallback<Any> {
-            override fun onSuccess(result: Any) {
+            override fun onSuccess(result: Any?) {
 
             }
 

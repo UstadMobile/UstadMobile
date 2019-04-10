@@ -498,7 +498,7 @@ public class DownloadJobItemRunner implements Runnable {
     private boolean connectToCloudNetwork() {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 699, "Reconnecting cloud network");
         networkManager.restoreWifi();
-        WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
+        WaitForLiveData.INSTANCE.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
                     if(connectivityStatus == null)
                         return false;
@@ -577,7 +577,7 @@ public class DownloadJobItemRunner implements Runnable {
         //disconnect first
         if(connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED
                 && connectivityStatus.getWifiSsid() != null) {
-            WaitForLiveData.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
+            WaitForLiveData.INSTANCE.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
                     (connectivityStatus) -> connectivityStatus != null
                             && connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_UNMETERED);
             UstadMobileSystemImpl.l(UMLog.INFO, 699, "Disconnected existing wifi network");
@@ -590,7 +590,7 @@ public class DownloadJobItemRunner implements Runnable {
                 wiFiDirectGroupBle.get().getPassphrase());
 
         AtomicReference<ConnectivityStatus> statusRef = new AtomicReference<>();
-        WaitForLiveData.observeUntil(statusLiveData, lWiFiConnectionTimeout, TimeUnit.SECONDS,
+        WaitForLiveData.INSTANCE.observeUntil(statusLiveData, lWiFiConnectionTimeout, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
                     statusRef.set(connectivityStatus);
                     if(connectivityStatus == null)

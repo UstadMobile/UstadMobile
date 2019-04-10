@@ -657,9 +657,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         PackageManager pm = ctx.getPackageManager();
         if (intent.resolveActivity(pm) != null) {
             ctx.startActivity(intent);
-            UmCallbackUtil.onSuccessIfNotNull(callback, null);
+            UmCallbackUtil.INSTANCE.onSuccessIfNotNull(callback, null);
         } else {
-            UmCallbackUtil.onFailIfNotNull(callback,
+            UmCallbackUtil.INSTANCE.onFailIfNotNull(callback,
                     new NoAppFoundException("No activity found for mimetype", mimeType));
         }
     }
