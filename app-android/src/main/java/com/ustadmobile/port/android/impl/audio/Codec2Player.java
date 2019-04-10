@@ -48,7 +48,7 @@ public class Codec2Player implements Runnable {
                     AudioFormat.ENCODING_PCM_16BIT);
 
             track = new AudioTrack(
-                    AudioManager.STREAM_VOICE_CALL,
+                    AudioManager.STREAM_MUSIC,
                     8000,
                     AudioFormat.CHANNEL_OUT_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
@@ -77,7 +77,7 @@ public class Codec2Player implements Runnable {
             if (codec2 != null) {
                 codec2.destroy();
             }
-            UMIOUtils.closeInputStream(is);
+            UMIOUtils.INSTANCE.closeInputStream(is);
         }
 
     }

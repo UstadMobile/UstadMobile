@@ -10,13 +10,11 @@ import android.webkit.WebView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.WebChunkPresenter;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.view.ViewWithErrorNotifier;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-
-import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
 import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class WebChunkActivity extends UstadBaseActivity implements WebChunkView, ViewWithErrorNotifier {
@@ -99,7 +97,7 @@ public class WebChunkActivity extends UstadBaseActivity implements WebChunkView,
     public void showErrorWithAction(String message, int actionMessageId, String mimeType) {
         showErrorNotification(message, () -> {
             Context ctx = (Context) getContext();
-            String appPackageName = mimeTypeToPlayStoreIdMap.get(mimeType);
+            String appPackageName = ContentEntryUtil.INSTANCE.getMimeTypeToPlayStoreIdMap().get(mimeType);
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng";
             }

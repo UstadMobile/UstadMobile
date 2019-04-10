@@ -31,7 +31,7 @@ public class UmZipUtils {
                 }
             }
         } finally {
-            UMIOUtils.closeQuietly(entryOut);
+            UMIOUtils.INSTANCE.closeQuietly(entryOut);
         }
 
     }

@@ -31,7 +31,8 @@ import com.ustadmobile.core.controller.VideoPlayerPresenter;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.port.android.impl.audio.Codec2Player;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.Objects;
 
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -83,7 +84,7 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
         }
 
         mPresenter = new VideoPlayerPresenter(getContext(),
-                bundleToMap(getIntent().getExtras()), this);
+                Objects.requireNonNull(bundleToMap(getIntent().getExtras())), this);
         mPresenter.onCreate(bundleToMap(savedInstanceState));
     }
 

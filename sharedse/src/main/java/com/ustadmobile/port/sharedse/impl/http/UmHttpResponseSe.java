@@ -25,12 +25,17 @@ public class UmHttpResponseSe extends UmHttpResponse {
     }
 
     @Override
-    public byte[] getResponseBody() throws IOException {
-        return response.body().bytes();
+    public byte[] getResponseBody() {
+        try {
+            return response.body().bytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
-    public InputStream getResponseAsStream() throws IOException {
+    public InputStream getResponseAsStream() {
         return response.body().byteStream();
     }
 

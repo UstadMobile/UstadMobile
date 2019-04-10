@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.impl;
 
+
 import com.ustadmobile.port.javase.impl.UstadMobileSystemImplJavaSe;
 
 /**
@@ -41,7 +42,7 @@ public class UstadMobileSystemImplFactory {
     /**
      * @return
      */
-    public static UstadMobileSystemImpl makeSystemImpl() {
+    public static Object makeSystemImpl() {
         return new UstadMobileSystemImplJavaSe();
     }
 

@@ -78,7 +78,7 @@ public class LearnerProgressView extends LinearLayout {
         progressNumTextView.setTextColor(statusColorId);
 
         TextView progressTextView = (TextView)findViewById(R.id.opds_item_learner_progress_status_text);
-        progressTextView.setText(UstadMobileSystemImpl.getInstance().getString(
+        progressTextView.setText(UstadMobileSystemImpl.Companion.getInstance().getString(
                 progress.getStatus(), getContext()));
         progressTextView.setTextColor(statusColorId);
     }

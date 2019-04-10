@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class NoCacheResponse extends AbstractCacheResponse {
@@ -35,12 +34,12 @@ public class NoCacheResponse extends AbstractCacheResponse {
     }
 
     @Override
-    public byte[] getResponseBody() throws IOException {
+    public byte[] getResponseBody() {
         return networkResponse.getResponseBody();
     }
 
     @Override
-    public InputStream getResponseAsStream() throws IOException {
+    public InputStream getResponseAsStream() {
         return networkResponse.getResponseAsStream();
     }
 

@@ -21,6 +21,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.core.util.ContentEntryUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage;
@@ -33,7 +34,6 @@ import java.util.Set;
 
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_AVAILABLE_ICON;
 import static com.ustadmobile.core.controller.ContentEntryDetailPresenter.LOCALLY_NOT_AVAILABLE_ICON;
-import static com.ustadmobile.core.util.ContentEntryUtil.mimeTypeToPlayStoreIdMap;
 import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 public class ContentEntryDetailActivity extends UstadBaseActivity implements
@@ -164,7 +164,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void setDownloadSize(long fileSize) {
-        downloadSize.setText(UMFileUtil.formatFileSize(fileSize));
+        downloadSize.setText(UMFileUtil.INSTANCE.formatFileSize(fileSize));
     }
 
     @Override
@@ -175,19 +175,6 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
                 .into((ImageView) findViewById(R.id.entry_detail_thumbnail));
     }
 
-    @Override
-    public void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result,
-                                         long entryUuid) {
-
-        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
-        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
-        flexBox.setLayoutManager(flexboxLayoutManager);
-
-        ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter(result,
-                this, entryUuid);
-        flexBox.setAdapter(adapter);
-
-    }
 
     @Override
     public void updateDownloadProgress(float progressValue) {
@@ -210,7 +197,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     public void showFileOpenError(String message, int actionMessageId, String mimeType) {
         showErrorNotification(message, () -> {
             Context ctx = (Context) getContext();
-            String appPackageName = mimeTypeToPlayStoreIdMap.get(mimeType);
+            String appPackageName = ContentEntryUtil.INSTANCE.getMimeTypeToPlayStoreIdMap().get(mimeType);
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng";
             }
@@ -271,7 +258,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
 
     @Override
     public void showDownloadOptionsDialog(HashMap<String,String> args) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 () -> impl.go("DownloadDialog", args, getContext()),
@@ -311,5 +298,16 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     public void onLocalAvailabilityChanged(Set<Long> locallyAvailableEntries) {
         entryDetailPresenter.handleLocalAvailabilityStatus(locallyAvailableEntries);
+    }
+
+    @Override
+    public void setAvailableTranslations(List<? extends ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
+        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
+        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+        flexBox.setLayoutManager(flexboxLayoutManager);
+
+        ContentEntryDetailLanguageAdapter adapter = new ContentEntryDetailLanguageAdapter((List<ContentEntryRelatedEntryJoinWithLanguage>) result,
+                this, entryUuid);
+        flexBox.setAdapter(adapter);
     }
 }

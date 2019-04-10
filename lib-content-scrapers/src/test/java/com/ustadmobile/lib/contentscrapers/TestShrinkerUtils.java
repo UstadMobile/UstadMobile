@@ -106,14 +106,14 @@ public class TestShrinkerUtils {
         OcfDocument ocfDoc = new OcfDocument();
         File ocfFile = new File(tmpTest, Paths.get("META-INF", "container.xml").toString());
         FileInputStream ocfFileInputStream = new FileInputStream(ocfFile);
-        XmlPullParser ocfParser = UstadMobileSystemImpl.getInstance()
+        XmlPullParser ocfParser = UstadMobileSystemImpl.Companion.getInstance()
                 .newPullParser(ocfFileInputStream);
         ocfDoc.loadFromParser(ocfParser);
 
         File opfFile = new File(tmpTest, ocfDoc.getRootFiles().get(0).getFullPath());
         OpfDocument document = new OpfDocument();
         FileInputStream opfFileInputStream = new FileInputStream(opfFile);
-        XmlPullParser xmlPullParser = UstadMobileSystemImpl.getInstance()
+        XmlPullParser xmlPullParser = UstadMobileSystemImpl.Companion.getInstance()
                 .newPullParser(opfFileInputStream);
         document.loadFromOPF(xmlPullParser);
 

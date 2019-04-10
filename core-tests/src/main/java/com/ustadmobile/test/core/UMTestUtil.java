@@ -25,7 +25,7 @@ public class UMTestUtil {
      * @return Complete path the resource was copied to
      */
     public static String copyResourceToStorageDir(String resourcePath) throws IOException{
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
 
         OutputStream fileOut = null;
         InputStream entryIn = null;
@@ -35,24 +35,24 @@ public class UMTestUtil {
             entryIn = UMTestUtil.class.getResourceAsStream(resourcePath);
 
             Object context = PlatformTestUtil.getTargetContext();
-            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
+            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.Companion.getSHARED_RESOURCE(),
                     context);
             String outDir = storageDirs[0].getDirURI();
             if(new File(outDir).isDirectory()) {
                 new File(outDir).mkdirs();
             }
 
-            outPath = UMFileUtil.joinPaths(new String[]{outDir,
-                    UMFileUtil.getFilename(resourcePath)});
+            outPath = UMFileUtil.INSTANCE.joinPaths(new String[]{outDir,
+                    UMFileUtil.INSTANCE.getFilename(resourcePath)});
 
             fileOut = new FileOutputStream(new File(outPath));
-            UMIOUtils.readFully(entryIn, fileOut, 8*1024);
+            UMIOUtils.INSTANCE.readFully(entryIn, fileOut, 8*1024);
         }catch(IOException e) {
             ioe = e;
         }finally {
-            UMIOUtils.closeInputStream(entryIn);
+            UMIOUtils.INSTANCE.closeInputStream(entryIn);
             UMIOUtils.closeOutputStream(fileOut);
-            UMIOUtils.throwIfNotNullIO(ioe);
+            UMIOUtils.INSTANCE.throwIfNotNullIO(ioe);
         }
 
         return outPath;

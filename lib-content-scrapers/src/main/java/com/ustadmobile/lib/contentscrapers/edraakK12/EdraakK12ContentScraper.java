@@ -227,7 +227,7 @@ public class EdraakK12ContentScraper implements Runnable {
         }
 
         try {
-            String index = UMIOUtils.readToString(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), UTF_ENCODING);
+            String index = UMIOUtils.INSTANCE.readToString(getClass().getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), UTF_ENCODING);
             Document doc = Jsoup.parse(index, UTF_ENCODING);
             doc.head().selectFirst("title").text(response.title);
             FileUtils.writeStringToFile(new File(destinationDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING);

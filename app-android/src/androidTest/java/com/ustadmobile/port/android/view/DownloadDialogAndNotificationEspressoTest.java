@@ -145,7 +145,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         UmAccount testAccount = new UmAccount(0, "test", "",
                 testEndpoint);
-        UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
+        UmAccountManager.INSTANCE.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
 
         prepareContentEntriesAndFiles();
         SystemClock.sleep(MIN_SLEEP_TIME);
@@ -153,8 +153,8 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         Intent mIntent = new Intent();
-        mIntent.putExtra(ARG_CONTENT_ENTRY_UID, rootEntry.getContentEntryUid());
-        mIntent.putExtra(ARG_DOWNLOADED_CONTENT, "");
+        mIntent.putExtra(Companion.getARG_CONTENT_ENTRY_UID(), rootEntry.getContentEntryUid());
+        mIntent.putExtra(Companion.getARG_DOWNLOADED_CONTENT(), "");
         mActivityRule.launchActivity(mIntent);
 
     }

@@ -53,7 +53,7 @@ public class UmFileUtilSe {
             if(childFile.isDirectory()) {
                 allDeleted &= deleteRecursively(childFile);
             }else if(!childFile.delete()) {
-                UstadMobileSystemImpl.l(UMLog.WARN, 53, "WARN: delete recursively " +
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getWARN(), 53, "WARN: delete recursively " +
                         "could not delete child file " + childFile.getAbsolutePath());
                 childFile.deleteOnExit();
                 allDeleted = false;
@@ -64,7 +64,7 @@ public class UmFileUtilSe {
         allDeleted &= thisFileDeleted;
         if(!thisFileDeleted) {
             file.deleteOnExit();
-            UstadMobileSystemImpl.l(UMLog.WARN, 53, "WARN: delete recursively " +
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getWARN(), 53, "WARN: delete recursively " +
                     "could not delete " + file.getAbsolutePath());
         }
 
@@ -77,12 +77,12 @@ public class UmFileUtilSe {
             FileInputStream fin = new FileInputStream(src);
             FileOutputStream fout = new FileOutputStream(dst);
         ) {
-            UMIOUtils.readFully(fin, fout, bufferSize);
+            UMIOUtils.INSTANCE.readFully(fin, fout, bufferSize);
         }
     }
 
     public static void copyFile(File src, File dst) throws IOException{
-        copyFile(src, dst, UMIOUtils.DEFAULT_BUFFER_SIZE);
+        copyFile(src, dst, UMIOUtils.INSTANCE.getDEFAULT_BUFFER_SIZE());
     }
 
 
@@ -104,7 +104,7 @@ public class UmFileUtilSe {
     }
 
     public static byte[] getMd5Sum(InputStream in) throws IOException{
-        return getMd5Sum(in, new byte[UMIOUtils.DEFAULT_BUFFER_SIZE]);
+        return getMd5Sum(in, new byte[UMIOUtils.INSTANCE.getDEFAULT_BUFFER_SIZE()]);
     }
 
     public static byte[] getMd5Sum(File file, byte[] buf) throws IOException {
@@ -127,7 +127,7 @@ public class UmFileUtilSe {
     }
 
     public static byte[] getMd5Sum(File file) throws IOException {
-        return getMd5Sum(file, new byte[UMIOUtils.DEFAULT_BUFFER_SIZE]);
+        return getMd5Sum(file, new byte[UMIOUtils.INSTANCE.getDEFAULT_BUFFER_SIZE()]);
     }
 
     public static void extractResourceToFile(String resourcePath, File destFile) throws IOException {

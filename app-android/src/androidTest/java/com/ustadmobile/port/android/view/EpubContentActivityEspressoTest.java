@@ -102,7 +102,7 @@ public class EpubContentActivityEspressoTest {
 
         InputStream opfIn = epubContainerManager.getInputStream(
                 epubContainerManager.getEntry("OEBPS/package.opf"));
-        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(opfIn,
+        XmlPullParser xpp = UstadMobileSystemImpl.Companion.getInstance().newPullParser(opfIn,
                 "UTF-8");
         opfDocument = new OpfDocument();
         opfDocument.loadFromOPF(xpp);
@@ -111,7 +111,7 @@ public class EpubContentActivityEspressoTest {
         InputStream navDocIn = epubContainerManager.getInputStream(
                 epubContainerManager.getEntry("OEBPS/nav.html"));
         navDocument = new EpubNavDocument();
-        navDocument.load(UstadMobileSystemImpl.getInstance().newPullParser(navDocIn, "UTF-8"));
+        navDocument.load(UstadMobileSystemImpl.Companion.getInstance().newPullParser(navDocIn, "UTF-8"));
         navDocIn.close();
     }
 
@@ -123,7 +123,7 @@ public class EpubContentActivityEspressoTest {
 
     public void launchActivity() {
         Intent launchIntent = new Intent();
-        launchIntent.putExtra(EpubContentView.ARG_CONTAINER_UID,
+        launchIntent.putExtra(EpubContentView.Companion.getARG_CONTAINER_UID(),
                 String.valueOf(epubContainer.getContainerUid()));
         mActivityRule.launchActivity(launchIntent);
     }

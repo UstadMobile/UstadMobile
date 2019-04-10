@@ -51,7 +51,7 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
 
     @Override
     public void mountH5PDist(UmCallback<String> callback) {
-        callback.onSuccess(UMFileUtil.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
+        callback.onSuccess(UMFileUtil.INSTANCE.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
                 "h5p/dist"));
     }
 

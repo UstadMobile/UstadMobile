@@ -117,7 +117,7 @@ public class EpubContentPageFragment extends Fragment {
                     container, false);
             webView = viewGroup.findViewById(R.id.fragment_container_page_webview);
         }else {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView");
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(), 517, "Containerpage: recycled onCreateView");
         }
 
         webView.setTag(mPageIndex);
@@ -136,7 +136,7 @@ public class EpubContentPageFragment extends Fragment {
         webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                    UMFileUtil.getFilename(url));
+                    UMFileUtil.INSTANCE.getFilename(url));
             DownloadManager downloadManager = (DownloadManager)getContext().getSystemService(
                     Context.DOWNLOAD_SERVICE);
             downloadManager.enqueue(request);

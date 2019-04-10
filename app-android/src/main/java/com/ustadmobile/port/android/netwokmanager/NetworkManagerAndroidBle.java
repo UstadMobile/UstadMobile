@@ -174,22 +174,22 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     private ScheduledExecutorService delayedExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private AsyncServiceManager scanningServiceManager = new AsyncServiceManager(
-            AsyncServiceManager.STATE_STOPPED,
+            AsyncServiceManager.Companion.getSTATE_STOPPED(),
             ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
         public void start() {
             if(isBleCapable()){
-                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),689,
                         "Starting BLE scanning");
-                notifyStateChanged(STATE_STARTED);
+                notifyStateChanged(Companion.getSTATE_STARTED());
                 bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
                         (BluetoothAdapter.LeScanCallback) bleScanCallback);
-                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),689,
                         "BLE Scanning started ");
             }else{
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
-                UstadMobileSystemImpl.l(UMLog.ERROR,689,
+                notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),689,
                         "Not BLE capable, no need to start");
             }
         }
@@ -198,17 +198,17 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void stop() {
             bluetoothAdapter.stopLeScan((BluetoothAdapter.LeScanCallback) bleScanCallback);
-            notifyStateChanged(STATE_STOPPED);
+            notifyStateChanged(Companion.getSTATE_STOPPED());
         }
     };
 
     private AsyncServiceManager advertisingServiceManager = new AsyncServiceManager(
-            AsyncServiceManager.STATE_STOPPED,
+            AsyncServiceManager.Companion.getSTATE_STOPPED(),
             ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
         @Override
         public void start() {
             if(canDeviceAdvertise()){
-                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),689,
                         "Starting BLE advertising service");
                 gattServerAndroid = new BleGattServerAndroid(mContext,
                         NetworkManagerAndroidBle.this);
@@ -225,7 +225,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                 if(gattServerAndroid == null
                     || ((BleGattServerAndroid)gattServerAndroid).getGattServer() == null
                     || bleServiceAdvertiser == null) {
-                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                    notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
                     return;
                 }
 
@@ -247,21 +247,21 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                                 super.onStartSuccess(settingsInEffect);
                                 bleAdvertisingLastStartTime = System.currentTimeMillis();
-                                notifyStateChanged(STATE_STARTED);
-                                UstadMobileSystemImpl.l(UMLog.DEBUG,689,
+                                notifyStateChanged(Companion.getSTATE_STARTED());
+                                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getDEBUG(),689,
                                         "Service advertised successfully");
                             }
 
                             @Override
                             public void onStartFailure(int errorCode) {
                                 super.onStartFailure(errorCode);
-                                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
-                                UstadMobileSystemImpl.l(UMLog.ERROR,689,
+                                notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
+                                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),689,
                                         "Service could'nt start, with error code "+errorCode);
                             }
                         });
             }else {
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
             }
         }
 
@@ -276,10 +276,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                 gattServerAndroid = null;
             }catch(Exception e) {
                 //maybe because bluetooth is actually off?
-                UstadMobileSystemImpl.l(UMLog.ERROR, 689,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 689,
                         "Exception trying to stop gatt server", e);
             }
-            notifyStateChanged(STATE_STOPPED);
+            notifyStateChanged(Companion.getSTATE_STOPPED());
         }
     };
 
@@ -305,7 +305,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         && (timeNow - networkManager.wifiDirectRequestLastCompletedTime.get()) > TIMEOUT_AFTER_LAST_REQUEST;
                 setEnabled(!timedOut);
 
-                if(getState() != STATE_STOPPED)
+                if(getState() != Companion.getSTATE_STOPPED())
                     timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(),
                             TIMEOUT_CHECK_INTERVAL);
             }
@@ -318,19 +318,19 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         networkManager.wifiP2pChannel, (group) -> {
                     wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group,
                             networkManager.httpd.getListeningPort()) : null);
-                    if((group == null && getState() == STATE_STARTING)
-                        || (group != null && getState() == STATE_STOPPING)) {
+                    if((group == null && getState() == Companion.getSTATE_STARTING())
+                        || (group != null && getState() == Companion.getSTATE_STOPPING())) {
                         return;//it's working on it, and hasn't failed yet, don't notify status change
                     }
 
-                    notifyStateChanged(group != null ? STATE_STARTED : STATE_STOPPED);
+                    notifyStateChanged(group != null ? Companion.getSTATE_STARTED() : Companion.getSTATE_STOPPED());
                 });
             }
         };
 
 
         private WifiP2PGroupServiceManager(NetworkManagerAndroidBle networkManager) {
-            super(STATE_STOPPED,
+            super(Companion.getSTATE_STOPPED(),
                     (runnable, delay) -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS));
             this.networkManager = networkManager;
         }
@@ -347,7 +347,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         if(wifiP2pGroup != null) {
                             wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
                                     networkManager.httpd.getListeningPort()));
-                            notifyStateChanged(STATE_STARTED);
+                            notifyStateChanged(Companion.getSTATE_STARTED());
                         }else {
                             createNewGroup();
                         }
@@ -359,15 +359,15 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
-                    UstadMobileSystemImpl.l(UMLog.INFO,692, "Group created successfully");
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(),692, "Group created successfully");
                     /* wait for the broadcast. OnSuccess might be called before the group is really ready */
                 }
 
                 @Override
                 public void onFailure(int reason) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR,692,
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),692,
                             "Failed to create a group with error code "+reason);
-                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                    notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
                 }
             });
         }
@@ -378,15 +378,15 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     networkManager.wifiP2pChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
-                    UstadMobileSystemImpl.l(UMLog.INFO,693,
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(),693,
                             "Group removed successfully");
                     wiFiDirectGroup.set(null);
-                    notifyStateChanged(STATE_STOPPED);
+                    notifyStateChanged(Companion.getSTATE_STOPPED());
                 }
 
                 @Override
                 public void onFailure(int reason) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR,693,
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(),693,
                             "Failed to remove a group with error code " + reason);
 
                     //check if the group is still active
@@ -396,10 +396,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                                 if(wifiP2pGroup != null) {
                                     wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
                                             networkManager.httpd.getListeningPort()));
-                                    notifyStateChanged(STATE_STARTED, STATE_STARTED);
+                                    notifyStateChanged(Companion.getSTATE_STARTED(), Companion.getSTATE_STARTED());
                                 }else {
                                     wiFiDirectGroup.set(null);
-                                    notifyStateChanged(STATE_STOPPED);
+                                    notifyStateChanged(Companion.getSTATE_STOPPED());
                                 }
                             });
                 }
@@ -445,14 +445,14 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void onLost(Network network) {
             super.onLost(network);
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getVERBOSE(), 42, "NetworkCallback: onAvailable" +
                     prettyPrintNetwork(connectivityManager.getNetworkInfo(network)));
             handleDisconnected();
         }
 
         @Override
         public void onUnavailable(){
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onUnavailable");
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getVERBOSE(), 42, "NetworkCallback: onUnavailable");
             super.onUnavailable();
             handleDisconnected();
         }
@@ -461,7 +461,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
     private void handleDisconnected() {
         localConnectionOpener = null;
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected");
+        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getVERBOSE(), 42, "NetworkCallback: handleDisconnected");
         connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null));
         umAppDatabase.getConnectivityStatusDao()
@@ -483,7 +483,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         }else{
             networkInfo = connectivityManager.getActiveNetworkInfo();
         }
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" +
+        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getVERBOSE(), 42, "NetworkCallback: onAvailable" +
                 prettyPrintNetwork(networkInfo));
 
         String ssid = networkInfo != null ? normalizeAndroidWifiSsid(networkInfo.getExtraInfo()) : null;
@@ -680,8 +680,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis());
         wifiP2pGroupServiceManager.setEnabled(true);
         wifiP2pGroupServiceManager.await(state ->
-                        state == AsyncServiceManager.STATE_STARTED
-                        || state == AsyncServiceManager.STATE_STOPPED,
+                        state == AsyncServiceManager.Companion.getSTATE_STARTED()
+                        || state == AsyncServiceManager.Companion.getSTATE_STOPPED(),
                 timeout, timeoutUnit);
         return wifiP2pGroupServiceManager.getGroup();
     }
@@ -706,14 +706,14 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         boolean networkEnabled = false;
 
         do{
-            UstadMobileSystemImpl.l(UMLog.INFO, 693, "Trying to connect to " + ssid);
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693, "Trying to connect to " + ssid);
             if(!networkEnabled){
                 enableWifiNetwork(ssid,passphrase);
-                UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693,
                         "Network changed  to "+ssid);
                 networkEnabled = true;
             }else if(isConnectedToRequiredWiFi(ssid)){
-                UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693,
                         "ConnectToWifi: Already connected to WiFi with ssid =" + ssid);
                 break;
             } else {
@@ -725,25 +725,25 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                             (routeInfo.gateway >> 8 & 0xff),
                             (routeInfo.gateway >> 16 & 0xff),
                             (routeInfo.gateway >> 24 & 0xff));
-                    UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693,
                             "Trying to ping gateway IP address " + gatewayIp);
                     if(ping(gatewayIp, 1000)){
-                        UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693,
                                 "Ping successful!" + ssid);
                         connectedOrFailed = true;
                     }else {
-                        UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693,
                                 "ConnectToWifi: ping to " + gatewayIp + " failed on " + ssid);
                     }
                 }else{
-                    UstadMobileSystemImpl.l(UMLog.INFO, 693,
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693,
                             "ConnectToWifi: No DHCP gateway yet on " + ssid);
                 }
             }
 
 
             if(!connectedOrFailed && System.currentTimeMillis() > connectionDeadline){
-                UstadMobileSystemImpl.l(UMLog.INFO, 693, " TIMEOUT: failed to connect " + ssid);
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 693, " TIMEOUT: failed to connect " + ssid);
                 break;
             }
             SystemClock.sleep(1000);
@@ -835,7 +835,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
     @Override
     public void restoreWifi() {
-        UstadMobileSystemImpl.l(UMLog.INFO, 339, "NetworkManager: restore wifi");
+        UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 339, "NetworkManager: restore wifi");
         endAnyLocalSession();
         wifiManager.disconnect();
         deleteTemporaryWifiDirectSsids();
@@ -854,7 +854,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         String endpoint = umAppDatabase.getNetworkNodeDao().getEndpointUrlByGroupSsid(
                 connectivityStatusRef.get().getWifiSsid());
         if(endpoint == null){
-            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 699,
                     "ERROR: No endpoint url for ssid" +
                             connectivityStatusRef.get().getWifiSsid());
             return;
@@ -862,9 +862,9 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         try {
             String endSessionUrl = endpoint + "endsession";
-            UmHttpResponse response = UstadMobileSystemImpl.getInstance().makeRequestSync(new UmHttpRequest(mContext,
+            UmHttpResponse response = UstadMobileSystemImpl.Companion.getInstance().makeRequestSync(new UmHttpRequest(mContext,
                     endSessionUrl));
-            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Send end of session request " +
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 699, "Send end of session request " +
                     endSessionUrl);
         }catch(IOException e) {
             e.printStackTrace();
@@ -1017,7 +1017,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         if(wifiLockReference.get() == null) {
             wifiLockReference.set(wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF,
                     "UstadMobile-Wifi-Lock-Tag"));
-            UstadMobileSystemImpl.l(UMLog.INFO, 699, "WiFi lock acquired for "
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 699, "WiFi lock acquired for "
                     + lockHolder);
         }
     }
@@ -1030,7 +1030,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         if(wifiLockHolders.isEmpty() && lock != null){
             wifiLockReference.set(null);
             lock.release();
-            UstadMobileSystemImpl.l(UMLog.ERROR, 699,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 699,
                     "WiFi lock released from object "+lockHolder);
         }
 
@@ -1078,7 +1078,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) {
-            UstadMobileSystemImpl.l(UMLog.INFO, 699,
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 699,
                     "Method was invoked using reflection  "+method.getName());
             return null;
         }

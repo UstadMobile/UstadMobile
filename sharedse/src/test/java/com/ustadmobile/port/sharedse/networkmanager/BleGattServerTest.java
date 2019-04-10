@@ -72,6 +72,7 @@ public class BleGattServerTest {
         umAppDatabase.clearAllTables();
 
         gattServer = spy(BleGattServer.class);
+        gattServer.setContext(context);
         wiFiDirectGroupBle = new WiFiDirectGroupBle("NetworkSsId","@@@1234");
         wiFiDirectGroupBle.setIpAddress("127.0.0.1");
         wiFiDirectGroupBle.setPort(0);

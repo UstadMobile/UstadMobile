@@ -17,9 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -85,11 +84,11 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         }
 
         public UmHttpResponse execute() throws IOException {
-            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
             AbstractCacheResponse cacheResponse = null;
 
             if(request.getUrl().startsWith(PROTOCOL_FILE)) {
-                String filePath = UMFileUtil.stripPrefixIfPresent("file://", request.getUrl());
+                String filePath = UMFileUtil.INSTANCE.stripPrefixIfPresent("file://", request.getUrl());
                 int zipSepPos = filePath.indexOf('!');
                 if(zipSepPos == -1) {
                     File responseFile = new File(filePath);
@@ -115,7 +114,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 if(isFresh(entry, timeToLive) || request.isOnlyIfCached()) {
                     cacheResponse = new HttpCacheResponse(entry, request);
                     cacheResponse.setCacheResponse(HttpCacheResponse.HIT_DIRECT);
-                    UstadMobileSystemImpl.l(UMLog.INFO, 384, "Cache:HIT_DIRECT: "
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 384, "Cache:HIT_DIRECT: "
                             + request.getUrl());
 
                     //no validation required - directly return the cached response
@@ -128,7 +127,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             }else if(request.isOnlyIfCached() && entry == null) {
                 IOException ioe =  new FileNotFoundException(request.getUrl());
                 if(async) {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 386,
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 386,
                             "Cache:onlyIfCached: Fail: not cached: " + request.getUrl());
                     responseCallback.onFailure(this, ioe);
                     return cacheResponse;
@@ -145,7 +144,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 }
                 if(entry.getLastModified() > 0) {
                     httpRequest.addHeader("if-modified-since",
-                            UMCalendarUtil.makeHTTPDate(entry.getLastModified()));
+                            UMCalendarUtil.INSTANCE.makeHTTPDate(entry.getLastModified()));
                 }
             }
 
@@ -166,7 +165,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             try {
                 execute();
             }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 73, request.getUrl(), e);
+                UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 73, request.getUrl(), e);
             }
         }
 
@@ -211,7 +210,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             String responseCacheControlHeader = response.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL);
 
             if(responseCacheControlHeader != null) {
-                HashMap<String , String> responseCacheControl = UMFileUtil.parseParams(responseCacheControlHeader, ',');
+                Map<String, String> responseCacheControl = UMFileUtil.INSTANCE.parseParams(responseCacheControlHeader, ',');
 
                 if(responseCacheControl.containsKey(CACHE_CONTROL_NO_CACHE)) {
                     AbstractCacheResponse noCacheResponse = new NoCacheResponse(response);
@@ -257,7 +256,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 if(!entryFile.exists() || (entryFile.exists() && entryFile.delete())){
                     deletedFileUris.add(fileUri);
                 }else {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Failed to deleteByDownloadSetUid cache file: " +
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 0, "Failed to deleteByDownloadSetUid cache file: " +
                             fileUri);
                 }
             }
@@ -278,7 +277,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     }
 
     protected void initCache() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         InputStream fileIndexIn = null;
 //        This class is going to be removed anyway and replaced with using the image library caching mechanisms
 //        try {
@@ -347,10 +346,10 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         if(networkResponse.getStatus() == 304) {
             updateCacheIndex(cacheResponse);
             cacheResponse.setNetworkResponseNotModified(true);
-            UstadMobileSystemImpl.l(UMLog.INFO, 387, "Cache:HIT_VALIDATED:"+ request.getUrl());
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 387, "Cache:HIT_VALIDATED:"+ request.getUrl());
         }else if(responseHasBody){
             cacheResponse.setOnResponseCompleteListener(this);
-            UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache:MISS - storing:"+ request.getUrl());
+            UstadMobileSystemImpl.Companion.l(UMLog.Companion.getINFO(), 385, "Cache:MISS - storing:"+ request.getUrl());
             if(forkSaveToDisk) {
                 cacheResponse.initPipe();
                 executorService.execute(cacheResponse);
@@ -379,7 +378,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 try {
                     cachedEntry.setContentLength(Integer.parseInt(headerVal));
                 }catch(IllegalArgumentException e) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 74, headerVal, e);
+                    UstadMobileSystemImpl.Companion.l(UMLog.Companion.getERROR(), 74, headerVal, e);
                 }
             }
 
@@ -432,9 +431,9 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     public static final long calculateEntryExpirationTime(HttpCachedEntry cachedEntry) {
         String cacheControl = cachedEntry.getCacheControl();
         if(cacheControl != null) {
-            HashMap<String , String> ccParams = UMFileUtil.parseParams(cacheControl, ',');
+            Map<String, String> ccParams = UMFileUtil.INSTANCE.parseParams(cacheControl, ',');
             if(ccParams.containsKey(CACHE_CONTROL_KEY_MAX_AGE)) {
-                long maxage = Integer.parseInt(ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
+                long maxage = Integer.parseInt((String)ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
                 return cachedEntry.getLastChecked() + (maxage * 1000);
             }
         }
@@ -451,7 +450,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         String headerVal = response.getHeader(headerName);
         if(headerVal != null) {
             try {
-                return UMCalendarUtil.parseHTTPDate(headerVal);
+                return UMCalendarUtil.INSTANCE.parseHTTPDate(headerVal);
             }catch(NumberFormatException e) {
                 return -1L;
             }
@@ -490,13 +489,13 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                                               String dir) {
         File dirFile = new File(dir);
         File entryFile;
-        String filename = UMIOUtils.sanitizeIDForFilename(
-                UMFileUtil.getFilename(request.getUrl()));
+        String filename = UMIOUtils.INSTANCE.sanitizeIDForFilename(
+                UMFileUtil.INSTANCE.getFilename(request.getUrl()));
 
-        String[] filenameParts = UMFileUtil.splitFilename(filename);
+        String[] filenameParts = UMFileUtil.INSTANCE.splitFilename(filename);
         String contentType = response.getHeader(UmHttpRequest.HEADER_CONTENT_TYPE);
         if(contentType != null) {
-            String expectedExtension = UstadMobileSystemImpl.getInstance().getExtensionFromMimeType(contentType);
+            String expectedExtension = UstadMobileSystemImpl.Companion.getInstance().getExtensionFromMimeType(contentType);
             if(expectedExtension != null && !expectedExtension.equals(filenameParts[1])) {
                 filenameParts = new String[]{filename, expectedExtension};
                 filename = filenameParts[0] + "." + filenameParts[1];
@@ -515,7 +514,7 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
                 return entryFile.getAbsolutePath();
         }
 
-        return new File(dir, UMUUID.randomUUID().toString() + "." + filenameParts[1]).getAbsolutePath();
+        return new File(dir, UMUUID.Companion.randomUUID().toString() + "." + filenameParts[1]).getAbsolutePath();
     }
 
     /**

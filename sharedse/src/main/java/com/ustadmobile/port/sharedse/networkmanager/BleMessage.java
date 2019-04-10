@@ -224,7 +224,7 @@ public class BleMessage {
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            UMIOUtils.closeQuietly(bout);
+            UMIOUtils.INSTANCE.closeQuietly(bout);
         }
         return bout.toByteArray();
     }
@@ -258,7 +258,7 @@ public class BleMessage {
                 e.printStackTrace();
                 return new byte[][]{};
             }finally {
-                UMIOUtils.closeQuietly(outputStream);
+                UMIOUtils.INSTANCE.closeQuietly(outputStream);
             }
             byte[] totalPayLoad = outputStream.toByteArray();
             byte[][] packets = new byte[numPackets][mtu];
@@ -290,7 +290,7 @@ public class BleMessage {
                 try {
                     outputStream.write(packetContent, 1, packetContent.length - 1);
                 } finally {
-                    UMIOUtils.closeQuietly(outputStream);
+                    UMIOUtils.INSTANCE.closeQuietly(outputStream);
                 }
             }
             return outputStream.toByteArray();

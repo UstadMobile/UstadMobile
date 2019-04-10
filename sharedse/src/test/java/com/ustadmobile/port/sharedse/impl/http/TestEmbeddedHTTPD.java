@@ -63,7 +63,7 @@ public class TestEmbeddedHTTPD {
         EmbeddedHTTPD.ResponseListener responseListener = mock(EmbeddedHTTPD.ResponseListener.class);
         httpd.addResponseListener(responseListener);
 
-        UmHttpResponse response = UstadMobileSystemImpl.getInstance().makeRequestSync(
+        UmHttpResponse response = UstadMobileSystemImpl.Companion.getInstance().makeRequestSync(
                 new UmHttpRequest(context, httpd.getLocalHttpUrl() + "dir/filename.txt"));
 
         ArgumentCaptor<NanoHTTPD.IHTTPSession> sessionArgumentCaptor = ArgumentCaptor.forClass(

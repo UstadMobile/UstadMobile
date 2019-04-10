@@ -78,15 +78,15 @@ public class TestResumableHttpDownload {
             MessageDigest md = MessageDigest.getInstance("MD5");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             din = new DigestInputStream(in, md);
-            UMIOUtils.readFully(din, bout, 1024 * 16);
+            UMIOUtils.INSTANCE.readFully(din, bout, 1024 * 16);
             byte[] byteArr = bout.toByteArray();
             return new TestResourceInfo(md.digest(), byteArr.length);
         }catch(IOException ioe) {
-            UMIOUtils.throwIfNotNull(ioe, IOException.class);
+            UMIOUtils.INSTANCE.throwIfNotNull(ioe, IOException.class);
         }catch(NoSuchAlgorithmException nse) {
-            UMIOUtils.throwIfNotNull(nse, NoSuchAlgorithmException.class);
+            UMIOUtils.INSTANCE.throwIfNotNull(nse, NoSuchAlgorithmException.class);
         }finally{
-            UMIOUtils.closeInputStream(din);
+            UMIOUtils.INSTANCE.closeInputStream(din);
         }
 
         return null;
@@ -98,7 +98,7 @@ public class TestResumableHttpDownload {
             NoSuchAlgorithmException{
         TestResourceInfo testResInfo = getResourceInfo(getClass().getResourceAsStream(
                 TEST_RESOURCE_PATH));
-        String httpDownloadUrl = UMFileUtil.joinPaths(httpRoot, TEST_RESOURCE_PATH);
+        String httpDownloadUrl = UMFileUtil.INSTANCE.joinPaths(httpRoot, TEST_RESOURCE_PATH);
         File tmpDownloadFile = File.createTempFile("testresuambledownload", ".epub");
         ResumableHttpDownload resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());
@@ -126,7 +126,7 @@ public class TestResumableHttpDownload {
         File tmpDownloadFile = File.createTempFile("testresumabledownload-retry", ".epub");
 
         for(int i = 0; i < retryLimit && !result; i++) {
-            String httpDownloadUrl = UMFileUtil.joinPaths(httpRoot,
+            String httpDownloadUrl = UMFileUtil.INSTANCE.joinPaths(httpRoot,
                     TEST_RESOURCE_PATH + "?cutoffafter=100000");
             ResumableHttpDownload resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());
@@ -150,7 +150,7 @@ public class TestResumableHttpDownload {
 
     @Test
     public void givenRemoteFileNotExisting_whenDownloaded_shouldThrowException() throws IOException{
-        String httpDownloadUrl = UMFileUtil.joinPaths(httpRoot, TEST_RESOURCE_PATH + "-wrongurl");
+        String httpDownloadUrl = UMFileUtil.INSTANCE.joinPaths(httpRoot, TEST_RESOURCE_PATH + "-wrongurl");
         File tmpDownloadFile = File.createTempFile("testresuambledownload-wrongurl", ".epub");
         ResumableHttpDownload resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());
@@ -170,7 +170,7 @@ public class TestResumableHttpDownload {
 
     @Test
     public void givenRemoteServerOffline_whenDownloaded_shouldThrowException() throws IOException{
-        String httpDownloadUrl = UMFileUtil.joinPaths("http://localhost:42", TEST_RESOURCE_PATH);
+        String httpDownloadUrl = UMFileUtil.INSTANCE.joinPaths("http://localhost:42", TEST_RESOURCE_PATH);
         File tmpDownloadFile = File.createTempFile("testresumabledownload-offlineserver", ".epub");
         ResumableHttpDownload resumableHttpDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());

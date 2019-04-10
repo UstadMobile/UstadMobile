@@ -57,7 +57,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         int itemId = item.getItemId();
 
         if (itemId == R.id.action_open_about){
-            UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME,getContext());
+            UstadMobileSystemImpl.Companion.getInstance().go(AboutView.Companion.getVIEW_NAME(),getContext());
         }else if(itemId == R.id.action_clear_history){
             UmAppDatabase database = UmAppDatabase.getInstance(this);
             database.getNetworkNodeDao().deleteAll(null);
@@ -77,7 +77,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
     @Override
     protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
                 ((NetworkManagerAndroidBle) networkManagerBle)::checkP2PBleServices,
                 impl.getString(MessageID.location_permission_title,getContext()),
@@ -92,7 +92,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         LibraryPagerAdapter(FragmentManager fragmentManager, Context context) {
             super(fragmentManager);
             this.context = context;
-            impl = UstadMobileSystemImpl.getInstance();
+            impl = UstadMobileSystemImpl.Companion.getInstance();
         }
 
         // Returns total number of pages

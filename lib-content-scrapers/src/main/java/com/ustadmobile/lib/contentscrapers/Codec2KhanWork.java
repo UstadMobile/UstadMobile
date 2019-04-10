@@ -138,7 +138,7 @@ public class Codec2KhanWork {
                     UMLogUtil.logInfo("No subtitle for youtube link " + youtubeId + " and fileUid " + khanFile.getContainerUid());
                 }
 
-                File webMFile = new File(contentFolder, UMFileUtil.stripExtensionIfPresent(content.getName()) + WEBM_EXT);
+                File webMFile = new File(contentFolder, UMFileUtil.INSTANCE.stripExtensionIfPresent(content.getName()) + WEBM_EXT);
                 ShrinkerUtil.convertKhanVideoToWebMAndCodec2(content, webMFile);
 
                 UMLogUtil.logTrace("Converted Coddec2");

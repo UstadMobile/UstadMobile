@@ -144,14 +144,14 @@ public class IndexFolderScraper {
                         OcfDocument ocfDoc = new OcfDocument();
                         File ocfFile = new File(tmpFolder, Paths.get("META-INF", "container.xml").toString());
                         ocfFileInputStream = new FileInputStream(ocfFile);
-                        XmlPullParser ocfParser = UstadMobileSystemImpl.getInstance()
+                        XmlPullParser ocfParser = UstadMobileSystemImpl.Companion.getInstance()
                                 .newPullParser(ocfFileInputStream);
                         ocfDoc.loadFromParser(ocfParser);
 
                         File opfFile = new File(tmpFolder, ocfDoc.getRootFiles().get(0).getFullPath());
                         OpfDocument document = new OpfDocument();
                         opfFileInputStream = new FileInputStream(opfFile);
-                        XmlPullParser xmlPullParser = UstadMobileSystemImpl.getInstance()
+                        XmlPullParser xmlPullParser = UstadMobileSystemImpl.Companion.getInstance()
                                 .newPullParser(opfFileInputStream);
                         document.loadFromOPF(xmlPullParser);
 
@@ -190,16 +190,16 @@ public class IndexFolderScraper {
                             ContentScraperUtil.insertContainer(containerDao, childEntry, true,
                                     ScraperConstants.MIMETYPE_EPUB, tmpFolder.lastModified(), tmpFolder, db, repository,
                                     containerDir);
-                            UMIOUtils.closeQuietly(opfFileInputStream);
-                            UMIOUtils.closeQuietly(ocfFileInputStream);
+                            UMIOUtils.INSTANCE.closeQuietly(opfFileInputStream);
+                            UMIOUtils.INSTANCE.closeQuietly(ocfFileInputStream);
                             FileUtils.deleteDirectory(tmpFolder);
                         }
                     } catch (Exception e) {
                         UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
                         UMLogUtil.logError("Error while parsing a file " + folder.getName());
                     } finally {
-                        UMIOUtils.closeQuietly(opfFileInputStream);
-                        UMIOUtils.closeQuietly(ocfFileInputStream);
+                        UMIOUtils.INSTANCE.closeQuietly(opfFileInputStream);
+                        UMIOUtils.INSTANCE.closeQuietly(ocfFileInputStream);
                     }
 
                 }
