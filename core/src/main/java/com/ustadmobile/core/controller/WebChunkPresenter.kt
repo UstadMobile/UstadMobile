@@ -38,7 +38,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
                 view.runOnUiThread(Runnable{ view.setToolbarTitle(result!!.title) })
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -51,13 +51,13 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
                         view.loadUrl(result!!)
                     }
 
-                    override fun onFailure(exception: Throwable) {
+                    override fun onFailure(exception: Throwable?) {
 
                     }
                 })
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -76,16 +76,18 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
 
             }
 
-            override fun onFailure(exception: Throwable) {
-                val message = exception.message
-                if (exception is NoAppFoundException) {
-                    view.runOnUiThread(Runnable {
-                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
-                                MessageID.get_app,
-                                exception.mimeType!!)
-                    })
-                } else {
-                    view.runOnUiThread(Runnable  { view.showError(message!!) })
+            override fun onFailure(exception: Throwable?) {
+                if(exception != null){
+                    val message = exception.message
+                    if (exception is NoAppFoundException) {
+                        view.runOnUiThread(Runnable {
+                            view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                                    MessageID.get_app,
+                                    exception.mimeType!!)
+                        })
+                    } else {
+                        view.runOnUiThread(Runnable  { view.showError(message!!) })
+                    }
                 }
             }
         })

@@ -46,7 +46,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var statusUmLiveData: UmLiveData<ContentEntryStatus>? = null
 
-    private var statusUmObserver: UmObserver<ContentEntryStatus>? = null
+    private val statusUmObserver: UmObserver<ContentEntryStatus> =
+            object : UmObserver<ContentEntryStatus> {
+                override fun onChanged(t: ContentEntryStatus?) {
+                    when (t) {
+                        null -> onEntryStatusChanged(null)
+                        else -> onEntryStatusChanged(t)
+                    }
+                }
+            }
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
@@ -80,8 +88,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
             }
 
-            override fun onFailure(exception: Throwable) {
-
+            override fun onFailure(exception: Throwable?) {
             }
         })
 
@@ -98,7 +105,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                }
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -116,19 +123,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                         }
                     }
 
-                    override fun onFailure(exception: Throwable) {
+                    override fun onFailure(exception: Throwable?) {
 
                     }
                 })
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
-        statusUmObserver = object : UmObserver<ContentEntryStatus> {
-            override fun onChanged(t: ContentEntryStatus) {
-                onEntryStatusChanged(t)
-            }
-        }
-        statusUmLiveData!!.observe(this, statusUmObserver!!)
+        statusUmLiveData!!.observe(this, statusUmObserver)
     }
 
     private fun getLicenseType(result: ContentEntry): String {
@@ -170,14 +172,12 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         })
 
         if (isDownloading) {
-
             view.runOnUiThread(Runnable {
                 view.setDownloadButtonVisible(false)
                 view.setDownloadProgressVisible(true)
                 view.updateDownloadProgress(if (status!!.totalSize > 0)
                     status.bytesDownloadSoFar.toFloat() / status.totalSize.toFloat()
-                else
-                    0f)
+                else 0f)
             })
 
         }
@@ -243,16 +243,18 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
                 }
 
-                override fun onFailure(exception: Throwable) {
-                    val message = exception.message
-                    if (exception is NoAppFoundException) {
-                        view.runOnUiThread (Runnable{
-                            view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
-                                    MessageID.get_app,
-                                    exception.mimeType!!)
-                        })
-                    } else {
-                        view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+                override fun onFailure(exception: Throwable?) {
+                    if(exception != null){
+                        val message = exception.message
+                        if (exception is NoAppFoundException) {
+                            view.runOnUiThread (Runnable{
+                                view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
+                                        MessageID.get_app,
+                                        exception.mimeType!!)
+                            })
+                        } else {
+                            view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+                        }
                     }
                 }
             })
@@ -290,7 +292,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitorStatus.set(false)
             monitor.stopMonitoringAvailability(this)
         }
-        statusUmLiveData!!.removeObserver(statusUmObserver!!)
+        statusUmLiveData!!.removeObserver(statusUmObserver)
         super.onDestroy()
     }
 

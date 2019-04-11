@@ -37,7 +37,7 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
             view.mountH5PFile(h5pFileUri!!, h5PFileMountedCallback)
         }
 
-        override fun onFailure(exception: Throwable) {
+        override fun onFailure(exception: Throwable?) {
 
         }
     }
@@ -49,7 +49,7 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
                     "/com/ustadmobile/core/h5p/contentframe.html", contentFrameLoadedCallback)
         }
 
-        override fun onFailure(exception: Throwable) {
+        override fun onFailure(exception: Throwable?) {
 
         }
     }
@@ -76,7 +76,7 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
 
         }
 
-        override fun onFailure(exception: Throwable) {
+        override fun onFailure(exception: Throwable?) {
 
         }
     }

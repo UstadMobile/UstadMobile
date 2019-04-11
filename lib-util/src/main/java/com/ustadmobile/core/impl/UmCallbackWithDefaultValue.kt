@@ -11,7 +11,7 @@ class UmCallbackWithDefaultValue<T>(private val defaultVal: T, callback: UmCallb
             UmCallbackUtil.onSuccessIfNotNull(callback, defaultVal)
     }
 
-    override fun onFailure(exception: Throwable) {
-        UmCallbackUtil.onFailIfNotNull(callback, exception)
+    override fun onFailure(exception: Throwable?) {
+        UmCallbackUtil.onFailIfNotNull(callback, exception!!)
     }
 }

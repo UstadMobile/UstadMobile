@@ -47,7 +47,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
                 viewContract.setToolbarTitle(result.title)
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
                 viewContract.runOnUiThread(Runnable { viewContract.showError() })
             }
         })
@@ -70,7 +70,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
                 }
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -107,7 +107,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
 
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -139,7 +139,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
                 }
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
                 viewContract.runOnUiThread(Runnable { viewContract.showError() })
             }
         })

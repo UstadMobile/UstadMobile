@@ -40,7 +40,7 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
                     manifestLoadedCallback)
         }
 
-        override fun onFailure(exception: Throwable) {
+        override fun onFailure(exception: Throwable?) {
             view.showNotification("ERROR: failed to open package file",
                     UstadViewWithNotifications.LENGTH_LONG)
         }
