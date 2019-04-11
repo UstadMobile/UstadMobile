@@ -12,11 +12,19 @@ import com.ustadmobile.core.view.SaleListView;
 import com.ustadmobile.core.view.SaleDetailView;
 
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.Sale;
 
 import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.lib.db.entities.SaleListDetail;
 
+import static com.ustadmobile.core.db.dao.SaleDao.ALL_SELECTED;
+import static com.ustadmobile.core.db.dao.SaleDao.PAYMENT_SELECTED;
+import static com.ustadmobile.core.db.dao.SaleDao.PREORDER_SELECTED;
+import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_AMOUNT_ASC;
+import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_AMOUNT_DESC;
+import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_DATE_CREATED_ASC;
+import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_DATE_CREATED_DESC;
+import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_NAME_ASC;
+import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_NAME_DESC;
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
 
 /**
@@ -28,16 +36,11 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
     UmAppDatabase repository;
     private SaleDao providerDao;
 
-    public static final int SORT_ORDER_NAME=1;
-    public static final int SORT_ORDER_AMOUNT=2;
-    public static final int SORT_ORDER_DATE_CREATED_DESC=3;
-    public static final int SORT_ORDER_DATE_CREATED_ASC=4;
+
 
     private Hashtable<Long, Integer> idToOrderInteger;
 
-    public static final int ALL_SELECTED = 1;
-    public static final int PREORDER_SELECTED = 2;
-    public static final int PAYMENT_SELECTED = 3;
+
 
     private int filterSelected ;
 
@@ -87,10 +90,14 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
 
         idToOrderInteger = new Hashtable<>();
 
-        presetAL.add(impl.getString(MessageID.sale_list_sort_by_name, getContext()));
-        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_NAME);
-        presetAL.add(impl.getString(MessageID.sale_list_sort_by_total, getContext()));
-        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_AMOUNT);
+        presetAL.add(impl.getString(MessageID.sort_by_name_asc, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_NAME_ASC);
+        presetAL.add(impl.getString(MessageID.sorT_by_name_desc, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_NAME_DESC);
+        presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_asc, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_AMOUNT_ASC);
+        presetAL.add(impl.getString(MessageID.sale_list_sort_by_total_desc, getContext()));
+        idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_AMOUNT_DESC);
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_date_desc, getContext()));
         idToOrderInteger.put((long) presetAL.size(), SORT_ORDER_DATE_CREATED_DESC);
         presetAL.add(impl.getString(MessageID.sale_list_sort_by_date_asc, getContext()));
@@ -104,13 +111,16 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
 
     public void getAndSetProvider(int sortCode){
 
+        umProvider = providerDao.filterAndSortSale(filterSelected, sortCode);
+        view.setListProvider(umProvider);
+
     }
 
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //Get provider 
+        //Get provider
         umProvider = providerDao.findAllActiveAsSaleListDetailProvider();
         view.setListProvider(umProvider);
 

@@ -29,6 +29,9 @@ public interface SelectProducerView extends UstadView {
      */
     void setListProvider(UmProvider<Person> listProvider);
 
+    void updateSpinner(String[] presents);
+
+
 
 }
 

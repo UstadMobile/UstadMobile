@@ -14,10 +14,24 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
 
+
+
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition =
 RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
+
+    public static final int ALL_SELECTED = 1;
+    public static final int PREORDER_SELECTED = 2;
+    public static final int PAYMENT_SELECTED = 3;
+
+    public static final int SORT_ORDER_NAME_ASC =1;
+    public static final int SORT_ORDER_NAME_DESC =2;
+    public static final int SORT_ORDER_AMOUNT_ASC=3;
+    public static final int SORT_ORDER_AMOUNT_DESC=4;
+    public static final int SORT_ORDER_DATE_CREATED_DESC=5;
+    public static final int SORT_ORDER_DATE_CREATED_ASC=6;
+
 
     //INSERT
 
@@ -70,7 +84,7 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     long saleCreationDate;
     int saleItemCount;
      */
-    public static final String ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY =
+    public static final String ALL_SALE_LIST =
     " SELECT s.*, Location.title AS locationName, " +
     " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
             "SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
@@ -81,32 +95,121 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     " LEFT JOIN Location ON Location.locationUid = s.saleLocationUid WHERE s.saleActive = 1";
 
 
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+
+    @UmQuery(ALL_SALE_LIST)
     public abstract UmLiveData<List<SaleListDetail>> findAllActiveAsSaleListDetailLive();
 
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+    @UmQuery(ALL_SALE_LIST)
     public abstract List<SaleListDetail> findAllActiveAsSaleListDetailList();
 
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
+    @UmQuery(ALL_SALE_LIST)
     public abstract void findAllActiveAsSaleListDetailAsync(UmCallback<List<SaleListDetail>> allActiveSalesCallback);
 
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY)
-    public abstract UmProvider<SaleListDetail> findAllActiveAsSaleListDetailProvider();
-
-    //Filter
-
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePreOrder = 1")
+    @UmQuery(ALL_SALE_LIST + " AND salePreOrder = 1")
     public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetailPreOrdersLive();
 
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePreOrder = 1")
-    public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPreOrdersProvider();
-
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePaymentDone = 1")
+    @UmQuery(ALL_SALE_LIST + " AND salePaymentDone = 1")
     public abstract UmLiveData<List<SaleListDetail>> findAllActiveSaleListDetailPaymentDueLive();
 
-    @UmQuery(ALL_SALES_ACTIVE_AS_SALE_LIST_DETAIL_QUERY + " AND salePaymentDone = 0")
+    //filter and sort
+
+    public static final String FILTER_PREORDER = " AND salePreOrder = 1";
+    public static final String FILTER_PAYMENT_DUE = " AND salePaymentDone = 0";
+
+    @UmQuery(ALL_SALE_LIST)
+    public abstract UmProvider<SaleListDetail> findAllActiveAsSaleListDetailProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER)
+    public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPreOrdersProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PAYMENT_DUE)
     public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPaymentDueProvider();
 
+
+    public static final String SORT_NAME_ASC = " ORDER BY s.saleTitle ASC ";
+    public static final String SORT_NAME_DEC = " ORDER BY s.saleTitle DESC ";
+    public static final String SORT_TOTAL_AMOUNT_DESC = " ORDER BY saleAmount DESC ";
+    public static final String SORT_TOTAL_AMOUNT_ASC = " ORDER BY saleAmount ASC ";
+    public static final String SORT_ORDER_DATE_DESC = " ORDER BY s.saleCreationDate DESC ";
+    public static final String SORT_ORDER_DATE_ASC = " ORDER BY s.saleCreationDate ASC ";
+
+    @UmQuery(ALL_SALE_LIST +  SORT_NAME_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortNameAscProvider();
+
+    @UmQuery(ALL_SALE_LIST + SORT_NAME_DEC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortNameDescProvider();
+
+    @UmQuery(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_DESC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortTotalAscProvider();
+
+    @UmQuery(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortTotalDescProvider();
+
+    @UmQuery(ALL_SALE_LIST + SORT_ORDER_DATE_DESC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortDateAscProvider();
+
+    @UmQuery(ALL_SALE_LIST + SORT_ORDER_DATE_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortDateDescProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER + SORT_NAME_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterPreOrderSortNameAscProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER + SORT_NAME_DEC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterPreOrderSortNameDescProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER + SORT_TOTAL_AMOUNT_DESC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterPreOrderSortTotalAscProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER + SORT_TOTAL_AMOUNT_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterPreOrderSortTotalDescProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_DESC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterPreOrderSortDateAscProvider();
+
+    @UmQuery(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleFilterPreOrderSortDateDescProvider();
+
+
+    public UmProvider<SaleListDetail> filterAndSortSale(int filter, int sort){
+
+        switch (filter){
+            case ALL_SELECTED:
+                switch (sort){
+                    case SORT_ORDER_NAME_ASC:
+                        return findAllSaleFilterAllSortNameAscProvider();
+                    case SORT_ORDER_NAME_DESC:
+                        return findAllSaleFilterAllSortNameDescProvider();
+                    case SORT_ORDER_AMOUNT_ASC:
+                        return findAllSaleFilterAllSortTotalAscProvider();
+                    case SORT_ORDER_AMOUNT_DESC:
+                        return findAllSaleFilterAllSortTotalDescProvider();
+                    case SORT_ORDER_DATE_CREATED_DESC:
+                        return findAllSaleFilterAllSortDateAscProvider();
+                    case SORT_ORDER_DATE_CREATED_ASC:
+                        return findAllSaleFilterAllSortDateDescProvider();
+                }
+                break;
+            case PREORDER_SELECTED:
+                switch (sort){
+                    case SORT_ORDER_NAME_ASC:
+                        return findAllSaleFilterPreOrderSortNameAscProvider();
+                    case SORT_ORDER_NAME_DESC:
+                        return findAllSaleFilterPreOrderSortNameDescProvider();
+                    case SORT_ORDER_AMOUNT_ASC:
+                        return findAllSaleFilterPreOrderSortTotalAscProvider();
+                    case SORT_ORDER_AMOUNT_DESC:
+                        return findAllSaleFilterPreOrderSortTotalDescProvider();
+                    case SORT_ORDER_DATE_CREATED_DESC:
+                        return findAllSaleFilterPreOrderSortDateAscProvider();
+                    case SORT_ORDER_DATE_CREATED_ASC:
+                        return findAllSaleFilterPreOrderSortDateDescProvider();
+                }
+                break;
+            case PAYMENT_SELECTED:
+                break;
+        }
+        return findAllActiveAsSaleListDetailProvider();
+    }
 
     //LOOK UP
 

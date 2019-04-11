@@ -338,9 +338,13 @@
     <string name="onboarding_goldozi_3">Track your stock and sales.</string>
     <string name="onboarding_goldozi_4">Review your courses.</string>
     <string name="onboarding_empty"> </string>
+    <string name="sort_by_most_used">most used</string>
+    <string name="sort_by_name_asc">name (asc)</string>
+    <string name="sorT_by_name_desc">name (desc)</string>
 
     <string name="sale_list_sort_by_name">name</string>
-    <string name="sale_list_sort_by_total">total</string>
-    <string name="sale_list_sort_by_date_desc">date created (desc)</string>
-    <string name="sale_list_sort_by_date_asc">date created (asc)</string>
+    <string name="sale_list_sort_by_total_asc">total (asc)</string>
+    <string name="sale_list_sort_by_total_desc">total (desc)</string>
+    <string name="sale_list_sort_by_date_desc">date (desc)</string>
+    <string name="sale_list_sort_by_date_asc">date (asc)</string>
 </resources>

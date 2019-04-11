@@ -12,6 +12,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectProducerPresenter;
@@ -22,13 +26,14 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
 
-import ru.dimorinny.floatingtextbutton.FloatingTextButton;
-
 public class SelectProducerActivity extends UstadBaseActivity implements SelectProducerView {
 
     private Toolbar toolbar;
     private SelectProducerPresenter mPresenter;
     private RecyclerView mRecyclerView;
+
+    private Spinner sortSpinner;
+    String[] sortSpinnerPresets;
 
 
     /**
@@ -72,6 +77,8 @@ public class SelectProducerActivity extends UstadBaseActivity implements SelectP
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        sortSpinner = findViewById(R.id.activity_select_producer_spinner);
+
         //RecyclerView
         mRecyclerView = findViewById(
                 R.id.activity_select_producer_recyclerview);
@@ -84,6 +91,18 @@ public class SelectProducerActivity extends UstadBaseActivity implements SelectP
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        //Sort spinner handler
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeSortOrder(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
     }
 
@@ -123,5 +142,14 @@ public class SelectProducerActivity extends UstadBaseActivity implements SelectP
 
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void updateSpinner(String[] presets) {
+        this.sortSpinnerPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                R.layout.item_simple_spinner, sortSpinnerPresets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
     }
 }
