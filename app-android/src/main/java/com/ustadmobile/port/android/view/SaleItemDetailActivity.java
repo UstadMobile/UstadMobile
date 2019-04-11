@@ -100,6 +100,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
 
         pppNP.setMinValue(minValue);
         pppNP.setMaxValue(maxValue);
+        pppNP.setValue(10);
 
 //        String[] valueSet = new String[maxValue/minValue];
 //
@@ -162,7 +163,9 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
                 if(q != 0) {
                     quantityNP.setValue(q);
                 }
-                pppNP.setValue((int) ppp);
+                if(ppp > 0) {
+                    pppNP.setValue((int) ppp);
+                }
                 totalTV.setText(String.valueOf(total));
                 saleRB.setActivated(saleItem.isSaleItemSold());
                 preOrderRB.setActivated(saleItem.isSaleItemPreorder());
