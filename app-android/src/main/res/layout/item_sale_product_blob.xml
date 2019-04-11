@@ -25,7 +25,7 @@
         android:id="@+id/item_sale_product_blob_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray"
+        android:background="@color/color_gray_transparent"
         android:text="TextView"
         app:layout_constraintBottom_toBottomOf="@+id/item_sale_product_blob_image"
         app:layout_constraintEnd_toEndOf="@+id/item_sale_product_blob_image"

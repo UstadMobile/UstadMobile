@@ -310,6 +310,7 @@
     <string name="quantity">Quantity</string>
     <string name="price_per_piece">Price per piece</string>
     <string name="total">Total</string>
+    <string name="total_colon">Total:</string>
     <string name="sold">Sold</string>
     <string name="pre_order">Pre-order</string>
     <string name="save">Save</string>
@@ -317,8 +318,8 @@
     <string name="delivered">Delivered</string>
     <string name="payments">payments</string>
     <string name="add_payment">Add payment</string>
-    <string name="order_total">Order total</string>
-    <string name="discount">Discount</string>
+    <string name="order_total">Order total:</string>
+    <string name="discount">Discount:</string>
     <string name="balance_due">Balance due</string>
     <string name="order_notes">Order notes</string>
     <string name="collections">Collections</string>

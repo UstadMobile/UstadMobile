@@ -9,13 +9,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <View
+        android:id="@+id/view4"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayoutCompat"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:id="@+id/linearLayoutCompat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
         android:visibility="visible"
@@ -53,6 +59,7 @@
                 android:id="@+id/item_sale_item_name"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
                 android:text="Item name "
                 android:textAppearance="@style/TextAppearance.AppCompat"
@@ -85,6 +92,7 @@
                 android:id="@+id/item_sale_item_quantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
                 android:text="Quantity"
                 android:textAppearance="@style/TextAppearance.AppCompat"
@@ -116,6 +124,7 @@
                 android:id="@+id/item_sale_item_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
                 android:text="Price"
                 android:textAppearance="@style/TextAppearance.AppCompat"
@@ -148,6 +157,7 @@
                 android:id="@+id/item_sale_item_total"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
                 android:text="Total"
                 android:textAppearance="@style/TextAppearance.AppCompat"

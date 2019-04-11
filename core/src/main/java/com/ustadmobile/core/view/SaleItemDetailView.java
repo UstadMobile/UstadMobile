@@ -21,7 +21,7 @@ public interface SaleItemDetailView extends UstadView {
      */
     void finish();
 
-    void updateSaleItemOnView(SaleItem saleItem);
+    void updateSaleItemOnView(SaleItem saleItem, String productTitle);
 
     void updateTotal(long total);
 

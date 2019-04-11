@@ -51,5 +51,12 @@ public interface SaleDetailView extends UstadView {
 
     void updatePaymentTotal(long paymentTotal);
 
+    void showSaveButton(boolean show);
+    void showCalculations(boolean show);
+    void showDelivered(boolean show);
+    void showNotes(boolean show);
+
+
+
 }
 

@@ -72,6 +72,8 @@ public class TestSaleItemDetailPresenter {
     @Test
     public void givenSaleItemOnly_whenOnCreateRun_shouldUpdateViewWithSaleItem() throws InterruptedException {
         long saleItemUid = repo.getSaleItemDao().findAllActiveList().get(0).getSaleItemUid();
+        long saleItemProductUid = repo.getSaleItemDao().findAllActiveList().get(0).getSaleItemProductUid();
+        String saleProductName = repo.getSaleProductDao().findByUid(saleItemProductUid).getSaleProductName();
         int beforeSaleItemActiveCount = repo.getSaleItemDao().findAllActiveList().size();
         int beforeSaleItemAllCount = repo.getSaleItemDao().findAllList().size();
         Hashtable<String, String> incomingArgs = new Hashtable<>();
@@ -87,7 +89,8 @@ public class TestSaleItemDetailPresenter {
 
         Assert.assertEquals(beforeSaleItemActiveCount,afterSaleItemActiveCount );
         Assert.assertEquals(beforeSaleItemAllCount,afterSaleItemAllCount );
-        verify(mockView, timeout(1000)).updateSaleItemOnView(any(SaleItem.class));
+        verify(mockView, timeout(1000)).updateSaleItemOnView(any(SaleItem.class),
+                saleProductName);
 
     }
 

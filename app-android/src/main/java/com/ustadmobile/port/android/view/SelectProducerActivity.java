@@ -9,6 +9,8 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
@@ -29,6 +31,17 @@ public class SelectProducerActivity extends UstadBaseActivity implements SelectP
     private RecyclerView mRecyclerView;
 
 
+    /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_search, menu);
+
+        return true;
+    }
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
      * the activity goes back when the back button is pressed.

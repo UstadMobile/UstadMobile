@@ -39,6 +39,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_save, menu);
 
+        menu.findItem(R.id.menu_save).setVisible(true);
         return true;
     }
 
@@ -111,13 +112,16 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     }
 
     @Override
-    public void updateSaleItemOnView(SaleItem saleItem) {
+    public void updateSaleItemOnView(SaleItem saleItem, String productName) {
         runOnUiThread(() -> {
             if(saleItem != null) {
                 int q = saleItem.getSaleItemQuantity();
                 float ppp = saleItem.getSaleItemPricePerPiece();
                 long total = (long) (q * ppp);
 
+                if(productName != null && productName != ""){
+                    toolbar.setTitle(productName);
+                }
                 quantityNP.setValue(q);
                 pppNP.setValue((int) ppp);
                 totalTV.setText(String.valueOf(total));

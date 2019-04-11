@@ -11,6 +11,7 @@ import java.util.Hashtable;
 
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
@@ -80,7 +81,31 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
             @Override
             public void onSuccess(SaleItem result) {
                 updatedSaleItem = result;
-                view.updateSaleItemOnView(updatedSaleItem);
+                long saleProductUid = 0;
+                if(result.getSaleItemProductUid() != 0){
+                    saleProductUid = result.getSaleItemProductUid();
+                }
+                if(producerUid != 0){
+                    saleProductUid = productUid;
+                }
+
+                repository.getSaleProductDao().findByUidAsync(saleProductUid,
+                        new UmCallback<SaleProduct>() {
+                            @Override
+                            public void onSuccess(SaleProduct saleProduct) {
+                                String productName = "";
+                                if(saleProduct != null){
+                                    productName = saleProduct.getSaleProductName();
+                                }
+                                view.updateSaleItemOnView(updatedSaleItem,
+                                        productName);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
             }
 
             @Override
@@ -95,7 +120,31 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
 
         if(updatedSaleItem == null || !updatedSaleItem.equals(changedSaleItem)) {
             if(changedSaleItem!=null) {
-                view.updateSaleItemOnView(updatedSaleItem);
+
+                long saleProductUid = 0;
+                if(productUid != 0){
+                    saleProductUid = productUid;
+                }else if(updatedSaleItem.getSaleItemProductUid() != 0){
+                    saleProductUid = updatedSaleItem.getSaleItemProductUid();
+                }
+                repository.getSaleProductDao().findByUidAsync(saleProductUid
+                        , new UmCallback<SaleProduct>() {
+                    @Override
+                    public void onSuccess(SaleProduct saleProduct) {
+                        String productName = "";
+                        if(saleProduct != null){
+                            productName = saleProduct.getSaleProductName();
+                        }
+                        view.updateSaleItemOnView(updatedSaleItem, productName);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+
+
                 updatedSaleItem = changedSaleItem;
             }
         }

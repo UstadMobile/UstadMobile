@@ -55,6 +55,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private TextView orderTotal, totalAfterDiscount;
     private ConstraintLayout addItemCL;
 
+    private TextView c1, c2, c3,c4,c5,c6;
+    View hlineCalc;
     private long saleUid;
 
     /**
@@ -67,6 +69,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_save, menu);
 
+        showSaveButton(mPresenter.isShowSaveButton());
         return true;
     }
 
@@ -100,7 +103,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_sale_detail_toolbar);
-        toolbar.setTitle(getText(R.string.sale_detail));
+        toolbar.setTitle(getText(R.string.record_sale));
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
@@ -121,6 +124,14 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         totalAfterDiscount.setText("0");
         orderNotesET = findViewById(R.id.activity_sale_detail_order_notes);
         addItemCL = findViewById(R.id.activity_sale_detail_add_cl);
+
+        c1 = findViewById(R.id.textView21);
+        c2 = findViewById(R.id.activity_sale_detail_disc_currency4);
+        c3 = findViewById(R.id.activity_sale_detail_disc_currency);
+        c4 = findViewById(R.id.activity_sale_detail_disc_currency3);
+        c5 = findViewById(R.id.textView);
+        c6 = findViewById(R.id.textView23);
+        hlineCalc = findViewById(R.id.view2);
 
 
         //Call the Presenter
@@ -176,8 +187,9 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-
     }
+
+
 
 
     /**
@@ -215,9 +227,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         Observer customObserver = o -> {
             recyclerAdapter.submitList((PagedList<SaleItemListDetail>) o);
             mPresenter.getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
-
         };
-
 
 
         //Observe the data:
@@ -297,6 +307,49 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     @Override
     public void updatePaymentTotal(long paymentTotal) {
         //Next Sprint
+    }
+
+    @Override
+    public void showSaveButton(boolean show) {
+        if(menu != null) {
+            MenuItem saveButton = menu.findItem(R.id.menu_save);
+            if (saveButton != null) {
+                saveButton.setVisible(show);
+            }
+        }
+    }
+
+    @Override
+    public void showCalculations(boolean show) {
+        if(show){
+            toolbar.setTitle(getText(R.string.sale_detail));
+        }else{
+            toolbar.setTitle(getText(R.string.record_sale));
+        }
+
+        c1.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        c2.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        c3.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        c4.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        c5.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        c6.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        discountET.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        discountET.setEnabled(show);
+        orderTotal.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        orderTotal.setEnabled(show);
+        totalAfterDiscount.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        totalAfterDiscount.setEnabled(show);
+        hlineCalc.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+    }
+
+    @Override
+    public void showDelivered(boolean show) {
+        deliveredCB.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+    }
+
+    @Override
+    public void showNotes(boolean show) {
+        orderNotesET.setVisibility(show?View.VISIBLE:View.INVISIBLE);
     }
 
 }

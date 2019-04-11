@@ -92,8 +92,8 @@ public class SaleItemRecyclerAdapter extends
         int quantity = entity.getSaleItemQuantity();
         float price = entity.getSaleItemPricePerPiece();
 
-        String priceString = String.valueOf(price) + theActivity.getString(R.string.currency_afs);
-        String priceTotalString = String.valueOf(Math.round(quantity*price)) + theActivity.getString(R.string.currency_afs);
+        String priceString = String.valueOf(Math.round(price)) + " " + theActivity.getString(R.string.currency_afs);
+        String priceTotalString = String.valueOf(Math.round(quantity*price)) + " " + theActivity.getString(R.string.currency_afs);
         String dueString = theActivity.getString(R.string.due) + " " +
                 UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                         entity.getSaleItemDueDate(), null);

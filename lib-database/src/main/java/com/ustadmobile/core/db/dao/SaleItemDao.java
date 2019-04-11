@@ -69,6 +69,8 @@ public abstract class SaleItemDao implements SyncableDao<SaleItem, SaleItemDao> 
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmProvider<SaleItem> findAllActiveProvider();
 
+    @UmQuery("SELECT count(*) From SaleItem where SaleItem.saleItemSaleUid = :saleUid AND SaleItem.saleItemActive = 1")
+    public abstract void getSaleItemCountFromSale(long saleUid, UmCallback<Integer> resultCallback);
 
     /**
      *     long saleItemPictureUid;

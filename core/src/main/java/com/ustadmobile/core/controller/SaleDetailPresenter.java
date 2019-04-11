@@ -51,7 +51,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     private Hashtable<Integer, Long> positionToLocationUid;
 
-
+    private boolean showSaveButton = false;
 
     public SaleDetailPresenter(Object context, Hashtable arguments, SaleDetailView view) {
         super(context, arguments, view);
@@ -74,6 +74,13 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
         if(getArguments().containsKey(ARG_SALE_UID)){
             initFromSale(Long.parseLong((String) getArguments().get(ARG_SALE_UID)));
+            showSaveButton = true;
+            view.runOnUiThread(() -> {
+                view.showCalculations(true);
+                view.showDelivered(true);
+                view.showNotes(true);
+            });
+
         }else{
             updatedSale = new Sale();
             updatedSale.setSalePreOrder(true); //ie: Not delivered unless ticked.
@@ -104,6 +111,26 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
 
     public void getTotalSaleOrderAndDiscountAndUpdateView(long saleUid){
+        saleItemDao.getSaleItemCountFromSale(saleUid, new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                if(result > 0) {
+                    view.runOnUiThread(() -> {
+                        view.showSaveButton(true);
+                        view.showNotes(true);
+                        view.showDelivered(true);
+                        view.showCalculations(true);
+                    });
+                }
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
         saleItemDao.findTotalPaidBySaleAsync(saleUid,
                 new UmCallback<Long>() {
             @Override
@@ -305,5 +332,13 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             long locationUid = positionToLocationUid.get(position);
             updatedSale.setSaleLocationUid(locationUid);
         }
+    }
+
+    public boolean isShowSaveButton() {
+        return showSaveButton;
+    }
+
+    public void setShowSaveButton(boolean showSaveButton) {
+        this.showSaveButton = showSaveButton;
     }
 }
