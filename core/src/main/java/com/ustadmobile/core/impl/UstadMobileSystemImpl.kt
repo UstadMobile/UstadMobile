@@ -496,27 +496,12 @@ abstract class UstadMobileSystemImpl {
         /**
          * Suggested name to create for content on Devices
          */
-        val DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent"
-
-
-        /**
-         * Flag to indicate a download requested has failed
-         *
-         * Same value as android.app.DownloadManager.STATUS_FAILED
-         */
-        val DLSTATUS_FAILED = 16
-
-
-        /**
-         * Indicates that a download has not actually started yet
-         */
-        val DLSTATUS_NOT_STARTED = 0
-
+        const val DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent"
 
         /**
          * The return value from getLocale when the user has said to use the system's locale
          */
-        val LOCALE_USE_SYSTEM = ""
+        const val LOCALE_USE_SYSTEM = ""
 
         private val MIME_TYPES = Hashtable<String, String>()
 
@@ -527,7 +512,7 @@ abstract class UstadMobileSystemImpl {
          *
          * Save/retrieve resource from user specific directory
          */
-        val USER_RESOURCE = 2
+        const val USER_RESOURCE = 2
 
 
         /**
@@ -535,11 +520,7 @@ abstract class UstadMobileSystemImpl {
          *
          * Save/retrieve resource from shared directory
          */
-        val SHARED_RESOURCE = 4
-
-        val STATUS_ACQUIRED = 0
-
-        val STATUS_ACQUISITION_IN_PROGRESS = 1
+        const val SHARED_RESOURCE = 4
 
         const val ARG_REFERRER = "ref"
 
@@ -571,6 +552,7 @@ abstract class UstadMobileSystemImpl {
          *
          * @return A singleton instance
          */
+        @JvmStatic
         val instance: UstadMobileSystemImpl
             get() {
                 if (mainInstance == null) {
@@ -583,6 +565,7 @@ abstract class UstadMobileSystemImpl {
         /**
          * Only for testing purposes (e.g. to use a mockito spy)
          */
+        @JvmStatic
         fun setMainInstance(instance: UstadMobileSystemImpl?) {
             mainInstance = instance
         }

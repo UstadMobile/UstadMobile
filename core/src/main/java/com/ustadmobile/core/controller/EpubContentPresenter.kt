@@ -266,6 +266,6 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
          * Hardcoded fixed path to the container.xml file as per the open container
          * format spec : META-INF/container.xml
          */
-        val OCF_CONTAINER_PATH = "META-INF/container.xml"
+        const val OCF_CONTAINER_PATH = "META-INF/container.xml"
     }
 }
