@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContai
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 
-interface ContentEntryListView : UstadView {
+interface ContentEntryListFragmentView : UstadView {
 
     fun setContentEntryProvider(entryProvider: UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>)
 

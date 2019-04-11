@@ -16,7 +16,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -223,9 +223,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     fun handleUpNavigation() {
-        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListView.VIEW_NAME, navigation!!)
+        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListFragmentView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs != null) {
-            impl.go(ContentEntryListView.VIEW_NAME,
+            impl.go(ContentEntryListFragmentView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), context,
                     UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
         } else {

@@ -22,7 +22,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
-import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.ContentEntryListFragmentView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
@@ -40,7 +40,7 @@ import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView,
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListFragmentView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
 
 
