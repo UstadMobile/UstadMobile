@@ -68,9 +68,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
 
     companion object {
 
-        val ARG_NEXT = "next"
+        const val ARG_NEXT = "next"
 
-        val ARG_SERVER_URL = "apiUrl"
+        const val ARG_SERVER_URL = "apiUrl"
     }
 
 

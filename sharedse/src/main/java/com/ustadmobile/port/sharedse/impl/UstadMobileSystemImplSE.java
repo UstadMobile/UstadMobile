@@ -74,7 +74,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         super.init(context);
 
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(Companion.getSHARED_RESOURCE(), context));
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
     }
 
     /**
@@ -108,7 +108,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         UstadMobileSystemImpl impl = Companion.getInstance();
         final String contentDirName = getContentDirName(context);
 
-        if((mode & Companion.getSHARED_RESOURCE()) == Companion.getSHARED_RESOURCE()) {
+        if((mode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
                     false, true, false));
 
@@ -123,7 +123,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
         UmAccount account = UmAccountManager.INSTANCE.getActiveAccount(context);
         if(account != null
-                && ((mode & Companion.getUSER_RESOURCE()) ==  Companion.getUSER_RESOURCE())) {
+                && ((mode & USER_RESOURCE) ==  USER_RESOURCE)) {
             String userBase = UMFileUtil.joinPaths(systemBaseDir, "user-", account.getUsername());
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
                     false, true, true));
@@ -255,7 +255,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public HttpCache getHttpCache(Object context) {
         if(httpCache == null)
-            httpCache = new HttpCache(getCacheDir(Companion.getSHARED_RESOURCE(), context));
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
 
         return httpCache;
     }

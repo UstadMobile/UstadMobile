@@ -137,30 +137,30 @@ class BasePointController(context: Any, arguments: Map<String, String?>, view: B
          *
          * Will get passed down as url -> http://server.com/file.opds
          */
-        val OPDS_ARGS_PREFIX = "-opds"
+        const val OPDS_ARGS_PREFIX = "-opds"
 
         /**
          * Indicates the tab for items already downloaded
          */
-        val INDEX_DOWNLOADEDENTRIES = 0
+        const val INDEX_DOWNLOADEDENTRIES = 0
 
         /**
          * Indicates the tab for browsing OPDS feeds
          */
-        val INDEX_BROWSEFEEDS = 1
+        const val INDEX_BROWSEFEEDS = 1
 
         /**
          * Indicates the tab for class management
          */
-        val INDEX_CLASSES = 1
+        const val INDEX_CLASSES = 1
 
-        val NUM_CATALOG_TABS = 1
+        const val NUM_CATALOG_TABS = 1
 
-        val ARG_WELCOME_SCREEN_DISPLAYED = "wsd"
+        const val ARG_WELCOME_SCREEN_DISPLAYED = "wsd"
 
-        val CMD_SHARE_APP = 1005
+        const val CMD_SHARE_APP = 1005
 
-        val CMD_RECEIVE_ENTRY = 1006
+        const val CMD_RECEIVE_ENTRY = 1006
     }
 
 
