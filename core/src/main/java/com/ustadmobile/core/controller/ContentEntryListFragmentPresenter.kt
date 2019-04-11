@@ -5,15 +5,15 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import java.util.*
 
-class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, private val viewContract: ContentEntryListView)
-    : UstadBaseController<ContentEntryListView>(context, arguments!!, viewContract) {
+class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
+    : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
 
     private var contentEntryDao: ContentEntryDao? = null
 
@@ -36,19 +36,19 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
     }
 
     private fun showContentByParent() {
-        parentUid = java.lang.Long.valueOf(arguments.get(ARG_CONTENT_ENTRY_UID))
-        viewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
+        parentUid = java.lang.Long.valueOf(arguments[ARG_CONTENT_ENTRY_UID])
+        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
         contentEntryDao!!.getContentByUuid(parentUid!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
                 if (result == null) {
-                    viewContract.runOnUiThread(Runnable { viewContract.showError() })
+                    fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
                     return
                 }
-                viewContract.setToolbarTitle(result.title)
+                fragmentViewContract.setToolbarTitle(result.title)
             }
 
-            override fun onFailure(exception: Throwable) {
-                viewContract.runOnUiThread(Runnable { viewContract.showError() })
+            override fun onFailure(exception: Throwable?) {
+                fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
             }
         })
 
@@ -66,11 +66,11 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
                     allLang.langUid = 0
                     languages.add(1, allLang)
 
-                    viewContract.setLanguageOptions(result!!)
+                    fragmentViewContract.setLanguageOptions(result!!)
                 }
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -102,19 +102,19 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
                         schemaMap[schema.contentCategorySchemaUid] = data
                     }
 
-                    viewContract.setCategorySchemaSpinner(schemaMap)
+                    fragmentViewContract.setCategorySchemaSpinner(schemaMap)
                 }
 
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
     }
 
     private fun showDownloadedContent() {
-        viewContract.setContentEntryProvider(contentEntryDao!!.downloadedRootItems)
+        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.downloadedRootItems)
     }
 
 
@@ -126,7 +126,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
         contentEntryDao!!.findByUid(entryUid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
                 if (result == null) {
-                    viewContract.runOnUiThread(Runnable { viewContract.showError() })
+                    fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
                     return
                 }
 
@@ -135,24 +135,24 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, p
                     impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.context)
                 }
             }
 
-            override fun onFailure(exception: Throwable) {
-                viewContract.runOnUiThread(Runnable { viewContract.showError() })
+            override fun onFailure(exception: Throwable?) {
+                fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
             }
         })
     }
 
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
+        fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
     fun handleUpNavigation() {

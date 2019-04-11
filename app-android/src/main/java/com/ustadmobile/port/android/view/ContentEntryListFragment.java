@@ -17,12 +17,12 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ContentEntryListPresenter;
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
-import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.ContentEntryListFragmentView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
@@ -40,11 +40,11 @@ import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView,
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListFragmentView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
 
 
-    private ContentEntryListPresenter entryListPresenter;
+    private ContentEntryListFragmentPresenter entryListPresenter;
 
     private RecyclerView recyclerView;
 
@@ -132,7 +132,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        entryListPresenter = new ContentEntryListPresenter(getContext(),
+        entryListPresenter = new ContentEntryListFragmentPresenter(getContext(),
                 bundleToMap(getArguments()), this);
         entryListPresenter.onCreate(bundleToMap(savedInstanceState));
 

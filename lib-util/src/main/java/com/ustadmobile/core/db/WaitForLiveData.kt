@@ -26,9 +26,11 @@ object WaitForLiveData {
         val latch = CountDownLatch(1)
 
         val observer = object : UmObserver<T> {
-            override fun onChanged(newVal: T) {
-                if (checker.done(newVal))
-                    latch.countDown()
+            override fun onChanged(t: T?) {
+                if(t != null){
+                    if (checker.done(t))
+                        latch.countDown()
+                }
             }
         }
         liveData.observeForever(observer)

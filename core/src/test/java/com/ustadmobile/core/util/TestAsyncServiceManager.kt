@@ -19,20 +19,26 @@ class TestAsyncServiceManager {
 
     private var scheduledExecutor: ScheduledExecutorService? = null
 
-    private val lastStartTime = AtomicLong()
+    private val lastTimeStarting = AtomicLong()
 
-    private val lastStopTime = AtomicLong()
+    private val lastTimeStarted = AtomicLong()
+
+    private val lastTimeStopped = AtomicLong()
+
+    private val lastTimeStopping = AtomicLong()
 
     private fun setupAsyncServiceManagerMock(startDelay: Int, stopDelay: Int): AsyncServiceManager {
+        lastTimeStopping.set(0L)
+        lastTimeStopped.set(0L)
+        lastTimeStarted.set(0L)
+        lastTimeStopping.set(0L)
+
         val asyncServiceManager = spy(AsyncServiceManager::class.java)
         doAnswer {
             Thread {
-                lastStartTime.set(System.currentTimeMillis())
-                try {
-                    Thread.sleep(startDelay.toLong())
-                } catch (e: InterruptedException) {
-                }
-
+                lastTimeStarting.set(System.currentTimeMillis())
+                TimeUnit.MILLISECONDS.sleep(startDelay.toLong())
+                lastTimeStarted.set(System.currentTimeMillis())
                 asyncServiceManager.notifyStateChanged(AsyncServiceManager.STATE_STARTED)
             }.start()
             null
@@ -40,12 +46,9 @@ class TestAsyncServiceManager {
 
         doAnswer {
             Thread {
-                lastStopTime.set(System.currentTimeMillis())
-                try {
-                    Thread.sleep(stopDelay.toLong())
-                } catch (e: InterruptedException) {
-                }
-
+                lastTimeStopping.set(System.currentTimeMillis())
+                TimeUnit.MILLISECONDS.sleep(stopDelay.toLong())
+                lastTimeStopped.set(System.currentTimeMillis())
                 asyncServiceManager.notifyStateChanged(AsyncServiceManager.STATE_STOPPED)
             }.start()
             null
@@ -96,17 +99,21 @@ class TestAsyncServiceManager {
     }
 
     @Test
-    @Throws(InterruptedException::class)
     fun givenServiceStarting_whenStopCalled_shouldCallStopAfterStarted() {
+        val startTime = System.currentTimeMillis()
         val serviceManager = setupAsyncServiceManagerMock(1000, 1000)
         serviceManager.setEnabled(true)
-        Thread.sleep(100)
+        TimeUnit.MILLISECONDS.sleep(500L)
+        val startingTimeBeforeStopRequest = lastTimeStarting.get()
+
         serviceManager.setEnabled(false)
 
         verify(serviceManager, timeout(10000)).stop()
         verify(serviceManager, timeout(10000)).start()
-        Assert.assertTrue("Stopped after started",
-                lastStopTime.get() > lastStartTime.get())
+        Assert.assertTrue("Service was starting when setEnabled false was called",
+                startingTimeBeforeStopRequest >= startTime)
+        Assert.assertTrue("Stop requested after service started completed",
+                lastTimeStopping.get() > lastTimeStarted.get())
     }
 
     @Test
@@ -131,7 +138,7 @@ class TestAsyncServiceManager {
         val asyncServiceManager = spy(AsyncServiceManager::class.java)
         doAnswer {
             Thread {
-                lastStartTime.set(System.currentTimeMillis())
+                lastTimeStarted.set(System.currentTimeMillis())
                 try {
                     Thread.sleep(200)
                 } catch (e: InterruptedException) {

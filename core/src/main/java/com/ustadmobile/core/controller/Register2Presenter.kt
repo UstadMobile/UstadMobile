@@ -79,7 +79,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
                                     systemImpl.go(mNextDest, context)
                                 }
 
-                                override fun onFailure(exception: Throwable) {
+                                override fun onFailure(exception: Throwable?) {
                                     //simple insert - this should not happen
                                     view.runOnUiThread(Runnable {
                                         view.setErrorMessageView(systemImpl.getString(
@@ -97,7 +97,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
                         }
                     }
 
-                    override fun onFailure(exception: Throwable) {
+                    override fun onFailure(exception: Throwable?) {
                         view.runOnUiThread(Runnable {
                             view.setInProgress(false)
                             view.setErrorMessageView(systemImpl.getString(

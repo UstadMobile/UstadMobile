@@ -21,8 +21,8 @@ import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_DOWNLOADED_CONTENT;
 
 public class DummyActivity extends UstadBaseActivity implements DummyView {
 

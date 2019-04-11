@@ -4,7 +4,7 @@ import com.ustadmobile.core.CoreTestConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer
 import com.ustadmobile.test.core.impl.PlatformTestUtil
@@ -16,9 +16,8 @@ import org.mockito.Mockito
 
 import java.util.Hashtable
 
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
@@ -68,7 +67,7 @@ class TestContentEntryDetailPresenter {
         presenter.handleUpNavigation()
 
 
-        verify(systemImplSpy, timeout(5000))?.go(ContentEntryListView.VIEW_NAME, argsresult , PlatformTestUtil.targetContext, flags)
+        verify(systemImplSpy, timeout(5000))?.go(ContentEntryListFragmentView.VIEW_NAME, argsresult , PlatformTestUtil.targetContext, flags)
 
     }
 

@@ -38,8 +38,10 @@ object ContentEntryUtil {
                 goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             }
 
-            override fun onFailure(exception: Throwable) {
-                UmCallbackUtil.onFailIfNotNull(callback, exception)
+            override fun onFailure(exception: Throwable?) {
+                if(exception != null){
+                    UmCallbackUtil.onFailIfNotNull(callback, exception)
+                }
             }
         })
 
@@ -100,8 +102,10 @@ object ContentEntryUtil {
 
                             }
 
-                            override fun onFailure(exception: Throwable) {
-                                UmCallbackUtil.onFailIfNotNull(callback, exception)
+                            override fun onFailure(exception: Throwable?) {
+                                if(exception != null){
+                                    UmCallbackUtil.onFailIfNotNull(callback, exception)
+                                }
                             }
                         })
                     }
@@ -111,8 +115,10 @@ object ContentEntryUtil {
                     }
                 }
 
-                override fun onFailure(exception: Throwable) {
-                    UmCallbackUtil.onFailIfNotNull(callback, exception)
+                override fun onFailure(exception: Throwable?) {
+                    if(exception != null){
+                        UmCallbackUtil.onFailIfNotNull(callback, exception)
+                    }
                 }
             })
 
@@ -125,7 +131,7 @@ object ContentEntryUtil {
 
     }
 
-    fun goToContentEntryBySourceUrl(sourceUrl: String, dbRepo: UmAppDatabase,
+    private fun goToContentEntryBySourceUrl(sourceUrl: String, dbRepo: UmAppDatabase,
                                     impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                     context: Any,
                                     callback: UmCallback<Any>) {
@@ -135,8 +141,10 @@ object ContentEntryUtil {
                 goToViewIfDownloaded(result!!, dbRepo, impl, openEntryIfNotDownloaded, context, callback)
             }
 
-            override fun onFailure(exception: Throwable) {
-                UmCallbackUtil.onFailIfNotNull(callback, exception)
+            override fun onFailure(exception: Throwable?) {
+                if(exception != null){
+                    UmCallbackUtil.onFailIfNotNull(callback, exception)
+                }
             }
         })
 

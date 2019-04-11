@@ -56,7 +56,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
                 }
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
                 view.runOnUiThread(Runnable  {
                     view.setErrorMessage(systemImpl.getString(
                             MessageID.login_network_error, context))

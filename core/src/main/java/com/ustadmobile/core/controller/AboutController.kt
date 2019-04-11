@@ -34,7 +34,7 @@ class AboutController(context: Any, args: Map<String, String>?, view: AboutView)
 
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
