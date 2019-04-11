@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import java.util.*
 
-class ContentEntryListPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
+class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
 
     private var contentEntryDao: ContentEntryDao? = null

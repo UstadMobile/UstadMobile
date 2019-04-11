@@ -16,7 +16,7 @@ import org.mockito.Mockito
 
 import java.util.Hashtable
 
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
