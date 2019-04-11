@@ -1,12 +1,16 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -28,6 +32,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     private TextView totalTV;
     private RadioButton saleRB, preOrderRB;
     NumberPicker quantityNP, pppNP;
+    EditText pppNPET;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -82,14 +87,26 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         preOrderRB = findViewById(R.id.activity_sale_item_detail_radiobutton_preorder);
         quantityNP = findViewById(R.id.activity_sale_item_detail_quantity_numberpicker);
         pppNP = findViewById(R.id.activity_sale_item_detail_price_per_piece_number_picker);
+        pppNPET = pppNP.findViewById(Resources.getSystem().getIdentifier("numberpicker_input",
+                "id", "android"));
 
         quantityNP.setMinValue(1);
-        quantityNP.setValue(2);
+        quantityNP.setValue(1);
         quantityNP.setMaxValue(99999);
 
-        pppNP.setMinValue(0);
-        pppNP.setValue(0);
-        pppNP.setMaxValue(999999);
+        int minValue = 10;
+        int maxValue = 99990;
+        int step = 10;
+
+        pppNP.setMinValue(minValue);
+        pppNP.setMaxValue(maxValue);
+
+//        String[] valueSet = new String[maxValue/minValue];
+//
+//        for (int i = minValue; i <= maxValue; i += step) {
+//            valueSet[(i/step)-1] = String.valueOf(i);
+//        }
+//        pppNP.setDisplayedValues(valueSet);
 
         //Presenter
         mPresenter = new SaleItemDetailPresenter(this,
@@ -109,6 +126,26 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
             mPresenter.handleChangePPP(newVal);
             mPresenter.updateTotal(q, newVal);
         });
+
+        pppNPET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                int newVal = Integer.valueOf(s.toString());
+                int q = quantityNP.getValue();
+                mPresenter.handleChangePPP(newVal);
+                mPresenter.updateTotal(q, newVal);
+            }
+        });
     }
 
     @Override
@@ -122,7 +159,9 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
                 if(productName != null && productName != ""){
                     toolbar.setTitle(productName);
                 }
-                quantityNP.setValue(q);
+                if(q != 0) {
+                    quantityNP.setValue(q);
+                }
                 pppNP.setValue((int) ppp);
                 totalTV.setText(String.valueOf(total));
                 saleRB.setActivated(saleItem.isSaleItemSold());
