@@ -8,7 +8,7 @@ import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ContentEntryListPresenter;
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ContentCategoryDao;
@@ -45,7 +45,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -66,7 +66,7 @@ public class ContentEntryListEspressoTest {
 
     public void launchActivity() {
         Intent launchActivityIntent = new Intent();
-        launchActivityIntent.putExtra(ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID,
+        launchActivityIntent.putExtra(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID,
                 String.valueOf(ROOT_CONTENT_ENTRY_UID));
         mActivityRule.launchActivity(launchActivityIntent);
     }

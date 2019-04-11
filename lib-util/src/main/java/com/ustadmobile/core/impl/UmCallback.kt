@@ -18,5 +18,5 @@ interface UmCallback<T> {
      *
      * @param exception exception thrown (if any)
      */
-    fun onFailure(exception: Throwable)
+    fun onFailure(exception: Throwable?)
 }

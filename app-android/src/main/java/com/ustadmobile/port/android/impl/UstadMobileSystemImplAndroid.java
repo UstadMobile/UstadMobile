@@ -70,7 +70,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
-import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.ContentEntryListFragmentView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.core.view.H5PContentView;
@@ -161,7 +161,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
-        viewNameToAndroidImplMap.put(ContentEntryListView.VIEW_NAME, ContentEntryListActivity.class);
+        viewNameToAndroidImplMap.put(ContentEntryListFragmentView.VIEW_NAME, ContentEntryListActivity.class);
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
         viewNameToAndroidImplMap.put(OnBoardingView.VIEW_NAME, OnBoardingActivity.class);

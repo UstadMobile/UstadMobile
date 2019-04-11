@@ -43,7 +43,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                 view.setVideoInfo(result!!)
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })
@@ -67,7 +67,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                 view.runOnUiThread(Runnable { view.setVideoParams(videoPath!!, audioPath!!, srtPath!!) })
             }
 
-            override fun onFailure(exception: Throwable) {
+            override fun onFailure(exception: Throwable?) {
 
             }
         })

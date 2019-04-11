@@ -6,5 +6,5 @@ package com.ustadmobile.core.db
 
 interface UmObserver<T> {
 
-    fun onChanged(t: T)
+    fun onChanged(t: T?)
 }

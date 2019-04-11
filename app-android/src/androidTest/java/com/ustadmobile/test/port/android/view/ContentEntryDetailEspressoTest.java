@@ -11,7 +11,7 @@ import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ContentEntryListPresenter;
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContainerDao;
@@ -249,7 +249,7 @@ public class ContentEntryDetailEspressoTest {
 
         intended(AllOf.allOf(
                 hasComponent(ContentEntryDetailActivity.class.getCanonicalName()),
-                hasExtra(equalTo(ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID),
+                hasExtra(equalTo(ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID),
                         equalTo(String.valueOf(10l))
                 )));
 

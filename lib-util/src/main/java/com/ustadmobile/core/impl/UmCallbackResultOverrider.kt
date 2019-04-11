@@ -12,7 +12,7 @@ class UmCallbackResultOverrider<T>(private val callback: UmCallback<T>?, private
         callback?.onSuccess(resultOverride)
     }
 
-    override fun onFailure(exception: Throwable) {
+    override fun onFailure(exception: Throwable?) {
         callback?.onFailure(exception)
     }
 }

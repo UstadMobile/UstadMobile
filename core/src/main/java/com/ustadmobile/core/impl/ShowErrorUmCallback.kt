@@ -10,7 +10,7 @@ import com.ustadmobile.core.view.ViewWithErrorNotifier
 </T> */
 abstract class ShowErrorUmCallback<T>(private val view: ViewWithErrorNotifier, private val errorMessage: Int) : UmCallback<T> {
 
-    override fun onFailure(exception: Throwable) {
+    override fun onFailure(exception: Throwable?) {
         view.showErrorNotification(UstadMobileSystemImpl.instance.getString(
                 errorMessage, view.context), Runnable { }, 0)
     }
