@@ -28,6 +28,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContai
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,11 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     private NetworkManagerAndroidBle managerAndroidBle;
 
     private ContentEntryListRecyclerViewAdapter recyclerAdapter;
+
+    private Bundle savedInstanceState;
+
+    private View rootContainer;
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -116,13 +122,13 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootContainer = inflater.inflate(R.layout.fragment_contententry_list, container, false);
+        rootContainer = inflater.inflate(R.layout.fragment_contententry_list, container, false);
+        this.savedInstanceState = savedInstanceState;
 
         // Set the adapter
         Context context = rootContainer.getContext();
@@ -131,10 +137,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-
-        entryListPresenter = new ContentEntryListFragmentPresenter(getContext(),
-                bundleToMap(getArguments()), this);
-        entryListPresenter.onCreate(bundleToMap(savedInstanceState));
+        checkReady();
 
         return rootContainer;
     }
@@ -145,16 +148,27 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         if(context instanceof UstadBaseActivity){
             this.ustadBaseActivity = ((UstadBaseActivity)context);
             ustadBaseActivity.runAfterServiceConnection( ()-> {
-                managerAndroidBle = (NetworkManagerAndroidBle)ustadBaseActivity
-                        .getNetworkManagerBle();
-                recyclerAdapter.setNetworkManager(managerAndroidBle);
+                ustadBaseActivity.runOnUiThread(() -> {
+                    managerAndroidBle = (NetworkManagerAndroidBle)ustadBaseActivity
+                            .getNetworkManagerBle();
+                    checkReady();
+                });
             });
         }
 
         if (context instanceof ContentEntryListener) {
             this.contentEntryListener = (ContentEntryListener) context;
         }
+
         super.onAttach(context);
+    }
+
+    private void checkReady() {
+        if(entryListPresenter == null && managerAndroidBle != null && rootContainer != null) {
+            entryListPresenter = new ContentEntryListFragmentPresenter(getContext(),
+                    UMAndroidUtil.bundleToMap(getArguments()), this);
+            entryListPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState));
+        }
     }
 
     @Override
@@ -166,7 +180,12 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void setContentEntryProvider(UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> entryProvider) {
-        recyclerAdapter = new ContentEntryListRecyclerViewAdapter(getActivity(),this, this);
+        if(recyclerAdapter != null)
+            recyclerAdapter.removeListeners();
+
+        recyclerAdapter = new ContentEntryListRecyclerViewAdapter(getActivity(),this, this,
+                managerAndroidBle);
+        recyclerAdapter.addListeners();
         DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid> factory =
                 (DataSource.Factory<Integer, ContentEntryWithStatusAndMostRecentContainerUid>) entryProvider.getProvider();
         LiveData<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> data =
@@ -232,4 +251,10 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         super.onStop();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(recyclerAdapter != null)
+            recyclerAdapter.removeListeners();
+    }
 }

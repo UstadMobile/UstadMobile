@@ -17,23 +17,25 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 public class ContentEntryListRecyclerViewAdapter extends
         PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid,
-        ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener {
+        ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener,
+        DownloadJobItemManager.OnDownloadJobItemChangeListener {
 
     private final AdapterViewListener listener;
 
@@ -41,34 +43,59 @@ public class ContentEntryListRecyclerViewAdapter extends
 
     private Set<Long> containerUidsToMonitor = new HashSet<>();
 
-    private WeakHashMap<Integer, ViewHolder> viewHolderWeakHashMap;
+    private Set<ViewHolder> boundViewHolders;
 
     private NetworkManagerAndroidBle managerAndroidBle;
 
     private FragmentActivity activity;
 
     ContentEntryListRecyclerViewAdapter(FragmentActivity activity, AdapterViewListener listener,
-                                        LocalAvailabilityMonitor monitor) {
+                                        LocalAvailabilityMonitor monitor,
+                                        NetworkManagerAndroidBle managerAndroidBle) {
         super(DIFF_CALLBACK);
         this.listener = listener;
         this.monitor = monitor;
         this.activity = activity;
-        viewHolderWeakHashMap = new WeakHashMap<>();
+        boundViewHolders = new HashSet<>();
+        this.managerAndroidBle = managerAndroidBle;
     }
 
-    void setNetworkManager(NetworkManagerAndroidBle managerAndroidBle){
-        this.managerAndroidBle = managerAndroidBle;
+
+    public void addListeners() {
         managerAndroidBle.addLocalAvailabilityListener(this);
+        managerAndroidBle.addDownloadChangeListener(this);
+    }
+
+    public void removeListeners() {
+        managerAndroidBle.removeLocalAvailabilityListener(this);
+        managerAndroidBle.removeDownloadChangeListener(this);
     }
 
     @Override
     public void onLocalAvailabilityChanged(Set<Long> locallyAvailableEntries) {
-        List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
+
+        List<ViewHolder> viewHoldersToNotify;
+        synchronized (boundViewHolders) {
+            viewHoldersToNotify = new LinkedList<>(boundViewHolders);
+        }
+
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
+        }
+    }
+
+    @Override
+    public void onDownloadJobItemChange(DownloadJobItemStatus status) {
+        List<ViewHolder> holdersToNotify;
+        synchronized (boundViewHolders) {
+            holdersToNotify = new LinkedList<>(boundViewHolders);
+        }
+
+        for(ViewHolder viewHolder : holdersToNotify){
+            viewHolder.onDownloadJobItemChange(status);
         }
     }
 
@@ -80,13 +107,10 @@ public class ContentEntryListRecyclerViewAdapter extends
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
-
-        for(Map.Entry<Integer,ViewHolder> holderMap : viewHolderWeakHashMap.entrySet()){
-            if(holderMap.getValue().equals(holder)){
-                viewHolderWeakHashMap.remove(holderMap.getKey());
-                break;
-            }
+        synchronized (boundViewHolders) {
+            boundViewHolders.remove(holder);
         }
+
         super.onViewRecycled(holder);
 
     }
@@ -96,7 +120,8 @@ public class ContentEntryListRecyclerViewAdapter extends
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_content_entry, parent, false);
-        return new ViewHolder(view);
+        ViewHolder vh = new ViewHolder(view);
+        return vh;
     }
 
 
@@ -112,6 +137,10 @@ public class ContentEntryListRecyclerViewAdapter extends
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         ContentEntryWithStatusAndMostRecentContainerUid entry = getItem(position);
+
+        synchronized (boundViewHolders) {
+            boundViewHolders.add(holder);
+        }
 
         if (entry == null) {
             holder.getEntryTitle().setText("");
@@ -135,6 +164,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             }
 
             holder.setContainerUid(entry.getMostRecentContainer());
+            holder.setContentEntryUid(entry.getContentEntryUid());
 
             holder.getView().setTag(entry.getContentEntryUid());
             holder.getEntryTitle().setText(entry.getTitle());
@@ -157,10 +187,8 @@ public class ContentEntryListRecyclerViewAdapter extends
 
                 if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.getTotalSize() > 0) {
                     contentDescription = context.getString(R.string.download_entry_state_downloading);
-                    holder.getDownloadView().setProgress((int) ((status.getBytesDownloadSoFar() * 100) / status.getTotalSize()));
                 } else {
                     contentDescription = context.getString(R.string.download_entry_state_queued);
-                    holder.getDownloadView().setProgress(0);
                 }
 
                 if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
@@ -210,11 +238,6 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getAvailabilityIcon().setVisibility(viewVisibility);
             holder.getAvailabilityStatus().setVisibility(viewVisibility);
 
-            //add as a reference only if is a leaf entry
-            if(entry.isLeaf()){
-                viewHolderWeakHashMap.put(entry.hashCode(),holder);
-            }
-
             List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
             if(!containerUidList.isEmpty()){
                 containerUidsToMonitor.addAll(containerUidList);
@@ -224,9 +247,10 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getDownloadView().getImageResource().setContentDescription(contentDescription);
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
+            holder.getDownloadView().setProgress(0);
+            managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(entry.getContentEntryUid(),
+                    holder::onDownloadJobItemChange);
         }
-
-
     }
 
     /**
@@ -250,7 +274,8 @@ public class ContentEntryListRecyclerViewAdapter extends
         return uidsToMonitor;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder implements
+            DownloadJobItemManager.OnDownloadJobItemChangeListener{
         final View mView;
         final TextView entryTitle;
         final TextView entryDescription;
@@ -260,7 +285,10 @@ public class ContentEntryListRecyclerViewAdapter extends
         final TextView availabilityStatus;
         final DownloadStatusButton downloadView;
         final ImageView iconView;
+
         private long containerUid;
+
+        private long contentEntryUid;
 
         ViewHolder(View view) {
             super(view);
@@ -290,6 +318,14 @@ public class ContentEntryListRecyclerViewAdapter extends
 
         long getContainerUid() {
             return containerUid;
+        }
+
+        public long getContentEntryUid() {
+            return contentEntryUid;
+        }
+
+        public void setContentEntryUid(long contentEntryUid) {
+            this.contentEntryUid = contentEntryUid;
         }
 
         @Override
@@ -331,6 +367,17 @@ public class ContentEntryListRecyclerViewAdapter extends
 
         public TextView getAvailabilityStatus() {
             return availabilityStatus;
+        }
+
+        @Override
+        public void onDownloadJobItemChange(DownloadJobItemStatus status) {
+            if(status != null && status.getContentEntryUid() == contentEntryUid) {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "ContentEntryList update " +
+                        "entryUid " + status.getContentEntryUid());
+                activity.runOnUiThread(() -> downloadView.setProgress(
+                        status.getTotalBytes() > 0 ?
+                        (int)((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0));
+            }
         }
     }
 

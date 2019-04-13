@@ -73,7 +73,7 @@ public class DownloadDialogFragment extends UstadDialogFragment implements Downl
             NetworkManagerBle managerBle = ((UstadBaseActivity)context).networkManagerBle;
             mPresenter = new DownloadDialogPresenter(getContext(),managerBle,
                     bundleToMap(getArguments()),this, UmAppDatabase.getInstance(context),
-                    UmAccountManager.getRepositoryForActiveAccount(context));
+                    UmAccountManager.INSTANCE.getRepositoryForActiveAccount(context));
         }
 
         super.onAttach(context);

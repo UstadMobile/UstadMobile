@@ -56,6 +56,9 @@ public class TestDownloadJobItemManager {
 
     private DownloadJob downloadJob;
 
+    private DownloadJobItem subLeafDjItem;
+
+    private DownloadJobItem rootDjItem;
 
     public void setupDb() {
         db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
@@ -109,11 +112,11 @@ public class TestDownloadJobItemManager {
 
     protected void setupRootAndSubleaf(DownloadJobItemManager manager) throws InterruptedException{
         CountDownLatch latch = new CountDownLatch(2);
-        DownloadJobItem rootDjItem = new DownloadJobItem(downloadJob,
+        rootDjItem = new DownloadJobItem(downloadJob,
                 parentEntry.getContentEntryUid(), 0, 0);
         manager.insertDownloadJobItems(Arrays.asList(rootDjItem), (aVoid) -> latch.countDown());
 
-        DownloadJobItem subLeafDjItem = new DownloadJobItem(downloadJob,
+        subLeafDjItem = new DownloadJobItem(downloadJob,
                 subLeaf.getContentEntryUid(), subLeafContainer.getContainerUid(),
                 subLeafContainer.getFileSize());
         manager.insertDownloadJobItems(Arrays.asList(subLeafDjItem), (aVoid) -> latch.countDown());
@@ -173,6 +176,32 @@ public class TestDownloadJobItemManager {
                 subLeafContainer.getFileSize(),
                 db.getDownloadJobItemDao().findByContentEntryUid2(parentEntry.getContentEntryUid())
                         .getDownloadLength());
+    }
+
+    @Test
+    public void givenStatusLoaded_whenProgressRecorded_thenShouldFireEventForAllParents()
+            throws InterruptedException{
+        setupDb();
+        DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
+        setupRootAndSubleaf(manager);
+        AtomicReference<DownloadJobItemStatus> parentStatusRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        manager.setOnDownloadJobItemChangeListener((status) -> {
+            if(status != null && status.getContentEntryUid() == parentEntry.getContentEntryUid()) {
+                parentStatusRef.set(status);
+                latch.countDown();
+            }
+        });
+
+        manager.updateProgress((int)subLeafDjItem.getDjiUid(), 300,
+                subLeafDjItem.getDownloadLength());
+        latch.await(5, TimeUnit.SECONDS);
+
+        Assert.assertNotNull("Got update to root entry item after updating parent",
+                parentStatusRef.get());
+
+        Assert.assertEquals("Progress now includes update", 300,
+                parentStatusRef.get().getBytesSoFar());
     }
 
     @Test

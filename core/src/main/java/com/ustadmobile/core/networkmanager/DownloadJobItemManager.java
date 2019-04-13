@@ -72,7 +72,7 @@ public class DownloadJobItemManager {
         }
 
         List<DownloadJobItemParentChildJoin> joinList = db.getDownloadJobItemParentChildJoinDao()
-                .findParentsByChildUid(downloadJobUid);
+                .findParentChildJoinsByDownloadJobUids(downloadJobUid);
         for(DownloadJobItemParentChildJoin join : joinList) {
             DownloadJobItemStatus parentStatus = jobItemUidToStatusMap.get((int)join.getDjiParentDjiUid());
             DownloadJobItemStatus childStatus = jobItemUidToStatusMap.get((int)join.getDjiChildDjiUid());
@@ -191,6 +191,13 @@ public class DownloadJobItemManager {
             if(callback != null)
                 callback.onDone(null);
         });
+    }
+
+    public void insertParentChildJoinsSync(List<DownloadJobItemParentChildJoin> joins) {
+        CountDownLatch latch = new CountDownLatch(1);
+        insertParentChildJoins(joins, (aVoid) -> latch.countDown());
+        try { latch.await(5, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {/* should not be interrupted */}
     }
 
     public void findStatusByContentEntryUid(long contentEntryUid, UmResultCallback<DownloadJobItemStatus> callback) {

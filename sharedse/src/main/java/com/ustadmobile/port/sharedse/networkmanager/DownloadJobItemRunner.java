@@ -135,9 +135,9 @@ public class DownloadJobItemRunner implements Runnable {
         @Override
         public void run() {
             ResumableHttpDownload httpDownload  = httpDownloadRef.get();
-            if(httpDownload != null && runnerStatus.get() == JobStatus.RUNNING) {
+            if(runnerStatus.get() == JobStatus.RUNNING) {
                 long bytesSoFar = completedEntriesBytesDownloaded.get() +
-                        httpDownload.getDownloadedSoFar();
+                        (httpDownload != null ? httpDownload.getDownloadedSoFar() : 0);
                 downloadJobItemManager.updateProgress((int)downloadItem.getDjiUid(),
                         bytesSoFar, downloadItem.getDownloadLength());
             }
