@@ -4,11 +4,17 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.db.dao.SalePaymentDao;
+import com.ustadmobile.core.db.dao.SaleVoiceNoteDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -26,6 +32,7 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 
 import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.lib.db.entities.SaleItemListDetail;
+import com.ustadmobile.lib.db.entities.SaleVoiceNote;
 
 import jdk.nashorn.internal.runtime.UserAccessorProperty;
 
@@ -41,6 +48,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     UmAppDatabase repository;
     private SaleItemDao saleItemDao;
     private SaleDao saleDao;
+    private SaleVoiceNoteDao saleVoiceNoteDao;
     private SalePaymentDao salePaymentDao;
     private SaleItem currentSaleItem = null;
     private Sale currentSale;
@@ -53,6 +61,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     private boolean showSaveButton = false;
 
+    private String voiceNoteFileName;
+
     public SaleDetailPresenter(Object context, Hashtable arguments, SaleDetailView view) {
         super(context, arguments, view);
 
@@ -63,6 +73,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         salePaymentDao = repository.getSalePaymentDao();
         saleDao = repository.getSaleDao();
         locationDao = repository.getLocationDao();
+        saleVoiceNoteDao = UmAppDatabase.getInstance(context).getSaleVoiceNoteDao();
 
         positionToLocationUid = new Hashtable<>();
 
@@ -190,6 +201,25 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             }
         });
 
+
+        //Any voice notes
+        saleVoiceNoteDao.findBySaleUidAsync(saleUid, new UmCallback<SaleVoiceNote>() {
+            @Override
+            public void onSuccess(SaleVoiceNote result) {
+                if(result!= null){
+                    String voiceNotePath  = saleVoiceNoteDao.getAttachmentPath(result.getSaleVoiceNoteUid());
+                    if(voiceNotePath!=null&&!voiceNotePath.isEmpty()){
+                        view.updateSaleVoiceNoteOnView(voiceNotePath);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
         getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
         updateSaleItemProvider(saleUid);
         //Next sprint:
@@ -251,6 +281,37 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
         if(updatedSale != null){
             updatedSale.setSaleActive(true);
+            if(updatedSale.getSaleLocationUid() == 0){
+                updatedSale.setSaleLocationUid(positionToLocationUid.get(0));
+            }
+
+            //Persist voice note
+            if(voiceNoteFileName != null && !voiceNoteFileName.isEmpty()){
+                SaleVoiceNote voiceNote = new SaleVoiceNote();
+                voiceNote.setSaleVoiceNoteSaleUid(updatedSale.getSaleUid());
+                saleVoiceNoteDao.insertAsync(voiceNote, new UmCallback<Long>() {
+                    @Override
+                    public void onSuccess(Long result) {
+                        try {
+                            FileInputStream is = new FileInputStream(voiceNoteFileName);
+                            saleVoiceNoteDao.setAttachment(result,is);
+
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
+            }
+
             saleItemDao.getTitleForSaleUidAsync(updatedSale.getSaleUid(), new UmCallback<String>() {
                 @Override
                 public void onSuccess(String result) {
@@ -258,6 +319,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
                     saleDao.updateAsync(updatedSale, new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {
+
                             view.finish();
                         }
 
@@ -286,7 +348,6 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     }
 
     public void handleClickAddSaleItem(){
-
 
         SaleItem saleItem = new SaleItem();
         saleItem.setSaleItemSaleUid(updatedSale.getSaleUid());
@@ -340,5 +401,17 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     public void setShowSaveButton(boolean showSaveButton) {
         this.showSaveButton = showSaveButton;
+    }
+
+    public String getVoiceNoteFileName() {
+        return voiceNoteFileName;
+    }
+
+    public void setVoiceNoteFileName(String voiceNoteFileName) {
+        this.voiceNoteFileName = voiceNoteFileName;
+    }
+
+    public void handleDeleteVoiceNote(){
+        this.voiceNoteFileName = "";
     }
 }

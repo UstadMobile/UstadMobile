@@ -56,6 +56,7 @@ public interface SaleDetailView extends UstadView {
     void showDelivered(boolean show);
     void showNotes(boolean show);
 
+    void updateSaleVoiceNoteOnView(String fileName);
 
 
 }

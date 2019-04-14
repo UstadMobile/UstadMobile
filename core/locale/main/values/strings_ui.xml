@@ -341,6 +341,7 @@
     <string name="sort_by_most_used">most used</string>
     <string name="sort_by_name_asc">name (asc)</string>
     <string name="sorT_by_name_desc">name (desc)</string>
+    <string name="feature_coming_soon">This feature is coming soon.</string>
 
     <string name="sale_list_sort_by_name">name</string>
     <string name="sale_list_sort_by_total_asc">total (asc)</string>

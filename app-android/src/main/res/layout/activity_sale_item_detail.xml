@@ -5,165 +5,228 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <NumberPicker
-        android:id="@+id/activity_sale_item_detail_price_per_piece_number_picker"
-        android:layout_width="64dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="@+id/activity_sale_item_price_per_piece_title"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_price_per_piece_title">
-
-    </NumberPicker>
-
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_select_sale_product_appbar" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:elevation="4dp"
+        android:id="@+id/activity_select_sale_product_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar android:id="@+id/activity_sale_item_detail_toolbar"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
-            app:layout_scrollFlags="scroll|enterAlways" app:title="@string/sale_product"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_sale_item_detail_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/sale_product"
             tools:layout_editor_absoluteY="0dp" />
     </android.support.design.widget.AppBarLayout>
 
-    <TextView
-        android:id="@+id/activity_sale_item_quantity_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:text="@string/quantity"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar" />
-
-    <TextView
-        android:id="@+id/activity_sale_item_price_per_piece_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:text="@string/price_per_piece"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar" />
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/activity_sale_item_detail_quantity_picker_cl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view">
-
-
-        <TextView
-            android:id="@+id/activity_sale_item_total_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/total"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar">
 
         <TextView
-            android:id="@+id/activity_sale_item_detail_total_amount"
+            android:id="@+id/activity_sale_item_quantity_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="0"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/activity_sale_item_total_title"
+            android:layout_marginEnd="8dp"
+            android:text="@string/quantity"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="@+id/activity_sale_item_detail_quantity_numberpicker"
+            app:layout_constraintStart_toStartOf="@+id/activity_sale_item_detail_quantity_numberpicker"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/activity_sale_item_detail_total_currency"
+
+        <NumberPicker
+            android:id="@+id/activity_sale_item_detail_quantity_numberpicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:text="@string/currency_afs"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/activity_sale_item_detail_total_amount"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_quantity_title">
+
+        </NumberPicker>
+
 
     </android.support.constraint.ConstraintLayout>
+
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/activity_sale_item_detail_price_per_piece_cl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="44dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar">
+
+        <TextView
+            android:id="@+id/activity_sale_item_price_per_piece_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/price_per_piece"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="@+id/activity_sale_item_detail_price_per_piece_number_picker"
+            app:layout_constraintStart_toStartOf="@+id/activity_sale_item_detail_price_per_piece_number_picker"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <NumberPicker
+            android:id="@+id/activity_sale_item_detail_price_per_piece_number_picker"
+            android:layout_width="64dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_price_per_piece_title">
+
+        </NumberPicker>
+
+        <TextView
+            android:id="@+id/activity_sale_item_detail_currency_ppp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/currency_afs"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            app:layout_constraintBottom_toBottomOf="@+id/activity_sale_item_detail_price_per_piece_number_picker"
+            app:layout_constraintStart_toEndOf="@+id/activity_sale_item_detail_price_per_piece_number_picker"
+            app:layout_constraintTop_toTopOf="@+id/activity_sale_item_detail_price_per_piece_number_picker" />
+
+    </android.support.constraint.ConstraintLayout>
+
 
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="4dp"
+        android:background="@color/divider"
+        android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_detail_quantity_numberpicker">
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_detail_price_per_piece_cl">
 
     </View>
 
-    <RadioGroup
-        android:id="@+id/activity_sale_item_detail_radiogroup"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+        app:layout_constraintTop_toBottomOf="@+id/view">
 
-        <RadioButton
-            android:id="@+id/activity_sale_item_detail_radiobutton_sold"
-            android:layout_width="match_parent"
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/sold" />
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <RadioButton
-            android:id="@+id/activity_sale_item_detail_radiobutton_preorder"
-            android:layout_width="match_parent"
+
+            <TextView
+                android:id="@+id/activity_sale_item_total_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/total"
+                android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Subtitle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/activity_sale_item_detail_total_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="0"
+                android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Subtitle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/activity_sale_item_total_title"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/activity_sale_item_detail_total_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/currency_afs"
+                android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/activity_sale_item_detail_total_amount"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+        <RadioGroup
+            android:id="@+id/activity_sale_item_detail_radiogroup"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/pre_order" />
-    </RadioGroup>
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
-    <NumberPicker
-        android:id="@+id/activity_sale_item_detail_quantity_numberpicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="54dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_quantity_title">
+            <RadioButton
+                android:id="@+id/activity_sale_item_detail_radiobutton_sold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sold"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
-    </NumberPicker>
+            <RadioButton
+                android:id="@+id/activity_sale_item_detail_radiobutton_preorder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/pre_order"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+        </RadioGroup>
 
-    <TextView
-        android:id="@+id/activity_sale_item_detail_currency_ppp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="@string/currency_afs"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:layout_constraintBottom_toBottomOf="@+id/activity_sale_item_detail_price_per_piece_number_picker"
-        app:layout_constraintStart_toEndOf="@+id/activity_sale_item_detail_price_per_piece_number_picker"
-        app:layout_constraintTop_toTopOf="@+id/activity_sale_item_detail_price_per_piece_number_picker" />
+    </android.support.constraint.ConstraintLayout>
+
 
 
 </android.support.constraint.ConstraintLayout>

@@ -35,6 +35,9 @@
     <!--To show download progress indicator-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
+    <!-- Record voice notes -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

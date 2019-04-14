@@ -9,12 +9,13 @@
     <ImageView
 
         android:id="@+id/item_sale_product_blob_image"
-        android:layout_width="112dp"
-        android:layout_height="112dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

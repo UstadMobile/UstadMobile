@@ -5,254 +5,327 @@
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <TextView
-        android:id="@+id/activity_sale_detail_disc_currency3"
-        android:layout_width="wrap_content"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_sale_detail_appbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/currency_afs"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view2" />
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <android.support.design.widget.AppBarLayout android:id="@+id/activity_sale_detail_appbar"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
-
-        <android.support.v7.widget.Toolbar android:id="@+id/activity_sale_detail_toolbar"
-            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_sale_detail_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/record_sale" />
 
     </android.support.design.widget.AppBarLayout>
 
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/activity_sale_detail_add_cl"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView18">
-
-
-        <ImageView
-            android:id="@+id/activity_sale_detail_add_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_add_black_24dp" />
-
-        <TextView
-            android:id="@+id/activity_sale_detail_add_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/add_item"
-            android:textColor="@color/text_primary"
-            app:layout_constraintStart_toEndOf="@+id/activity_sale_detail_add_image"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </android.support.constraint.ConstraintLayout>
-
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/activity_sale_detail_recyclerview"
+    <ScrollView
+        android:id="@+id/activity_sale_detail_scrollview_sv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:scrollbars="vertical"
+        android:layout_height="0dp"
         android:visibility="visible"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_cl" />
-
-    <TextView
-        android:id="@+id/textView16"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/location"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_appbar" />
-
-    <Spinner
-        android:id="@+id/activity_sale_detail_location_spinner"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:backgroundTint="@color/color_gray"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:dropDownWidth="match_parent"
-        android:spinnerMode="dropdown"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView16" />
-
-    <TextView
-        android:id="@+id/textView18"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/items"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_location_spinner" />
-
-    <TextView
-        android:id="@+id/activity_sale_detail_order_total"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency4"
-        app:layout_constraintTop_toBottomOf="@+id/view3" />
-
-    <TextView
-        android:id="@+id/textView21"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/order_total"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="@+id/textView23"
-        app:layout_constraintTop_toBottomOf="@+id/view3" />
-
-    <TextView
-        android:id="@+id/textView23"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/discount"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_discount"
-        app:layout_constraintTop_toBottomOf="@+id/textView21" />
-
-    <EditText
-        android:id="@+id/activity_sale_detail_discount"
-        android:layout_width="56dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:ems="10"
-        android:gravity="right"
-        android:inputType="number"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency"
-        app:layout_constraintTop_toBottomOf="@+id/textView21" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/total_colon"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="@+id/textView23"
-        app:layout_constraintTop_toBottomOf="@+id/view2" />
-
-    <TextView
-        android:id="@+id/activity_sale_detail_order_after_discount_tota"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency3"
-        app:layout_constraintTop_toBottomOf="@+id/view2" />
-
-    <View
-        android:id="@+id/view2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_discount"
-        android:visibility="invisible" />
-
-    <View
-        android:id="@+id/view3"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_recyclerview" />
-
-    <CheckBox
-        android:id="@+id/activity_sale_detail_delivered"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/delivered"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/activity_sale_detail_order_notes"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/activity_sale_detail_order_notes"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:hint="@string/order_notes"
-        android:inputType="textPersonName"
-        android:text="@string/order_notes"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_appbar"
+        app:layout_constraintVertical_bias="1.0">
 
-    <TextView
-        android:id="@+id/activity_sale_detail_disc_currency"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/currency_afs"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_order_total" />
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/activity_sale_detail_scroll_me_cl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible">
 
-    <TextView
-        android:id="@+id/activity_sale_detail_disc_currency4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/currency_afs"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view3" />
+            <TextView
+                android:id="@+id/textView16"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/location"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/activity_sale_detail_location_spinner"
+                style="@style/Widget.AppCompat.Spinner.Underlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/color_gray"
+                android:dropDownWidth="match_parent"
+                android:spinnerMode="dropdown"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView16" />
+
+            <TextView
+                android:id="@+id/textView18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/items"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_location_spinner" />
+
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/activity_sale_detail_add_cl"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView18">
+
+
+                <ImageView
+                    android:id="@+id/activity_sale_detail_add_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_add_black_24dp" />
+
+                <TextView
+                    android:id="@+id/activity_sale_detail_add_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/add_item"
+                    android:textColor="@color/text_primary"
+                    app:layout_constraintStart_toEndOf="@+id/activity_sale_detail_add_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/activity_sale_detail_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:scrollbars="vertical"
+                android:visibility="visible"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_cl" />
+
+            <View
+                android:id="@+id/view3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_recyclerview" />
+
+            <TextView
+                android:id="@+id/activity_sale_detail_order_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency4"
+                app:layout_constraintTop_toBottomOf="@+id/view3" />
+
+            <TextView
+                android:id="@+id/textView21"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/order_total"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/textView23"
+                app:layout_constraintTop_toBottomOf="@+id/view3" />
+
+            <TextView
+                android:id="@+id/textView23"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/discount"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_discount"
+                app:layout_constraintTop_toBottomOf="@+id/textView21" />
+
+            <TextView
+                android:id="@+id/activity_sale_detail_disc_currency3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/currency_afs"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+            <EditText
+                android:id="@+id/activity_sale_detail_discount"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:ems="10"
+                android:gravity="right"
+                android:inputType="number"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency"
+                app:layout_constraintTop_toBottomOf="@+id/textView21" />
+
+            <TextView
+                android:id="@+id/activity_sale_detail_disc_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/currency_afs"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_order_total" />
+
+            <TextView
+                android:id="@+id/activity_sale_detail_disc_currency4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/currency_afs"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/view3" />
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_discount" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/total_colon"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/textView23"
+                app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+            <TextView
+                android:id="@+id/activity_sale_detail_order_after_discount_tota"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency3"
+                app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+            <CheckBox
+                android:id="@+id/activity_sale_detail_delivered"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/delivered"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <EditText
+                android:id="@+id/activity_sale_detail_order_notes"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:ems="10"
+                android:hint="@string/order_notes"
+                android:inputType="textPersonName"
+                android:text="@string/order_notes"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered" />
+
+            <ImageButton
+                android:id="@+id/activity_sale_detail_order_notes_record_voice_note_ib"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:backgroundTint="@android:color/transparent"
+                android:elevation="0dp"
+                android:padding="@dimen/dimen_8dp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered"
+                app:srcCompat="@drawable/ic_mic_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/activity_sale_detail_order_notes_play_image_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:backgroundTint="@android:color/transparent"
+                android:padding="@dimen/dimen_8dp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_order_notes_delete_ib"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered"
+                app:srcCompat="@drawable/ic_play_arrow_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/activity_sale_detail_order_notes_delete_ib"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="@dimen/dimen_8dp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_order_notes_record_voice_note_ib"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered"
+                app:srcCompat="@drawable/ic_delete_black_24dp" />
+
+
+        </android.support.constraint.ConstraintLayout>
+
+    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>

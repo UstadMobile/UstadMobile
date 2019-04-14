@@ -9,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 73)
 public class SaleProductPicture {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleProductPictureUid;
 
     //The product uid
@@ -19,7 +19,7 @@ public class SaleProductPicture {
     private int saleProductPictureFileSize;
 
     //picture file's timestamp
-    private int saleProductPictureTimestamp;
+    private long saleProductPictureTimestamp;
 
     //picture file's mime type
     private String saleProductPictureMime;
@@ -32,6 +32,7 @@ public class SaleProductPicture {
 
     @UmSyncLastChangedBy
     private int saleProductPictureLCB;
+
 
     public long getSaleProductPictureUid() {
         return saleProductPictureUid;
@@ -57,11 +58,11 @@ public class SaleProductPicture {
         this.saleProductPictureFileSize = saleProductPictureFileSize;
     }
 
-    public int getSaleProductPictureTimestamp() {
+    public long getSaleProductPictureTimestamp() {
         return saleProductPictureTimestamp;
     }
 
-    public void setSaleProductPictureTimestamp(int saleProductPictureTimestamp) {
+    public void setSaleProductPictureTimestamp(long saleProductPictureTimestamp) {
         this.saleProductPictureTimestamp = saleProductPictureTimestamp;
     }
 

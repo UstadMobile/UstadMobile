@@ -33,6 +33,10 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     private RadioButton saleRB, preOrderRB;
     NumberPicker quantityNP, pppNP;
     EditText pppNPET;
+    int quantityDefaultValue = 1;
+    int pppDefaultValue =0;
+    int minValue = 0;
+    int maxValue = 99990;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -91,16 +95,12 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
                 "id", "android"));
 
         quantityNP.setMinValue(1);
-        quantityNP.setValue(1);
+        quantityNP.setValue(quantityDefaultValue);
         quantityNP.setMaxValue(99999);
-
-        int minValue = 10;
-        int maxValue = 99990;
-        int step = 10;
 
         pppNP.setMinValue(minValue);
         pppNP.setMaxValue(maxValue);
-        pppNP.setValue(10);
+        pppNP.setValue(pppDefaultValue);
 
 //        String[] valueSet = new String[maxValue/minValue];
 //

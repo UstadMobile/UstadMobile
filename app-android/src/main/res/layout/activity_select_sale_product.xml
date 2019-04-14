@@ -17,19 +17,17 @@
             tools:layout_editor_absoluteY="0dp" />
     </android.support.design.widget.AppBarLayout>
 
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/activity_select_sale_product_collection_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:scrollbars="vertical"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,8 +41,9 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/collections"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        android:visibility="invisible"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="16sp"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +57,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/by_category"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -70,7 +70,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:scrollbars="horizontal"
         android:visibility="visible"
@@ -81,15 +80,12 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_category_title" />
 
 
-
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/activity_select_sale_product_recent_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:scrollbars="horizontal"
         android:visibility="visible"
@@ -105,7 +101,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/most_recent"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar" />
 
@@ -139,7 +136,7 @@
         android:layout_marginEnd="8dp"
         android:text="@string/more_caps"
         android:textColor="@color/primary"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_category_rv" />
 

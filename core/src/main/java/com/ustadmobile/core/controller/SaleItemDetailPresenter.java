@@ -160,6 +160,10 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
                 updatedSaleItem.setSaleItemProducerUid(producerUid);
             }
 
+            if (updatedSaleItem.getSaleItemQuantity() == 0){
+                updatedSaleItem.setSaleItemQuantity(1);
+            }
+
             saleItemDao.updateAsync(updatedSaleItem, new UmCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {

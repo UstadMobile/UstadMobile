@@ -16,6 +16,7 @@ import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
 import static com.ustadmobile.core.view.SelectProducerView.ARG_PRODUCER_UID;
 import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_CATEGORY;
+import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION;
 
 
 /**
@@ -59,7 +60,7 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
         updateRecentProvider();
         updateCategoryProvider();
-        //updateCollectionProvider();
+        updateCollectionProvider();
 
     }
 
@@ -75,7 +76,9 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
     }
     private void updateCollectionProvider(){
-        //TODO
+        collectionProvider =
+                saleProductGroupDao.findAllTypedActiveSNWIProvider(PRODUCT_GROUP_TYPE_COLLECTION);
+        view.setCollectionProvider(collectionProvider);
     }
 
 

@@ -61,6 +61,8 @@ public class SaleItem {
         this.setSaleItemSold(false);
         this.setSaleItemPreorder(false);
         this.setSaleItemProductUid(productUid);
+        this.setSaleItemPricePerPiece(0);
+        this.setSaleItemQuantity(0);
     }
 
     public SaleItem(long productUid, int quantity, long ppp, long saleUid, long dueDate ){
