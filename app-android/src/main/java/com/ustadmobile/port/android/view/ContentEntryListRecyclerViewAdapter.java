@@ -27,9 +27,11 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ContentEntryListRecyclerViewAdapter extends
@@ -43,11 +45,25 @@ public class ContentEntryListRecyclerViewAdapter extends
 
     private Set<Long> containerUidsToMonitor = new HashSet<>();
 
-    private Set<ViewHolder> boundViewHolders;
+    private final Set<ViewHolder> boundViewHolders;
 
     private NetworkManagerAndroidBle managerAndroidBle;
 
     private FragmentActivity activity;
+
+    private static final Map<Integer, Integer> CONTENT_TYPE_TO_ICON_RES_MAP = new HashMap<>();
+
+    static {
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.EBOOK_TYPE, R.drawable.ic_book_black_24dp);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.AUDIO_TYPE, R.drawable.ic_audiotrack_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.VIDEO_TYPE, R.drawable.ic_video_library_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.COLLECTION_TYPE,
+                R.drawable.ic_collections_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.DOCUMENT_TYPE, R.drawable.ic_file_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.INTERACTIVE_EXERICSE_TYPE,
+                R.drawable.ic_assignment_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.ARTICLE_TYPE, R.drawable.ic_newspaper);
+    }
 
     ContentEntryListRecyclerViewAdapter(FragmentActivity activity, AdapterViewListener listener,
                                         LocalAvailabilityMonitor monitor,
@@ -120,8 +136,7 @@ public class ContentEntryListRecyclerViewAdapter extends
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_content_entry, parent, false);
-        ViewHolder vh = new ViewHolder(view);
-        return vh;
+        return new ViewHolder(view);
     }
 
 
@@ -143,6 +158,8 @@ public class ContentEntryListRecyclerViewAdapter extends
         }
 
         if (entry == null) {
+            holder.setContainerUid(0L);
+            holder.setContentEntryUid(0L);
             holder.getEntryTitle().setText("");
             holder.getEntryDescription().setText("");
             holder.getThumbnailView().setImageDrawable(null);
@@ -153,7 +170,6 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getAvailabilityStatus().setText("");
             holder.getAvailabilityIcon().setImageDrawable(null);
         } else {
-
             boolean available = false;
             if(managerAndroidBle != null)
                 available = managerAndroidBle.isEntryLocallyAvailable(
@@ -209,23 +225,10 @@ public class ContentEntryListRecyclerViewAdapter extends
 
             ImageView iconView = holder.getIconView();
             int iconFlag = entry.getContentTypeFlag();
-            if (iconFlag == ContentEntry.EBOOK_TYPE) {
-                iconView.setImageResource(R.drawable.ic_book_black_24dp);
-            } else if (iconFlag == ContentEntry.AUDIO_TYPE) {
-                iconView.setImageResource(R.drawable.ic_audiotrack_24px);
-            } else if (iconFlag == ContentEntry.VIDEO_TYPE) {
-                iconView.setImageResource(R.drawable.ic_video_library_24px);
-            } else if (iconFlag == ContentEntry.COLLECTION_TYPE) {
-                iconView.setImageResource(R.drawable.ic_collections_24px);
-            } else if (iconFlag == ContentEntry.DOCUMENT_TYPE) {
-                iconView.setImageResource(R.drawable.ic_file_24px);
-            } else if (iconFlag == ContentEntry.INTERACTIVE_EXERICSE_TYPE) {
-                iconView.setImageResource(R.drawable.ic_assignment_24px);
-            } else if (iconFlag == ContentEntry.ARTICLE_TYPE){
-                iconView.setImageResource(R.drawable.ic_newspaper);
-            } else{
-                iconView.setImageResource(R.drawable.ic_book_black_24dp);
-            }
+            iconView.setImageResource(
+                    CONTENT_TYPE_TO_ICON_RES_MAP.containsKey(entry.getContentTypeFlag()) ?
+                            CONTENT_TYPE_TO_ICON_RES_MAP.get(entry.getContentTypeFlag())
+                            : R.drawable.ic_book_black_24dp);
 
             if (iconFlag == ContentEntry.UNDEFINED_TYPE) {
                 iconView.setVisibility(View.GONE);
@@ -249,7 +252,14 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
             holder.getDownloadView().setProgress(0);
             managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(entry.getContentEntryUid(),
-                    holder::onDownloadJobItemChange);
+                    (status) -> {
+                        if(status != null) {
+                            holder.onDownloadJobItemChange(status);
+                        }else {
+                            activity.runOnUiThread(() ->
+                                    holder.getDownloadView().setProgressVisibility(View.GONE));
+                        }
+                    });
         }
     }
 
@@ -374,9 +384,14 @@ public class ContentEntryListRecyclerViewAdapter extends
             if(status != null && status.getContentEntryUid() == contentEntryUid) {
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "ContentEntryList update " +
                         "entryUid " + status.getContentEntryUid());
-                activity.runOnUiThread(() -> downloadView.setProgress(
+                activity.runOnUiThread(() -> {
+                    downloadView.setProgress(
                         status.getTotalBytes() > 0 ?
-                        (int)((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0));
+                        (int)((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0);
+                    if(status.getTotalBytes() > 0 && status.getBytesSoFar() == status.getTotalBytes())
+                        downloadView.setProgressVisibility(View.INVISIBLE);
+
+                });
             }
         }
     }

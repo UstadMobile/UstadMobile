@@ -105,10 +105,11 @@ public class DownloadJobPreparer implements Runnable {
                 }
 
                 if(!createdJoinCepjUids.contains(child.getCepcjUid())) {
-                    jobItemManager.insertParentChildJoins(Arrays.asList(new DownloadJobItemParentChildJoin(
-                            contentEntryUidToDjiUidMap.get(child.getParentEntryUid()),
-                            contentEntryUidToDjiUidMap.get(child.getContentEntryUid()),
-                            child.getCepcjUid())
+                    jobItemManager.insertParentChildJoins(Collections.singletonList(
+                            new DownloadJobItemParentChildJoin(
+                                contentEntryUidToDjiUidMap.get(child.getParentEntryUid()),
+                                contentEntryUidToDjiUidMap.get(child.getContentEntryUid()),
+                                child.getCepcjUid())
                     ), null);
                     createdJoinCepjUids.add(child.getCepcjUid());
                 }
