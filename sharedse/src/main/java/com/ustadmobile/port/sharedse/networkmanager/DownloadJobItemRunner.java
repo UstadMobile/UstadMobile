@@ -285,8 +285,6 @@ public class DownloadJobItemRunner implements Runnable {
             statusCheckTimer.cancel();
 
             updateItemStatus(newStatus);
-            appDb.getDownloadJobDao().updateJobStatusToCompleteIfAllItemsAreCompleted(
-                    downloadItem.getDjiDjUid());
             networkManager.releaseWifiLock(this);
         }
     }
@@ -470,7 +468,6 @@ public class DownloadJobItemRunner implements Runnable {
 
             downloadJobItemManager.updateProgress((int)downloadItem.getDjiUid(),
                     totalDownloaded, totalDownloaded);
-            appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), JobStatus.COMPLETE);
         }
 
         stop(downloaded ? JobStatus.COMPLETE : JobStatus.FAILED);
@@ -608,9 +605,11 @@ public class DownloadJobItemRunner implements Runnable {
      * @see JobStatus
      */
     private void updateItemStatus(int itemStatus) {
-        appDb.getDownloadJobItemDao().updateStatus(downloadItem.getDjiUid(), itemStatus);
-        appDb.getContentEntryStatusDao().updateDownloadStatus(
-                downloadItem.getDjiContentEntryUid(), itemStatus);
+        CountDownLatch latch = new CountDownLatch(1);
+        downloadJobItemManager.updateStatus((int)downloadItem.getDjiUid(), itemStatus,
+                (aVoid) -> latch.countDown());
+        try { latch.await(5, TimeUnit.SECONDS); }
+        catch(InterruptedException e) {/* should not happen */ }
     }
 
     private boolean isExpectedWifiDirectGroup(ConnectivityStatus status){

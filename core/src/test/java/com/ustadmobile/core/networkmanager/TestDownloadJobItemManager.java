@@ -264,7 +264,8 @@ public class TestDownloadJobItemManager {
         Map<Integer, DownloadJobItemStatus> statusMap = addItemsAndParents(50000);
         System.gc();
         long memoryUsed = (runtime.totalMemory() - runtime.freeMemory()) - memoryBefore;
-        Assert.assertTrue(memoryUsed < 1000 * 1000 * 1000 * 10);//10MB?
+        System.out.println("Map size = " + statusMap.size());
+        Assert.assertTrue(memoryUsed <  1000 * 1000 * 10);//10MB
     }
 
     private DownloadJobItemStatus findInMapByContentEntryUid(long contentEntryUid,

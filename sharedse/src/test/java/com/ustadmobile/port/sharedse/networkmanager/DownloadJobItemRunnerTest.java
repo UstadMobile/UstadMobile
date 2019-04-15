@@ -35,6 +35,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -210,8 +211,7 @@ public class DownloadJobItemRunnerTest {
         downloadJobItem.setDownloadedSoFar(0);
         downloadJobItem.setDestinationFile(new File(clientContainerDir,
                 String.valueOf(TEST_CONTENT_ENTRY_FILE_UID)).getAbsolutePath());
-        downloadJobItem.setDjiUid(clientDb.getDownloadJobItemDao().insert(downloadJobItem));
-
+        downloadJobItemManager.insertDownloadJobItemsSync(Collections.singletonList(downloadJobItem));
 
 
         connectivityStatus = new ConnectivityStatus();

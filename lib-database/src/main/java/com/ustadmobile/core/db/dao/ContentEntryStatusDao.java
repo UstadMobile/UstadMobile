@@ -6,7 +6,9 @@ import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 
 import java.util.List;
@@ -40,5 +42,13 @@ public abstract class ContentEntryStatusDao implements BaseDao<ContentEntryStatu
 
     @UmQuery("DELETE FROM ContentEntryStatus WHERE cesUid = :cesUid")
     public abstract void deleteByFileUids(long cesUid);
+
+    @UmTransaction
+    public void updateDownloadStatusByList(List<DownloadJobItemStatus> statusList) {
+        for(DownloadJobItemStatus status : statusList) {
+            updateDownloadStatus(status.getContentEntryUid(), status.getStatus());
+        }
+    }
+
 
 }

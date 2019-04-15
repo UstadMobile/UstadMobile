@@ -321,49 +321,11 @@ public abstract class DownloadJobItemDao {
     @UmInsert
     public abstract void insertDownloadJobItemParentChildJoin(DownloadJobItemParentChildJoin dj);
 
-
-//    @UmTransaction
-//    public void createJobItemsRecursively(long rootContentEntryUid, UmAppDatabase repo) {
-//        List<DownloadJobItemToBeCreated2> childItemsToCreate;
-//        DownloadJobItem rootDownlaodItem = new DownloadJobItem();
-//        rootDownlaodItem.setDjiUid(insert(rootDownlaodItem));
-//
-//        Map<Long, Long> contentEntryUidToDjiUidMap = new HashMap<>();
-//        List<Long> parentUids = new ArrayList<>();
-//        parentUids.add(rootContentEntryUid);
-//        contentEntryUidToDjiUidMap.put(rootContentEntryUid, rootDownlaodItem.getDjiUid());
-//
-//        List<DownloadJobItem> downloadJobItems = new ArrayList<>();
-//        HashSet<Long> createdJoinCepjUids = new HashSet<>();
-//
-//        do {
-//            childItemsToCreate = findByParentContentEntryUuids(parentUids);
-//            parentUids.clear();
-//
-//            for(DownloadJobItemToBeCreated2 child : childItemsToCreate){
-//                if(!contentEntryUidToDjiUidMap.containsKey(child.getContentEntryUid())) {
-//                    DownloadJobItem newItem = new DownloadJobItem();
-//                    //TODO: fill in the item
-//                    newItem.setDjiUid(insert(newItem));
-//
-//                    contentEntryUidToDjiUidMap.put(child.getContentEntryUid(),
-//                            newItem.getDjiUid());
-//
-//                    if(newItem.getDjiContainerUid() != 0)
-//                        parentUids.add(child.getContentEntryUid());
-//
-//                    newItem.setDjiUid(insert(newItem));
-//                }
-//
-//                if(!createdJoinCepjUids.contains(child.getCepcjUid())) {
-//                    insertDownloadJobItemParentChildJoin(new DownloadJobItemParentChildJoin(
-//                        contentEntryUidToDjiUidMap.get(child.getParentEntryUid()),
-//                            contentEntryUidToDjiUidMap.get(child.getContentEntryUid()),
-//                            child.getCepcjUid()));
-//                    createdJoinCepjUids.add(child.getCepcjUid());
-//                }
-//            }
-//        }while(!parentUids.isEmpty());
-//    }
+    @UmTransaction
+    public void updateJobItemStatusList(List<DownloadJobItemStatus> statusList) {
+        for(DownloadJobItemStatus status : statusList) {
+            updateStatus(status.getJobItemUid(), status.getStatus());
+        }
+    }
 
 }

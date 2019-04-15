@@ -11,7 +11,7 @@ public class DownloadJobItemStatus {
 
     private int jobItemUid;
 
-    private transient LinkedList<DownloadJobItemStatus> parents;
+    private transient List<DownloadJobItemStatus> parents;
 
     private long contentEntryUid;
 
@@ -19,6 +19,9 @@ public class DownloadJobItemStatus {
 
     private long totalBytes;
 
+    private byte status;
+
+    private transient List<DownloadJobItemStatus> children;
 
     public DownloadJobItemStatus() {
 
@@ -67,6 +70,14 @@ public class DownloadJobItemStatus {
         bytesSoFar += increment;
     }
 
+    public byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(byte status) {
+        this.status = status;
+    }
+
     public List<DownloadJobItemStatus> getParents() {
         return parents;
     }
@@ -76,6 +87,17 @@ public class DownloadJobItemStatus {
             parents = new LinkedList<>();
 
         parents.add(parent);
+    }
+
+    public void addChild(DownloadJobItemStatus child) {
+        if(children == null)
+            children = new LinkedList<>();
+
+        children.add(child);
+    }
+
+    public List<DownloadJobItemStatus> getChildren() {
+        return children;
     }
 
     public long getContentEntryUid() {

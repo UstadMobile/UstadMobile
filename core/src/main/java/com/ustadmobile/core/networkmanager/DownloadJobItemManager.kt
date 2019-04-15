@@ -1,5 +1,6 @@
 package com.ustadmobile.core.networkmanager
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmResultCallback
@@ -21,7 +22,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     private val jobItemUidToStatusMap = HashMap<Int, DownloadJobItemStatus>()
 
-    private val changedItems = HashSet<DownloadJobItemStatus>()
+    private val progressChangedItems = HashSet<DownloadJobItemStatus>()
 
     var onDownloadJobItemChangeListener: OnDownloadJobItemChangeListener? = null
 
@@ -77,6 +78,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             }
 
             childStatus.addParent(parentStatus)
+            parentStatus.addChild(childStatus)
         }
     }
 
@@ -91,7 +93,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
                 djStatus.setBytesSoFar(bytesSoFar)
                 djStatus.setTotalBytes(totalBytes)
-                changedItems.add(djStatus)
+                progressChangedItems.add(djStatus)
 
                 if (onDownloadJobItemChangeListener != null)
                     onDownloadJobItemChangeListener!!.onDownloadJobItemChange(djStatus)
@@ -99,28 +101,60 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 updateParentsProgress(djStatus.getJobItemUid(), djStatus.getParents(), deltaBytesFoFar,
                         deltaTotalBytes)
             }
-
         }
     }
 
+    fun updateStatus(djiUid: Int, status: Int, callback : UmResultCallback<Void?>?) {
+        executor.execute {
+            val updatedItems = LinkedList<DownloadJobItemStatus>()
+            val djStatus = jobItemUidToStatusMap[djiUid]
+            if(djStatus != null) {
+                djStatus.status = status.toByte()
+                updatedItems.add(djStatus)
+
+                runOnAllParents(djStatus.jobItemUid, djStatus.parents) {parent ->
+                    var parentChanged = false
+                    if(djStatus.children.all { it.status >= JobStatus.COMPLETE_MIN}){
+                        parent.status = JobStatus.COMPLETE_MIN.toByte()
+                        updatedItems.add(djStatus)
+                        parentChanged = true
+                    }
+
+                    parentChanged
+                }
+
+                db.downloadJobItemDao.updateJobItemStatusList(updatedItems)
+                db.contentEntryStatusDao.updateDownloadStatusByList(updatedItems)
+            }
+
+            callback?.onDone(null)
+        }
+    }
+
+
     private fun updateParentsProgress(djiUid: Int, parents: List<DownloadJobItemStatus>?, deltaBytesFoFar: Long,
                                       deltaTotalBytes: Long) {
-        var parents = parents
         UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Updating ID #" +
                 djiUid + " parents = " + UMUtil.debugPrintList(parents) +
                 " deltaBytesSoFar=" + deltaBytesFoFar + ", deltaTotalBytes=" + deltaTotalBytes)
+        runOnAllParents(djiUid, parents) { parent ->
+            parent.incrementTotalBytes(deltaTotalBytes)
+            parent.incrementBytesSoFar(deltaBytesFoFar)
+            progressChangedItems.add(parent)
+            onDownloadJobItemChangeListener?.onDownloadJobItemChange(parent)
+            true
+        }
+    }
+
+    private fun runOnAllParents(djiUid: Int, startParents: List<DownloadJobItemStatus>?,
+                                fn : (DownloadJobItemStatus) -> Boolean) {
+        var parents = startParents
         while (parents != null && !parents.isEmpty()) {
             val nextParents = LinkedList<DownloadJobItemStatus>()
-            for (parent in parents) {
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "\tIncrement parent" + parent.jobItemUid)
-                parent.incrementTotalBytes(deltaTotalBytes)
-                parent.incrementBytesSoFar(deltaBytesFoFar)
-                changedItems.add(parent)
-                if (onDownloadJobItemChangeListener != null)
-                    onDownloadJobItemChangeListener!!.onDownloadJobItemChange(parent)
-
-                if (parent.parents != null)
+            for(parent in parents) {
+                if(fn.invoke(parent) && parent.parents != null)
                     nextParents.addAll(parent.parents)
+
             }
 
             parents = nextParents
@@ -183,6 +217,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 }
 
                 childStatus.addParent(parentStatus)
+                parentStatus.addChild(childStatus)
 
                 updateParentsProgress(childStatus.jobItemUid, Arrays.asList(parentStatus),
                         childStatus.bytesSoFar, childStatus.totalBytes)
@@ -217,8 +252,8 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     }
 
     private fun doCommit() {
-        db.downloadJobItemDao.updateDownloadJobItemsProgress(LinkedList(changedItems))
-        changedItems.clear()
+        db.downloadJobItemDao.updateDownloadJobItemsProgress(LinkedList(progressChangedItems))
+        progressChangedItems.clear()
     }
 
     fun close() {
