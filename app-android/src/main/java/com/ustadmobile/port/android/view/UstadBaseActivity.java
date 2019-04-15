@@ -133,7 +133,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
                 intentFilter);
         super.onCreate(savedInstanceState);
-        localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
+        localeOnCreate = UstadMobileSystemImpl.Companion.getInstance().getDisplayedLocale(this);
 
 
         Intent syncServiceIntent = new Intent(this, UmAppDatabaseSyncService.class);
@@ -157,7 +157,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void showErrorNotification(String errorMessage, Runnable action, int actionMessageId) {
         Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG);
         if (action != null) {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
             snackbar.setAction(impl.getString(actionMessageId, getContext()), view -> action.run());
             snackbar.setActionTextColor(ContextCompat.getColor((Context) getContext(), R.color.accent));
         }
@@ -180,7 +180,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     protected void onResume() {
         super.onResume();
         if (localeChanged) {
-            if (UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
+            if (UstadMobileSystemImpl.Companion.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
                 new Handler().postDelayed(this::recreate, 200);
             }
         }
@@ -286,8 +286,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
+                impl.go(impl.getAppConfigString(AppConfig.INSTANCE.getKEY_FIRST_DEST(), null,
                         this), this);
                 return true;
         }
@@ -328,7 +328,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     protected void attachBaseContext(Context newBase) {
         final Resources res = newBase.getResources();
         final Configuration config = res.getConfiguration();
-        String languageSetting = UstadMobileSystemImpl.getInstance().getLocale(newBase);
+        String languageSetting = UstadMobileSystemImpl.Companion.getInstance().getLocale(newBase);
         UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
                 + languageSetting + "'");
 

@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.DrawerActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
+import android.support.test.espresso.web.webdriver.Locator;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.widget.TextView;
@@ -21,6 +22,11 @@ import com.ustadmobile.port.sharedse.container.ContainerManager;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 import com.ustadmobile.test.port.android.UmViewActions;
 
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
+import static android.support.test.espresso.web.assertion.WebViewAssertions.webMatches;
+import static android.support.test.espresso.web.sugar.Web.onWebView;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,13 +40,14 @@ import java.io.InputStream;
 import java.util.zip.ZipFile;
 
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
-import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.findElement;
+import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
@@ -94,17 +101,17 @@ public class EpubContentActivityEspressoTest {
         zipFile.close();
 
         InputStream opfIn = epubContainerManager.getInputStream(
-                epubContainerManager.getEntry("content.opf"));
-        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(opfIn,
+                epubContainerManager.getEntry("OEBPS/package.opf"));
+        XmlPullParser xpp = UstadMobileSystemImpl.Companion.getInstance().newPullParser(opfIn,
                 "UTF-8");
         opfDocument = new OpfDocument();
         opfDocument.loadFromOPF(xpp);
         opfIn.close();
 
         InputStream navDocIn = epubContainerManager.getInputStream(
-                epubContainerManager.getEntry("nav.xhtml"));
+                epubContainerManager.getEntry("OEBPS/nav.html"));
         navDocument = new EpubNavDocument();
-        navDocument.load(UstadMobileSystemImpl.getInstance().newPullParser(navDocIn, "UTF-8"));
+        navDocument.load(UstadMobileSystemImpl.Companion.getInstance().newPullParser(navDocIn, "UTF-8"));
         navDocIn.close();
     }
 
@@ -149,6 +156,10 @@ public class EpubContentActivityEspressoTest {
         onView(allOf(withId(R.id.expandedListItem), withText("Page 3")))
                 .perform(click());
 
+        //Check that the requested page has loaded - look for the page number footer in this epub
+        onWebView(allOf(withId(R.id.fragment_container_page_webview), withTagValue(equalTo(2))))
+                .withElement(findElement(Locator.CLASS_NAME, "page_number"))
+                .check(webMatches(getText(), containsString("3")));
     }
 
     @Test

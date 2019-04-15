@@ -1,10 +1,8 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -19,7 +17,6 @@ import com.rd.animation.type.AnimationType;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.OnBoardingPresenter;
 import com.ustadmobile.core.view.OnBoardingView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;

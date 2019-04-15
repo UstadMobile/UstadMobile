@@ -167,8 +167,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         @Override
         public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
             return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
-                    umAppDatabase, UmAccountManager.getRepositoryForActiveAccount(mContext),
-                    UmAccountManager.getActiveEndpoint(mContext),
+                    umAppDatabase, UmAccountManager.INSTANCE.getRepositoryForActiveAccount(mContext),
+                    UmAccountManager.INSTANCE.getActiveEndpoint(mContext),
                     connectivityStatusRef.get());
         }
 
@@ -669,8 +669,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            UMIOUtils.closeQuietly(outputStream);
-            UMIOUtils.closeQuietly(bos);
+            UMIOUtils.INSTANCE.closeQuietly(outputStream);
+            UMIOUtils.INSTANCE.closeQuietly(bos);
         }
         return  infoAsbytes;
     }
@@ -692,8 +692,8 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            UMIOUtils.closeQuietly(inputStream);
-            UMIOUtils.closeQuietly(dataInputStream);
+            UMIOUtils.INSTANCE.closeQuietly(inputStream);
+            UMIOUtils.INSTANCE.closeQuietly(dataInputStream);
         }
 
         UstadMobileSystemImpl.l(UMLog.INFO, 699,

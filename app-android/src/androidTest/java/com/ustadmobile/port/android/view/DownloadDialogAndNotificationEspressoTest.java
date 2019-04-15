@@ -53,8 +53,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_DOWNLOADED_CONTENT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertEquals;
@@ -145,7 +145,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         UmAccount testAccount = new UmAccount(0, "test", "",
                 testEndpoint);
-        UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
+        UmAccountManager.INSTANCE.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext());
 
         prepareContentEntriesAndFiles();
         SystemClock.sleep(MIN_SLEEP_TIME);
@@ -273,7 +273,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         startDownloading(connectedToUnmeteredConnection);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
                 MAX_THRESHOLD,TimeUnit.MINUTES, downloadJob -> downloadJob!=null
                         && downloadJob.getDjStatus() == JobStatus.COMPLETE);
 
@@ -302,7 +302,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
                 MAX_LATCH_TIME,TimeUnit.SECONDS, downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
 
@@ -313,7 +313,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         //reset for next test
         UmAndroidTestUtil.setAirplaneModeEnabled(false);
-        WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
                 MAX_LATCH_TIME,TimeUnit.SECONDS, status -> status != null
                         && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
@@ -332,7 +332,7 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
                 MAX_LATCH_TIME, TimeUnit.SECONDS, downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.WAITING_FOR_CONNECTION);
 
@@ -340,11 +340,11 @@ public class DownloadDialogAndNotificationEspressoTest {
 
         SystemClock.sleep(MAX_SLEEP_TIME);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getConnectivityStatusDao().getStatusLive(),
                 MAX_LATCH_TIME ,TimeUnit.SECONDS, status -> status != null
                         && status.getConnectivityState() != ConnectivityStatus.STATE_DISCONNECTED);
 
-        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
+        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao().getLastJobLive(),
                 MAX_LATCH_TIME, TimeUnit.SECONDS,
                 downloadJob -> downloadJob != null
                         && downloadJob.getDjStatus() == JobStatus.COMPLETE);

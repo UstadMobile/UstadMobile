@@ -315,7 +315,7 @@ public class AsbScraper {
                     continue;
                 }
 
-                File tmpFolder = new File(UMFileUtil.stripExtensionIfPresent(ePubFile.getName()));
+                File tmpFolder = new File(UMFileUtil.INSTANCE.stripExtensionIfPresent(ePubFile.getName()));
                 if (ContentScraperUtil.fileHasContent(tmpFolder)) {
                     FileUtils.deleteDirectory(tmpFolder);
                 }

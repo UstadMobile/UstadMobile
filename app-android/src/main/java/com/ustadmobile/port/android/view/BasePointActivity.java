@@ -26,6 +26,7 @@ import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_point);
         Map<String , String> savedInstanceHt = bundleToMap(savedInstanceState);
-        String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
+        String recreateWelcomeVal = UstadMobileSystemImpl.Companion.getInstance().getAppPref(
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
         /*
@@ -82,7 +83,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
          * called by Android. Thus we look for a manually saved state.
          */
         if(recreateWelcomeVal != null) {
-            UstadMobileSystemImpl.getInstance().setAppPref(
+            UstadMobileSystemImpl.Companion.getInstance().setAppPref(
                     "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, null, this);
         }
 
@@ -116,7 +117,8 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
         findViewById(R.id.activity_basepoint_fab).setOnClickListener(this);
 
-        mBasePointController = new BasePointController(this, this);
+        mBasePointController = new BasePointController(this,
+                UMAndroidUtil.bundleToMap(getIntent().getExtras()), this);
         mBasePointController.onCreate(bundleToMap(getIntent().getExtras()),
                 bundleToMap(savedInstanceState));
 
@@ -139,7 +141,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
          * called by Android
          */
         String welcomeScreenDisplayed = String.valueOf(mBasePointController.isWelcomeScreenDisplayed());
-        UstadMobileSystemImpl.getInstance().setAppPref("recreate-"
+        UstadMobileSystemImpl.Companion.getInstance().setAppPref("recreate-"
                     + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, welcomeScreenDisplayed, this);
         super.recreate();
     }
@@ -166,7 +168,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
 
                 Menu drawerMenu = mDrawerNavigationView.getMenu();
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
                 MenuItem item;
                 String iconName;
 
@@ -195,20 +197,18 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                if(!mDrawerLayout.isDrawerOpen(mDrawerNavigationView)){
-                    mDrawerLayout.openDrawer(mDrawerNavigationView);
-                }
-                return true;
-            case BasePointController.CMD_SHARE_APP:
-                mBasePointController.handleClickShareApp();
-                return true;
-
-            case BasePointController.CMD_RECEIVE_ENTRY:
-                mBasePointController.handleClickReceive();
-                return true;
-
+        int i = item.getItemId();
+        if (i == android.R.id.home) {
+            if (!mDrawerLayout.isDrawerOpen(mDrawerNavigationView)) {
+                mDrawerLayout.openDrawer(mDrawerNavigationView);
+            }
+            return true;
+        } else if (i == BasePointController.CMD_SHARE_APP) {
+            mBasePointController.handleClickShareApp();
+            return true;
+        } else if (i == BasePointController.CMD_RECEIVE_ENTRY) {
+            mBasePointController.handleClickReceive();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

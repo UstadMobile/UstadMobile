@@ -70,7 +70,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
-import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.ContentEntryListFragmentView;
 import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.core.view.H5PContentView;
@@ -161,7 +161,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
         viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
         viewNameToAndroidImplMap.put(DownloadDialogView.VIEW_NAME, DownloadDialogFragment.class);
-        viewNameToAndroidImplMap.put(ContentEntryListView.VIEW_NAME, ContentEntryListActivity.class);
+        viewNameToAndroidImplMap.put(ContentEntryListFragmentView.VIEW_NAME, ContentEntryListActivity.class);
         viewNameToAndroidImplMap.put(ContentEntryDetailView.VIEW_NAME, ContentEntryDetailActivity.class);
         viewNameToAndroidImplMap.put(DummyView.VIEW_NAME, DummyActivity.class);
         viewNameToAndroidImplMap.put(OnBoardingView.VIEW_NAME, OnBoardingActivity.class);
@@ -227,9 +227,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         protected String doInBackground(Boolean... booleans) {
             File apkFile = new File(context.getApplicationInfo().sourceDir);
             //TODO: replace this with something from appconfig.properties
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
 
-            String baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
+            String baseName = impl.getAppConfigString(AppConfig.INSTANCE.getKEY_APP_BASE_NAME(), "", context) + "-" +
                     impl.getVersion(context);
 
 
@@ -246,13 +246,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                     zipOut = new ZipOutputStream(new FileOutputStream(outZipFile));
                     zipOut.putNextEntry(new ZipEntry(baseName + ".apk"));
                     apkFileIn = new FileInputStream(apkFile);
-                    UMIOUtils.readFully(apkFileIn, zipOut, 1024);
+                    UMIOUtils.INSTANCE.readFully(apkFileIn, zipOut, 1024);
                     zipOut.closeEntry();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
                     UMIOUtils.closeOutputStream(zipOut);
-                    UMIOUtils.closeInputStream(apkFileIn);
+                    UMIOUtils.INSTANCE.closeInputStream(apkFileIn);
                 }
 
                 return outZipFile.getAbsolutePath();
@@ -262,11 +262,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 try {
                     apkFileIn = new FileInputStream(apkFile);
                     fout = new FileOutputStream(outApkFile);
-                    UMIOUtils.readFully(apkFileIn, fout, 1024);
+                    UMIOUtils.INSTANCE.readFully(apkFileIn, fout, 1024);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    UMIOUtils.closeInputStream(apkFileIn);
+                    UMIOUtils.INSTANCE.closeInputStream(apkFileIn);
                     UMIOUtils.closeOutputStream(fout);
                 }
 
@@ -286,7 +286,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      * @return
      */
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
-        return (UstadMobileSystemImplAndroid) getInstance();
+        return (UstadMobileSystemImplAndroid) Companion.getInstance();
     }
 
     @Override
@@ -412,10 +412,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 }
 
                 if ((flags & GO_FLAG_CLEAR_TOP) > 0) {
-                    referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
+                    referrer = UMFileUtil.INSTANCE.clearTopFromReferrerPath(viewName, args,
                             referrer);
                 } else {
-                    referrer += "/" + viewName + "?" + UMFileUtil.mapToQueryString(args);
+                    referrer += "/" + viewName + "?" + UMFileUtil.INSTANCE.mapToQueryString(args);
                 }
 
                 startIntent.putExtra(ARG_REFERRER, referrer);
@@ -552,13 +552,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         } else {
             editor.remove(key);
         }
-        editor.commit();
+        editor.apply();
     }
 
 
     @Override
     public XmlSerializer newXMLSerializer() {
         return Xml.newSerializer();
+    }
+
+    @Override
+    public NetworkManagerBle getNetworkManagerBle() {
+        return null;
     }
 
     @Override
@@ -614,16 +619,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return 0;
     }
 
-    @Override
-    public boolean isWiFiP2PSupported() {
-        //TODO: Use android specific code here to determine if this device supports wifi p2p
-        return true;
-    }
-
-    @Override
-    public NetworkManagerBle getNetworkManagerBle() {
-        return null;
-    }
 
     @Override
     public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
@@ -650,7 +645,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Void> callback) {
+    public void openFileInDefaultViewer(Object context, String path, String mimeType, UmCallback<Object> callback) {
         Context ctx = (Context) context;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -662,9 +657,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         PackageManager pm = ctx.getPackageManager();
         if (intent.resolveActivity(pm) != null) {
             ctx.startActivity(intent);
-            UmCallbackUtil.onSuccessIfNotNull(callback, null);
+            UmCallbackUtil.INSTANCE.onSuccessIfNotNull(callback, null);
         } else {
-            UmCallbackUtil.onFailIfNotNull(callback,
+            UmCallbackUtil.INSTANCE.onFailIfNotNull(callback,
                     new NoAppFoundException("No activity found for mimetype", mimeType));
         }
     }

@@ -21,8 +21,8 @@ import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_CONTENT_ENTRY_UID;
-import static com.ustadmobile.core.controller.ContentEntryListPresenter.ARG_DOWNLOADED_CONTENT;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID;
+import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_DOWNLOADED_CONTENT;
 
 public class DummyActivity extends UstadBaseActivity implements DummyView {
 
@@ -43,6 +43,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
+
     }
 
     @Override
@@ -57,7 +58,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         int itemId = item.getItemId();
 
         if (itemId == R.id.action_open_about){
-            UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME,getContext());
+            UstadMobileSystemImpl.Companion.getInstance().go(AboutView.VIEW_NAME, getContext());
         }else if(itemId == R.id.action_clear_history){
             UmAppDatabase database = UmAppDatabase.getInstance(this);
             database.getNetworkNodeDao().deleteAll(null);
@@ -77,7 +78,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
     @Override
     protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
                 ((NetworkManagerAndroidBle) networkManagerBle)::checkP2PBleServices,
                 impl.getString(MessageID.location_permission_title,getContext()),
@@ -92,7 +93,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         LibraryPagerAdapter(FragmentManager fragmentManager, Context context) {
             super(fragmentManager);
             this.context = context;
-            impl = UstadMobileSystemImpl.getInstance();
+            impl = UstadMobileSystemImpl.Companion.getInstance();
         }
 
         // Returns total number of pages

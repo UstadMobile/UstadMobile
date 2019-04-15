@@ -1,4 +1,4 @@
-include ':app-android',
+include ':app-android', ':core-compile-only',
         ':core',
         ':sharedse',
         ':core-tests',

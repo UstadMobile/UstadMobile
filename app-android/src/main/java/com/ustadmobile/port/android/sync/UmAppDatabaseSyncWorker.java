@@ -43,12 +43,12 @@ public class UmAppDatabaseSyncWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        UmAccount activeAccount = UmAccountManager.getActiveAccount(getApplicationContext());
+        UmAccount activeAccount = UmAccountManager.INSTANCE.getActiveAccount(getApplicationContext());
 
         UmAppDatabase umAppDb = UmAppDatabase.getInstance(getApplicationContext());
         try {
             umAppDb.syncWith(
-                    UmAccountManager.getRepositoryForActiveAccount(getApplicationContext()),
+                    UmAccountManager.INSTANCE.getRepositoryForActiveAccount(getApplicationContext()),
                     activeAccount != null ? activeAccount.getPersonUid() : 0, 100, 100);
             UstadMobileSystemImpl.l(UMLog.INFO, 100, "database syncWith repo ran");
         }catch(Exception e) {
@@ -62,7 +62,7 @@ public class UmAppDatabaseSyncWorker extends Worker {
                     < UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG;
 
              if(appRecentlyActive ||
-                     umAppDb.countPendingLocalChanges(UmAccountManager.getActivePersonUid(
+                     umAppDb.countPendingLocalChanges(UmAccountManager.INSTANCE.getActivePersonUid(
                              getApplicationContext()), umAppDb.getDeviceBits()) > 0) {
                  queueSyncWorker(appRecentlyActive ? 1 : 15, TimeUnit.MINUTES);
              }

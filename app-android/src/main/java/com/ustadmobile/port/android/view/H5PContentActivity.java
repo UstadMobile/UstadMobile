@@ -44,14 +44,15 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
 
         setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mPresenter = new H5PContentPresenter(this, this);
+        mPresenter = new H5PContentPresenter(this,
+                UMAndroidUtil.bundleToMap(getIntent().getExtras()), this);
         runWhenHttpdReady(() ->
                 mPresenter.onCreate(UMAndroidUtil.bundleToMap(getIntent().getExtras())));
     }
 
     @Override
     public void mountH5PDist(UmCallback<String> callback) {
-        callback.onSuccess(UMFileUtil.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
+        callback.onSuccess(UMFileUtil.INSTANCE.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
                 "h5p/dist"));
     }
 
@@ -61,12 +62,12 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
             @Override
             public void onSuccess(String result) {
                 mountedPath.set(result);
-                UmCallbackUtil.onSuccessIfNotNull(callback, result);
+                UmCallbackUtil.INSTANCE.onSuccessIfNotNull(callback, result);
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                UmCallbackUtil.onFailIfNotNull(callback, exception);
+                UmCallbackUtil.INSTANCE.onFailIfNotNull(callback, exception);
             }
         });
     }

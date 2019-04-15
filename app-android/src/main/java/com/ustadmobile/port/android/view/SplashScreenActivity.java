@@ -58,7 +58,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
     @Override
     public void onStart() {
         super.onStart();
-        UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
+        UstadMobileSystemImpl.Companion.getInstance().startUI(SplashScreenActivity.this);
     }
 
 }

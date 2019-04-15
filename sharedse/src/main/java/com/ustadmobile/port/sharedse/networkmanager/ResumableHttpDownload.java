@@ -187,15 +187,15 @@ public class ResumableHttpDownload {
 
                 if(validated) {
                     startFrom = dlPartFile.length();
-                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " validated to start from " + startFrom);
+                    UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " validated to start from " + startFrom);
                 }else {
-                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " file exists but not validated");
+                    UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " file exists but not validated");
                 }
             }
 
             if(startFrom == 0 && dlPartFile.exists()) {
                 //Part file exists but does not match the last modified and/or etag
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " : startFrom = 0 and dlpart file exists");
+                UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " : startFrom = 0 and dlpart file exists");
                 dlPartFile.delete();
             }
 
@@ -318,9 +318,9 @@ public class ResumableHttpDownload {
         }catch(IOException e) {
             ioe = e;
         }finally {
-            UMIOUtils.closeInputStream(propertiesIn);
+            UMIOUtils.INSTANCE.closeInputStream(propertiesIn);
             UMIOUtils.closeOutputStream(propertiesOut);
-            UMIOUtils.closeInputStream(httpIn);
+            UMIOUtils.INSTANCE.closeInputStream(httpIn);
             httpIn = null;
             try {
                 statusLock.lock();
@@ -337,7 +337,7 @@ public class ResumableHttpDownload {
         }
 
         if(completed) {
-            UstadMobileSystemImpl.l(UMLog.INFO, 0, mkLogPrefix() + " completed, downloaded " +
+            UstadMobileSystemImpl.Companion.l(UMLog.INFO, 0, mkLogPrefix() + " completed, downloaded " +
                     downloadedSoFar + "bytes");
             synchronized (this) {
                 File destinationFile = new File(this.destinationFile);
@@ -362,7 +362,7 @@ public class ResumableHttpDownload {
             }
         }
 
-        UMIOUtils.throwIfNotNullIO(ioe);
+        UMIOUtils.INSTANCE.throwIfNotNullIO(ioe);
 
         return completed;
     }
@@ -466,7 +466,7 @@ public class ResumableHttpDownload {
             stopped.incrementAndGet();
 
             //stopped.set(true);
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
+            UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
 
             //close the file output stream
             if(fileOut != null) {
@@ -474,7 +474,7 @@ public class ResumableHttpDownload {
                     fileOut.flush();
                     UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: flushed fileout OK");
                 }catch(IOException e) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception flushing fileOut", e);
+                    UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception flushing fileOut", e);
                 }
 
                 try {

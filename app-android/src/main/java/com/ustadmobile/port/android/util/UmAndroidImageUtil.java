@@ -33,16 +33,12 @@ public class UmAndroidImageUtil {
 
     public static void loadSvgIntoImageView(String url, final ImageView imageView) {
         UmHttpRequest request = new UmHttpRequest(imageView.getContext(), url);
-        HttpCache cache = ((UstadMobileSystemImplFs) UstadMobileSystemImpl.getInstance())
+        HttpCache cache = ((UstadMobileSystemImplFs) UstadMobileSystemImpl.Companion.getInstance())
                 .getHttpCache(imageView.getContext());
         cache.get(request, new UmHttpResponseCallback() {
             @Override
             public void onComplete(UmHttpCall call, UmHttpResponse response) {
-                try {
-                    Sharp.loadInputStream(response.getResponseAsStream()).into(imageView);
-                }catch(IOException e) {
-                    e.printStackTrace();
-                }
+                Sharp.loadInputStream(response.getResponseAsStream()).into(imageView);
             }
 
             @Override

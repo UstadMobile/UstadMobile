@@ -24,6 +24,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.EpubContentPresenter;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
 import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -66,7 +67,7 @@ public class EpubContentActivity extends ZippedContentActivity implements
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if(!UstadMobileSystemImpl.getInstance().getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
+        if(!UstadMobileSystemImpl.Companion.getInstance().getAppConfigBoolean(AppConfig.INSTANCE.getKEY_EPUB_TOC_ENABLED(),
                 getContext())) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         }

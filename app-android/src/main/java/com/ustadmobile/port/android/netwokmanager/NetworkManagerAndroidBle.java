@@ -174,7 +174,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
     private ScheduledExecutorService delayedExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private AsyncServiceManager scanningServiceManager = new AsyncServiceManager(
-            AsyncServiceManager.STATE_STOPPED,
+            AsyncServiceManager.Companion.getSTATE_STOPPED(),
             ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
@@ -182,13 +182,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
             if(isBleCapable()){
                 UstadMobileSystemImpl.l(UMLog.DEBUG,689,
                         "Starting BLE scanning");
-                notifyStateChanged(STATE_STARTED);
+                notifyStateChanged(Companion.getSTATE_STARTED());
                 bluetoothAdapter.startLeScan(new UUID[] {parcelServiceUuid.getUuid()},
                         (BluetoothAdapter.LeScanCallback) bleScanCallback);
                 UstadMobileSystemImpl.l(UMLog.DEBUG,689,
                         "BLE Scanning started ");
             }else{
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
                 UstadMobileSystemImpl.l(UMLog.ERROR,689,
                         "Not BLE capable, no need to start");
             }
@@ -198,12 +198,12 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         @Override
         public void stop() {
             bluetoothAdapter.stopLeScan((BluetoothAdapter.LeScanCallback) bleScanCallback);
-            notifyStateChanged(STATE_STOPPED);
+            notifyStateChanged(Companion.getSTATE_STOPPED());
         }
     };
 
     private AsyncServiceManager advertisingServiceManager = new AsyncServiceManager(
-            AsyncServiceManager.STATE_STOPPED,
+            AsyncServiceManager.Companion.getSTATE_STOPPED(),
             ((runnable, delay) -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS))) {
         @Override
         public void start() {
@@ -225,7 +225,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                 if(gattServerAndroid == null
                     || ((BleGattServerAndroid)gattServerAndroid).getGattServer() == null
                     || bleServiceAdvertiser == null) {
-                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                    notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
                     return;
                 }
 
@@ -247,7 +247,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                                 super.onStartSuccess(settingsInEffect);
                                 bleAdvertisingLastStartTime = System.currentTimeMillis();
-                                notifyStateChanged(STATE_STARTED);
+                                notifyStateChanged(Companion.getSTATE_STARTED());
                                 UstadMobileSystemImpl.l(UMLog.DEBUG,689,
                                         "Service advertised successfully");
                             }
@@ -255,13 +255,13 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                             @Override
                             public void onStartFailure(int errorCode) {
                                 super.onStartFailure(errorCode);
-                                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                                notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
                                 UstadMobileSystemImpl.l(UMLog.ERROR,689,
                                         "Service could'nt start, with error code "+errorCode);
                             }
                         });
             }else {
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
             }
         }
 
@@ -279,7 +279,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                 UstadMobileSystemImpl.l(UMLog.ERROR, 689,
                         "Exception trying to stop gatt server", e);
             }
-            notifyStateChanged(STATE_STOPPED);
+            notifyStateChanged(Companion.getSTATE_STOPPED());
         }
     };
 
@@ -305,7 +305,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         && (timeNow - networkManager.wifiDirectRequestLastCompletedTime.get()) > TIMEOUT_AFTER_LAST_REQUEST;
                 setEnabled(!timedOut);
 
-                if(getState() != STATE_STOPPED)
+                if(getState() != Companion.getSTATE_STOPPED())
                     timeoutCheckHandler.postDelayed(new CheckTimeoutRunnable(),
                             TIMEOUT_CHECK_INTERVAL);
             }
@@ -318,19 +318,19 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         networkManager.wifiP2pChannel, (group) -> {
                     wiFiDirectGroup.set(group != null ? new WifiDirectGroupAndroid(group,
                             networkManager.httpd.getListeningPort()) : null);
-                    if((group == null && getState() == STATE_STARTING)
-                        || (group != null && getState() == STATE_STOPPING)) {
+                    if((group == null && getState() == Companion.getSTATE_STARTING())
+                        || (group != null && getState() == Companion.getSTATE_STOPPING())) {
                         return;//it's working on it, and hasn't failed yet, don't notify status change
                     }
 
-                    notifyStateChanged(group != null ? STATE_STARTED : STATE_STOPPED);
+                    notifyStateChanged(group != null ? Companion.getSTATE_STARTED() : Companion.getSTATE_STOPPED());
                 });
             }
         };
 
 
         private WifiP2PGroupServiceManager(NetworkManagerAndroidBle networkManager) {
-            super(STATE_STOPPED,
+            super(Companion.getSTATE_STOPPED(),
                     (runnable, delay) -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS));
             this.networkManager = networkManager;
         }
@@ -347,7 +347,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                         if(wifiP2pGroup != null) {
                             wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
                                     networkManager.httpd.getListeningPort()));
-                            notifyStateChanged(STATE_STARTED);
+                            notifyStateChanged(Companion.getSTATE_STARTED());
                         }else {
                             createNewGroup();
                         }
@@ -367,7 +367,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                 public void onFailure(int reason) {
                     UstadMobileSystemImpl.l(UMLog.ERROR,692,
                             "Failed to create a group with error code "+reason);
-                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED);
+                    notifyStateChanged(Companion.getSTATE_STOPPED(), Companion.getSTATE_STOPPED());
                 }
             });
         }
@@ -381,7 +381,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                     UstadMobileSystemImpl.l(UMLog.INFO,693,
                             "Group removed successfully");
                     wiFiDirectGroup.set(null);
-                    notifyStateChanged(STATE_STOPPED);
+                    notifyStateChanged(Companion.getSTATE_STOPPED());
                 }
 
                 @Override
@@ -396,10 +396,10 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
                                 if(wifiP2pGroup != null) {
                                     wiFiDirectGroup.set(new WifiDirectGroupAndroid(wifiP2pGroup,
                                             networkManager.httpd.getListeningPort()));
-                                    notifyStateChanged(STATE_STARTED, STATE_STARTED);
+                                    notifyStateChanged(Companion.getSTATE_STARTED(), Companion.getSTATE_STARTED());
                                 }else {
                                     wiFiDirectGroup.set(null);
-                                    notifyStateChanged(STATE_STOPPED);
+                                    notifyStateChanged(Companion.getSTATE_STOPPED());
                                 }
                             });
                 }
@@ -653,7 +653,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      */
     @Override
     public boolean canDeviceAdvertise() {
-        return isAdvertiser() && bluetoothAdapter.isMultipleAdvertisementSupported();
+        return isAdvertiser() && bluetoothAdapter != null && bluetoothAdapter.isMultipleAdvertisementSupported();
     }
 
     /**
@@ -679,8 +679,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis());
         wifiP2pGroupServiceManager.setEnabled(true);
         wifiP2pGroupServiceManager.await(state ->
-                        state == AsyncServiceManager.STATE_STARTED
-                        || state == AsyncServiceManager.STATE_STOPPED,
+                        state == AsyncServiceManager.Companion.getSTATE_STARTED()
+                        || state == AsyncServiceManager.Companion.getSTATE_STOPPED(),
                 timeout, timeoutUnit);
         return wifiP2pGroupServiceManager.getGroup();
     }
@@ -861,7 +861,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
 
         try {
             String endSessionUrl = endpoint + "endsession";
-            UmHttpResponse response = UstadMobileSystemImpl.getInstance().makeRequestSync(new UmHttpRequest(mContext,
+            UmHttpResponse response = UstadMobileSystemImpl.Companion.getInstance().makeRequestSync(new UmHttpRequest(mContext,
                     endSessionUrl));
             UstadMobileSystemImpl.l(UMLog.INFO, 699, "Send end of session request " +
                     endSessionUrl);

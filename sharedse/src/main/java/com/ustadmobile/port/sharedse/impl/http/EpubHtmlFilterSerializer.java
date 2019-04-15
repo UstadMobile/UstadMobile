@@ -44,12 +44,12 @@ public class EpubHtmlFilterSerializer {
 
     public byte[] getOutput() throws IOException, XmlPullParserException{
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        XmlSerializer xs = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+        XmlSerializer xs = UstadMobileSystemImpl.Companion.getInstance().newXMLSerializer();
         xs.setOutput(bout, "UTF-8");
 
-        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in, "UTF-8");
+        XmlPullParser xpp = UstadMobileSystemImpl.Companion.getInstance().newPullParser(in, "UTF-8");
         xs.startDocument("UTF-8", false);
-        UMUtil.passXmlThrough(xpp, xs, true, new UMUtil.PassXmlThroughFilter() {
+        UMUtil.INSTANCE.passXmlThrough(xpp, xs, true, new UMUtil.PassXmlThroughFilter() {
             @Override
             public boolean beforePassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer) throws IOException {
                 if(evtType == XmlPullParser.END_TAG && parser.getName().equals("head")) {

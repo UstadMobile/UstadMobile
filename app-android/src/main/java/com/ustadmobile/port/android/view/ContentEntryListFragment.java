@@ -17,18 +17,17 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ContentEntryListPresenter;
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
-import com.ustadmobile.core.view.ContentEntryListView;
+import com.ustadmobile.core.view.ContentEntryListFragmentView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -41,11 +40,11 @@ import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
  * Activities containing this fragment MUST implement the {@link}
  * interface.
  */
-public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListView,
+public class ContentEntryListFragment extends UstadBaseFragment implements ContentEntryListFragmentView,
         ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
 
 
-    private ContentEntryListPresenter entryListPresenter;
+    private ContentEntryListFragmentPresenter entryListPresenter;
 
     private RecyclerView recyclerView;
 
@@ -74,6 +73,25 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     public void clickUpNavigation() {
        entryListPresenter.handleUpNavigation();
+    }
+
+    @Override
+    public void setCategorySchemaSpinner(Map<Long, ? extends List<? extends DistinctCategorySchema>> spinnerData) {
+        runOnUiThread(() -> {
+            if (contentEntryListener != null) {
+                // TODO tell activiity to create the spinners
+                contentEntryListener.setFilterSpinner((Map<Long, List<DistinctCategorySchema>>) spinnerData);
+            }
+        });
+    }
+
+    @Override
+    public void setLanguageOptions(List<? extends Language> result) {
+        runOnUiThread(() -> {
+            if (contentEntryListener != null) {
+                contentEntryListener.setLanguageFilterSpinner((List<Language>) result);
+            }
+        });
     }
 
 
@@ -114,7 +132,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-        entryListPresenter = new ContentEntryListPresenter(getContext(),
+        entryListPresenter = new ContentEntryListFragmentPresenter(getContext(),
                 bundleToMap(getArguments()), this);
         entryListPresenter.onCreate(bundleToMap(savedInstanceState));
 
@@ -171,24 +189,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
         Toast.makeText(getContext(), R.string.content_entry_not_found, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void setCategorySchemaSpinner(Map<Long, List<DistinctCategorySchema>> spinnerData) {
-        runOnUiThread(() -> {
-            if (contentEntryListener != null) {
-                // TODO tell activiity to create the spinners
-                contentEntryListener.setFilterSpinner(spinnerData);
-            }
-        });
-    }
 
-    @Override
-    public void setLanguageOptions(List<Language> result) {
-        runOnUiThread(() -> {
-            if (contentEntryListener != null) {
-                contentEntryListener.setLanguageFilterSpinner(result);
-            }
-        });
-    }
 
     @Override
     public void contentEntryClicked(ContentEntry entry) {
@@ -201,7 +202,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
 
     @Override
     public void downloadStatusClicked(ContentEntry entry) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         ustadBaseActivity.runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 () -> entryListPresenter.handleDownloadStatusButtonClicked(entry),

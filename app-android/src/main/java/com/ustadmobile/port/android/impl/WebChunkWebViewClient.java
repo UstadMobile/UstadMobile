@@ -40,7 +40,7 @@ public class WebChunkWebViewClient extends WebViewClient {
     public WebChunkWebViewClient(Container pathToZip, WebChunkPresenter mPresenter, Object context) {
         try {
             this.presenter = mPresenter;
-            UmAppDatabase repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context);
+            UmAppDatabase repoAppDatabase = UmAccountManager.INSTANCE.getRepositoryForActiveAccount(context);
             UmAppDatabase appDatabase = UmAppDatabase.getInstance(context);
 
             containerManager = new ContainerManager(pathToZip, appDatabase, repoAppDatabase);

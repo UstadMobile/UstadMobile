@@ -33,7 +33,7 @@ public class OneOffWork {
 
         byte[] buf = new byte[8 * 1024];
 
-        String md5 = new String(Base64Coder.encode(UmFileUtilSe.getMd5Sum(file, buf)));
+        String md5 = Base64Coder.encodeToString(UmFileUtilSe.getMd5Sum(file, buf));
 
         containerEntryFile.setCefMd5(md5);
         containerEntryFile.setCeTotalSize(file.length());

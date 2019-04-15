@@ -1,6 +1,16 @@
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    }
+}
+
 task runOrmLiteGeneration(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
 }
@@ -19,6 +29,9 @@ dependencies {
 
     implementation "org.json:json:$version_json"
     implementation "net.sf.kxml:kxml2:$version_kxml"
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 }
 
 sourceSets {

@@ -153,7 +153,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
     }
 
     public static String getMimeType(String uri) {
-        String mimeResult = theMimeTypes.get(UMFileUtil.getExtension(uri));
+        String mimeResult = theMimeTypes.get(UMFileUtil.INSTANCE.getExtension(uri));
         return mimeResult != null ? mimeResult : "application/octet-stream";
     }
 
@@ -174,8 +174,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
      */
     @Deprecated
     public String mountZip(String zipPath, String mountPath) {
-        if (mountPath == null) {
-            mountPath = UMFileUtil.getFilename(zipPath) + '-' +
+        if(mountPath == null) {
+            mountPath= UMFileUtil.INSTANCE.getFilename(zipPath) + '-' +
                     new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         }
 
@@ -186,8 +186,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
             String fullPath = toFullZipMountPath(mountPath);
             mountedZips.put(fullPath, zipFile);
             return toFullZipMountPath(mountPath);
-        } catch (ZipException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 90, zipPath, e);
+        }catch(ZipException e) {
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 90, zipPath, e);
         }
 
         return null;
@@ -225,7 +225,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
             return PREFIX_MOUNT + URLEncoder.encode(mountPath, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             //Should enver happen
-            UstadMobileSystemImpl.l(UMLog.ERROR, 0, null, e);
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, null, e);
         }
 
         return null;
@@ -243,8 +243,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
                     + MountedZipHandler.URI_ROUTE_POSTFIX;
             removeRoute(route);
             mountedZips.remove(toFullZipMountPath(mountPath));
-        } catch (UnsupportedEncodingException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 20, mountPath, e);
+        }catch(UnsupportedEncodingException e) {
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 20, mountPath, e);
         }
     }
 
@@ -324,7 +324,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
      * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
      */
     public String mountZipOnHttp(String zipPath, String mountName) {
-        UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
+        UstadMobileSystemImpl.Companion.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
                 + this + "httpd server = " + this + " listening port = " + getListeningPort());
 
         mountName = mountZip(zipPath, mountName);

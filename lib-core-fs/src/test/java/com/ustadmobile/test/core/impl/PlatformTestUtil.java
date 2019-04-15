@@ -12,7 +12,7 @@ public class PlatformTestUtil {
     static UmContextSe testContext = new UmContextSe();
 
     public static Object getTargetContext() {
-        return testContext;
+        return INSTANCE.getTestContext();
     }
 
     public static Object getTestContext() {

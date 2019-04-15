@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.HttpCachedEntry;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +90,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             try {
                 pipeSize = Math.min(maxPipeBuffer, Integer.parseInt(networkLengthHeader));
             }catch(NumberFormatException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 0, networkLengthHeader, e);
+                UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, networkLengthHeader, e);
             }
         }
 
@@ -98,7 +99,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         try {
             bufferedPipeOut= new PipedOutputStream(bufferPipeIn);
         }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 0,
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0,
                     "HttpCacheResponse: Exception with pipe init");
         }
     }
@@ -122,9 +123,9 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             bufferedPipeOut.flush();
             responseCompleted = true;
         }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Exception piping cache response to disk", e);
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, "Exception piping cache response to disk", e);
         }finally {
-            UMIOUtils.closeInputStream(networkIn);
+            UMIOUtils.INSTANCE.closeInputStream(networkIn);
             UMIOUtils.closeOutputStream(fout);
             UMIOUtils.closeOutputStream(bufferedPipeOut);
         }
@@ -143,7 +144,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             fout.flush();
             responseCompleted = true;
         }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Exception writing / buffering response", e);
+            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, "Exception writing / buffering response", e);
         }finally {
             UMIOUtils.closeOutputStream(fout);
         }
@@ -166,7 +167,7 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
             case UmHttpRequest.HEADER_ETAG:
                 return entry.getEtag();
             case UmHttpRequest.HEADER_EXPIRES:
-                return UMCalendarUtil.makeHTTPDate(entry.getExpiresTime());
+                return UMCalendarUtil.INSTANCE.makeHTTPDate(entry.getExpiresTime());
 
             default:
                 return null;
@@ -181,33 +182,55 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
     }
 
     @Override
-    public byte[] getResponseBody() throws IOException {
+    public byte[] getResponseBody() {
         if(!hasResponseBody())
-            throw new IOException("getResponseBody called on response that has no body");
+            try {
+                throw new IOException("getResponseBody called on response that has no body");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         markBodyReturned();
         if(networkResponse == null) {
-            return UMIOUtils.readStreamToByteArray(new FileInputStream(new File(entry.getFileUri())));
+            try {
+                return UMIOUtils.readStreamToByteArray(new FileInputStream(new File(entry.getFileUri())));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }else if(byteBuf != null) {
             return byteBuf;
         }else {
-            return UMIOUtils.readStreamToByteArray(bufferPipeIn);
+            try {
+                return UMIOUtils.readStreamToByteArray(bufferPipeIn);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        return null;
     }
 
     @Override
-    public InputStream getResponseAsStream() throws IOException {
+    public InputStream getResponseAsStream() {
         if(!hasResponseBody())
-            throw new IOException("getResponseAsStream called on response that has no body");
+            try {
+                throw new IOException("getResponseAsStream called on response that has no body");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         markBodyReturned();
         if(networkResponse == null) {
-            return new FileInputStream(new File(entry.getFileUri()));
+            try {
+                return new FileInputStream(new File(entry.getFileUri()));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }else if(byteBuf != null){
             return new ByteArrayInputStream(byteBuf);
         }else {
             return bufferPipeIn;
         }
+        return null;
     }
 
     @Override

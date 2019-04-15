@@ -136,7 +136,7 @@ public class EpubContentPageFragment extends Fragment {
         webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                    UMFileUtil.getFilename(url));
+                    UMFileUtil.INSTANCE.getFilename(url));
             DownloadManager downloadManager = (DownloadManager)getContext().getSystemService(
                     Context.DOWNLOAD_SERVICE);
             downloadManager.enqueue(request);

@@ -11,7 +11,7 @@ public class UstadMobileSystemImplFactory {
     /**
      * @return
      */
-    public static UstadMobileSystemImpl makeSystemImpl() {
+    public static Object makeSystemImpl() {
         return new UstadMobileSystemImplAndroid();
     }
 

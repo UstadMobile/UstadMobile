@@ -181,7 +181,7 @@ public class IndexPrathamContentScraper {
                     continue;
                 }
 
-                File tmpDir = new File(UMFileUtil.stripExtensionIfPresent(content.getPath()));
+                File tmpDir = new File(UMFileUtil.INSTANCE.stripExtensionIfPresent(content.getPath()));
                 if (ContentScraperUtil.fileHasContent(tmpDir)) {
                     FileUtils.deleteDirectory(tmpDir);
                 }
@@ -312,7 +312,7 @@ public class IndexPrathamContentScraper {
             if (conn != null) {
                 conn.disconnect();
             }
-            UMIOUtils.closeQuietly(out);
+            UMIOUtils.INSTANCE.closeQuietly(out);
         }
 
         return "";

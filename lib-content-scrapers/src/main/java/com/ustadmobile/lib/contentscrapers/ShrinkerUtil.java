@@ -128,7 +128,7 @@ public class ShrinkerUtil {
 
     private static File createTmpFolderForZipAndUnZip(File contentFile) throws IOException {
         File parentFolder = contentFile.getParentFile();
-        File tmpFolder = new File(parentFolder, UMFileUtil.stripExtensionIfPresent(contentFile.getName()));
+        File tmpFolder = new File(parentFolder, UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getName()));
         UmZipUtils.unzip(contentFile, tmpFolder);
         return tmpFolder;
     }
@@ -153,7 +153,7 @@ public class ShrinkerUtil {
             OcfDocument ocfDoc = new OcfDocument();
             File ocfFile = new File(directory, Paths.get("META-INF", "container.xml").toString());
             ocfFileInputStream = new FileInputStream(ocfFile);
-            XmlPullParser ocfParser = UstadMobileSystemImpl.getInstance()
+            XmlPullParser ocfParser = UstadMobileSystemImpl.Companion.getInstance()
                     .newPullParser(ocfFileInputStream);
             ocfDoc.loadFromParser(ocfParser);
 
@@ -163,7 +163,7 @@ public class ShrinkerUtil {
             cleanXml(opfFile);
             OpfDocument document = new OpfDocument();
             opfFileInputStream = new FileInputStream(opfFile);
-            XmlPullParser xmlPullParser = UstadMobileSystemImpl.getInstance()
+            XmlPullParser xmlPullParser = UstadMobileSystemImpl.Companion.getInstance()
                     .newPullParser(opfFileInputStream);
             document.loadFromOPF(xmlPullParser);
 
@@ -176,7 +176,7 @@ public class ShrinkerUtil {
 
                 if (IMAGE_MIME_TYPES.contains(itemValue.getMediaType())) {
                     String oldHrefValue = itemValue.getHref();
-                    String newHref = UMFileUtil.stripExtensionIfPresent(oldHrefValue) +
+                    String newHref = UMFileUtil.INSTANCE.stripExtensionIfPresent(oldHrefValue) +
                             ScraperConstants.WEBP_EXT;
 
                     File inputFile = new File(opfDir, oldHrefValue);
@@ -203,7 +203,7 @@ public class ShrinkerUtil {
 
                     File htmlFile = new File(opfDir, opfItem.getHref());
                     try (FileInputStream htmlFileInputStream = new FileInputStream(htmlFile)) {
-                        String html = UMIOUtils.readToString(htmlFileInputStream, UTF_ENCODING);
+                        String html = UMIOUtils.INSTANCE.readToString(htmlFileInputStream, UTF_ENCODING);
                         /*
                          * Pratham uses an entity code to map &nbsp; to &#160; - this confuses jsoup
                          */
@@ -248,9 +248,9 @@ public class ShrinkerUtil {
                                             .toString().replaceAll(Pattern.quote("\\"), "/");
 
                                     OpfItem styleOpf = new OpfItem();
-                                    styleOpf.href = pathFromOpfToStyleFile;
-                                    styleOpf.mediaType = MIMETYPE_CSS;
-                                    styleOpf.id = "style_" + countStyle;
+                                    styleOpf.setHref(pathFromOpfToStyleFile);
+                                    styleOpf.setMediaType(MIMETYPE_CSS);
+                                    styleOpf.setId("style_" + countStyle);
                                     newOpfItems.add(styleOpf);
 
                                     styleMap.put(cssText, pathToStyleFile);
@@ -273,9 +273,9 @@ public class ShrinkerUtil {
                                     .toString().replaceAll(Pattern.quote("\\"), "/");
 
                             OpfItem styleOpf = new OpfItem();
-                            styleOpf.href = pathFromOpfToCssFile;
-                            styleOpf.mediaType = MIMETYPE_CSS;
-                            styleOpf.id = "cssHelper";
+                            styleOpf.setHref(pathFromOpfToCssFile);
+                            styleOpf.setMediaType(MIMETYPE_CSS);
+                            styleOpf.setId("cssHelper");
 
                             newOpfItems.add(styleOpf);
 
@@ -291,14 +291,14 @@ public class ShrinkerUtil {
             }
 
             for (OpfItem item : newOpfItems) {
-                manifestList.put(item.id, item);
+                manifestList.put(item.getId(), item);
             }
 
             if (newOpfItems.size() == 0 && replacedFiles.size() == 0 && styleMap.size() == 0) {
                 return false;
             }
 
-            XmlSerializer xmlSerializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+            XmlSerializer xmlSerializer = UstadMobileSystemImpl.Companion.getInstance().newXMLSerializer();
             opfFileOutputStream = new FileOutputStream(opfFile);
             xmlSerializer.setOutput(opfFileOutputStream, UTF_ENCODING);
             document.serialize(xmlSerializer);
@@ -317,9 +317,9 @@ public class ShrinkerUtil {
             UMLogUtil.logError("IO Exception for directory " + directory.getPath());
             throw e;
         } finally {
-            UMIOUtils.closeQuietly(opfFileInputStream);
-            UMIOUtils.closeQuietly(opfFileOutputStream);
-            UMIOUtils.closeQuietly(ocfFileInputStream);
+            UMIOUtils.INSTANCE.closeQuietly(opfFileInputStream);
+            UMIOUtils.INSTANCE.closeQuietly(opfFileOutputStream);
+            UMIOUtils.INSTANCE.closeQuietly(ocfFileInputStream);
         }
 
         return false;
@@ -396,7 +396,7 @@ public class ShrinkerUtil {
             int exitValue = process.exitValue();
             if (exitValue != 0) {
                 UMLogUtil.logError("Error Stream for src " + src.getPath() + UMIOUtils.readStreamToString(process.getErrorStream()));
-                pngFile = new File(UMFileUtil.stripExtensionIfPresent(src.getPath()) + PNG_EXT);
+                pngFile = new File(UMFileUtil.INSTANCE.stripExtensionIfPresent(src.getPath()) + PNG_EXT);
                 convertJpgToPng(src, pngFile);
                 convertImageToWebp(pngFile, dest);
                 pngFile.delete();
