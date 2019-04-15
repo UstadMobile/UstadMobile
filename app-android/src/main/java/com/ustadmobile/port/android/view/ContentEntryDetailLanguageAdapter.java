@@ -41,7 +41,7 @@ public class ContentEntryDetailLanguageAdapter extends RecyclerView.Adapter<Cont
     public void onBindViewHolder(@NonNull LangHolder holder, int position) {
         ContentEntryRelatedEntryJoinWithLanguage entry = data.get(position);
         holder.entryLang.setText(entry.getLanguageName());
-        holder.entryLang.setOnClickListener(view -> listener.selectContentEntryOfLanguage(entry.getCerejContentEntryUid() == entryUid ? entry.getCerejRelatedEntryUid() : entry.getCerejContentEntryUid()));
+        holder.entryLang.setOnClickListener(view -> listener.selectContentEntryOfLanguage(entry.getCerejRelatedEntryUid()));
     }
 
     @Override
