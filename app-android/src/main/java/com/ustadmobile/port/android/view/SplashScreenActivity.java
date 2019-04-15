@@ -31,7 +31,6 @@
 
 package com.ustadmobile.port.android.view;
 
-import android.content.res.AssetManager;
 import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
@@ -56,7 +55,6 @@ import com.ustadmobile.lib.db.entities.SaleProductGroup;
 import com.ustadmobile.lib.db.entities.SaleProductGroupJoin;
 import com.ustadmobile.lib.db.entities.SaleProductPicture;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -127,8 +125,6 @@ public class SplashScreenActivity extends UstadBaseActivity{
         PersonDao personDao = repo.getPersonDao();
         SaleProductGroupDao productGroupDao = repo.getSaleProductGroupDao();
         SaleProductGroupJoinDao productGroupJoinDao = repo.getProductGroupJoinDao();
-        SaleProductPictureDao pictureDao = repo.getSaleProductPictureDao();
-
 
 
         //Create a new location
@@ -217,14 +213,14 @@ public class SplashScreenActivity extends UstadBaseActivity{
 
 
                     //Create categories
-                    SaleProductGroup bedLinenGroup = new SaleProductGroup("Bed linen");
+                    SaleProductGroup bedLinenGroup = new SaleProductGroup("Bed Linen");
                     bedLinenGroup.setSaleProductGroupUid(productGroupDao.insert(bedLinenGroup));
                     SaleProductGroupJoin bedLinen1 =
                             new SaleProductGroupJoin(pinkBedLinen.getSaleProductUid(),
                                     bedLinenGroup.getSaleProductGroupUid());
                     productGroupJoinDao.insert(bedLinen1);
 
-                    SaleProductGroup tableLinenGroup = new SaleProductGroup("Table linen");
+                    SaleProductGroup tableLinenGroup = new SaleProductGroup("Table Linen");
                     tableLinenGroup.setSaleProductGroupUid(productGroupDao.insert(tableLinenGroup));
                     SaleProductGroupJoin tableLinen1 =
                             new SaleProductGroupJoin(redTableLinen.getSaleProductUid(),
@@ -264,7 +260,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     productGroupJoinDao.insert(accessoriesJoin);
                 }
 
-                String pinkHatSaleTitle = "20x Pink hat";
+                String pinkHatSaleTitle = "20x Pink Hat";
                 SaleProduct finalPinkHatProduct = pinkHatProduct;
                 saleDao.findAllSaleWithTitleAsync(pinkHatSaleTitle, new UmCallback<List<Sale>>() {
                     @Override
@@ -294,9 +290,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     }
 
                     @Override
-                    public void onFailure(Throwable exception) {
-
-                    }
+                    public void onFailure(Throwable exception) {exception.printStackTrace();}
                 });
 
                 
