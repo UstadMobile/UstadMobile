@@ -23,7 +23,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private var parentUid: Long? = null
 
-    override fun onCreate(savedState: Map<String, String?> ?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val appDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = appDatabase.contentEntryDao
@@ -66,7 +66,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                     allLang.langUid = 0
                     languages.add(1, allLang)
 
-                    fragmentViewContract.setLanguageOptions(result!!)
+                    fragmentViewContract.setLanguageOptions(languages)
                 }
             }
 
