@@ -65,7 +65,7 @@ public class Login2ActivityEspressoTest {
     @Test
     public void givenValidUsernameAndPassword_whenLoginClicked_thenShouldFireIntent() {
         Intent launchIntent = new Intent();
-        launchIntent.putExtra(Login2Presenter.Companion.getARG_SERVER_URL(),
+        launchIntent.putExtra(Login2Presenter.ARG_SERVER_URL,
                 mockRestServer.url("/").toString());
         mActivityRule.launchActivity(launchIntent);
 
