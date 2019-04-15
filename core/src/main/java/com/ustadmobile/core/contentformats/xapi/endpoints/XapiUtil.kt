@@ -145,10 +145,10 @@ object XapiUtil {
             statementEntity.stored = UMCalendarUtil.parse8601Timestamp(statement.stored!!).timeInMillis
             statementEntity.fullStatement = gson.toJson(statement)
             if (statement.result != null) {
-                statementEntity.isResultCompletion = statement.result!!.isCompletion
+                statementEntity.isResultCompletion = statement.result!!.completion
                 statementEntity.resultDuration = UMTinCanUtil.parse8601Duration(statement.result!!.duration!!)
                 statementEntity.resultResponse = statement.result!!.response
-                statementEntity.isResultSuccess = statement.result!!.isSuccess
+                statementEntity.isResultSuccess = statement.result!!.success
                 if (statement.result!!.score != null) {
                     statementEntity.resultScoreMax = statement.result!!.score!!.max
                     statementEntity.resultScoreMin = statement.result!!.score!!.min

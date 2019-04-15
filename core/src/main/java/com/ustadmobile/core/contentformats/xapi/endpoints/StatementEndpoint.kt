@@ -40,7 +40,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     @Throws(IllegalArgumentException::class)
     private fun checkValidStatement(statement: Statement, isSubStatement: Boolean) {
 
-        if (!isSubStatement && (statement.id == null || statement.id!!.isEmpty())) {
+        if (!isSubStatement && statement.id.isNullOrEmpty()) {
             statement.id = UUID.randomUUID().toString()
         }
 
@@ -49,10 +49,9 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         checkValidActor(actor)
 
         val verb = statement.verb ?: throw IllegalArgumentException("No Verb Found in Statement")
-        if (verb.id == null || verb.id!!.isEmpty()) {
+        if (verb.id.isNullOrEmpty()) {
             throw IllegalArgumentException("Invalid Verb In Statement: Required Id not found")
         }
-
 
         val subStatement = statement.subStatement
         val xobject = statement.`object`
@@ -61,7 +60,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         }
 
         if (xobject != null) {
-            if (xobject.id == null || xobject.id!!.isEmpty()) {
+            if (xobject.id.isNullOrEmpty()) {
                 throw IllegalArgumentException("Invalid Object In Statement: Required Id not found")
             }
 
@@ -70,7 +69,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 if (xobject.definition!!.type != null) {
                     if (xobject.definition!!.type == "http://adlnet.gov/expapi/activities/cmi.interaction") {
 
-                        if (xobject.definition!!.interactionType == null || xobject.definition!!.interactionType!!.isEmpty()) {
+                        if (xobject.definition!!.interactionType.isNullOrEmpty()) {
                             throw IllegalArgumentException("Invalid Object In Statement: Required Interaction Type was not found")
                         }
 
@@ -84,8 +83,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         if (context != null) {
 
             if (xobject != null) {
-
-                if (xobject.objectType != null && xobject.objectType != "Activity") {
+                if (xobject.objectType != "Activity") {
 
                     if (context.revision != null) {
                         throw IllegalArgumentException("Invalid Context In Statement: Revision can only be used when objectType is activity")
@@ -141,21 +139,21 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         if (statement.authority != null) {
             val authority = statement.authority
             checkValidActor(authority!!)
-            if (authority.objectType == null || authority.objectType!!.isEmpty()) {
+            if (authority.objectType.isNullOrEmpty()) {
                 throw IllegalArgumentException("Invalid Authority In Statement: authority was not agent or group")
             }
             if (authority.objectType == "Group") {
 
                 val membersList = authority.members
-                if (membersList!!.size != 2) {
+                if (membersList?.size != 2) {
                     throw IllegalArgumentException("Invalid Authority In Statement: invalid OAuth consumer")
                 }
 
                 var has1Account = false
                 for (member in membersList) {
                     if (member.account != null) {
-                        has1Account = actor.account!!.homePage != null && !actor.account!!.homePage!!.isEmpty() &&
-                                actor.account!!.name != null && !actor.account!!.name!!.isEmpty()
+                        has1Account = actor.account?.homePage?.isNotEmpty() ?: false &&
+                                actor.account?.name?.isNotEmpty() ?: false
                     }
                 }
                 if (!has1Account) {
@@ -172,15 +170,15 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         if (attachmentList != null) {
             for (attachment in attachmentList) {
 
-                if (attachment.usageType == null || attachment.usageType!!.isEmpty()) {
+                if (attachment.usageType.isNullOrEmpty()) {
                     throw IllegalArgumentException("Invalid Attachment In Statement: Required usageType in Attachment not found")
                 }
 
-                if (attachment.display == null || attachment.display!!.size > 0) {
+                if (attachment.display.isNullOrEmpty()) {
                     throw IllegalArgumentException("Invalid Attachment In Statement: Required displayMap in Attachment not found")
                 }
 
-                if (attachment.contentType == null || attachment.contentType!!.isEmpty()) {
+                if (attachment.contentType.isNullOrEmpty()) {
                     throw IllegalArgumentException("Invalid Attachment In Statement: Required contentType in Attachment not found")
                 }
 
@@ -188,7 +186,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                     throw IllegalArgumentException("Invalid Attachment In Statement: Required length in Attachment not found")
                 }
 
-                if (attachment.sha2 == null || attachment.sha2!!.isEmpty()) {
+                if (attachment.sha2.isNullOrEmpty()) {
                     throw IllegalArgumentException("Invalid Attachment In Statement: Required sha2 in Attachment not found")
                 }
 
@@ -199,7 +197,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz").format(Date())
             statement.stored = date
 
-            if (statement.timestamp == null || statement.timestamp!!.isEmpty()) {
+            if (statement.timestamp.isNullOrEmpty()) {
                 statement.timestamp = date
             }
 
@@ -232,7 +230,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 }
             }
             val authorityEntity = getAgent(agentDao, personDao, authority!!)
-            authorityUid = authorityEntity?.agentUid ?: 0
+            authorityUid = authorityEntity.agentUid
         }
 
         var xObjectEntity: XObjectEntity? = null
@@ -281,7 +279,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
         val statementEntity = insertOrUpdateStatementEntity(statementDao, statement, gson,
                 person?.personUid ?: 0,
-                verbEntity?.verbUid ?: 0,
+                verbEntity.verbUid,
                 xObjectEntity?.xObjectUid ?: 0,
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
@@ -363,12 +361,11 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         @Throws(IllegalArgumentException::class)
         fun checkValidActor(actor: Actor) {
 
-            val hasMbox = actor.mbox != null && !actor.mbox!!.isEmpty()
-            val hasSha = actor.mbox_sha1sum != null && !actor.mbox_sha1sum!!.isEmpty()
-            val hasOpenId = actor.openid != null && !actor.openid!!.isEmpty()
-            val hasAccount = actor.account != null &&
-                    actor.account!!.homePage != null && !actor.account!!.homePage!!.isEmpty() &&
-                    actor.account!!.name != null && !actor.account!!.name!!.isEmpty()
+            val hasMbox = actor.mbox?.isNotEmpty() ?: false
+            val hasSha = actor.mbox_sha1sum?.isNotEmpty() ?: false
+            val hasOpenId = actor.openid?.isNotEmpty() ?: false
+            val hasAccount = actor.account?.homePage?.isNotEmpty() ?: false &&
+                    actor.account?.name?.isNotEmpty() ?: false
 
             val idCount = (if (hasAccount) 1 else 0) + (if (hasMbox) 1 else 0) + (if (hasOpenId) 1 else 0) + if (hasSha) 1 else 0
             if (actor.objectType == null || actor.objectType == "Agent") {
@@ -393,7 +390,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 if (actor.members != null) {
                     for (members in actor.members!!) {
                         checkValidActor(members)
-                        if (members.members != null && members.members!!.size > 0) {
+                        if (members.members?.isNotEmpty() == true) {
                             throw IllegalArgumentException("Members were found in the member group statement")
                         }
                     }

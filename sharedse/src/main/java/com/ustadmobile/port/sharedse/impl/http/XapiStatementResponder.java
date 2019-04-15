@@ -144,8 +144,8 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.getMessage());
         } finally {
-            UMIOUtils.closeQuietly(fin);
-            UMIOUtils.closeQuietly(bout);
+            UMIOUtils.INSTANCE.closeQuietly(fin);
+            UMIOUtils.INSTANCE.closeQuietly(bout);
 
         }
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
@@ -209,7 +209,7 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.getMessage());
         } finally {
-            UMIOUtils.closeQuietly(is);
+            UMIOUtils.INSTANCE.closeQuietly(is);
         }
 
     }

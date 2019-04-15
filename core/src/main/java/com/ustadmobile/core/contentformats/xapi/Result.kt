@@ -2,9 +2,9 @@ package com.ustadmobile.core.contentformats.xapi
 
 class Result {
 
-    var isCompletion: Boolean = false
+    var completion: Boolean = false
 
-    var isSuccess: Boolean = false
+    var success: Boolean = false
 
     var score: Score? = null
 
@@ -31,8 +31,8 @@ class Result {
 
         val result = o as Result?
 
-        if (isCompletion != result!!.isCompletion) return false
-        if (isSuccess != result.isSuccess) return false
+        if (completion != result!!.completion) return false
+        if (success != result.success) return false
         if (if (score != null) score != result.score else result.score != null) return false
         if (if (duration != null) duration != result.duration else result.duration != null)
             return false
@@ -42,8 +42,8 @@ class Result {
     }
 
     override fun hashCode(): Int {
-        var result = if (isCompletion) 1 else 0
-        result = 31 * result + if (isSuccess) 1 else 0
+        var result = if (completion) 1 else 0
+        result = 31 * result + if (success) 1 else 0
         result = 31 * result + if (score != null) score!!.hashCode() else 0
         result = 31 * result + if (duration != null) duration!!.hashCode() else 0
         result = 31 * result + if (response != null) response!!.hashCode() else 0

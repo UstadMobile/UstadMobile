@@ -109,8 +109,8 @@ public class XapiStateResponder implements RouterNanoHTTPD.UriResponder {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.getMessage());
         } finally {
-            UMIOUtils.closeQuietly(fin);
-            UMIOUtils.closeQuietly(bout);
+            UMIOUtils.INSTANCE.closeQuietly(fin);
+            UMIOUtils.INSTANCE.closeQuietly(bout);
 
         }
 

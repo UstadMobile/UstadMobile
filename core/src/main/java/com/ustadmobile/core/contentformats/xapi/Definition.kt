@@ -26,7 +26,7 @@ class Definition {
 
     var steps: List<Interaction>? = null
 
-    private inner class Interaction {
+    inner class Interaction {
 
         var id: String? = null
 
