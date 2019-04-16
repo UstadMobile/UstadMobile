@@ -254,10 +254,13 @@ public class ContentEntryListRecyclerViewAdapter extends
             managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(entry.getContentEntryUid(),
                     (status) -> {
                         if(status != null) {
-                            holder.onDownloadJobItemChange(status);
+                            activity.runOnUiThread(() -> {
+                                holder.getDownloadView().setProgressVisibility(View.VISIBLE);
+                                holder.onDownloadJobItemChange(status);
+                            });
                         }else {
                             activity.runOnUiThread(() ->
-                                    holder.getDownloadView().setProgressVisibility(View.GONE));
+                                    holder.getDownloadView().setProgressVisibility(View.INVISIBLE));
                         }
                     });
         }
@@ -388,9 +391,24 @@ public class ContentEntryListRecyclerViewAdapter extends
                     downloadView.setProgress(
                         status.getTotalBytes() > 0 ?
                         (int)((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0);
-                    if(status.getTotalBytes() > 0 && status.getBytesSoFar() == status.getTotalBytes())
-                        downloadView.setProgressVisibility(View.INVISIBLE);
 
+                    if(status.getTotalBytes() > 0) {
+                        if(status.getBytesSoFar() == status.getTotalBytes()) {
+                            /*
+                             * ContentEntryStatus will be changed, and that will trigger showing
+                             * the offline downloaded pin. We can now hide the progress view.
+                             */
+                            downloadView.setProgressVisibility(View.INVISIBLE);
+                        }else if(status.getTotalBytes() > 0
+                                && downloadView.getProgressVisibility() != View.VISIBLE){
+                            /*
+                             * The download just started. When this view was first shown, the download
+                             * was not in progress, so the progress view was made invisible. We need
+                             * to show it now that the download is underway.
+                             */
+                            downloadView.setProgressVisibility(View.VISIBLE);
+                        }
+                    }
                 });
             }
         }

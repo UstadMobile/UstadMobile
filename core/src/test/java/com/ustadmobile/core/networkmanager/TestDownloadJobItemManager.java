@@ -1,5 +1,6 @@
 package com.ustadmobile.core.networkmanager;
 
+import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContentEntryDao;
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
@@ -18,7 +19,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -291,6 +295,46 @@ public class TestDownloadJobItemManager {
             Assert.assertNotNull("Found item in table", itemFound);
             Assert.assertTrue("Found item quickly enough", lookupTime < 50);
         }
+    }
+
+    @Test
+    public void givenParentWithChild_whenAllChildrenDownloadCompleted_thenParentStatusShouldBeCompleted()
+            throws InterruptedException{
+        db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
+        db.clearAllTables();
+
+        downloadJob = new DownloadJob();
+        downloadJob.setDjRootContentEntryUid(0);
+        downloadJob.setDjUid(db.getDownloadJobDao().insert(downloadJob));
+        rootDjItem = new DownloadJobItem(downloadJob.getDjUid(), 0, 0, 0);
+        DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
+        List<DownloadJobItem> childItems = new LinkedList<>();
+        for(int i = 0; i < 5; i++) {
+            DownloadJobItem childItem = new DownloadJobItem(downloadJob.getDjUid(), i + 1,
+                    i + 1, 500);
+            childItems.add(childItem);
+        }
+        manager.insertDownloadJobItemsSync(Collections.singletonList(rootDjItem));
+        manager.insertDownloadJobItemsSync(childItems);
+        List<DownloadJobItemParentChildJoin> parentChildJoins = new LinkedList<>();
+        int i = 1;
+        for(DownloadJobItem item : childItems) {
+            parentChildJoins.add(new DownloadJobItemParentChildJoin(rootDjItem.getDjiUid(),
+                    item.getDjiUid(), i++));
+        }
+        CountDownLatch latch = new CountDownLatch(1);
+        manager.insertParentChildJoins(parentChildJoins, (aVoid) -> latch.countDown());
+        latch.await(5, TimeUnit.SECONDS);
+
+        CountDownLatch statusLatch = new CountDownLatch(childItems.size());
+        for(DownloadJobItem item : childItems) {
+            manager.updateStatus((int)item.getDjiUid(), JobStatus.COMPLETE,
+                    (aVoid) -> statusLatch.countDown());
+        }
+        statusLatch.await(5, TimeUnit.SECONDS);
+
+        Assert.assertEquals("After all child items complete, root item status is completed",
+                JobStatus.COMPLETE, manager.getRootItemStatus().getStatus());
     }
 
 

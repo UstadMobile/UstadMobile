@@ -94,4 +94,8 @@ public class DownloadStatusButton extends RelativeLayout {
     public void setProgressVisibility(int visibility) {
         mProgressBar.setVisibility(visibility);
     }
+
+    public int getProgressVisibility() {
+        return mProgressBar.getVisibility();
+    }
 }

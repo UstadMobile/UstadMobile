@@ -298,7 +298,7 @@ public abstract class DownloadJobItemDao {
             "djiContentEntryUid AS contentEntryUid, " +
             "downloadedSoFar AS bytesSoFar, " +
             "downloadLength AS totalBytes," +
-            "djiStatus AS state " +
+            "djiStatus AS status " +
             "FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiDjUid = :downloadJobUid")
     public abstract List<DownloadJobItemStatus> findStatusByDownlaodJobUid(long downloadJobUid);

@@ -114,9 +114,9 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
                 runOnAllParents(djStatus.jobItemUid, djStatus.parents) {parent ->
                     var parentChanged = false
-                    if(djStatus.children.all { it.status >= JobStatus.COMPLETE_MIN}){
-                        parent.status = JobStatus.COMPLETE_MIN.toByte()
-                        updatedItems.add(djStatus)
+                    if(parent.children.all { it.status >= JobStatus.COMPLETE_MIN}){
+                        parent.status = JobStatus.COMPLETE.toByte()
+                        updatedItems.add(parent)
                         parentChanged = true
                     }
 

@@ -751,15 +751,19 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
                                                             UmResultCallback<DownloadJobItemStatus> callback) {
         final List<DownloadJobItemManager> managerList = new LinkedList<>(downloadJobItemManagerMap.values());
         final AtomicInteger checksLeft = new AtomicInteger(managerList.size());
+
+        if(managerList.isEmpty()) {
+            callback.onDone(null);
+        }
+
         for(DownloadJobItemManager manager : managerList) {
             manager.findStatusByContentEntryUid(contentEntryUid, (status) -> {
                 if(status != null) {
                     callback.onDone(status);
                     checksLeft.set(-1);
                 }else {
-                    checksLeft.decrementAndGet();
-                    if(checksLeft.get() == 0) {
-                        //all known managers checked, not found
+                    if(checksLeft.decrementAndGet() == 0) {
+                        //all known managers were checked, but this entry was not found anywhere
                         callback.onDone(null);
                     }
                 }

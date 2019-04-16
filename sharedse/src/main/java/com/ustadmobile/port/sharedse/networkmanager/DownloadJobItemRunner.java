@@ -298,7 +298,7 @@ public class DownloadJobItemRunner implements Runnable {
         appDb.getDownloadJobDao().update(downloadJobId, JobStatus.RUNNING);
 
         networkManager.startMonitoringAvailability(this,
-                Arrays.asList(downloadItem.getDjiContainerUid()));
+                Collections.singletonList(downloadItem.getDjiContainerUid()));
 
         statusLiveData = appDb.getConnectivityStatusDao().getStatusLive();
         downloadJobItemLiveData = appDb.getDownloadJobItemDao().getLiveStatus(downloadItem.getDjiUid());
