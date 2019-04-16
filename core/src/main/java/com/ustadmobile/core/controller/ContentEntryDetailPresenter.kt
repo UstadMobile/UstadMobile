@@ -67,19 +67,19 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         containerDao = repoAppDatabase.containerDao
         networkNodeDao = appdb.networkNodeDao
 
-        entryUuid = java.lang.Long.valueOf(arguments.get(ARG_CONTENT_ENTRY_UID))
-        navigation = arguments.get(ARG_REFERRER)
+        entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
+        navigation = arguments.getValue(ARG_REFERRER) ?: ""
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry?> {
             override fun onSuccess(result: ContentEntry?) {
-                if(result != null) {
+                if (result != null) {
                     val licenseType = getLicenseType(result)
-                    view.runOnUiThread (Runnable{
+                    view.runOnUiThread(Runnable {
                         view.setContentEntryLicense(licenseType)
                         view.setContentEntryAuthor(result.author)
                         view.setContentEntryTitle(result.title)
                         view.setContentEntryDesc(result.description)
-                        if (result.thumbnailUrl != null && !result.thumbnailUrl.isEmpty()) {
+                        if (!result.thumbnailUrl.isNullOrEmpty()) {
                             view.loadEntryDetailsThumbnail(result.thumbnailUrl)
                         }
                     })
@@ -93,15 +93,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         containerDao!!.findFilesByContentEntryUid(entryUuid, object : UmCallback<List<Container>> {
             override fun onSuccess(result: List<Container>?) {
-               if(result != null){
-                   view.runOnUiThread(Runnable {
-                       view.setDetailsButtonEnabled(!result.isEmpty())
-                       if (!result.isEmpty()) {
-                           val container = result[0]
-                           view.setDownloadSize(container.fileSize)
-                       }
-                   })
-               }
+                if (result != null) {
+                    view.runOnUiThread(Runnable {
+                        view.setDetailsButtonEnabled(result.isNotEmpty())
+                        if (result.isNotEmpty()) {
+                            val container = result[0]
+                            view.setDownloadSize(container.fileSize)
+                        }
+                    })
+                }
             }
 
             override fun onFailure(exception: Throwable?) {
@@ -113,10 +113,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 object : UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>> {
 
                     override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>?) {
-                        if(result != null){
+                        if (result != null) {
                             view.runOnUiThread(Runnable {
-                                view.setTranslationLabelVisible(!result.isEmpty())
-                                view.setFlexBoxVisible(!result.isEmpty())
+                                view.setTranslationLabelVisible(result.isNotEmpty())
+                                view.setFlexBoxVisible(result.isNotEmpty())
                                 view.setAvailableTranslations(result, entryUuid)
                             })
                         }
@@ -220,7 +220,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                 listOf(containerUid!!))
                     }
 
-                    val monitorSet : MutableSet<Long> = view.allKnowAvailabilityStatus as MutableSet<Long>
+                    val monitorSet: MutableSet<Long> = view.allKnowAvailabilityStatus as MutableSet<Long>
 
                     monitorSet.add((if (localNetworkNode != null) containerUid else 0L)!!)
 
@@ -261,20 +261,20 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    fun handleDownloadButtonClick(isDownloadComplete: Boolean , entryUuid: Long) {
+    fun handleDownloadButtonClick(isDownloadComplete: Boolean, entryUuid: Long) {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
                     context, object : UmCallback<Any> {
-                override fun onSuccess(result: Any ?) {
+                override fun onSuccess(result: Any?) {
 
                 }
 
                 override fun onFailure(exception: Throwable?) {
-                    if(exception != null){
+                    if (exception != null) {
                         val message = exception.message
                         if (exception is NoAppFoundException) {
-                            view.runOnUiThread (Runnable{
+                            view.runOnUiThread(Runnable {
                                 view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
                                         MessageID.get_app,
                                         exception.mimeType!!)
@@ -310,7 +310,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 else
                     MessageID.download_cloud_availability, context)
 
-        view.runOnUiThread (Runnable{ view.updateLocalAvailabilityViews(icon, status) })
+        view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
 
 

@@ -10,32 +10,32 @@ import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.DummyView
-import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.core.view.WebChunkView
+import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 
-class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: WebChunkView)
-    : UstadBaseController<WebChunkView>(context, arguments!!, view) {
+class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView)
+    : UstadBaseController<WebChunkView>(context, arguments, view) {
 
     private var navigation: String? = null
 
-    internal fun onCreate(savedState: Map<String, String>) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         val contentEntryDao = repoAppDatabase.contentEntryDao
         val containerDao = repoAppDatabase.containerDao
 
-        val entryUuid = java.lang.Long.parseLong(arguments.get(ARG_CONTENT_ENTRY_ID))
-        val containerUid = java.lang.Long.parseLong(arguments.get(ARG_CONTAINER_UID))
+        val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
+        val containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
 
 
-        navigation = arguments.get(ARG_REFERRER)
+        navigation = arguments[ARG_REFERRER] ?: ""
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
-                view.runOnUiThread(Runnable{ view.setToolbarTitle(result!!.title) })
+                view.runOnUiThread(Runnable { view.setToolbarTitle(result!!.title) })
             }
 
             override fun onFailure(exception: Throwable?) {
@@ -77,7 +77,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
             }
 
             override fun onFailure(exception: Throwable?) {
-                if(exception != null){
+                if (exception != null) {
                     val message = exception.message
                     if (exception is NoAppFoundException) {
                         view.runOnUiThread(Runnable {
@@ -86,7 +86,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>?, view: Web
                                     exception.mimeType!!)
                         })
                     } else {
-                        view.runOnUiThread(Runnable  { view.showError(message!!) })
+                        view.runOnUiThread(Runnable { view.showError(message!!) })
                     }
                 }
             }

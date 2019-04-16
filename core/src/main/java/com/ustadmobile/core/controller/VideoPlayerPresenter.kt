@@ -27,16 +27,16 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
     var videoPath: String? = null
         private set
 
-     override fun onCreate(savedState: Map<String, String?> ?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val db = UmAppDatabase.getInstance(context)
         val dbRepo = UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = dbRepo.contentEntryDao
         val containerEntryDao = db.containerEntryDao
 
-        navigation = arguments.get(ARG_REFERRER)
-        val entryUuid = java.lang.Long.parseLong(arguments.get(ARG_CONTENT_ENTRY_ID))
-        val containerUid = java.lang.Long.parseLong(arguments.get(ARG_CONTAINER_UID))
+        navigation = arguments[ARG_REFERRER] ?: ""
+        val entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_ID)!!.toLong()
+        val containerUid = arguments.getValue(ARG_CONTAINER_UID)!!.toLong()
 
         contentEntryDao!!.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {

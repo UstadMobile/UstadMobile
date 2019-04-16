@@ -23,7 +23,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private var parentUid: Long? = null
 
-    override fun onCreate(savedState: Map<String, String?> ?) {
+    override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val appDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = appDatabase.contentEntryDao
@@ -36,7 +36,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
     private fun showContentByParent() {
-        parentUid = java.lang.Long.valueOf(arguments[ARG_CONTENT_ENTRY_UID])
+        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
         contentEntryDao!!.getContentByUuid(parentUid!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
@@ -66,7 +66,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                     allLang.langUid = 0
                     languages.add(1, allLang)
 
-                    fragmentViewContract.setLanguageOptions(result!!)
+                    fragmentViewContract.setLanguageOptions(languages)
                 }
             }
 
