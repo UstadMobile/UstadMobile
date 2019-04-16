@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -37,7 +38,7 @@ public class ContainerManager {
 
     private Container container;
 
-    private Hashtable<String, ContainerEntryWithContainerEntryFile> pathToEntryMap = new Hashtable<>();
+    private Map<String, ContainerEntryWithContainerEntryFile> pathToEntryMap = new Hashtable<>();
 
     private File newFileDir;
 
@@ -63,6 +64,19 @@ public class ContainerManager {
         this.db = db;
         this.dbRepo = dbRepo;
         loadFromDb();
+    }
+
+    public ContainerManager(Container container, UmAppDatabase db, UmAppDatabase dbRepo,
+                            String newFileStorageDir,
+                            Map<String, ContainerEntryWithContainerEntryFile> pathToEntryMap) {
+        this.container = container;
+        this.db = db;
+        this.dbRepo = dbRepo;
+        this.pathToEntryMap = pathToEntryMap;
+    }
+
+    public long getContainerUid() {
+        return container.getContainerUid();
     }
 
     private void loadFromDb() {
@@ -267,4 +281,38 @@ public class ContainerManager {
 
         return new FileInputStream(entryWithFile.getContainerEntryFile().getCefPath());
     }
+
+    /**
+     * Make a copy of this container as a new container - e.g. when making a new version of this
+     * file, adding files, etc.
+     *
+     * @return ContainerManager wiht the same contents, linked to the same underlying files, with the
+     * last modified timestamp updated.
+     */
+    public ContainerManager copyToNewContainer() {
+        Container newContainer = new Container();
+        newContainer.setFileSize(container.getFileSize());
+        newContainer.setLastModified(System.currentTimeMillis());
+        newContainer.setCntNumEntries(pathToEntryMap.size());
+        newContainer.setContainerContentEntryUid(container.getContainerContentEntryUid());
+        newContainer.setMimeType(container.getMimeType());
+        newContainer.setMobileOptimized(container.isMobileOptimized());
+        newContainer.setRemarks(container.getRemarks());
+        newContainer.setContainerUid(dbRepo.getContainerDao().insert(newContainer));
+
+        Map<String, ContainerEntryWithContainerEntryFile> newEntryMap = new Hashtable<>();
+        List<ContainerEntry> newContainerEntryList = new LinkedList<>();
+        for(ContainerEntryWithContainerEntryFile entryFile : pathToEntryMap.values()) {
+            ContainerEntryWithContainerEntryFile newEntry = new ContainerEntryWithContainerEntryFile(
+                    entryFile.getCePath(), newContainer, entryFile.getContainerEntryFile());
+            newEntryMap.put(entryFile.getCePath(), newEntry);
+            newContainerEntryList.add(newEntry);
+        }
+
+        db.getContainerEntryDao().insertList(newContainerEntryList);
+
+        return new ContainerManager(newContainer, db, dbRepo, newFileDir.getAbsolutePath(),
+                newEntryMap);
+    }
+
 }
