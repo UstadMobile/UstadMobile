@@ -123,4 +123,28 @@ public class TestContainerManager {
                 dbRepo.getContainerDao().findByUid(container2.getContainerUid()).getCntNumEntries());
     }
 
+    @Test
+    public void givenExistingContainer_whenCopyToNewContainerCalled_thenShouldHaveSameContents() throws IOException{
+        Container container = new Container();
+        container.setContainerUid(dbRepo.getContainerDao().insert(container));
+        ContainerManager manager = new ContainerManager(container, db, dbRepo,
+                tmpDir.getAbsolutePath());
+
+        Map<File, String> filesToAdd2 = new HashMap<>();
+        filesToAdd2.put(testFiles.get(0), "testfileothername.png");
+        filesToAdd2.put(testFiles.get(1), "anotherimage.png");
+        manager.addEntries(filesToAdd2, true);
+
+        ContainerManager copy = manager.copyToNewContainer();
+        Assert.assertArrayEquals(UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                manager.getEntry("testfileothername.png"))),
+                UMIOUtils.readStreamToByteArray(copy.getInputStream(
+                        copy.getEntry("testfileothername.png"))));
+        Assert.assertArrayEquals(UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                manager.getEntry("anotherimage.png"))),
+                UMIOUtils.readStreamToByteArray(copy.getInputStream(
+                        copy.getEntry("anotherimage.png"))));
+    }
+
+
 }
