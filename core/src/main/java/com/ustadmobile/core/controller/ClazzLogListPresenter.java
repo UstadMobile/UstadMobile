@@ -167,21 +167,21 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                 //7
                 fromDate = UMCalendarUtil.getDateInMilliPlusDays(-7);
                 for(int i=-7; i<-1; i++) {
-                    lineDataMap.put((float) UMCalendarUtil.getDateInMilliPlusDays(i) / 1000, 0f);
+                    lineDataMap.put((float) UMCalendarUtil.getDateInMilliPlusDays(i) / 1000, -1f);
                 }
                 break;
             case CHART_DURATION_LAST_MONTH:
                 //31
                 fromDate = UMCalendarUtil.getDateInMilliPlusDays(-31);
                 for(int i=-31; i<-1; i++){
-                    lineDataMap.put((float) UMCalendarUtil.getDateInMilliPlusDays(i) / 1000, 0f);
+                    lineDataMap.put((float) UMCalendarUtil.getDateInMilliPlusDays(i) / 1000, -1f);
                 }
                 break;
             case CHART_DURATION_LAST_YEAR:
                 //31
                 fromDate = UMCalendarUtil.getDateInMilliPlusDays(-365);
                 for(int i=-365; i<-1; i++){
-                    lineDataMap.put((float) UMCalendarUtil.getDateInMilliPlusDays(i) / 1000, 0f);
+                    lineDataMap.put((float) UMCalendarUtil.getDateInMilliPlusDays(i) / 1000, -1f);
                 }
                 break;
             default:

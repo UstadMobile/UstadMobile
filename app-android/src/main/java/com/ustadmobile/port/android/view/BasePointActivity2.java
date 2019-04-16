@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -261,6 +262,15 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     public void forceSync() {
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
         UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        runOnUiThread(() -> Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_SHORT
+        ).show());
     }
 
     /**

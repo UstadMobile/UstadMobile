@@ -400,6 +400,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="activity">Activity</string>
     <string name="sel_done_select_another_student">SEL done. You can now move to another student</string>
     <string name="sort_by_name">Sort by name</string>
+    <string name="sort_by_name_asc">name (ascending)</string>
+    <string name="sort_by_name_desc">name (descending)</string>
     <string name="sort_by_attendance_asc">Sort by attendance(high to low)</string>
     <string name="sort_by_attendance_desc">Sort by attendance(low to high)</string>
     <string name="sort_by_text">Sort by</string>
@@ -536,8 +538,19 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="view_class">View class</string>
     <string name="view_student">View student</string>
     <string name="sync">Sync</string>
-    <string name="force_sync">Force sync</string>
+    <string name="force_sync">Refresh</string>
     <string name="not_recorded">Not recorded</string>
+    <string name="number_of_classes">Classes</string>
+
+    <string name="dropout_reason_other_ngo">Other NGO</string>
+    <string name="dropout_reason_move">Move</string>
+    <string name="dropout_reason_cry">Cry</string>
+    <string name="dropout_reason_sickness">Sickness</string>
+    <string name="dropout_reason_parents_refuse_permission">Parents refuse permission</string>
+    <string name="dropout_reason_public_school">Public school</string>
+    <string name="dropout_reason_transportation">Transportation</string>
+    <string name="dropout_reason_personal_issues">Personal issues</string>
+    <string name="dropout_reason_other">Other</string>
 
 
     <string name="onboarding_get_started_label">Get Started</string>

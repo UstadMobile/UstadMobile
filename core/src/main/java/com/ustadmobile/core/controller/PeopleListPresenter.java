@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
@@ -25,6 +27,10 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
+import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_ATTENDANCE_DESC;
+import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_ATTENDANCE_ASC;
+import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_NAME_ASC;
+import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_NAME_DESC;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
 import static com.ustadmobile.lib.db.entities.Role.PERMISSION_PERSON_INSERT;
@@ -45,6 +51,9 @@ public class PeopleListPresenter
 
     private Long loggedInPersonUid = 0L;
 
+    String queryParam = "%";
+    private Hashtable<Integer, Integer> idToOrderInteger;
+
     public PeopleListPresenter(Object context, Hashtable arguments, PeopleListView view) {
         super(context, arguments, view);
 
@@ -62,22 +71,71 @@ public class PeopleListPresenter
 
         personWithEnrollmentUmProvider = repository.getPersonDao()
                 .findAllPeopleWithEnrollment();
-        setPeopleProviderToView();
+        updateProviderToView();
+
+        idToOrderInteger = new Hashtable<>();
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        updateSortSpinnerPreset();
 
         getLoggedInPerson();
 
         checkPermissions();
     }
 
-    public void updateProviderWithSearch(String searchValue){
-        String queryParam = "%" + searchValue + "%";
-        personWithEnrollmentUmProvider = repository.getPersonDao()
-                .findAllPeopleWithEnrollmentBySearch(queryParam);
+    public void updateProviderToView(){
         setPeopleProviderToView();
     }
 
+    public void updateProviderWithSearch(String searchValue){
+        queryParam = "%" + searchValue + "%";
+        personWithEnrollmentUmProvider = repository.getPersonDao()
+                .findAllPeopleWithEnrollmentBySearch(queryParam);
+        updateProviderToView();
+    }
+
+
+    /**
+     * Common method to convert Array List to String Array
+     *
+     * @param presetAL The array list of string type
+     * @return  String array
+     */
+    private String[] arrayListToStringArray(ArrayList<String> presetAL){
+        Object[] objectArr = presetAL.toArray();
+        String[] strArr = new String[objectArr.length];
+        for(int j = 0 ; j < objectArr.length ; j ++){
+            strArr[j] = (String) objectArr[j];
+        }
+        return strArr;
+    }
+
+    /**
+     * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
+     * defined within this method and will automatically update the sort options without any
+     * database call.
+     */
+    private void updateSortSpinnerPreset(){
+        ArrayList<String> presetAL = new ArrayList<>();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        idToOrderInteger = new Hashtable<>();
+
+        presetAL.add(impl.getString(MessageID.sort_by_name_asc, getContext()));
+        idToOrderInteger.put( presetAL.size(), SORT_ORDER_NAME_ASC);
+        presetAL.add(impl.getString(MessageID.sort_by_name_desc, getContext()));
+        idToOrderInteger.put( presetAL.size(), SORT_ORDER_NAME_DESC);
+
+//        presetAL.add(impl.getString(MessageID.attendance_high_to_low, getContext()));
+//        idToOrderInteger.put( presetAL.size(), SORT_ORDER_ATTENDANCE_DESC);
+//        presetAL.add(impl.getString(MessageID.attendance_low_to_high, getContext()));
+//        idToOrderInteger.put(presetAL.size(), SORT_ORDER_ATTENDANCE_ASC);
+
+        String[] sortPresets = arrayListToStringArray(presetAL);
+
+        view.updateSortSpinner(sortPresets);
+    }
     /**
      * Gets logged in person and observes it.
      */
@@ -204,5 +262,45 @@ public class PeopleListPresenter
         //No secondary action for every item here.
     }
 
+
+    public void handleChangeSortOrder(int posiiton){
+        posiiton = posiiton + 1;
+        if(idToOrderInteger.containsKey(posiiton)){
+            int sortCode = idToOrderInteger.get(posiiton);
+            getAndSetProvider(sortCode);
+        }
+    }
+
+    /**
+     * This method updates the Class List provider based on the sort order flag selected.
+     * Every order has a corresponding order by change in the database query where this method
+     * reloads the class list provider.
+     *
+     * @param order The order selected.
+     */
+    private void getAndSetProvider(int order){
+        switch (order){
+
+            case SORT_ORDER_NAME_DESC:
+                personWithEnrollmentUmProvider = repository.getPersonDao()
+                        .findAllPeopleWithEnrollmentSortNameDesc();
+                break;
+            case SORT_ORDER_ATTENDANCE_ASC:
+                personWithEnrollmentUmProvider = repository.getPersonDao()
+                        .findAllPeopleWithEnrollmentBySearch(queryParam);
+                break;
+            case SORT_ORDER_ATTENDANCE_DESC:
+                personWithEnrollmentUmProvider = repository.getPersonDao()
+                        .findAllPeopleWithEnrollmentBySearch(queryParam);
+                break;
+            case SORT_ORDER_NAME_ASC:
+                personWithEnrollmentUmProvider = repository.getPersonDao()
+                        .findAllPeopleWithEnrollmentSortNameAsc();
+                break;
+        }
+
+        updateProviderToView();
+
+    }
 
 }

@@ -137,10 +137,13 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
     @UmUpdate
     public abstract void updateAsync(Clazz entity, UmCallback<Integer> resultObject);
 
+    @UmQuery("UPDATE Clazz SET clazzActive = 0 WHERE clazzUid = :clazzUid")
+    public abstract void inactivateClazz(long clazzUid, UmCallback<Integer> resultCallback);
+
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
-                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
+                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberActive = 1)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
 
     @UmQuery(CLAZZ_WHERE +
@@ -392,7 +395,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid " +
             " FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = " +
             " (SELECT clazzLocationUid FROM Clazz WHERE clazzUid = :clazzUid)))) " +
-            "AND Role.roleUid = :roleUid")
+            "AND Role.roleUid = :roleUid AND Person.personUid != null")
     public abstract List<Person> findPeopleWithRoleAssignedToClazz(long clazzUid, long roleUid);
 
 

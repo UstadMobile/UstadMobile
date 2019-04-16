@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
+import java.awt.geom.QuadCurve2D;
 import java.util.List;
 import java.util.Random;
 
@@ -79,24 +80,34 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmQuery("SELECT * From Person")
     public abstract UmProvider<Person> findAllPeopleAsync();
 
-    @UmQuery("SELECT Person.* , (0) AS clazzUid, " +
+
+    public static final String QUERY_FIND_ALL = "SELECT Person.* , (0) AS clazzUid, " +
             " (0) AS attendancePercentage, " +
             " (0) AS clazzMemberRole, " +
             " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
             " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
             " DESC LIMIT 1) AS personPictureUid, " +
-            " (0) AS enrolled FROM Person WHERE Person.active = 1 ")
+            " (0) AS enrolled FROM Person WHERE Person.active = 1 ";
+
+    public static final String QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC ";
+    public static final String QUERY_SORT_BY_NAME_DESC = " ORDER BY Person.lastName DESC ";
+    public static final String QUERY_SORT_BY_ATTENDANCE_ASC = " ORDER BY attendancePercentage ASC ";
+    public static final String QUERY_SORT_BY_ATTENDANCE_DESC = " ORDER BY attendancePercentage DESC ";
+
+    public static final String QUERY_SEARCH_BIT =
+            " AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery ";
+
+    @UmQuery(QUERY_FIND_ALL)
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollment();
 
+    @UmQuery(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
+    public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentSortNameAsc();
 
-    @UmQuery("SELECT Person.* , (0) AS clazzUid, " +
-            " (0) AS attendancePercentage, " +
-            " (0) AS clazzMemberRole, " +
-            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
-            " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
-            " DESC LIMIT 1) AS personPictureUid, " +
-            " (0) AS enrolled FROM Person WHERE Person.active = 1 " +
-            " AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery " )
+    @UmQuery(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
+    public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentSortNameDesc();
+
+
+    @UmQuery(QUERY_FIND_ALL + QUERY_SEARCH_BIT )
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentBySearch(String searchQuery);
 
     @UmQuery("SELECT * FROM Person WHERE admin = 1")

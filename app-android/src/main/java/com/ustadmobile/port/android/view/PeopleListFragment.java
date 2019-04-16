@@ -11,6 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.PeopleListPresenter;
@@ -18,6 +21,8 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.PeopleListView;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
@@ -30,6 +35,9 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
     private RecyclerView mRecyclerView;
     private PeopleListPresenter mPresenter;
     private FloatingTextButton fab;
+
+    Spinner sortSpinner;
+    String[] sortSpinnerPresets;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -70,14 +78,27 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         fab = rootContainer.findViewById(R.id.fragment_people_list_fab);
+        sortSpinner = rootContainer.findViewById(R.id.fragment_people_list_sort_spinner2);
 
         //set up Presenter
-        mPresenter = new PeopleListPresenter(this,
+        mPresenter = new PeopleListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
 
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
+
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeSortOrder(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         return rootContainer;
     }
@@ -128,5 +149,14 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
             fab.setEnabled(show);
         });
 
+    }
+
+    @Override
+    public void updateSortSpinner(String[] presets) {
+        this.sortSpinnerPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
+                R.layout.spinner_item, sortSpinnerPresets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
     }
 }

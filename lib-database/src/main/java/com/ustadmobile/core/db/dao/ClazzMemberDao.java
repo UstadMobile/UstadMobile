@@ -452,4 +452,6 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
         }
     }
 
+    @UmQuery("UPDATE ClazzMember SET clazzMemberActive = 0 WHERE clazzMemberPersonUid = :personUid")
+    public abstract void inactivateClazzMemberForPerson(long personUid, UmCallback<Integer> resultCallback);
 }

@@ -376,7 +376,45 @@ public abstract class ClazzLogAttendanceRecordDao implements
                                                                    UmCallback<List<Long>> callback);
 
 
-    @UmQuery("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, ClazzLog.logDate, " +
+    public static final String QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE =
+            " SELECT " +
+            "  clazzlog.clazzloguid AS clazzLogUid, clazzlog.done, clazzlog.logdate, " +
+            "  (  SELECT ( SUM(CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = 1 THEN 1 ELSE 0 END) " +
+            "      *1.0/Count(*)   )  " +
+            "    FROM ClazzLogAttendanceRecord WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "  ) AS attendancePercentage, " +
+            "  (  SELECT ( SUM(CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = 2 THEN 1 ELSE 0 END) " +
+            "      *1.0/Count(*)   )  " +
+            "      FROM ClazzLogAttendanceRecord WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "  ) AS absentPercentage, " +
+            "  (  SELECT (  SUM(CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = 4 THEN 1 ELSE 0 END) " +
+            "      *1.0/Count(*) )  " +
+            "    FROM ClazzLogAttendanceRecord WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "  ) AS partialPercentage," +
+            "  (  SELECT (  SUM(CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = 1 AND person.gender = " + Person.GENDER_FEMALE + " THEN 1 ELSE 0 END) " +
+            "      *1.0/Count(*)  )  " +
+            "    FROM ClazzLogAttendanceRecord " +
+            "    LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "    LEFT JOIN person ON clazzmember.clazzmemberpersonuid = person.personuid " +
+            "    WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "  ) AS femaleAttendance, " +
+            "  (  SELECT ( SUM(CASE WHEN ClazzLogAttendanceRecord.attendanceStatus = 1 AND person.gender = " + Person.GENDER_MALE + " THEN 1 ELSE 0 END) " +
+            "      *1.0/Count(*) )  " +
+            "    FROM ClazzLogAttendanceRecord  " +
+            "    LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            "    LEFT JOIN person ON clazzmember.clazzmemberpersonuid = person.personuid " +
+            "    WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "  ) AS maleAttendance,  " +
+            "  ( :clazzUid  ) AS clazzUid " +
+            " FROM ClazzLog  " +
+            "  LEFT JOIN ClazzLogAttendanceRecord ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "WHERE  clazzlog.clazzlogclazzuid = :clazzUid " +
+            "   AND ClazzLog.logDate > :fromDate " +
+            "   AND ClazzLog.logDate < :toDate " +
+            "GROUP  BY ( clazzlog.logdate )  ";
+
+
+    public static final String QUERY_ATTNEDANCE_OLD = "select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, ClazzLog.logDate, " +
             " sum(case when attendanceStatus = 1 then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
             " sum(case when attendanceStatus = 2 then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
             " sum(case when attendanceStatus = 4 then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
@@ -393,11 +431,14 @@ public abstract class ClazzLogAttendanceRecordDao implements
             "ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid " +
 
-            " WHERE ClazzLog.done = 1 " +
-            " AND ClazzLog.logDate > :fromDate " +
+            " WHERE " +
+            " ClazzLog.logDate > :fromDate " +
             " AND ClazzLog.logDate < :toDate " +
             " AND ClazzLog.clazzLogClazzUid = :clazzUid " +
-            "group by (ClazzLog.logDate)")
+            " group by (ClazzLog.logDate)";
+
+
+    @UmQuery(QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE)
     public abstract void findDailyAttendanceByClazzUidAndDateAsync( long clazzUid, long fromDate,
                             long toDate, UmCallback<List<DailyAttendanceNumbers>> resultObject);
 
@@ -498,16 +539,16 @@ public abstract class ClazzLogAttendanceRecordDao implements
     @UmQuery("select ClazzLogAttendanceRecordClazzLogUid as clazzLogUid, " +
             " ClazzLog.logDate, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ATTENDED +
-            " then 1 else 0 end) * 1.0 / COUNT(*) as attendancePercentage, " +
+            " then 1 else 0 end) * 0.5 / SUM(CASE WHEN clazzMember.role = 1 THEN 1 else 0 end) as attendancePercentage, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_ABSENT +
             " then 1 else 0 end) * 1.0 / COUNT(*) as absentPercentage, " +
             " sum(case when attendanceStatus = " + ClazzLogAttendanceRecord.STATUS_PARTIAL +
             " then 1 else 0 end) * 1.0 / COUNT(*) as partialPercentage, " +
             " ClazzLog.clazzLogClazzUid as clazzUid, " +
             " sum(case when attendanceStatus = 1 and Person.gender = " + Person.GENDER_FEMALE +
-            " then 1 else 0 end) * 1.0 / COUNT(*) as femaleAttendance, " +
+            " then 1 else 0 end) * 1.0 / SUM(CASE WHEN person.gender = 1 AND clazzMember.role = 1 THEN 1 else 0 end) as femaleAttendance, " +
             " sum(case when attendanceStatus = 1 and Person.gender =  " + Person.GENDER_MALE +
-            " then 1 else 0 end) * 1.0/COUNT(*) as maleAttendance, " +
+            " then 1 else 0 end) * 1.0/ SUM(CASE WHEN person.gender = 2 AND clazzMember.role = 1 THEN 1 else 0 end) as maleAttendance, " +
             " ClazzLog.clazzLogUid as clazzLogUid " +
             " from ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON " +

@@ -9,6 +9,7 @@ import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -89,6 +90,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public static final int DEFAULT_DIVIDER_HEIGHT = 2;
     public static final int DEFAULT_TEXT_PADDING_RIGHT = 4;
     public static final String ADD_PERSON_ICON = "ic_person_add_black_24dp";
+    public static final int ADD_PERSON_ICON_WIDTH = 24;
     public static final int HEADER_TEXT_SIZE = 12;
     public static final String COLOR_GREY= "#B3B3B3";
 
@@ -148,6 +150,10 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         }
     }
 
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
     /**
      * Clears all fields.
      */
@@ -180,44 +186,30 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                              int labelId, String iconName, boolean editMode,
                              LinearLayout thisLinearLayout, Object thisValue){
 
-        Locale currentLocale = getResources().getConfiguration().locale;
-
-        //Set icon if not present (for margins to align ok)
-        if(iconName == null || iconName.length() == 0) iconName = ADD_PERSON_ICON;
-
-        LinearLayout.LayoutParams dividerLayout =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                        DEFAULT_DIVIDER_HEIGHT);
-
         LinearLayout.LayoutParams parentParams =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
 
+        //Calculate the width of the screen.
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
+        int displayWidth = displayMetrics.widthPixels;
 
-        ViewGroup.LayoutParams editTextParams =
-                new LinearLayout.LayoutParams(
-                        width,
-                        ViewGroup.LayoutParams.MATCH_PARENT);
+        //Horizontal layout: Icon Area space + field (Horizontal)
+        LinearLayout fieldHLayout = new LinearLayout(this);
+        fieldHLayout.setLayoutParams(parentParams);
+        fieldHLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        TextInputLayout.LayoutParams tilp = new TextInputLayout.LayoutParams(width,
-                TextInputLayout.LayoutParams.MATCH_PARENT);
-
-        LinearLayout hll = new LinearLayout(this);
-        hll.setLayoutParams(parentParams);
-        hll.setOrientation(LinearLayout.HORIZONTAL);
-
-        TextInputLayout til = new TextInputLayout(this);
-
-        View editView = null;
+        View fieldView = null;
 
         switch(fieldType) {
 
             case FIELD_TYPE_HEADER:
                 //Add The Divider
                 View divider = new View(this);
+                LinearLayout.LayoutParams dividerLayout =
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                                DEFAULT_DIVIDER_HEIGHT);
                 divider.setLayoutParams(dividerLayout);
                 divider.setBackgroundColor(Color.parseColor(COLOR_GREY));
                 thisLinearLayout.addView(divider);
@@ -287,32 +279,54 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
             case FIELD_TYPE_PHONE_NUMBER:
             case FIELD_TYPE_DATE:
 
-                //Add the icon
+
+                //width of editText to be width of screen - (icon put left right padding)
+                int pixelOffset = dpToPx(ADD_PERSON_ICON_WIDTH + (2*DEFAULT_PADDING));
+                int widthWithPadding = displayWidth - pixelOffset;
+
+                //The field is an input type. So we are gonna add a TextInputLayout:
+                TextInputLayout fieldTextInputLayout = new TextInputLayout(this);
+                //Edit Text is inside a TextInputLayout
+                TextInputLayout.LayoutParams textInputLayoutParams =
+                        new TextInputLayout.LayoutParams(widthWithPadding,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+                //Add the icon to the Horizontal layout
+                //Set icon if not present (for margins to align ok)
+                if(iconName == null || iconName.length() == 0) iconName = ADD_PERSON_ICON;
+
                 int iconResId = getResourceId(iconName, "drawable", getPackageName());
-                //ImageView icon = new ImageView(this);
                 AppCompatImageView icon = new AppCompatImageView(this);
                 if(iconName.equals(ADD_PERSON_ICON)){
                     icon.setImageAlpha(0);
-                }
+                }//else don't set the icon. Let it be blank
                 icon.setImageResource(iconResId);
                 icon.setPadding(DEFAULT_PADDING,0,DEFAULT_TEXT_PADDING_RIGHT,0);
-                hll.addView(icon);
+                fieldHLayout.addView(icon);
 
-                EditText et = new EditText(this);
-
-                et.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-                et.setLayoutParams(editTextParams);
+                //The EditText next to the icon
+                EditText fieldEditText = new EditText(this);
+                fieldEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+                ViewGroup.LayoutParams editTextParams =
+                        new LinearLayout.LayoutParams(
+                                widthWithPadding,
+                                ViewGroup.LayoutParams.MATCH_PARENT);
+                fieldEditText.setLayoutParams(editTextParams);
                 if (label != null) {
-                    et.setHint(label);
+                    fieldEditText.setHint(label);
                 }
                 if (thisValue != null) {
-                    et.setText(thisValue.toString());
+                    fieldEditText.setText(thisValue.toString());
                 }
                 if (fieldType == FIELD_TYPE_PHONE_NUMBER) {
-                    et.setInputType(InputType.TYPE_CLASS_PHONE);
+                    fieldEditText.setInputType(InputType.TYPE_CLASS_PHONE);
                 }
                 if (fieldType == FIELD_TYPE_DATE) {
 
+                    //Get locale
+                    Locale currentLocale = getResources().getConfiguration().locale;
+
+                    //Get calendar instance
                     Calendar myCalendar = Calendar.getInstance();
 
                     //Date pickers's on click listener - sets text
@@ -321,13 +335,13 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                         myCalendar.set(Calendar.MONTH, month);
                         myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                        et.setText(UMCalendarUtil.getPrettyDateFromLong(
+                        fieldEditText.setText(UMCalendarUtil.getPrettyDateFromLong(
                                 myCalendar.getTimeInMillis(), currentLocale));
                         mPresenter.handleFieldEdited(fieldUid, myCalendar.getTimeInMillis());
 
                     };
 
-                    et.setFocusable(false);
+                    fieldEditText.setFocusable(false);
 
                     //date listener - opens a new date picker.
                     DatePickerDialog dateFieldPicker = new DatePickerDialog(
@@ -335,16 +349,16 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                             myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
                     dateFieldPicker.getDatePicker().setMaxDate(System.currentTimeMillis());
 
-                    et.setOnClickListener(v -> dateFieldPicker.show());
+                    fieldEditText.setOnClickListener(v -> dateFieldPicker.show());
 
 
                 }
                 if (fieldType == FIELD_TYPE_TEXT) {
-                    et.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                    fieldEditText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 }
 
                 if(fieldType != FIELD_TYPE_DATE){
-                    et.addTextChangedListener(new TextWatcher() {
+                    fieldEditText.addTextChangedListener(new TextWatcher() {
                         @Override
                         public void beforeTextChanged(CharSequence s, int start,
                                                       int count, int after) {}
@@ -361,9 +375,9 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 }
 
                 
-                til.addView(et, tilp);
+                fieldTextInputLayout.addView(fieldEditText, textInputLayoutParams);
 
-                editView = til;
+                fieldView = fieldTextInputLayout;
                 //End of TEXT
 
                 break;
@@ -374,11 +388,11 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 break;
         }
 
-        if(editView != null) {
-            hll.addView(editView);
+        if(fieldView != null) {
+            fieldHLayout.addView(fieldView);
         }
 
-        mLinearLayout.addView(hll);
+        mLinearLayout.addView(fieldHLayout);
 
     }
 

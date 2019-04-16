@@ -89,6 +89,7 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.PersonListSearchView;
 import com.ustadmobile.core.view.PersonPictureDialogView;
+import com.ustadmobile.core.view.RecordDropoutDialogView;
 import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.ReportAtRiskStudentsView;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
@@ -148,6 +149,7 @@ import com.ustadmobile.port.android.view.PersonDetailEnrollClazzActivity;
 import com.ustadmobile.port.android.view.PersonEditActivity;
 import com.ustadmobile.port.android.view.PersonListSearchActivity;
 import com.ustadmobile.port.android.view.PersonPictureDialogFragment;
+import com.ustadmobile.port.android.view.RecordDropoutDialogFragment;
 import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.ReportAtRiskStudentsActivity;
 import com.ustadmobile.port.android.view.ReportAttendanceGroupedByThresholdsActivity;
@@ -290,6 +292,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(PersonListSearchView.VIEW_NAME, PersonListSearchActivity.class);
         viewNameToAndroidImplMap.put(WebChunkView.VIEW_NAME, WebChunkActivity.class);
         viewNameToAndroidImplMap.put(VideoPlayerView.VIEW_NAME, VideoPlayerActivity.class);
+        viewNameToAndroidImplMap.put(RecordDropoutDialogView.VIEW_NAME, RecordDropoutDialogFragment.class);
     }
 
     /**

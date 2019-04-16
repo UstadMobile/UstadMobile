@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="8dp" />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/item_clazz_list_enroll_person_icon"
         android:layout_width="15dp"
         android:layout_height="15dp"
@@ -46,13 +46,14 @@
         android:id="@+id/item_clazz_list_enroll_person_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/enroll_in_class"
+        android:buttonTint="@color/primary"
+        android:textColor="@color/text_primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginRight="8dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
