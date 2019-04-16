@@ -43,6 +43,7 @@ public class TestContainerManager {
                 SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
         db = UmAppDatabase.getInstance(PlatformTestUtil.getTargetContext());
         dbRepo = db.getRepository("http://localhost/dummy/", "");
+        db.clearAllTables();
 
         tmpDir = UmFileUtilSe.makeTempDir("TestContainerManager", "tmpdir");
 
