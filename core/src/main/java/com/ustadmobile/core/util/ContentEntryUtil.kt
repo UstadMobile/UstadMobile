@@ -56,7 +56,8 @@ object ContentEntryUtil {
 
         if (entryStatus.contentEntryStatus != null && entryStatus.contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
 
-            dbRepo.containerDao.getMostRecentContainerForContentEntryAsync(entryStatus.contentEntryUid, object : UmCallback<Container> {
+            dbRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entryStatus.contentEntryUid,
+                    object : UmCallback<Container> {
                 override fun onSuccess(result: Container?) {
                     val args = HashMap<String, String>()
                     var viewName: String? = null
