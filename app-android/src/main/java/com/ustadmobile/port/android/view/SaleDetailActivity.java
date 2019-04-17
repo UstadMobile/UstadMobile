@@ -171,36 +171,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
             playIB.setVisibility(View.INVISIBLE);
 
 
-//            if(fromFile){
-//                File audioFile = new File(saleVoiceNoteFilePath);
-//                if(audioFile.exists()){
-//                    FileInputStream is = null;
-//                    try {
-//                        is = new FileInputStream(audioFile);
-//                        player.setDataSource(is.getFD());
-//                        player.prepare();
-//                        player.start();
-//
-//                        stopIB.setVisibility(View.VISIBLE);
-//                        playIB.setVisibility(View.INVISIBLE);
-//                    } catch (FileNotFoundException e1) {
-//                        e1.printStackTrace();
-//                    } catch (IOException e1) {
-//                        e1.printStackTrace();
-//                    }
-//
-//                }
-//            }else {
-//                player.setDataSource(saleVoiceNoteFilePath);
-//                player.prepare();
-//                player.start();
-//
-//                stopIB.setVisibility(View.VISIBLE);
-//                playIB.setVisibility(View.INVISIBLE);
-//            }
-
-
-
         } catch (IOException e) {
             e.printStackTrace();
 
