@@ -47,6 +47,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name='about'>About</string>
     <string name='download_for'>Download for...</string>
     <string name='refresh'>Refresh</string>
+    <string name="last_synced">Last synced </string>
+    <string name="syncing">Syncing..</string>
     <string name='download_all'>Download all</string>
     <string name='nothing_selected'>Nothing selected!</string>
     <string name='next'>Next</string>

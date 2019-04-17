@@ -81,6 +81,13 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private String permission;
 
 
+    public void sendToast(String message) {
+        runOnUiThread(() -> Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_SHORT
+        ).show());
+    }
 
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
