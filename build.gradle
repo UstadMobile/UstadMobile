@@ -29,12 +29,12 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.97.8"
+version = "0.97.9"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 185
+    ustadVersionCode = 187
 
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -81,7 +81,8 @@ ext {
     version_android_lifecycle = "1.1.1"
     version_android_room = "1.1.1"
     version_android_multidex = "1.0.3"
-    version_android_workmanager = "1.0.0-rc02"
+    version_androidx_workmanager = "2.0.1"
+    version_android_workmanager = "1.0.1"
     version_android_paging = "1.0.1"
     version_android_constraint_layout = "1.1.3"
     version_android_flexbox = "0.3.2"
@@ -101,7 +102,6 @@ ext {
     version_compressor = "2.1.0"
     version_mpandroidchart = "v3.0.3"
     version_tellh_recyclertreeview = "1.2.0"
-    version_work_manager = "1.0.0-rc02"
 
     version_picasso = "2.71828"
     version_crystalrangeseekbar = "1.1.3"

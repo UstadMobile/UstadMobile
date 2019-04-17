@@ -300,6 +300,7 @@ dependencies {
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
+    //implementation "androidx.work:work-runtime:$version_androidx_workmanager"
     androidTestImplementation project(':core-tests')
 
 
@@ -383,8 +384,6 @@ dependencies {
     //Recycler tree view library
     implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
 
-    //Work manager
-    implementation "android.arch.work:work-runtime:$version_work_manager"
     testImplementation "junit:junit:$version_junit"
 
     //Range seekbar by Crystal
