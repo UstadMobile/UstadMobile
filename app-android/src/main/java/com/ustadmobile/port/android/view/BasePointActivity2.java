@@ -327,7 +327,7 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
                             syncing = false;
                             checkSyncFinished();
                         }else{
-                            updateSyncing();
+                            //updateSyncing();
                         }
                     }
                 });
