@@ -16,13 +16,23 @@ import com.ustadmobile.lib.db.entities.Person;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.Login2View.ARG_STARTSYNCING;
+
 public class BasePointActivity2Presenter extends UstadBaseController<BasePointView2> {
 
     //Database repository
     UmAppDatabase repository;
 
+    private boolean syncStarted = false;
+
     public BasePointActivity2Presenter(Object context, Hashtable arguments, BasePointView2 view) {
         super(context, arguments, view);
+
+        if(getArguments() != null && getArguments().containsKey(ARG_STARTSYNCING)){
+            if(getArguments().get(ARG_STARTSYNCING).equals("true")){
+                syncStarted = true;
+            }
+        }
     }
 
     /**
@@ -129,5 +139,13 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
                 exception.printStackTrace();
             }
         });
+    }
+
+    public boolean isSyncStarted() {
+        return syncStarted;
+    }
+
+    public void setSyncStarted(boolean syncStarted) {
+        this.syncStarted = syncStarted;
     }
 }

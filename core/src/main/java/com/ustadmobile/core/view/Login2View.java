@@ -4,6 +4,8 @@ public interface Login2View extends UstadView{
 
     String VIEW_NAME = "Login2";
 
+    String ARG_STARTSYNCING="argStatSync";
+
     void setInProgress(boolean inProgress);
 
     void setErrorMessage(String errorMessage);

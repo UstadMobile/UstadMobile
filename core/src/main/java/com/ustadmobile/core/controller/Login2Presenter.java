@@ -12,6 +12,8 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
+import static com.ustadmobile.core.view.Login2View.ARG_STARTSYNCING;
+
 public class Login2Presenter extends UstadBaseController<Login2View> {
 
     public static final String ARG_NEXT = "next";
@@ -63,8 +65,9 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
                     UmAccountManager.setActiveAccount(result, getContext());
 
                     view.forceSync();
-
-                    systemImpl.go(mNextDest, getContext());
+                    Hashtable<String, String> args = new Hashtable<>();
+                    args.put(ARG_STARTSYNCING, "true");
+                    systemImpl.go(mNextDest, args, getContext());
                 }else {
                     view.runOnUiThread(() -> {
                         view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,

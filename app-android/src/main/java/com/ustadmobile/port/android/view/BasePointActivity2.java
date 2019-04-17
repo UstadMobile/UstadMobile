@@ -171,6 +171,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         // Setting the very 1st item as default home screen.
         bottomNavigation.setCurrentItem(0);
 
+        syncing = mPresenter.isSyncStarted();
+
         //Observe syncing
         observeSyncing();
 

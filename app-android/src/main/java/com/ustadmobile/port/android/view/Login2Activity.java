@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.view;
 
-import android.arch.lifecycle.Observer;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -14,7 +12,6 @@ import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.work.ExistingWorkPolicy;
