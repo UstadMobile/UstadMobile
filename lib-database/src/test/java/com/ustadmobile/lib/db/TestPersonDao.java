@@ -134,7 +134,7 @@ public class TestPersonDao extends AbstractDaoTest{
 
         clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
 
-        Assert.assertEquals("After local update by account with update permission granted" +
+        Assert.assertEquals("After local updateState by account with updateState permission granted" +
                         " by clazz, person name is updated on server", newFirstname,
                 serverDb.getPersonDao().findByUid(myStudent.getPersonUid()).getFirstNames());
     }
@@ -153,7 +153,7 @@ public class TestPersonDao extends AbstractDaoTest{
 
         clientDb.syncWith(clientRepo, accountPerson.getPersonUid(), 100, 100);
 
-        Assert.assertEquals("After local update by account with update permission granted" +
+        Assert.assertEquals("After local updateState by account with updateState permission granted" +
                         " by clazz, person name is updated on server", oldFirstname,
                 serverDb.getPersonDao().findByUid(myStudent.getPersonUid()).getFirstNames());
     }

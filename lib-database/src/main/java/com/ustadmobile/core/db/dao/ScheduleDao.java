@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 @UmDao(inheritPermissionFrom = ClazzDao.class,
 inheritPermissionForeignKey = "scheduleClazzUid",
@@ -105,6 +106,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      * time.
      *
      * Note: We always create ClazzLogs in the TimeZone.
+     * Note 2: the startTime and endTime are times in the phone's timezone.
      *
      * @param startTime             between start time
      * @param endTime               AND end time
@@ -114,7 +116,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
     public void
     createClazzLogs(long startTime, long endTime, long accountPersonUid, UmAppDatabase db) {
         //This method will usually be called from the Workmanager in Android every day. Making the
-        // start time 00:00 and end tim 23:59
+        // start time 00:00 and end tim 23:59 : Note: This is the device's timzone. (not class)
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTimeInMillis(startTime);
         UMCalendarUtil.normalizeSecondsAndMillis(startCalendar);
@@ -133,10 +135,13 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
         for(ClazzWithTimeZone clazz : clazzList) {
             //Skipp classes that have no time zone
             if(clazz.getTimeZone() == null) {
-                System.err.println("Warning: cannot create schedules for clazz" +
+                System.err.println("Warning: cannot create schedules for clazz" + clazz.getClazzName() + ", uid:" +
                         clazz.getClazzUid() + " as it has no timezone");
                 continue;
             }
+
+            String timeZone = clazz.getTimeZone();
+
 
             //Get a list of schedules for the classes
             List<Schedule> clazzSchedules = findAllSchedulesByClazzUidAsList(clazz.getClazzUid());
@@ -161,13 +166,13 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         dayOfWeek = today;
                     }
                     //TODO: Associate with weekend feature in the future
-                    if(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY){
+                    if(dayOfWeek == Calendar.SUNDAY){
                         //skip
-                        System.out.println("Skipping");
+                        System.out.println("Today is a weekend. Skipping ClazzLog creation for today.");
 
                     }else if(checkGivenDateAHolidayForClazz(startCalendar.getTimeInMillis(),
                             clazz.getClazzUid())){
-                        //Its a holiday. Skup
+                        //Its a holiday. Skip
                         System.out.println("Skipping holiday");
 
                     } else {
@@ -175,7 +180,7 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         //This will get the next schedule for that day. For the same day, it will
                         //return itself if incToday is set to true, else it will go to next week.
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                                startCalendar, clazz.getTimeZone(),dayOfWeek, incToday);
+                                startCalendar, timeZone ,dayOfWeek, incToday);
 
                         //Set to 00:00
                         nextScheduleOccurence.set(Calendar.HOUR_OF_DAY, 0);
@@ -193,11 +198,24 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                 }else if(schedule.getScheduleFrequency() == Schedule.SCHEDULE_FREQUENCY_WEEKLY) {
 
                     if(checkGivenDateAHolidayForClazz(startCalendar.getTimeInMillis(),
-                            clazz.getClazzUid())){
-                        //Its a holiday. Skup
+                            clazz.getClazzUid())) {
+                        //Its a holiday. Skip it.
                         System.out.println("Skipping holiday");
+                    }else{
 
-                    } else {
+
+                    if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == schedule.getScheduleDay()){
+                        incToday = true;
+                    }else{
+                        incToday = false;
+                    }
+
+                    //Get the day of next occurence.
+                    nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                            startCalendar, timeZone, schedule.getScheduleDay(), incToday);
+
+                    //Set the day's timezone to Clazz
+                    nextScheduleOccurence.setTimeZone(TimeZone.getTimeZone(timeZone));
 
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                                 startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
@@ -214,6 +232,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         nextScheduleOccurence.set(Calendar.SECOND, 0);
                         nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
                     }
+
+
                 }
 
                 if (nextScheduleOccurence != null && nextScheduleOccurence.before(endCalendar)) {
@@ -268,8 +288,13 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
      *  automatically.
      *  Called when a new Schedule is created in AddScheduleDialogPresenter , AND
      *  Called by ClazzLogScheduleWorker work manager to be run everyday 00:00
+     *
+     *  The method creates ClazzLog from the device's time zone.
+     *  ie: today is device's 00:00 to device's 23:59.
      */
     public void createClazzLogsForToday(long accountPersonUid, UmAppDatabase db) {
+
+        //Note this calendar is created on the device's time zone.
         Calendar dayCal = Calendar.getInstance();
         dayCal.set(Calendar.HOUR_OF_DAY, 0);
         dayCal.set(Calendar.MINUTE, 0);

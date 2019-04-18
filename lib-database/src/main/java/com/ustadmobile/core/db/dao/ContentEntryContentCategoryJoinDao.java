@@ -7,6 +7,8 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class ContentEntryContentCategoryJoinDao
@@ -18,5 +20,10 @@ public abstract class ContentEntryContentCategoryJoinDao
 
     @UmUpdate
     public abstract void update(ContentEntryContentCategoryJoin entity);
+
+    @UmQuery("SELECT ContentEntryContentCategoryJoin.* FROM ContentEntryContentCategoryJoin " +
+            "LEFT JOIN ContentEntry ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContentEntry.publik")
+    public abstract List<ContentEntryContentCategoryJoin> getPublicContentEntryContentCategoryJoins();
 
 }

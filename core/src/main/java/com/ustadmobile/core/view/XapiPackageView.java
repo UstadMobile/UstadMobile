@@ -15,7 +15,7 @@ public interface XapiPackageView extends UstadView{
 
     void loadUrl(String url);
 
-    void mountZip(String zipUri, UmCallback callback);
+    void mountZip(String zipUri, UmCallback<String> callback);
 
     XapiPackagePresenter getPresenter();
 

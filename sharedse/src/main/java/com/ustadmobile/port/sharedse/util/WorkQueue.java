@@ -52,7 +52,7 @@ public class WorkQueue {
     public void checkQueue() {
         Runnable nextItem;
         synchronized (activeItems) {
-            while(activeItems.size() < (maxThreads -1) && (nextItem = source.nextItem()) != null) {
+            while(activeItems.size() < maxThreads && (nextItem = source.nextItem()) != null) {
                 final Runnable itemRef = nextItem;
                 Runnable runWrapper = () -> {
                     itemRef.run();

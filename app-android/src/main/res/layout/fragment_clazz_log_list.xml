@@ -15,6 +15,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
+            android:id="@+id/fragment_clazz_log_list_bar_chart_ll"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -113,18 +114,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="-32dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_ll"
-        android:layout_marginLeft="8dp" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_bar_ll" />
 
     <LinearLayout
         android:id="@+id/fragment_clazz_log_list_line_chart_selector_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
-        android:orientation="horizontal"
         android:gravity="center_horizontal"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_log_list_line_chart">
@@ -137,9 +140,9 @@
             android:layout_marginLeft="@dimen/dimen_2dp"
             android:layout_marginRight="@dimen/dimen_2dp"
             android:background="@drawable/rounded_button_selector"
-            android:textSize="12sp"
             android:text="@string/last_week"
-            android:textColor="@color/icons" />
+            android:textColor="@color/icons"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/fragment_clazz_log_list_line_chart_selector_button_thismonth"
@@ -150,8 +153,8 @@
             android:layout_marginRight="@dimen/dimen_2dp"
             android:background="@drawable/rounded_button_selector"
             android:text="@string/last_month"
-            android:textSize="12sp"
-            android:textColor="@color/icons" />
+            android:textColor="@color/icons"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/fragment_clazz_log_list_line_chart_selector_button_lastyear"

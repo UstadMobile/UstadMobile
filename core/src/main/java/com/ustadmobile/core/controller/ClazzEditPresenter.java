@@ -73,7 +73,7 @@ public class ClazzEditPresenter
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
             initFromClazz(currentClazzUid);
-        }else if(getArguments().containsKey(UstadView.ARG_NEW)){
+        }else if(getArguments().containsKey(ClazzEditView.ARG_NEW)){
             repository.getLocationDao().insertAsync(new Location("Clazz Location",
                     "Clazz Location", TimeZone.getDefault().getID()), new UmCallback<Long>() {
                 @Override
@@ -87,7 +87,9 @@ public class ClazzEditPresenter
                         }
 
                         @Override
-                        public void onFailure(Throwable exception) { exception.printStackTrace();}
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
                     });
                 }
 
@@ -111,7 +113,6 @@ public class ClazzEditPresenter
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
                 view.runOnUiThread(() -> view.updateClazzEditView(result));
-
                 holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
@@ -157,7 +158,9 @@ public class ClazzEditPresenter
         if(mOriginalClazz == null){
             mOriginalClazz = new Clazz();
         }
-        if(mOriginalClazz.getClazzHolidayUMCalendarUid() > 0){
+
+        //TODO: Change this.
+        if(mOriginalClazz.getClazzHolidayUMCalendarUid() != 0){
             selectedPosition = (int) mOriginalClazz.getClazzHolidayUMCalendarUid();
         }
 
@@ -213,10 +216,12 @@ public class ClazzEditPresenter
             mOriginalClazz = clazz;
 
         if(mUpdatedClazz == null || !mUpdatedClazz.equals(clazz)) {
-            //update class edit views
-            view.updateClazzEditView(mUpdatedClazz);
-            //Update the currently editing class object
-            mUpdatedClazz = clazz;
+            if(clazz!=null) {
+                //update class edit views
+                view.updateClazzEditView(mUpdatedClazz);
+                //Update the currently editing class object
+                mUpdatedClazz = clazz;
+            }
         }
     }
 

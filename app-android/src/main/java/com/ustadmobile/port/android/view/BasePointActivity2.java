@@ -17,16 +17,21 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointActivity2Presenter;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.BasePointView2;
+import com.ustadmobile.port.android.impl.ClazzLogScheduleWorker;
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -34,6 +39,8 @@ import java.io.File;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 
@@ -61,6 +68,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
     private PeopleListFragment peopleListFragment;
     private ReportSelectionFragment reportSelectionFragment;
     private FeedListFragment newFrag;
+
+    private long lastSyncTime;
+    private boolean syncing = false;
 
     public static final int VIEW_POSITION_POSITION_FEED = 0;
     public static final int VIEW_POSITION_POSITION_CLASSES = 1;
@@ -170,6 +180,11 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         // Setting the very 1st item as default home screen.
         bottomNavigation.setCurrentItem(0);
 
+        syncing = mPresenter.isSyncStarted();
+
+        //Observe syncing
+        observeSyncing();
+
     }
 
 
@@ -252,14 +267,88 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         else if(i == R.id.menu_basepoint_sync){
             forceSync();
         }
+        //Testing. TODO: Remove
+        else if(i == R.id.menu_testing_create_clazzlogs){
+            testClazzLogs();
+        }
+        //End of testing.
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void testClazzLogs(){
+        ClazzLogScheduleWorker.queueClazzLogScheduleWorkerTesting(60000);
+    }
+
+    public void checkSyncFinished(){
+        if(mOptionsMenu == null)
+            return;
+        if (lastSyncTime > 0) {
+            MenuItem syncItem = mOptionsMenu.findItem(R.id.menu_basepoint_sync);
+            String updatedTitle = getString(R.string.refresh) + " ("
+                    //+ getString(R.string.last_synced)
+                    + UMCalendarUtil.getPrettyTimeFromLong(lastSyncTime, null) + ")";
+            syncItem.setTitle(updatedTitle);
+            syncItem.setEnabled(true);
+        }
+        if(syncing){
+            updateSyncing();
+        }
+
+    }
+
+    public void updateSyncing(){
+        if(mOptionsMenu == null)
+            return;
+
+        MenuItem syncItem = mOptionsMenu.findItem(R.id.menu_basepoint_sync);
+        if(syncItem==null)
+            return;
+
+        String syncingString = getString(R.string.syncing);
+        syncItem.setTitle(syncingString);
+        //syncItem.setActionView(R.color.enable_disable_text);
+        //syncItem.getActionView().setBackgroundResource(R.color.enable_disable_text);
+        SpannableString textWithColor = new SpannableString(syncingString);
+        textWithColor.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.text_secondary)), 0,
+                textWithColor.length(), 0);
+        syncItem.setTitle(textWithColor);
+        syncItem.setEnabled(false);
     }
 
     @Override
     public void forceSync() {
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
-        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+        UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(1000, TimeUnit.MILLISECONDS,
+                ExistingWorkPolicy.KEEP);
+        syncing = true;
+        sendToast("Sync started");
+        updateSyncing();
+
+    }
+
+    private void observeSyncing(){
+        WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
+                this, workInfos -> {
+                    for(WorkInfo wi:workInfos){
+                        if(wi.getState().isFinished()){
+                            lastSyncTime = System.currentTimeMillis();
+                            syncing = false;
+                            checkSyncFinished();
+                        }else{
+                            //updateSyncing();
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void showMessage(String message) {
+        runOnUiThread(() -> Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_SHORT
+        ).show());
     }
 
     /**
@@ -276,6 +365,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         MenuItem bulkUploadMenuItem = menu.findItem(R.id.menu_basepoint_bulk_upload_master);
         MenuItem settingsMenuItem = menu.findItem(R.id.menu_settings_gear);
         MenuItem logoutMenuItem = menu.findItem(R.id.menu_basepoint_logout);
+
+        MenuItem syncMenuItem = menu.findItem(R.id.menu_basepoint_sync);
 
         Drawable shareMenuIcon = AppCompatResources.getDrawable(getApplicationContext(),
                 R.drawable.ic_share_white_24dp);
@@ -302,6 +393,9 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
 
         mOptionsMenu = menu;
         mPresenter.getLoggedInPerson();
+
+
+        checkSyncFinished();
 
         //Search stuff
         // Associate searchable configuration with the SearchView

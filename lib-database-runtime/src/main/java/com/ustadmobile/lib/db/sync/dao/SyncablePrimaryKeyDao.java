@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.sync.entities.SyncDeviceBits;
 import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -18,6 +19,9 @@ import java.util.Random;
 public abstract class SyncablePrimaryKeyDao  {
 
     private volatile int deviceBits = -1;
+
+    @UmQuery("SELECT * FROM SyncablePrimaryKey")
+    public abstract List<SyncablePrimaryKey> findAllDebug();
 
     @UmQuery("SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = :tableId")
     public abstract int findNextPrimaryKeyByTableId(int tableId);

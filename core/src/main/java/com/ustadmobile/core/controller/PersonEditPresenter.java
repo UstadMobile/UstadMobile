@@ -539,10 +539,13 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
         if(mUpdatedPerson == null || !mUpdatedPerson.equals(person)) {
             //set fields on the view as they change and arrive.
-            setFieldsOnView(person, headersAndFields, view,
-                    customFieldWithFieldValueMap);
+            if(person!= null){
+                setFieldsOnView(person, headersAndFields, view,
+                        customFieldWithFieldValueMap);
 
-            mUpdatedPerson = person;
+                mUpdatedPerson = person;
+            }
+
         }
 
     }

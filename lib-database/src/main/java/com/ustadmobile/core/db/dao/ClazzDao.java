@@ -193,11 +193,13 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
 
     }
 
+    @UmQuery("UPDATE Clazz SET clazzActive = 0 WHERE clazzUid = :clazzUid")
+    public abstract void inactivateClazz(long clazzUid, UmCallback<Integer> resultCallback);
 
     @UmQuery(CLAZZ_WHERE +
             " FROM Clazz WHERE :personUid in " +
             " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
-                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid)")
+                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberActive = 1)")
     public abstract UmProvider<ClazzWithNumStudents> findAllClazzesByPersonUid(long personUid);
 
     @UmQuery(CLAZZ_WHERE +
@@ -391,7 +393,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "   AS percentage")
     public abstract float findClazzAttendancePercentageWithoutLatestClazzLog(long clazzUid);
 
-    /** Check if a permission is present on a specific entity e.g. update/modify etc*/
+    /** Check if a permission is present on a specific entity e.g. updateState/modify etc*/
     @UmQuery("SELECT 1 FROM Clazz WHERE Clazz.clazzUid = :clazzUid AND (" + ENTITY_LEVEL_PERMISSION_CONDITION1 +
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + ")")
     public abstract void personHasPermission(long accountPersonUid, long clazzUid, long permission,
@@ -415,8 +417,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             "WHERE " +
             "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
             "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
-            "AND ((" +
-                ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can update it
+            "AND ((" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + //can updateState it
                 ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
             " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 +
                 Role.PERMISSION_CLAZZ_INSERT + //can insert on table
@@ -450,7 +451,7 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid " +
             " FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = " +
             " (SELECT clazzLocationUid FROM Clazz WHERE clazzUid = :clazzUid)))) " +
-            "AND Role.roleUid = :roleUid")
+            "AND Role.roleUid = :roleUid AND Person.personUid != null")
     public abstract List<Person> findPeopleWithRoleAssignedToClazz(long clazzUid, long roleUid);
 
 

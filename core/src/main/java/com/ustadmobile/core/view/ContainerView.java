@@ -32,6 +32,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
+import com.ustadmobile.core.impl.UmCallback;
 
 /**
  *
@@ -54,5 +55,7 @@ public interface ContainerView extends UstadView {
     void setCoverImage(String imageUrl);
 
     void setAuthorName(String authorName);
+
+    void mountZip(String zipPath, UmCallback<String> callback);
     
 }

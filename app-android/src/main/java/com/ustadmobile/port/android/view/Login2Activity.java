@@ -14,6 +14,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.concurrent.TimeUnit;
 
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 public class Login2Activity extends UstadBaseActivity implements Login2View {
@@ -98,6 +100,16 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
     @Override
     public void forceSync() {
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
-        UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+        UmAppDatabaseSyncWorker.queueSyncWorkerWithPolicy(100, TimeUnit.MILLISECONDS,
+                ExistingWorkPolicy.APPEND);
+        sendToast("Sync started");
+        WorkManager.getInstance().getWorkInfosByTagLiveData(UmAppDatabaseSyncWorker.TAG).observe(
+                this, workInfos -> {
+                    for(WorkInfo wi:workInfos){
+                        if(wi.getState().isFinished()){
+                            sendToast("Sync finished");
+                        }
+                    }
+                });
     }
 }

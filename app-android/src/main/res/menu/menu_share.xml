@@ -46,7 +46,12 @@
     <item android:id="@+id/menu_basepoint_sync"
         android:icon="@drawable/ic_sync_black_24dp"
         android:title="@string/force_sync"
+        android:textColor="@color/enable_disable_text"
         android:visible="true"/>
+
+    <item android:id="@+id/menu_testing_create_clazzlogs"
+        android:title="Test CreateLogsForToday"
+        android:visible="false"/>
 
 
 </menu>

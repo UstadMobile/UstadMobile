@@ -1,6 +1,20 @@
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
+    }
+}
+
 apply plugin: 'java-library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
+apply plugin: "de.fuerstenau.buildconfig"
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
@@ -10,7 +24,18 @@ repositories {
     maven {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }
+}
 
+buildConfig {
+    appName = "sharedse"
+
+    sourceSets {
+        test {
+            packageName = "com.ustadmobile.sharedse"
+            clsName = "SharedSeTestConfig"
+            buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
+        }
+    }
 }
 
 /*
@@ -50,15 +75,19 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation project(":sharedse-tests")
     testImplementation project(":core-tests")
     testImplementation project (':lib-database-entities')
+    testImplementation project(":lib-database-runtime-jdbc")
 
 
     //SQLite dependencies for running db-driven tests
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+    //MockWebServer
+    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
     testImplementation project(":app-javase")
 }

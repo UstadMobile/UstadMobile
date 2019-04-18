@@ -267,7 +267,7 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
         TextView valueHeading = new TextView(getApplicationContext());
         valueHeading.setTextColor(Color.BLACK);
         valueHeading.setLayoutParams(everyItemParam);
-        valueHeading.setText(R.string.days);
+        valueHeading.setText(R.string.number_of_classes);
 
         headingRow.addView(dateHeading);
         headingRow.addView(valueHeading);

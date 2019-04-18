@@ -148,7 +148,7 @@ public abstract class ScheduledCheckDao implements BaseDao<ScheduledCheck> {
             Date tomorrowZeroDate = new Date(tomorrowZeroHour);
 
             if(tomorrowZeroDate != null){
-                System.out.println("hy");
+                System.out.println("tomorrowZeroDate is null");
             }
 
             ScheduledCheck nextDayCheck = new ScheduledCheck(

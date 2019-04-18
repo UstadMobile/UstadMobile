@@ -2,10 +2,9 @@
 
 Ustad Mobile enables learners to access and share content offline. It uses peer-to-peer networking 
 (including WiFi Direct) to enable offline sharing between devices. It's open source __and__ 
-powered by open standards:
+powered by open standards:  
 
 * [EPUB content](http://idpf.org/epub): Anything you can do with HTML5 can be in EPUB (video, interactive quizzes, etc).
-* [Open Publication Distribution System (OPDS)](https://opds-spec.org): An Atom RSS feed describing and index of content. Well explained at [discover-opds.org](http://discover-opds.org).
 * [Experience API](http://www.tincanapi.com): The open widely adopted standard to record learning experiences.
 
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
@@ -20,10 +19,8 @@ Code is contained (mostly) in the following modules:
   app-android-launcher but can also be used as a library in other apps.
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
 * [app-android-testserver](app-android-testserver/): Provides a test server for p2p functionality integration testing.
-* [app-gwt](app-gwt/): implementtion of the core app using GWT (work in progress).
 * [lib-core-fs](lib-core-fs/): Contains code used on platforms that have a file system. To be
 merged into sharedse.
-* [lib-core-fs-tests](lib-core-fs-tests/): Contains unit tests for implementations that have a file system.
 * [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
 module's README for further details on the relationship between different database modules.
 * [lib-database-android](lib-database-android/) Android database

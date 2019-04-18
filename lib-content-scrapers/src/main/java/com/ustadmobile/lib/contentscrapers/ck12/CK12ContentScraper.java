@@ -4,8 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixIndex;
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixLog;
+import com.ustadmobile.lib.contentscrapers.LogIndex;
+import com.ustadmobile.lib.contentscrapers.LogResponse;
+import com.ustadmobile.lib.contentscrapers.UMLogUtil;
 import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse;
 import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse;
@@ -17,6 +18,7 @@ import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -84,8 +87,10 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_CANCEL_LI
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_COLOR_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TEX_COLOR_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.ZIP_EXT;
 
 
 /**
@@ -151,9 +156,9 @@ public class CK12ContentScraper {
     public final String css = "<style> .read-more-container { display: none; } #plixIFrameContainer { float: left !important; margin-top: 15px; } #plixLeftWrapper { float: left !important; width: 49%; min-width: 200px; padding-left: 15px !important; padding-right: 15px !important; margin-right: 15px; } @media (max-width: 1070px) { #plixLeftWrapper { width: 98% !important; } } .plixQestionPlayer, .plixLeftMiddlequestionContainer { margin-bottom: 5px !important; } .leftTopFixedBar { padding-top: 20px !important; } #next-container { margin-top: 0 !important; } .overflow-container { background: transparent !important; width: 0px !important; } .overflow-indicator { left: 50% !important; padding: 12px !important; } .plixWrapper { width: 95% !important; max-width: inherit !important; } body.plix-modal { overflow: auto !important; padding: 0; width: 95% !important; height: inherit !important; } .show-description, .show-challenge { position: static !important; padding-top: 0 !important; } #hintModal { width: 90% !important; margin-left: -45% !important; } @media only screen and (max-device-width: 605px), only screen and (max-device-height: 605px) { #landscapeView { display: block !important; } } </style>";
 
 
-    public final String postfix = "?hints=true&evalData=true";
-    public final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
-    public final String practicePost = "?nextPractice=true&adaptive=true&checkUserLogin=false";
+    private final String postfix = "?hints=true&evalData=true";
+    private final String POLICIES = "?policies=[{\"name\":\"shuffle\",\"value\":false},{\"name\":\"shuffle_question_options\",\"value\":false},{\"name\":\"max_questions\",\"value\":15},{\"name\":\"adaptive\",\"value\":false}]";
+    private final String practicePost = "?nextPractice=true&adaptive=true&checkUserLogin=false";
 
     String practiceIdLink = "https://www.ck12.org/assessment/api/get/info/test/practice/";
     String startTestLink = "https://www.ck12.org/assessment/api/start/test/";
@@ -164,9 +169,6 @@ public class CK12ContentScraper {
 
 
     public ScriptEngineReader scriptEngineReader = new ScriptEngineReader();
-
-    private ChromeDriver driver;
-    private WebDriverWait waitDriver;
 
     public static final String RESPONSE_RECEIVED = "Network.responseReceived";
     private boolean isContentUpdated = true;
@@ -179,14 +181,19 @@ public class CK12ContentScraper {
     }
 
     public static void main(String[] args) {
-        if (args.length != 3) {
-            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO or plix");
+        if (args.length < 3) {
+            System.err.println("Usage: <ck12 json url> <file destination><type READ or PRACTICE or VIDEO or plix><optional log{trace, debug, info, warn, error, fatal}>");
             System.exit(1);
         }
+        UMLogUtil.setLevel(args.length == 4 ? args[3] : "");
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        System.out.println(args[2]);
+
+        UMLogUtil.logInfo(args[0]);
+        UMLogUtil.logInfo(args[1]);
+        UMLogUtil.logInfo(args[2]);
+
+
+
         try {
             CK12ContentScraper scraper = new CK12ContentScraper(args[0], new File(args[1]));
             String type = args[2];
@@ -209,12 +216,12 @@ public class CK12ContentScraper {
                     scraper.scrapeReadContent();
                     break;
                 default:
-                    System.out.println("found a group type not supported " + type);
+                    UMLogUtil.logError("found a group type not supported " + type);
             }
 
         } catch (IOException e) {
-            System.err.println("Exception running scrapeContent");
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Exception running scrapeContent ck12");
         }
 
     }
@@ -224,8 +231,9 @@ public class CK12ContentScraper {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
         String plixId = urlString.substring(urlString.lastIndexOf("-") + 1, urlString.lastIndexOf("?"));
+        String plixName = FilenameUtils.getBaseName(scrapUrl.getPath());
 
-        File plixDirectory = new File(destinationDirectory, plixId);
+        File plixDirectory = new File(destinationDirectory, plixName);
         plixDirectory.mkdirs();
 
         assetDirectory = new File(plixDirectory, "asset");
@@ -246,53 +254,34 @@ public class CK12ContentScraper {
 
         ContentScraperUtil.setChromeDriverLocation();
 
-        DesiredCapabilities d = DesiredCapabilities.chrome();
-        d.setCapability("opera.arguments", "-screenwidth 1024 -screenheight 768");
-        // d.merge(capabilities);
-        LoggingPreferences logPrefs = new LoggingPreferences();
-        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-        d.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
-        driver = new ChromeDriver(d);
+        ChromeDriver driver = ContentScraperUtil.setupLogIndexChromeDriver();
 
         driver.get(urlString);
-        waitDriver = new WebDriverWait(driver, 10000);
+        WebDriverWait waitDriver = new WebDriverWait(driver, TIME_OUT_SELENIUM);
         ContentScraperUtil.waitForJSandJQueryToLoad(waitDriver);
         try {
             waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#questionController"))).click();
         } catch (Exception e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
         }
         LogEntries les = driver.manage().logs().get(LogType.PERFORMANCE);
         driver.close();
+        driver.quit();
 
-        List<PlixIndex> index = new ArrayList<>();
+        List<LogIndex.IndexEntry> indexList = new ArrayList<>();
 
         for (LogEntry le : les) {
 
-            PlixLog log = gson.fromJson(le.getMessage(), PlixLog.class);
+            LogResponse log = gson.fromJson(le.getMessage(), LogResponse.class);
             if (RESPONSE_RECEIVED.equalsIgnoreCase(log.message.method)) {
                 String mimeType = log.message.params.response.mimeType;
                 String urlString = log.message.params.response.url;
 
                 try {
+
                     URL url = new URL(urlString);
-                    File urlFile = new File(plixDirectory, url.getAuthority().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-                    urlFile.mkdirs();
-                    String fileName = ContentScraperUtil.getFileNameFromUrl(url);
-                    File file = new File(urlFile, fileName);
-                    if (log.message.params.response.requestHeaders != null) {
-                        URLConnection conn = url.openConnection();
-                        for (Map.Entry<String, String> e : log.message.params.response.requestHeaders.entrySet()) {
-                            if (e.getKey().equalsIgnoreCase("Accept-Encoding")) {
-                                continue;
-                            }
-                            conn.addRequestProperty(e.getKey().replaceAll(":", ""), e.getValue());
-                        }
-                        FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
-                    } else {
-                        FileUtils.copyURLToFile(url, file);
-                    }
+                    File urlDirectory = ContentScraperUtil.createDirectoryFromUrl(plixDirectory, url);
+                    File file = ContentScraperUtil.downloadFileFromLogIndex(url, urlDirectory, log);
 
                     if (file.getName().contains("plix.js")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
@@ -304,7 +293,7 @@ public class CK12ContentScraper {
 
                     if (file.getName().contains("plix.css")) {
                         String plixJs = FileUtils.readFileToString(file, UTF_ENCODING);
-                        int startIndex = plixJs.indexOf("@media only screen and (max-device-width:605px)");
+                        int startIndex = plixJs.indexOf("@media only screen and (max-device-width:");
                         int endIndex = plixJs.indexOf(".plix{");
                         plixJs = new StringBuilder(plixJs).insert(endIndex, "*/").insert(startIndex, "/*").toString();
                         FileUtils.writeStringToFile(file, plixJs, UTF_ENCODING);
@@ -345,24 +334,18 @@ public class CK12ContentScraper {
                     }
 
 
-                    PlixIndex plixIndex = new PlixIndex();
-                    plixIndex.url = urlString;
-                    plixIndex.mimeType = mimeType;
-                    plixIndex.path = urlFile.getName() + "/" + file.getName();
-                    plixIndex.headers = log.message.params.response.headers;
+                    LogIndex.IndexEntry logIndex = ContentScraperUtil.createIndexFromLog(urlString, mimeType, urlDirectory, file, log);
+                    indexList.add(logIndex);
 
-                    index.add(plixIndex);
-
-                } catch (IOException e) {
-                    System.err.println(urlString);
-                    System.err.println(le.getMessage());
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    UMLogUtil.logError("Index url failed at " + urlString);
+                    UMLogUtil.logDebug(le.getMessage());
                 }
             }
         }
 
-        FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(index), UTF_ENCODING);
-        ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()), destinationDirectory);
+        FileUtils.writeStringToFile(new File(plixDirectory, "index.json"), gson.toJson(indexList), UTF_ENCODING);
+        ContentScraperUtil.zipDirectory(plixDirectory, FilenameUtils.getBaseName(scrapUrl.getPath()) + ZIP_EXT, destinationDirectory);
     }
 
     public void scrapeVideoContent() throws IOException {
@@ -389,35 +372,27 @@ public class CK12ContentScraper {
         if (videoContent == null) {
             videoContent = getMainContent(fullSite, "iframe[src]", "src");
             if (videoContent == null) {
-                System.err.println("Unsupported video content" + urlString);
+                UMLogUtil.logError("Unsupported video content" + urlString);
                 throw new IOException("Did not find video content" + urlString);
             }
         }
 
         Elements videoElement = getIframefromHtml(videoContent);
-        String link = videoElement.attr("src");
 
-        String imageThumnail = fullSite.select("meta[property=og:image]").attr("content");
+        String imageThumbnail = fullSite.select("meta[property=og:image]").attr("content");
 
-        if (imageThumnail == null || imageThumnail.isEmpty()) {
-            throw new IllegalArgumentException("Did not receive image content from meta tag");
-        }
+        if (imageThumbnail != null && !imageThumbnail.isEmpty()) {
+            try {
+                File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
+                if (!ContentScraperUtil.fileHasContent(thumbnail)) {
+                    FileUtils.copyURLToFile(new URL(scrapUrl,imageThumbnail), thumbnail);
+                }
 
-        try {
-            File thumbnail = new File(assetDirectory, videoContentName + "-" + "video-thumbnail.jpg");
-            if (!ContentScraperUtil.fileHasContent(thumbnail)) {
-                FileUtils.copyURLToFile(new URL(imageThumnail), thumbnail);
+            } catch (IOException ignored) {
             }
-
-        } catch (MalformedURLException e) {
-            imageThumnail = "";
         }
 
         String videoSource = ContentScraperUtil.downloadAllResources(videoElement.outerHtml(), assetDirectory, scrapUrl);
-
-        if (link == null || link.isEmpty()) {
-            throw new IllegalArgumentException("Have not finished support of video type link for url " + urlString);
-        }
 
         String videoTitleHtml = getTitleHtml(fullSite);
 
@@ -431,10 +406,11 @@ public class CK12ContentScraper {
             ContentScraperUtil.generateTinCanXMLFile(videoHtmlLocation, videoContentName, "en", "index.html",
                     ScraperConstants.VIDEO_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Video Tin can file unable to create for url" +  urlString);
         }
 
-        ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName, destinationDirectory);
+        ContentScraperUtil.zipDirectory(videoHtmlLocation, videoContentName + ZIP_EXT, destinationDirectory);
     }
 
     public boolean isContentUpdated() {
@@ -516,7 +492,7 @@ public class CK12ContentScraper {
         Document content = getMainContent(html, "div.modality_content[data-loadurl]", "data-loadurl");
 
         if (content == null) {
-            System.err.println("Unsupported read content" + urlString);
+            UMLogUtil.logError("Unsupported read content" + urlString);
             throw new IllegalArgumentException("Did not find read content" + urlString);
         }
         String readHtml = content.html();
@@ -561,10 +537,11 @@ public class CK12ContentScraper {
             ContentScraperUtil.generateTinCanXMLFile(readHtmlLocation, readContentName, "en", "index.html",
                     ScraperConstants.ARTICLE_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Read Tin can file unable to create for url" +  urlString);
         }
 
-        ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName, destinationDirectory);
+        ContentScraperUtil.zipDirectory(readHtmlLocation, readContentName + ZIP_EXT, destinationDirectory);
     }
 
     private String appendMathJaxScript() {
@@ -768,7 +745,8 @@ public class CK12ContentScraper {
             ContentScraperUtil.generateTinCanXMLFile(practiceDirectory, practiceUrl, "en", "index.html",
                     ScraperConstants.ASSESMENT_TIN_CAN_FILE, scrapUrl.getPath(), "", "");
         } catch (TransformerException | ParserConfigurationException e) {
-            e.printStackTrace();
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e));
+            UMLogUtil.logError("Practice Tin can file unable to create for url" +  urlString);
         }
 
         ContentScraperUtil.saveListAsJson(practiceDirectory, questionList, ScraperConstants.QUESTIONS_JSON);
@@ -780,7 +758,7 @@ public class CK12ContentScraper {
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.TROPHY_PATH), new File(practiceDirectory, TROPHY_NAME));
         FileUtils.copyToFile(getClass().getResourceAsStream(ScraperConstants.CHECK_PATH), new File(practiceDirectory, CHECK_NAME));
 
-        ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl, destinationDirectory);
+        ContentScraperUtil.zipDirectory(practiceDirectory, practiceUrl + ZIP_EXT, destinationDirectory);
 
     }
 
@@ -833,11 +811,7 @@ public class CK12ContentScraper {
 
         Document doc = Jsoup.parse(html);
 
-        Elements elements = doc.select("[href]");
-
-        for (Element element : elements) {
-            element.removeAttr("href");
-        }
+        doc.select("[href]").removeAttr("href");
 
         return doc.body().html();
     }

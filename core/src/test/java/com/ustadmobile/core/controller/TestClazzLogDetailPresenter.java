@@ -91,6 +91,8 @@ public class TestClazzLogDetailPresenter {
         repo = db.getRepository(TEST_URI, "");
 
         db.clearAllTables();
+
+
         PersonDao personDao = repo.getPersonDao();
         Person testPerson = new Person();
         testPerson.setUsername(VALID_USER);

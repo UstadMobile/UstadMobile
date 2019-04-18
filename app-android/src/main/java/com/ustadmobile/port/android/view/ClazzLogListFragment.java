@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -157,24 +158,49 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
     @Override
     public void updateAttendanceLineChart(LinkedHashMap<Float, Float> dataMap){
         List<Entry> lineDataEntries = new ArrayList<>();
+        List<Entry> lineDataEntriesZero = new ArrayList<>();
         for (Map.Entry<Float, Float> floatFloatEntry : dataMap.entrySet()) {
             Entry anEntry = new Entry();
-            anEntry.setX(floatFloatEntry.getKey());
-            anEntry.setY(floatFloatEntry.getValue() * 100);
-            lineDataEntries.add(anEntry);
+            float x = floatFloatEntry.getKey();
+            float y = floatFloatEntry.getValue();
+            anEntry.setX(x);
+            anEntry.setY(y*100);
+
+            if(y > -1){ //If the value is meant to be 0
+                lineDataEntries.add(anEntry);
+            }else{
+                //Not meant to be 0 - join adjacent lines (ie: not a school day/no ClazzLog)
+                lineDataEntriesZero.add(new Entry(x,0));
+            }
+
+
+
         }
+
+        //0 data set
+        LineDataSet dataSetLine0 = new LineDataSet(lineDataEntriesZero, "Line 0 label");
+        dataSetLine0.setColor(android.R.color.transparent);
+        dataSetLine0.setValueTextColor(android.R.color.transparent);
+        dataSetLine0.setDrawValues(false);
+        dataSetLine0.setDrawCircles(false);
 
         //Create a line data set (one line)
         LineDataSet dataSetLine1 = new LineDataSet(lineDataEntries, ATTENDANCE_LINE_LABEL_DESC);
         dataSetLine1.setColor(Color.parseColor(ATTENDANCE_LINE_CHART_COLOR));
         dataSetLine1.setValueTextColor(Color.BLACK);
+        dataSetLine1.setLineWidth(2.0f);
         //Don't want to see the values on the data points.
         dataSetLine1.setDrawValues(false);
         //Don't want to see the circles
         dataSetLine1.setDrawCircles(false);
 
+        //dataSetLine1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+
         //Add LineDataSet to LineData
-        LineData lineData = new LineData(dataSetLine1);
+        LineData lineData = new LineData();
+        lineData.addDataSet(dataSetLine1);
+        //Add 0 line :
+        lineData.addDataSet(dataSetLine0);
 
         //Update the lineChart on the UI thread (since this method is called via the Presenter)
         runOnUiThread(() -> {
@@ -251,13 +277,21 @@ public class ClazzLogListFragment extends UstadBaseFragment implements ClassLogL
         lineChart.getXAxis().setValueFormatter((value, axis) -> (int)value + "");
         lineChart.setTouchEnabled(false);
         lineChart.getXAxis().setLabelCount(4,true);
+        lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        lineChart.getAxisLeft().setLabelCount(4, true);
+        //lineChart.setExtraOffsets(0,-150,0,0);
+        lineChart.getXAxis().setAxisMinimum(0);
+        lineChart.getAxisLeft().setAxisMinimum(0);
+        lineChart.getAxisLeft().setAxisMaximum(100);
 
         barChart = rootContainer.findViewById(R.id.fragment_clazz_log_list_bar_chart);
         barChart.setMinimumHeight(dpToPx(ATTENDANCE_BAR_CHART_HEIGHT));
+        barChart.setMinimumWidth(dpToPx(ATTENDANCE_BAR_CHART_HEIGHT));
         barChart = hideEverythingInBarChart(barChart);
         barChart.getAxisLeft().setAxisMaximum(ATTENDANCE_BAR_CHART_AXIS_MAXIMUM);
         barChart.getAxisLeft().setAxisMinimum(ATTENDANCE_BAR_CHART_AXIS_MINIMUM);
         barChart.setTouchEnabled(false);
+
 
     }
 

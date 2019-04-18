@@ -184,7 +184,7 @@ public class OpfDocument {
 
         int evtType = xpp.getEventType();
         String filename=null;
-        String itemMime=null;
+        String itemMediaType=null;
         String id=null;
         String properties=null;
         String idref=null;
@@ -196,7 +196,7 @@ public class OpfDocument {
         do
         {
             filename=null;
-            itemMime=null;
+            itemMediaType=null;
             id=null;
             properties=null;
             idref=null;
@@ -215,13 +215,13 @@ public class OpfDocument {
                     if(tagName != null && tagName.equals("item")){
 
                         filename=xpp.getAttributeValue(null, "href");
-                        itemMime=xpp.getAttributeValue(null, "media-type");
+                        itemMediaType=xpp.getAttributeValue(null, "media-type");
                         id = xpp.getAttributeValue(null, "id");
                         properties = xpp.getAttributeValue(null, "properties");
 
                         OpfItem item2 = new OpfItem();
                         item2.href = filename;
-                        item2.mimeType = itemMime;
+                        item2.mediaType = itemMediaType;
                         item2.properties = properties;
                         item2.id = id;
 
@@ -352,7 +352,7 @@ public class OpfDocument {
             xs.startTag(NAMESPACE_OPF, "item");
             xs.attribute(null, "id", item.getId());
             xs.attribute(null, "href", item.getHref());
-            xs.attribute(null, "media-type", item.getMimeType());
+            xs.attribute(null, "media-type", item.getMediaType());
             if(item.getProperties() != null)
                 xs.attribute(null, "properties", item.getProperties());
             xs.endTag(NAMESPACE_OPF, "item");
@@ -375,7 +375,7 @@ public class OpfDocument {
     public String getMimeType(String filename) {
         OpfItem item = findItemByHref(filename);
         if(item != null)
-            return item.getMimeType();
+            return item.getMediaType();
         else
             return null;
     }

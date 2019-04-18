@@ -8,6 +8,7 @@ if (keyStorePropertiesExists) {
 
 buildscript {
     repositories {
+        google()
         jcenter()
     }
 
@@ -49,10 +50,8 @@ afterEvaluate {
 }
 
 tasks.whenTaskAdded { task ->
- if (task.name == "installLocalconfigDebugAndroidTest") {
-        testEmulatorLocalconfigDebug.dependsOn task
-    } else if (task.name == "installLocalconfigDebug") {
-        testEmulatorLocalconfigDebug.dependsOn task
+    if (task.name.toLowerCase().endsWith("androidtest")) {
+        task.dependsOn(":lib-http-testserver:startDaemon")
     }
 }
 
@@ -101,7 +100,12 @@ android {
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders = [applicationClass: "android.app.Application"]
+        buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
+        buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
+        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
+        buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
+        buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
+
 
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
 
@@ -122,16 +126,22 @@ android {
 
         /*
          * Our main application does not exceed 64K methods, but it does exceed this limit with
-         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled
+         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled.
+         *
+         * Min SDK version = 18 as this is required by ui-automator
          */
         vanillamultidex {
             dimension "config"
+            minSdkVersion 18
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
             }
         }
 
+        /**
+         * Used for day to day work in Android studio to avoid the need to use multidex when running tests
+         */
         devMinApi21 {
             dimension "config"
             minSdkVersion 21
@@ -165,7 +175,9 @@ gradle.taskGraph.useFilter { task ->
     if(task.name.equals("connectedVanillaDebugAndroidTest")
         || task.name.equals("createVanillaDebugCoverageReport")
         || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")) {
+        || task.name.equals("testVanillaReleaseUnitTest")
+        || task.name.equals("processVanillaDebugAndroidTestManifest")
+        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 
@@ -265,7 +277,9 @@ configurations.all {
 dependencies {
     api project(':core')
     api project(':sharedse')
-    api project(':lib-core-fs')
+    api project(":lib-core-fs")
+    //api project(":libcodec2-android")
+    implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')
@@ -286,9 +300,9 @@ dependencies {
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
+    //implementation "androidx.work:work-runtime:$version_androidx_workmanager"
     androidTestImplementation project(':core-tests')
-    androidTestImplementation project(':sharedse-tests')
-    androidTestImplementation project(':lib-core-fs-tests')
+
 
     /*
          * If this needs to be made compatible as a library for something using older appcompat libs -
@@ -314,15 +328,13 @@ dependencies {
 
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 
+    implementation "com.google.android.exoplayer:exoplayer:$version_exo_player"
+
     //used for learner progress view
     implementation 'com.txusballesteros:FitChart:1.0'
     implementation "com.google.android:flexbox:$version_android_flexbox"
 
-    //Used for dns local network discovery on Android versions lower than 5.0
-    implementation 'org.jmdns:jmdns:3.5.2'
-
-    //ASCII 85 used to encode
-    implementation "com.github.fzakaria:ascii85:$version_ascii85"
+    //SVG support for Android
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
     //Support for encrypted zips
@@ -350,6 +362,9 @@ dependencies {
 
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
+    androidTestImplementation "commons-io:commons-io:$version_commons_io"
+
+
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -369,8 +384,6 @@ dependencies {
     //Recycler tree view library
     implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
 
-    //Work manager
-    implementation "android.arch.work:work-runtime:$version_work_manager"
     testImplementation "junit:junit:$version_junit"
 
     //Range seekbar by Crystal

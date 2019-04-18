@@ -93,129 +93,197 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_student_name" />
 
-            <ImageView
-                android:id="@+id/activity_person_detail_action_call_parent_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="8dp"
-                android:adjustViewBounds="false"
-                android:contentDescription="@string/call_parent"
-                android:cropToPadding="true"
-                android:tint="@color/icons"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
-                app:srcCompat="@drawable/ic_phone_forwarded_bcd4_24dp" />
 
-            <TextView
-                android:id="@+id/activity_person_detail_action_call_parent_text"
-                android:layout_width="60dp"
+            <LinearLayout
+                android:id="@+id/activity_person_detail_action_ll"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/call_parent"
-                android:textColor="@color/icons"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_text_parent_text"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_call_parent_icon" />
 
-            <ImageView
-                android:id="@+id/activity_person_detail_action_text_parent_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="62dp"
-                android:layout_marginTop="8dp"
-                android:adjustViewBounds="false"
-                android:contentDescription="@string/text_parent"
-                android:cropToPadding="false"
-                android:tint="@color/icons"
-                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_icon"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
-                app:srcCompat="@drawable/ic_message_bcd4_24dp" />
-
-            <TextView
-                android:id="@+id/activity_person_detail_action_text_parent_text"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/text_parent"
-                android:textColor="@color/icons"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_text"
-                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_text"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_text_parent_icon" />
-
-            <ImageView
-                android:id="@+id/activity_person_detail_action_enroll_in_class_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="62dp"
-                android:layout_marginTop="8dp"
-                android:adjustViewBounds="false"
-                android:contentDescription="@string/enroll_in_class"
-                android:cropToPadding="false"
-                android:tint="@color/icons"
-                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_icon"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
-                app:srcCompat="@drawable/ic_group_add_bcd4_24dp" />
-
-            <TextView
-                android:id="@+id/activity_person_detail_action_enroll_in_class_text"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/enroll_in_class"
-                android:textColor="@color/icons"
-                android:textSize="14sp"
-                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_text"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_icon" />
-
-            <ImageView
-                android:id="@+id/activity_person_detail_action_record_dropout_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:adjustViewBounds="false"
-                android:contentDescription="@string/record_dropout"
-                android:cropToPadding="false"
-                android:tint="@color/icons"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_icon"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
-                app:srcCompat="@drawable/ic_dropout_bcd4_24dp" />
-
-            <TextView
-                android:id="@+id/activity_person_detail_action_record_dropout_text"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/record_dropout"
-                android:textColor="@color/icons"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_text"
+                android:orientation="horizontal"
+                android:weightSum="4"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_text"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_record_dropout_icon" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1">
+
+                <LinearLayout
+                    android:id="@+id/activity_person_detail_action_ll_call_parent_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:id="@+id/activity_person_detail_action_call_parent_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:adjustViewBounds="false"
+                        android:contentDescription="@string/call_parent"
+                        android:cropToPadding="true"
+                        android:tint="@color/icons"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
+                        app:srcCompat="@drawable/ic_phone_forwarded_bcd4_24dp" />
+
+                    <TextView
+                        android:id="@+id/activity_person_detail_action_call_parent_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/dimen_8dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="@string/call_parent"
+                        android:textColor="@color/icons"
+                        android:textSize="14sp"
+                        app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_text_parent_text"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_call_parent_icon" />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/activity_person_detail_action_ll_text_parent_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:id="@+id/activity_person_detail_action_text_parent_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:adjustViewBounds="false"
+                        android:contentDescription="@string/text_parent"
+                        android:cropToPadding="false"
+                        android:tint="@color/icons"
+                        app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_icon"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
+                        app:srcCompat="@drawable/ic_message_bcd4_24dp" />
+
+                    <TextView
+                        android:id="@+id/activity_person_detail_action_text_parent_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/dimen_8dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="@string/text_parent"
+                        android:textColor="@color/icons"
+                        android:textSize="14sp"
+                        app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_text"
+                        app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_call_parent_text"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_text_parent_icon" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_person_detail_action_ll_enroll_in_class_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:id="@+id/activity_person_detail_action_enroll_in_class_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:adjustViewBounds="false"
+                        android:contentDescription="@string/enroll_in_class"
+                        android:cropToPadding="false"
+                        android:tint="@color/icons"
+                        app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_icon"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
+                        app:srcCompat="@drawable/ic_group_add_bcd4_24dp" />
+
+                    <TextView
+                        android:id="@+id/activity_person_detail_action_enroll_in_class_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/dimen_8dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="@string/enroll_in_class"
+                        android:textColor="@color/icons"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_text_parent_text"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_icon" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_person_detail_action_ll_record_dropout_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:id="@+id/activity_person_detail_action_record_dropout_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:adjustViewBounds="false"
+                        android:contentDescription="@string/record_dropout"
+                        android:cropToPadding="false"
+                        android:tint="@color/icons"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_icon"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_divider1"
+                        app:srcCompat="@drawable/ic_dropout_bcd4_24dp" />
+
+                    <TextView
+                        android:id="@+id/activity_person_detail_action_record_dropout_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/dimen_8dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="@string/record_dropout"
+                        android:textColor="@color/icons"
+                        android:textSize="14sp"
+                        app:layout_constraintBottom_toBottomOf="@+id/activity_person_detail_action_enroll_in_class_text"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/activity_person_detail_action_enroll_in_class_text"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_record_dropout_icon" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
 
             <View
                 android:id="@+id/activity_person_detail_divider2"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:background="?android:attr/listDivider"
                 android:visibility="invisible"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="392dp" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_ll" />
 
             <LinearLayout
                 android:id="@+id/activity_person_detail_fields_linear_layout"
@@ -225,8 +293,9 @@
                 android:layout_marginBottom="100dp"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_text_parent_text">
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_action_ll">
 
             </LinearLayout> <!-- activity_person_detail_fields_linear_layout -->
 
@@ -244,7 +313,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_edit"
+        app:floating_left_icon="@drawable/ic_edit_white_24dp"
         app:floating_title="@string/edit"
         app:floating_title_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"

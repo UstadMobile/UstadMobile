@@ -11,13 +11,14 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+        classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
     }
 }
 
 apply plugin: "java-library"
 apply plugin: "jacoco"
 apply plugin: "maven-publish"
+apply plugin: "de.fuerstenau.buildconfig"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -60,6 +61,7 @@ dependencies {
     testImplementation project(":sharedse")
     testImplementation project(":app-javase")
     testImplementation project(":lib-database-jdbc")
+    testImplementation project(":lib-database-runtime-jdbc")
     testImplementation project(":lib-database-entities")
     testImplementation project(":app-rest-server")
 
@@ -98,6 +100,18 @@ if(rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
+buildConfig {
+    appName = "core"
+
+    sourceSets {
+        test {
+            packageName = "com.ustadmobile.core"
+            clsName = "CoreTestConfig"
+            buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
+            buildConfigField 'String', 'TESTDB_JDBCURL_DB1', rootProject.ext.buildConfigProperties['test.db.db1.url']
+        }
+    }
+}
 /*
  * Generate a class with constant integer flags for each string message ID. See localization docs
  * for further information.

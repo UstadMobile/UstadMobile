@@ -6,10 +6,12 @@ buildscript {
     }
     dependencies {
         classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
     }
 }
 
 apply plugin: 'java-library'
+apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "jacoco"
 
 
@@ -19,50 +21,70 @@ test {
 
 task scrapeContent(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
-    if(project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
+    if (project.hasProperty("edraakUrl") && project.hasProperty("edraakDir")) {
         main "com.ustadmobile.lib.contentscrapers.edraakK12.EdraakK12ContentScraper"
-        args  project.getProperties().get("edraakUrl"), project.getProperties().get("edraakDir")
+        args project.getProperties().get("edraakUrl"), project.getProperties().get("edraakDir")
     }
-    if(project.hasProperty("findEdraakUrl") && project.hasProperty("findEdraakDir")) {
+    if (project.hasProperty("findEdraakUrl") && project.hasProperty("findEdraakDir")) {
         main "com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content"
-        args  project.getProperties().get("findEdraakUrl"), project.getProperties().get("findEdraakDir")
+        args project.getProperties().get("findEdraakUrl"), project.getProperties().get("findEdraakDir")
     }
-    if(project.hasProperty("phetUrl") && project.hasProperty("phetDir")){
+    if (project.hasProperty("phetUrl") && project.hasProperty("phetDir")) {
         main "com.ustadmobile.lib.contentscrapers.phetsimulation.PhetContentScraper"
-        args  project.getProperties().get("phetUrl"), project.getProperties().get("phetDir")
+        args project.getProperties().get("phetUrl"), project.getProperties().get("phetDir")
     }
-    if(project.hasProperty("findPhetUrl") && project.hasProperty("findPhetDir")){
+    if (project.hasProperty("findPhetUrl") && project.hasProperty("findPhetDir")) {
         main "com.ustadmobile.lib.contentscrapers.phetsimulation.IndexPhetContentScraper"
-        args  project.getProperties().get("findPhetUrl"), project.getProperties().get("findPhetDir")
+        args project.getProperties().get("findPhetUrl"), project.getProperties().get("findPhetDir")
     }
 
-    if(project.hasProperty("ck12Url") && project.hasProperty("ck12Dir") && project.hasProperty("ck12type")){
+    if (project.hasProperty("ck12Url") && project.hasProperty("ck12Dir") && project.hasProperty("ck12type")) {
         main "com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper"
-        args  project.getProperties().get("ck12Url"), project.getProperties().get("ck12Dir"), project.getProperties().get("ck12type")
+        args project.getProperties().get("ck12Url"), project.getProperties().get("ck12Dir"), project.getProperties().get("ck12type")
     }
 
-    if(project.hasProperty("findCK12Url") && project.hasProperty("findCK12Dir")){
+    if (project.hasProperty("findCK12Url") && project.hasProperty("findCK12Dir")) {
         main "com.ustadmobile.lib.contentscrapers.ck12.IndexCategoryCK12Content"
-        args  project.getProperties().get("findCK12Url"), project.getProperties().get("findCK12Dir")
+        args project.getProperties().get("findCK12Url"), project.getProperties().get("findCK12Dir")
     }
 
-    if(project.hasProperty("findPratDir")){
+    if (project.hasProperty("findPratDir")) {
         main "com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper"
         args project.getProperties().get("findPratDir")
     }
 
-    if(project.hasProperty("findAsbDir")){
+    if (project.hasProperty("findAsbDir")) {
         main "com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper"
         args project.getProperties().get("findAsbDir")
     }
 
-    if(project.hasProperty("findDdlUrl") && project.hasProperty("findDdlDir")) {
+    if (project.hasProperty("findDdlUrl") && project.hasProperty("findDdlDir")) {
         main "com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent"
-        args  project.getProperties().get("findDdlUrl"), project.getProperties().get("findDdlDir")
+        args project.getProperties().get("findDdlUrl"), project.getProperties().get("findDdlDir")
     }
-    if(project.hasProperty("ddlUrl") && project.hasProperty("ddlDir")) {
+    if (project.hasProperty("ddlUrl") && project.hasProperty("ddlDir")) {
         main "com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper"
-        args  project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
+        args project.getProperties().get("ddlUrl"), project.getProperties().get("ddlDir")
+    }
+
+    if (project.hasProperty("findKhanUrl") && project.hasProperty("findKhanDir")) {
+        main "com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer"
+        args project.getProperties().get("findKhanUrl"), project.getProperties().get("findKhanDir")
+    }
+
+    if (project.hasProperty("findVoaUrl") && project.hasProperty("findVoaDir")) {
+        main "com.ustadmobile.lib.contentscrapers.voa.IndexVoaScraper"
+        args project.getProperties().get("findVoaUrl"), project.getProperties().get("findVoaDir")
+    }
+
+    if (project.hasProperty("findFolderName") && project.hasProperty("findFolderDir")) {
+        main "com.ustadmobile.lib.contentscrapers.folder.IndexFolderScraper"
+        args project.getProperties().get("findFolderName"), project.getProperties().get("findFolderDir")
+    }
+
+    if (project.hasProperty("findEtekUrl") && project.hasProperty("findEtekDir")) {
+        main "com.ustadmobile.lib.contentscrapers.etekkatho.IndexEtekkathoScraper"
+        args project.getProperties().get("findEtekUrl"), project.getProperties().get("findEtekDir")
     }
 
 
@@ -76,37 +98,58 @@ task scrapeContent(type: JavaExec) {
     outputs.upToDateWhen { false }
 }
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
-ext.localProperties = new Properties()
-ext.localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+task generateScraperBuildConfig(type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    doFirst {
+        if (!rootProject.file(rootProject.ext.buildConfigProperties["shrinker.webp"]).exists()) {
+            throw new GradleException("Shrinker Util requires webp to turn images to lossy format which needs to run on the command line" +
+                    " You must define a path to the cwebp executable in buildconfig.local.properties.  " +
+                    " On Ubuntu you can install this using apt-get install webp. " +
+                    "Please open the README file in lib-content-scrapers for further instructions")
+        }
 
-task generateScraperBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+        if (!rootProject.ext.localProperties.containsKey("scraper.chrome_driver_path")) {
+            throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
+                    " You must define a path to the chrome driver in local.properties. " +
+                    "Please open the README file in lib-content-scrapers for further instructions")
+        }
+
+        if (!rootProject.file(rootProject.ext.buildConfigProperties["ffmpeg.webm"]).exists()) {
+            throw new GradleException("Shrinker Util requires ffmpeg to turn videos to webm format which needs to run on the command line" +
+                    " You must define a path to the ffmpeg executable in buildconfig.local.properties.  " +
+                    " On Ubuntu you can install this using apt-get install ffmpeg. " +
+                    "Please open the README file in lib-content-scrapers for further instructions")
+        }
+    }
+
+
     inputs.files(rootProject.file("local.properties"))
-    outputDir = new File ("${projectDir}/src/main/java")
+    outputDir = new File("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.lib.contentscrapers.buildconfig"
-    appName = project.ext.buildConfigProperties['appName']
+    appName = rootProject.ext.buildConfigProperties['appName']
     clsName = "ScraperBuildConfig"
     version = rootProject.version
 
     buildConfigField "String", "CHROME_DRIVER_PATH", rootProject.ext.localProperties["scraper.chrome_driver_path"]
+    buildConfigField "String", "CWEBP_PATH", rootProject.ext.buildConfigProperties["shrinker.webp"]
+    buildConfigField "String", "FFMPEG_PATH", rootProject.ext.buildConfigProperties["ffmpeg.webm"]
+    buildConfigField "String", "CODEC2_PATH", rootProject.ext.buildConfigProperties["shrinker.codec2"]
 
 }
 compileJava.dependsOn(generateScraperBuildConfig)
 
-if(!ext.localProperties.containsKey("scraper.chrome_driver_path")) {
-    throw new GradleException("Content Scraping requires Selenium which needs a chrome driver to run." +
-            " You must define a path to the chrome driver in local.properties. " +
-            "Please open the README file in lib-content-scrapers for further instructions")
-}
+
+
 
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib-database-runtime-jdbc")
+    implementation project(":lib-database-jdbc")
     implementation "org.jsoup:jsoup:$version_jsoup"
     implementation "com.google.code.gson:gson:$version_gson"
     implementation project(":core")
     implementation project(":lib-database-entities")
+    implementation project(":app-javase")
     implementation "commons-io:commons-io:$version_commons_io"
     implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
     implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
@@ -114,14 +157,16 @@ dependencies {
     implementation "io.github.bonigarcia:webdrivermanager:$version_web_driver"
     implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
     implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+    implementation "org.apache.logging.log4j:log4j-core:$version_log4j"
+    implementation "org.apache.logging.log4j:log4j-api:$version_log4j"
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    implementation project(":lib-database-jdbc")
     implementation project(":lib-database")
     implementation project(":lib-database-entities")
     implementation project(":lib-database-runtime")
+    implementation project(":sharedse")
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"

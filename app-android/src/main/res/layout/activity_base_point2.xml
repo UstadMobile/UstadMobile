@@ -18,13 +18,12 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/base_point_2_toolbar"
-            android:titleTextColor="#fff"
+            android:titleTextColor="@color/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
 
             />
         <!--app:layout_scrollFlags="scroll|enterAlways"-->
-a
     </android.support.design.widget.AppBarLayout>
 
 

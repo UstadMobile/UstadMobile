@@ -1,4 +1,20 @@
+
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.com.github.psxpaul:gradle-execfork-plugin:0.1.9"
+    }
+}
+
 apply plugin: 'java-library'
+apply plugin: "com.github.psxpaul.execfork"
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -25,5 +41,15 @@ task runHttpTestServer(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     standardInput = System.in
     main = "com.ustadmobile.test.http.UmTestServerManager"
-    args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", rootProject.file("sharedse-tests/src/main/resources").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"]
+    args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"]
+}
+
+task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "com.ustadmobile.test.http.UmTestServerManager"
+    args = ["--controlport", "8400", "--startport", "8500", "--endport", "8600", "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"] ]
+    waitForPort = 8400
+    workingDir = "$projectDir/"
+    standardOutput = "$projectDir/build/tmp/daemon.log"
+    errorOutput = "$projectDir/build/tmp/daemon-error.log"
 }

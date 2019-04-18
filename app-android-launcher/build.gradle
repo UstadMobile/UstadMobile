@@ -41,8 +41,7 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
-        versionName "0.96.6"
-
+        versionName "0.98.5"
         manifestPlaceholders = [applicationClass : "android.app.Application"]
 
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""

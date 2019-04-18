@@ -13,6 +13,8 @@ public interface ClazzEditView extends UstadView {
 
     String VIEW_NAME = "ClazzEdit";
 
+    String ARG_NEW = "ArgNew";
+
     String ARG_SCHEDULE_UID = "argScheduleUid";
 
     /**

@@ -279,6 +279,19 @@ public class UMCalendarUtil {
         return format.format(calendar.getTime());
     }
 
+    public static String getPrettyTimeFromLong(long thisDate, Locale locale){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format;
+        if(locale != null) {
+            format = new SimpleDateFormat("HH:mm", locale);
+        }else{
+            format = new SimpleDateFormat("HH:mm");
+        }
+        return format.format(calendar.getTime());
+    }
+
+
     public static String getPrettyDateSimpleFromLong(long thisDate, Locale locale){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);
@@ -367,19 +380,38 @@ public class UMCalendarUtil {
      */
     public static Calendar copyCalendarAndAdvanceTo(Calendar calendar, String timeZone,
                                                     int dayOfWeek, boolean incToday) {
-        Calendar result = Calendar.getInstance();
-        result.setTimeZone(TimeZone.getTimeZone(timeZone));
-        result.setTimeInMillis(calendar.getTimeInMillis());
+
+        //Note: calendar is the calendar in the phone's time zone. The phone's timezone can be
+        // different from the Class's timezone. Since all times are in the Class's time zone,
+        // a phone 9 am is in fact intended to be Class TimeZone's 9 am.
+        //
+        // The return Calendar is the calendar where the next occurence should be. This should
+        // match with the right day of the week. Hence this has to be in the Local time zone.
+        // (ie: to avoid situations where next occurence clazz timezone = previous day device.
+        // Since theis method is called every midnight of the phone device, we need the time to be
+        // the right day (ie phone device's timezone). For this purpose we will advance to the phone
+        // timezone and can set its timezone to Clazz outside this method.
+
+        Calendar comparisonCalendar = Calendar.getInstance();
+        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis());
+        comparisonCalendar.setTimeZone(calendar.getTimeZone());
 
         int today = calendar.get(Calendar.DAY_OF_WEEK);
 
         if(today == dayOfWeek) {
             if(!incToday) {
-                result.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
+                comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis() + (7 * 1000 * 60 * 60 * 24));
             }
 
-            result.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-            return result;
+
+            //Addition:
+            // Calendar without Time Zone's day = time zoned calendar's day = expected day of week
+            if(comparisonCalendar.get(Calendar.DAY_OF_WEEK) == calendar.get(Calendar.DAY_OF_WEEK) &&
+                calendar.get(Calendar.DAY_OF_WEEK) == dayOfWeek){
+                return comparisonCalendar;
+            }
+            comparisonCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+            return comparisonCalendar;
         }
 
 
@@ -390,9 +422,9 @@ public class UMCalendarUtil {
             deltaDays = (7 - today) + dayOfWeek;
         }
 
-        result.setTimeInMillis(calendar.getTimeInMillis() + (deltaDays * 1000 * 60 * 60 * 24));
+        comparisonCalendar.setTimeInMillis(calendar.getTimeInMillis() + (deltaDays * 1000 * 60 * 60 * 24));
 
-        return result;
+        return comparisonCalendar;
     }
 
     public static void normalizeSecondsAndMillis(Calendar calendar) {

@@ -21,6 +21,7 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.PersonPictureDialogView;
+import com.ustadmobile.core.view.RecordDropoutDialogView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
@@ -289,6 +290,21 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                     }
                 }
             ));
+
+        clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_INSERT,
+                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        view.showDropout(result);
+                        view.showEnrollInClass(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                }));
+
     }
 
 
@@ -314,7 +330,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
                 view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid));
@@ -555,6 +571,14 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         args.put(ARG_PERSON_UID, personUid);
 
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
+    }
+
+    public void handleClickRecordDropout(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, Object> args = new Hashtable<>();
+        args.put(ARG_PERSON_UID, personUid);
+
+        impl.go(RecordDropoutDialogView.VIEW_NAME, args, context);
     }
 
     /**

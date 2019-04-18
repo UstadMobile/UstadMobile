@@ -104,11 +104,6 @@ public class ClazzStudentListPresenter extends
 
         this.teachersEditable = true;
 
-        //Find the Provider
-//        clazzPersonListProvider = repository.getClazzMemberDao()
-//                .findAllPersonWithEnrollmentInClazzByClazzUid(currentClazzId);
-//        setProviderToView();
-
         //Initialise sort spinner data:
         idToOrderInteger = new Hashtable<>();
         updateSortSpinnerPreset();

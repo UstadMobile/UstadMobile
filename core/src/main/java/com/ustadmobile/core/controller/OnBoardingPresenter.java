@@ -19,7 +19,7 @@ public class OnBoardingPresenter extends UstadBaseController<OnBoardingView> {
     }
 
 
-    public void handleGetStarted(){
+    public void handleGetStarted() {
         UstadMobileSystemImpl.getInstance().go(DummyView.VIEW_NAME, getContext());
     }
 }

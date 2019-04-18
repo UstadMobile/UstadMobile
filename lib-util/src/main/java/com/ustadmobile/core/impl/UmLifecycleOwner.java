@@ -38,6 +38,4 @@ public interface UmLifecycleOwner {
      */
     void removeLifecycleListener(UmLifecycleListener listener);
 
-    int getCurrentStatus();
-
 }

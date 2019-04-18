@@ -259,7 +259,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
      */
     public void handleClickPrimaryActionButton(){
         Hashtable<String, Object> args = new Hashtable<>();
-        args.put(UstadView.ARG_NEW, String.valueOf(true));
+        args.put(ClazzEditView.ARG_NEW, String.valueOf(true));
         UstadMobileSystemImpl.getInstance().go(ClazzEditView.VIEW_NAME, args, getContext());
     }
 

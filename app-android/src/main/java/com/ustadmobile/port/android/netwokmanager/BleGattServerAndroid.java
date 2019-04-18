@@ -39,7 +39,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.UST
  *  @author kileha3
  */
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-class BleGattServerAndroid extends BleGattServer{
+class BleGattServerAndroid extends BleGattServer {
 
     private BluetoothGattServer gattServer;
 

@@ -72,4 +72,8 @@ public interface PersonDetailView extends UstadView {
 
     void addImageFromCamera();
 
+    void showEnrollInClass(boolean show);
+
+    void showDropout(boolean show);
+
 }

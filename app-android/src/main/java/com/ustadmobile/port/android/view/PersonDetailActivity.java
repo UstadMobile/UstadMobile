@@ -27,6 +27,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -88,6 +89,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     public static final String CALL_ICON_NAME = "ic_call_bcd4_24dp";
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
 
+    private LinearLayout enrollInClassLL, recordDropoutLL;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
@@ -138,6 +141,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         updateImageButton.setOnClickListener(view -> addImageFromCamera());
 
+        enrollInClassLL = findViewById(R.id.activity_person_detail_action_ll_enroll_in_class_ll);
+        recordDropoutLL = findViewById(R.id.activity_person_detail_action_ll_record_dropout_ll);
+
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -164,6 +170,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         enrollInClassImageView.setOnClickListener(v -> mPresenter.handleClickEnrollInClass());
         enrollInClassTextView.setOnClickListener(v -> mPresenter.handleClickEnrollInClass());
+
+        recordDropoutLL.setOnClickListener(v -> mPresenter.handleClickRecordDropout());
 
     }
 
@@ -200,6 +208,16 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
             return;
         }
         startCameraIntent();
+    }
+
+    @Override
+    public void showEnrollInClass(boolean show) {
+        enrollInClassLL.setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    @Override
+    public void showDropout(boolean show) {
+        recordDropoutLL.setVisibility(show?View.VISIBLE:View.GONE);
     }
 
 
@@ -378,6 +396,7 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                 hll.setOrientation(LinearLayout.HORIZONTAL);
                 hll.setPadding(16,16,16,16);
 
+
                 String iconName = field.getIconName();
 
                 if(iconName == null || iconName.length() == 0){
@@ -412,33 +431,46 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     vll.addView(fieldLabel);
                 }
 
-                hll.addView(vll);
+
 
                 //Add call and text buttons to father and mother detail
                 if(field.getActionParam() != null && field.getActionParam().length() > 0){
                     AppCompatImageView textIcon = new AppCompatImageView(this);
                     textIcon.setImageResource(getResourceId(TEXT_ICON_NAME,
                             "drawable", getPackageName()));
-                    textIcon.setPadding(8,16, 32,16);
+                    //textIcon.setPadding(8,16, 32,16);
                     textIcon.setOnClickListener(v -> mPresenter.handleClickText(field.getActionParam()));
 
                     AppCompatImageView callIcon = new AppCompatImageView(this);
                     callIcon.setImageResource(getResourceId(CALL_ICON_NAME,
                             "drawable", getPackageName()));
-                    callIcon.setPadding(8,16, 32,16);
+                    callIcon.setPadding(32,0, 0,0);
                     callIcon.setOnClickListener(v -> mPresenter.handleClickCall(field.getActionParam()));
 
                     LinearLayout.LayoutParams heavyLayout = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
                             1.0f
                     );
                     View fillIt = new View(this);
                     fillIt.setLayoutParams(heavyLayout);
 
-                    hll.addView(fillIt);
-                    hll.addView(textIcon);
-                    hll.addView(callIcon);
+
+                    vll.setLayoutParams(heavyLayout);
+                    hll.addView(vll);
+
+                    LinearLayout talkToMe = new LinearLayout(this);
+                    talkToMe.setOrientation(LinearLayout.HORIZONTAL);
+                    talkToMe.setGravity(Gravity.RIGHT);
+                    talkToMe.setWeightSum(2);
+                    textIcon.setLayoutParams(heavyLayout);
+                    callIcon.setLayoutParams(heavyLayout);
+                    talkToMe.addView(textIcon);
+                    talkToMe.addView(callIcon);
+                    hll.addView(talkToMe);
+
+                }else{
+                    hll.addView(vll);
                 }
 
                 mLinearLayout.addView(hll);

@@ -94,16 +94,12 @@ public abstract class UmLiveDataJdbc<T> implements UmLiveData<T>, DbChangeListen
 
     @Override
     public void observe(UmLifecycleOwner controller, UmObserver<T> observer) {
-        if(controller.getCurrentStatus() >= UmLifecycleOwner.STATUS_STARTED
-                && controller.getCurrentStatus() < UmLifecycleOwner.STATUS_STOPPED)
-            addActiveObserver(observer);
-
         controller.addLifecycleListener(new LiveDataLifecycleListener(observer));
     }
 
     @Override
     public void observeForever(UmObserver<T> observer) {
-        removeActiveObserver(observer);
+        addActiveObserver(observer);
     }
 
     @Override

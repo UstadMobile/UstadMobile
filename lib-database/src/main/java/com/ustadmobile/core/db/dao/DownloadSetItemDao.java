@@ -13,16 +13,12 @@ import java.util.List;
 @UmDao
 public abstract class DownloadSetItemDao {
 
-
-    @UmQuery("SELECT * From DownloadSetItem WHERE id = :id")
-    public abstract DownloadSetItem findById(int id);
-
     /**
      * Insert a list of DownloadSetItem entities
      * @param jobItems List of DownloadSetItem entities to insert
      */
     @UmInsert
-    public abstract void insertList(List<DownloadSetItem> jobItems);
+    public abstract void insert(List<DownloadSetItem> jobItems);
 
     /**
      * Insert a single DownloadSetItem
@@ -34,17 +30,10 @@ public abstract class DownloadSetItemDao {
     @UmInsert
     public abstract long insert(DownloadSetItem item);
 
-    /**
-     * Find the DownloadSetItem for the given OPDS entryId
-     *
-     * @param entryId OPDS entryId to search by
-     * @param downloadSetId Primary Key of the DownloadSet to search in
-     * @return DownloadSetItem matching the given arguments, otherwise null
-     */
-    @UmQuery("SELECT * FROM DownloadSetItem WHERE entryId = :entryId AND downloadSetId = :downloadSetId")
-    public abstract DownloadSetItem findByEntryId(String entryId, int downloadSetId);
+    @UmQuery("SELECT dsiDsUid FROM DownloadSetItem WHERE dsiContentEntryUid = :contentEntryUid")
+    public abstract long findDownloadSetUidByContentEntryUid(long contentEntryUid);
 
-
-
+    @UmQuery("SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :dsiDsUid")
+    public abstract List<Long> findBySetUid(long dsiDsUid);
 
 }

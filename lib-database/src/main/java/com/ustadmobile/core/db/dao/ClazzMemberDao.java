@@ -449,8 +449,8 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND ClazzMember.role = " + ClazzMember.ROLE_STUDENT + " ")
     public abstract void getAttendanceAverageAsListForClazzBetweenDates(long clazzUid,
-                                                                long fromDate, long toDate,
-                                                                UmCallback<List<Float>> resultList);
+                                                                        long fromDate, long toDate,
+                                                                        UmCallback<List<Float>> resultList);
 
 
     @UmQuery("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " +
@@ -476,4 +476,6 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
         }
     }
 
+    @UmQuery("UPDATE ClazzMember SET clazzMemberActive = 0 WHERE clazzMemberPersonUid = :personUid")
+    public abstract void inactivateClazzMemberForPerson(long personUid, UmCallback<Integer> resultCallback);
 }

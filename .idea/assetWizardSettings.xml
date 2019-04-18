@@ -3,6 +3,14 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+<<<<<<< HEAD
+=======
+        <entry key="imageWizard">
+          <value>
+            <PersistentState />
+          </value>
+        </entry>
+>>>>>>> dev-irc-sprint5
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -11,6 +19,7 @@
                   <entry key="vectorAssetStep">
                     <value>
                       <PersistentState>
+<<<<<<< HEAD
                         <option name="children">
                           <map>
                             <entry key="clipartAsset">
@@ -30,6 +39,13 @@
                           <map>
                             <entry key="outputName" value="ic_text_fields_black_24dp" />
                             <entry key="sourceFile" value="C:\Users\lenovo" />
+=======
+                        <option name="values">
+                          <map>
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="ic_launcher_classbook_logo" />
+                            <entry key="sourceFile" value="C:\Users\lenovo\UstadMobile\IRC\Logo\logo1.svg" />
+>>>>>>> dev-irc-sprint5
                           </map>
                         </option>
                       </PersistentState>

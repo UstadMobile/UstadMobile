@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -15,13 +16,23 @@ import com.ustadmobile.lib.db.entities.Person;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.Login2View.ARG_STARTSYNCING;
+
 public class BasePointActivity2Presenter extends UstadBaseController<BasePointView2> {
 
     //Database repository
     UmAppDatabase repository;
 
+    private boolean syncStarted = false;
+
     public BasePointActivity2Presenter(Object context, Hashtable arguments, BasePointView2 view) {
         super(context, arguments, view);
+
+        if(getArguments() != null && getArguments().containsKey(ARG_STARTSYNCING)){
+            if(getArguments().get(ARG_STARTSYNCING).equals("true")){
+                syncStarted = true;
+            }
+        }
     }
 
     /**
@@ -130,4 +141,11 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
         });
     }
 
+    public boolean isSyncStarted() {
+        return syncStarted;
+    }
+
+    public void setSyncStarted(boolean syncStarted) {
+        this.syncStarted = syncStarted;
+    }
 }

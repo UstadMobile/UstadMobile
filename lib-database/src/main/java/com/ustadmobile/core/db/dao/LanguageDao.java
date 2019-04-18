@@ -7,20 +7,25 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 public abstract class LanguageDao implements SyncableDao<Language, LanguageDao> {
 
 
-    @UmQuery("SELECT * from Language WHERE name = :name")
+    @UmQuery("SELECT * FROM Language WHERE name = :name LIMIT 1")
     public abstract Language findByName(String name);
 
-    @UmQuery("SELECT * from Language WHERE iso_639_1_standard = :langCode")
+    @UmQuery("SELECT * FROM Language WHERE iso_639_1_standard = :langCode LIMIT 1")
     public abstract Language findByTwoCode(String langCode);
 
-    @UmQuery("Select COUNT(*) FROM LANGUAGE")
+    @UmQuery("SELECT COUNT(*) FROM LANGUAGE")
     public abstract int totalLanguageCount();
 
     @UmUpdate
     public abstract void update(Language entity);
+
+    @UmQuery("SELECT * FROM Language")
+    public abstract List<Language> getPublicLanguages();
 }

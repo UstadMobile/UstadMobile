@@ -1,14 +1,13 @@
 package com.ustadmobile.port.android.util;
 
-import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -105,25 +104,52 @@ public class UMAndroidUtil {
 
     }
 
+    /**
+     *
+     * @param map
+     * @return
+     */
+    public static Bundle mapToBundle(Map<String, String> map) {
+        if(map == null)
+            return null;
 
-
-    @SuppressLint("NewApi")
-    public static int generateViewId() {
-        if (Build.VERSION.SDK_INT < 17) {
-            for (;;) {
-                final int result = sNextGeneratedId.get();
-                // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
-                int newValue = result + 1;
-                if (newValue > 0x00FFFFFF)
-                    newValue = 1; // Roll over to 1, not 0.
-                if (sNextGeneratedId.compareAndSet(result, newValue)) {
-                    return result;
-                }
-            }
-        } else {
-            return View.generateViewId();
+        Bundle bundle = new Bundle();
+        for(Map.Entry<String, String> entry : map.entrySet()) {
+            bundle.putString(entry.getKey(), entry.getValue());
         }
 
+        return bundle;
+    }
+
+    public static Map<String, String> bundleToMap(Bundle bundle) {
+        if(bundle == null)
+            return null;
+
+        Set<String> keys = bundle.keySet();
+        Map<String, String> map = new HashMap<>();
+        for(String key : keys) {
+            Object val = bundle.get(key);
+            if(val instanceof String) {
+                map.put(key, (String)val);
+            }
+        }
+
+        return map;
+    }
+
+
+    /**
+     * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
+     * This method simply removes the quotes, if they are there. Will also handle null safely.
+     *
+     * @param ssid
+     * @return
+     */
+    public static String normalizeAndroidWifiSsid(String ssid) {
+        if(ssid == null)
+            return ssid;
+        else
+            return ssid.replace("\"", "");
     }
 
 
