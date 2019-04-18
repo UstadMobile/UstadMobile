@@ -296,10 +296,9 @@ public class KhanContentIndexer implements Runnable {
                         int index = data.indexOf("{\"initialState\"");
                         int end = data.lastIndexOf("})");
                         if (end == -1) {
-                            end = data.lastIndexOf("}");
+                            end = data.lastIndexOf("}") + 1;
                         }
-
-                        return data.substring(index, end + 1);
+                        return data.substring(index, end);
                     } catch (IndexOutOfBoundsException e) {
                         UMLogUtil.logError("Could not get json from the script for url " + url);
                         return EMPTY_STRING;
