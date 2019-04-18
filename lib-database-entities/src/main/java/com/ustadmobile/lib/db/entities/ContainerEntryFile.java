@@ -23,15 +23,18 @@ public class ContainerEntryFile {
 
     private int compression;
 
+    private long lastModified;
+
     public ContainerEntryFile() {
 
     }
 
-    public ContainerEntryFile(String md5, long totalSize, long compressedSize, int compression) {
+    public ContainerEntryFile(String md5, long totalSize, long compressedSize, int compression, long lastModified) {
         this.cefMd5 = md5;
         this.ceTotalSize = totalSize;
         this.ceCompressedSize = compressedSize;
         this.compression = compression;
+        this.lastModified = lastModified;
     }
 
 
@@ -81,5 +84,13 @@ public class ContainerEntryFile {
 
     public void setCompression(int compression) {
         this.compression = compression;
+    }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
     }
 }

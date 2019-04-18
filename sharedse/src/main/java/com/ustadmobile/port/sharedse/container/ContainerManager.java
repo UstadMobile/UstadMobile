@@ -103,7 +103,8 @@ public class ContainerManager {
                 //this is not a duplicate - we need to add it
                 File srcFile = entry.getKey();
                 containerEntryFile = new ContainerEntryFile(fileMd5, srcFile.length(),
-                        srcFile.length(), ContainerEntryFile.COMPRESSION_NONE);
+                        srcFile.length(), ContainerEntryFile.COMPRESSION_NONE,
+                        System.currentTimeMillis());
                 if (!((options & OPTION_COPY) == OPTION_COPY)) {
                     containerEntryFile.setCefPath(srcFile.getPath());
                 }

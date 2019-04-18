@@ -98,8 +98,6 @@ public class KhanContentIndexer implements Runnable {
         UMLogUtil.logDebug(args[0]);
         UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
-        // UMLogUtil.logError(args[1]);
-
         try {
             ScrapeRunDao runDao = UmAppDatabase.getInstance(null).getScrapeRunDao();
 
@@ -210,7 +208,7 @@ public class KhanContentIndexer implements Runnable {
                 indexerLatch.countDown());
         indexWorkQueue.start();
         CountDownLatch scraperLatch = new CountDownLatch(1);
-        scrapeWorkQueue = new WorkQueue(scraperSource, 6);
+        scrapeWorkQueue = new WorkQueue(scraperSource, 1);
         scrapeWorkQueue.start();
 
         try {
@@ -297,7 +295,11 @@ public class KhanContentIndexer implements Runnable {
                     try {
                         int index = data.indexOf("{\"initialState\"");
                         int end = data.lastIndexOf("})");
-                        return data.substring(index, end);
+                        if (end == -1) {
+                            end = data.lastIndexOf("}");
+                        }
+
+                        return data.substring(index, end + 1);
                     } catch (IndexOutOfBoundsException e) {
                         UMLogUtil.logError("Could not get json from the script for url " + url);
                         return EMPTY_STRING;

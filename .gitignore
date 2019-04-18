@@ -220,3 +220,4 @@ app-gwt/*
 .classpath
 .settings
 
+.idea/

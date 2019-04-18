@@ -101,7 +101,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 18, entities = {
+@UmDatabase(version = 20, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -619,6 +619,13 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
 
                 }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(18, 20) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                db.execSql("ALTER TABLE ContainerEntryFile ADD COLUMN lastModified BIGINT");
             }
         });
 
