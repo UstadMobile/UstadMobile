@@ -108,9 +108,12 @@ public class ContainerManager {
             md5ToExistingFileMap.put(entryFile.getCefMd5(), entryFile);
         }
 
+        List<ContainerEntry> containerEntriesToDelete = new LinkedList<>();
+
         List<ContainerEntryWithContainerEntryFile> newContainerEntries = new ArrayList<>();
         for (Map.Entry<File, String> entry : fileToMd5Map.entrySet()) {
             String fileMd5 = entry.getValue();
+            String pathInContainer = fileToPathInContainerMap.get(entry.getKey());
 
             ContainerEntryFile containerEntryFile = md5ToExistingFileMap.get(fileMd5);
             if (containerEntryFile == null) {
@@ -135,14 +138,20 @@ public class ContainerManager {
             }
 
             ContainerEntryWithContainerEntryFile containerEntry =
-                    new ContainerEntryWithContainerEntryFile(
-                            fileToPathInContainerMap.get(entry.getKey()),
+                    new ContainerEntryWithContainerEntryFile(pathInContainer,
                             container, containerEntryFile);
             newContainerEntries.add(containerEntry);
+
+            if(pathToEntryMap.containsKey(pathInContainer)) {
+                //this file is already here. the existing entity needs deleted
+                containerEntriesToDelete.add(pathToEntryMap.get(pathInContainer));
+            }
         }
 
+        if(!containerEntriesToDelete.isEmpty())
+            db.getContainerEntryDao().deleteList(containerEntriesToDelete);
 
-        db.getContainerEntryDao().insertList(new ArrayList<>(newContainerEntries));
+        db.getContainerEntryDao().insertAndSetIds(new ArrayList<>(newContainerEntries));
         for (ContainerEntryWithContainerEntryFile file : newContainerEntries) {
             pathToEntryMap.put(file.getCePath(), file);
         }
