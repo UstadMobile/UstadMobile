@@ -292,14 +292,17 @@ public class KhanContentIndexer implements Runnable {
                 } else if (node.getWholeData().contains("{\"initialState\"")) {
 
                     String data = node.getWholeData();
+                    UMLogUtil.logTrace(data);
                     try {
                         int index = data.indexOf("{\"initialState\"");
                         int end = data.lastIndexOf("})");
                         if (end == -1) {
                             end = data.lastIndexOf("}") + 1;
                         }
+                        UMLogUtil.logTrace("index " + index + " end  =" + end);
                         return data.substring(index, end);
                     } catch (IndexOutOfBoundsException e) {
+
                         UMLogUtil.logError("Could not get json from the script for url " + url);
                         return EMPTY_STRING;
                     }
