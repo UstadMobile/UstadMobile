@@ -280,10 +280,13 @@ public class KhanContentIndexer implements Runnable {
 
                 if (node.getWholeData().contains("ReactComponent(")) {
 
+                    UMLogUtil.logTrace("React Component");
                     String data = node.getWholeData();
+                    UMLogUtil.logTrace(data);
                     try {
                         int index = data.indexOf("ReactComponent(") + 15;
                         int end = data.indexOf("loggedIn\": false})") + 17;
+                        UMLogUtil.logTrace("index " + index + " end  =" + end);
                         return data.substring(index, end);
                     } catch (IndexOutOfBoundsException e) {
                         UMLogUtil.logError("Could not get json from the script for url " + url);
@@ -291,6 +294,7 @@ public class KhanContentIndexer implements Runnable {
                     }
                 } else if (node.getWholeData().contains("{\"initialState\"")) {
 
+                    UMLogUtil.logTrace("initialState");
                     String data = node.getWholeData();
                     UMLogUtil.logTrace(data);
                     try {
