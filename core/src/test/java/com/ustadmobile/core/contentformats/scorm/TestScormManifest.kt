@@ -1,10 +1,7 @@
 package com.ustadmobile.core.contentformats.scorm
 
-import com.ustadmobile.test.core.ResourcesHttpdTestServer
 
-import org.junit.AfterClass
 import org.junit.Assert
-import org.junit.BeforeClass
 import org.junit.Test
 import org.xmlpull.v1.XmlPullParserException
 
@@ -43,16 +40,5 @@ class TestScormManifest {
 
         internal val SCORM_MANIFEST_RESOURCE = "/com/ustadmobile/test/core/scorm12manifest.xml"
 
-        @BeforeClass
-        @Throws(IOException::class)
-        fun startHttpResourcesServer() {
-            ResourcesHttpdTestServer.startServer()
-        }
-
-        @AfterClass
-        @Throws(IOException::class)
-        fun stopHttpResourcesServer() {
-            ResourcesHttpdTestServer.stopServer()
-        }
     }
 }

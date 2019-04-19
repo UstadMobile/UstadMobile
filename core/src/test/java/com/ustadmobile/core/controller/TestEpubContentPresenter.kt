@@ -119,11 +119,11 @@ class TestEpubContentPresenter {
                 args, mockEpubView)
         presenter.onCreate(args)
 
-        verify<EpubContentView>(mockEpubView, timeout(5000)).mountContainer(eq(epubContainer!!.containerUid),
+        verify<EpubContentView>(mockEpubView, timeout(15000)).mountContainer(eq(epubContainer!!.containerUid),
                 any<UmCallback<String>>())
-        verify<EpubContentView>(mockEpubView, timeout(5000)).setContainerTitle(opf!!.title!!)
+        verify<EpubContentView>(mockEpubView, timeout(15000)).setContainerTitle(opf!!.title!!)
 
-        verify<EpubContentView>(mockEpubView, timeout(5000)).setSpineUrls(any())
+        verify<EpubContentView>(mockEpubView, timeout(15000)).setSpineUrls(any())
 
         val linearSpineUrls = hrefListReference.get() as Array<String>
         for (i in linearSpineUrls.indices) {

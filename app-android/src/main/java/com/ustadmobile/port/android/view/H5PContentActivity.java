@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -51,23 +52,23 @@ public class H5PContentActivity extends ZippedContentActivity implements H5PCont
     }
 
     @Override
-    public void mountH5PDist(UmCallback<String> callback) {
-        callback.onSuccess(UMFileUtil.INSTANCE.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
+    public void mountH5PDist(@NonNull UmCallback<String> callback) {
+        callback.onSuccess(UMFileUtil.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
                 "h5p/dist"));
     }
 
     @Override
-    public void mountH5PFile(String zipFile, UmCallback<String> callback) {
-        mountZip(zipFile, new UmCallback<String>() {
+    public void mountH5PContainer(long containerUid, UmCallback<String> callback) {
+        mountContainer(containerUid, new UmCallback<String>() {
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess( String result) {
                 mountedPath.set(result);
-                UmCallbackUtil.INSTANCE.onSuccessIfNotNull(callback, result);
+                UmCallbackUtil.onSuccessIfNotNull(callback, result);
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                UmCallbackUtil.INSTANCE.onFailIfNotNull(callback, exception);
+                UmCallbackUtil.onFailIfNotNull(callback, exception);
             }
         });
     }

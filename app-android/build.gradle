@@ -14,12 +14,17 @@ buildscript {
 
     dependencies {
         classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$version_kotlin"
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
 
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
@@ -298,6 +303,9 @@ dependencies {
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
 
     androidTestImplementation project(":core-tests")

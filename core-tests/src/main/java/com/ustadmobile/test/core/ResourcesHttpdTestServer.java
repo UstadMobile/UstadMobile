@@ -1,6 +1,6 @@
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.test.core.impl.ClassResourcesResponder;
+import com.ustadmobile.port.sharedse.impl.http.ClassResourcesResponder;
 
 import java.io.IOException;
 

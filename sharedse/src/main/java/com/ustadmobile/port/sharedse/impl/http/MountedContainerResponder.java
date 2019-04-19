@@ -11,6 +11,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,25 +118,31 @@ public class MountedContainerResponder extends FileResponder implements RouterNa
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-        String requestUri = RouterNanoHTTPD.normalizeUri(session.getUri());
-        String pathInContainer = requestUri.substring(
-                uriResource.getUri().length() - URI_ROUTE_POSTFIX.length());
-        ContainerManager container = uriResource.initParameter(0, ContainerManager.class);
-        ContainerEntryWithContainerEntryFile entry = container.getEntry(pathInContainer);
-        if(entry == null){
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                    "text/plain", "Entry not found in container");
+        try {
+            String requestUri = RouterNanoHTTPD.normalizeUri(session.getUri());
+            requestUri = new URI(requestUri).normalize().toString();
+            String pathInContainer = requestUri.substring(
+                    uriResource.getUri().length() - URI_ROUTE_POSTFIX.length());
+            ContainerManager container = uriResource.initParameter(0, ContainerManager.class);
+            ContainerEntryWithContainerEntryFile entry = container.getEntry(pathInContainer);
+            if(entry == null){
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+                        "text/plain", "Entry not found in container");
+            }
+
+            List<MountedContainerFilter> filterList = uriResource.initParameter(1, List.class);
+            NanoHTTPD.Response response = newResponseFromFile(uriResource, session,
+                    new FileSource(new File(entry.getContainerEntryFile().getCefPath())));
+            for(MountedContainerFilter filter : filterList) {
+                response = filter.filterResponse(response, uriResource, urlParams, session);
+            }
+
+            return response;
+        }catch(URISyntaxException e) {
+            e.printStackTrace();
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
+                    "text/plain", "URISyntax error: " + e);
         }
-
-        List<MountedContainerFilter> filterList = uriResource.initParameter(1, List.class);
-        NanoHTTPD.Response response = newResponseFromFile(uriResource, session,
-                new FileSource(new File(entry.getContainerEntryFile().getCefPath())));
-        for(MountedContainerFilter filter : filterList) {
-            response = filter.filterResponse(response, uriResource, urlParams, session);
-        }
-
-
-        return response;
     }
 
     @Override
