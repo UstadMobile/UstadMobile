@@ -13,9 +13,15 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 public abstract class CustomFieldValueDao
         implements SyncableDao<CustomFieldValue, CustomFieldValueDao> {
 
+    //TODO: Wrong , Check it:
     @UmQuery("SELECT * FROM CustomFieldValue " +
-            " LEFT JOIN CustomField ON CustomField.customFieldUid = CustomFieldValue.customFieldValueFieldUid WHERE customFieldValueEntityUid = :uid AND" +
+            " LEFT JOIN CustomField ON CustomField.customFieldUid = CustomFieldValue.customFieldValueFieldUid " +
+            " WHERE customFieldValueEntityUid = :uid AND" +
             " CustomField.customFieldEntityType = :type LIMIT 1")
     public abstract void findByEntityTypeAndUid(int type, long uid, UmCallback<CustomFieldValue> resultCallback);
 
+
+    @UmQuery("SELECT * FROM CustomFieldValue WHERE customFieldValueFieldUid = :fieldUid AND " +
+            " customFieldValueEntityUid = :entityUid ")
+    public abstract void findValueByCustomFieldUidAndEntityUid(long fieldUid, long entityUid, UmCallback<CustomFieldValue> resultCallback);
 }

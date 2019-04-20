@@ -17,12 +17,15 @@ import com.ustadmobile.core.view.SelectClazzFeaturesView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.CustomField;
+import com.ustadmobile.lib.db.entities.CustomFieldValue;
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.UMCalendar;
 
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.TimeZone;
@@ -53,6 +56,8 @@ public class ClazzEditPresenter
 
     private long loggedInPersonUid = 0L;
 
+    private HashMap<Integer, Long> viewIdToCustomFieldUid;
+
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzDao clazzDao = repository.getClazzDao();
     private CustomFieldDao customFieldDao;
@@ -65,6 +70,11 @@ public class ClazzEditPresenter
         customFieldValueDao = repository.getCustomFieldValueDao();
         customFieldValueOptionDao = repository.getCustomFieldValueOptionDao();
 
+        viewIdToCustomFieldUid = new HashMap<>();
+    }
+
+    public void addToMap(int viewId, long fieldId){
+        viewIdToCustomFieldUid.put(viewId, fieldId);
     }
 
     public void getAllClazzCustomFields(){
@@ -77,30 +87,66 @@ public class ClazzEditPresenter
             @Override
             public void onSuccess(List<CustomField> result) {
                 for(CustomField c: result){
-                    String value = "";
-                    if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
-                        view.runOnUiThread(() -> view.addCustomFieldText(c, value));
-                    }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
-                        customFieldValueOptionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
-                            new UmCallback<List<CustomFieldValueOption>>() {
-                                @Override
-                                public void onSuccess(List<CustomFieldValueOption> result) {
-                                    List<String> options = new ArrayList<>();
 
-                                    for(CustomFieldValueOption o:result){
-                                        options.add(o.getCustomFieldValueOptionName());
+                    //Get value as well
+                    customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                        c.getCustomFieldUid(), mUpdatedClazz.getClazzUid(),
+                        new UmCallback<CustomFieldValue>() {
+                            @Override
+                            public void onSuccess(CustomFieldValue result) {
+                                String valueString = "";
+                                int valueSelection = 0;
+
+
+
+                                if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
+
+                                    if(result != null) {
+                                        valueString = result.getCustomFieldValueValue();
                                     }
-                                    view.runOnUiThread(() ->
-                                        view.addCustomFieldDropdown(c,
-                                            options.toArray(new String[options.size()]), 0));
+                                    String finalValueString = valueString;
+                                    view.runOnUiThread(() -> view.addCustomFieldText(c, finalValueString));
+
+                                }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
+                                    if(result != null) {
+                                        valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
+                                    }
+                                    int finalValueSelection = valueSelection;
+                                    customFieldValueOptionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
+                                        new UmCallback<List<CustomFieldValueOption>>() {
+                                            @Override
+                                            public void onSuccess(List<CustomFieldValueOption> result) {
+                                                List<String> options = new ArrayList<>();
+
+                                                for(CustomFieldValueOption o:result){
+                                                    options.add(o.getCustomFieldValueOptionName());
+                                                }
+
+                                                view.runOnUiThread(() ->
+                                                {
+                                                    view.addCustomFieldDropdown(c,
+                                                            options.toArray(new String[options.size()]),
+                                                            finalValueSelection);
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable exception) {
+                                                exception.printStackTrace();}
+                                        });
+
                                 }
 
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();}
-                            });
+                            }
 
-                    }
+                            @Override
+                            public void onFailure(Throwable exception) {
+
+                            }
+                        });
+
+
+
                 }
             }
 
@@ -124,7 +170,6 @@ public class ClazzEditPresenter
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 
-        getAllClazzCustomFields();
 
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
@@ -139,7 +184,7 @@ public class ClazzEditPresenter
                             new UmCallback<Long>() {
                         @Override
                         public void onSuccess(Long result) {
-                            view.runOnUiThread(() -> initFromClazz(result));
+                            initFromClazz(result);
                         }
 
                         @Override
@@ -156,6 +201,7 @@ public class ClazzEditPresenter
     }
 
     private void initFromClazz(long clazzUid) {
+
         this.currentClazzUid = clazzUid;
         //Handle Clazz info changed:
         //Get person live data and observe
@@ -168,10 +214,13 @@ public class ClazzEditPresenter
             @Override
             public void onSuccess(Clazz result) {
                 mUpdatedClazz = result;
+                currentClazzUid = mUpdatedClazz.getClazzUid();
                 view.runOnUiThread(() -> view.updateClazzEditView(result));
                 holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
+
+                getAllClazzCustomFields();
 
 
             }
@@ -292,6 +341,49 @@ public class ClazzEditPresenter
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzUid);
         impl.go(AddScheduleDialogView.VIEW_NAME, args, getContext());
+    }
+
+    public void handleSaveCustomFieldValues(int viewId, int type, Object value){
+
+        //Lookup viewId
+        if(viewIdToCustomFieldUid.containsKey(viewId)){
+            long customFieldUid = viewIdToCustomFieldUid.get(viewId);
+
+            if(type == CustomField.FIELD_TYPE_TEXT){
+                String valueString = value.toString();
+                customFieldValueDao.findValueByCustomFieldUidAndEntityUid(customFieldUid,
+                        currentClazzUid, new UmCallback<CustomFieldValue>() {
+                    @Override
+                    public void onSuccess(CustomFieldValue result) {
+                        CustomFieldValue customFieldValue;
+                        if(result == null){
+                            customFieldValue = new CustomFieldValue();
+                            customFieldValue.setCustomFieldValueEntityUid(mUpdatedClazz.getClazzUid());
+                            customFieldValue.setCustomFieldValueFieldUid(customFieldUid);
+                            customFieldValue.setCustomFieldValueValue(valueString);
+                            customFieldValueDao.insert(customFieldValue);
+                        }else{
+                            customFieldValue = result;
+                            customFieldValue.setCustomFieldValueValue(valueString);
+                            customFieldValueDao.update(customFieldValue);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+            }
+            else if(type == CustomField.FIELD_TYPE_DROPDOWN){
+                int spinnerSelection = (int)value;
+            }
+
+
+
+        }
+
+
     }
 
     /**

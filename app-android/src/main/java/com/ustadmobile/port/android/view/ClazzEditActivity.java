@@ -139,7 +139,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
         //FAB and its listener
         FloatingTextButton fab = findViewById(R.id.activity_clazz_edit_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickDone());
+        fab.setOnClickListener(v -> handleClickDone());
 
         //Add schedule button listener
         addScheduleButton = findViewById(R.id.activity_clazz_edit_add_schedule);
@@ -157,6 +157,32 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+    }
+
+    private void handleClickDone(){
+
+        int customCount = customFieldsLL.getChildCount();
+        for(int i=0; i< customCount; i++){
+            View field = customFieldsLL.getChildAt(i);
+            int fieldId = field.getId();
+            int type = 0;
+            Object valueObject = null;
+            if(field instanceof TextInputLayout){
+                //Text custom field
+                type = CustomField.FIELD_TYPE_TEXT;
+                TextInputLayout til = (TextInputLayout)field;
+                valueObject = til.getEditText().getText().toString();
+
+            }else if(field instanceof LinearLayout){
+                LinearLayout vll = (LinearLayout) field;
+                type = CustomField.FIELD_TYPE_DROPDOWN;
+                Spinner s = (Spinner) vll.getChildAt(1);
+                valueObject = s.getSelectedItemPosition();
+            }
+            mPresenter.handleSaveCustomFieldValues(fieldId,type, valueObject);
+        }
+
+        mPresenter.handleClickDone();
     }
 
     @Override
@@ -283,6 +309,9 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
         //The field is an input type. So we are gonna add a TextInputLayout:
         TextInputLayout fieldTextInputLayout = new TextInputLayout(this);
+        int viewId = View.generateViewId();
+        mPresenter.addToMap(viewId, label.getCustomFieldUid());
+        fieldTextInputLayout.setId(viewId);
         //Edit Text is inside a TextInputLayout
         TextInputLayout.LayoutParams textInputLayoutParams =
                 new TextInputLayout.LayoutParams(displayWidth,
@@ -324,15 +353,21 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
 
         //Spinner time
         Spinner spinner = new Spinner(this);
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, options);
+        ArrayAdapter<String> spinnerArrayAdapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                        options);
         spinner.setAdapter(spinnerArrayAdapter);
 
         //Spinner label
         TextView labelTV = new TextView(this);
         labelTV.setText(label.getCustomFieldName());
 
+        int viewId = View.generateViewId();
+        mPresenter.addToMap(viewId, label.getCustomFieldUid());
+
         //VLL
         LinearLayout vll = new LinearLayout(this);
+        vll.setId(viewId);
         vll.setLayoutParams(textInputLayoutParams)  ;
         vll.setOrientation(LinearLayout.VERTICAL);
 
