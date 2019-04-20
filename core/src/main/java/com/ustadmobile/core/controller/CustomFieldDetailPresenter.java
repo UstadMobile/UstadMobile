@@ -103,6 +103,8 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
         if(customFieldUid == 0){
             currentField = new CustomField();
             currentField.setCustomFieldActive(false);
+            currentField.setCustomFieldEntityType(Clazz.TABLE_ID);
+            currentField.setCustomFieldType(CustomField.FIELD_TYPE_TEXT);
             customFieldDao.insertAsync(currentField, new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long result) {
@@ -168,12 +170,14 @@ public class CustomFieldDetailPresenter extends UstadBaseController<CustomFieldD
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
+        args.put(ARG_CUSTOM_FIELD_UID, updatedField.getCustomFieldUid());
         impl.go(AddCustomFieldOptionDialogView.VIEW_NAME, args, context);
     }
 
     public void handleClickOptionEdit(long customFieldOptionUid){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
+        args.put(ARG_CUSTOM_FIELD_UID, updatedField.getCustomFieldUid());
         args.put(ARG_CUSTOM_FIELD_VALUE_OPTION_UID, customFieldOptionUid);
         impl.go(AddCustomFieldOptionDialogView.VIEW_NAME, args, context);
     }

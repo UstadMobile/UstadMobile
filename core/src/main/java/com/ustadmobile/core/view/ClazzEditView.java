@@ -3,6 +3,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.lib.db.entities.Schedule;
 
 /**
@@ -40,5 +41,10 @@ public interface ClazzEditView extends UstadView {
      * @param id    The id/position of the DateRange selected from the drop-down.
      */
     void setHolidaySelected(long id);
+
+
+    void addCustomFieldText(CustomField label, String value);
+    void addCustomFieldDropdown(CustomField label, String[] options, int selected);
+    void clearAllCustomFields();
 
 }

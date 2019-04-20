@@ -13,8 +13,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -52,6 +55,17 @@ public class CustomFieldDetailActivity extends UstadBaseActivity implements Cust
 
 
     /**
+     * Creates the options on the toolbar - specifically the Done tick menu item
+     * @param menu  The menu options
+     * @return  true. always.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_done, menu);
+        return true;
+    }
+
+    /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
      * the activity goes back when the back button is pressed.
      *
@@ -60,6 +74,12 @@ public class CustomFieldDetailActivity extends UstadBaseActivity implements Cust
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_catalog_entry_presenter_share) {
+            mPresenter.handleClickDone();
+
+            return super.onOptionsItemSelected(item);
+        }
+
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
@@ -92,6 +112,8 @@ public class CustomFieldDetailActivity extends UstadBaseActivity implements Cust
         optionsCL.setVisibility(View.GONE);
 
         addOptionsCL = findViewById(R.id.activity_custom_field_detail_add_cl);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         //RecyclerView
         mRecyclerView = findViewById(
@@ -165,10 +187,7 @@ public class CustomFieldDetailActivity extends UstadBaseActivity implements Cust
                 mPresenter.handleDefaultValueChanged(s.toString());
             }
         });
-        //FAB and its listener
-        FloatingTextButton fab = findViewById(R.id.activity_custom_field_detail_fab);
 
-        fab.setOnClickListener(v -> mPresenter.handleClickDone());
 
 
     }

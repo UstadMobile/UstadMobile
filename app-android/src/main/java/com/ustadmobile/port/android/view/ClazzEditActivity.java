@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.util.DiffUtil;
@@ -12,12 +13,18 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -26,6 +33,7 @@ import com.ustadmobile.core.controller.ClazzEditPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -55,6 +63,8 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     Spinner holidaySpinner;
 
     TextView featuresTextView;
+
+    LinearLayout customFieldsLL;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -87,6 +97,8 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         scheduleRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
         featuresTextView = findViewById(R.id.activity_clazz_edit_features_selected);
+
+        customFieldsLL = findViewById(R.id.activity_clazz_edit_customfields_ll);
 
         //Call the Presenter
         mPresenter = new ClazzEditPresenter(this,
@@ -254,6 +266,86 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     @Override
     public void setHolidaySelected(long id) {
         mPresenter.updateHoliday(id);
+    }
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    @Override
+    public void addCustomFieldText(CustomField label, String value) {
+        //customFieldsLL
+
+        //Calculate the width of the screen.
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+
+        //The field is an input type. So we are gonna add a TextInputLayout:
+        TextInputLayout fieldTextInputLayout = new TextInputLayout(this);
+        //Edit Text is inside a TextInputLayout
+        TextInputLayout.LayoutParams textInputLayoutParams =
+                new TextInputLayout.LayoutParams(displayWidth,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+        int widthWithPadding = displayWidth - dpToPx(28);
+        //The EditText
+        EditText fieldEditText = new EditText(this);
+        fieldEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        ViewGroup.LayoutParams editTextParams =
+                new LinearLayout.LayoutParams(
+                        widthWithPadding,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+        fieldEditText.setLayoutParams(editTextParams);
+        fieldEditText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        fieldEditText.setText(value);
+
+        fieldEditText.setHint(label.getCustomFieldName());
+
+        fieldTextInputLayout.addView(fieldEditText, textInputLayoutParams);
+        fieldTextInputLayout.setPadding(dpToPx(8),0,0,0);
+        customFieldsLL.addView(fieldTextInputLayout);
+    }
+
+    @Override
+    public void addCustomFieldDropdown(CustomField label, String[] options, int selected) {
+        //Calculate the width of the screen.
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+
+        //The field is an input type. So we are gonna add a TextInputLayout:
+        //Edit Text is inside a TextInputLayout
+        TextInputLayout.LayoutParams textInputLayoutParams =
+                new TextInputLayout.LayoutParams(displayWidth,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+        int widthWithPadding = displayWidth - dpToPx(28);
+
+        //Spinner time
+        Spinner spinner = new Spinner(this);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, options);
+        spinner.setAdapter(spinnerArrayAdapter);
+
+        //Spinner label
+        TextView labelTV = new TextView(this);
+        labelTV.setText(label.getCustomFieldName());
+
+        //VLL
+        LinearLayout vll = new LinearLayout(this);
+        vll.setLayoutParams(textInputLayoutParams)  ;
+        vll.setOrientation(LinearLayout.VERTICAL);
+
+        vll.addView(labelTV);
+        vll.addView(spinner);
+
+        vll.setPadding(dpToPx(8),0,0,0);
+        customFieldsLL.addView(vll);
+    }
+
+    @Override
+    public void clearAllCustomFields() {
+        customFieldsLL.removeAllViews();
     }
 
     @Override

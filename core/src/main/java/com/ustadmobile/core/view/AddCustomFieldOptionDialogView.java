@@ -17,6 +17,8 @@ public interface AddCustomFieldOptionDialogView extends UstadView {
      */
     void finish();
 
+    void setOptionValue(String optionValue);
+
 
 }
 

@@ -4,6 +4,9 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.CustomFieldDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao;
 import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -13,6 +16,8 @@ import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.SelectClazzFeaturesView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.CustomField;
+import com.ustadmobile.lib.db.entities.CustomFieldValueOption;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.UMCalendar;
@@ -50,9 +55,58 @@ public class ClazzEditPresenter
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzDao clazzDao = repository.getClazzDao();
+    private CustomFieldDao customFieldDao;
+    private CustomFieldValueDao customFieldValueDao;
+    private CustomFieldValueOptionDao customFieldValueOptionDao;
 
     public ClazzEditPresenter(Object context, Hashtable arguments, ClazzEditView view) {
         super(context, arguments, view);
+        customFieldDao = repository.getCustomFieldDao();
+        customFieldValueDao = repository.getCustomFieldValueDao();
+        customFieldValueOptionDao = repository.getCustomFieldValueOptionDao();
+
+    }
+
+    public void getAllClazzCustomFields(){
+        //0. Clear all added custom fields on view.
+        view.runOnUiThread(() -> view.clearAllCustomFields());
+
+        //1. Get all custom fields
+        customFieldDao.findAllCustomFieldsProviderForEntityAsync(Clazz.TABLE_ID,
+                new UmCallback<List<CustomField>>() {
+            @Override
+            public void onSuccess(List<CustomField> result) {
+                for(CustomField c: result){
+                    String value = "";
+                    if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
+                        view.runOnUiThread(() -> view.addCustomFieldText(c, value));
+                    }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
+                        customFieldValueOptionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
+                            new UmCallback<List<CustomFieldValueOption>>() {
+                                @Override
+                                public void onSuccess(List<CustomFieldValueOption> result) {
+                                    List<String> options = new ArrayList<>();
+
+                                    for(CustomFieldValueOption o:result){
+                                        options.add(o.getCustomFieldValueOptionName());
+                                    }
+                                    view.runOnUiThread(() ->
+                                        view.addCustomFieldDropdown(c,
+                                            options.toArray(new String[options.size()]), 0));
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    exception.printStackTrace();}
+                            });
+
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
+        });
     }
 
     /**
@@ -69,6 +123,8 @@ public class ClazzEditPresenter
         super.onCreate(savedState);
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        getAllClazzCustomFields();
 
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
@@ -116,6 +172,8 @@ public class ClazzEditPresenter
                 holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
+
+
             }
 
             @Override

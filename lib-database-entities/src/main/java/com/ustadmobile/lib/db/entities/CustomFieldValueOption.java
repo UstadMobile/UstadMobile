@@ -61,6 +61,7 @@ public class CustomFieldValueOption {
         this.customFieldValueOptionFieldUid = customFieldValueOptionFieldUid;
     }
 
+
     public String getCustomFieldValueOptionIcon() {
         return customFieldValueOptionIcon;
     }

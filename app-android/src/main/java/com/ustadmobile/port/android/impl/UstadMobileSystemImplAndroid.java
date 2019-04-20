@@ -64,6 +64,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AddActivityChangeDialogView;
+import com.ustadmobile.core.view.AddCustomFieldOptionDialogView;
 import com.ustadmobile.core.view.AddDateRangeDialogView;
 import com.ustadmobile.core.view.AddQuestionOptionDialogView;
 import com.ustadmobile.core.view.AddQuestionSetDialogView;
@@ -142,6 +143,7 @@ import com.ustadmobile.port.android.scheduler.ScheduledCheckWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AddActivityChangeDialogFragment;
+import com.ustadmobile.port.android.view.AddCustomFieldOptionDialogFragment;
 import com.ustadmobile.port.android.view.AddDateRangeDialogFragment;
 import com.ustadmobile.port.android.view.AddQuestionOptionDialogFragment;
 import com.ustadmobile.port.android.view.AddQuestionSetDialogFragment;
@@ -347,7 +349,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SelectPeopleDialogView.VIEW_NAME, SelectPeopleDialogFragment.class);
         viewNameToAndroidImplMap.put(CustomFieldListView.VIEW_NAME, CustomFieldListActivity.class);
         viewNameToAndroidImplMap.put(CustomFieldDetailView.VIEW_NAME, CustomFieldDetailActivity.class);
-
+        viewNameToAndroidImplMap.put(AddCustomFieldOptionDialogView.VIEW_NAME, AddCustomFieldOptionDialogFragment.class);
 
         viewNameToAndroidImplMap.put(WebChunkView.VIEW_NAME, WebChunkActivity.class);
         viewNameToAndroidImplMap.put(VideoPlayerView.VIEW_NAME, VideoPlayerActivity.class);

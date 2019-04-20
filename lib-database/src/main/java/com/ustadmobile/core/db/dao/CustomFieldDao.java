@@ -10,6 +10,8 @@ import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
+import java.util.List;
+
 @UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
@@ -27,6 +29,11 @@ public abstract class CustomFieldDao implements SyncableDao<CustomField, CustomF
     @UmQuery("SELECT * FROM CustomField WHERE customFieldEntityType = :tableId AND " +
             " customFieldActive = 1")
     public abstract UmProvider<CustomField> findAllCustomFieldsProviderForEntity(int tableId);
+
+    @UmQuery("SELECT * FROM CustomField WHERE customFieldEntityType = :tableId AND " +
+            " customFieldActive = 1")
+    public abstract void findAllCustomFieldsProviderForEntityAsync(int tableId,
+                                                  UmCallback<List<CustomField>> listResultCallback);
 
     @UmQuery("UPDATE CustomField SET customFieldActive = 0 WHERE customFieldUid = :customFieldUid")
     public abstract void deleteCustomField(long customFieldUid, UmCallback<Integer> resultCallback);

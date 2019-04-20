@@ -184,10 +184,19 @@
                 android:layout_height="2dp"
                 android:layout_marginStart="8dp"
                 android:background="?android:attr/listDivider"
-                app:layout_constraintStart_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/activity_clazz_edit_features_selected"></View>
+                app:layout_constraintTop_toBottomOf="@id/activity_clazz_edit_features_selected" />
 
+            <LinearLayout
+                android:id="@+id/activity_clazz_edit_customfields_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="100dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_hline"></LinearLayout>
 
         </android.support.constraint.ConstraintLayout>
 
