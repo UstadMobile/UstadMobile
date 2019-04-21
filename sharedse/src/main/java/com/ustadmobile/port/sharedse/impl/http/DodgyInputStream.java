@@ -17,7 +17,7 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core.impl;
+package com.ustadmobile.port.sharedse.impl.http;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

@@ -1,6 +1,8 @@
 package com.ustadmobile.port.sharedse.util;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,33 +20,35 @@ public class RunnableQueue {
     }
 
     public void runWhenReady(Runnable runnable) {
-        if(ready.get()){
-            runnable.run();
-        }else{
-            try {
-                lock.lock();
+        try {
+            lock.lock();
+            if(ready.get()){
+                runnable.run();
+            }else{
                 queue.add(runnable);
-            }finally {
-                lock.unlock();
             }
+        }finally {
+            lock.unlock();
         }
     }
 
     public void setReady(boolean ready) {
+        List<Runnable> itemsToRun = null;
         try {
             lock.lock();
             if(ready && !this.ready.get()) {
-                Iterator<Runnable> iterator = queue.iterator();
-                while(iterator.hasNext()) {
-                    Runnable r= iterator.next();
-                    r.run();
-                    iterator.remove();
-                }
+                this.ready.set(ready);
+                itemsToRun = new LinkedList<>(queue);
+                queue.clear();
             }
-
-            this.ready.set(ready);
         }finally {
             lock.unlock();
+        }
+
+        if(itemsToRun != null) {
+            for(Runnable r : itemsToRun){
+                r.run();
+            }
         }
     }
 }

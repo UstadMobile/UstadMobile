@@ -2,7 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.test.core.impl.ClassResourcesResponder;
+import com.ustadmobile.port.sharedse.impl.http.ClassResourcesResponder;
 
 import org.junit.AfterClass;
 import org.junit.Assert;

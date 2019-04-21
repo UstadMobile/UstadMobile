@@ -1,15 +1,10 @@
-package com.ustadmobile.test.core.impl;
-
-import com.ustadmobile.port.sharedse.impl.http.FileResponder;
+package com.ustadmobile.port.sharedse.impl.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
 
