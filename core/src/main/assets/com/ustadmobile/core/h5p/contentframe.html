@@ -9,8 +9,16 @@
       $(function() {
         $('.h5p-container').h5p({
           frameJs: '$DISTPATH/js/h5p-standalone-frame.js',
-          frameCss: '$DISTPATH/dist/styles/h5p.css',
-          h5pContent: '$CONTENTPATH'
+          frameCss: '$DISTPATH/styles/h5p.css',
+          h5pContent: '$CONTENTPATH',
+          displayOptions: { // OPTIONAL hide the frame or download, export etc. buttons they are visible by default
+            frame: true,
+            copyright: true,
+            embed: false,
+            download: false,
+            icon: true,
+            export: false
+          }
         });
       });
     })(H5P.jQuery);

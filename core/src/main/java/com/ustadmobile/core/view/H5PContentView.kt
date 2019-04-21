@@ -14,7 +14,7 @@ interface H5PContentView : UstadView {
      */
     fun mountH5PDist(callback: UmCallback<String>)
 
-    fun mountH5PFile(zipFile: String, callback: UmCallback<String>)
+    fun mountH5PContainer(containerUid: Long, callback: UmCallback<String>)
 
     fun setTitle(title: String)
 

@@ -201,8 +201,13 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
         }
 
         ContainerManager containerManager = new ContainerManager(container, appDatabase, repository);
-        if (mountPath == null) {
-            mountPath = "/container/" + container.getContainerUid() + "/" +
+        return mountContainer(containerManager, mountPath, filters);
+    }
+
+    public String mountContainer(ContainerManager containerManager, String mountPath,
+                                 List<MountedContainerResponder.MountedContainerFilter> filters) {
+        if(mountPath == null){
+            mountPath = "/container/" + containerManager.getContainerUid() +"/" +
                     System.currentTimeMillis() + "/";
         }
 

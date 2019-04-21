@@ -32,7 +32,7 @@ public class AndroidAssetsHandler implements RouterNanoHTTPD.UriResponder {
         NanoHTTPD.Response response = null;
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            assetIn = context.getAssets().open(UMFileUtil.INSTANCE.joinPaths(new String[]{"http", assetPath}));
+            assetIn = context.getAssets().open(UMFileUtil.joinPaths("http", assetPath));
 
             UMIOUtils.INSTANCE.readFully(assetIn, bout, 1024);
             byte[] assetBytes = bout.toByteArray();
