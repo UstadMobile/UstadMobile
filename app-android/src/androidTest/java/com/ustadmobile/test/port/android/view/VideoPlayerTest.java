@@ -3,10 +3,8 @@ package com.ustadmobile.test.port.android.view;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.rule.GrantPermissionRule;
@@ -28,15 +26,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
-
-import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources;
 
 @RunWith(AndroidJUnit4.class)
 public class VideoPlayerTest {
@@ -79,7 +71,8 @@ public class VideoPlayerTest {
         tmpDir.mkdirs();
         File videoFile = new File(tmpDir, "video1.webm");
         File audioTempFile = new File(tmpDir, "audio.c2");
-        File srtTmpFile = new File(tmpDir, "subtitle.srt");
+        File srtTmpFile = new File(tmpDir, "subtitle-english.srt");
+        File germanTmpFile = new File(tmpDir, "subtitle-Deutsch.srt");
 
         FileUtils.copyInputStreamToFile(
                 getClass().getResourceAsStream("/com/ustadmobile/app/android/video1.webm"),
@@ -89,8 +82,12 @@ public class VideoPlayerTest {
                 getClass().getResourceAsStream("/com/ustadmobile/app/android/video1-codec2-version2.c2"),
                 audioTempFile);
         FileUtils.copyInputStreamToFile(
-                getClass().getResourceAsStream("/com/ustadmobile/app/android/srtfile.srt"),
+                getClass().getResourceAsStream("/com/ustadmobile/app/android/subtitle-english.srt"),
                 srtTmpFile);
+
+        FileUtils.copyInputStreamToFile(
+                getClass().getResourceAsStream("/com/ustadmobile/app/android/subtitle-Deutsch.srt"),
+                germanTmpFile);
 
         File dir = Environment.getExternalStorageDirectory();
 
@@ -105,7 +102,8 @@ public class VideoPlayerTest {
         HashMap<File, String> fileMap = new HashMap<>();
         fileMap.put(videoFile, "video1.webm");
         fileMap.put(audioTempFile, "audio.c2");
-        fileMap.put(srtTmpFile, "subtitle.srt");
+        fileMap.put(srtTmpFile, "subtitle-English.srt");
+        fileMap.put(germanTmpFile, "subtitle-Deutsch.srt");
         manager.addEntries(fileMap, true);
 
     }

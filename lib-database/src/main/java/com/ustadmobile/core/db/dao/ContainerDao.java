@@ -20,7 +20,6 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
 
     @UmQuery("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     public abstract void getMostRecentDownloadedContainerForContentEntryAsync(long contentEntry, UmCallback<Container> callback);
 

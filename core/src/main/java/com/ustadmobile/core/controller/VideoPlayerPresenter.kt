@@ -26,6 +26,10 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         private set
     var videoPath: String? = null
         private set
+    var srtMap: HashMap<String, String>? = null
+        private set
+    var srtLangList: ArrayList<String>? = null
+        private set
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -52,6 +56,9 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         containerEntryDao.findByContainer(containerUid, object : UmCallback<List<ContainerEntryWithContainerEntryFile>> {
             override fun onSuccess(result: List<ContainerEntryWithContainerEntryFile>?) {
 
+                srtMap = HashMap()
+                srtLangList = ArrayList()
+                var defaultLangName = ""
                 for (entry in result!!) {
 
                     val fileInContainer = entry.cePath
@@ -59,12 +66,31 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                         videoPath = entry.containerEntryFile.cefPath
                     } else if (fileInContainer == "audio.c2") {
                         audioPath = entry.containerEntryFile.cefPath
-                    } else if (fileInContainer == "subtitle.srt") {
-                        srtPath = entry.containerEntryFile.cefPath
+                    } else if (fileInContainer == "subtitle.srt" || fileInContainer.toLowerCase() == "subtitle-english.srt") {
+                        defaultLangName = if (fileInContainer.contains("-"))
+                            fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
+                        else "English"
+                        srtMap!![defaultLangName] = entry.containerEntryFile.cefPath
+                    } else {
+                        val name = fileInContainer.substring(fileInContainer.indexOf("-") + 1, fileInContainer.lastIndexOf("."))
+                        srtMap!![name] = entry.containerEntryFile.cefPath
+                        srtLangList!!.add(name)
                     }
                 }
 
-                view.runOnUiThread(Runnable { view.setVideoParams(videoPath!!, audioPath!!, srtPath!!) })
+                srtLangList!!.sortedWith(Comparator { a, b ->
+                    when {
+                        a > b -> 1
+                        a < b -> -1
+                        else -> 0
+                    }
+                })
+
+
+                srtLangList!!.add(0, "No Subtitles")
+                srtLangList!!.add(1, defaultLangName)
+
+                view.runOnUiThread(Runnable { view.setVideoParams(videoPath!!, audioPath!!, srtLangList!!, srtMap!!) })
             }
 
             override fun onFailure(exception: Throwable?) {

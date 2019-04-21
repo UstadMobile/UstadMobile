@@ -1,12 +1,16 @@
 package com.ustadmobile.port.android.view;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
@@ -32,6 +36,8 @@ import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.port.android.impl.audio.Codec2Player;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -56,6 +62,8 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
     boolean isPortrait = true;
 
     private Codec2Player audioPlayer;
+
+    private int subtitleSelection = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,11 +157,11 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
 
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
-        setVideoParams(mPresenter.getVideoPath(), mPresenter.getAudioPath(), mPresenter.getSrtPath());
+        setVideoParams(mPresenter.getVideoPath(), mPresenter.getAudioPath(), mPresenter.getSrtLangList(), mPresenter.getSrtMap());
     }
 
     @Override
-    public void setVideoParams(String videoPath, String audioPath, String srtPath) {
+    public void setVideoParams(String videoPath, String audioPath, ArrayList<String> langList, HashMap<String, String> srtMap) {
         if (audioPath != null && !audioPath.isEmpty()) {
 
             player.addListener(new Player.DefaultEventListener() {
@@ -174,28 +182,62 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
         if (videoPath != null && !videoPath.isEmpty()) {
             Uri uri = Uri.parse(videoPath);
             MediaSource mediaSource = buildMediaSource(uri);
-            MergingMediaSource mergedSource = null;
 
-            if (srtPath != null && !srtPath.isEmpty()) {
+            ImageButton subtitles = findViewById(R.id.exo_subtitle_button);
+            if (langList != null && !langList.isEmpty()) {
 
-                Format subtitleFormat = Format.createTextSampleFormat(
-                        null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
-                        C.SELECTION_FLAG_DEFAULT, null);
+                subtitles.setVisibility(View.VISIBLE);
+                subtitles.setOnClickListener(view -> {
 
-                Uri subTitleUri = Uri.parse(srtPath);
+                    AlertDialog.Builder builderSingle = new AlertDialog.Builder((Context) getContext());
+                    builderSingle.setTitle("Select Subtitle Language");
+                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>((Context) getContext(),
+                            android.R.layout.select_dialog_singlechoice, langList);
+                    builderSingle.setSingleChoiceItems(arrayAdapter, subtitleSelection, (dialogInterface, position) -> {
+                        subtitleSelection = position;
+                        String srtName = arrayAdapter.getItem(position);
+                        setSubtitle(srtMap.get(srtName), mediaSource);
+                        dialogInterface.cancel();
+                    });
+                    builderSingle.setNegativeButton("cancel", (dialog, which) -> dialog.dismiss());
+                    builderSingle.show();
 
-                DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
-                        Util.getUserAgent(this, "ustadmobile"));
+                });
+                setSubtitle(srtMap.get(langList.get(1)), mediaSource);
 
-                MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
-                        createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
+            } else {
+                subtitles.setVisibility(View.GONE);
 
-                mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
+                player.prepare(mediaSource, false, false);
             }
 
 
-            player.prepare(mergedSource == null ? mediaSource : mergedSource, false, false);
         }
+    }
+
+    public void setSubtitle(String subtitle, MediaSource mediaSource) {
+
+        if (subtitle == null) {
+            playerView.getSubtitleView().setVisibility(View.GONE);
+            return;
+        }
+
+        playerView.getSubtitleView().setVisibility(View.VISIBLE);
+
+        Format subtitleFormat = Format.createTextSampleFormat(
+                null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
+                C.SELECTION_FLAG_DEFAULT, null);
+
+        Uri subTitleUri = Uri.parse(subtitle);
+
+        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
+                Util.getUserAgent(this, "ustadmobile"));
+
+        MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
+                createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
+
+        MergingMediaSource mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
+        player.prepare(mergedSource, false, false);
     }
 
 
