@@ -43,6 +43,7 @@ public class AboutActivity extends UstadBaseActivity implements AboutView {
                 .loadData(aboutHTML, "text/html", "UTF-8"));
     }
 
+    //TODO: change this to using the standard up navigation arrow, then remove this menu and it's drawable
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_about, menu);

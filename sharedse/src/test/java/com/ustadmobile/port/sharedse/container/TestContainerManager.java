@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.container;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
@@ -14,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -145,6 +147,49 @@ public class TestContainerManager {
                 manager.getEntry("anotherimage.png"))),
                 UMIOUtils.readStreamToByteArray(copy.getInputStream(
                         copy.getEntry("anotherimage.png"))));
+    }
+
+    @Test
+    public void givenExistingContainer_whenFileAddedWithSamePath_thenFileShouldBeOverwritten() throws IOException {
+        Container container = new Container();
+        container.setContainerUid(dbRepo.getContainerDao().insert(container));
+        ContainerManager manager = new ContainerManager(container, db, dbRepo, tmpDir.getAbsolutePath());
+
+        String version1Content = "Version-1";
+        String version2Content = "Version-2";
+
+        File entryv1 = File.createTempFile("tmp", "testv1");
+        FileOutputStream foutV1 = new FileOutputStream(entryv1);
+        UMIOUtils.readFully(new ByteArrayInputStream(version1Content.getBytes()), foutV1);
+        foutV1.close();
+
+        File entryV2 = File.createTempFile("tmp", "testv2");
+        FileOutputStream foutV2 = new FileOutputStream(entryV2);
+        UMIOUtils.readFully(new ByteArrayInputStream(version2Content.getBytes()), foutV2);
+        foutV2.close();
+
+        manager.addEntry(entryv1, "test.txt",
+                ContainerManager.OPTION_COPY | ContainerManager.OPTION_UPDATE_TOTALS);
+
+        byte[] v1ContentFromContainer = UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                manager.getEntry("test.txt")));
+
+        manager.addEntry(entryV2, "test.txt",
+                ContainerManager.OPTION_COPY | ContainerManager.OPTION_UPDATE_TOTALS);
+        byte[] v2ContentFRomContainer = UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                manager.getEntry("test.txt")));
+
+
+        Assert.assertArrayEquals("After adding first version, got version 1 content",
+                version1Content.getBytes(), v1ContentFromContainer);
+
+        Assert.assertArrayEquals("After adding second version, got version 2 content",
+                version2Content.getBytes(), v2ContentFRomContainer);
+        Assert.assertEquals("After adding an entry with the same name, there is still only one entry",
+                1, db.getContainerEntryDao().findByContainer(container.getContainerUid()).size());
+
+
+
     }
 
 

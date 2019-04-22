@@ -24,7 +24,7 @@ import java.util.HashMap
 class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: H5PContentView) :
         UstadBaseController<H5PContentView>(context, arguments, view) {
 
-    private var h5pFileUri: String? = null
+    private var containerUid = 0L
 
     private var h5pDistMountUrl: String? = null
 
@@ -34,7 +34,7 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
     private val mH5PDistMountedCallback = object : UmCallback<String> {
         override fun onSuccess(result: String?) {
             h5pDistMountUrl = result
-            view.mountH5PFile(h5pFileUri!!, h5PFileMountedCallback)
+            view.mountH5PContainer(containerUid, h5PFileMountedCallback)
         }
 
         override fun onFailure(exception: Throwable?) {
@@ -61,10 +61,10 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
                 try {
                     var htmlStr = UMIOUtils.readStreamToString(result)
                     htmlStr = htmlStr.replace("\$DISTPATH", h5pDistMountUrl!!)
-                    val subHtmlStr = htmlStr.replace("\$CONTENTPATH", h5pFileMountUrl!!)
+                    val h5pMountUrl2 = h5pFileMountUrl!!.substring(0, h5pFileMountUrl!!.length - 1)
+                    val subHtmlStr = htmlStr.replace("\$CONTENTPATH", h5pMountUrl2)
                     view.runOnUiThread (Runnable {
-                        view.setContentHtml(h5pFileMountUrl!!,
-                                subHtmlStr)
+                        view.setContentHtml(h5pFileMountUrl!!, subHtmlStr)
                     })
                     val h5PJsonRequest = UmHttpRequest(context,
                             UMFileUtil.joinPaths(h5pFileMountUrl!!, "h5p.json"))
@@ -103,8 +103,9 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
         }
     }
 
-    fun onCreate(args: HashMap<String, String>?) {
-        this.h5pFileUri = args!![UstadView.ARG_CONTAINER_UID]
+    override fun onCreate(savedState: Map<String, String?>?) {
+        super.onCreate(savedState)
+        this.containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()
         view.mountH5PDist(mH5PDistMountedCallback)
     }
 

@@ -1,7 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.test.core.impl.DodgyInputStream;
 
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;

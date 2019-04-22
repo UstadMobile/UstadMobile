@@ -2,9 +2,11 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmTransaction;
 import com.ustadmobile.lib.db.entities.ContainerEntry;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
@@ -16,6 +18,16 @@ import java.util.List;
 @UmRepository
 public abstract class ContainerEntryDao implements BaseDao<ContainerEntry> {
 
+
+    @UmTransaction
+    public void insertAndSetIds(List<ContainerEntry> containerEntryList) {
+        for(ContainerEntry entry : containerEntryList) {
+            entry.setCeUid(insert(entry));
+        }
+    }
+
+    @UmDelete
+    public abstract void deleteList(List<ContainerEntry> containerEntryList);
 
     @UmQuery("SELECT ContainerEntry.*, ContainerEntryFile.* " +
             "FROM ContainerEntry " +
