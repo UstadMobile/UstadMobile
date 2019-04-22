@@ -284,16 +284,22 @@ public class KhanContentScraper implements Runnable {
                     UMLogUtil.logInfo("content length = " + contentLength);
                     if (contentLength != null) {
                         if (Long.parseLong(contentLength) > HUGE_FILE_SIZE) {
+                            UMLogUtil.logInfo("File size too big");
                             break;
                         }
                     }
 
                     long lastModifiedServer = manager != null ? manager.getEntry(url.getPath()) != null ?
-                            manager.getEntry(url.getPath()).getContainerEntryFile().getLastModified() : 0 : 0;
+                            manager.getEntry(url.getPath()).getContainerEntryFile().getLastModified() : 1552521600 : 1552521600;
+
+                    lastModifiedServer = lastModifiedServer == 0 ? 1552521600 : lastModifiedServer;
 
                     long lastModifiedVideo = ContentScraperUtil.getLastModified(conn);
 
                     File oldETagLocation = new File(folder, FilenameUtils.getName(url.getPath()) + ScraperConstants.ETAG_TXT);
+                    oldETagLocation = !ContentScraperUtil.fileHasContent(oldETagLocation) ?
+                            new File(folder, FilenameUtils.getName(content.downloadUrls.mp4Low) + ScraperConstants.ETAG_TXT) : oldETagLocation;
+
                     boolean isEtagUpdated = ContentScraperUtil.isEtagUpdated(conn, destinationDirectory, destinationDirectory.getName());
                     if (ContentScraperUtil.fileHasContent(oldETagLocation)) {
 
@@ -303,12 +309,12 @@ public class KhanContentScraper implements Runnable {
                         isEtagUpdated = !newEtagText.equals(oldETagText);
                         FileUtils.deleteQuietly(oldETagLocation);
                     }
+                    File contentFile = new File(folder, FilenameUtils.getName(url.getPath()));
+                    File webMFile = new File(folder, UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getName()) + WEBM_EXT);
+                    if ((isEtagUpdated && lastModifiedVideo > lastModifiedServer) || !ContentScraperUtil.fileHasContent(webMFile)) {
 
-                    if (isEtagUpdated && lastModifiedVideo > lastModifiedServer) {
-
-                        File contentFile = new File(folder, FilenameUtils.getName(url.getPath()));
+                        UMLogUtil.logTrace("Downloading content for url " + url.toString());
                         FileUtils.copyURLToFile(url, contentFile);
-                        File webMFile = new File(folder, UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getName()) + WEBM_EXT);
                         ShrinkerUtil.convertKhanVideoToWebMAndCodec2(contentFile, webMFile);
                         ContentScraperUtil.deleteFile(contentFile);
                         isContentUpdated = true;
