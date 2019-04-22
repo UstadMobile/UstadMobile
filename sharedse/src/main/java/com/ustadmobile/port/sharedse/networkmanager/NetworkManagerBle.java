@@ -148,7 +148,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
 
-    private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
+    //private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
 
     private DownloadJobItemManagerList jobItemManagerList;
 
@@ -177,6 +177,15 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public final void setContext(Object context){
         this.mContext = context;
+    }
+
+    /**
+     * Only for testing - allows the unit test to set this without running the main onCreate method
+     *
+     * @param jobItemManagerList DownloadJobItemManagerList
+     */
+    public final void setJobItemManagerList(DownloadJobItemManagerList jobItemManagerList) {
+        this.jobItemManagerList = jobItemManagerList;
     }
 
     private LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>
@@ -211,7 +220,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * Start web server, advertising and discovery
      */
     public void onCreate() {
-        umAppDatabase = UmAppDatabase.getInstance(new Object());
+        umAppDatabase = UmAppDatabase.getInstance(mContext);
         jobItemManagerList = new DownloadJobItemManagerList(umAppDatabase);
         downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
@@ -736,12 +745,6 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      * @return
      */
     public DownloadJobItemManager createNewDownloadJobItemManager(DownloadJob newDownloadJob) {
-//        newDownloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(newDownloadJob));
-//        DownloadJobItemManager manager =  new DownloadJobItemManager(umAppDatabase,
-//                (int)newDownloadJob.getDjUid());
-//        downloadJobItemManagerMap.put((int)newDownloadJob.getDjUid(), manager);
-//        manager.setOnDownloadJobItemChangeListener(this);
-//        return manager;
         return jobItemManagerList.createNewDownloadJobItemManager(newDownloadJob);
     }
 
@@ -752,48 +755,13 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
 
     public DownloadJobItemManager getDownloadJobItemManager(int downloadJobId) {
-        return downloadJobItemManagerMap.get(downloadJobId);
+        return jobItemManagerList.getDownloadJobItemManager(downloadJobId);
     }
 
     public void findDownloadJobItemStatusByContentEntryUid(long contentEntryUid,
                                                             UmResultCallback<DownloadJobItemStatus> callback) {
         jobItemManagerList.findDownloadJobItemStatusByContentEntryUid(contentEntryUid, callback);
-        /*
-        final List<DownloadJobItemManager> managerList = new LinkedList<>(downloadJobItemManagerMap.values());
-        final AtomicInteger checksLeft = new AtomicInteger(managerList.size());
-
-        if(managerList.isEmpty()) {
-            callback.onDone(null);
-        }
-
-        for(DownloadJobItemManager manager : managerList) {
-            manager.findStatusByContentEntryUid(contentEntryUid, (status) -> {
-                if(status != null) {
-                    callback.onDone(status);
-                    checksLeft.set(-1);
-                }else {
-                    if(checksLeft.decrementAndGet() == 0) {
-                        //all known managers were checked, but this entry was not found anywhere
-                        callback.onDone(null);
-                    }
-                }
-            });
-        }*/
     }
-
-//    @Override
-//    public void onDownloadJobItemChange(DownloadJobItemStatus status) {
-//        LinkedList<DownloadJobItemManager.OnDownloadJobItemChangeListener> listenersToNotify =
-//                new LinkedList<>();
-//        synchronized (downloadJobItemChangeListeners) {
-//            listenersToNotify.addAll(downloadJobItemChangeListeners);
-//        }
-//
-//        for(DownloadJobItemManager.OnDownloadJobItemChangeListener listener
-//                : listenersToNotify) {
-//            listener.onDownloadJobItemChange(status);
-//        }
-//    }
 
     public void addDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
         jobItemManagerList.addDownloadChangeListener(listener);
@@ -802,7 +770,5 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     public void removeDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
         jobItemManagerList.removeDownloadChangeListener(listener);
     }
-
-
 
 }

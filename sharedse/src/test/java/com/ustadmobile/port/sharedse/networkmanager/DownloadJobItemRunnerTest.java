@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManagerList;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
@@ -150,13 +151,15 @@ public class DownloadJobItemRunnerTest {
 
         mockedNetworkManager = spy(NetworkManagerBle.class);
         mockedNetworkManager.setDatabase(clientDb);
+        mockedNetworkManager.setContext(context);
+        mockedNetworkManager.setJobItemManagerList(new DownloadJobItemManagerList(clientDb));
 
         mockedNetworkManagerBleWorking.set(true);
 
         mockedNetworkManagerWifiConnectWorking.set(true);
 
         mockedEntryStatusTask = mock(BleEntryStatusTask.class);
-        mockedNetworkManager.setContext(context);
+
 
         EmbeddedHTTPD httpd = new EmbeddedHTTPD(0,context);
         httpd.start();

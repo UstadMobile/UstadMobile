@@ -7,11 +7,11 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Manages a list of DownloadJobItemManager. Creates new items, closes downloadjobs that have finished etc.
+ * Manages a list of DownloadJobItemManagers. Creates new items, closes downloadjobs that have finished etc.
  */
-class DownloadJobItemManagerList(val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider, DownloadJobItemManager.OnDownloadJobItemChangeListener{
+class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider, DownloadJobItemManager.OnDownloadJobItemChangeListener{
 
-    private val managerList = mutableListOf<DownloadJobItemManager>()
+    private val managerMap = mutableMapOf<Int, DownloadJobItemManager>()
 
     private val changeListeners = mutableListOf<DownloadJobItemManager.OnDownloadJobItemChangeListener>()
 
@@ -19,16 +19,22 @@ class DownloadJobItemManagerList(val appDatabase: UmAppDatabase) : DownloadJobIt
         newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob)
         val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid.toInt())
         manager.onDownloadJobItemChangeListener = this
+        managerMap.put(newDownloadJob.djUid.toInt(), manager)
+
         return manager
     }
 
+    fun getDownloadJobItemManager(downloadJobId: Int): DownloadJobItemManager? {
+        return managerMap.get(downloadJobId)
+    }
+
     override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long, callback: UmResultCallback<DownloadJobItemStatus>?) {
-        val managerListToCheck = managerList.toList()
-        if(managerListToCheck.isEmpty()){
+        if(managerMap.isEmpty()){
             callback?.onDone(null)
             return
         }
 
+        val managerListToCheck = managerMap.values.toList()
         val checksLeft = AtomicInteger(managerListToCheck.size)
 
         for(manager in managerListToCheck) {
@@ -58,12 +64,12 @@ class DownloadJobItemManagerList(val appDatabase: UmAppDatabase) : DownloadJobIt
     }
 
     override fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
-        var listenersToNotify = null as List<DownloadJobItemManager.OnDownloadJobItemChangeListener>?
+        var listenersToNotify : List<DownloadJobItemManager.OnDownloadJobItemChangeListener>
         synchronized(changeListeners) {
             listenersToNotify = changeListeners.toList()
         }
 
-        for(listener in changeListeners) {
+        for(listener in listenersToNotify) {
             listener.onDownloadJobItemChange(status)
         }
     }
