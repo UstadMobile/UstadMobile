@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -26,16 +28,22 @@ import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.ByteArrayDataSource;
+import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.FileDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.VideoPlayerPresenter;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.port.android.impl.audio.Codec2Player;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -187,12 +195,13 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
             if (langList != null && !langList.isEmpty()) {
 
                 subtitles.setVisibility(View.VISIBLE);
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>((Context) getContext(),
+                        android.R.layout.select_dialog_singlechoice, langList);
+
                 subtitles.setOnClickListener(view -> {
 
                     AlertDialog.Builder builderSingle = new AlertDialog.Builder((Context) getContext());
                     builderSingle.setTitle("Select Subtitle Language");
-                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>((Context) getContext(),
-                            android.R.layout.select_dialog_singlechoice, langList);
                     builderSingle.setSingleChoiceItems(arrayAdapter, subtitleSelection, (dialogInterface, position) -> {
                         subtitleSelection = position;
                         String srtName = arrayAdapter.getItem(position);
@@ -215,9 +224,9 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
         }
     }
 
-    public void setSubtitle(String subtitle, MediaSource mediaSource) {
+    public void setSubtitle(String subtitleData, MediaSource mediaSource) {
 
-        if (subtitle == null) {
+        if (subtitleData == null) {
             playerView.getSubtitleView().setVisibility(View.GONE);
             return;
         }
@@ -228,16 +237,33 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
                 null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
                 C.SELECTION_FLAG_DEFAULT, null);
 
-        Uri subTitleUri = Uri.parse(subtitle);
+        UmAppDatabase repoAppDatabase = UmAccountManager.INSTANCE.getRepositoryForActiveAccount(getContext());
+        UmAppDatabase appDatabase = UmAppDatabase.getInstance(getContext());
 
-        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
-                Util.getUserAgent(this, "ustadmobile"));
+        HandlerThread ht = new HandlerThread("SubtitleThread");
+        ht.start();
+        new Handler(ht.getLooper()).post(() -> {
 
-        MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
-                createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);
+            try {
+                ContainerManager containerManager = new ContainerManager(mPresenter.getContainer(), appDatabase, repoAppDatabase);
 
-        MergingMediaSource mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
-        player.prepare(mergedSource, false, false);
+                ByteArrayDataSource byteArrayDataSource = new ByteArrayDataSource(
+                        UMIOUtils.readStreamToString(containerManager.getInputStream(containerManager.getEntry(subtitleData))).getBytes());
+
+                DataSource.Factory factory = () -> byteArrayDataSource;
+
+                MediaSource subTitleSource = new SingleSampleMediaSource.Factory(factory).
+                        createMediaSource(Uri.EMPTY, subtitleFormat, C.TIME_UNSET);
+
+                MergingMediaSource mergedSource = new MergingMediaSource(mediaSource, subTitleSource);
+                player.prepare(mergedSource, false, false);
+            } catch (IOException ignored) {
+
+            }
+
+        });
+
+
     }
 
 
