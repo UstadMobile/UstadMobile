@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GestureDetectorCompat;
@@ -113,7 +112,7 @@ public class EpubContentPageFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         if(viewGroup == null) {
-            viewGroup = (RelativeLayout) inflater.inflate(R.layout.fragment_container_page,
+            viewGroup = (RelativeLayout) inflater.inflate(R.layout.fragment_epubcontent_page,
                     container, false);
             webView = viewGroup.findViewById(R.id.fragment_container_page_webview);
         }else {
