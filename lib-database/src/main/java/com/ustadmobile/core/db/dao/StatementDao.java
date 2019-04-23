@@ -15,6 +15,9 @@ public abstract class StatementDao implements SyncableDao<StatementEntity, State
     @UmQuery("SELECT * FROM StatementEntity WHERE statementId = :id LIMIT 1")
     public abstract StatementEntity findByStatementId(String id);
 
+    @UmQuery("SELECT * FROM StatementEntity WHERE statementId IN (:id)")
+    public abstract List<StatementEntity> findByStatementIdList(List<String> id);
+
     @UmQuery("SELECT * From StatementEntity")
     public abstract List<StatementEntity> getAll();
 }

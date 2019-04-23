@@ -69,7 +69,7 @@ public class TestXapiStateResponder {
         int code = httpCon.getResponseCode();
 
         Assert.assertEquals(204, code);
-        StateEntity stateEntity = appRepo.getStateDao().findByStateId("http://www.example.com/states/1");
+        StateEntity stateEntity = appRepo.getStateDao().findByStateId("http://www.example.com/states/1", agentEntity.agentUid, activityId, registration);
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity.getActivityId());
     }
 
@@ -101,7 +101,7 @@ public class TestXapiStateResponder {
         int code = httpCon.getResponseCode();
 
         Assert.assertEquals(204, code);
-        StateEntity stateEntity = appRepo.getStateDao().findByStateId("http://www.example.com/states/1");
+        StateEntity stateEntity = appRepo.getStateDao().findByStateId("http://www.example.com/states/1", agentEntity.agentUid, activityId, registration);
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity.getActivityId());
     }
 
@@ -132,7 +132,7 @@ public class TestXapiStateResponder {
         int code = httpCon.getResponseCode();
 
         Assert.assertEquals(204, code);
-        StateEntity stateEntity = appRepo.getStateDao().findByStateId("http://www.example.com/states/1");
+        StateEntity stateEntity = appRepo.getStateDao().findByStateId("http://www.example.com/states/1", agentEntity.agentUid, activityId, registration);
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity.getActivityId());
 
         HttpURLConnection getCon = (HttpURLConnection) new URL(urlString).openConnection();
@@ -151,7 +151,7 @@ public class TestXapiStateResponder {
 
         Assert.assertEquals(204, deleteCode);
 
-        StateEntity deletedState = appRepo.getStateDao().findByStateId("http://www.example.com/states/1");
+        StateEntity deletedState = appRepo.getStateDao().findByStateId("http://www.example.com/states/1", agentEntity.agentUid, activityId, registration);
         Assert.assertFalse("is set to inactive", deletedState.isIsactive());
 
     }

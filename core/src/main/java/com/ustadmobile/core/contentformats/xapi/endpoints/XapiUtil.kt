@@ -16,12 +16,14 @@ object XapiUtil {
                 actor.openid,
                 actor.mbox,
                 if (actor.account != null) actor.account!!.name else null,
+                if (actor.account != null) actor.account!!.homePage else null,
                 actor.mbox_sha1sum)
         if (agentEntity == null) {
             agentEntity = AgentEntity()
             agentEntity.agentOpenid = actor.openid
             agentEntity.agentMbox = actor.mbox
             agentEntity.agentAccountName = if (actor.account != null) actor.account!!.name else null
+            agentEntity.agentHomePage = if (actor.account != null) actor.account!!.homePage else null
             agentEntity.agentMbox_sha1sum = actor.mbox_sha1sum
             agentEntity.agentPersonUid = person?.personUid ?: 0
             agentEntity.agentUid = dao.insert(agentEntity)
@@ -85,7 +87,7 @@ object XapiUtil {
     }
 
     fun insertOrUpdateState(dao: StateDao, state: State, agentUid: Long): StateEntity {
-        val stateEntity = dao.findByStateId(state.stateId)
+        val stateEntity = dao.findByStateId(state.stateId, agentUid, state.activityId, state.registration)
 
         val changedState = StateEntity(state.activityId, agentUid,
                 state.registration, state.stateId, true, System.currentTimeMillis())
@@ -108,16 +110,24 @@ object XapiUtil {
             val value = contentMap[key]
             val content = dao.findStateContentByKeyAndStateUid(key, stateEntity.stateUid)
             if (content == null) {
-                val contentEntity = StateContentEntity(key, stateEntity.stateUid, value.toString())
+                val contentEntity = StateContentEntity(key, stateEntity.stateUid, value.toString(), true)
                 contentEntity.stateContentUid = dao.insert(contentEntity)
             } else {
-                val changedContent = StateContentEntity(key, stateEntity.stateUid, value.toString())
+                val changedContent = StateContentEntity(key, stateEntity.stateUid, value.toString(), true)
                 changedContent.stateContentUid = content.stateContentUid
                 if (changedContent != content) {
                     dao.update(changedContent)
                 }
             }
         }
+    }
+
+    fun deleteAndInsertNewStateContent(stateContentDao: StateContentDao, content: HashMap<String, Any>, stateEntity: StateEntity) {
+
+        stateContentDao.setInActiveStateContentByKeyAndUid(false, stateEntity.stateUid)
+
+        insertOrUpdateStateContent(stateContentDao, content, stateEntity)
+
     }
 
     fun insertOrUpdateStatementEntity(dao: StatementDao, statement: Statement, gson: Gson,

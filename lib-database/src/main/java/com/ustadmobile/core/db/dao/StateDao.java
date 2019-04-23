@@ -12,17 +12,19 @@ import java.util.List;
 @UmRepository
 public abstract class StateDao implements SyncableDao<StateEntity, StateDao> {
 
-    @UmQuery("SELECT * FROM StateEntity WHERE stateId = :id LIMIT 1")
-    public abstract StateEntity findByStateId(String id);
+    @UmQuery("SELECT * FROM StateEntity WHERE stateId = :id AND agentUid = :agentUid AND activityId = :activityId " +
+            "AND registration = :registration AND isactive LIMIT 1")
+    public abstract StateEntity findByStateId(String id, long agentUid, String activityId, String registration);
 
     @UmQuery("SELECT * FROM StateEntity WHERE agentUid = :agentUid AND activityId = :activityId " +
             "AND registration = :registration AND isactive AND timestamp > :since")
     public abstract List<StateEntity> findStateIdByAgentAndActivity(long agentUid, String activityId, String registration, String since);
 
     @UmQuery("UPDATE StateEntity SET isactive = :isActive WHERE agentUid = :agentUid AND activityId = :activityId " +
-            "AND registration = :registration AND isactive AND timestamp > :since")
-    public abstract void updateStateToInActive(long agentUid, String activityId, String registration, String since, boolean isActive);
+            "AND registration = :registration AND isactive")
+    public abstract void updateStateToInActive(long agentUid, String activityId, String registration, boolean isActive);
 
-    @UmQuery("UPDATE StateEntity SET isactive = :isActive WHERE stateId = :stateId")
-    public abstract void setStateInActive(String stateId, boolean isActive);
+    @UmQuery("UPDATE StateEntity SET isactive = :isActive WHERE stateId = :stateId AND agentUid = :agentUid AND activityId = :activityId " +
+            "AND registration = :registration AND isactive")
+    public abstract void setStateInActive(String stateId, long agentUid, String activityId, String registration, boolean isActive);
 }

@@ -13,9 +13,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
-import java.util.*
 
-class TestStatementParser {
+class TestStatementEndpoint {
 
     val contextWithObject = "/com/ustadmobile/core/contentformats/xapi/contextWitObject"
     val fullstatement = "/com/ustadmobile/core/contentformats/xapi/fullstatement"
@@ -44,12 +43,10 @@ class TestStatementParser {
 
         val statement = gson!!.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(simpleStatement)), Statement::class.java)
         val endpoint = StatementEndpoint(repo!!, gson!!)
-        val list = ArrayList<Statement>()
-        list.add(statement)
-        endpoint.storeStatements(list)
+        endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo!!.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:user@example.com", "", "")
+        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:user@example.com", "", "", "")
         val verb = repo!!.verbDao.findByUrl("http://example.com/xapi/verbs#sent-a-statement")
         val xobject = repo!!.xObjectDao.findByObjectId("http://example.com/xapi/activity/simplestatement")
 
@@ -67,12 +64,10 @@ class TestStatementParser {
 
         val statement = gson!!.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(contextWithObject)), Statement::class.java)
         val endpoint = StatementEndpoint(repo!!, gson!!)
-        val list = ArrayList<Statement>()
-        list.add(statement)
-        endpoint.storeStatements(list)
+        endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:sally@example.com", "", "")
+        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:sally@example.com", "", "", "")
         val verb = repo!!.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/experienced")
         val xobject = repo!!.xObjectDao.findByObjectId("http://example.com/activities/solo-hang-gliding")
         val parent = repo!!.xObjectDao.findByObjectId("http://example.com/activities/hang-gliding-class-a")
@@ -98,40 +93,38 @@ class TestStatementParser {
 
         val statement = gson!!.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(fullstatement)), Statement::class.java)
         val endpoint = StatementEndpoint(repo!!, gson!!)
-        val list = ArrayList<Statement>()
-        list.add(statement)
-        endpoint.storeStatements(list)
+        endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "")
+        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
         val verb = repo!!.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/attended")
         val xobject = repo!!.xObjectDao.findByObjectId("http://www.example.com/meetings/occurances/34534")
-        val instructor = repo!!.agentDao.getAgentByAnyId("", "", "13936749", "")
-        val authority = repo!!.agentDao.getAgentByAnyId("", "", "anonymous", "")
-        val team = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "")
+        val instructor = repo!!.agentDao.getAgentByAnyId("", "", "13936749", "", "")
+        val authority = repo!!.agentDao.getAgentByAnyId("", "", "anonymous", "", "")
+        val team = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
         val parent = repo!!.xObjectDao.findByObjectId("http://www.example.com/meetings/series/267")
         val contextJoin = repo!!.contextXObjectStatementJoinDao
                 .findByStatementAndObjectUid(entity.statementUid, parent.xObjectUid)
 
-        Assert.assertEquals("joined to agent", entity.agentUid, agent.agentUid)
+        Assert.assertEquals("joined to agent", agent.agentUid, entity.agentUid)
         Assert.assertEquals("mailto:teampb@example.com", agent.agentMbox)
 
-        Assert.assertEquals("joined to verb", entity.verbUid, verb.verbUid)
-        Assert.assertEquals("joined to object", entity.xObjectUid, xobject.xObjectUid)
+        Assert.assertEquals("joined to verb", verb.verbUid, entity.verbUid)
+        Assert.assertEquals("joined to object", xobject.xObjectUid, entity.xObjectUid)
 
         Assert.assertEquals("context registration matched", "ec531277-b57b-4c15-8d91-d292c5b2b8f7", entity.contextRegistration)
         Assert.assertEquals("context platform matched", "Example virtual meeting software", entity.contextPlatform)
         Assert.assertEquals("context statement matched", "6690e6c9-3ef0-4ed3-8b37-7f3964730bee", entity.contextStatementId)
 
-        Assert.assertEquals("joined to instructor", entity.instructorUid, instructor.agentUid)
+        Assert.assertEquals("joined to instructor", instructor.agentUid, entity.instructorUid)
         Assert.assertEquals("13936749", instructor.agentAccountName)
 
-        Assert.assertEquals("joined to authority", entity.authorityUid, authority.agentUid)
-        Assert.assertEquals("joined to team", entity.teamUid, team.agentUid)
+        Assert.assertEquals("joined to authority", authority.agentUid, entity.authorityUid)
+        Assert.assertEquals("joined to team", team.agentUid, entity.teamUid)
 
-        Assert.assertEquals("context statement joined with parent flag", contextJoin.contextActivityFlag.toLong(), ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong())
+        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin.contextActivityFlag.toLong())
         Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin.contextXObjectUid)
-        Assert.assertEquals("context statement joined matches with statement", entity.statementUid, contextJoin.contextStatementUid)
+        Assert.assertEquals("context statement joined matches with statement", contextJoin.contextStatementUid, entity.statementUid)
 
         Assert.assertTrue("result success matched", entity.isResultSuccess)
         Assert.assertTrue("result completion matched", entity.isResultCompletion)
@@ -146,27 +139,25 @@ class TestStatementParser {
 
         val statement = gson!!.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(subStatement)), Statement::class.java)
         val endpoint = StatementEndpoint(repo!!, gson!!)
-        val list = ArrayList<Statement>()
-        list.add(statement)
-        endpoint.storeStatements(list)
+        endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo!!.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "")
+        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "", "")
         val verb = repo!!.verbDao.findByUrl("http://example.com/planned")
-        val subActor = repo!!.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "")
+        val subActor = repo!!.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "", "")
         val subVerb = repo!!.verbDao.findByUrl("http://example.com/visited")
         val subobject = repo!!.xObjectDao.findByObjectId("http://example.com/website")
 
-        Assert.assertEquals("joined to agent", entity.agentUid, agent.agentUid)
+        Assert.assertEquals("joined to agent", agent.agentUid, entity.agentUid)
         Assert.assertEquals("mailto:test@example.com", agent.agentMbox)
 
-        Assert.assertEquals("joined to verb", entity.verbUid, verb.verbUid)
+        Assert.assertEquals("joined to verb", verb.verbUid, entity.verbUid)
 
-        Assert.assertEquals("joined to substatement actor", entity.subStatementActorUid, subActor.agentUid)
+        Assert.assertEquals("joined to substatement actor", subActor.agentUid, entity.subStatementActorUid)
         Assert.assertEquals("mailto:test@example.com", subActor.agentMbox)
 
-        Assert.assertEquals("joined to substatement verb", entity.substatementVerbUid, subVerb.verbUid)
-        Assert.assertEquals("joined to substatement object", entity.subStatementObjectUid, subobject.xObjectUid)
+        Assert.assertEquals("joined to substatement verb", subVerb.verbUid, entity.substatementVerbUid)
+        Assert.assertEquals("joined to substatement object", subobject.xObjectUid, entity.subStatementObjectUid)
         Assert.assertEquals("with substatment, object should be null", 0, entity.xObjectUid)
 
 
@@ -195,6 +186,7 @@ class TestStatementParser {
                 agentEntity.agentOpenid,
                 agentEntity.agentMbox,
                 agentEntity.agentAccountName,
+                agentEntity.agentHomePage,
                 agentEntity.agentMbox_sha1sum)
 
         Assert.assertEquals("not same mbox", agentEntity.agentMbox, entity.agentMbox)

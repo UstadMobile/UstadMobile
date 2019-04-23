@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentformats.xapi.Statement;
 import com.ustadmobile.core.contentformats.xapi.StatementDeserializer;
 import com.ustadmobile.core.contentformats.xapi.StatementSerializer;
 import com.ustadmobile.core.contentformats.xapi.endpoints.StatementEndpoint;
+import com.ustadmobile.core.contentformats.xapi.endpoints.StatementRequestException;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.util.UMIOUtils;
 
@@ -28,17 +29,17 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 
 public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
 
-    String[] wantedKeys = new String[]{PARAM_STATEMENT_ID, PARAM_VOID_STATEMENT_ID, PARAM_ATTACHMENTS, PARAM_FORMAT};
-
-    public static final Type listType = new TypeToken<ArrayList<Statement>>() {
+    private static final Type STATEMENT_LIST_TYPE = new TypeToken<ArrayList<Statement>>() {
     }.getType();
 
     public static final String PARAM_STATEMENT_ID = "statementId";
-    public static final String PARAM_VOID_STATEMENT_ID = "voidedStatementId";
-    public static final String PARAM_ATTACHMENTS = "attachments";
-    public static final String PARAM_FORMAT = "format";
+    private static final String PARAM_VOID_STATEMENT_ID = "voidedStatementId";
+    private static final String PARAM_ATTACHMENTS = "attachments";
+    private static final String PARAM_FORMAT = "format";
 
-    public static final int PARAM_APPREPO_INDEX = 0;
+    private static final String[] WANTED_KEYS = new String[]{PARAM_STATEMENT_ID, PARAM_VOID_STATEMENT_ID, PARAM_ATTACHMENTS, PARAM_FORMAT};
+
+    private static final int PARAM_APPREPO_INDEX = 0;
 
 
     @Override
@@ -55,7 +56,7 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
             }
 
             Set<String> keyList = urlParams.keySet();
-            List<String> wantedList = Arrays.asList(wantedKeys);
+            List<String> wantedList = Arrays.asList(WANTED_KEYS);
             for (String key : keyList) {
                 if (!wantedList.contains(key)) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
@@ -79,10 +80,7 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
     public NanoHTTPD.Response put(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
         UmAppDatabase repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase.class);
 
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Statement.class, new StatementSerializer());
-        builder.registerTypeAdapter(Statement.class, new StatementDeserializer());
-        Gson gson = builder.create();
+        Gson gson = createGson();
         byte[] content = null;
         FileInputStream fin = null;
         ByteArrayOutputStream bout = null;
@@ -107,39 +105,19 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
             if (queryParams != null && queryParams.containsKey("statementId")) {
                 statementId = queryParams.get("statementId").get(0);
             }
+
             if (content != null || statement != null) {
                 statement = content != null ? new String(content) : statement;
-                ArrayList<Statement> statements = new ArrayList<>();
-                if (statement.startsWith("{")) {
-                    Statement obj = gson.fromJson(statement, Statement.class);
 
-                    if (statementId != null && !statementId.isEmpty()) {
-                        if (!statementId.equalsIgnoreCase(obj.getId())) {
-                            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
-                                    "application/octet", null);
-                        }
-                    }
-
-                    statements.add(obj);
-                } else {
-                    statements.addAll(gson.fromJson(statement, listType));
-                }
+                ArrayList<Statement> statements = getStatementsFromJson(statement.trim(), gson);
                 StatementEndpoint endpoint = new StatementEndpoint(repo, gson);
-
-                if (endpoint.hasMultipleStatementWithSameId(statements)) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
-                            "application/octet", null);
-                }
-
-                if (endpoint.hasExistingStatements(statements)) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT,
-                            "application/octet", null);
-                }
-
-                endpoint.storeStatements(statements);
+                endpoint.storeStatements(statements, statementId);
             } else {
-                throw new IOException("no content found");
+                throw new StatementRequestException("no content found", 204);
             }
+        } catch (StatementRequestException e) {
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.lookup(e.getErrorCode()),
+                    "application/octet", e.getMessage());
         } catch (IOException | NanoHTTPD.ResponseException e) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.getMessage());
@@ -152,14 +130,18 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
                 "application/octet", null);
     }
 
+    private Gson createGson() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(Statement.class, new StatementSerializer());
+        builder.registerTypeAdapter(Statement.class, new StatementDeserializer());
+        return builder.create();
+    }
+
     @Override
     public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
         UmAppDatabase repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase.class);
 
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Statement.class, new StatementSerializer());
-        builder.registerTypeAdapter(Statement.class, new StatementDeserializer());
-        Gson gson = builder.create();
+        Gson gson = createGson();
         List<String> uuids;
         InputStream is = null;
         try {
@@ -177,41 +159,39 @@ public class XapiStatementResponder implements RouterNanoHTTPD.UriResponder {
             }
             Map<String, String> map = new HashMap<>();
             session.parseBody(map);
-            String statement = session.getQueryParameterString();
+            String statement = session.getQueryParameterString().trim();
 
-            ArrayList<Statement> statements = new ArrayList<>();
-            if (statement.startsWith("{")) {
-                Statement obj = gson.fromJson(statement, Statement.class);
-                statements.add(obj);
-            } else {
-                statements.addAll(gson.fromJson(statement, listType));
-            }
+            ArrayList<Statement> statements = getStatementsFromJson(statement, gson);
 
             StatementEndpoint endpoint = new StatementEndpoint(repo, gson);
-
-            if (endpoint.hasMultipleStatementWithSameId(statements)) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
-                        "application/octet", null);
-            }
-
-            if (endpoint.hasExistingStatements(statements)) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT,
-                        "application/octet", null);
-            }
-
-            uuids = endpoint.storeStatements(statements);
+            uuids = endpoint.storeStatements(statements, "");
             is = new ByteArrayInputStream(gson.toJson(uuids).getBytes());
 
             return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
                     "application/octet", is);
 
         } catch (IOException | NanoHTTPD.ResponseException e) {
+            if (e.getMessage() != null && e.getMessage().equals("Has Existing Statements")) {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT,
+                        "application/octet", null);
+            }
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                     "application/octet", e.getMessage());
         } finally {
             UMIOUtils.INSTANCE.closeQuietly(is);
         }
 
+    }
+
+    private ArrayList<Statement> getStatementsFromJson(String statement, Gson gson) {
+        ArrayList<Statement> statements = new ArrayList<>();
+        if (statement.startsWith("{")) {
+            Statement obj = gson.fromJson(statement, Statement.class);
+            statements.add(obj);
+        } else {
+            statements.addAll(gson.fromJson(statement, STATEMENT_LIST_TYPE));
+        }
+        return statements;
     }
 
     @Override

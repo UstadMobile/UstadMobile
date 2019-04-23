@@ -12,9 +12,14 @@ import java.util.List;
 @UmRepository
 public abstract class StateContentDao implements SyncableDao<StateContentEntity, StateContentDao> {
 
-    @UmQuery("SELECT * FROM StateContentEntity WHERE stateContentStateUid = :id")
+    @UmQuery("SELECT * FROM StateContentEntity WHERE stateContentStateUid = :id AND isactive")
     public abstract List<StateContentEntity> findAllStateContentWithStateUid(long id);
 
-    @UmQuery("SELECT * FROM StateContentEntity WHERE stateContentStateUid = :stateUid AND stateContentKey = :key")
+    @UmQuery("SELECT * FROM StateContentEntity WHERE stateContentStateUid = :stateUid AND stateContentKey = :key AND isactive")
     public abstract StateContentEntity findStateContentByKeyAndStateUid(String key, long stateUid);
+
+    @UmQuery("UPDATE StateContentEntity SET isactive = :isActive WHERE stateContentUid = :stateUid")
+    public abstract void setInActiveStateContentByKeyAndUid(boolean isActive, long stateUid);
+
+
 }

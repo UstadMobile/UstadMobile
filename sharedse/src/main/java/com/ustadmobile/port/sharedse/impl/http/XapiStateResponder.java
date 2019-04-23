@@ -45,14 +45,8 @@ public class XapiStateResponder implements RouterNanoHTTPD.UriResponder {
                     queryParams.get("since").get(0) : "";
 
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-            StateEndpoint endpoint = new StateEndpoint(repo, gson);
-            String json;
-            if (stateId == null || stateId.isEmpty()) {
-                json = endpoint.getListOfStateId(agentJson, activityId, registration, since);
-            } else {
-                json = endpoint.getStateContent(stateId);
-
-            }
+            StateEndpoint endpoint = new StateEndpoint(repo, gson, null);
+            String json = endpoint.getContent(stateId, agentJson, activityId, registration, since);
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     "application/octet", json);
 
@@ -92,6 +86,8 @@ public class XapiStateResponder implements RouterNanoHTTPD.UriResponder {
             String registration = queryParams.containsKey("registration") ?
                     queryParams.get("registration").get(0) : "";
 
+            String contentType = session.getHeaders().get("Content-Type");
+
             Gson gson = new Gson();
             Actor agent = gson.fromJson(agentJson, Actor.class);
             String contentJson = new String(content);
@@ -99,8 +95,8 @@ public class XapiStateResponder implements RouterNanoHTTPD.UriResponder {
             contentMap = gson.fromJson(contentJson, contentMapToken);
 
             State state = new State(stateId, agent, activityId, contentMap, registration);
-            StateEndpoint endpoint = new StateEndpoint(repo, gson);
-            endpoint.storeState(state);
+            StateEndpoint endpoint = new StateEndpoint(repo, gson, contentType);
+            endpoint.overrideState(state);
 
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                     "application/octet", null);
@@ -137,8 +133,10 @@ public class XapiStateResponder implements RouterNanoHTTPD.UriResponder {
             HashMap<String, Object> contentMap;
             contentMap = gson.fromJson(stateString, contentMapToken);
 
+            String contentType = session.getHeaders().get("Content-Type");
+
             State state = new State(stateId, agent, activityId, contentMap, registration);
-            StateEndpoint endpoint = new StateEndpoint(repo, gson);
+            StateEndpoint endpoint = new StateEndpoint(repo, gson, contentType);
             endpoint.storeState(state);
 
             return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.NO_CONTENT,
@@ -164,15 +162,13 @@ public class XapiStateResponder implements RouterNanoHTTPD.UriResponder {
                     queryParams.get("stateId").get(0) : "";
             String registration = queryParams.containsKey("registration") ?
                     queryParams.get("registration").get(0) : "";
-            String since = queryParams.containsKey("since") ?
-                    queryParams.get("since").get(0) : "";
 
             Gson gson = new Gson();
-            StateEndpoint endpoint = new StateEndpoint(repo, gson);
+            StateEndpoint endpoint = new StateEndpoint(repo, gson, null);
             if (stateId == null || stateId.isEmpty()) {
-                endpoint.deleteListOfStates(agentJson, activityId, registration, since);
+                endpoint.deleteListOfStates(agentJson, activityId, registration);
             } else {
-                endpoint.deleteStateContent(stateId);
+                endpoint.deleteStateContent(stateId, agentJson, activityId, registration);
 
             }
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,

@@ -24,6 +24,8 @@ public class AgentEntity {
 
     private String agentAccountName;
 
+    private String agentHomePage;
+
     private long agentPersonUid;
 
     @UmSyncMasterChangeSeqNum
@@ -105,5 +107,13 @@ public class AgentEntity {
 
     public void setStatementLastChangedBy(int statementLastChangedBy) {
         this.statementLastChangedBy = statementLastChangedBy;
+    }
+
+    public String getAgentHomePage() {
+        return agentHomePage;
+    }
+
+    public void setAgentHomePage(String agentHomePage) {
+        this.agentHomePage = agentHomePage;
     }
 }

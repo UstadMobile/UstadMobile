@@ -39,7 +39,7 @@ public class TestXapiStatementResponder {
     public void testput() throws IOException {
 
         String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/statements";
-        String content = UMIOUtils.readToString(
+        String content =  UMIOUtils.INSTANCE.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8");
 
         HttpURLConnection httpCon = (HttpURLConnection) new URL(urlString).openConnection();
@@ -62,7 +62,7 @@ public class TestXapiStatementResponder {
     public void testPost() throws IOException {
 
         String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/statements";
-        String content = UMIOUtils.readToString(
+        String content = UMIOUtils.INSTANCE.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8");
 
         HttpURLConnection httpCon = (HttpURLConnection) new URL(urlString).openConnection();
@@ -86,7 +86,7 @@ public class TestXapiStatementResponder {
     public void givenAValidStatement_whenPostRequestHasQueryParamsWithMethodisPut_thenShouldReturn204() throws IOException {
 
         String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/statements?method=PUT";
-        String content = UMIOUtils.readToString(
+        String content =  UMIOUtils.INSTANCE.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8");
 
         HttpURLConnection httpCon = (HttpURLConnection) new URL(urlString).openConnection();
@@ -111,7 +111,7 @@ public class TestXapiStatementResponder {
 
         String urlString = "http://localhost:" + httpd.getListeningPort() + "/xapi/statements?statementId=" +
                 URLEncoder.encode("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", StandardCharsets.UTF_8.toString());
-        String content = UMIOUtils.readToString(
+        String content =  UMIOUtils.INSTANCE.readToString(
                 getClass().getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8");
 
         HttpURLConnection httpCon = (HttpURLConnection) new URL(urlString).openConnection();

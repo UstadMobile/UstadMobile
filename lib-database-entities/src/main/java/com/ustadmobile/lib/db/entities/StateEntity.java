@@ -6,6 +6,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
+import java.util.Objects;
+
 import static com.ustadmobile.lib.db.entities.StateEntity.TABLE_ID;
 
 @UmEntity(tableId = TABLE_ID)
@@ -140,10 +142,10 @@ public class StateEntity {
         if (stateUid != that.stateUid) return false;
         if (agentUid != that.agentUid) return false;
         if (isactive != that.isactive) return false;
-        if (stateId != null ? !stateId.equals(that.stateId) : that.stateId != null) return false;
-        if (activityId != null ? !activityId.equals(that.activityId) : that.activityId != null)
+        if (!Objects.equals(stateId, that.stateId)) return false;
+        if (!Objects.equals(activityId, that.activityId))
             return false;
-        return registration != null ? registration.equals(that.registration) : that.registration == null;
+        return Objects.equals(registration, that.registration);
     }
 
     @Override

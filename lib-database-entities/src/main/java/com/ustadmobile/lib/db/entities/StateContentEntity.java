@@ -6,6 +6,8 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
+import java.util.Objects;
+
 import static com.ustadmobile.lib.db.entities.StateContentEntity.TABLE_ID;
 
 @UmEntity(tableId = TABLE_ID)
@@ -22,6 +24,8 @@ public class StateContentEntity {
 
     private String stateContentValue;
 
+    private boolean isactive;
+
     @UmSyncMasterChangeSeqNum
     private long stateContentMasterChangeSeqNum;
 
@@ -31,13 +35,14 @@ public class StateContentEntity {
     @UmSyncLastChangedBy
     private int stateContentLastChangedBy;
 
-    public StateContentEntity(String key, long stateUid, String valueOf) {
+    public StateContentEntity(String key, long stateUid, String valueOf, boolean isActive) {
         this.stateContentKey = key;
         this.stateContentValue = valueOf;
         this.stateContentStateUid = stateUid;
+        this.isactive = isActive;
     }
 
-    public StateContentEntity(){
+    public StateContentEntity() {
 
     }
 
@@ -97,6 +102,14 @@ public class StateContentEntity {
         this.stateContentLastChangedBy = stateContentLastChangedBy;
     }
 
+    public boolean isIsactive() {
+        return isactive;
+    }
+
+    public void setIsactive(boolean isactive) {
+        this.isactive = isactive;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -106,9 +119,10 @@ public class StateContentEntity {
 
         if (stateContentUid != that.stateContentUid) return false;
         if (stateContentStateUid != that.stateContentStateUid) return false;
-        if (stateContentKey != null ? !stateContentKey.equals(that.stateContentKey) : that.stateContentKey != null)
+        if (isactive != that.isactive) return false;
+        if (!Objects.equals(stateContentKey, that.stateContentKey))
             return false;
-        return stateContentValue != null ? stateContentValue.equals(that.stateContentValue) : that.stateContentValue == null;
+        return Objects.equals(stateContentValue, that.stateContentValue);
     }
 
     @Override
@@ -117,6 +131,7 @@ public class StateContentEntity {
         result = 31 * result + (int) (stateContentStateUid ^ (stateContentStateUid >>> 32));
         result = 31 * result + (stateContentKey != null ? stateContentKey.hashCode() : 0);
         result = 31 * result + (stateContentValue != null ? stateContentValue.hashCode() : 0);
+        result = 31 * result + (isactive ? 1 : 0);
         return result;
     }
 }

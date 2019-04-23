@@ -10,7 +10,8 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 @UmRepository
 public abstract class AgentDao implements SyncableDao<AgentEntity, AgentDao> {
 
-    @UmQuery("SELECT * FROM AgentEntity WHERE agentOpenId = :openId OR agentMbox = :mbox OR agentMbox_sha1sum = :sha1 OR agentAccountName = :account")
-    public abstract AgentEntity getAgentByAnyId(String openId, String mbox, String account, String sha1);
+    @UmQuery("SELECT * FROM AgentEntity WHERE agentOpenId = :openId OR agentMbox = :mbox " +
+            "OR agentMbox_sha1sum = :sha1 OR (agentAccountName = :account AND agentHomePage = :homepage)")
+    public abstract AgentEntity getAgentByAnyId(String openId, String mbox, String account, String homepage, String sha1);
 
 }

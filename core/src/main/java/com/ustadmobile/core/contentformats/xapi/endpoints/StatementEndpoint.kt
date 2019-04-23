@@ -27,11 +27,17 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
 
     @Throws(IllegalArgumentException::class)
-    fun storeStatements(statements: List<Statement>): List<String> {
+    fun storeStatements(statements: List<Statement>, statementId: String): List<String> {
+
+        hasStatementWithMatchingId(statements, statementId)
+
+        hasMultipleStatementWithSameId(statements)
+
+        hasExistingStatements(statements)
 
         val statementUids = ArrayList<String>()
         for (statement in statements) {
-            val entity = createStatement(statement)
+            val entity = storeStatement(statement)
             statementUids.add(entity.statementId)
         }
         return statementUids
@@ -44,11 +50,12 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             statement.id = UUID.randomUUID().toString()
         }
 
-        val actor = statement.actor ?: throw IllegalArgumentException("No Actor Found in Statement")
+        val actor = statement.actor
+                ?: throw StatementRequestException("No Actor Found in Statement")
 
         checkValidActor(actor)
 
-        val verb = statement.verb ?: throw IllegalArgumentException("No Verb Found in Statement")
+        val verb = statement.verb ?: throw StatementRequestException("No Verb Found in Statement")
         if (verb.id.isNullOrEmpty()) {
             throw IllegalArgumentException("Invalid Verb In Statement: Required Id not found")
         }
@@ -56,12 +63,12 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         val subStatement = statement.subStatement
         val xobject = statement.`object`
         if (subStatement == null && xobject == null) {
-            throw IllegalArgumentException("No Object Found in Statement")
+            throw StatementRequestException("No Object Found in Statement")
         }
 
         if (xobject != null) {
             if (xobject.id.isNullOrEmpty()) {
-                throw IllegalArgumentException("Invalid Object In Statement: Required Id not found")
+                throw StatementRequestException("Invalid Object In Statement: Required Id not found")
             }
 
             if (xobject.definition != null) {
@@ -70,7 +77,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                     if (xobject.definition!!.type == "http://adlnet.gov/expapi/activities/cmi.interaction") {
 
                         if (xobject.definition!!.interactionType.isNullOrEmpty()) {
-                            throw IllegalArgumentException("Invalid Object In Statement: Required Interaction Type was not found")
+                            throw StatementRequestException("Invalid Object In Statement: Required Interaction Type was not found")
                         }
 
                     }
@@ -86,11 +93,11 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 if (xobject.objectType != "Activity") {
 
                     if (context.revision != null) {
-                        throw IllegalArgumentException("Invalid Context In Statement: Revision can only be used when objectType is activity")
+                        throw StatementRequestException("Invalid Context In Statement: Revision can only be used when objectType is activity")
                     }
 
                     if (context.platform != null) {
-                        throw IllegalArgumentException("Invalid Context In Statement: Platform can only be used when objectType is activity")
+                        throw StatementRequestException("Invalid Context In Statement: Platform can only be used when objectType is activity")
                     }
 
 
@@ -112,24 +119,24 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         if (subStatement != null) {
 
             if (subStatement.objectType == null) {
-                throw IllegalArgumentException("Invalid Object In Statement: Required ObjectType was not found")
+                throw StatementRequestException("Invalid Object In Statement: Required ObjectType was not found")
             }
             if (subStatement.id != null) {
-                throw IllegalArgumentException("Invalid SubStatement In Statement: ID field is not required")
+                throw StatementRequestException("Invalid SubStatement In Statement: ID field is not required")
             }
             if (subStatement.stored != null) {
-                throw IllegalArgumentException("Invalid SubStatement In Statement: stored field is not required")
+                throw StatementRequestException("Invalid SubStatement In Statement: stored field is not required")
             }
             if (subStatement.version != null) {
-                throw IllegalArgumentException("Invalid SubStatement In Statement: version field is not required")
+                throw StatementRequestException("Invalid SubStatement In Statement: version field is not required")
             }
 
             if (subStatement.authority != null) {
-                throw IllegalArgumentException("Invalid SubStatement In Statement: authority object is not required")
+                throw StatementRequestException("Invalid SubStatement In Statement: authority object is not required")
             }
 
             if (subStatement.subStatement != null) {
-                throw IllegalArgumentException("Invalid SubStatement In Statement: nested subStatement found")
+                throw StatementRequestException("Invalid SubStatement In Statement: nested subStatement found")
             }
 
             checkValidStatement(subStatement, true)
@@ -140,13 +147,13 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             val authority = statement.authority
             checkValidActor(authority!!)
             if (authority.objectType.isNullOrEmpty()) {
-                throw IllegalArgumentException("Invalid Authority In Statement: authority was not agent or group")
+                throw StatementRequestException("Invalid Authority In Statement: authority was not agent or group")
             }
             if (authority.objectType == "Group") {
 
                 val membersList = authority.members
                 if (membersList?.size != 2) {
-                    throw IllegalArgumentException("Invalid Authority In Statement: invalid OAuth consumer")
+                    throw StatementRequestException("Invalid Authority In Statement: invalid OAuth consumer")
                 }
 
                 var has1Account = false
@@ -157,7 +164,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                     }
                 }
                 if (!has1Account) {
-                    throw IllegalArgumentException("Invalid Authority In Statement: does not have account for OAuth")
+                    throw StatementRequestException("Invalid Authority In Statement: does not have account for OAuth")
                 }
 
             }
@@ -171,23 +178,23 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             for (attachment in attachmentList) {
 
                 if (attachment.usageType.isNullOrEmpty()) {
-                    throw IllegalArgumentException("Invalid Attachment In Statement: Required usageType in Attachment not found")
+                    throw StatementRequestException("Invalid Attachment In Statement: Required usageType in Attachment not found")
                 }
 
                 if (attachment.display.isNullOrEmpty()) {
-                    throw IllegalArgumentException("Invalid Attachment In Statement: Required displayMap in Attachment not found")
+                    throw StatementRequestException("Invalid Attachment In Statement: Required displayMap in Attachment not found")
                 }
 
                 if (attachment.contentType.isNullOrEmpty()) {
-                    throw IllegalArgumentException("Invalid Attachment In Statement: Required contentType in Attachment not found")
+                    throw StatementRequestException("Invalid Attachment In Statement: Required contentType in Attachment not found")
                 }
 
                 if (attachment.length == 0L) {
-                    throw IllegalArgumentException("Invalid Attachment In Statement: Required length in Attachment not found")
+                    throw StatementRequestException("Invalid Attachment In Statement: Required length in Attachment not found")
                 }
 
                 if (attachment.sha2.isNullOrEmpty()) {
-                    throw IllegalArgumentException("Invalid Attachment In Statement: Required sha2 in Attachment not found")
+                    throw StatementRequestException("Invalid Attachment In Statement: Required sha2 in Attachment not found")
                 }
 
             }
@@ -207,7 +214,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     }
 
     @Throws(IllegalArgumentException::class)
-    fun createStatement(statement: Statement): StatementEntity {
+    fun storeStatement(statement: Statement): StatementEntity {
 
         checkValidStatement(statement, false)
 
@@ -317,6 +324,20 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         }
     }
 
+    @Throws(StatementRequestException::class)
+    private fun hasStatementWithMatchingId(statements: List<Statement>, statementId: String) {
+
+        if (statementId.isEmpty()) {
+            return
+        }
+        for (statement in statements) {
+            if (!statementId.equals(statement.id)) {
+                throw StatementRequestException("Statement Id did not match with Parameter Statement ID", 409)
+            }
+        }
+    }
+
+    @Throws(StatementRequestException::class)
     fun hasMultipleStatementWithSameId(statementList: List<Statement>): Boolean {
         val uniques = HashSet<String>()
         for (statement in statementList) {
@@ -324,25 +345,24 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             if (statement.id != null) {
                 val added = uniques.add(statement.id!!)
                 if (!added) {
-                    return true
+                    throw StatementRequestException("Multiple Statements With Same Id")
                 }
             }
         }
         return false
     }
 
-
+    @Throws(StatementRequestException::class)
     fun hasExistingStatements(statements: List<Statement>): Boolean {
 
-        for (statement in statements) {
+        val ids = statements.filter { it.id != null }.map { it.id }
+        val statementList = statementDao.findByStatementIdList(ids)
 
-            if (statement.id == null || statement.id!!.isEmpty()) {
-                continue
-            }
+        for (statement in statementList) {
 
-            val statementEntity = statementDao.findByStatementId(statement.id) ?: continue
+            if (statement == null) continue
 
-            return true
+            throw StatementRequestException("Has Existing Statements", 409)
 
             // TODO statements can be updated in certain places
             /* Statement statementDb = gson.fromJson(statementEntity.getFullStatement(), Statement.class);
@@ -358,7 +378,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
     companion object {
 
-        @Throws(IllegalArgumentException::class)
+        @Throws(StatementRequestException::class)
         fun checkValidActor(actor: Actor) {
 
             val hasMbox = actor.mbox?.isNotEmpty() ?: false
@@ -371,27 +391,27 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             if (actor.objectType == null || actor.objectType == "Agent") {
 
                 if (idCount == 0) {
-                    throw IllegalArgumentException("Invalid Actor In Statement: Required Id not found")
+                    throw StatementRequestException("Invalid Actor In Statement: Required Id not found")
                 }
                 if (idCount > 1) {
-                    throw IllegalArgumentException("More than 1 Id identified in Actor")
+                    throw StatementRequestException("More than 1 Id identified in Actor")
                 }
 
             } else if (actor.objectType == "Group") {
 
                 if (idCount == 0 && actor.members == null) {
-                    throw IllegalArgumentException("Invalid Actor In Statement: Required list of members not found for group")
+                    throw StatementRequestException("Invalid Actor In Statement: Required list of members not found for group")
                 }
 
                 if (idCount > 1) {
-                    throw IllegalArgumentException("More than 1 Id identified in Actor")
+                    throw StatementRequestException("More than 1 Id identified in Actor")
                 }
 
                 if (actor.members != null) {
                     for (members in actor.members!!) {
                         checkValidActor(members)
                         if (members.members?.isNotEmpty() == true) {
-                            throw IllegalArgumentException("Members were found in the member group statement")
+                            throw StatementRequestException("Members were found in the member group statement")
                         }
                     }
                 }

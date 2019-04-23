@@ -3,6 +3,7 @@ package com.ustadmobile.core.contentformats.xapi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.contentformats.xapi.endpoints.StateEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.test.core.impl.PlatformTestUtil
@@ -12,7 +13,7 @@ import org.junit.Test
 import java.io.IOException
 import java.util.*
 
-class TestStateParser {
+class TestStateEndpoint {
 
     private var gson: Gson? = null
     private var repo: UmAppDatabase? = null
@@ -51,8 +52,10 @@ class TestStateParser {
         val endpoint = StateEndpoint(repo!!, gson)
         endpoint.storeState(state)
 
-        val stateEntity = repo!!.stateDao.findByStateId("http://www.example.com/states/1")
-        val agentEntity = repo!!.agentDao.findByUid(stateEntity.agentUid)
+        val agentEntity = XapiUtil.getAgent(repo!!.agentDao, repo!!.personDao, state.agent!!)
+
+        val stateEntity = repo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity.agentUid, activityId, state.registration)
+
 
         Assert.assertEquals("matches activity id", state.activityId, stateEntity.activityId)
         Assert.assertEquals("matches actor", state.agent!!.account!!.name, agentEntity.agentAccountName)
