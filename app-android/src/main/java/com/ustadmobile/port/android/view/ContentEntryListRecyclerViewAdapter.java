@@ -104,7 +104,7 @@ public class ContentEntryListRecyclerViewAdapter extends
     }
 
     @Override
-    public void onDownloadJobItemChange(DownloadJobItemStatus status) {
+    public void onDownloadJobItemChange(DownloadJobItemStatus status, DownloadJobItemManager manager) {
         List<ViewHolder> holdersToNotify;
         synchronized (boundViewHolders) {
             holdersToNotify = new LinkedList<>(boundViewHolders);
@@ -287,8 +287,7 @@ public class ContentEntryListRecyclerViewAdapter extends
         return uidsToMonitor;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements
-            DownloadJobItemManager.OnDownloadJobItemChangeListener{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView entryTitle;
         final TextView entryDescription;
@@ -382,8 +381,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             return availabilityStatus;
         }
 
-        @Override
-        public void onDownloadJobItemChange(DownloadJobItemStatus status) {
+        void onDownloadJobItemChange(DownloadJobItemStatus status) {
             if(status != null && status.getContentEntryUid() == contentEntryUid) {
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "ContentEntryList update " +
                         "entryUid " + status.getContentEntryUid());

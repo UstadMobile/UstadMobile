@@ -38,7 +38,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     interface OnDownloadJobItemChangeListener {
 
-        fun onDownloadJobItemChange(status: DownloadJobItemStatus?)
+        fun onDownloadJobItemChange(status: DownloadJobItemStatus?, manager: DownloadJobItemManager)
 
     }
 
@@ -95,8 +95,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 djStatus.setTotalBytes(totalBytes)
                 progressChangedItems.add(djStatus)
 
-                if (onDownloadJobItemChangeListener != null)
-                    onDownloadJobItemChangeListener!!.onDownloadJobItemChange(djStatus)
+                onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
 
                 updateParentsProgress(djStatus.getJobItemUid(), djStatus.getParents(), deltaBytesFoFar,
                         deltaTotalBytes)
@@ -111,12 +110,14 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             if(djStatus != null) {
                 djStatus.status = status.toByte()
                 updatedItems.add(djStatus)
+                onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
 
                 runOnAllParents(djStatus.jobItemUid, djStatus.parents) {parent ->
                     var parentChanged = false
                     if(parent.children.all { it.status >= JobStatus.COMPLETE_MIN}){
                         parent.status = JobStatus.COMPLETE.toByte()
                         updatedItems.add(parent)
+                        onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
                         parentChanged = true
                     }
 
@@ -141,7 +142,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             parent.incrementTotalBytes(deltaTotalBytes)
             parent.incrementBytesSoFar(deltaBytesFoFar)
             progressChangedItems.add(parent)
-            onDownloadJobItemChangeListener?.onDownloadJobItemChange(parent)
+            onDownloadJobItemChangeListener?.onDownloadJobItemChange(parent, this)
             true
         }
     }
@@ -163,7 +164,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         }
     }
 
-    fun insertDownloadJobItems(items: List<DownloadJobItem>, callback: UmResultCallback<Void?>) {
+    fun insertDownloadJobItems(items: List<DownloadJobItem>, callback: UmResultCallback<Void?>?) {
         executor.execute {
             UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Adding download job items" + UMUtil.debugPrintList(items))
             db.downloadJobItemDao.insertListAndSetIds(items)

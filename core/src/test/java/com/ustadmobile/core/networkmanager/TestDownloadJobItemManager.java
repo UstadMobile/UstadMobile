@@ -143,7 +143,7 @@ public class TestDownloadJobItemManager {
         DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<DownloadJobItemStatus> statusRef = new AtomicReference<>();
-        manager.setOnDownloadJobItemChangeListener((status) -> {
+        manager.setOnDownloadJobItemChangeListener((status, manager1) -> {
             if(status.getContentEntryUid() == downloadJob.getDjRootContentEntryUid()
                 && status.getTotalBytes() == subLeafContainer.getFileSize()) {
                 statusRef.set(status);
@@ -190,7 +190,7 @@ public class TestDownloadJobItemManager {
         setupRootAndSubleaf(manager);
         AtomicReference<DownloadJobItemStatus> parentStatusRef = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
-        manager.setOnDownloadJobItemChangeListener((status) -> {
+        manager.setOnDownloadJobItemChangeListener((status, manager2) -> {
             if(status != null && status.getContentEntryUid() == parentEntry.getContentEntryUid()) {
                 parentStatusRef.set(status);
                 latch.countDown();

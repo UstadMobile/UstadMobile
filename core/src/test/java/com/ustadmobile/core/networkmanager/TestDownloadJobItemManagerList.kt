@@ -3,6 +3,7 @@ package com.ustadmobile.core.networkmanager
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.lib.db.entities.*
@@ -105,7 +106,7 @@ class TestDownloadJobItemManagerList {
 
         itemManager.updateProgress(downloadJobItem1!!.djiUid.toInt(), 50, 100)
 
-        verify(mockListener, timeout(5000)).onDownloadJobItemChange(any())
+        verify(mockListener, timeout(5000)).onDownloadJobItemChange(any(), any())
     }
 
     @Test
@@ -116,6 +117,33 @@ class TestDownloadJobItemManagerList {
         Assert.assertEquals(itemManager, itemManagerList.getDownloadJobItemManager(downloadJob1!!
                 .djUid.toInt()))
     }
+
+    @Test
+    fun givenDownloadJobItemManagerCreated_whenRootEntryIsCompleted_thenDownloadJobItemManagerShouldBeClosed() {
+        val itemManagerList = DownloadJobItemManagerList(appDatabase)
+        val itemManager = itemManagerList.createNewDownloadJobItemManager(downloadJob1!!)
+        itemManager.insertDownloadJobItemsSync(listOf(downloadJobItem1!!))
+
+        val itemManagerBeforeComplete = itemManagerList.getDownloadJobItemManager(downloadJob1!!.djUid.toInt())
+
+        val latch = CountDownLatch(1)
+        itemManager.updateStatus(downloadJobItem1!!.djiUid.toInt(), JobStatus.COMPLETE,
+                object: UmResultCallback<Void?> {
+                    override fun onDone(result: Void?) {
+                        latch.countDown()
+                    }
+                })
+
+        latch.await(5, TimeUnit.SECONDS)
+
+        Assert.assertNotNull("Before downloadjob was marked as completed, item manager was in list",
+                itemManagerBeforeComplete)
+        Assert.assertNull("Once downloadjob root entry is marked as complete, item manager was " +
+                "removed from the list",
+                itemManagerList.getDownloadJobItemManager(downloadJob1!!.djUid.toInt()))
+
+    }
+
 
 
 }

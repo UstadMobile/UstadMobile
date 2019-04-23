@@ -234,7 +234,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
+    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, manager: DownloadJobItemManager) {
+        onDownloadJobItemChange(status)
+    }
+
+    fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
         if(status != null && status.contentEntryUid == entryUuid) {
             view.runOnUiThread(Runnable {
                 view.updateDownloadProgress(

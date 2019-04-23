@@ -1,5 +1,6 @@
 package com.ustadmobile.core.networkmanager
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.lib.db.entities.DownloadJob
@@ -63,14 +64,23 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         }
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
+    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, manager: DownloadJobItemManager) {
         var listenersToNotify : List<DownloadJobItemManager.OnDownloadJobItemChangeListener>
         synchronized(changeListeners) {
             listenersToNotify = changeListeners.toList()
         }
 
         for(listener in listenersToNotify) {
-            listener.onDownloadJobItemChange(status)
+            listener.onDownloadJobItemChange(status, manager)
+        }
+
+        if(status != null && status.status >= JobStatus.COMPLETE_MIN
+                && manager.rootContentEntryUid == status.contentEntryUid) {
+
+            //this downloadjob is complete, remove it from the list
+            synchronized(managerMap) {
+                managerMap.remove(manager.downloadJobUid)
+            }
         }
     }
 
