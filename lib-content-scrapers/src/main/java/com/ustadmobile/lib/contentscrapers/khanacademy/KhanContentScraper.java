@@ -311,7 +311,7 @@ public class KhanContentScraper implements Runnable {
                     }
                     File contentFile = new File(folder, FilenameUtils.getName(url.getPath()));
                     File webMFile = new File(folder, UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getName()) + WEBM_EXT);
-                    if ((isEtagUpdated && lastModifiedVideo > lastModifiedServer) || !ContentScraperUtil.fileHasContent(webMFile)) {
+                    if (!ContentScraperUtil.fileHasContent(webMFile)) {
 
                         UMLogUtil.logTrace("Downloading content for url " + url.toString());
                         FileUtils.copyURLToFile(url, contentFile);
