@@ -296,22 +296,18 @@ public class KhanContentScraper implements Runnable {
 
                     long lastModifiedVideo = ContentScraperUtil.getLastModified(conn);
 
-                    File oldETagLocation = new File(folder, FilenameUtils.getName(url.getPath()) + ScraperConstants.ETAG_TXT);
+                    File oldETagLocation = new File(folder, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ETAG_TXT);
                     oldETagLocation = !ContentScraperUtil.fileHasContent(oldETagLocation) ?
-                            new File(folder, FilenameUtils.getName(content.downloadUrls.mp4Low) + ScraperConstants.ETAG_TXT) : oldETagLocation;
+                            new File(folder, FilenameUtils.getBaseName(content.downloadUrls.mp4Low) + ScraperConstants.ETAG_TXT) : oldETagLocation;
 
                     boolean isEtagUpdated = ContentScraperUtil.isEtagUpdated(conn, destinationDirectory, destinationDirectory.getName());
                     if (ContentScraperUtil.fileHasContent(oldETagLocation)) {
-
-                        File newEtagLocation = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.ETAG_TXT);
-                        String newEtagText = FileUtils.readFileToString(newEtagLocation, UTF_ENCODING);
-                        String oldETagText = FileUtils.readFileToString(oldETagLocation, UTF_ENCODING);
-                        isEtagUpdated = !newEtagText.equals(oldETagText);
                         FileUtils.deleteQuietly(oldETagLocation);
                     }
+
                     File contentFile = new File(folder, FilenameUtils.getName(url.getPath()));
                     File webMFile = new File(folder, UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getName()) + WEBM_EXT);
-                    if (!ContentScraperUtil.fileHasContent(webMFile)) {
+                    if ((isEtagUpdated || lastModifiedVideo > lastModifiedServer) || !ContentScraperUtil.fileHasContent(webMFile)) {
 
                         UMLogUtil.logTrace("Downloading content for url " + url.toString());
                         FileUtils.copyURLToFile(url, contentFile);
@@ -474,6 +470,12 @@ public class KhanContentScraper implements Runnable {
         }
 
         File modifiedFile = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+
+        File oldModifiedFile = new File(khanDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+        if (ContentScraperUtil.fileHasContent(oldModifiedFile)) {
+            FileUtils.deleteQuietly(oldModifiedFile);
+        }
+
         isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
 
         File indexJsonFile = new File(khanDirectory, "index.json");
@@ -718,6 +720,13 @@ public class KhanContentScraper implements Runnable {
                 long dateModified = ContentScraperUtil.parseServerDate(response.date_modified);
 
                 File modifiedFile = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+                File oldModifiedFile = new File(khanDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+                if (ContentScraperUtil.fileHasContent(oldModifiedFile)) {
+                    FileUtils.deleteQuietly(oldModifiedFile);
+                }
+
+
+
                 isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
 
                 if (!isContentUpdated) {
