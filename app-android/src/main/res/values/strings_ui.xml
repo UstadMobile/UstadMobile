@@ -352,7 +352,7 @@
     <string name="language_dari">Dari</string>
     <string name="language_pashto">Pashto</string>
     <string name="confirm_logout">Confirm logout</string>
-    <string name="confirm_logout_confirmation">Are you sure you wnat to logout?</string>
+    <string name="confirm_logout_confirmation">Are you sure you want to logout?</string>
     <string name="payments_heading">Payments</string>
     <string name="payment_amount">Payment amount</string>
     <string name="payment_date">Payment date</string>

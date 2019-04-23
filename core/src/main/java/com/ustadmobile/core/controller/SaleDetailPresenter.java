@@ -90,9 +90,11 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
                 view.showCalculations(true);
                 view.showDelivered(true);
                 view.showNotes(true);
+                view.showPayments(true);
             });
 
         }else{
+            view.runOnUiThread(() -> view.showPayments(false));
             updatedSale = new Sale();
             updatedSale.setSalePreOrder(true); //ie: Not delivered unless ticked.
             updatedSale.setSaleDone(false);

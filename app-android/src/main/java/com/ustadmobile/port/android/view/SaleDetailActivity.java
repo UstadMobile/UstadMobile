@@ -83,6 +83,11 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private boolean recorded = false;
     private boolean fromFile = false;
 
+    private TextView paymentTV;
+    private ConstraintLayout addPaymentCL;
+    private RecyclerView pRecyclerView;
+    private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
+
 
     public static String getSaleVoiceNoteFilePath() {
         return saleVoiceNoteFilePath;
@@ -357,6 +362,14 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         hlineCalc = findViewById(R.id.view2);
 
 
+        paymentTV = findViewById(R.id.activity_sale_detail_payments_title);
+        addPaymentCL = findViewById(R.id.activity_sale_detail_add_payments_cl);
+        pRecyclerView = findViewById(R.id.activity_sale_detail_payments_recyclerview);
+        //private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
+        balanceDueTV = findViewById(R.id.activity_sale_detail_balance_due_textview);
+        balanceTV = findViewById(R.id.activity_sale_detail_order_after_discount_tota3);
+        balanceCurrencyTV = findViewById(R.id.activity_sale_detail_disc_currency5);
+
         //Call the Presenter
         mPresenter = new SaleDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
@@ -587,6 +600,18 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     public void showNotes(boolean show) {
         orderNotesET.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         recordVoiceNotesIB.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+
+    }
+
+    @Override
+    public void showPayments(boolean show) {
+        paymentTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        addPaymentCL.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        pRecyclerView.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        //private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
+        balanceCurrencyTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        balanceTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        balanceDueTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
 
     }
 
