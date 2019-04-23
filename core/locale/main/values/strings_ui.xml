@@ -346,18 +346,13 @@
     <!--Sprint 2-->
     <string name="change_password">Change password</string>
     <string name="current_password">Current password</string>
-    <string name="new_password">New password</string>
     <string name="confirm_new_password">Confirm new password</string>
-    <string name="language">Language</string>
     <string name="choose_language">Choose language</string>
     <string name="language_english">English</string>
     <string name="language_dari">Dari</string>
     <string name="language_pashto">Pashto</string>
-    <string name="logout">Logout</string>
     <string name="confirm_logout">Confirm logout</string>
-    <string name="confirm_logout_confirmation">Are you sure you wnat to logout?</string>
-    <string name="ok">Ok</string>
-    <string name="cancel">Cancel</string>
+    <string name="confirm_logout_confirmation">Are you sure you want to logout?</string>
     <string name="payments_heading">Payments</string>
     <string name="payment_amount">Payment amount</string>
     <string name="payment_date">Payment date</string>

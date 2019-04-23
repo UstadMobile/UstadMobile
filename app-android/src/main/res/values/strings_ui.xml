@@ -343,6 +343,24 @@
     <string name="sorT_by_name_desc">name (desc)</string>
     <string name="feature_coming_soon">This feature is coming soon.</string>
 
+    <!--Sprint 2-->
+    <string name="change_password">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="confirm_new_password">Confirm new password</string>
+    <string name="choose_language">Choose language</string>
+    <string name="language_english">English</string>
+    <string name="language_dari">Dari</string>
+    <string name="language_pashto">Pashto</string>
+    <string name="confirm_logout">Confirm logout</string>
+    <string name="confirm_logout_confirmation">Are you sure you wnat to logout?</string>
+    <string name="payments_heading">Payments</string>
+    <string name="payment_amount">Payment amount</string>
+    <string name="payment_date">Payment date</string>
+    <string name="order_due_date">Order due date</string>
+
+
+
+
     <string name="sale_list_sort_by_name">name</string>
     <string name="sale_list_sort_by_total_asc">total (asc)</string>
     <string name="sale_list_sort_by_total_desc">total (desc)</string>

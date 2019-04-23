@@ -20,8 +20,5 @@ public interface SalePaymentDetailView extends UstadView {
      */
     void finish();
 
-
-
-
 }
 
