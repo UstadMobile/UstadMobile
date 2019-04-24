@@ -140,16 +140,8 @@ public abstract class DownloadJobDao {
             "WHERE DownloadJob.djUid = :downloadJobId")
     public abstract void getEntryTitleByJobUid(long downloadJobId, UmCallback<String> callback);
 
-    @UmQuery("UPDATE DownloadJob " +
-            "SET djStatus = " + JobStatus.COMPLETE + " WHERE " +
-            "djUid = :downloadJobUid AND " +
-            "(SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid " +
-            "AND djiContainerUid != 0) = " +
-            "(SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid " +
-            "AND djiContainerUid != 0 " +
-            "AND djiStatus >= " + JobStatus.COMPLETE_MIN + ") ")
-    public abstract void updateJobStatusToCompleteIfAllItemsAreCompleted(long downloadJobUid);
-
+    @UmQuery("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :downloadJobId")
+    public abstract void updateStatus(int downloadJobId, byte djStatus);
 
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
     public abstract long findDownloadJobUidByRootContentEntryUid(long rootContentEntryUid);

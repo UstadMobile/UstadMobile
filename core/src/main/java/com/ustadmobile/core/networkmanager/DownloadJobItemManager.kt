@@ -108,16 +108,12 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             val updatedItems = LinkedList<DownloadJobItemStatus>()
             val djStatus = jobItemUidToStatusMap[djiUid]
             if(djStatus != null) {
-                djStatus.status = status.toByte()
-                updatedItems.add(djStatus)
-                onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
+                updateItemStatusInt(djStatus, status.toByte(), updatedItems)
 
                 runOnAllParents(djStatus.jobItemUid, djStatus.parents) {parent ->
                     var parentChanged = false
                     if(parent.children.all { it.status >= JobStatus.COMPLETE_MIN}){
-                        parent.status = JobStatus.COMPLETE.toByte()
-                        updatedItems.add(parent)
-                        onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
+                        updateItemStatusInt(parent, JobStatus.COMPLETE.toByte(), updatedItems)
                         parentChanged = true
                     }
 
@@ -126,10 +122,22 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
                 db.downloadJobItemDao.updateJobItemStatusList(updatedItems)
                 db.contentEntryStatusDao.updateDownloadStatusByList(updatedItems)
+
+                val updatedRoot = updatedItems.firstOrNull { it.contentEntryUid == rootContentEntryUid }
+                if(updatedRoot != null) {
+                    db.downloadJobDao.updateStatus(downloadJobUid, updatedRoot.status)
+                }
             }
 
             callback?.onDone(null)
         }
+    }
+
+    private fun updateItemStatusInt(djStatus: DownloadJobItemStatus, status: Byte,
+                                    updatedItems: MutableList<DownloadJobItemStatus>) {
+        djStatus.status = status
+        updatedItems.add(djStatus)
+        onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
     }
 
 
