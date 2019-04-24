@@ -17,7 +17,7 @@
 .idea/caches/gradle_models.ser
 .idea/modules.xml
 .idea/caches/
-
+.idea/encodings.xml
 
 # Java class files
 *.class
