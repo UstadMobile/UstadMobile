@@ -104,9 +104,9 @@ public class SaleItemRecyclerAdapter extends
         itemTotal.setText(priceTotalString);
 
         //Sprint 2:
-        //dueDate.setVisibility(View.VISIBLE);
-        //dueDateImage.setVisibility(View.VISIBLE);
-        //dueDate.setText(dueString);
+        dueDate.setVisibility(View.VISIBLE);
+        dueDateImage.setVisibility(View.VISIBLE);
+        dueDate.setText(dueString);
 
         itemWhole.setOnClickListener(v ->
                 mPresenter.handleClickSaleItemEdit(entity.getSaleItemUid()));

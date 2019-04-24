@@ -73,7 +73,7 @@
                 android:id="@+id/textView18"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/items"
@@ -258,7 +258,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:text="@string/delivered"
                 android:visibility="invisible"
                 app:layout_constraintStart_toStartOf="parent"
@@ -269,8 +269,8 @@
                 android:id="@+id/activity_sale_detail_payments_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="28dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/payments_heading"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
@@ -279,17 +279,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_delivered" />
 
+            <View
+                android:id="@+id/anotherHLinePaymentRelated"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/divider"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_title" />
+
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/activity_sale_detail_add_payments_cl"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="14dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_title">
+                app:layout_constraintTop_toBottomOf="@+id/anotherHLinePaymentRelated">
 
 
                 <ImageView
@@ -315,20 +323,28 @@
 
             </android.support.constraint.ConstraintLayout>
 
+            <View
+                android:id="@+id/hlinebeforePaymentRV"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/divider"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_payments_cl" />
+
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/activity_sale_detail_payments_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:scrollbars="vertical"
                 android:visibility="visible"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_payments_cl" >
+                app:layout_constraintTop_toBottomOf="@+id/hlinebeforePaymentRV">
 
             </android.support.v7.widget.RecyclerView>
 
@@ -342,6 +358,19 @@
                 android:text="@string/balance_due"
                 android:textAppearance="@style/TextAppearance.AppCompat"
                 android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_order_after_discount_tota3"
+                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_recyclerview" />
+
+
+            <TextView
+                android:id="@+id/activity_sale_detail_order_after_discount_tota3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/primary"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency5"
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_recyclerview" />
 
@@ -350,23 +379,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:layout_marginEnd="32dp"
+                android:layout_marginEnd="16dp"
                 android:text="@string/currency_afs"
                 android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/primary"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_recyclerview" />
 
-            <TextView
-                android:id="@+id/activity_sale_detail_order_after_discount_tota3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="2dp"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:visibility="invisible"
-                app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_disc_currency5"
-                app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_recyclerview" />
 
             <LinearLayout
                 android:id="@+id/activity_sale_detail_"
@@ -387,14 +407,16 @@
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="12dp"
                         android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
                         android:ems="10"
                         android:hint="@string/order_notes"
                         android:inputType="textPersonName"
                         android:text="@string/order_notes"
                         android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
                         android:visibility="invisible"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

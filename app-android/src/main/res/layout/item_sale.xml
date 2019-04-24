@@ -7,18 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/item_sale_order_due_date_image"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:tint="@color/primary"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_sale_location"
-        app:srcCompat="@drawable/ic_warning_black_24dp" />
-
     <TextView
         android:id="@+id/item_sale_title"
         android:layout_width="wrap_content"
@@ -81,6 +69,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/item_sale_order_due_date_image"
         app:layout_constraintTop_toBottomOf="@+id/item_sale_order_date" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/item_sale_order_due_date_image"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:tint="@color/primary"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_sale_location"
+        app:srcCompat="@drawable/ic_warning_black_24dp" />
 
     <View
         android:id="@+id/view4"

@@ -22,6 +22,7 @@ import java.util.List;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
+import com.ustadmobile.core.view.SalePaymentDetailView;
 import com.ustadmobile.core.view.SelectProducerView;
 import com.ustadmobile.core.view.SelectSaleProductView;
 
@@ -32,12 +33,14 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 
 import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.lib.db.entities.SaleItemListDetail;
+import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.lib.db.entities.SaleVoiceNote;
 
 import jdk.nashorn.internal.runtime.UserAccessorProperty;
 
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
+import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_UID;
 
 /**
  * Presenter for SaleDetail view
@@ -45,6 +48,7 @@ import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
 public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     private UmProvider<SaleItemListDetail> umProvider;
+    private UmProvider<SalePayment> pProvider;
     UmAppDatabase repository;
     private SaleItemDao saleItemDao;
     private SaleDao saleDao;
@@ -122,6 +126,12 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     }
 
+    public void updatePaymentItemProvider(long saleUid){
+        //Get provider
+        pProvider = salePaymentDao.findBySaleProvider(saleUid);
+        view.setPaymentProvider(pProvider);
+    }
+
 
     public void getTotalSaleOrderAndDiscountAndUpdateView(long saleUid){
         saleItemDao.getSaleItemCountFromSale(saleUid, new UmCallback<Integer>() {
@@ -133,6 +143,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
                         view.showNotes(true);
                         view.showDelivered(true);
                         view.showCalculations(true);
+                        view.showPayments(true);
                     });
                 }
 
@@ -140,7 +151,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
             @Override
             public void onFailure(Throwable exception) {
-
+                exception.printStackTrace();
             }
         });
 
@@ -159,6 +170,11 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         });
 
 
+    }
+
+    public void getTotalPaymentsAndUpdateTotalView(long saleUid){
+        //Get total payment count
+        // Then update totals
     }
 
     //Next sprint
@@ -224,9 +240,12 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
         getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
         updateSaleItemProvider(saleUid);
-        //Next sprint:
-        //getPaymentTotalAndUpdateView();
+        updatePaymentItemProvider(saleUid);
+
+        getPaymentTotalAndUpdateView();
     }
+
+
 
     public void startObservingLocations(){
         locationLiveData = locationDao.findAllActiveLocationsLive();
@@ -346,6 +365,32 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
         impl.go(SaleItemDetailView.VIEW_NAME, args, context);
+
+    }
+
+    public void handleClickAddPayment(){
+        SalePayment newSalePayment = new SalePayment();
+        newSalePayment.setSalePaymentActive(false);
+        newSalePayment.setSalePaymentPaidDate(System.currentTimeMillis()); //default start to today
+        newSalePayment.setSalePaymentPaidAmount(0);
+        newSalePayment.setSalePaymentCurrency("Afs");
+        newSalePayment.setSalePaymentSaleUid(updatedSale.getSaleUid());
+        newSalePayment.setSalePaymentDone(false);
+        salePaymentDao.insertAsync(newSalePayment, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                newSalePayment.setSalePaymentUid(result);
+
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                Hashtable<String, String> args = new Hashtable<>();
+                args.put(ARG_SALE_PAYMENT_UID, String.valueOf(newSalePayment.getSalePaymentUid()));
+                impl.go(SalePaymentDetailView.VIEW_NAME, args, context);
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
+        });
 
     }
 

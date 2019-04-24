@@ -87,6 +87,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private ConstraintLayout addPaymentCL;
     private RecyclerView pRecyclerView;
     private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
+    private View paymentHLineBeforeRV, anotherOneHLine;
 
 
     public static String getSaleVoiceNoteFilePath() {
@@ -339,6 +340,14 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                 new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+        pRecyclerView = findViewById(
+                R.id.activity_sale_detail_payments_recyclerview);
+        RecyclerView.LayoutManager pRecyclerLayoutManager =
+                new LinearLayoutManager(getApplicationContext());
+        pRecyclerView.setLayoutManager(pRecyclerLayoutManager);
+
+
+
         locationSpinner = findViewById(R.id.activity_sale_detail_location_spinner);
         discountET = findViewById(R.id.activity_sale_detail_discount);
         discountET.setText("0");
@@ -364,11 +373,13 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
         paymentTV = findViewById(R.id.activity_sale_detail_payments_title);
         addPaymentCL = findViewById(R.id.activity_sale_detail_add_payments_cl);
-        pRecyclerView = findViewById(R.id.activity_sale_detail_payments_recyclerview);
         //private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
         balanceDueTV = findViewById(R.id.activity_sale_detail_balance_due_textview);
         balanceTV = findViewById(R.id.activity_sale_detail_order_after_discount_tota3);
+        balanceTV.setText("0");
         balanceCurrencyTV = findViewById(R.id.activity_sale_detail_disc_currency5);
+        paymentHLineBeforeRV = findViewById(R.id.hlinebeforePaymentRV);
+        anotherOneHLine = findViewById(R.id.anotherHLinePaymentRelated);
 
         //Call the Presenter
         mPresenter = new SaleDetailPresenter(this,
@@ -412,6 +423,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
         addItemCL.setOnClickListener(v -> mPresenter.handleClickAddSaleItem());
 
+        addPaymentCL.setOnClickListener(v -> mPresenter.handleClickAddPayment());
+
         //Location spinner
         locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -434,7 +447,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
         requestPermission();
 
-
         stopIB.setOnClickListener(v -> stopRecording());
     }
 
@@ -455,6 +467,24 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                 @Override
                 public boolean areContentsTheSame(SaleItemListDetail oldItem,
                                                   SaleItemListDetail newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
+    /**
+     * The DIFF CALLBACK
+     */
+    public static final DiffUtil.ItemCallback<SalePayment> DIFF_CALLBACK_PAYMENT =
+            new DiffUtil.ItemCallback<SalePayment>() {
+                @Override
+                public boolean areItemsTheSame(SalePayment oldItem,
+                                               SalePayment newItem) {
+                    return oldItem == newItem;
+                }
+
+                @Override
+                public boolean areContentsTheSame(SalePayment oldItem,
+                                                  SalePayment newItem) {
                     return oldItem.equals(newItem);
                 }
             };
@@ -486,6 +516,38 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         //set the adapter
         mRecyclerView.setAdapter(recyclerAdapter);
     }
+
+
+    @Override
+    public void setPaymentProvider(UmProvider<SalePayment> paymentProvider) {
+        SalePaymentRecyclerAdapter recyclerAdapter =
+                new SalePaymentRecyclerAdapter(DIFF_CALLBACK_PAYMENT, mPresenter, this,
+                        getApplicationContext());
+
+        // get the provider, set , observe, etc.
+        // A warning is expected
+        DataSource.Factory<Integer, SalePayment> factory =
+                (DataSource.Factory<Integer, SalePayment>)
+                        paymentProvider.getProvider();
+        LiveData<PagedList<SalePayment>> data =
+                new LivePagedListBuilder<>(factory, 20).build();
+
+        Observer customObserver = o -> {
+            recyclerAdapter.submitList((PagedList<SalePayment>) o);
+            mPresenter.getTotalPaymentsAndUpdateTotalView(saleUid);
+        };
+
+
+        //Observe the data:
+        //data.observe(this, recyclerAdapter::submitList);
+        data.observe(this, customObserver);
+
+        //set the adapter
+        pRecyclerView.setAdapter(recyclerAdapter);
+
+    }
+
+
 
     @Override
     public void setLocationPresets(String[] locationPresets, int selectedPosition) {
@@ -540,7 +602,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                 orderNotesET.setText(sale.getSaleNotes());
                 String discountValue = "0";
                 if(sale.getSaleDiscount() > 0){
-                    discountValue = String.valueOf(String.valueOf(sale.getSaleDiscount()));
+                    discountValue = String.valueOf(sale.getSaleDiscount());
                 }
                 discountET.setText(discountValue);
             }
@@ -548,10 +610,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     }
 
-    @Override
-    public void setPaymentProvider(UmProvider<SalePayment> paymentProvider) {
-        //Next Sprint
-    }
 
     @Override
     public void updatePaymentTotal(long paymentTotal) {
@@ -612,6 +670,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         balanceCurrencyTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         balanceTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         balanceDueTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        paymentHLineBeforeRV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        anotherOneHLine.setVisibility(show?View.VISIBLE:View.INVISIBLE);
 
     }
 

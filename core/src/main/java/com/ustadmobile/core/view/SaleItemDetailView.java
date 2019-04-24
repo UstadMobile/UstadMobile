@@ -27,7 +27,7 @@ public interface SaleItemDetailView extends UstadView {
 
     void updatePPP(long ppp);
 
-
+    void showPreOrder(boolean show);
 
 }
 

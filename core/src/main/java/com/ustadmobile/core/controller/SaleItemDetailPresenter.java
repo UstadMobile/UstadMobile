@@ -69,6 +69,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
 
 
     }
+
     private void initFromSaleItem(long saleItemUid){
 
         //Observe it.
@@ -194,6 +195,10 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     }
     public void setPreOrder(boolean po){
         updatedSaleItem.setSaleItemPreorder(po);
+    }
+
+    public void handleChangeOrderDueDate(long date){
+        updatedSaleItem.setSaleItemDueDate(date);
     }
 
 }

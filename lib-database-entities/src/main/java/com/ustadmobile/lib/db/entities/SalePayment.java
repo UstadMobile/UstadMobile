@@ -9,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 65)
 public class SalePayment {
 
-    @UmPrimaryKey
+    @UmPrimaryKey(autoGenerateSyncable = true)
     private long salePaymentUid;
 
     //The date the payment was made
@@ -18,11 +18,11 @@ public class SalePayment {
     //Paid amount
     private long salePaymentPaidAmount;
 
-    //Currecy of paid amount
+    //Currency of paid amount
     private String salePaymentCurrency;
 
     //Which sale is it attached to.
-    private String salePaymentSaleUid;
+    private long salePaymentSaleUid;
 
     //Says the payment was done. If it is false, then the amount is outstanding.
     private boolean salePaymentDone;
@@ -71,11 +71,11 @@ public class SalePayment {
         this.salePaymentCurrency = salePaymentCurrency;
     }
 
-    public String getSalePaymentSaleUid() {
+    public long getSalePaymentSaleUid() {
         return salePaymentSaleUid;
     }
 
-    public void setSalePaymentSaleUid(String salePaymentSaleUid) {
+    public void setSalePaymentSaleUid(long salePaymentSaleUid) {
         this.salePaymentSaleUid = salePaymentSaleUid;
     }
 

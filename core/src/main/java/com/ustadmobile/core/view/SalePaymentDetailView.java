@@ -14,11 +14,14 @@ public interface SalePaymentDetailView extends UstadView {
     String VIEW_NAME = "SalePaymentDetail";
 
     //Any argument keys:
+    String ARG_SALE_PAYMENT_UID = "ArgSalePaymentUid";
 
     /**
      * Method to finish the screen / view.
      */
     void finish();
+
+    void updateSalePaymentOnView(SalePayment payment);
 
 }
 
