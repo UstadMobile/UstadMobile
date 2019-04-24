@@ -39,7 +39,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
             }
 
             override fun onFailure(exception: Throwable?) {
-
+                view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
             }
         })
 
@@ -48,11 +48,15 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
             override fun onSuccess(result: Container?) {
                 view.mountChunk(result!!, object : UmCallback<String> {
                     override fun onSuccess(result: String?) {
-                        view.loadUrl(result!!)
+                        if (result != null) {
+                            view.loadUrl(result)
+                        } else {
+                            view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
+                        }
                     }
 
                     override fun onFailure(exception: Throwable?) {
-
+                        view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
                     }
                 })
             }

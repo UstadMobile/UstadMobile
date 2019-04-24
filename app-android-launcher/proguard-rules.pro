@@ -24,42 +24,48 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-#OrmLite
--keepattributes *DatabaseField*
--keepattributes *DatabaseTable*
--keepattributes *SerializedName*
--keep class com.j256.**
--keepclassmembers class com.j256.** { *; }
--keep enum com.j256.**
--keepclassmembers enum com.j256.** { *; }
--keep interface com.j256.**
--keepclassmembers interface com.j256.** { *; }
+# database entities
+-keep public class com.ustadmobile.lib.db.entities.**{
+       *;
+}
+-keep public class com.ustadmobile.lib.db.sync.entities.**{
+       *;
+}
+-keep public class com.ustadmobile.core.db.**{
+    public <init>(...);
+}
+-keep public class com.ustadmobile.port.android.impl.WebChunkWebViewClient$IndexLog{
+       *;
+}
+-keep public class com.ustadmobile.port.android.impl.WebChunkWebViewClient$IndexLog$IndexEntry{
+       *;
+}
 
+-keep public class com.toughra.ustadmobile.BuildConfig
+-keep public class com.ustadmobile.codec2.Codec2{
+        *;
+}
 
--dontwarn com.j256.ormlite.android.**
--dontwarn com.j256.ormlite.logger.**
--dontwarn com.j256.ormlite.misc.**
+ #
+ ###################################################################################################
+ #### OKHttp3 rules as per
+ ## https://github.com/square/okhttp/blob/master/okhttp/src/main/resources/META-INF/proguard/okhttp3.pro
+ ###################################################################################################
+ ## JSR 305 annotations are for embedding nullability information.
+-dontwarn javax.annotation.**
+ #
+ ## A resource is loaded with a relative path so the package of this class must be preserved.
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+ #
+ ## Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
+-dontwarn org.codehaus.mojo.animal_sniffer.*
+ #
+ ## OkHttp platform used only on JVM and when Conscrypt dependency is available.
+-dontwarn okhttp3.internal.platform.ConscryptPlatform
+ ####
 
--keep class org.apache.harmony.lang.annotation.** { *; }
--keep interface org.apache.harmony.lang.annotation.** { *; }
-
-#ormlite entities
--keep class com.ustadmobile.nanolrs.ormlite.generated.model.** { *; }
--keep class com.ustadmobile.nanolrs.core.model.** { *; }
-
--keep class org.kxml2.** { *; }
--keep class org.xmlpull.** { *; }
-
-#ignore .j256.ormlite.android.DatabaseTableConfigUtil: can't find dynamically referenced class org.apache.harmony.lang.annotation.AnnotationFactory, it's in the core lib
-#-dontwarn com.j256.ormlite.android.DatabaseTableConfigUtil
-#-dontwarn com.j256.ormlite.field.DatabaseFieldConfig
-
-#JodaTime
--dontwarn org.joda.convert.**
--dontwarn org.joda.time.**
--keep class org.joda.time.** { *; }
--keep interface org.joda.time.** { *; }
-
--keep class org.slf4j.** { *; }
--keep interface org.slf4j.** { *; }
--dontwarn org.slf4j.**
+ # Prevent proguard from stripping interface information from TypeAdapterFactory,
+ # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
+ -keep class * implements com.google.gson.TypeAdapterFactory
+ -keep class * implements com.google.gson.JsonSerializer
+ -keep class * implements com.google.gson.JsonDeserializer

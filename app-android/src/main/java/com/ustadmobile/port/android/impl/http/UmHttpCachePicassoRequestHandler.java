@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.impl.http;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -59,6 +60,6 @@ public class UmHttpCachePicassoRequestHandler extends RequestHandler{
 
         InputStream inputStream = response.getResponseAsStream();
 
-        return new Result(inputStream, loadedFrom);
+        return new Result(BitmapFactory.decodeStream(inputStream), loadedFrom);
     }
 }
