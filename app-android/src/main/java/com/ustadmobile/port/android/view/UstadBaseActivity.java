@@ -130,6 +130,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private boolean mSyncServiceBound = false;
 
     private volatile boolean bleServiceBound = false;
+    private ShakeDetector shakeDetector;
+    private SensorManager sensorManager;
+    boolean isDialogShown = false;
 
 
     @Override
@@ -154,31 +157,35 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         bindService(bleServiceIntent, bleServiceConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_ADJUST_WITH_ACTIVITY);
 
-        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        ShakeDetector shakeDetector = new ShakeDetector(this);
-        shakeDetector.start(sensorManager);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        shakeDetector = new ShakeDetector(this);
 
     }
 
     @Override
     public void hearShake() {
 
-        if (isStarted()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.send_feedback);
-            LayoutInflater inflater = getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.view_feedback_layout,null);
-            EditText editText = dialogView.findViewById(R.id.feedback_edit_comment);
-            builder.setView(dialogView);
-            builder.setPositiveButton(R.string.send, (dialogInterface, whichButton) -> {
-                ACRA.getErrorReporter().handleSilentException(new UserFeedbackException(editText.getText().toString()));
-                Toast.makeText((Context) getContext(), R.string.feedback_thanks, Toast.LENGTH_LONG).show();
-                dialogInterface.cancel();
-            });
-            builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
-            AlertDialog dialog = builder.create();
-            dialog.show();
+        if (isDialogShown) {
+            return;
         }
+
+        isDialogShown = true;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.send_feedback);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.view_feedback_layout, null);
+        EditText editText = dialogView.findViewById(R.id.feedback_edit_comment);
+        builder.setView(dialogView);
+        builder.setPositiveButton(R.string.send, (dialogInterface, whichButton) -> {
+            ACRA.getErrorReporter().handleSilentException(new UserFeedbackException(editText.getText().toString()));
+            Toast.makeText((Context) getContext(), R.string.feedback_thanks, Toast.LENGTH_LONG).show();
+            dialogInterface.cancel();
+        });
+        builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
+        builder.setOnDismissListener(dialogInterface -> isDialogShown = false);
+        builder.setOnCancelListener(dialogInterface -> isDialogShown = false);
+        AlertDialog dialog = builder.create();
+        dialog.show();
 
     }
 
@@ -219,6 +226,17 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             if (UstadMobileSystemImpl.Companion.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
                 new Handler().postDelayed(this::recreate, 200);
             }
+        }
+        if (shakeDetector != null && sensorManager != null) {
+            shakeDetector.start(sensorManager);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (shakeDetector != null) {
+            shakeDetector.stop();
         }
     }
 
@@ -280,6 +298,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         super.onSaveInstanceState(outState);
     }
 
+
     @Override
     public void onStart() {
         isStarted = true;
@@ -311,6 +330,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
         }
+        shakeDetector = null;
+        sensorManager = null;
         super.onDestroy();
     }
 
