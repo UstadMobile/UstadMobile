@@ -316,6 +316,7 @@ dependencies {
      *  implementation group: 'com.android.support', name: "appcompat-v7", version: "[26+, 27+]"
      */
     implementation "com.android.support:support-core-utils:$version_android_support_lib"
+    implementation "com.android.support:exifinterface:$version_android_support_lib"
     implementation "com.android.support:appcompat-v7:$version_android_support_lib"
     implementation "com.android.support:cardview-v7:$version_android_support_lib"
     implementation "com.android.support:design:$version_android_support_lib"
