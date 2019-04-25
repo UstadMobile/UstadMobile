@@ -24,10 +24,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.squareup.seismic.ShakeDetector;
@@ -131,7 +131,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private volatile boolean bleServiceBound = false;
 
-    private boolean dialogShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,44 +157,28 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         ShakeDetector shakeDetector = new ShakeDetector(this);
         shakeDetector.start(sensorManager);
+
     }
 
     @Override
     public void hearShake() {
 
-        if (dialogShown) {
-            return;
+        if (isStarted()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.send_feedback);
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.view_feedback_layout,null);
+            EditText editText = dialogView.findViewById(R.id.feedback_edit_comment);
+            builder.setView(dialogView);
+            builder.setPositiveButton(R.string.send, (dialogInterface, whichButton) -> {
+                ACRA.getErrorReporter().handleSilentException(new UserFeedbackException(editText.getText().toString()));
+                Toast.makeText((Context) getContext(), R.string.feedback_thanks, Toast.LENGTH_LONG).show();
+                dialogInterface.cancel();
+            });
+            builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
-
-        runOnUiThread(() -> {
-
-            if (!isFinishing()) {
-                dialogShown = true;
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Send Feedback");
-                LinearLayout container = new LinearLayout(this);
-                container.setOrientation(LinearLayout.VERTICAL);
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                lp.setMarginStart((int) getResources().getDimension(R.dimen.dimen_16dp));
-                lp.setMarginEnd((int) getResources().getDimension(R.dimen.dimen_16dp));
-                EditText editText = new EditText(this);
-                editText.setLayoutParams(lp);
-                editText.setSingleLine(false);
-                editText.setGravity(Gravity.START | Gravity.TOP);
-                container.addView(editText);
-                builder.setView(container);
-                builder.setPositiveButton(R.string.send, (dialogInterface, whichButton) -> {
-                    ACRA.getErrorReporter().handleSilentException(new UserFeedbackException(editText.getText().toString()));
-                    dialogInterface.cancel();
-                });
-                builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
-                builder.setOnCancelListener(dialogInterface -> dialogShown = false);
-                builder.setOnDismissListener(dialogInterface -> dialogShown = false);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
-
 
     }
 
