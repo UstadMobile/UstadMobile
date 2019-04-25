@@ -34,7 +34,7 @@ dependencies {
     annotationProcessor project(':lib-database-annotation-processor')
 
     testImplementation "junit:junit:$version_junit"
-    testImplementation "javax.ws.rs:javax.ws.rs-api:2.1"
+    testImplementation "javax.ws.rs:javax.ws.rs-api:$version_javax_api"
     testRuntimeOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testRuntimeOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testRuntimeOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

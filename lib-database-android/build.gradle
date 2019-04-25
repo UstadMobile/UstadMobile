@@ -77,9 +77,6 @@ dependencies {
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"
 
-    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
-    implementation "com.android.support:support-core-utils:$version_android_support_lib"
-
     testImplementation "junit:junit:$version_junit"
     androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"

@@ -64,7 +64,7 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
     implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    implementation "net.sf.kxml:kxml2:$version_kxml";
+    implementation "net.sf.kxml:kxml2:$version_kxml"
     implementation "com.google.code.gson:gson:$version_gson"
     implementation "net.lingala.zip4j:zip4j:$version_zip4j"
     implementation "org.json:json:$version_json"

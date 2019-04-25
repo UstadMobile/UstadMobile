@@ -13,7 +13,7 @@ dependencies {
     gretty "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     gretty "org.postgresql:postgresql:$version_postgres_jdbc"
 
-    implementation "javax.ws.rs:javax.ws.rs-api:2.1"
+    implementation "javax.ws.rs:javax.ws.rs-api:$version_javax_api"
 
     implementation project(":core")
     implementation project(":lib-database-jdbc")
