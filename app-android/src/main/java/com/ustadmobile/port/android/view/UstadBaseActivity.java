@@ -10,6 +10,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,9 +24,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.squareup.seismic.ShakeDetector;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AppConfig;
@@ -33,10 +38,13 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.core.view.ViewWithErrorNotifier;
+import com.ustadmobile.port.android.impl.UserFeedbackException;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+
+import org.acra.ACRA;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -49,7 +57,7 @@ import java.util.Locale;
  * Created by mike on 10/15/15.
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
-        UstadViewWithNotifications, ViewWithErrorNotifier {
+        UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener {
 
     private UstadBaseController baseController;
 
@@ -106,7 +114,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             bleServiceBound = true;
             onBleNetworkServiceBound(networkManagerBle);
 
-            if(runAfterServiceConnection != null){
+            if (runAfterServiceConnection != null) {
                 runAfterServiceConnection.run();
                 runAfterServiceConnection = null;
             }
@@ -122,6 +130,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private boolean mSyncServiceBound = false;
 
     private volatile boolean bleServiceBound = false;
+
+    private boolean dialogShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,8 +154,50 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         Intent bleServiceIntent = new Intent(this, NetworkManagerBleAndroidService.class);
         bindService(bleServiceIntent, bleServiceConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_ADJUST_WITH_ACTIVITY);
+
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        ShakeDetector shakeDetector = new ShakeDetector(this);
+        shakeDetector.start(sensorManager);
     }
 
+    @Override
+    public void hearShake() {
+
+        if (dialogShown) {
+            return;
+        }
+
+        runOnUiThread(() -> {
+
+            if (!isFinishing()) {
+                dialogShown = true;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Send Feedback");
+                LinearLayout container = new LinearLayout(this);
+                container.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.setMarginStart((int) getResources().getDimension(R.dimen.dimen_16dp));
+                lp.setMarginEnd((int) getResources().getDimension(R.dimen.dimen_16dp));
+                EditText editText = new EditText(this);
+                editText.setLayoutParams(lp);
+                editText.setSingleLine(false);
+                editText.setGravity(Gravity.START | Gravity.TOP);
+                container.addView(editText);
+                builder.setView(container);
+                builder.setPositiveButton(R.string.send, (dialogInterface, whichButton) -> {
+                    ACRA.getErrorReporter().handleSilentException(new UserFeedbackException(editText.getText().toString()));
+                    dialogInterface.cancel();
+                });
+                builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
+                builder.setOnCancelListener(dialogInterface -> dialogShown = false);
+                builder.setOnDismissListener(dialogInterface -> dialogShown = false);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+
+
+    }
 
     /**
      * Display the snackbar at the bottom of the page
@@ -170,7 +222,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
      *
      * @param networkManagerBle
      */
-    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) { }
+    protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
+    }
 
     protected void onBleNetworkServiceUnbound() {
 
@@ -424,9 +477,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     /**
      * Make sure NetworkManagerBle is not null when running a certain logic
+     *
      * @param runnable Future task to be executed
      */
-    public void runAfterServiceConnection(Runnable runnable){
+    public void runAfterServiceConnection(Runnable runnable) {
         this.runAfterServiceConnection = runnable;
     }
 

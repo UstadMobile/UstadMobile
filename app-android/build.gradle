@@ -307,6 +307,8 @@ dependencies {
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+    //Crash reporting
+    implementation "ch.acra:acra-http:$version_android_acra"
 
     androidTestImplementation project(":core-tests")
 
@@ -332,6 +334,9 @@ dependencies {
 
     //Page indicator
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+
+    // shake detector
+    implementation "com.squareup:seismic:$version_android_seismic"
 
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 
