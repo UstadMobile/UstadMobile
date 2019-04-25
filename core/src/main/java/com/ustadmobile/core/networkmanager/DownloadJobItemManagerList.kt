@@ -29,6 +29,10 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         return managerMap.get(downloadJobId)
     }
 
+    fun getActiveDownloadJobItemManagers(): List<DownloadJobItemManager> {
+        return managerMap.values.toList()
+    }
+
     override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long, callback: UmResultCallback<DownloadJobItemStatus>?) {
         if(managerMap.isEmpty()){
             callback?.onDone(null)

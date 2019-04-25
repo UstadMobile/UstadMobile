@@ -758,6 +758,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         return jobItemManagerList.getDownloadJobItemManager(downloadJobId);
     }
 
+    public List<DownloadJobItemManager> getActiveDownloadJobItemManagers() {
+        return jobItemManagerList.getActiveDownloadJobItemManagers();
+    }
+
     public void findDownloadJobItemStatusByContentEntryUid(long contentEntryUid,
                                                             UmResultCallback<DownloadJobItemStatus> callback) {
         jobItemManagerList.findDownloadJobItemStatusByContentEntryUid(contentEntryUid, callback);
