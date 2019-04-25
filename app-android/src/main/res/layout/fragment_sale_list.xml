@@ -37,48 +37,139 @@
         android:id="@+id/fragment_clazz_log_list_line_chart_selector_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/fragment_sale_list_filter_all_sales"
-            style="@android:style/Widget.Material.Light.Button"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:layout_marginLeft="@dimen/dimen_2dp"
-            android:layout_marginRight="@dimen/dimen_2dp"
-            android:background="@drawable/rounded_button_selector"
-            android:text="@string/all_sales"
-            android:textAppearance="@style/TextAppearance.AppCompat.Inverse" />
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/fragment_sale_list_filter_pre_orders"
-            style="@android:style/Widget.Material.Light.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:layout_marginLeft="@dimen/dimen_2dp"
-            android:layout_marginRight="@dimen/dimen_2dp"
-            android:background="@drawable/rounded_button_selector"
-            android:text="@string/pre_orders"
-            android:textAppearance="@style/TextAppearance.AppCompat.Inverse" />
 
-        <Button
-            android:id="@+id/fragment_sale_list_filter_payments_due"
-            style="@android:style/Widget.Material.Light.Button"
+            <TextView
+                android:id="@+id/fragment_sale_list_filter_all_sales_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|right"
+                android:layout_marginTop="0dp"
+                android:background="@drawable/badge_circle"
+                android:text="20"
+                android:visibility="invisible"
+                android:textColor="@color/background_light"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/fragment_sale_list_filter_all_sales"
+                style="@android:style/Widget.Material.Light.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_button_selector"
+                android:text="@string/all_sales"
+                android:textAppearance="@style/TextAppearance.AppCompat.Inverse"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+
+        <android.support.constraint.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:background="@drawable/rounded_button_selector"
-            android:paddingLeft="@dimen/bottom_navigation_notification_radius"
-            android:paddingRight="@dimen/bottom_navigation_notification_radius"
-            android:text="@string/payments_due"
-            android:textAppearance="@style/TextAppearance.AppCompat.Inverse"
-            android:visibility="gone" />
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:id="@+id/fragment_sale_list_filter_pre_orders_counter"
+                android:layout_width="@dimen/dimen_20dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|right"
+                android:background="@drawable/badge_circle"
+                android:elevation="@dimen/dimen_4dp"
+                android:gravity="center"
+                android:text="20"
+                android:textColor="@color/background_light"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <Button
+                android:id="@+id/fragment_sale_list_filter_pre_orders"
+                style="@android:style/Widget.Material.Light.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_button_selector"
+                android:text="@string/pre_orders"
+                android:textAppearance="@style/TextAppearance.AppCompat.Inverse"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:id="@+id/fragment_sale_list_filter_payments_due_counter"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|right"
+                android:background="@drawable/badge_circle"
+                android:elevation="@dimen/dimen_4dp"
+                android:gravity="center"
+                android:text="20"
+                android:textColor="@color/background_light"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <Button
+                android:id="@+id/fragment_sale_list_filter_payments_due"
+                style="@android:style/Widget.Material.Light.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/rounded_button_selector"
+                android:paddingLeft="@dimen/dimen_8dp"
+                android:paddingRight="@dimen/dimen_4dp"
+                android:text="@string/payments_due"
+                android:textAppearance="@style/TextAppearance.AppCompat.Inverse"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
 
 
     </LinearLayout>

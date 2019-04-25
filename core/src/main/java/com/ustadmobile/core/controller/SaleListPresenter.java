@@ -1,5 +1,7 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.dao.SalePaymentDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -34,13 +36,10 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
 
     private UmProvider<SaleListDetail> umProvider;
     UmAppDatabase repository;
-    private SaleDao providerDao;
-
-
+    private SaleDao saleDao;
+    private SalePaymentDao salePaymentDao;
 
     private Hashtable<Long, Integer> idToOrderInteger;
-
-
 
     private int filterSelected ;
 
@@ -50,8 +49,8 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
         //Get provider Dao
-        providerDao = repository.getSaleDao();
-
+        saleDao = repository.getSaleDao();
+        salePaymentDao = repository.getSalePaymentDao();
 
     }
 
@@ -111,7 +110,7 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
 
     public void getAndSetProvider(int sortCode){
 
-        umProvider = providerDao.filterAndSortSale(filterSelected, sortCode);
+        umProvider = saleDao.filterAndSortSale(filterSelected, sortCode);
         view.setListProvider(umProvider);
 
     }
@@ -121,30 +120,51 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
         super.onCreate(savedState);
 
         //Get provider
-        umProvider = providerDao.findAllActiveAsSaleListDetailProvider();
+        umProvider = saleDao.findAllActiveAsSaleListDetailProvider();
         view.setListProvider(umProvider);
 
         idToOrderInteger = new Hashtable<>();
         updateSortSpinnerPreset();
 
+        observePreOrderAndPaymentCounters();
+
+    }
+
+    public void observePreOrderAndPaymentCounters(){
+        UmLiveData<Integer> preOrderLiveData = saleDao.getPreOrderSaleCountLive();
+        UmLiveData<Integer> paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive();
+
+        preOrderLiveData.observe(SaleListPresenter.this,
+                SaleListPresenter.this::handlePreOrderCountUpdate);
+
+        paymentsDueLiveData.observe(SaleListPresenter.this,
+                SaleListPresenter.this::handlePaymentDueCountUpdate);
+    }
+
+    public void handlePreOrderCountUpdate(int count){
+        view.updatePreOrderCounter(count);
+    }
+
+    public void handlePaymentDueCountUpdate(int count){
+        view.updatePaymentDueCounter(count);
     }
 
     public void filterAll(){
         filterSelected = ALL_SELECTED;
-        umProvider = providerDao.findAllActiveAsSaleListDetailProvider();
+        umProvider = saleDao.findAllActiveAsSaleListDetailProvider();
         view.setListProvider(umProvider);
 
     }
 
     public void filterPreOrder(){
         filterSelected = PREORDER_SELECTED;
-        umProvider = providerDao.findAllActiveSaleListDetailPreOrdersProvider();
+        umProvider = saleDao.findAllActiveSaleListDetailPreOrdersProvider();
         view.setListProvider(umProvider);
 
     }
     public void filterPaymentDue(){
         filterSelected = PAYMENT_SELECTED;
-        umProvider = providerDao.findAllActiveSaleListDetailPaymentDueProvider();
+        umProvider = saleDao.findAllActiveSaleListDetailPaymentDueProvider();
         view.setListProvider(umProvider);
     }
 

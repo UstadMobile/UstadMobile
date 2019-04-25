@@ -138,8 +138,6 @@ public class SalePaymentDetailActivity extends UstadBaseActivity implements Sale
 
     }
 
-
-
     @Override
     public void updateSalePaymentOnView(SalePayment payment) {
         amountNP.setValue((int) payment.getSalePaymentPaidAmount());

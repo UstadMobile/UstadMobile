@@ -191,9 +191,11 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     }
 
     public void setSold(boolean sold){
+        updatedSaleItem.setSaleItemPreorder(!sold);
         updatedSaleItem.setSaleItemSold(sold);
     }
     public void setPreOrder(boolean po){
+        updatedSaleItem.setSaleItemSold(!po);
         updatedSaleItem.setSaleItemPreorder(po);
     }
 

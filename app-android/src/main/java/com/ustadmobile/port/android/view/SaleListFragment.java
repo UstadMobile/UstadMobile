@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleListPresenter;
@@ -45,6 +46,7 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
 
     private Button allSalesButton, preOrdersButton, paymentsDueButton;
 
+    private TextView allSalesCounter, preOrderCounter, paymentsDueCounter;
 
     public static SaleListFragment newInstance(){
         SaleListFragment fragment = new SaleListFragment();
@@ -75,6 +77,11 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
 
         sortSpinner = rootContainer.findViewById(R.id.fragment_sale_list_sort_by_spinner);
 
+
+        allSalesCounter = rootContainer.findViewById(R.id.fragment_sale_list_filter_all_sales_counter);
+        preOrderCounter = rootContainer.findViewById(R.id.fragment_sale_list_filter_pre_orders_counter);
+        paymentsDueCounter = rootContainer.findViewById(R.id.fragment_sale_list_filter_payments_due_counter);
+
         //set up Presenter
         mPresenter = new SaleListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
@@ -86,7 +93,7 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
         paymentsDueButton = rootContainer.findViewById(R.id.fragment_sale_list_filter_payments_due);
 
         //Sprint 2:
-        //paymentsDueButton.setVisibility(View.VISIBLE);
+        paymentsDueButton.setVisibility(View.VISIBLE);
 
         allSalesButton.setOnClickListener(v -> {
             disableAllButtonSelected();
@@ -132,6 +139,26 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
                 R.layout.item_simple_spinner, sortSpinnerPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(adapter);
+    }
+
+    @Override
+    public void updatePreOrderCounter(int count) {
+        if(count == 0){
+            preOrderCounter.setVisibility(View.INVISIBLE);
+        }else{
+            preOrderCounter.setText(String.valueOf(count));
+            preOrderCounter.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void updatePaymentDueCounter(int count) {
+        if(count == 0){
+            paymentsDueCounter.setVisibility(View.INVISIBLE);
+        }else{
+            paymentsDueCounter.setText(String.valueOf(count));
+            paymentsDueCounter.setVisibility(View.VISIBLE);
+        }
     }
 
     public void disableAllButtonSelected(){

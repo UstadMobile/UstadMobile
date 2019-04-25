@@ -84,15 +84,59 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     long saleCreationDate;
     int saleItemCount;
      */
+//    public static final String ALL_SALE_LIST =
+//    " SELECT s.*, Location.title AS locationName, " +
+//    " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
+//            "SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
+//            "Sale.saleUid WHERE Sale.saleUid = s.saleUid) ,0) AS saleAmount, " +
+//    " 'Afs' AS saleCurrency,  " +
+//    " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = s.saleUid) AS saleItemCount " +
+//    "FROM Sale s " +
+//    " LEFT JOIN Location ON Location.locationUid = s.saleLocationUid WHERE s.saleActive = 1";
+//
     public static final String ALL_SALE_LIST =
-    " SELECT s.*, Location.title AS locationName, " +
-    " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
-            "SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-            "Sale.saleUid WHERE Sale.saleUid = s.saleUid) ,0) AS saleAmount, " +
-    " 'Afs' AS saleCurrency,  " +
-    " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = s.saleUid) AS saleItemCount " +
-    "FROM Sale s " +
-    " LEFT JOIN Location ON Location.locationUid = s.saleLocationUid WHERE s.saleActive = 1";
+            " SELECT sl.*, " +
+            " (SELECT SaleItem.saleItemQuantity " +
+            " FROM Sale stg " +
+            " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid " +
+            " WHERE stg.saleUid = sl.saleUid " +
+            " ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
+            " )  " +
+            " || 'x ' || " +
+            " (SELECT SaleProduct.saleProductName " +
+            " FROM SaleItem sitg " +
+            " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid " +
+            " WHERE sitg.saleItemSaleUid = sl.saleUid " +
+            " ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) " +
+            " || " +
+            " (select " +
+            "  (case  " +
+            "   when  " +
+            "   (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid) > 1 " +
+            "   then '...'  " +
+            "   else '' " +
+            "  end) " +
+            " from sale) " +
+            " AS saleTitleGen, " +
+            " Location.title AS locationName, " +
+            " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
+            "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
+            "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+            " ) AS saleAmount, " +
+            " (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
+            "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
+            "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+            " ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
+            " WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
+            " AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0)) AS saleAmountDue, " +
+            " 'Afs' AS saleCurrency,  " +
+            " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount," +
+            " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  " +
+            "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
+            "  AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0) " +
+            "  AS saleAmountPaid " +
+            " FROM Sale sl " +
+            " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid WHERE sl.saleActive = 1  ";
 
 
 
@@ -114,7 +158,7 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     //filter and sort
 
     public static final String FILTER_PREORDER = " AND salePreOrder = 1";
-    public static final String FILTER_PAYMENT_DUE = " AND salePaymentDone = 0";
+    public static final String FILTER_PAYMENT_DUE = " AND saleAmountPaid < saleAmount ";
 
     @UmQuery(ALL_SALE_LIST)
     public abstract UmProvider<SaleListDetail> findAllActiveAsSaleListDetailProvider();
@@ -122,16 +166,20 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     @UmQuery(ALL_SALE_LIST + FILTER_PREORDER)
     public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPreOrdersProvider();
 
+
+    //Payments due shows the payment amount pending vs the total amount of the sale.
     @UmQuery(ALL_SALE_LIST + FILTER_PAYMENT_DUE)
     public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPaymentDueProvider();
 
 
-    public static final String SORT_NAME_ASC = " ORDER BY s.saleTitle ASC ";
-    public static final String SORT_NAME_DEC = " ORDER BY s.saleTitle DESC ";
+
+
+    public static final String SORT_NAME_ASC = " ORDER BY sl.saleTitle ASC ";
+    public static final String SORT_NAME_DEC = " ORDER BY sl.saleTitle DESC ";
     public static final String SORT_TOTAL_AMOUNT_DESC = " ORDER BY saleAmount DESC ";
     public static final String SORT_TOTAL_AMOUNT_ASC = " ORDER BY saleAmount ASC ";
-    public static final String SORT_ORDER_DATE_DESC = " ORDER BY s.saleCreationDate DESC ";
-    public static final String SORT_ORDER_DATE_ASC = " ORDER BY s.saleCreationDate ASC ";
+    public static final String SORT_ORDER_DATE_DESC = " ORDER BY sl.saleCreationDate DESC ";
+    public static final String SORT_ORDER_DATE_ASC = " ORDER BY sl.saleCreationDate ASC ";
 
     @UmQuery(ALL_SALE_LIST +  SORT_NAME_ASC)
     public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortNameAscProvider();

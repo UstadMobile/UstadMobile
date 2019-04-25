@@ -31,6 +31,10 @@ public interface SaleListView extends UstadView {
 
     void updateSortSpinner(String[] presets);
 
+    void updatePreOrderCounter(int count);
+
+    void updatePaymentDueCounter(int count);
+
 
 }
 

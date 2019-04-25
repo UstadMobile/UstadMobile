@@ -4,10 +4,14 @@ package com.ustadmobile.lib.db.entities;
  * Sale 's POJO for representing itself on the view (and recycler views)
  */
 public class SaleListDetail extends Sale {
+
     String locationName;
     float saleAmount;
     String saleCurrency;
     int saleItemCount;
+    String saleTitleGen;
+    float saleAmountPaid;
+    float saleAmountDue;
 
 
     public String getLocationName() {
@@ -40,5 +44,29 @@ public class SaleListDetail extends Sale {
 
     public void setSaleItemCount(int saleItemCount) {
         this.saleItemCount = saleItemCount;
+    }
+
+    public String getSaleTitleGen() {
+        return saleTitleGen;
+    }
+
+    public void setSaleTitleGen(String saleTitleGen) {
+        this.saleTitleGen = saleTitleGen;
+    }
+
+    public float getSaleAmountPaid() {
+        return saleAmountPaid;
+    }
+
+    public void setSaleAmountPaid(float saleAmountPaid) {
+        this.saleAmountPaid = saleAmountPaid;
+    }
+
+    public float getSaleAmountDue() {
+        return saleAmountDue;
+    }
+
+    public void setSaleAmountDue(float saleAmountDue) {
+        this.saleAmountDue = saleAmountDue;
     }
 }

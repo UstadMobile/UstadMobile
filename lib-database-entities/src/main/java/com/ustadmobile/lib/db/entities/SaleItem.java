@@ -18,25 +18,35 @@ public class SaleItem {
     //Producer person uid
     private long saleItemProducerUid;
 
-    //Product id
+    //Sale product uid
     private long saleItemProductUid;
 
+    //Quantity of sale product
     private int saleItemQuantity;
 
+    //Price per product
     private float saleItemPricePerPiece;
 
+    //Currency (eg: Afs)
     private String saleItemCurrency;
 
+    //If sold ticked.
     private boolean saleItemSold;
 
+    //If pre order ticked.
     private boolean saleItemPreorder;
 
+    //Any specific discount applied (not used at the moment)
     private float saleItemDiscount;
 
+    //If active or not (false is effectively deleted
+    // and is usually set for sale items not saved during creation)
     private boolean saleItemActive;
 
+    //Date when the sale item was created (Usually current system time)
     private long saleItemCreationDate;
 
+    //Due date of the sale item. Will only be used if saleItemPreorder is true.
     private long saleItemDueDate;
 
     @UmSyncMasterChangeSeqNum

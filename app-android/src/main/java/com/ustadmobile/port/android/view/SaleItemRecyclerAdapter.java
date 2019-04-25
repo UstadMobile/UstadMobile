@@ -89,6 +89,9 @@ public class SaleItemRecyclerAdapter extends
 
         ConstraintLayout itemWhole = holder.itemView.findViewById(R.id.item_sale_item_cl);
 
+        dueDate.setVisibility(entity.isSaleItemPreorder()?View.VISIBLE:View.INVISIBLE);
+        dueDateImage.setVisibility(entity.isSaleItemPreorder()?View.VISIBLE:View.INVISIBLE);
+
         int quantity = entity.getSaleItemQuantity();
         float price = entity.getSaleItemPricePerPiece();
 
@@ -103,9 +106,6 @@ public class SaleItemRecyclerAdapter extends
         itemPrice.setText(priceString);
         itemTotal.setText(priceTotalString);
 
-        //Sprint 2:
-        dueDate.setVisibility(View.VISIBLE);
-        dueDateImage.setVisibility(View.VISIBLE);
         dueDate.setText(dueString);
 
         itemWhole.setOnClickListener(v ->

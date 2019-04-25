@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
@@ -179,7 +180,12 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
             }
         });
 
-        preOrderRB.setOnCheckedChangeListener((buttonView, isChecked) -> showPreOrder(isChecked));
+        preOrderRB.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPresenter.setPreOrder(isChecked);
+            showPreOrder(isChecked);
+        });
+
+        saleRB.setOnCheckedChangeListener((buttonView, isChecked) -> mPresenter.setSold(isChecked));
     }
 
     @Override
@@ -200,8 +206,8 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
                     pppNP.setValue((int) ppp);
                 }
                 totalTV.setText(String.valueOf(total));
-                saleRB.setActivated(saleItem.isSaleItemSold());
-                preOrderRB.setActivated(saleItem.isSaleItemPreorder());
+                saleRB.setChecked(saleItem.isSaleItemSold());
+                preOrderRB.setChecked(saleItem.isSaleItemPreorder());
 
                 long dueDate = saleItem.getSaleItemDueDate();
                 if(dueDate >0){

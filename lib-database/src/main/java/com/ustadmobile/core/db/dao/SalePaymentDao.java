@@ -102,4 +102,20 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
 
     @UmUpdate
     public abstract void updateAsync(SalePayment entity, UmCallback<Integer> updateCallback);
+
+
+    @UmQuery(" SELECT COUNT(*) FROM " +
+            " (SELECT " +
+            " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
+            "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
+            "            Sale.saleUid WHERE Sale.saleUid = sl.saleUid) ,0 " +
+            " ) AS saleAmount, " +
+            " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment " +
+            "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
+            "  AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0) " +
+            "  AS saleAmountPaid " +
+            " FROM Sale sl " +
+            " WHERE sl.saleActive = 1 AND saleAmountPaid < saleAmount " +
+            " )")
+    public abstract UmLiveData<Integer> getPaymentsDueCountLive();
 }

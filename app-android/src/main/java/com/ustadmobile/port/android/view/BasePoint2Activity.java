@@ -269,12 +269,12 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     public void updateNotificationForSales(int number) {
         //Sprint 2
         //Send notification to 2nd last item (sales)
-//        String nString = String.valueOf(number);
-//        if (number == 0) {
-//            nString = "";
-//        }
-//        bottomNavigation.setNotification(nString,
-//                bottomNavigation.getItemsCount() - 2);
+        String nString = String.valueOf(number);
+        if (number == 0) {
+            nString = "";
+        }
+        bottomNavigation.setNotification(nString,
+                bottomNavigation.getItemsCount() - 2);
     }
 
     /**

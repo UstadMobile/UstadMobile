@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.SaleDao;
+import com.ustadmobile.core.db.dao.SalePaymentDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
@@ -29,11 +30,16 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
 
     UmLiveData<Integer> preOrderLive;
 
+    UmLiveData<Integer> paymentsDueLive;
+
+    SalePaymentDao salePaymentDao;
+
     public BasePoint2Presenter(Object context, Hashtable arguments, BasePoint2View view) {
         super(context, arguments, view);
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
         saleDao = repository.getSaleDao();
+        salePaymentDao = repository.getSalePaymentDao();
     }
 
     /**
@@ -140,11 +146,23 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
         preOrderLive.observe(BasePoint2Presenter.this,
                 BasePoint2Presenter.this::handlePreOrderCountUpdate);
 
+        paymentsDueLive = salePaymentDao.getPaymentsDueCountLive();
+        paymentsDueLive.observe(BasePoint2Presenter.this,
+                BasePoint2Presenter.this::handlePaymnetsDueCountUpdate);
+
     }
 
+    private int preOrderCount = 0, paymentsDueCount = 0;
 
     public void handlePreOrderCountUpdate(Integer count){
-        view.updateNotificationForSales(count);
+        preOrderCount = count;
+        //view.updateNotificationForSales(count);
+        view.updateNotificationForSales(preOrderCount + paymentsDueCount);
+    }
+
+    public void handlePaymnetsDueCountUpdate(Integer count){
+        paymentsDueCount = count;
+        view.updateNotificationForSales(preOrderCount + paymentsDueCount);
     }
 
 }
