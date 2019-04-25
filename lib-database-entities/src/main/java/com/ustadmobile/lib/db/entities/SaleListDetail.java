@@ -12,6 +12,7 @@ public class SaleListDetail extends Sale {
     String saleTitleGen;
     float saleAmountPaid;
     float saleAmountDue;
+    long earliestDueDate;
 
 
     public String getLocationName() {
@@ -68,5 +69,13 @@ public class SaleListDetail extends Sale {
 
     public void setSaleAmountDue(float saleAmountDue) {
         this.saleAmountDue = saleAmountDue;
+    }
+
+    public long getEarliestDueDate() {
+        return earliestDueDate;
+    }
+
+    public void setEarliestDueDate(long earliestDueDate) {
+        this.earliestDueDate = earliestDueDate;
     }
 }

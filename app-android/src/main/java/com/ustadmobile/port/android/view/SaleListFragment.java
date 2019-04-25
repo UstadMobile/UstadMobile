@@ -207,10 +207,11 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
             };
 
     @Override
-    public void setListProvider(UmProvider<SaleListDetail> listProvider) {
+    public void setListProvider(UmProvider<SaleListDetail> listProvider, boolean paymentsDueTab) {
 
         SaleListRecyclerAdapter recyclerAdapter =
-                new SaleListRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, getContext());
+                new SaleListRecyclerAdapter(DIFF_CALLBACK, mPresenter,paymentsDueTab,
+                        this, getContext());
         //A warning is expected
         DataSource.Factory<Integer, SaleListDetail> factory =
                 (DataSource.Factory<Integer, SaleListDetail>)listProvider.getProvider();

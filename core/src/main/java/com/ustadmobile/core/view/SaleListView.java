@@ -26,7 +26,8 @@ public interface SaleListView extends UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<SaleListDetail> listProvider);
+    void setListProvider(UmProvider<SaleListDetail> listProvider, boolean paymentsDueTab);
+
 
 
     void updateSortSpinner(String[] presets);
@@ -34,6 +35,7 @@ public interface SaleListView extends UstadView {
     void updatePreOrderCounter(int count);
 
     void updatePaymentDueCounter(int count);
+
 
 
 }

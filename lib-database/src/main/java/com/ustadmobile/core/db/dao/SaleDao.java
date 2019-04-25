@@ -130,6 +130,13 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             " WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
             " AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0)) AS saleAmountDue, " +
             " 'Afs' AS saleCurrency,  " +
+            " coalesce(" +
+            "    ( " +
+            "    SELECT SaleItem.saleItemDueDate FROM SaleItem LEFT JOIN Sale on Sale.saleUid = " +
+            "       SaleItem.saleItemSaleUid WHERE SaleItem.saleItemSaleUid = sl.saleUid  " +
+            "      AND Sale.salePreOrder = 1 AND Sale.saleActive = 1 AND SaleItem.saleItemPreOrder = 1 " +
+            "      AND SaleItem.saleItemSold = 0 ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 " +
+            "    ) ,0) AS earliestDueDate, "  +
             " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount," +
             " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  " +
             "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +

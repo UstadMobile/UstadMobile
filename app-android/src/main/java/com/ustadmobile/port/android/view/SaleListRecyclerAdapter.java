@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ public class SaleListRecyclerAdapter extends
     Activity theActivity;
     Fragment theFragment;
     SaleListPresenter mPresenter;
+    boolean paymentsDueTab = false;
 
     @NonNull
     @Override
@@ -55,27 +57,40 @@ public class SaleListRecyclerAdapter extends
 
         assert entity != null;
         saleTitle.setText(entity.getSaleTitle());
-        String saleAmountWithCurrency = String.valueOf(Math.round(entity.getSaleAmount())) + " " +
+        String saleAmountWithCurrency = Math.round(entity.getSaleAmount()) + " " +
                 entity.getSaleCurrency();
-        saleAmount.setText(saleAmountWithCurrency);
         saleLocation.setText(entity.getLocationName());
 
         String creationDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(entity.getSaleCreationDate(), null);
-        String dueDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(entity.getSaleDueDate(), null);
+        saleOrderDate.setText(creationDatePretty);
 
-        saleOrderDate.setText(String.valueOf(creationDatePretty));
-        String dueString = theFragment.getText(R.string.due) + " " + String.valueOf(dueDatePretty);
-        saleDueDate.setText(dueString);
+        saleAmount.setText(saleAmountWithCurrency);
+        saleAmount.setTextColor(ContextCompat.getColor(theContext, R.color.text_primary));
+
+        long earliestDueDate = entity.getEarliestDueDate();
 
         //Sprint 2:
-//        if(entity.getSaleDueDate() != 0 &&
-//                entity.getSaleDueDate() < System.currentTimeMillis()){
-//            saleDueDate.setVisibility(View.VISIBLE);
-//            saleDueDateImage.setVisibility(View.VISIBLE);
-//        }else{
-//            saleDueDate.setVisibility(View.GONE);
-//            saleDueDateImage.setVisibility(View.GONE);
-//        }
+        if(earliestDueDate!= 0 &&
+                earliestDueDate < System.currentTimeMillis()){
+            saleDueDate.setVisibility(View.VISIBLE);
+            saleDueDateImage.setVisibility(View.VISIBLE);
+
+        }else{
+            saleDueDate.setVisibility(View.GONE);
+            saleDueDateImage.setVisibility(View.GONE);
+
+        }
+
+        if(paymentsDueTab){
+            //Also change amount to remaining amount and change its color
+            String saleAmountRemainingWithCurrency = Math.round(entity.getSaleAmountDue()) + " " +
+                    entity.getSaleCurrency();
+            saleAmount.setText(saleAmountRemainingWithCurrency);
+            saleAmount.setTextColor(ContextCompat.getColor(theContext, R.color.primary_dark));
+        }
+        String dueDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(earliestDueDate, null);
+        String dueString = theFragment.getText(R.string.due) + " " + dueDatePretty;
+        saleDueDate.setText(dueString);
 
         ConstraintLayout item = holder.itemView.findViewById(R.id.item_sale_cl);
         item.setOnClickListener(v -> mPresenter.handleClickSale(entity.getSaleUid()));
@@ -90,25 +105,17 @@ public class SaleListRecyclerAdapter extends
         }
     }
 
-    protected SaleListRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<SaleListDetail> diffCallback,
-            SaleListPresenter thePresenter,
-            Activity activity,
-            Context context) {
-        super(diffCallback);
-        mPresenter = thePresenter;
-        theContext = context;
-        theActivity = activity;
-    }
 
     protected SaleListRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SaleListDetail> diffCallback,
             SaleListPresenter thePresenter,
+            boolean paymentsDue,
             Fragment fragment,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theContext = context;
+        paymentsDueTab = paymentsDue;
         theFragment = fragment;
     }
 
