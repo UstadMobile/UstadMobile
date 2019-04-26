@@ -132,7 +132,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private volatile boolean bleServiceBound = false;
     private ShakeDetector shakeDetector;
     private SensorManager sensorManager;
-    boolean isDialogShown = false;
+    boolean feedbackDialogVisible = false;
 
 
     @Override
@@ -165,11 +165,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     public void hearShake() {
 
-        if (isDialogShown) {
+        if (feedbackDialogVisible) {
             return;
         }
 
-        isDialogShown = true;
+        feedbackDialogVisible = true;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.send_feedback);
         LayoutInflater inflater = getLayoutInflater();
@@ -182,8 +182,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             dialogInterface.cancel();
         });
         builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
-        builder.setOnDismissListener(dialogInterface -> isDialogShown = false);
-        builder.setOnCancelListener(dialogInterface -> isDialogShown = false);
+        builder.setOnDismissListener(dialogInterface -> feedbackDialogVisible = false);
+        builder.setOnCancelListener(dialogInterface -> feedbackDialogVisible = false);
         AlertDialog dialog = builder.create();
         dialog.show();
 
