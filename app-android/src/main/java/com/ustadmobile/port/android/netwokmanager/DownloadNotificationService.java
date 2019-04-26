@@ -94,6 +94,7 @@ public class DownloadNotificationService extends Service
             mNetworkServiceBound.set(true);
             networkManagerBle = ((NetworkManagerBleAndroidService.LocalServiceBinder) service)
                     .getService().getNetworkManagerBle();
+            networkManagerBle.addDownloadChangeListener(DownloadNotificationService.this);
             List<DownloadJobItemManager> activeDownloadManagers = networkManagerBle
                     .getActiveDownloadJobItemManagers();
             for(DownloadJobItemManager manager : activeDownloadManagers) {
@@ -104,7 +105,10 @@ public class DownloadNotificationService extends Service
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mNetworkServiceBound.set(false);
-            networkManagerBle = null;
+            if(networkManagerBle != null){
+                networkManagerBle.removeDownloadChangeListener(DownloadNotificationService.this);
+                networkManagerBle = null;
+            }
         }
     };
 
@@ -162,13 +166,8 @@ public class DownloadNotificationService extends Service
         createChannel();
 
         umAppDatabase = UmAppDatabase.getInstance(this);
-//        new Handler().postDelayed(() -> {
-//            activeDownloadJobData = umAppDatabase.getDownloadJobDao().getActiveDownloadJobs();
-//            activeDownloadJobObserver = DownloadNotificationService.this::handleJobListChanged;
-//            activeDownloadJobData.observeForever(activeDownloadJobObserver);
-//        },TimeUnit.SECONDS.toMillis(1));
 
-        //bind to service
+        //bind to network service
         Intent networkServiceIntent = new Intent(getApplicationContext(),
                 NetworkManagerBleAndroidService.class);
         bindService(networkServiceIntent, mNetworkServiceConnection, Context.BIND_AUTO_CREATE);
@@ -255,7 +254,9 @@ public class DownloadNotificationService extends Service
                             public void onFailure(Throwable exception) {}
                         });
 
-            } else {
+            }else if(status.getStatus() >= JobStatus.COMPLETE_MIN) {
+                //job has completed and notification needs to be removed
+            }else {
                 totalBytesDownloadedSoFar = totalBytesDownloadedSoFar +
                         status.getBytesSoFar();
                 int progress = (int)((double)status.getBytesSoFar()
