@@ -6,6 +6,7 @@
 
 
     <LinearLayout
+        android:id="@+id/activity_user_profile_logout_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -15,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_language_ll">
 
         <ImageView
             android:id="@+id/imageView4"
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/ic_person_black_24dp"
+            app:srcCompat="@drawable/ic_exit_to_app_black_24dp"
             tools:layout_editor_absoluteY="243dp" />
 
         <TextView
@@ -40,7 +41,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/activity_user_profile_language_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -50,7 +51,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_change_password_ll">
 
         <ImageView
             android:id="@+id/language_logo"
@@ -58,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/ic_person_black_24dp"
+            app:srcCompat="@drawable/ic_language_black_24dp"
             tools:layout_editor_absoluteY="243dp" />
 
         <LinearLayout
@@ -79,11 +80,12 @@
                  />
 
             <TextView
-                android:id="@+id/language_selection"
+                android:id="@+id/activity_user_profile_language_selection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
+                android:text="@string/language_english"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView4" />
         </LinearLayout>
@@ -138,7 +140,7 @@
         app:srcCompat="@drawable/ic_edit_black_24dp" />
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/activity_user_profile_change_password_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -156,7 +158,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/ic_person_black_24dp"
+            app:srcCompat="@drawable/ic_person_key_account_black_24dp"
             tools:layout_editor_absoluteY="243dp" />
 
         <TextView

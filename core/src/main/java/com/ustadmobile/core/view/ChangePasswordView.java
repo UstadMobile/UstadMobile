@@ -18,5 +18,10 @@ public interface ChangePasswordView extends UstadView {
     void finish();
 
 
+    void updateUsername(String username);
+
+    void sendMessage(int messageId);
+
+
 }
 

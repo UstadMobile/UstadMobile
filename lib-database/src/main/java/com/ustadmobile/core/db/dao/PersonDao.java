@@ -9,6 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.Location;
@@ -222,6 +223,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmQuery("SELECT * From Person WHERE personUid = :uid")
     public abstract UmLiveData<Person> findByUidLive(long uid);
 
+    @UmQuery("SELECT * From Person WHERE personUid = :uid")
+    public abstract void findByUidAsync(long uid, UmCallback<Person> resultCallback);
+
     @UmQuery("SELECT * FROM Person WHERE active =1")
     public abstract UmProvider<Person> findAllPeopleProvider();
 
@@ -233,4 +237,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmQuery("Select * From Person WHERE active = 1")
     public abstract List<Person> findAllPeople();
+
+    @UmUpdate
+    public abstract void updateAsync(Person entity, UmCallback<Integer> resultObject);
 }

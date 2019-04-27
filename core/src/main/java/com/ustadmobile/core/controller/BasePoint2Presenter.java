@@ -14,6 +14,7 @@ import java.util.Hashtable;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.Login2View;
+import com.ustadmobile.core.view.UserProfileView;
 import com.ustadmobile.lib.db.entities.Person;
 
 
@@ -163,6 +164,12 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
     public void handlePaymnetsDueCountUpdate(Integer count){
         paymentsDueCount = count;
         view.updateNotificationForSales(preOrderCount + paymentsDueCount);
+    }
+
+    public void handleClickPersonIcon(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        impl.go(UserProfileView.VIEW_NAME, args, context);
     }
 
 }

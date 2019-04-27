@@ -358,6 +358,8 @@
     <string name="payment_date">Payment date</string>
     <string name="order_due_date">Order due date</string>
     <string name="not_delivered">Not delivered</string>
+    <string name="passwords_dont_match">Passwords do not match. Try again.</string>
+    <string name="unable_to_update_password">Unable to reset password.</string>
 
 
 

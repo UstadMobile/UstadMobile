@@ -20,6 +20,12 @@ public interface UserProfileView extends UstadView {
      */
     void finish();
 
+    void updateToolbarTitle(String personName);
+
+    void setLanguageSet(String languageSet);
+
+
+
 
 
 }

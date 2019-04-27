@@ -70,6 +70,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         return true;
     }
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,7 +86,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         toolbar = findViewById(R.id.activity_basepoint2_toolbar);
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setIcon(R.drawable.ic_account_circle_white_36dp);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_account_circle_white_36dp);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
         //Call the Presenter
@@ -213,8 +216,11 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                mPresenter.handleClickPersonIcon();
                 return true;
+        }
+        if( item.getItemId() == R.id.menu_basepoint_about){
+            mPresenter.handleClickAbout();
         }
         return super.onOptionsItemSelected(item);
     }

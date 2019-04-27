@@ -70,6 +70,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.ChangePasswordView;
 import com.ustadmobile.core.view.ComingSoonView;
 import com.ustadmobile.core.view.ContentEntryDetailView;
 import com.ustadmobile.core.view.ContentEntryListView;
@@ -83,8 +84,10 @@ import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SalePaymentDetailView;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.core.view.SelectProducerView;
 import com.ustadmobile.core.view.SelectSaleProductView;
+import com.ustadmobile.core.view.UserProfileView;
 import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageContentView;
@@ -94,6 +97,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.BasePoint2Activity;
 import com.ustadmobile.port.android.view.BasePointActivity;
+import com.ustadmobile.port.android.view.ChangePasswordActivity;
 import com.ustadmobile.port.android.view.ComingSoonFragment;
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity;
 import com.ustadmobile.port.android.view.ContentEntryListActivity;
@@ -108,8 +112,10 @@ import com.ustadmobile.port.android.view.SaleDetailActivity;
 import com.ustadmobile.port.android.view.SaleItemDetailActivity;
 import com.ustadmobile.port.android.view.SalePaymentDetailActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
+import com.ustadmobile.port.android.view.SelectLanguageDialogFragment;
 import com.ustadmobile.port.android.view.SelectProducerActivity;
 import com.ustadmobile.port.android.view.SelectSaleProductActivity;
+import com.ustadmobile.port.android.view.UserProfileActivity;
 import com.ustadmobile.port.android.view.VideoPlayerActivity;
 import com.ustadmobile.port.android.view.WebChunkActivity;
 import com.ustadmobile.port.android.view.XapiPackageContentActivity;
@@ -190,6 +196,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SelectSaleProductView.VIEW_NAME, SelectSaleProductActivity.class);
         viewNameToAndroidImplMap.put(ComingSoonView.VIEW_NAME, ComingSoonFragment.class);
         viewNameToAndroidImplMap.put(SalePaymentDetailView.VIEW_NAME, SalePaymentDetailActivity.class);
+        viewNameToAndroidImplMap.put(UserProfileView.VIEW_NAME, UserProfileActivity.class);
+        viewNameToAndroidImplMap.put(ChangePasswordView.VIEW_NAME, ChangePasswordActivity.class);
+        viewNameToAndroidImplMap.put(SelectLanguageDialogView.VIEW_NAME, SelectLanguageDialogFragment.class);
 
     }
 

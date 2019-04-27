@@ -146,6 +146,14 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/register"
             android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.ChangePasswordActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
 
 
         <!--Services-->

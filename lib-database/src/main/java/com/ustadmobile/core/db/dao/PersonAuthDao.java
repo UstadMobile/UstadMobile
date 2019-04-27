@@ -1,7 +1,12 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmRestAccessible;
+import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.util.Base64Coder;
@@ -41,6 +46,65 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
     public static boolean authenticateEncryptedPassword(String providedPassword,
                                                         String encryptedPassword) {
         return encryptPassword(providedPassword).equals(encryptedPassword);
+    }
+
+
+    @UmQuery("SELECT * FROM PersonAuth WHERE personAuthUid = :uid")
+    public  abstract void findByUidAsync(long uid, UmCallback<PersonAuth> resultObject);
+
+
+    @UmUpdate
+    public abstract void updateAsync(PersonAuth entity, UmCallback<Integer> resultObject);
+
+
+    @UmQuery("SELECT admin from Person WHERE personUid = :uid")
+    public abstract boolean isPersonAdmin(long uid);
+
+    @UmQuery("UPDATE PersonAuth set passwordHash = :passwordHash " +
+            " WHERE personAuthUid = :personUid")
+    public abstract void updatePasswordForPersonUid(long personUid, String passwordHash,
+                                                    UmCallback<Integer> resultCallback);
+
+    @UmRestAccessible
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    public void resetPassword(long personUid, String password,
+                              @UmRestAuthorizedUidParam long loggedInPersonUid,
+                              UmCallback<Integer> resetCallback) {
+        String passwordHash = encryptPassword(password);
+        if(loggedInPersonUid != personUid){
+            if(isPersonAdmin(loggedInPersonUid)){
+                PersonAuth personAuth = new PersonAuth(personUid, passwordHash);
+                PersonAuth existingPersonAuth = findByUid(personUid);
+                if(existingPersonAuth == null){
+                    insert(personAuth);
+                }
+                updatePasswordForPersonUid(personUid, passwordHash,
+                        new UmCallback<Integer>() {
+                            @Override
+                            public void onSuccess(Integer result) {
+                                if(result > 0) {
+                                    System.out.println("Update password success");
+                                    resetCallback.onSuccess(1);
+                                }else{
+                                    resetCallback.onFailure(new Exception());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                System.out.println("Update password fail");
+                                resetCallback.onFailure(new Exception());
+                            }
+                        });
+            }else{
+                System.out.println("Update password fail2");
+                resetCallback.onFailure(new Exception());
+            }
+        }else{
+            System.out.println("Update password fail3");
+            resetCallback.onFailure(new Exception());
+        }
+
     }
 
 
