@@ -26,7 +26,7 @@ public interface SaleListView extends UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    void setListProvider(UmProvider<SaleListDetail> listProvider, boolean paymentsDueTab);
+    void setListProvider(UmProvider<SaleListDetail> listProvider, boolean paymentsDueTab, boolean preOrderTab);
 
 
 

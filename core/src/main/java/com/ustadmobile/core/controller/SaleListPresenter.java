@@ -111,7 +111,7 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
     public void getAndSetProvider(int sortCode){
 
         umProvider = saleDao.filterAndSortSale(filterSelected, sortCode);
-        view.setListProvider(umProvider, false);
+        view.setListProvider(umProvider, false, false);
 
     }
 
@@ -121,7 +121,7 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
 
         //Get provider
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider();
-        view.setListProvider(umProvider, false);
+        view.setListProvider(umProvider, false, false);
 
         idToOrderInteger = new Hashtable<>();
         updateSortSpinnerPreset();
@@ -152,20 +152,20 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
     public void filterAll(){
         filterSelected = ALL_SELECTED;
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider();
-        view.setListProvider(umProvider, false);
+        view.setListProvider(umProvider, false, false);
 
     }
 
     public void filterPreOrder(){
         filterSelected = PREORDER_SELECTED;
         umProvider = saleDao.findAllActiveSaleListDetailPreOrdersProvider();
-        view.setListProvider(umProvider, false);
+        view.setListProvider(umProvider, false, true);
 
     }
     public void filterPaymentDue(){
         filterSelected = PAYMENT_SELECTED;
         umProvider = saleDao.findAllActiveSaleListDetailPaymentDueProvider();
-        view.setListProvider(umProvider, true);
+        view.setListProvider(umProvider, true, false);
     }
 
     public void handleClickSale(long saleUid){

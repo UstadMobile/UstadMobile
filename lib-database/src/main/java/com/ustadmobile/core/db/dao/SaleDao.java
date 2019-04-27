@@ -134,14 +134,18 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             "    ( " +
             "    SELECT SaleItem.saleItemDueDate FROM SaleItem LEFT JOIN Sale on Sale.saleUid = " +
             "       SaleItem.saleItemSaleUid WHERE SaleItem.saleItemSaleUid = sl.saleUid  " +
-            "      AND Sale.salePreOrder = 1 AND Sale.saleActive = 1 AND SaleItem.saleItemPreOrder = 1 " +
-            "      AND SaleItem.saleItemSold = 0 ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 " +
+            "       AND Sale.saleActive = 1 AND SaleItem.saleItemPreOrder = 1 " +
+            "     ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 " +
             "    ) ,0) AS earliestDueDate, "  +
             " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount," +
             " COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  " +
             "  WHERE SalePayment.salePaymentSaleUid = sl.saleUid " +
             "  AND SalePayment.salePaymentDone = 1 AND SalePayment.salePaymentActive = 1) ,0) " +
-            "  AS saleAmountPaid " +
+            "  AS saleAmountPaid, " +
+            "  (select (case  when  " +
+            "   (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid and sip.saleItemPreOrder = 1 ) > 0 " +
+            "   then 1  else 0 end) " +
+            " from Sale)  as saleItemPreOrder " +
             " FROM Sale sl " +
             " LEFT JOIN Location ON Location.locationUid = sl.saleLocationUid WHERE sl.saleActive = 1  ";
 
@@ -164,7 +168,7 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
 
     //filter and sort
 
-    public static final String FILTER_PREORDER = " AND salePreOrder = 1";
+    public static final String FILTER_PREORDER = " AND (saleItemPreOrder = 1 OR salePreOrder = 1)";
     public static final String FILTER_PAYMENT_DUE = " AND saleAmountPaid < saleAmount ";
 
     @UmQuery(ALL_SALE_LIST)
@@ -303,6 +307,10 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     @UmQuery("select count(*) from sale where salePreOrder = 1 AND saleActive = 1")
     public abstract UmProvider<Integer> getPreOrderSaleCountProvider();
 
-    @UmQuery("select count(*) from sale where salePreOrder = 1 AND saleActive = 1")
+//    @UmQuery("select count(*) from sale where salePreOrder = 1 AND saleActive = 1")
+    @UmQuery(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
+            " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
+            " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
+            " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
     public abstract UmLiveData<Integer> getPreOrderSaleCountLive();
 }

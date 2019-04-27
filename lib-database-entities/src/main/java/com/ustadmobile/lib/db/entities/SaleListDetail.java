@@ -13,6 +13,7 @@ public class SaleListDetail extends Sale {
     float saleAmountPaid;
     float saleAmountDue;
     long earliestDueDate;
+    boolean saleItemPreOrder;
 
 
     public String getLocationName() {
@@ -77,5 +78,13 @@ public class SaleListDetail extends Sale {
 
     public void setEarliestDueDate(long earliestDueDate) {
         this.earliestDueDate = earliestDueDate;
+    }
+
+    public boolean isSaleItemPreOrder() {
+        return saleItemPreOrder;
+    }
+
+    public void setSaleItemPreOrder(boolean saleItemPreOrder) {
+        this.saleItemPreOrder = saleItemPreOrder;
     }
 }

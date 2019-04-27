@@ -49,6 +49,7 @@ public interface SaleDetailView extends UstadView {
 
     void updateSaleOnView(Sale sale);
 
+    //N/A:
     void updatePaymentTotal(long paymentTotal);
 
     void showSaveButton(boolean show);
@@ -59,6 +60,8 @@ public interface SaleDetailView extends UstadView {
     void showPayments(boolean show);
 
     void updateSaleVoiceNoteOnView(String fileName);
+
+    void updateBalanceDue(long balance);
 
 
 }

@@ -214,7 +214,6 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
                     orderDueDateET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                             dueDate, null));
                 }
-
             }
         });
 

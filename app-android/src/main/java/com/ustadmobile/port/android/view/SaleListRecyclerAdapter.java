@@ -31,6 +31,7 @@ public class SaleListRecyclerAdapter extends
     Fragment theFragment;
     SaleListPresenter mPresenter;
     boolean paymentsDueTab = false;
+    boolean preOrderTab = false;
 
     @NonNull
     @Override
@@ -68,18 +69,34 @@ public class SaleListRecyclerAdapter extends
         saleAmount.setTextColor(ContextCompat.getColor(theContext, R.color.text_primary));
 
         long earliestDueDate = entity.getEarliestDueDate();
+        String dueDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(earliestDueDate, null);
+        String dueString = theFragment.getText(R.string.due) + " " + dueDatePretty;
 
-        //Sprint 2:
-        if(earliestDueDate!= 0 &&
-                earliestDueDate < System.currentTimeMillis()){
+        if(preOrderTab){
             saleDueDate.setVisibility(View.VISIBLE);
             saleDueDateImage.setVisibility(View.VISIBLE);
+            if(earliestDueDate != 0 &&
+                    earliestDueDate <= System.currentTimeMillis()){
+                saleDueDate.setText(dueString);
 
+            }else if(!entity.isSaleItemPreOrder()){
+                    dueString = theFragment.getText(R.string.not_delivered).toString();
+                    saleDueDate.setText(dueString);
+            }else if (earliestDueDate != 0 &&
+                    earliestDueDate > System.currentTimeMillis()){
+                saleDueDate.setText(dueString);
+                saleDueDate.setTextColor(ContextCompat.getColor(theContext, R.color.text_primary));
+                saleDueDateImage.setColorFilter(ContextCompat.getColor(theContext,
+                        R.color.text_primary));
+            }else{
+                saleDueDate.setVisibility(View.GONE);
+                saleDueDateImage.setVisibility(View.GONE);
+            }
         }else{
             saleDueDate.setVisibility(View.GONE);
             saleDueDateImage.setVisibility(View.GONE);
-
         }
+
 
         if(paymentsDueTab){
             //Also change amount to remaining amount and change its color
@@ -88,9 +105,7 @@ public class SaleListRecyclerAdapter extends
             saleAmount.setText(saleAmountRemainingWithCurrency);
             saleAmount.setTextColor(ContextCompat.getColor(theContext, R.color.primary_dark));
         }
-        String dueDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(earliestDueDate, null);
-        String dueString = theFragment.getText(R.string.due) + " " + dueDatePretty;
-        saleDueDate.setText(dueString);
+
 
         ConstraintLayout item = holder.itemView.findViewById(R.id.item_sale_cl);
         item.setOnClickListener(v -> mPresenter.handleClickSale(entity.getSaleUid()));
@@ -110,6 +125,7 @@ public class SaleListRecyclerAdapter extends
             @NonNull DiffUtil.ItemCallback<SaleListDetail> diffCallback,
             SaleListPresenter thePresenter,
             boolean paymentsDue,
+            boolean preOrder,
             Fragment fragment,
             Context context) {
         super(diffCallback);
@@ -117,6 +133,7 @@ public class SaleListRecyclerAdapter extends
         theContext = context;
         paymentsDueTab = paymentsDue;
         theFragment = fragment;
+        preOrderTab = preOrder;
     }
 
 

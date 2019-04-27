@@ -448,6 +448,25 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         requestPermission();
 
         stopIB.setOnClickListener(v -> stopRecording());
+
+
+        totalAfterDiscount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateBalanceDueFromTotal(Float.valueOf(s.toString()));
+
+            }
+        });
     }
 
 
@@ -613,7 +632,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     @Override
     public void updatePaymentTotal(long paymentTotal) {
-        //Next Sprint
+        //Actually, this is the balance due total not payment total.
     }
 
     @Override
@@ -690,6 +709,12 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
             fromFile = true;
 
         }
+    }
+
+    @Override
+    public void updateBalanceDue(long balance) {
+        runOnUiThread(() -> balanceTV.setText(String.valueOf(balance)));
+
     }
 
 }

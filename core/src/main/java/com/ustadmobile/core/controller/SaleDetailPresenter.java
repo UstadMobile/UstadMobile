@@ -66,6 +66,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     private boolean showSaveButton = false;
 
     private String voiceNoteFileName;
+    private long totalPayment=0;
+    private long totalAfterDiscount = 0;
 
     public SaleDetailPresenter(Object context, Hashtable arguments, SaleDetailView view) {
         super(context, arguments, view);
@@ -172,12 +174,35 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     }
 
+    //Called every time payment list gets updated (via Recycler Adapter's custom observer)
     public void getTotalPaymentsAndUpdateTotalView(long saleUid){
         //Get total payment count
-        // Then update totals
+        salePaymentDao.findTotalPaidBySaleAsync(saleUid, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long result) {
+                // Then update totals
+                totalPayment= result;
+                updateBalance();
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+
     }
 
-    //Next sprint
+    public void updateBalanceDueFromTotal(float totalAD){
+        totalAfterDiscount = (long) totalAD;
+        updateBalance();
+
+    }
+
+    public void updateBalance(){
+        view.updateBalanceDue(totalAfterDiscount - totalPayment);
+    }
+
     public void getPaymentTotalAndUpdateView(){
         if(currentSaleItem != null){
             salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.getSaleItemUid(),
@@ -327,7 +352,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
                     @Override
                     public void onFailure(Throwable exception) {
-
+                        exception.printStackTrace();
                     }
                 });
 

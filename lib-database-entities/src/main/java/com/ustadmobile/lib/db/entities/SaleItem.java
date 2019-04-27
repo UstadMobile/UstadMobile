@@ -68,7 +68,7 @@ public class SaleItem {
     public SaleItem(long productUid){
         this.setSaleItemCreationDate(System.currentTimeMillis());
         this.setSaleItemActive(false);
-        this.setSaleItemSold(false);
+        this.setSaleItemSold(true);
         this.setSaleItemPreorder(false);
         this.setSaleItemProductUid(productUid);
         this.setSaleItemPricePerPiece(0);
