@@ -1,10 +1,10 @@
 plugins {
     id 'java-library'
     id 'war'
-    id 'org.gretty' version '2.2.0'
+    id 'org.gretty' version '2.3.1'
 }
 
-sourceSets.main.java.srcDirs += ["build/generated/source/umdbprocessor"]
+sourceSets.main.java.srcDirs += ["build/generated/source/umdbprocessor", "src/main"]
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

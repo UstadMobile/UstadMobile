@@ -125,6 +125,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final int GO_FLAG_SINGLE_TOP = 536870912;
 
+
     /**
      * As per Android Intent.FLAG_CLEAR_TOP
      */
@@ -277,12 +278,11 @@ public abstract class UstadMobileSystemImpl {
 
         if(getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context)
                 && activeAccount == null) {
-            //TODO: change
-            //go(Login2View.VIEW_NAME, null, context);
+            go(Login2View.VIEW_NAME, null, context);
         }else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
         }
-        //go(BasePoint2View.VIEW_NAME, null, context);
+
     }
 
     /**

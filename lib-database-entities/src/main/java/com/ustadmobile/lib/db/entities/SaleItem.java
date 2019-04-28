@@ -84,6 +84,7 @@ public class SaleItem {
         this.saleItemPricePerPiece = ppp;
         this.saleItemSaleUid = saleUid;
         this.saleItemDueDate = dueDate;
+        this.setSaleItemSold(true);
 
     }
 

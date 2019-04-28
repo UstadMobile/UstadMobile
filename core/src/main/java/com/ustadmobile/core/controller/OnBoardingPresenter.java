@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePoint2View;
+import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.OnBoardingView;
 
 import java.util.Hashtable;
@@ -28,9 +29,14 @@ public class OnBoardingPresenter extends UstadBaseController<OnBoardingView> {
 
     public void handleGetStarted() {
 
-        UstadMobileSystemImpl.getInstance().setAppPref(PREF_TAG, String.valueOf(true)
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setAppPref(PREF_TAG, String.valueOf(true)
                 , view.getContext());
-        UstadMobileSystemImpl.getInstance().go(BasePoint2View.VIEW_NAME, getContext());
+
+        //impl.go(Login2View.VIEW_NAME, null, context);
+        impl.startUI(context);
+
+        //UstadMobileSystemImpl.getInstance().go(BasePoint2View.VIEW_NAME, getContext());
 
     }
 }

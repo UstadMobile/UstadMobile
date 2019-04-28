@@ -13,6 +13,7 @@ import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 import java.util.concurrent.TimeUnit;
 
 import androidx.work.Constraints;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -39,6 +40,18 @@ public class UmAppDatabaseSyncWorker extends Worker {
         WorkManager.getInstance().enqueue(request);
     }
 
+    public static void queueSyncWorkerWithPolicy(long delay, TimeUnit timeUnit,
+                                                 ExistingWorkPolicy policy) {
+        Constraints workConstraint = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(UmAppDatabaseSyncWorker.class)
+                .setInitialDelay(delay, timeUnit)
+                .addTag(TAG)
+                .setConstraints(workConstraint)
+                .build();
+        WorkManager.getInstance().enqueueUniqueWork(TAG, policy, request);
+    }
 
     @NonNull
     @Override

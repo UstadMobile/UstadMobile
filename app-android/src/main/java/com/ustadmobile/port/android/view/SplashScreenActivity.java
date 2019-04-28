@@ -43,9 +43,11 @@ import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao;
 import com.ustadmobile.core.db.dao.SaleProductPictureDao;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.Sale;
@@ -76,7 +78,6 @@ public class SplashScreenActivity extends UstadBaseActivity{
         //Add dummy data
         UmAppDatabase repo  = UmAppDatabase.getInstance(getContext());
 
-
         addDummyData(repo);
 
     }
@@ -84,7 +85,8 @@ public class SplashScreenActivity extends UstadBaseActivity{
     @Override
     public void onStart() {
         super.onStart();
-        UstadMobileSystemImpl.getInstance().startUI(SplashScreenActivity.this);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.go(OnBoardingView.VIEW_NAME, null, getContext());
     }
 
 

@@ -59,26 +59,29 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
                 @Override
                 public void onSuccess(Person result) {
                     currentPerson = result;
-                    usernameSet = currentPerson.getUsername();
-                    if (usernameSet != null) {
-                        view.updateUsername(usernameSet);
+                    if(currentPerson != null){
+                        usernameSet = currentPerson.getUsername();
+                        if (usernameSet != null) {
+                            view.updateUsername(usernameSet);
+                        }
+
+                        personAuthDao.findByUidAsync(currentPersonUid, new UmCallback<PersonAuth>() {
+                            @Override
+                            public void onSuccess(PersonAuth result) {
+                                currentPersonAuth = result;
+                                if (result == null) {
+                                    currentPersonAuth = new PersonAuth();
+                                    currentPersonAuth.setPersonAuthUid(currentPersonUid);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
                     }
 
-                    personAuthDao.findByUidAsync(currentPersonUid, new UmCallback<PersonAuth>() {
-                        @Override
-                        public void onSuccess(PersonAuth result) {
-                            currentPersonAuth = result;
-                            if (result == null) {
-                                currentPersonAuth = new PersonAuth();
-                                currentPersonAuth.setPersonAuthUid(currentPersonUid);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
                 }
 
                 @Override
