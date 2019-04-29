@@ -18,6 +18,7 @@ import java.io.InputStream;
         permissionJoin = " LEFT JOIN SaleProduct ON SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid",
         selectPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@UmRepository
 public abstract class SaleProductPictureDao implements SyncableDao<SaleProductPicture, SaleProductPictureDao> {
 
     @UmDbSetAttachment

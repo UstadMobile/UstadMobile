@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import com.ustadmobile.core.view.ChangePasswordView;
 import com.ustadmobile.lib.database.annotation.UmRepository;
@@ -58,6 +59,7 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
             personDao.findByUidAsync(currentPersonUid, new UmCallback<Person>() {
                 @Override
                 public void onSuccess(Person result) {
+                    List<Person> allPeople = personDao.findAllPeopleIncludingInactive();
                     currentPerson = result;
                     if(currentPerson != null){
                         usernameSet = currentPerson.getUsername();

@@ -360,6 +360,7 @@
     <string name="not_delivered">Not delivered</string>
     <string name="passwords_dont_match">Passwords do not match. Try again.</string>
     <string name="unable_to_update_password">Unable to reset password.</string>
+    <string name="syncing">Syncing</string>
 
 
 

@@ -18,6 +18,7 @@ import java.io.InputStream;
         permissionJoin = " LEFT JOIN Sale ON SaleVoiceNote.saleVoiceNoteSaleUid = Sale.saleUid",
         selectPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@UmRepository
 public abstract class SaleVoiceNoteDao implements SyncableDao<SaleVoiceNote, SaleVoiceNoteDao> {
 
     @UmDbSetAttachment

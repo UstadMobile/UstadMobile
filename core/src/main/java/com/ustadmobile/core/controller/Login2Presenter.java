@@ -55,7 +55,9 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
                     result.setEndpointUrl(serverUrl);
                     view.runOnUiThread(() -> view.setInProgress(false));
                     UmAccountManager.setActiveAccount(result, getContext());
+                    view.forceSync();
                     systemImpl.go(mNextDest, getContext());
+
                 }else {
                     view.runOnUiThread(() -> {
                         view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,

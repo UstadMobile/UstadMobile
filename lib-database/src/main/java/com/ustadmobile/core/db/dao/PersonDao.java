@@ -238,6 +238,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     @UmQuery("Select * From Person WHERE active = 1")
     public abstract List<Person> findAllPeople();
 
+    @UmQuery("Select * From Person")
+    public abstract List<Person> findAllPeopleIncludingInactive();
+
     @UmUpdate
     public abstract void updateAsync(Person entity, UmCallback<Integer> resultObject);
 }

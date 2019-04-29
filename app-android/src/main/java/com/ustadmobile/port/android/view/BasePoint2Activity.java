@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -66,7 +68,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_basepoint, menu);
-
+        mOptionsMenu = menu;
         return true;
     }
 
@@ -214,13 +216,17 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int i = item.getItemId();
         switch (item.getItemId()) {
             case android.R.id.home:
                 mPresenter.handleClickPersonIcon();
                 return true;
         }
-        if( item.getItemId() == R.id.menu_basepoint_about){
+        if( i == R.id.menu_basepoint_about){
             mPresenter.handleClickAbout();
+        }
+        if(i == R.id.menu_basepoint_sync){
+            forceSync();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -230,6 +236,27 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG);
         UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
+
+        updateSyncing();
+    }
+
+    public void updateSyncing(){
+        if(mOptionsMenu == null)
+            return;
+
+        MenuItem syncItem = mOptionsMenu.findItem(R.id.menu_basepoint_sync);
+        if(syncItem==null)
+            return;
+
+        String syncingString = getString(R.string.syncing);
+        syncItem.setTitle(syncingString);
+        //syncItem.setActionView(R.color.enable_disable_text);
+        //syncItem.getActionView().setBackgroundResource(R.color.enable_disable_text);
+        SpannableString textWithColor = new SpannableString(syncingString);
+        textWithColor.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.text_secondary)), 0,
+                textWithColor.length(), 0);
+        syncItem.setTitle(textWithColor);
+        syncItem.setEnabled(false);
     }
 
     @Override

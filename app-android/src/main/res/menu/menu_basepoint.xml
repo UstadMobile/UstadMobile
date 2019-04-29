@@ -17,6 +17,12 @@
         app:showAsAction="always"
         />
 
+    <item android:id="@+id/menu_basepoint_sync"
+        android:icon="@drawable/ic_sync_black_24dp"
+        android:title="@string/refresh"
+        android:textColor="@color/enable_disable_text"
+        android:visible="true"/>
+
     <item android:id="@+id/menu_basepoint_about"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/about"
