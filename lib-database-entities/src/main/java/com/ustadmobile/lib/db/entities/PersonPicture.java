@@ -29,7 +29,7 @@ public class PersonPicture {
 
     private int fileSize;
 
-    private int picTimestamp;
+    private long picTimestamp;
 
     private String mimeType;
 
@@ -82,11 +82,11 @@ public class PersonPicture {
         this.fileSize = fileSize;
     }
 
-    public int getPicTimestamp() {
+    public long getPicTimestamp() {
         return picTimestamp;
     }
 
-    public void setPicTimestamp(int picTimestamp) {
+    public void setPicTimestamp(long picTimestamp) {
         this.picTimestamp = picTimestamp;
     }
 

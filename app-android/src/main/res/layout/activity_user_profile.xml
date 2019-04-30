@@ -4,8 +4,19 @@
     android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <android.support.design.widget.AppBarLayout android:id="@+id/activity_user_profile_appbar"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.Toolbar android:id="@+id/activity_user_profile_toolbar"
+            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways" />
+
+    </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
+        android:background="?android:attr/selectableItemBackground"
         android:id="@+id/activity_user_profile_logout_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -19,7 +30,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_language_ll">
 
         <ImageView
-            android:id="@+id/imageView4"
+            android:id="@+id/activity_user_profile_logout_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -28,19 +39,20 @@
             tools:layout_editor_absoluteY="243dp" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/activity_user_profile_logout_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/logout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView4"
+            app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon"
             tools:layout_editor_absoluteY="257dp" />
 
     </LinearLayout>
 
     <LinearLayout
+        android:background="?android:attr/selectableItemBackground"
         android:id="@+id/activity_user_profile_language_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -76,7 +88,7 @@
                 android:layout_marginEnd="8dp"
                 android:text="@string/language"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/imageView4"
+                app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon"
                  />
 
             <TextView
@@ -87,7 +99,7 @@
                 android:layout_marginEnd="8dp"
                 android:text="@string/language_english"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/imageView4" />
+                app:layout_constraintStart_toEndOf="@+id/activity_user_profile_logout_icon" />
         </LinearLayout>
 
 
@@ -102,22 +114,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_user_profile_user_image" />
 
-    <android.support.design.widget.AppBarLayout android:id="@+id/activity_user_profile_appbar"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar android:id="@+id/activity_user_profile_toolbar"
-            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways" />
-
-    </android.support.design.widget.AppBarLayout>
 
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/activity_user_profile_user_image"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_marginStart="8dp"
@@ -129,17 +132,18 @@
         app:srcCompat="@drawable/ic_account_circle_black_32dp" />
 
     <ImageView
-        android:id="@+id/imageView3"
+        android:id="@+id/activity_user_profile_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="165dp"
         android:layout_marginTop="116dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="@+id/activity_user_profile_user_image"
         app:srcCompat="@drawable/ic_edit_black_24dp" />
 
     <LinearLayout
+        android:background="?android:attr/selectableItemBackground"
         android:id="@+id/activity_user_profile_change_password_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -153,7 +157,7 @@
         app:layout_constraintTop_toBottomOf="@+id/view5">
 
         <ImageView
-            android:id="@+id/imageView4"
+            android:id="@+id/activity_user_profile_change_password_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -162,14 +166,14 @@
             tools:layout_editor_absoluteY="243dp" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/activity_user_profile_change_password_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/change_password"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView4"
+            app:layout_constraintStart_toEndOf="@+id/activity_user_profile_change_password_icon"
             tools:layout_editor_absoluteY="257dp" />
 
     </LinearLayout>

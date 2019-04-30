@@ -40,6 +40,7 @@ import jdk.nashorn.internal.runtime.UserAccessorProperty;
 
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
+import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_DEFAULT_VALUE;
 import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_UID;
 
 /**
@@ -409,6 +410,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
                 UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                 Hashtable<String, String> args = new Hashtable<>();
                 args.put(ARG_SALE_PAYMENT_UID, String.valueOf(newSalePayment.getSalePaymentUid()));
+                args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE, String.valueOf(totalAfterDiscount - totalPayment));
                 impl.go(SalePaymentDetailView.VIEW_NAME, args, context);
 
             }
@@ -485,5 +487,17 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     public void handleDeleteVoiceNote(){
         this.voiceNoteFileName = "";
+    }
+
+    public void handleDeletePayment(long salePaymentUid){
+        salePaymentDao.inactivateEntityAsync(salePaymentUid, null);
+    }
+
+    public void handleEditPayment(long salePaymentUid){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_SALE_PAYMENT_UID, String.valueOf(salePaymentUid));
+        //args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE, String.valueOf(totalAfterDiscount - totalPayment));
+        impl.go(SalePaymentDetailView.VIEW_NAME, args, context);
     }
 }

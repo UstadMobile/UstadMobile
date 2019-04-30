@@ -4,11 +4,14 @@ import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageButton;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.app.Activity;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -50,6 +53,33 @@ public class SalePaymentRecyclerAdapter extends
                 entity.getSalePaymentCurrency();
         keyTV.setText(prettyDate);
         valueTV.setText(amountText);
+
+        AppCompatImageView dots = holder.itemView.findViewById(R.id.item_key_value_context_dots);
+
+        //Options to Edit/Delete every schedule in the list
+        dots.setOnClickListener((View v) -> {
+            //creating a popup menu
+            PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+            popup.setOnMenuItemClickListener(item -> {
+                int i = item.getItemId();
+                if (i == R.id.edit) {
+                    mPresenter.handleEditPayment(entity.getSalePaymentUid());
+                    return true;
+                } else if (i == R.id.delete) {
+                    mPresenter.handleDeletePayment(entity.getSalePaymentUid());
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            //inflating menu from xml resource
+            popup.inflate(R.menu.menu_edit_delete);
+
+            popup.getMenu().findItem(R.id.edit).setVisible(true);
+
+            //displaying the popup
+            popup.show();
+        });
     }
 
     protected class SaleDetailViewHolder extends RecyclerView.ViewHolder {

@@ -38,6 +38,8 @@
     <!-- Record voice notes -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -49,9 +51,10 @@
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"/>
 
+
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

@@ -1,10 +1,19 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
@@ -13,11 +22,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+import com.squareup.picasso.Transformation;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePoint2Presenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -25,6 +38,7 @@ import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.File;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +71,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     public static final int VIEW_POSITION_POSITION_COURSES = 3;
 
     AHBottomNavigation bottomNavigation;
+    private ActionBar ab;
 
 
 
@@ -88,8 +103,11 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         toolbar = findViewById(R.id.activity_basepoint2_toolbar);
         toolbar.setTitle("Ustad Mobile");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_account_circle_white_36dp);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        ab = getSupportActionBar();
+        ab.setHomeAsUpIndicator(R.drawable.ic_account_circle_white_36dp);
+        ab.setDisplayHomeAsUpEnabled(true);
+
 
 
         //Call the Presenter
@@ -165,6 +183,48 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         bottomNavigation.setCurrentItem(2);
 
         mPresenter.updateDueCountOnView();
+
+    }
+
+
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    @Override
+    public void updateImageOnView(String imagePath){
+        File output = new File(imagePath);
+
+        if (output.exists()) {
+            Uri profileImage = Uri.fromFile(output);
+
+
+            int iconDimen = dpToPx(36);
+            runOnUiThread(() -> Picasso.get()
+                    .load(profileImage)
+                    .transform(new CircleTransform())
+                    .resize(iconDimen, iconDimen)
+                    .centerCrop()
+                    .into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            Drawable d = new BitmapDrawable(getResources(), bitmap);
+                            ab.setHomeAsUpIndicator(d);
+                            ab.setDisplayHomeAsUpEnabled(true);
+                        }
+
+                        @Override
+                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                        }
+
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        }
+                    }));
+
+        }
 
     }
 

@@ -84,6 +84,7 @@
 
 
             <android.support.constraint.ConstraintLayout
+                android:background="?android:attr/selectableItemBackground"
                 android:id="@+id/activity_sale_detail_add_cl"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -289,6 +290,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_title" />
 
             <android.support.constraint.ConstraintLayout
+                android:background="?android:attr/selectableItemBackground"
                 android:id="@+id/activity_sale_detail_add_payments_cl"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

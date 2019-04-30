@@ -24,8 +24,11 @@ public interface UserProfileView extends UstadView {
 
     void setLanguageSet(String languageSet);
 
+    void updateImageOnView(String imagePath);
 
+    void addImageFromCamera();
 
+    void addImageFromGallery();
 
 
 }

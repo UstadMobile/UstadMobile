@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.db.dao.SalePaymentDao;
 import com.ustadmobile.core.impl.UmAccountManager;
@@ -16,6 +17,7 @@ import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.UserProfileView;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.PersonPicture;
 
 
 /**
@@ -34,6 +36,7 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
     UmLiveData<Integer> paymentsDueLive;
 
     SalePaymentDao salePaymentDao;
+    PersonPictureDao personPictureDao;
 
     public BasePoint2Presenter(Object context, Hashtable arguments, BasePoint2View view) {
         super(context, arguments, view);
@@ -41,6 +44,8 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
         saleDao = repository.getSaleDao();
         salePaymentDao = repository.getSalePaymentDao();
+        personPictureDao = repository.getPersonPictureDao();
+
     }
 
     /**
@@ -67,6 +72,23 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
                 view.showInventory(true);
                 view.showSales(true);
                 view.showCourses(true);
+
+                //Find pic and update on view
+                personPictureDao = repository.getPersonPictureDao();
+                personPictureDao.findByPersonUidAsync(loggedInPerson.getPersonUid(),
+                        new UmCallback<PersonPicture>() {
+                    @Override
+                    public void onSuccess(PersonPicture personPicture) {
+                        if (personPicture != null)
+                            view.updateImageOnView(personPictureDao.getAttachmentPath(
+                                    personPicture.getPersonPictureUid()));
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
             } else {
                 view.showCatalog(true);
                 view.showInventory(true);
@@ -139,6 +161,8 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
+
+        getLoggedInPerson();
     }
 
     public void updateDueCountOnView(){

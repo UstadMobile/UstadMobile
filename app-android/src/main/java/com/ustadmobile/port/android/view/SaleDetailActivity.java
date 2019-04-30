@@ -274,8 +274,14 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     public void initiateRecording(){
 
-        onRecord(mStartRecording);
-        mStartRecording = !mStartRecording;
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermission();
+        }else {
+
+            onRecord(mStartRecording);
+            mStartRecording = !mStartRecording;
+        }
 
     }
 
@@ -444,8 +450,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         // Record to the external cache directory for visibility
         saleVoiceNoteFilePath = getExternalCacheDir().getAbsolutePath();
         saleVoiceNoteFilePath += "/audiorecordtest.3gp";
-
-        requestPermission();
 
         stopIB.setOnClickListener(v -> stopRecording());
 

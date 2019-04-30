@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.SalePayment;
 
 import com.ustadmobile.core.db.dao.SalePaymentDao;
 
+import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_DEFAULT_VALUE;
 import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_UID;
 
 /**
@@ -27,6 +28,8 @@ public class SalePaymentDetailPresenter extends UstadBaseController<SalePaymentD
 
     private long paymentUid;
     private SalePayment currentPayment;
+
+    private long balanceDue;
 
 
     public SalePaymentDetailPresenter(Object context, Hashtable arguments, SalePaymentDetailView view) {
@@ -44,6 +47,9 @@ public class SalePaymentDetailPresenter extends UstadBaseController<SalePaymentD
 
         if(getArguments().containsKey(ARG_SALE_PAYMENT_UID)){
             paymentUid = Long.parseLong(getArguments().get(ARG_SALE_PAYMENT_UID).toString());
+            if(getArguments().containsKey(ARG_SALE_PAYMENT_DEFAULT_VALUE)){
+                balanceDue = Long.parseLong(getArguments().get(ARG_SALE_PAYMENT_DEFAULT_VALUE).toString());
+            }
             initFromSalePaymentUid(paymentUid);
         }else{
             //Should not happen  \'.'/
@@ -56,7 +62,10 @@ public class SalePaymentDetailPresenter extends UstadBaseController<SalePaymentD
             @Override
             public void onSuccess(SalePayment result) {
                 currentPayment = result;
-                view.updateSalePaymentOnView(currentPayment);
+                view.runOnUiThread(() -> view.updateSalePaymentOnView(currentPayment));
+                if(balanceDue > 0){
+                    view.runOnUiThread(() -> view.updateDefaultValue(balanceDue));
+                }
             }
 
             @Override

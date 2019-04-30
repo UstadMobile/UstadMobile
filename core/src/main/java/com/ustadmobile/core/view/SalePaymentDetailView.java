@@ -15,6 +15,7 @@ public interface SalePaymentDetailView extends UstadView {
 
     //Any argument keys:
     String ARG_SALE_PAYMENT_UID = "ArgSalePaymentUid";
+    String ARG_SALE_PAYMENT_DEFAULT_VALUE = "ArgSalePaymentDefaultValue";
 
     /**
      * Method to finish the screen / view.
@@ -22,6 +23,8 @@ public interface SalePaymentDetailView extends UstadView {
     void finish();
 
     void updateSalePaymentOnView(SalePayment payment);
+
+    void updateDefaultValue(long value);
 
 }
 

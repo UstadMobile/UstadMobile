@@ -10,6 +10,8 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 
@@ -86,7 +88,59 @@ public class SalePaymentDetailActivity extends UstadBaseActivity implements Sale
         amountNP =findViewById(R.id.activity_sale_payment_detail_amount_np);
         amountNP.setMinValue(1);
         amountNP.setMaxValue(9999999);
-        amountNP.setValue(0);
+        amountNP.setValue(1);
+
+
+
+        final NumberPicker np = amountNP;
+        np.setMaxValue(9999999); // max value 1000
+        np.setMinValue(0);   // min value 0
+        np.setValue(1);
+        np.setWrapSelectorWheel(false);
+        final int m_oldFocus = np.getDescendantFocusability();
+        np.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        np.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                np.setDescendantFocusability(m_oldFocus);
+                return false;
+            }
+        });
+
+        np.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
+                int stepSize = 10;
+                if(newVal%stepSize !=0){
+                    if(newVal < oldVal){
+                        numberPicker.setValue(((int)(newVal/stepSize)) *stepSize);
+                    }else{
+                        numberPicker.setValue((((int)(newVal/stepSize)) *stepSize ) +stepSize );
+                    }
+
+                }else{
+                    numberPicker.setValue(newVal);
+                }
+
+            }
+        });
+
+//        String[] minuteValues = new String[12];
+//
+//        for (int i = 0; i < minuteValues.length; i++) {
+//            String number = Integer.toString(i*10);
+//            minuteValues[i] = number.length() < 2 ? "0" + number : number;
+//        }
+//        amountNP.setOnValueChangedListener((picker, oldVal, newVal) ->
+//                picker.setValue(Integer.parseInt(minuteValues[newVal])));
+//
+//        amountNP.setDisplayedValues(minuteValues);
+
+//        NumberPicker.Formatter formatter = value -> {
+//            int temp = value * 5;
+//            return "" + temp;
+//        };
+//        amountNP.setFormatter(formatter);
 
         paymentDateET = findViewById(R.id.activity_sale_payment_detail_payment_date_et);
 
@@ -131,8 +185,11 @@ public class SalePaymentDetailActivity extends UstadBaseActivity implements Sale
 
             @Override
             public void afterTextChanged(Editable s) {
-                int newVal = Integer.valueOf(s.toString());
-                mPresenter.handleAmountUpdated(newVal);
+                if(!s.toString().equals("")){
+                    int newVal = Integer.valueOf(s.toString());
+                    mPresenter.handleAmountUpdated(newVal);
+                }
+
             }
         });
 
@@ -144,5 +201,10 @@ public class SalePaymentDetailActivity extends UstadBaseActivity implements Sale
 
         paymentDateET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                 payment.getSalePaymentPaidDate(), null));
+    }
+
+    @Override
+    public void updateDefaultValue(long value) {
+        amountNP.setValue((int) value);
     }
 }

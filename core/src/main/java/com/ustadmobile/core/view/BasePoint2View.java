@@ -39,6 +39,8 @@ public interface BasePoint2View extends UstadView {
 
     void updateNotificationForSales(int number);
 
+    void updateImageOnView(String imagePath);
+
 
 }
 
