@@ -145,7 +145,8 @@ public class ChangePasswordActivity extends UstadBaseActivity implements ChangeP
 
     @Override
     public void updateUsername(String username) {
-        usernameET.setText(username);
+        runOnUiThread(() -> usernameET.setText(username));
+
     }
 
     @Override

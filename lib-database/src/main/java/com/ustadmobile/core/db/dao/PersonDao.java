@@ -38,7 +38,8 @@ updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION
 public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +
-            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) = 1 OR " +
+
+            "(SELECT admin FROM Person WHERE personUid = :accountPersonUid) OR " +
             "EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
             "JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
             "JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
@@ -52,9 +53,10 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             "OR" +
             "(EntityRole.ertableId = " + Location.TABLE_ID +
             " AND EntityRole.erEntityUid IN " +
-                "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
-                "IN (SELECT personLocationLocationUid FROM PersonLocationJoin WHERE personLocationPersonUid = Person.personUid)))" +
+            "(SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid " +
+            "IN (SELECT personLocationLocationUid FROM PersonLocationJoin WHERE personLocationPersonUid = Person.personUid)))" +
             ") AND (Role.rolePermissions & ";
+
 
     protected static final String ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)";
 
