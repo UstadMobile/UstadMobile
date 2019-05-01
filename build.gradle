@@ -36,7 +36,8 @@ ext {
     ustadVersionCode = 151
 
     version_gradle_buildconfig_plugin = "1.1.7"
-    version_kotlin = '1.3.30'
+    version_kotlin = '1.3.31'
+    version_kotlinx_serialization = "0.11.0"
 
     version_junit = "4.12"
     version_nanohttpd = "2.3.1"
