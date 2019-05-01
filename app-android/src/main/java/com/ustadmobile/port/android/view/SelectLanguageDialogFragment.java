@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +16,7 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import io.reactivex.annotations.NonNull;
@@ -79,13 +81,33 @@ public class SelectLanguageDialogFragment extends UstadDialogFragment implements
     }
 
     private void handleClickEnglish(){
+        Locale englishLocale = Locale.forLanguageTag("en");
         //TODO
+        Locale.setDefault(englishLocale);
+        Configuration config = new Configuration();
+        // TODO fix deprecation issues
+        config.locale = englishLocale;
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
 
     }
     private void handleClickDari(){
+        Locale englishLocale = Locale.forLanguageTag("dr");
+        //TODO
+        Locale.setDefault(englishLocale);
+        Configuration config = new Configuration();
+        // TODO fix deprecation issues
+        config.locale = englishLocale;
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
         //TODO
     }
     private void handleClickPashto(){
+        Locale englishLocale = Locale.forLanguageTag("ps");
+        //TODO
+        Locale.setDefault(englishLocale);
+        Configuration config = new Configuration();
+        // TODO fix deprecation issues
+        config.locale = englishLocale;
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
         //TODO
     }
 
