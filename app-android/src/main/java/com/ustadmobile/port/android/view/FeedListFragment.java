@@ -7,6 +7,7 @@ import android.arch.paging.PagedList;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -45,6 +46,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     private Button reportButton;
     private ImageView reportImageView;
     private CardView summaryCard;
+    private SwipeRefreshLayout pullToRefresh;
 
     /**
      * The Diff callback
@@ -115,12 +117,24 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
         summaryCard = rootContainer.findViewById(R.id.fragment_feed_list_report_card);
 
+        pullToRefresh = rootContainer.findViewById(R.id.fragment_feed_list_swiperefreshlayout);
+
         //Create presenter and call its onCreate()
         mPresenter = new FeedListPresenter(getContext(), UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         reportButton.setOnClickListener(v -> mPresenter.handleClickViewReports());
+
+        pullToRefresh.setOnRefreshListener(() -> {
+            try {
+                Thread.sleep(300);
+                ((BasePointActivity2) Objects.requireNonNull(getActivity())).forceSync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            pullToRefresh.setRefreshing(false);
+        });
 
         return rootContainer;
     }

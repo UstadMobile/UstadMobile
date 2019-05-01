@@ -6,6 +6,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -49,6 +50,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
 
     private boolean showAllClazzSettingsButton = false;
 
+    private SwipeRefreshLayout pullToRefresh;
+
     /**
      * Generates a new Fragment for a page fragment
      *
@@ -90,6 +93,8 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
         fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab);
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
+        pullToRefresh = rootContainer.findViewById(R.id.fragment_clazz_list_swipe_refresh_layout);
+
         //set up Presenter
         mPresenter = new ClazzListPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
@@ -105,6 +110,16 @@ public class ClazzListFragment extends UstadBaseFragment implements ClazzListVie
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
+        });
+
+        pullToRefresh.setOnRefreshListener(() -> {
+            try {
+                Thread.sleep(300);
+                ((BasePointActivity2) Objects.requireNonNull(getActivity())).forceSync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            pullToRefresh.setRefreshing(false);
         });
 
         return rootContainer;

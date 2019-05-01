@@ -51,8 +51,6 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="syncing">Syncing..</string>
     <string name='download_all'>Download all</string>
     <string name='nothing_selected'>Nothing selected!</string>
-    <string name='next'>Next</string>
-    <string name='back'>Back</string>
     <string name='username'>Username</string>
     <string name='password'>Password</string>
     <string name="new_password">New password</string>
@@ -171,7 +169,7 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
 
-
+    <!-- DO NOT CHANGE THE ORDER FROM HERE -->
     <!-- Registration fields -->
     <string name="field_university" value="980">University Name</string>
     <string name="field_fullname" value="981">Full Name</string>
@@ -316,6 +314,9 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="fathers_number">Fathers number</string>
     <string name="mothers_name">Mothers name</string>
     <string name="mothers_number">Mothers number</string>
+    <!-- DO NOT CHANGE THE ORDER TO HERE -->
+
+
     <string name="new_person">New Person</string>
     <string name="edit_person">Edit Person</string>
     <string name="edit">Edit</string>
@@ -581,5 +582,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="download_storage_option_device">Use %1$s - %2$s free</string>
     <string name="download_storage_permission_title">File permissions required</string>
     <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
+
+    <string name='next'>Next</string>
+    <string name='back'>Back</string>
 
 </resources>
