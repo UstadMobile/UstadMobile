@@ -251,37 +251,5 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                     }
                 });
 
-
-//        clazzMemberDao.getAttendanceAverageAsListForClazzBetweenDates(currentClazzUid, fromDate,
-//                toDate, new UmCallback<List<Float>>() {
-//                    @Override
-//                    public void onSuccess(List<Float> result) {
-//
-//                        float attendanceGreenTotal = 0f;
-//                        float attendanceOrangeTotal = 0f;
-//                        float attendanceRedTotal = 0f;
-//
-//
-//                        for(Float everyValue: result){
-//                            if(everyValue > 0.79){
-//                                attendanceGreenTotal += everyValue;
-//                            }else if(everyValue > 0.59){
-//                                attendanceOrangeTotal += everyValue;
-//                            }else{
-//                                attendanceRedTotal += everyValue;
-//                            }
-//                        }
-//
-//                        barDataMap.put(3f, attendanceGreenTotal/ result.size());
-//                        barDataMap.put(2f, attendanceOrangeTotal/result.size());
-//                        barDataMap.put(1f, attendanceRedTotal/result.size());
-//                        view.updateAttendanceBarChart(barDataMap);
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Throwable exception) {
-//                        exception.printStackTrace();
-//                    }
-//                });
     }
 }
