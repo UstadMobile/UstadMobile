@@ -1060,7 +1060,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
                         //BEGIN Create ScheduledCheck (PostgreSQL)
                         db.execSql("CREATE TABLE IF NOT EXISTS  ScheduledCheck  ( scheduledCheckId  SERIAL PRIMARY KEY  NOT NULL ,  checkTime  BIGINT,  checkType  INTEGER,  checkUuid  TEXT,  checkParameters  TEXT,  scClazzLogUid  BIGINT)");
                         //END Create ScheduledCheck (PostgreSQL)
-                        //TODO: Check: do we need to create Sequence, etc for ScheduledCheck ?
+                        //TODOne: Check: do we need to create Sequence, etc for ScheduledCheck ?
+                        //Update: Nothing broke so I guess not.
 
                         /*
                         SelQuestion - New entity

@@ -21,8 +21,8 @@ import org.junit.runner.RunWith;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_LOGDATE;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
-import static com.ustadmobile.core.view.ClazzListView.ARG_LOGDATE;
 
 
 /**
@@ -79,7 +79,7 @@ public class ClazzActivityEditActivityEspressoTest {
 
         Bundle b = new Bundle();
         b.putLong(ARG_CLAZZ_UID, testClazz.getClazzUid());
-        b.putLong(ARG_LOGDATE, System.currentTimeMillis());
+        b.putLong(ARG_CLAZZACTIVITY_LOGDATE, System.currentTimeMillis());
 
         launchActivityIntent.putExtras(b);
         mActivityRule.launchActivity(launchActivityIntent);

@@ -23,10 +23,16 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
     private UmAppDatabase appDatabaseRepo;
 
-
     long currentClazzUid = -1;
     private long currentScheduleUid = -1L;
 
+    /**
+     * Initialises all Daos, gets all needed arguments and creates a schedule if argument not given.
+     * Updates the schedule to the view.
+     * @param context       Context of application
+     * @param arguments     Arguments
+     * @param view          View
+     */
     public AddScheduleDialogPresenter(Object context, Hashtable arguments, AddScheduleDialogView view) {
         super(context, arguments, view);
 
@@ -36,7 +42,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         if(getArguments().containsKey(ARG_CLAZZ_UID)){
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
         }
-
 
         if(getArguments().containsKey(ARG_SCHEDULE_UID)){
             currentScheduleUid = (long) getArguments().get(ARG_SCHEDULE_UID);
@@ -51,9 +56,7 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
                 }
 
                 @Override
-                public void onFailure(Throwable exception) {
-
-                }
+                public void onFailure(Throwable exception) {exception.printStackTrace();}
             });
         }else{
             currentSchedule = new Schedule();
@@ -67,7 +70,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         if(currentSchedule == null) {
             currentSchedule = new Schedule();
         }
-
     }
 
     /**
@@ -122,7 +124,6 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
      * Cancels the schedule dialog
      */
     public void handleCancelSchedule(){
-        //Do nothing.
         currentSchedule = null;
     }
 
@@ -145,6 +146,11 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
         currentSchedule.setScheduleEndTime(time);
     }
 
+    /**
+     * Sets schedule from the position of drop down options
+     * @param position  Position of drop down (spinner) selected
+     * @param id        If of drop down (spinner) selected
+     */
     public void handleScheduleSelected(int position, long id){
         if(id == EVERY_DAY_SCHEDULE_POSITION){
             currentSchedule.setScheduleDay(-1);
@@ -156,6 +162,10 @@ public class AddScheduleDialogPresenter  extends UstadBaseController<AddSchedule
 
     }
 
+    /**
+     * Sets schedule Day on the currently editing schedule.
+     * @param position  The position of the day according to the drop down options.
+     */
     public void handleDaySelected(int position){
         currentSchedule.setScheduleDay(position + 1);
     }

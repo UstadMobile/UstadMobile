@@ -15,11 +15,8 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
-import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.core.view.PersonDetailView;
-import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord;
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson;
@@ -69,7 +66,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
     private String title;
 
     public static final float feedAlertPerentageHigh = 0.69f;
-    public static final float feedAlertPerentageMed = 0.5f;
+    private static final float feedAlertPerentageMed = 0.5f;
 
     private List<ClazzMember> teachers;
     private String clazzName;
@@ -90,7 +87,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     ClazzDao clazzDao = repository.getClazzDao();
-    ScheduleDao scheduleDao = repository.getScheduleDao();
+    private ScheduleDao scheduleDao = repository.getScheduleDao();
 
     private UmCallback<ClazzLog> setupFromClazzLogCallback = new UmCallback<ClazzLog>() {
         @Override
@@ -293,10 +290,17 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
             });
     }
 
+    /**
+     * Goes back a day and updates the view
+     */
     public void handleClickGoBackDate(){
         incrementLogInList(-1);
     }
 
+    /**
+     * Goes ahead by the given number of day(s) and updates the view
+     * @param inc   The amount of days that the should update the view with. Can be negative.
+     */
     private void incrementLogInList(int inc) {
         int nextIndex = currentClazzLogIndex + inc;
         if(nextIndex >= 0 && nextIndex < currentClazzLogs.size())
@@ -304,6 +308,9 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                 setupFromClazzLogCallback);
     }
 
+    /**
+     * Goes forward a day and updates the view
+     */
     public void handleClickGoForwardDate(){
         incrementLogInList(1);
     }
@@ -370,7 +377,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                         String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                 PersonDetailView.ARG_PERSON_UID + "=" +
-                                String.valueOf(after.getClazzMemberPersonUid());
+                                after.getClazzMemberPersonUid();
 
                         for(ClazzMember teacher: teachers){
 
@@ -385,7 +392,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     "Student " + thisPerson.getFirstNames() + " " +
                                             thisPerson.getLastName() + " of Class " +
                                             clazzName + " attendance dropped "+
-                                            String.valueOf(feedAlertPerentageHigh * 100)  +"%",
+                                            feedAlertPerentageHigh * 100 +"%",
                                     feedLinkViewPerson,
                                     clazzName,
                                     teacher.getClazzMemberPersonUid()
@@ -409,7 +416,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                         String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                 PersonDetailView.ARG_PERSON_UID + "=" +
-                                String.valueOf(after.getClazzMemberPersonUid());
+                                after.getClazzMemberPersonUid();
 
                         for(ClazzMember teacher: teachers){
                             long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
@@ -423,7 +430,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
                                     "Student " + thisPerson.getFirstNames() + " " +
                                             thisPerson.getLastName() + " of Class " +
                                             clazzName + " attendance dropped "+
-                                            String.valueOf(feedAlertPerentageMed * 100)  +"%",
+                                            feedAlertPerentageMed * 100 +"%",
                                     feedLinkViewPerson,
                                     clazzName,
                                     teacher.getClazzMemberPersonUid()
@@ -455,7 +462,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                                 String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                         PersonDetailView.ARG_PERSON_UID + "=" +
-                                        String.valueOf(each.getPersonUid());
+                                        each.getPersonUid();
 
                                 for(ClazzMember teacher:teachers){
                                     long feedEntryUid = FeedEntryDao.generateFeedEntryHash(
@@ -509,7 +516,7 @@ public class ClazzLogDetailPresenter extends UstadBaseController<ClassLogDetailV
 
                                 String feedLinkViewPerson = PersonDetailView.VIEW_NAME + "?" +
                                         PersonDetailView.ARG_PERSON_UID + "=" +
-                                        String.valueOf(each.getPersonUid());
+                                        each.getPersonUid();
 
                                 //a. Send to teachers
                                 for(ClazzMember teacher:teachers){

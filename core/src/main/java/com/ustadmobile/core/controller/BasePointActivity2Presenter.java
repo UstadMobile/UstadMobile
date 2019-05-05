@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.db.dao.ScheduleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -10,7 +9,6 @@ import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.BasePointView2;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.core.view.Login2View;
-import com.ustadmobile.core.view.PersonListSearchView;
 import com.ustadmobile.core.view.SettingsView;
 import com.ustadmobile.lib.db.entities.Person;
 
@@ -25,6 +23,12 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
 
     private boolean syncStarted = false;
 
+    /**
+     * Gets arguments and initialises
+     * @param context       Context
+     * @param arguments     Arguments
+     * @param view          View
+     */
     public BasePointActivity2Presenter(Object context, Hashtable arguments, BasePointView2 view) {
         super(context, arguments, view);
 
@@ -73,7 +77,7 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     }
 
     /**
-     * Goes to bulk upload screen
+     * Goes to bulk upload screen.
      */
     public void handleClickBulkUpload(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -82,7 +86,7 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     }
 
     /**
-     * Logs out
+     * Logs out of the application.
      */
     public void handleLogOut(){
         UmAccountManager.setActiveAccount(null, context);
@@ -92,7 +96,7 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     }
 
     /**
-     * Goes to settings screen.
+     * Goes to settings screen view.
      */
     public void handleClickSettingsIcon(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -101,7 +105,8 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     }
 
     /**
-     * Goes to Search activity.
+     * Goes to Search activity. This method will not do anything. The Search will figure out
+     * where it has been clicked.
      */
     public void handleClickSearchIcon(){
 
@@ -110,7 +115,7 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
     }
 
     /**
-     * About menu clicked.
+     * About menu clicked. Goes to about screen
      */
     public void handleClickAbout(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -141,11 +146,12 @@ public class BasePointActivity2Presenter extends UstadBaseController<BasePointVi
         });
     }
 
+    /**
+     * Gets sync started flag
+     * @return  true if syncStarted set to true, else false
+     */
     public boolean isSyncStarted() {
         return syncStarted;
     }
 
-    public void setSyncStarted(boolean syncStarted) {
-        this.syncStarted = syncStarted;
-    }
 }

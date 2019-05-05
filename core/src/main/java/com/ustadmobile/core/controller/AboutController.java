@@ -13,8 +13,9 @@ import java.util.Hashtable;
 
 /**
  * Created by mike on 12/27/16.
+ * Presenter for About screen.
+ *
  */
-
 public class AboutController extends UstadBaseController<AboutView>  {
 
     private String aboutHTMLStr;
@@ -23,6 +24,11 @@ public class AboutController extends UstadBaseController<AboutView>  {
         super(context, args, view);
     }
 
+    /**
+     * This will load the about.html file in Asset and read the stream to string (Html) and output to
+     *  the view. It also updates the version code and other build version info to the view.
+     * @param savedState savedState if any
+     */
     public void onCreate(Hashtable savedState) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
@@ -40,14 +46,14 @@ public class AboutController extends UstadBaseController<AboutView>  {
             @Override
             public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
+        view.setAboutHTML(aboutHTMLStr);
 
         String currentApiUrl = UstadMobileSystemImpl.getInstance().getAppConfigString("apiUrl",
                 "http://localhost", context);
-
         view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)) + "\n" +
                 "API: " + currentApiUrl + "\n");
-        view.setAboutHTML(aboutHTMLStr);
+
     }
 
 }

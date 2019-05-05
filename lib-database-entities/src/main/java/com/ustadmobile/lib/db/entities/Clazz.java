@@ -26,7 +26,7 @@ public class Clazz {
     //Gives the Holiday calendar Uid
     private long clazzHolidayUMCalendarUid;
 
-    //Gives the schedule calendar ui
+    //Gives the schedule calendar uid
     private long clazzScheuleUMCalendarUid;
 
     //Active

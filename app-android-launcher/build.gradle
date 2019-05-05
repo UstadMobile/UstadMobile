@@ -41,7 +41,7 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
-        versionName "0.98.1"
+        versionName "0.98.2"
 
         manifestPlaceholders = [applicationClass : "android.app.Application"]
 

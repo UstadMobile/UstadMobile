@@ -60,6 +60,9 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         checkPermissions();
     }
 
+    /**
+     * Check permission and update the view accordingly
+     */
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
