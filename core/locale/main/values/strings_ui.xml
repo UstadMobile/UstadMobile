@@ -364,6 +364,7 @@
     <string name="edit">Edit</string>
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
+    <string name="unable_open_image">Unable to open that image</string>
 
 
 

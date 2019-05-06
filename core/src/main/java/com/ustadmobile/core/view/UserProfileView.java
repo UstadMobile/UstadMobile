@@ -30,6 +30,8 @@ public interface UserProfileView extends UstadView {
 
     void addImageFromGallery();
 
+    void sendMessage(int messageId);
+
 
 }
 

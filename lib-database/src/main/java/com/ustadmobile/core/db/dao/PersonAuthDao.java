@@ -71,8 +71,7 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
                               @UmRestAuthorizedUidParam long loggedInPersonUid,
                               UmCallback<Integer> resetCallback) {
         String passwordHash = encryptPassword(password);
-        System.out.println("personUid : " + personUid);
-        System.out.println("logged in person uid : " + loggedInPersonUid);
+
         if(loggedInPersonUid != personUid){
             if(isPersonAdmin(loggedInPersonUid)){
                 PersonAuth personAuth = new PersonAuth(personUid, passwordHash);
@@ -111,38 +110,89 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
 
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    public void selfResetPassword(String password,
-                              @UmRestAuthorizedUidParam long loggedInPersonUid,
-                              UmCallback<Integer> resetCallback) {
-        String passwordHash = encryptPassword(password);
-        System.out.println("logged in person uid : " + loggedInPersonUid);
+    public void authenticate(long loggedInPersonUid, String oldPassword, UmCallback<Void> resetCallback){
+        //Authenticate with current password first.
+        findByUidAsync(loggedInPersonUid, new UmCallback<PersonAuth>() {
+            @Override
+            public void onSuccess(PersonAuth personAuthResult) {
+                if(personAuthResult == null) {
+                    resetCallback.onFailure(null);
+                }else {
+                    String passwordHash = personAuthResult.getPasswordHash();
 
+                    if (passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
+                            && !passwordHash.substring(2).equals(oldPassword)) {
+                        resetCallback.onSuccess(null);
 
-        PersonAuth personAuth = new PersonAuth(loggedInPersonUid, passwordHash);
-        PersonAuth existingPersonAuth = findByUid(loggedInPersonUid);
-        if(existingPersonAuth == null){
-            insert(personAuth);
-        }
-        updatePasswordForPersonUid(loggedInPersonUid, passwordHash,
-            new UmCallback<Integer>() {
-                @Override
-                public void onSuccess(Integer result) {
-                    if(result > 0) {
-                        System.out.println("Update password success");
-                        resetCallback.onSuccess(1);
+                    } else if (passwordHash.startsWith(ENCRYPTED_PASS_PREFIX)
+                            && !PersonAuthDao.authenticateEncryptedPassword(oldPassword,
+                            passwordHash.substring(2))) {
+                        resetCallback.onSuccess(null);
+                    }else if(!PersonAuthDao.authenticateEncryptedPassword(oldPassword,
+                            passwordHash)){
+                        resetCallback.onSuccess(null);
                     }else{
-                        resetCallback.onFailure(new Exception());
+                        resetCallback.onFailure(null);
                     }
                 }
 
-                @Override
-                public void onFailure(Throwable exception) {
-                    System.out.println("Update password fail");
-                    resetCallback.onFailure(new Exception());
+
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+                resetCallback.onFailure(exception);
+            }
+        });
+    }
+
+
+    @UmRestAccessible
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    public void selfResetPassword(String oldPassword, String newPassword,
+                              @UmRestAuthorizedUidParam long loggedInPersonUid,
+                              UmCallback<Integer> resetCallback) {
+
+        //Generate password Hash
+        String passwordHash = encryptPassword(newPassword);
+
+        authenticate(loggedInPersonUid, oldPassword, new UmCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                //Create new person auth entry if it doesnt exist
+                PersonAuth existingPersonAuth = findByUid(loggedInPersonUid);
+                if(existingPersonAuth == null){
+                    PersonAuth personAuth = new PersonAuth(loggedInPersonUid, passwordHash);
+                    insert(personAuth);
                 }
-            });
 
+                //Update password for Person
+                updatePasswordForPersonUid(loggedInPersonUid, passwordHash,
+                        new UmCallback<Integer>() {
+                            @Override
+                            public void onSuccess(Integer result) {
+                                if(result > 0) {
+                                    System.out.println("Update password success");
+                                    resetCallback.onSuccess(1);
+                                }else{
+                                    resetCallback.onFailure(new Exception());
+                                }
+                            }
 
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                System.out.println("Update password fail");
+                                resetCallback.onFailure(new Exception());
+                            }
+                        });
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                resetCallback.onFailure(new Exception());
+            }
+        });
 
     }
 

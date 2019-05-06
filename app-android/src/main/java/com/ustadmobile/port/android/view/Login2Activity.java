@@ -103,7 +103,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View {
                 this, workInfos -> {
                     for(WorkInfo wi:workInfos){
                         if(wi.getState().isFinished()){
-                            sendToast("Sync finished");
+                            //sendToast("Sync finished");
                         }
                     }
                 });

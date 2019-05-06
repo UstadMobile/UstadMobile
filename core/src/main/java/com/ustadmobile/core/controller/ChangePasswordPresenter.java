@@ -128,25 +128,26 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
             personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {
-                    personAuthDao.selfResetPassword(updatePassword, loggedInPersonUid,
-                            new UmCallback<Integer>() {
-                                @Override
-                                public void onSuccess(Integer result) {
-                                    personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
-                                        @Override
-                                        public void onSuccess(Integer result) {view.finish();}
 
-                                        @Override
-                                        public void onFailure(Throwable exception) {exception.printStackTrace();
-                                            view.sendMessage(MessageID.unable_to_update_password);}
-                                    });
-                                }
+                    personAuthDao.selfResetPassword(currentPassword, updatePassword, loggedInPersonUid,
+                      new UmCallback<Integer>() {
+                        @Override
+                        public void onSuccess(Integer result) {
+                            personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
+                                @Override
+                                public void onSuccess(Integer result) {view.finish();}
 
                                 @Override
-                                public void onFailure(Throwable exception) {
-                                    view.sendMessage(MessageID.unable_to_update_password);
-                                }
+                                public void onFailure(Throwable exception) {exception.printStackTrace();
+                                    view.sendMessage(MessageID.unable_to_update_password);}
                             });
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            view.sendMessage(MessageID.unable_to_update_password);
+                        }
+                    });
                 }
 
                 @Override

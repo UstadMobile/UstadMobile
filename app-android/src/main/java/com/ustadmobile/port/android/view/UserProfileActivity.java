@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
@@ -19,14 +18,16 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UserProfilePresenter;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.UserProfileView;
@@ -141,6 +142,7 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
 
     @Override
     public void updateImageOnView(String imagePath){
+        imagePathFromCamera = imagePath;
         File output = new File(imagePath);
 
         int iconDimen = dpToPx(150);
@@ -271,18 +273,14 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
                 case GALLERY_REQUEST_CODE:
 
                     Uri selectedImage = data.getData();
-//                    String[] filePathColumn = { MediaStore.Images.Media.DATA };
-//                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn,
-//                            null, null, null);
-//                    cursor.moveToFirst();
-//                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-//                    String picturePath = cursor.getString(columnIndex);
-//                    cursor.close();
-//
-//                    imagePathFromCamera = picturePath;
+
 
                     String picPath = doInBackground(selectedImage);
                     imagePathFromCamera = picPath;
+                    if(imagePathFromCamera == null){
+                        sendMessage(MessageID.unable_open_image);
+                        return;
+                    }
 
                     //Compress the image:
                     compressImage();
@@ -294,6 +292,17 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
         }
     }
 
+    @Override
+    public void sendMessage(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String toast = impl.getString(messageId, this);
+        runOnUiThread(() -> Toast.makeText(
+                this,
+                toast,
+                Toast.LENGTH_SHORT
+        ).show());
+    }
+
     protected String doInBackground(Uri... fileUris) {
         Cursor cursor = null;
         InputStream fileIn = null;
@@ -302,7 +311,8 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
 
         try {
             //As per https://developer.android.com/guide/topics/providers/document-provider
-            cursor = getContentResolver().query(fileUris[0], null, null, null, null, null);
+            cursor = getContentResolver().query(fileUris[0], null, null,
+                    null, null, null);
             if(cursor != null && cursor.moveToFirst()) {
                 String displayName = cursor.getString(cursor
                         .getColumnIndex(OpenableColumns.DISPLAY_NAME));
