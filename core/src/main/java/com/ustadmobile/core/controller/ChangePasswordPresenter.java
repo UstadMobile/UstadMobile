@@ -24,15 +24,40 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordView> {
 
     UmAppDatabase repository;
-    private long currentPersonUid = 0;
     private PersonDao personDao;
     private PersonAuthDao personAuthDao;
-    private String passwordSet;
-    private String confirmPasswordSet;
+
     private Person currentPerson;
     private PersonAuth currentPersonAuth;
-    private String usernameSet;
     private long loggedInPersonUid = 0L;
+    private String currentPassword;
+    private String updatePassword;
+
+    public String getCurrentPassword() {
+        return currentPassword;
+    }
+
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
+    }
+
+    public String getUpdatePassword() {
+        return updatePassword;
+    }
+
+    public void setUpdatePassword(String updatePassword) {
+        this.updatePassword = updatePassword;
+    }
+
+    public String getUpdatePasswordConfirm() {
+        return updatePasswordConfirm;
+    }
+
+    public void setUpdatePasswordConfirm(String updatePasswordConfirm) {
+        this.updatePasswordConfirm = updatePasswordConfirm;
+    }
+
+    private String updatePasswordConfirm;
 
 
     public ChangePasswordPresenter(Object context, Hashtable arguments, ChangePasswordView view) {
@@ -45,7 +70,7 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
         personAuthDao = repository.getPersonAuthDao();
         UmAccount cp = UmAccountManager.getActiveAccount(context);
         if(cp!=null){
-            currentPersonUid = cp.getPersonUid();
+            loggedInPersonUid = cp.getPersonUid();
         }
 
 
@@ -55,25 +80,20 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        if (currentPersonUid != 0) {
-            personDao.findByUidAsync(currentPersonUid, new UmCallback<Person>() {
+        if (loggedInPersonUid != 0) {
+            personDao.findByUidAsync(loggedInPersonUid, new UmCallback<Person>() {
                 @Override
                 public void onSuccess(Person result) {
-                    List<Person> allPeople = personDao.findAllPeopleIncludingInactive();
                     currentPerson = result;
                     if(currentPerson != null){
-                        usernameSet = currentPerson.getUsername();
-                        if (usernameSet != null) {
-                            view.updateUsername(usernameSet);
-                        }
 
-                        personAuthDao.findByUidAsync(currentPersonUid, new UmCallback<PersonAuth>() {
+                        personAuthDao.findByUidAsync(loggedInPersonUid, new UmCallback<PersonAuth>() {
                             @Override
                             public void onSuccess(PersonAuth result) {
                                 currentPersonAuth = result;
                                 if (result == null) {
                                     currentPersonAuth = new PersonAuth();
-                                    currentPersonAuth.setPersonAuthUid(currentPersonUid);
+                                    currentPersonAuth.setPersonAuthUid(loggedInPersonUid);
                                 }
                             }
 
@@ -95,26 +115,21 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
         }
     }
 
-    public void handleClickSave(){
-
-    }
-
-    public void handleClickDone() {
-        if(passwordSet != null && !passwordSet.isEmpty() && usernameSet != null
-                && !usernameSet.isEmpty() && currentPersonAuth != null && currentPerson != null ){
-            if(!passwordSet.equals(confirmPasswordSet)){
+    public void handleClickSave() {
+        if(updatePassword != null && !updatePassword.isEmpty()  && updatePasswordConfirm != null &&
+                !updatePasswordConfirm.isEmpty() && currentPersonAuth != null && currentPerson != null ){
+            if(!updatePassword.equals(updatePasswordConfirm)){
                 view.sendMessage(MessageID.passwords_dont_match);
                 return;
             }
-            currentPerson.setUsername(usernameSet);
-            currentPersonAuth.setPasswordHash(PersonAuthDao.encryptPassword(passwordSet));
-            personDao.updateAsync(currentPerson, null);
+
+            currentPersonAuth.setPasswordHash(PersonAuthDao.encryptPassword(updatePassword));
 
             personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {
-                    personAuthDao.resetPassword(currentPersonUid, passwordSet,
-                            loggedInPersonUid, new UmCallback<Integer>() {
+                    personAuthDao.selfResetPassword(updatePassword, loggedInPersonUid,
+                            new UmCallback<Integer>() {
                                 @Override
                                 public void onSuccess(Integer result) {
                                     personAuthDao.updateAsync(currentPersonAuth, new UmCallback<Integer>() {
@@ -142,28 +157,6 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
 
     }
 
-    public String getPasswordSet() {
-        return passwordSet;
-    }
 
-    public void setPasswordSet(String passwordSet) {
-        this.passwordSet = passwordSet;
-    }
-
-    public String getUsernameSet() {
-        return usernameSet;
-    }
-
-    public void setUsernameSet(String usernameSet) {
-        this.usernameSet = usernameSet;
-    }
-
-    public String getConfirmPasswordSet() {
-        return confirmPasswordSet;
-    }
-
-    public void setConfirmPasswordSet(String confirmPasswordSet) {
-        this.confirmPasswordSet = confirmPasswordSet;
-    }
 
 }

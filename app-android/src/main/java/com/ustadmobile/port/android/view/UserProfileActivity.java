@@ -9,7 +9,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -24,11 +27,16 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UserProfilePresenter;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.UserProfileView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -224,6 +232,26 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
     }
 
 
+    //this is how you check permission grant task result.
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_PERMISSION_REQUEST:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCameraIntent();
+                }
+                break;
+            case GALLERY_REQUEST_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startGalleryIntent();
+                }
+                break;
+        }
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -243,16 +271,19 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
                 case GALLERY_REQUEST_CODE:
 
                     Uri selectedImage = data.getData();
-                    String[] filePathColumn = { MediaStore.Images.Media.DATA };
-                    Cursor cursor = getContentResolver().query(selectedImage,filePathColumn, null, null, null);
-                    cursor.moveToFirst();
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String picturePath = cursor.getString(columnIndex);
-                    cursor.close();
+//                    String[] filePathColumn = { MediaStore.Images.Media.DATA };
+//                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn,
+//                            null, null, null);
+//                    cursor.moveToFirst();
+//                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+//                    String picturePath = cursor.getString(columnIndex);
+//                    cursor.close();
+//
+//                    imagePathFromCamera = picturePath;
 
-                    imagePathFromCamera = picturePath;
+                    String picPath = doInBackground(selectedImage);
+                    imagePathFromCamera = picPath;
 
-                    //TODO Maybe
                     //Compress the image:
                     compressImage();
 
@@ -261,6 +292,43 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
                     break;
             }
         }
+    }
+
+    protected String doInBackground(Uri... fileUris) {
+        Cursor cursor = null;
+        InputStream fileIn = null;
+        OutputStream tmpOut = null;
+        String tmpFilePath = null;
+
+        try {
+            //As per https://developer.android.com/guide/topics/providers/document-provider
+            cursor = getContentResolver().query(fileUris[0], null, null, null, null, null);
+            if(cursor != null && cursor.moveToFirst()) {
+                String displayName = cursor.getString(cursor
+                        .getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                String extension = UMFileUtil.getExtension(displayName);
+
+                File tmpFile = File.createTempFile("SelectedFileTmp",
+                        "-"+System.currentTimeMillis() + "." + extension);
+                fileIn = getContentResolver().openInputStream(fileUris[0]);
+                tmpOut = new FileOutputStream(tmpFile);
+                UMIOUtils.readFully(fileIn, tmpOut);
+                tmpFilePath = tmpFile.getAbsolutePath();
+            }else {
+
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+
+        }finally {
+            if(cursor != null)
+                cursor.close();
+
+            UMIOUtils.closeQuietly(fileIn);
+            UMIOUtils.closeQuietly(tmpOut);
+        }
+
+        return tmpFilePath;
     }
 
     /**
@@ -277,11 +345,14 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
                     .setCompressFormat(Bitmap.CompressFormat.JPEG)
                     .setDestinationDirectoryPath(imageFile.getPath() + "_" + imageFile.getName());
 
-            File compressedImageFile = c.compressToFile(imageFile);
-            if(!imageFile.delete()){
-                System.out.print("Could not delete " + imagePathFromCamera);
+            if(imageFile.exists()){
+                File compressedImageFile = c.compressToFile(imageFile);
+                if(!imageFile.delete()){
+                    System.out.print("Could not delete " + imagePathFromCamera);
+                }
+                imagePathFromCamera = compressedImageFile.getAbsolutePath();
             }
-            imagePathFromCamera = compressedImageFile.getAbsolutePath();
+
 
         } catch (IOException e) {
             e.printStackTrace();

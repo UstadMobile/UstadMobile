@@ -25,7 +25,7 @@ public class ChangePasswordActivity extends UstadBaseActivity implements ChangeP
     private Toolbar toolbar;
     private ChangePasswordPresenter mPresenter;
 
-    private EditText usernameET, passwordET,updatePasswordET;
+    private EditText currentPasswordET, updatePasswordET, updatePasswordConfirmET;
     private Menu menu;
 
 
@@ -78,9 +78,9 @@ public class ChangePasswordActivity extends UstadBaseActivity implements ChangeP
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        usernameET = findViewById(R.id.activity_change_password_username);
-        passwordET = findViewById(R.id.activity_change_password_password);
-        updatePasswordET = findViewById(R.id.activity_change_password_password_confirm);
+        currentPasswordET = findViewById(R.id.activity_change_password_current);
+        updatePasswordET = findViewById(R.id.activity_change_password_new_password);
+        updatePasswordConfirmET = findViewById(R.id.activity_change_password_new_password_confirm);
 
 
         //Call the Presenter
@@ -89,7 +89,7 @@ public class ChangePasswordActivity extends UstadBaseActivity implements ChangeP
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
 
-        usernameET.addTextChangedListener(new TextWatcher() {
+        currentPasswordET.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -102,24 +102,7 @@ public class ChangePasswordActivity extends UstadBaseActivity implements ChangeP
 
             @Override
             public void afterTextChanged(Editable s) {
-                mPresenter.setUsernameSet(s.toString());
-            }
-        });
-
-        passwordET.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                mPresenter.setPasswordSet(s.toString());
+                mPresenter.setCurrentPassword(s.toString());
             }
         });
 
@@ -136,16 +119,27 @@ public class ChangePasswordActivity extends UstadBaseActivity implements ChangeP
 
             @Override
             public void afterTextChanged(Editable s) {
-                mPresenter.setConfirmPasswordSet(s.toString());
+                mPresenter.setUpdatePassword(s.toString());
             }
         });
 
+        updatePasswordConfirmET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-    }
+            }
 
-    @Override
-    public void updateUsername(String username) {
-        runOnUiThread(() -> usernameET.setText(username));
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.setUpdatePasswordConfirm(s.toString());
+            }
+        });
+
 
     }
 

@@ -71,6 +71,8 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
                               @UmRestAuthorizedUidParam long loggedInPersonUid,
                               UmCallback<Integer> resetCallback) {
         String passwordHash = encryptPassword(password);
+        System.out.println("personUid : " + personUid);
+        System.out.println("logged in person uid : " + loggedInPersonUid);
         if(loggedInPersonUid != personUid){
             if(isPersonAdmin(loggedInPersonUid)){
                 PersonAuth personAuth = new PersonAuth(personUid, passwordHash);
@@ -104,6 +106,43 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
             System.out.println("Update password fail3");
             resetCallback.onFailure(new Exception());
         }
+
+    }
+
+    @UmRestAccessible
+    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    public void selfResetPassword(String password,
+                              @UmRestAuthorizedUidParam long loggedInPersonUid,
+                              UmCallback<Integer> resetCallback) {
+        String passwordHash = encryptPassword(password);
+        System.out.println("logged in person uid : " + loggedInPersonUid);
+
+
+        PersonAuth personAuth = new PersonAuth(loggedInPersonUid, passwordHash);
+        PersonAuth existingPersonAuth = findByUid(loggedInPersonUid);
+        if(existingPersonAuth == null){
+            insert(personAuth);
+        }
+        updatePasswordForPersonUid(loggedInPersonUid, passwordHash,
+            new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    if(result > 0) {
+                        System.out.println("Update password success");
+                        resetCallback.onSuccess(1);
+                    }else{
+                        resetCallback.onFailure(new Exception());
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    System.out.println("Update password fail");
+                    resetCallback.onFailure(new Exception());
+                }
+            });
+
+
 
     }
 

@@ -38,6 +38,7 @@
     <!-- Record voice notes -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Select gallery images for profile picture -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <uses-feature
