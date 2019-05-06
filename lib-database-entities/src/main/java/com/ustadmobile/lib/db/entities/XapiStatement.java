@@ -1,10 +1,13 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 public class XapiStatement {
 
     @UmPrimaryKey
+    @PrimaryKey
     private String uuid;
 
     private long xapiAgentUid;

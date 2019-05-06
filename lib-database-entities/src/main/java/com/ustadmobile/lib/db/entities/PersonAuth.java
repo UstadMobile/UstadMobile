@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -18,9 +21,11 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  * Currently, as PersonAuthDao does not extend syncable dao, it will not sync
  */
 @UmEntity(tableId = 30)
+@Entity
 public class PersonAuth {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long personAuthUid;
 
     private String passwordHash;

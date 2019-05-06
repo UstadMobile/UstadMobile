@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -13,11 +16,13 @@ import static com.ustadmobile.lib.db.entities.ContentCategorySchema.TABLE_ID;
  * Represents a schema (list) of categories.
  */
 @UmEntity(tableId = TABLE_ID)
+@Entity
 public class ContentCategorySchema {
 
     public static final int TABLE_ID = 2;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long contentCategorySchemaUid;
 
     private String schemaName;

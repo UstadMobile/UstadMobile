@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -10,11 +13,13 @@ import static com.ustadmobile.lib.db.entities.Language.TABLE_ID;
 
 
 @UmEntity(tableId = TABLE_ID)
+@Entity
 public class Language {
 
     public static final int TABLE_ID = 13;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long langUid;
 
     private String name;

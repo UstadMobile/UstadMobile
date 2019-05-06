@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
@@ -9,6 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * download items in the future.
  */
 @UmEntity
+@Entity
 public class DownloadJobItemHistory {
 
     public static final int MODE_CLOUD = 1;
@@ -16,6 +20,7 @@ public class DownloadJobItemHistory {
     public static final int MODE_LOCAL = 2;
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     private long id;
 
     private String url;

@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Index;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndex;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -9,9 +13,12 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  */
 @UmEntity(indices = {@UmIndex(name="containerUid_nodeId_unique", unique = true,
         value = {"erContainerUid", "erNodeId"})})
+@Entity(indices = {@Index(name="containerUid_nodeId_unique", unique = true,
+        value = {"erContainerUid", "erNodeId"})})
 public class EntryStatusResponse {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     private int erId;
 
     private long erContainerUid;

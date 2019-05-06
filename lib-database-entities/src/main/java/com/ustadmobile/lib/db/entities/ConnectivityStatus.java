@@ -1,9 +1,13 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 @UmEntity
+@Entity
 public class ConnectivityStatus {
 
     public static final int STATE_DISCONNECTED = 0;
@@ -17,6 +21,7 @@ public class ConnectivityStatus {
     public static final int STATE_UNMETERED = 4;
 
     @UmPrimaryKey
+    @PrimaryKey
     private int csUid = 1;
 
     private int connectivityState;

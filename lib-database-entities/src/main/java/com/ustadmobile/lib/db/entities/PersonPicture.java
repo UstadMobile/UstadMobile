@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -9,11 +12,13 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 import static com.ustadmobile.lib.db.entities.PersonPicture.TABLE_ID;
 
 @UmEntity(tableId = TABLE_ID)
+@Entity
 public class PersonPicture {
 
     public static final int TABLE_ID = 50;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long personPictureUid;
 
     private long personPicturePersonUid;

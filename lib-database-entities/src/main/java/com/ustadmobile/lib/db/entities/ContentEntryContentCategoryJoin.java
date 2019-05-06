@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -14,15 +18,18 @@ import static com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin.TA
  * Join entity to link ContentEntry many:many with ContentCategory
  */
 @UmEntity(tableId = TABLE_ID)
+@Entity
 public class ContentEntryContentCategoryJoin {
 
     public static final int TABLE_ID = 3;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long ceccjUid;
 
     //TODO: Migration
     @UmIndexField
+    @ColumnInfo(index = true)
     private long ceccjContentEntryUid;
 
     private long ceccjContentCategoryUid;

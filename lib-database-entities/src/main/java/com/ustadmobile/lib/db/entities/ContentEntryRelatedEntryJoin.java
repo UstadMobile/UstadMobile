@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -16,6 +19,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.TABLE
  */
 //shortcode cerej
 @UmEntity(tableId = TABLE_ID)
+@Entity
 public class ContentEntryRelatedEntryJoin {
 
     public static final int TABLE_ID = 8;
@@ -25,6 +29,7 @@ public class ContentEntryRelatedEntryJoin {
     public static final int REL_TYPE_SEE_ALSO = 2;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long cerejUid;
 
     private long cerejContentEntryUid;

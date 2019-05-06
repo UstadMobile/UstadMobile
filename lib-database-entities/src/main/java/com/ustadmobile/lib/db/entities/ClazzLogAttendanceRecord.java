@@ -1,9 +1,13 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 @UmEntity
+@Entity
 public class ClazzLogAttendanceRecord {
 
     public static final int STATUS_ATTENDED = 1;
@@ -13,6 +17,7 @@ public class ClazzLogAttendanceRecord {
     public static final int STATUS_PARTIAL = 4;
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     private long clazzLogAttendanceRecordUid;
 
     private long clazzLogClazzLogUid;

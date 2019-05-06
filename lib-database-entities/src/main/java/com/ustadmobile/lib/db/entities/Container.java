@@ -1,5 +1,10 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Index;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndex;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
@@ -11,9 +16,11 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 @UmEntity(tableId = 51 , indices = {@UmIndex(
                 name="cnt_uid_to_most_recent",
                 value = {"containerContentEntryUid", "lastModified"})})
+@Entity(indices = {@Index(name = "cnt_uid_to_most_recent", value = {"containerContentEntryUid", "lastModified"})})
 public class Container {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long containerUid;
 
     @UmSyncLocalChangeSeqNum
@@ -30,6 +37,7 @@ public class Container {
     private long containerContentEntryUid;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private long lastModified;
 
     private String mimeType;

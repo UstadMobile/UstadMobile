@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -17,6 +21,7 @@ import static com.ustadmobile.lib.db.entities.ContentEntry.TABLE_ID;
  * there should be the appropriate ContentEntryParentChildJoin entities present.
  */
 @UmEntity(tableId = TABLE_ID)
+@Entity
 public class ContentEntry {
 
     public static final int TABLE_ID = 42;
@@ -52,6 +57,7 @@ public class ContentEntry {
     public static final int ARTICLE_TYPE = 7;
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long contentEntryUid;
 
     private String title;
@@ -76,8 +82,8 @@ public class ContentEntry {
 
     private long lastModified;
 
-    //TODO: Migration : add to migration
     @UmIndexField
+    @ColumnInfo(index = true)
     private long primaryLanguageUid;
 
     private long languageVariantUid;

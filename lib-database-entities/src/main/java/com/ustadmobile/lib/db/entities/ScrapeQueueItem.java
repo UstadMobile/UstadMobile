@@ -1,9 +1,13 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 @UmEntity
+@Entity
 public class ScrapeQueueItem {
 
     public static final int ITEM_TYPE_INDEX = 1;
@@ -11,6 +15,7 @@ public class ScrapeQueueItem {
     public static final int ITEM_TYPE_SCRAPE = 2;
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey
     private int sqiUid;
 
     private long sqiContentEntryParentUid;

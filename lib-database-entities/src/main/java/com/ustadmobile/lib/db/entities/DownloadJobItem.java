@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -11,9 +15,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  * updated, re-downloaded after the user deletes it, etc)
  */
 @UmEntity
+@Entity
 public class DownloadJobItem {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     private long djiUid;
 
     private long djiDsiUid;
@@ -31,11 +37,13 @@ public class DownloadJobItem {
     private long currentSpeed;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private long timeStarted;
 
     private long timeFinished;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private int djiStatus;
 
     private String destinationFile;

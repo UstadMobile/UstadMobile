@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -12,19 +16,23 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
  * or a student. Each member has a joining date, and a leaving date.
  */
 @UmEntity(tableId = 11)
+@Entity
 public class ClazzMember implements SyncableEntity {
 
     public static final int ROLE_STUDENT = 1;
 
     public static final int ROLE_TEACHER = 2;
 
-    @UmPrimaryKey(autoGenerateSyncable= true)
+    @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     private long clazzMemberUid;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private long clazzMemberPersonUid;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private long clazzMemberClazzUid;
 
     private long dateJoined;

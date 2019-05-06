@@ -1,5 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -9,6 +13,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
  *
  */
 @UmEntity
+@Entity
 public class HttpCachedEntry {
 
     public static final int METHOD_GET = 0;
@@ -18,9 +23,11 @@ public class HttpCachedEntry {
     public static final int METHOD_HEAD = 2;
 
     @UmPrimaryKey(autoIncrement = true)
-    private Integer uid;
+    @PrimaryKey(autoGenerate = true)
+    private int uid;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private String url;
 
     private String fileUri;
@@ -44,6 +51,7 @@ public class HttpCachedEntry {
     private long lastChecked;
 
     @UmIndexField
+    @ColumnInfo(index = true)
     private long lastAccessed;
 
 
@@ -66,7 +74,7 @@ public class HttpCachedEntry {
      *
      * @return primary key
      */
-    public Integer getUid() {
+    public int getUid() {
         return uid;
     }
 
@@ -74,7 +82,7 @@ public class HttpCachedEntry {
      * Set the primary key - only to be used by the ORM
      * @param uid
      */
-    public void setUid(Integer uid) {
+    public void setUid(int uid) {
         this.uid = uid;
     }
 
