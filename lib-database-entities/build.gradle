@@ -1,5 +1,17 @@
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    }
+}
+
+
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
+apply plugin: 'kotlin'
 
 
 dependencies {
