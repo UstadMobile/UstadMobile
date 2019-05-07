@@ -31,11 +31,11 @@ class ContentCategorySchema {
     @UmSyncLastChangedBy
     var contentCategorySchemaLastChangedBy: Int = 0
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
 
-        val schema = o as ContentCategorySchema?
+        val schema = other as ContentCategorySchema?
 
         if (contentCategorySchemaUid != schema!!.contentCategorySchemaUid) return false
         if (if (schemaName != null) schemaName != schema.schemaName else schema.schemaName != null)

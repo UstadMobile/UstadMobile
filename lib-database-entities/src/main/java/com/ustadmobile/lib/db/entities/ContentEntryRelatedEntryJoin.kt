@@ -40,11 +40,11 @@ class ContentEntryRelatedEntryJoin {
     @UmSyncMasterChangeSeqNum
     var cerejMasterChangeSeqNum: Long = 0
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
 
-        val that = o as ContentEntryRelatedEntryJoin?
+        val that = other as ContentEntryRelatedEntryJoin?
 
         if (cerejUid != that!!.cerejUid) return false
         if (cerejContentEntryUid != that.cerejContentEntryUid) return false
