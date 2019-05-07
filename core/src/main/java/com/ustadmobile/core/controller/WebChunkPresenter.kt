@@ -35,7 +35,11 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
-                view.runOnUiThread(Runnable { view.setToolbarTitle(result!!.title) })
+                view.runOnUiThread(Runnable {
+                    val resultTitle = result?.title
+                    if(resultTitle != null)
+                        view.setToolbarTitle(resultTitle)
+                })
             }
 
             override fun onFailure(exception: Throwable?) {

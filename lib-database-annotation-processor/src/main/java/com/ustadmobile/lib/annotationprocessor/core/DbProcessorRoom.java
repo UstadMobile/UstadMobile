@@ -513,7 +513,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 bindCodeBlock.add("stmt.bindLong($L, value.get$L());\n",
                         fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
             }else if(fieldType.getKind().equals(TypeKind.BOOLEAN)) {
-                bindCodeBlock.add("stmt.bindLong($L, value.is$L() ? 1: 0);\n",
+                bindCodeBlock.add("stmt.bindLong($L, value.get$L() ? 1: 0);\n",
                         fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
             }else if(INSERT_BIND_DOUBLE.contains(fieldType.getKind())) {
                 bindCodeBlock.add("stmt.bindDouble($L, value.get$L());\n",

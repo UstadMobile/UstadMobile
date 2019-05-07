@@ -44,7 +44,9 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                     fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
                     return
                 }
-                fragmentViewContract.setToolbarTitle(result.title)
+                val resultTitle = result.title
+                if(resultTitle != null)
+                    fragmentViewContract.setToolbarTitle(resultTitle)
             }
 
             override fun onFailure(exception: Throwable?) {
@@ -130,7 +132,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                     return
                 }
 
-                if (result.isLeaf) {
+                if (result.leaf) {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
                     impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
                 } else {
