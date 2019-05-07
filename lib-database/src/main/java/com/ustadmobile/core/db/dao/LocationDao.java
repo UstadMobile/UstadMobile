@@ -71,6 +71,9 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     @UmQuery("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     public abstract void findByTitleAsync(String name, UmCallback<List<Location>> resultList);
 
+    @UmQuery("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
+    public abstract List<Location> findByTitle(String name);
+
     @UmQuery("SELECT *, 0 AS subLocations  FROM Location WHERE parentLocationUid = 0")
     public abstract UmProvider<LocationWithSubLocationCount> findAllTopLocationsWithCount();
 

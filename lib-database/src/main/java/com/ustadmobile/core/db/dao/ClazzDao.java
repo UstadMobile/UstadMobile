@@ -303,8 +303,11 @@ public abstract class ClazzDao implements SyncableDao<Clazz, ClazzDao> {
             String searchQuery
     );
 
-    @UmQuery("SELECT * FROM Clazz WHERE clazzName = :name")
+    @UmQuery("SELECT * FROM Clazz WHERE clazzName = :name and clazzActive = 1")
     public abstract void findByClazzNameAsync(String name, UmCallback<List<Clazz>> resultList);
+
+    @UmQuery("SELECT * FROM Clazz WHERE clazzName = :name and clazzActive = 1")
+    public abstract List<Clazz> findByClazzName(String name);
 
 
     @UmQuery("SELECT " +

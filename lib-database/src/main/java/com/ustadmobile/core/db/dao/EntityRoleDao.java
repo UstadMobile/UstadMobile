@@ -39,6 +39,10 @@ public abstract class EntityRoleDao implements SyncableDao<EntityRole, EntityRol
                                                      UmCallback<List<EntityRole>> resultList);
 
     @UmQuery("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " +
+            "AND erGroupUid = :groupUid")
+    public abstract List<EntityRole> findByEntitiyAndPersonGroupSync(int tableId, long entityUid, long groupUid);
+
+    @UmQuery("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " +
             "AND erRoleUid = :roleUid")
     public abstract void findGroupByRoleAndEntityTypeAndUid(int tableId, long entityUid,
                                                             long roleUid, UmCallback<List<EntityRole>> resultList);

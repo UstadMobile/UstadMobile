@@ -1,6 +1,9 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
@@ -30,55 +33,62 @@ import java.util.TimeZone;
 
 public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMasterView> {
 
+    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+
+    private int currentPosition = 0;
+    private List<String> lines;
+    private long teacherRoleUid = 0L;
+    private String chosenTZ;
+    private List<String> allTZ;
+
+    private LocationDao locationDao;
+    private RoleDao roleDao;
+    private ClazzDao clazzDao;
+    private ClazzMemberDao clazzMemberDao;
+    private PersonDao personDao;
+    private PersonGroupMemberDao personGroupMemberDao;
+    private EntityRoleDao entityRoleDao;
+    private PersonCustomFieldDao personFieldDao;
+    private PersonCustomFieldValueDao personCustomFieldValueDao;
+
     public BulkUploadMasterPresenter(Object context, Hashtable arguments,
                                      BulkUploadMasterView view) {
         super(context, arguments, view);
+        locationDao = repository.getLocationDao();
+        roleDao = repository.getRoleDao();
+        clazzDao = repository.getClazzDao();
+        clazzMemberDao = repository.getClazzMemberDao();
+        personDao = repository.getPersonDao();
+        personGroupMemberDao = repository.getPersonGroupMemberDao();
+        entityRoleDao = repository.getEntityRoleDao();
+        personFieldDao = repository.getPersonCustomFieldDao();
+        personCustomFieldValueDao =repository.getPersonCustomFieldValueDao();
     }
 
     @Override
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
+        //Set all timezones to view
         allTZ = Arrays.asList(TimeZone.getAvailableIDs());
         view.setTimeZonesList(allTZ);
-        choozenTZ = TimeZone.getDefault().getID();
+        //Get default timezone
+        chosenTZ = TimeZone.getDefault().getID();
+        //Get Teacher role
+        getRole();
 
     }
 
-    private int currentPosition = 0;
-    private List<String> lines;
-    private long teacherRoleUid = 0L;
-    private long officerRoleUid = 0L;
-    private long selRoleUid = 0L;
-    private long mneRoleUid = 0L;
-
-    private long officerPersonGroupUid = 0L;
-    private long selPersonGroupUid = 0L;
-    private long mnePersonGroupUid = 0L;
-
-    private String choozenTZ;
-    private List<String> allTZ;
-
-
-    public void setCurrentPosition(int currentPosition) {
-        this.currentPosition = currentPosition;
-    }
-
-    public List<String> getLines() {
-        return lines;
-    }
-
-    public void setLines(List<String> lines) {
-        this.lines = lines;
-    }
-
-    UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
-
-
+    /**
+     * Update chosen timezone
+     */
     public void setTimeZoneSelected(int position, long id){
-        choozenTZ = allTZ.get(position);
+        chosenTZ = allTZ.get(position);
     }
 
+    /**
+     * Start processing the next line
+     */
     public void processNextLine(){
         currentPosition ++;
         System.out.println("BULK UPLOAD LINE : " + currentPosition);
@@ -86,142 +96,141 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         view.updateProgressValue(currentPosition, lines.size());
 
         if(currentPosition >= lines.size()){
+            //If at the end of the line, finish the activity.
             view.finish();
         }else {
-            parseMasterListLineToDatabase(lines.get(currentPosition));
+            //Get the line and Start processing it.
+            parseLine(lines.get(currentPosition));
         }
 
     }
 
+    /**
+     * Every line to be parsed contains all the information including Student, Tecaher, Class,
+     * Location, etc. This is why we need to run things in order.
+     * We need to set up in a way where we first make sure we get all Roles and Daos required.
+     * Then we need to process Location. Then we need proces Class, then Teachers and then students.
+     *
+     * @param line  The bulk upload line
+     */
+    private void parseLine(String line){
+        System.out.println("Processing line of length: " + line.length());
+
+        BulkUploadLine bulkLine = new BulkUploadLine(line);
+
+        //1. Location
+        //2. Clazz
+        //3. Teacher
+        //4. Student
+
+        processLocations(bulkLine);
+
+    }
+
+
+    /**
+     * Process the 4 levels of locations in the bulk upload line.
+     * @param bulkLine  The line
+     */
     private void processLocations(BulkUploadLine bulkLine){
 
-        String location1Title = bulkLine.location1;
-        String location2Title = bulkLine.location2;
-        String location3Title = bulkLine.location3;
+        String locationGovernorateTitle = bulkLine.location1;
+        String locationDistrictTitle = bulkLine.location2;
+        String locationTownTitle = bulkLine.location3;
         String locationLeafTitle = bulkLine.locationLeaf;
 
-        Location location1 = new Location();
-        location1.setTitle(location1Title);
-        location1.setTimeZone(choozenTZ);
+        Location locationGovernorate = new Location();
+        locationGovernorate.setTitle(locationGovernorateTitle);
+        locationGovernorate.setTimeZone(chosenTZ);
 
-        Location location2 = new Location();
-        location2.setTitle(location2Title);
-        location2.setTimeZone(choozenTZ);
+        Location locationDistrict = new Location();
+        locationDistrict.setTitle(locationDistrictTitle);
+        locationDistrict.setTimeZone(chosenTZ);
 
-        Location location3 = new Location();
-        location3.setTitle(location3Title);
-        location3.setTimeZone(choozenTZ);
+        Location locationTown = new Location();
+        locationTown.setTitle(locationTownTitle);
+        locationTown.setTimeZone(chosenTZ);
 
         Location locationLeaf = new Location();
         locationLeaf.setTitle(locationLeafTitle);
-        locationLeaf.setTimeZone(choozenTZ);
+        locationLeaf.setTimeZone(chosenTZ);
 
-        LocationDao locationDao = repository.getLocationDao();
-
-        locationDao.findByTitleAsync(location1Title, new UmCallback<List<Location>>() {
+        locationDao.findByTitleAsync(locationGovernorateTitle, new UmCallback<List<Location>>() {
             @Override
             public void onSuccess(List<Location> location1s) {
 
                 boolean move = false;
                 if(location1s.size() == 0){
-
                     //Location not created. Create it.
-                    location1.setLocationUid(locationDao.insert(location1));
+                    locationGovernorate.setLocationUid(locationDao.insert(locationGovernorate));
                     move = true;
                 }else if(location1s.size() == 1){
-
                     //Location already exists. Getting uid.
-                    location1.setLocationUid(location1s.get(0).getLocationUid());
+                    locationGovernorate.setLocationUid(location1s.get(0).getLocationUid());
                     move = true;
                 }else{
                     System.out.println("ERROR: Location: 1st level: More than 1 with the same title");
                 }
 
-                if(move)
-                    //Move on to the 2nd level
-                    locationDao.findByTitleAsync(location2Title, new UmCallback<List<Location>>() {
-                        @Override
-                        public void onSuccess(List<Location> location2s) {
-                            boolean move = false;
-                            if(location2s.size() ==0){
-                                move = true;
-                                //Location not created. Create it.
-                                location2.setParentLocationUid(location1.getLocationUid());
-                                location2.setLocationUid(locationDao.insert(location2));
-                            }else if(location2s.size() == 1){
-                                move = true;
-                                //Location already exists. Getting uid.
-                                location2.setLocationUid(location2s.get(0).getLocationUid());
+                if(move) {
+                    List<Location> location2s = locationDao.findByTitle(locationDistrictTitle);
+                    boolean move2 = false;
+                    if(location2s.size() ==0){
+                        move2 = true;
+                        //Location not created. Create it.
+                        locationDistrict.setParentLocationUid(locationGovernorate.getLocationUid());
+                        locationDistrict.setLocationUid(locationDao.insert(locationDistrict));
+                    }else if(location2s.size() == 1){
+                        move2 = true;
+                        //Location already exists. Getting uid.
+                        locationDistrict.setLocationUid(location2s.get(0).getLocationUid());
+                    }else{
+                        System.out.println("ERROR: Location: 2nd level: More than 1 with the same title");
+                    }
+
+                    if(move2){
+                        List<Location> location3s = locationDao.findByTitle(locationTownTitle);
+                        boolean move3 = false;
+                        if(location3s.size() == 0){
+                            move3 = true;
+                            locationTown.setParentLocationUid(locationDistrict.getLocationUid());
+                            locationTown.setLocationUid(locationDao.insert(locationTown));
+                        }else if(location3s.size() == 1){
+                            move3 = true;
+                            locationTown.setLocationUid(location3s.get(0).getLocationUid());
+                        }else{
+                            System.out.println("ERROR: Location: 3rd level: More than 1" +
+                                    " with the same title");
+                        }
+
+                        if(move3){
+                            //Move on the the leaf level
+                            List<Location> locationLeafs = locationDao.findByTitle(locationLeafTitle);
+
+                            boolean moveOn = false;
+                            if(locationLeafs.size() == 0){
+                                //Location leaf not created. Setting parent and
+                                //persisting to get uid.
+                                locationLeaf.setParentLocationUid(locationTown.getLocationUid());
+                                locationLeaf.setLocationUid(locationDao.insert(locationLeaf));
+                                moveOn = true;
+
+                            }else if(locationLeafs.size() == 1){
+                                //Location leaf already exists. Getting uid
+                                locationLeaf.setLocationUid(locationLeafs.get(0).getLocationUid());
+                                moveOn = true;
                             }else{
-                                System.out.println("ERROR: Location: 2nd level: More than 1 with the same title");
+                                System.out.println("ERROR: Location Leaf: More than " +
+                                        "1 location leaf with the same title");
                             }
 
-                            if(move)
-                                //Move on to the 3rd level
-                                locationDao.findByTitleAsync(location3Title, new UmCallback<List<Location>>() {
-                                    @Override
-                                    public void onSuccess(List<Location> location3s) {
-                                        boolean move = false;
-                                        if(location3s.size() == 0){
-                                            move = true;
-                                            location3.setParentLocationUid(location2.getLocationUid());
-                                            location3.setLocationUid(locationDao.insert(location3));
-                                        }else if(location3s.size() == 1){
-                                            move = true;
-                                            location3.setLocationUid(location3s.get(0).getLocationUid());
-                                        }else{
-                                            System.out.println("ERROR: Location: 3rd level: More than 1" +
-                                                    " with the same title");
-                                        }
-
-                                        if(move)
-                                            //Move on the the leaf level
-                                            locationDao.findByTitleAsync(locationLeafTitle, new UmCallback<List<Location>>() {
-                                                @Override
-                                                public void onSuccess(List<Location> locationLeafs) {
-
-                                                    boolean moveOn = false;
-                                                    if(locationLeafs.size() == 0){
-                                                        //Location leaf not created. Setting parent and
-                                                        //persisting to get uid.
-                                                        locationLeaf.setParentLocationUid(location3.getLocationUid());
-                                                        locationLeaf.setLocationUid(locationDao.insert(locationLeaf));
-                                                        moveOn = true;
-
-                                                    }else if(locationLeafs.size() == 1){
-                                                        //Location leaf already exists. Getting uid
-                                                        locationLeaf.setLocationUid(locationLeafs.get(0).getLocationUid());
-                                                        moveOn = true;
-                                                    }else{
-                                                        System.out.println("ERROR: Location Leaf: More than " +
-                                                                "1 location leaf with the same title");
-                                                    }
-
-                                                    //Moving forward
-                                                    if(moveOn)
-                                                        processClazz(bulkLine, locationLeaf);
-                                                }
-
-                                                @Override
-                                                public void onFailure(Throwable exception) {
-                                                    exception.printStackTrace();
-                                                }
-                                            });
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable exception) {
-                                        exception.printStackTrace();
-                                    }
-                                });
+                            //Moving forward
+                            if(moveOn) {
+                                processClazz(bulkLine, locationLeaf);
+                            }
                         }
-
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-
+                    }
+                }
             }
 
             @Override
@@ -237,176 +246,302 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         String clazzLocation = bulkLine.class_location;
 
         //Get clazz by name:
-        repository.getClazzDao().findByClazzNameAsync(clazzName,
-                new UmCallback<List<Clazz>>() {
-                    @Override
-                    public void onSuccess(List<Clazz> clazzes) {
-                        Clazz thisClazz;
-                        if(clazzes.size() == 0){   //No clazzes with that name.
-                            //Create clazz
-                            thisClazz = new Clazz();
-                            thisClazz.setClazzName(clazzName);
+        List<Clazz> clazzes = clazzDao.findByClazzName(clazzName);
+        Clazz thisClazz;
+        if(clazzes.size() == 0){   //No clazzes with that name.
+            //Create clazz
+            thisClazz = new Clazz();
+            thisClazz.setClazzName(clazzName);
 
-                            repository.getClazzDao().insertAsync(thisClazz, new UmCallback<Long>() {
-                                @Override
-                                public void onSuccess(Long newClazzUid) {
-                                    thisClazz.setClazzUid(newClazzUid);
+            thisClazz.setClazzUid(clazzDao.insert(thisClazz));
 
-                                    //Add location
-                                    repository.getLocationDao()
-                                            .findByTitleAsync(clazzLocation, new UmCallback<List<Location>>() {
-                                                @Override
-                                                public void onSuccess(List<Location> result) {
-                                                    if (result.size() == 1) {
-                                                        //Location exists and is unique
-                                                        Location clazzLocation = result.get(0);
-                                                        thisClazz.setClazzLocationUid(clazzLocation.getLocationUid());
-                                                        thisClazz.setClazzActive(true);
-                                                        thisClazz.setClazzLocationUid(locationLeaf.getLocationUid());
+            //Add location
+            List<Location> clazzLocations = locationDao.findByTitle(clazzLocation);
+            if (clazzLocations.size() == 1) {
+                //Location exists and is unique
+                Location thisClazzLocation = clazzLocations.get(0);
+                thisClazz.setClazzLocationUid(thisClazzLocation.getLocationUid());
+                thisClazz.setClazzActive(true);
+                thisClazz.setClazzLocationUid(locationLeaf.getLocationUid());
 
-                                                        repository.getClazzDao().updateAsync(thisClazz, new UmCallback<Integer>() {
-                                                            @Override
-                                                            public void onSuccess(Integer result) {
-                                                                if(result != null) {
+                clazzDao.update(thisClazz);
+                //Move on
+                checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
 
-                                                                    //Move on
-                                                                    checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
-                                                                }
-                                                            }
+            }else{
+                //Location does not exist.
+                System.out.println("FAIL: LOCATION : " + clazzLocation
+                        + " DOESN'T EXIST");
+            }
 
-                                                            @Override
-                                                            public void onFailure(Throwable exception) {exception.printStackTrace();}
-                                                        });
+        }else if (clazzes.size() > 1){   //Multiple clazzes with that name (ERROR)
+            System.out.println("ERROR : MULTIPLE CLAZZ WITH NAME: " + clazzName);
+        }else{
+            thisClazz = clazzes.get(0);
+            //Not updating clazz. Moving on
+            checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
+        }
 
-                                                    }else{
-                                                        //Location does not exist.
-                                                        System.out.println("FAIL: LOCATION : " + clazzLocation
-                                                                + " DOESN'T EXIST");
-                                                    }
+    }
 
-                                                }
+    private void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
+        String personUid = bulkLine.person_id;
+        String teacherUsername = bulkLine.teacher_username;
+        String teacherFirstName = bulkLine.teacher_first_name;
+        String teacherLastName = bulkLine.teacher_last_name;
+        String teacherPhoneNo = bulkLine.teacher_phone_no;
 
-                                                @Override
-                                                public void onFailure(Throwable exception) {
-                                                    exception.printStackTrace();
-                                                }
-                                            });
-                                }
-
-                                @Override
-                                public void onFailure(Throwable exception) {
-                                    exception.printStackTrace();
-                                }
-                            });
+        String stuentFirstName = bulkLine.first_name;
+        String studentLastName = bulkLine.last_name;
+        String studentGender = bulkLine.gender;
+        String studentMotherName = bulkLine.mother_name;
+        String studentPhoneNo = bulkLine.phone_no;
+        String studentSchool = bulkLine.school;
+        String studentAddress = bulkLine.address;
+        String studentFatherName = bulkLine.father_name;
+        String studentDateOfBirth = bulkLine.dob;
 
 
+        String username;
+        if(role == ClazzMember.ROLE_TEACHER){
+            username = teacherUsername;
+        }else{
+            username = personUid;
+        }
 
-                        }else if (clazzes.size() > 1){   //Multiple clazzes with that name (ERROR)
-                            System.out.println("ERROR : MULTIPLE CLAZZ WITH NAME: " + clazzName);
-                        }else{
-                            thisClazz = clazzes.get(0);
-                            //Not updating clazz. Moving on
-                            checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
+        Person thePerson = personDao.findByUsername(username);
+
+        if(thePerson != null){
+            //person object exists
+
+            //Still create Entity Role for this different Clazz
+            // and //Check for ClazzMember then  directly
+            createEntityRoleForTeacherAndClazz(role,thisClazz, thePerson.getPersonUid(),
+                    bulkLine);
+
+        }else{
+            //Create new person
+            Person person = new Person();
+
+            if(role == ClazzMember.ROLE_TEACHER) {
+                person.setFirstNames(teacherFirstName);
+                person.setLastName(teacherLastName);
+                person.setPhoneNum(teacherPhoneNo);
+                person.setUsername(username);
+
+            }else{
+                person.setUsername(username);
+                person.setFirstNames(stuentFirstName);
+                person.setLastName(studentLastName);
+                person.setMotherName(studentMotherName);
+                person.setFatherName(studentFatherName);
+                person.setAddress(studentAddress);
+                person.setPhoneNum(studentPhoneNo);
+                person.setDateOfBirth(getDOBFromString(studentDateOfBirth));
+                if (studentGender.toLowerCase().startsWith("f")) {
+                    person.setGender(Person.GENDER_FEMALE);
+                }else if(studentGender.toLowerCase().startsWith("m")){
+                    person.setGender(Person.GENDER_MALE);
+                }
+            }
+
+            person.setActive(true);
+
+            personDao.createPersonWithGroupAsync(person,
+             new UmCallback<PersonDao.PersonWithGroup>() {
+                @Override
+                public void onSuccess(PersonDao.PersonWithGroup personWithGroup) {
+                    Long personPersonUid = personWithGroup.getPersonUid();
+                    Long personGroupUid = personWithGroup.getPersonGroupUid();
+
+                    if(role == ClazzMember.ROLE_STUDENT) {
+                        PersonField customField = personFieldDao.findByLabelMessageIdSync(
+                                String.valueOf(MessageID.current_formal_school));
+
+                        if (customField != null) {
+                            PersonCustomFieldValue personCustomFieldValue =
+                                    new PersonCustomFieldValue();
+                            personCustomFieldValue.setFieldValue(studentSchool);
+                            personCustomFieldValue
+                                    .setPersonCustomFieldValuePersonUid(personPersonUid);
+                            personCustomFieldValue
+                                    .setPersonCustomFieldValuePersonCustomFieldUid(
+                                            customField.getPersonCustomFieldUid());
+
+                            personCustomFieldValueDao.insert(personCustomFieldValue);
+
+                        } else {
+                            System.out.println("Unable to create Custom Value");
                         }
+
                     }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
+                    if(personPersonUid != null && personGroupUid != null){
+                        //Done teachers person - create clazzMember
+
+                        if(role == ClazzMember.ROLE_TEACHER){
+
+                            //Create EntityRole
+                            EntityRole entityRole = new EntityRole();
+                            entityRole.setErTableId(Clazz.TABLE_ID);
+                            entityRole.setErEntityUid(thisClazz.getClazzUid());
+                            entityRole.setErRoleUid(teacherRoleUid);
+
+                            Long entityRoleUid = entityRoleDao.insert(entityRole);
+
+                            if(entityRoleUid != null){
+
+                                //For a specific clazz
+                                EntityRole newEntityClazzSpecific = new EntityRole();
+                                newEntityClazzSpecific.setErGroupUid(personGroupUid);
+                                newEntityClazzSpecific.setErRoleUid(teacherRoleUid);
+                                newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
+                                newEntityClazzSpecific.setErEntityUid(thisClazz.getClazzUid());
+
+                                Long entityRoleDaoUid = entityRoleDao.insert(newEntityClazzSpecific);
+
+                                if(entityRoleDaoUid != null){
+                                    checkClazzMember(thisClazz, bulkLine,
+                                            personPersonUid, role);
+                                }else{
+                                    view.showMessage("Something went wrong in clazz entity roles");
+                                }
+
+                            }else{
+                                view.showMessage("Something went wrong");
+                            }
+
+                        }else{
+                            //Create ClazzMember
+                            checkClazzMember(thisClazz, bulkLine,
+                                    personPersonUid, role);
+                        }
+
+                    }else{
+                        System.out.println("ERROR: UNABLE TO PERSIST PERSON!");
                     }
-                });
-    }
+                }
 
-    private void parseMasterListLineToDatabase(String line){
-        System.out.println("Processing line of length: " + line.length());
-
-        BulkUploadLine bulkLine = new BulkUploadLine(line);
-
-        //1. Location
-        //2. Clazz
-        //3. Teacher
-        //4. Student
-
-        getRole(bulkLine);
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }
 
     }
 
-    public void getRole(BulkUploadLine bulkLine){
-        RoleDao roleDao = repository.getRoleDao();
+    private void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid,
+                                  int role){
+
+        ClazzMember clazzMember = clazzMemberDao.findByPersonUidAndClazzUid(personPersonUid,
+                thisClazz.getClazzUid());
+
+        if(clazzMember == null){
+            //Create one.
+            ClazzMember personClazzMember;
+            personClazzMember = new ClazzMember();
+            personClazzMember.setClazzMemberPersonUid(personPersonUid);
+            personClazzMember.setClazzMemberClazzUid(thisClazz.getClazzUid());
+            personClazzMember.setClazzMemberActive(true);
+            personClazzMember.setDateJoined(System.currentTimeMillis());
+            personClazzMember.setRole(role);
+
+            Long clazzMemberUid = clazzMemberDao.insert(personClazzMember);
+
+            if(clazzMemberUid != null) {
+                if (role == ClazzMember.ROLE_TEACHER) {
+                    checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
+                }else{
+                    processNextLine();
+
+                }
+            }else{
+                System.out.println("ERROR: UNABLE TO PERSIST CLAZZMEMBER??");
+            }
+
+
+        }else{
+            //Exists already
+            if (role == ClazzMember.ROLE_TEACHER) {
+                checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
+            }else{
+                processNextLine();
+
+            }
+        }
+    }
+
+    private void createEntityRoleForTeacherAndClazz(int role, Clazz thisClazz, long personPersonUid,
+                                                    BulkUploadLine bulkLine){
+        if(role == ClazzMember.ROLE_TEACHER){
+
+            List<PersonGroupMember> allGroups =
+                    personGroupMemberDao.findAllGroupWherePersonIsInSync(personPersonUid);
+
+            long personGroupUid;
+            if(allGroups != null && allGroups.size() > 0){
+                //Get parent group :  ASSUMING ITS THE FIRST ONE
+                personGroupUid = allGroups.get(0).getGroupMemberGroupUid();
+
+                //Create EntityRole
+                EntityRole entityRole = new EntityRole();
+                entityRole.setErTableId(Clazz.TABLE_ID);
+                entityRole.setErEntityUid(thisClazz.getClazzUid());
+                entityRole.setErRoleUid(teacherRoleUid);
+
+                List<EntityRole> entityRoles = entityRoleDao.findByEntitiyAndPersonGroupSync(
+                        Clazz.TABLE_ID, thisClazz.getClazzUid(), personGroupUid);
+
+
+                if(entityRoles.isEmpty()){
+                    //Good, create one.
+
+                    Long entityRoleUid = entityRoleDao.insert(entityRole);
+
+                    if(entityRoleUid != null){
+
+                        //For a specific clazz
+                        EntityRole newEntityClazzSpecific = new EntityRole();
+                        newEntityClazzSpecific.setErGroupUid(personGroupUid);
+                        newEntityClazzSpecific.setErRoleUid(teacherRoleUid);
+                        newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
+                        newEntityClazzSpecific.setErEntityUid(thisClazz.getClazzUid());
+                        Long entityRoleDaoUid = entityRoleDao.insert(newEntityClazzSpecific);
+
+                        if(entityRoleDaoUid != null){
+                            checkClazzMember(thisClazz, bulkLine,
+                                    personPersonUid, role);
+                        }else{
+                            view.showMessage("Something went wrong in clazz entity roles");
+                        }
+
+
+                    }else{
+                        view.showMessage("Something went wrong");
+                    }
+
+
+                }else{
+                    //Already created. continue.
+                    checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
+                }
+
+            }
+
+
+        }else{
+            checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
+        }
+    }
+
+    private void getRole(){
+
         roleDao.findByName(Role.ROLE_NAME_TEACHER, new UmCallback<Role>() {
             @Override
             public void onSuccess(Role teacherRole) {
                 if(teacherRole != null){
                     teacherRoleUid = teacherRole.getRoleUid();
-
-                    processLocations(bulkLine);
-
-//                    roleDao.findByName(Role.ROLE_NAME_OFFICER, new UmCallback<Role>() {
-//                        @Override
-//                        public void onSuccess(Role officerRole) {
-//                            if(officerRole != null){
-//                                officerRoleUid = officerRole.getRoleUid();
-//                            }
-//
-//                            repository.getPersonDao().findByUsernameAsync("officer",
-//                                    new UmCallback<Person>() {
-//                                @Override
-//                                public void onSuccess(Person result) {
-//                                    repository.getPersonGroupMemberDao()
-//                                            .findAllGroupWherePersonIsIn(result.getPersonUid(),
-//                                                    new UmCallback<List<PersonGroupMember>>() {
-//                                        @Override
-//                                        public void onSuccess(List<PersonGroupMember> result) {
-//                                            officerPersonGroupUid = result.get(0).getGroupMemberGroupUid();
-//                                        }
-//
-//                                        @Override
-//                                        public void onFailure(Throwable exception) {
-//
-//                                        }
-//                                    });
-//                                }
-//
-//                                @Override
-//                                public void onFailure(Throwable exception) {}
-//                            });
-//
-//
-//                            roleDao.findByName(Role.ROLE_NAME_MNE, new UmCallback<Role>() {
-//                                @Override
-//                                public void onSuccess(Role result) {
-//                                    if(result!= null){
-//                                        mneRoleUid = result.getRoleUid();
-//                                    }
-//
-//                                    roleDao.findByName(Role.ROLE_NAME_SEL, new UmCallback<Role>() {
-//                                        @Override
-//                                        public void onSuccess(Role result) {
-//                                            if(result!= null){
-//                                                selRoleUid = result.getRoleUid();
-//                                            }
-//
-//
-//                                        }
-//
-//                                        @Override
-//                                        public void onFailure(Throwable exception) {}
-//                                    });
-//                                }
-//
-//                                @Override
-//                                public void onFailure(Throwable exception) {}
-//                            });
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Throwable exception) {
-//
-//                        }
-//                    });
-
-
-
                 }else{
                     view.showMessage("Please wait until the app syncs and try again.");
                 }
@@ -425,348 +560,21 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 dateString,"dd/MM/yyyy", currentLocale);
     }
 
-    private void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid,
-                                  int role){
-
-        repository.getClazzMemberDao().findByPersonUidAndClazzUidAsync(
-                personPersonUid, thisClazz.getClazzUid(),
-                new UmCallback<ClazzMember>() {
-                    @Override
-                    public void onSuccess(ClazzMember clazzMember) {
-                        if(clazzMember == null){
-                            //Create one.
-                            ClazzMember personClazzMember;
-                            personClazzMember = new ClazzMember();
-                            personClazzMember.setClazzMemberPersonUid(personPersonUid);
-                            personClazzMember.setClazzMemberClazzUid(thisClazz.getClazzUid());
-                            personClazzMember.setClazzMemberActive(true);
-                            personClazzMember.setDateJoined(System.currentTimeMillis());
-                            personClazzMember.setRole(role);
-
-                            repository.getClazzMemberDao().insertAsync(personClazzMember,
-                                    new UmCallback<Long>() {
-                                        @Override
-                                        public void onSuccess(Long clazzMemberUid) {
-                                            if(clazzMemberUid != null) {
-                                                if (role == ClazzMember.ROLE_TEACHER) {
-                                                    checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
-                                                }else{
-                                                    processNextLine();
-
-                                                }
-                                            }else{
-                                                System.out.println("ERROR: UNABLE TO PERSIST CLAZZMEMBER??");
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
-
-
-
-                        }else{
-                            //Exists already
-                            if (role == ClazzMember.ROLE_TEACHER) {
-                                checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_STUDENT);
-                            }else{
-                                processNextLine();
-
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                }
-        );
+    public void setCurrentPosition(int currentPosition) {
+        this.currentPosition = currentPosition;
     }
 
-    private void createEntityRoleForTeacherAndClazz(int role, Clazz thisClazz, long personPersonUid,
-                                                    BulkUploadLine bulkLine){
-        if(role == ClazzMember.ROLE_TEACHER){
-
-            PersonGroupMemberDao personGroupMemberDao = repository.getPersonGroupMemberDao();
-            personGroupMemberDao.findAllGroupWherePersonIsIn(personPersonUid,
-                    new UmCallback<List<PersonGroupMember>>() {
-                @Override
-                public void onSuccess(List<PersonGroupMember> result) {
-
-                    long personGroupUid;
-                    if(result != null && result.size() > 0){
-                        //Get parent group :  ASSUMING ITS THE FIRST ONE
-                        personGroupUid = result.get(0).getGroupMemberGroupUid();
-
-                        //Create EntityRole
-                        EntityRole entityRole = new EntityRole();
-                        entityRole.setErTableId(Clazz.TABLE_ID);
-                        entityRole.setErEntityUid(thisClazz.getClazzUid());
-                        entityRole.setErRoleUid(teacherRoleUid);
-
-                        repository.getEntityRoleDao().findByEntitiyAndPersonGroup(
-                        Clazz.TABLE_ID, thisClazz.getClazzUid(), personGroupUid,
-                        new UmCallback<List<EntityRole>>() {
-                            @Override
-                            public void onSuccess(List<EntityRole> result) {
-                                if(result.isEmpty()){
-                                    //Good, create one.
-
-                                    repository.getEntityRoleDao().insertAsync(entityRole, new UmCallback<Long>() {
-                                        @Override
-                                        public void onSuccess(Long result) {
-                                            if(result != null){
-
-                                                //For a specific clazz
-                                                EntityRole newEntityClazzSpecific = new EntityRole();
-                                                newEntityClazzSpecific.setErGroupUid(personGroupUid);
-                                                newEntityClazzSpecific.setErRoleUid(teacherRoleUid);
-                                                newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
-                                                newEntityClazzSpecific.setErEntityUid(thisClazz.getClazzUid());
-                                                repository.getEntityRoleDao()
-                                                        .insertAsync(newEntityClazzSpecific, new UmCallback<Long>() {
-                                                            @Override
-                                                            public void onSuccess(Long entityRoleDaoUid) {
-                                                                if(entityRoleDaoUid != null){
-                                                                    checkClazzMember(thisClazz, bulkLine,
-                                                                            personPersonUid, role);
-                                                                }else{
-                                                                    view.showMessage("Something went wrong in clazz entity roles");
-                                                                }
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(Throwable exception) {
-                                                                exception.printStackTrace();
-                                                            }
-                                                        });
-
-                                            }else{
-                                                view.showMessage("Something went wrong");
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
-
-                                }else{
-                                    //Already created. continue.
-                                    checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
-                                }
-
-                            }
-
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                exception.printStackTrace();
-                            }
-                        }
-                        );
-
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-            });
-
-        }else{
-            checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
-        }
-
+    public List<String> getLines() {
+        return lines;
     }
 
-    private void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
-        String personUid = bulkLine.person_id;
-        String teacherUsername = bulkLine.teacher_username;
-        String teacherFirstName = bulkLine.teacher_first_name;
-        String teacherLastName = bulkLine.teacher_last_name;
-        String teacherPhoneNo = bulkLine.teacher_phone_no;
-
-        String studentUsername = bulkLine.username;
-        String studentPassword = bulkLine.password;
-        String stuentFirstName = bulkLine.first_name;
-        String studentLastName = bulkLine.last_name;
-        String studentGender = bulkLine.gender;
-        String studentMotherName = bulkLine.mother_name;
-        String studentPhoneNo = bulkLine.phone_no;
-        String studentSchool = bulkLine.school;
-        String studentAddress = bulkLine.address;
-        String studentFatherName = bulkLine.father_name;
-        String studentDateOfBirth = bulkLine.dob;
-
-        PersonCustomFieldDao personFieldDao = repository.getPersonCustomFieldDao();
-        PersonCustomFieldValueDao personCustomFieldValueDao =
-                repository.getPersonCustomFieldValueDao();
-
-        String username;
-        if(role == ClazzMember.ROLE_TEACHER){
-            username = teacherUsername;
-        }else{
-            //username = studentUsername;
-            //FIX: Considering Person id is unique in the sheet.
-            username = personUid;
-        }
-
-        repository.getPersonDao().findByUsernameAsync(username, new UmCallback<Person>() {
-
-            @Override
-            public void onSuccess(Person thePerson) {
-                if(thePerson != null){
-                    //person object exists
-
-                    //Still create Entity Role for this different Clazz
-                    // and //Check for ClazzMember then  directly
-                    createEntityRoleForTeacherAndClazz(role,thisClazz, thePerson.getPersonUid(),
-                            bulkLine);
-
-                }else{
-                    //Create new person
-                    Person person = new Person();
-
-                    if(role == ClazzMember.ROLE_TEACHER) {
-                        person.setFirstNames(teacherFirstName);
-                        person.setLastName(teacherLastName);
-                        person.setPhoneNum(teacherPhoneNo);
-                        person.setUsername(username);
-
-                    }else{
-                        person.setUsername(username);
-                        person.setFirstNames(stuentFirstName);
-                        person.setLastName(studentLastName);
-                        person.setMotherName(studentMotherName);
-                        person.setFatherName(studentFatherName);
-                        person.setAddress(studentAddress);
-                        person.setPhoneNum(studentPhoneNo);
-                        person.setDateOfBirth(getDOBFromString(studentDateOfBirth));
-                        if (studentGender.toLowerCase().startsWith("f")) {
-                            person.setGender(Person.GENDER_FEMALE);
-                        }else if(studentGender.toLowerCase().startsWith("m")){
-                            person.setGender(Person.GENDER_MALE);
-                        }
-                    }
-
-                    person.setActive(true);
-
-                    repository.getPersonDao().createPersonWithGroupAsync(person,
-                     new UmCallback<PersonDao.PersonWithGroup>() {
-                        @Override
-                        public void onSuccess(PersonDao.PersonWithGroup personWithGroup) {
-                            Long personPersonUid = personWithGroup.getPersonUid();
-                            Long personGroupUid = personWithGroup.getPersonGroupUid();
-
-                            if(role == ClazzMember.ROLE_STUDENT) {
-                                personFieldDao.findByLabelMessageId(
-                                 String.valueOf(MessageID.current_formal_school),
-                                 new UmCallback<PersonField>() {
-                                    @Override
-                                    public void onSuccess(PersonField customField) {
-                                        if (customField != null) {
-                                            PersonCustomFieldValue personCustomFieldValue =
-                                                    new PersonCustomFieldValue();
-                                            personCustomFieldValue.setFieldValue(studentSchool);
-                                            personCustomFieldValue
-                                                    .setPersonCustomFieldValuePersonUid(personPersonUid);
-                                            personCustomFieldValue
-                                                    .setPersonCustomFieldValuePersonCustomFieldUid(
-                                                            customField.getPersonCustomFieldUid());
-
-                                            personCustomFieldValueDao.insert(personCustomFieldValue);
-
-                                        } else {
-                                            System.out.println("Unable to create Custom Value");
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable exception) {exception.printStackTrace();}
-                                });
-                            }
-
-                            if(personPersonUid != null && personGroupUid != null){
-                                //Done teachers person - create clazzMember
-
-                                if(role == ClazzMember.ROLE_TEACHER){
-
-                                    //Create EntityRole
-                                    EntityRole entityRole = new EntityRole();
-                                    entityRole.setErTableId(Clazz.TABLE_ID);
-                                    entityRole.setErEntityUid(thisClazz.getClazzUid());
-                                    entityRole.setErRoleUid(teacherRoleUid);
-
-                                    repository.getEntityRoleDao().insertAsync(entityRole,
-                                     new UmCallback<Long>() {
-                                        @Override
-                                        public void onSuccess(Long result) {
-                                            if(result != null){
-
-                                                //For a specific clazz
-                                                EntityRole newEntityClazzSpecific = new EntityRole();
-                                                newEntityClazzSpecific.setErGroupUid(personGroupUid);
-                                                newEntityClazzSpecific.setErRoleUid(teacherRoleUid);
-                                                newEntityClazzSpecific.setErTableId(Clazz.TABLE_ID);
-                                                newEntityClazzSpecific.setErEntityUid(thisClazz.getClazzUid());
-                                                repository.getEntityRoleDao()
-                                                        .insertAsync(newEntityClazzSpecific, new UmCallback<Long>() {
-                                                            @Override
-                                                            public void onSuccess(Long entityRoleDaoUid) {
-                                                                if(entityRoleDaoUid != null){
-                                                                    checkClazzMember(thisClazz, bulkLine,
-                                                                            personPersonUid, role);
-                                                                }else{
-                                                                    view.showMessage("Something went wrong in clazz entity roles");
-                                                                }
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(Throwable exception) {
-                                                                exception.printStackTrace();
-                                                            }
-                                                        });
-
-                                            }else{
-                                                view.showMessage("Something went wrong");
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable exception) {exception.printStackTrace();}
-                                    });
-                                }else{
-                                    //Create ClazzMember
-                                    checkClazzMember(thisClazz, bulkLine,
-                                            personPersonUid, role);
-                                }
-
-                            }else{
-                                System.out.println("ERROR: UNABLE TO PERSIST PERSON!");
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+    public void setLines(List<String> lines) {
+        this.lines = lines;
     }
 
-
+    /**
+     * Bulk upload line class
+     */
     public class BulkUploadLine{
 
         private static final String CSV_DELIMITTER = ",";
@@ -807,6 +615,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 teacher_phone_no, teacher_first_name, teacher_last_name, teacher_id, teacher_username,
                 teacher_password;
 
+
         BulkUploadLine(String line){
             this.line=line;
             this.data = line.split(CSV_DELIMITTER);
@@ -839,6 +648,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
             teacher_password = data[INDEX_TEACHER_PASSWORD];
 
         }
+
 
     }
 

@@ -22,6 +22,9 @@ public abstract class PersonGroupMemberDao implements SyncableDao<PersonGroupMem
     public abstract void findAllGroupWherePersonIsIn(long personUid,
                                                  UmCallback<List<PersonGroupMember>> resultList);
 
+    @UmQuery("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid")
+    public abstract List<PersonGroupMember> findAllGroupWherePersonIsInSync(long personUid);
+
     @UmQuery("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid " +
             " AND groupMemberActive = 1")
     public abstract UmProvider<PersonGroupMember> finAllMembersWithGroupId(long groupUid);

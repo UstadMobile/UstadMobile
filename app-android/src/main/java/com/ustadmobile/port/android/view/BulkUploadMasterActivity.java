@@ -39,7 +39,6 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton;
 
 public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkUploadMasterView {
 
-    private Toolbar toolbar;
     private String filePathFromFilePicker;
     private BulkUploadMasterPresenter mPresenter;
     private ProgressBar mProgressBar;
@@ -48,7 +47,6 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
     private Spinner timeZoneSpinner;
 
     private static final int FILE_PERMISSION_REQUEST = 400;
-    private static final int FILE_CAPUTURE_REQUEST = 401;
 
     private TextView heading;
 
@@ -60,7 +58,7 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         setContentView(R.layout.activity_bulk_upload_master);
 
         //Toolbar
-        toolbar = findViewById(R.id.activity_bulk_upload_master_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_bulk_upload_master_toolbar);
         toolbar.setTitle(R.string.bulk_upload_master);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -98,16 +96,14 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
         //FAB
         fab = findViewById(R.id.activity_bulk_upload_master_fab);
-        //fab.setOnClickListener(v -> mPresenter.startBulkUpload(filePathFromFilePicker));
         fab.setOnClickListener(v -> parseFile(filePathFromFilePicker));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                onBackPressed();
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -117,7 +113,6 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         mProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
         fab.setEnabled(!inProgress);
         fab.setVisibility(inProgress?View.INVISIBLE:View.VISIBLE);
-        //fab.getBackground().setAlpha(inProgress ? 128 : 255);
         selectFileButton.setEnabled(inProgress);
         selectFileButton.setVisibility(inProgress?View.INVISIBLE:View.VISIBLE);
         selectFileButton.getBackground().setAlpha(inProgress ? 128 : 255 );
@@ -134,24 +129,23 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case FILE_PERMISSION_REQUEST: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted - call the method here
-                    chooseFileFromDevice();
-                } else {
-                    // permission denied, you may keep on requesting it or just finish the activity
-                }
-                return;
+        if (requestCode == FILE_PERMISSION_REQUEST) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // permission was granted - call the method here
+                chooseFileFromDevice();
+            } else {
+                // permission denied, you may keep on requesting it or just finish the activity
             }
+            return;
         }
     }
 
     @Override
     public void setTimeZonesList(List<String> timeZoneIds) {
 
-        ArrayAdapter<String> timeZoneAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, timeZoneIds);
+        ArrayAdapter<String> timeZoneAdapter = new ArrayAdapter<>(getApplicationContext(),
+                android.R.layout.simple_spinner_item, timeZoneIds);
         timeZoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         timeZoneSpinner.setAdapter(timeZoneAdapter);
@@ -226,11 +220,12 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
 
     @Override
     public void showMessage(String message) {
-        Toast.makeText(
+        runOnUiThread(() -> Toast.makeText(
                 getApplicationContext(),
                 message,
                 Toast.LENGTH_SHORT
-        ).show();
+        ).show());
+
     }
 
     @Override

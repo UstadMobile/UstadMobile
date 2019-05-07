@@ -49,6 +49,9 @@ public abstract class PersonCustomFieldDao
     @UmQuery("SELECT * FROM PersonField WHERE labelMessageId = :messageId")
     public abstract void findByLabelMessageId(String messageId, UmCallback<PersonField> resultObject);
 
+    @UmQuery("SELECT * FROM PersonField WHERE labelMessageId = :messageId")
+    public abstract PersonField findByLabelMessageIdSync(String messageId);
+
     @UmQuery("SELECT PersonField.fieldName AS fieldName, '' AS fieldType, '' AS defaultValue " +
             "FROM PersonField " +
             "WHERE personCustomFieldUid > :minCustomFieldUid ")
