@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 import static com.ustadmobile.core.db.dao.PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1;
@@ -170,7 +171,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void insertDeviceBits(SyncDeviceBits deviceBits);
 
     protected void onSuccessCreateAccessToken(long personUid, String username, UmCallback<UmAccount> callback) {
-        AccessToken accessToken = new AccessToken(personUid,
+        AccessToken accessToken = new AccessToken(UUID.randomUUID().toString(), personUid,
                 System.currentTimeMillis() + SESSION_LENGTH);
         insertAccessToken(accessToken);
         callback.onSuccess(new UmAccount(personUid, username, accessToken.getToken(),

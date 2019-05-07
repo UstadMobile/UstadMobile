@@ -1,6 +1,18 @@
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    }
+}
+
+
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 apply plugin: 'kotlin'
+<<<<<<< HEAD
 
 buildscript {
     repositories {
@@ -14,6 +26,8 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
     }
 }
+=======
+>>>>>>> dev-download2
 
 
 dependencies {
