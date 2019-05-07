@@ -94,9 +94,9 @@ public class PersonDetailEnrollClazzPresenter extends UstadBaseController<Person
                         newClazzMember.setClazzMemberPersonUid(personUid);
                         newClazzMember.setClazzMemberActive(true);
                         clazzMemberDao.insert(newClazzMember);
-                    }else{
-                        //Don't create. false anyway
                     }
+                    //else Don't create. false anyway
+
                 }
             }
 

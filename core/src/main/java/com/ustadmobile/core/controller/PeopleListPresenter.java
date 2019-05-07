@@ -1,10 +1,8 @@
 package com.ustadmobile.core.controller;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-
+import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
@@ -13,22 +11,22 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
-import com.ustadmobile.core.view.PeopleListView;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-
-import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.PeopleListView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
-import com.ustadmobile.lib.db.entities.UmAccount;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.view.ClazzDetailEnrollStudentView.ARG_NEW_PERSON;
-import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_ATTENDANCE_DESC;
 import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_ATTENDANCE_ASC;
+import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_ATTENDANCE_DESC;
 import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_NAME_ASC;
 import static com.ustadmobile.core.view.PeopleListView.SORT_ORDER_NAME_DESC;
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
@@ -51,7 +49,7 @@ public class PeopleListPresenter
 
     private Long loggedInPersonUid = 0L;
 
-    String queryParam = "%";
+    private String queryParam = "%";
     private Hashtable<Integer, Integer> idToOrderInteger;
 
     public PeopleListPresenter(Object context, Hashtable arguments, PeopleListView view) {
@@ -84,10 +82,14 @@ public class PeopleListPresenter
         checkPermissions();
     }
 
-    public void updateProviderToView(){
+    private void updateProviderToView(){
         setPeopleProviderToView();
     }
 
+    /**
+     * Updates people list provider with search parameter and updates the view to show it.
+     * @param searchValue   The search value. eg: "Mo"
+     */
     public void updateProviderWithSearch(String searchValue){
         queryParam = "%" + searchValue + "%";
         personWithEnrollmentUmProvider = repository.getPersonDao()
@@ -127,11 +129,6 @@ public class PeopleListPresenter
         presetAL.add(impl.getString(MessageID.sort_by_name_desc, getContext()));
         idToOrderInteger.put( presetAL.size(), SORT_ORDER_NAME_DESC);
 
-//        presetAL.add(impl.getString(MessageID.attendance_high_to_low, getContext()));
-//        idToOrderInteger.put( presetAL.size(), SORT_ORDER_ATTENDANCE_DESC);
-//        presetAL.add(impl.getString(MessageID.attendance_low_to_high, getContext()));
-//        idToOrderInteger.put(presetAL.size(), SORT_ORDER_ATTENDANCE_ASC);
-
         String[] sortPresets = arrayListToStringArray(presetAL);
 
         view.updateSortSpinner(sortPresets);
@@ -139,7 +136,7 @@ public class PeopleListPresenter
     /**
      * Gets logged in person and observes it.
      */
-    public void getLoggedInPerson(){
+    private void getLoggedInPerson(){
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
         Long loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
         UmLiveData<Person> personLive = repository.getPersonDao().findByUidLive(loggedInPersonUid);
@@ -152,11 +149,14 @@ public class PeopleListPresenter
      *
      * @param loggedInPerson    The person changed.
      */
-    public void handlePersonValueChanged(Person loggedInPerson){
+    private void handlePersonValueChanged(Person loggedInPerson){
         if(loggedInPerson!=null)
             view.showFAB(loggedInPerson.isAdmin());
     }
 
+    /**
+     * Checks permission and updates view accordingly (ie: enables/disables components on view)
+     */
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_PERSON_INSERT,
@@ -167,9 +167,7 @@ public class PeopleListPresenter
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         }));
     }
 
@@ -226,14 +224,10 @@ public class PeopleListPresenter
                         exception.printStackTrace();
                     }
                 });
-
-
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
 
     }
@@ -263,6 +257,10 @@ public class PeopleListPresenter
     }
 
 
+    /**
+     * Queries provider to be ordered and updates the view.
+     * @param posiiton  Position of the order selected looked up in idToOrderInteger Map.
+     */
     public void handleChangeSortOrder(int posiiton){
         posiiton = posiiton + 1;
         if(idToOrderInteger.containsKey(posiiton)){
@@ -276,7 +274,7 @@ public class PeopleListPresenter
      * Every order has a corresponding order by change in the database query where this method
      * reloads the class list provider.
      *
-     * @param order The order selected.
+     * @param order The order selected (defined in this class as static final)
      */
     private void getAndSetProvider(int order){
         switch (order){

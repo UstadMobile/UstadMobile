@@ -21,6 +21,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.WeakHashMap;
 
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
@@ -41,8 +42,6 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     Long currentClazzUid;
     private boolean attendanceVisibility, activityVisibility, selVisibility, settingsVisibility;
     Menu menu;
-
-    private ClazzStudentListFragment clazzStudentListFragment;
 
     private Map<Integer, Class> fragPosMap = new HashMap<>();
 
@@ -87,7 +86,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     /**
      * The ClazzDetailActivity's onCreate get the Clazz UID from arguments given to it
      * and sets up TabLayout.
-     * @param savedInstanceState
+     * @param savedInstanceState    Android bundle
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +94,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         //Setting layout:
         setContentView(R.layout.activity_clazz_detail);
 
-        if(getIntent().getExtras().get(ARG_CLAZZ_UID) instanceof  String){
+        if(Objects.requireNonNull(getIntent().getExtras()).get(ARG_CLAZZ_UID) instanceof  String){
             currentClazzUid = Long.valueOf(getIntent().getStringExtra(ARG_CLAZZ_UID));
         }else {
             currentClazzUid = getIntent().getLongExtra(ARG_CLAZZ_UID, 0L);
@@ -176,7 +175,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
     //Tab layout's on Tab selected
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        Fragment selectedFragment = mPagerAdapter.getItem(tab.getPosition());
+        mPagerAdapter.getItem(tab.getPosition()); //Loads first fragment
         mPagerAdapter.notifyDataSetChanged();
         mPager.setCurrentItem(tab.getPosition());
     }
@@ -196,7 +195,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         runOnUiThread(() -> {
             toolbar.setTitle(toolbarTitle);
             setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         });
 
     }
@@ -253,8 +252,9 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
             } else {
                 Class fragClass = fragPosMap.get(position);
                 if(fragClass.equals(ClazzStudentListFragment.class)) {
-                    clazzStudentListFragment = ClazzStudentListFragment.newInstance(currentClazzUid);
-                    return clazzStudentListFragment;
+                    ClazzStudentListFragment classStudentListFragment =
+                            ClazzStudentListFragment.newInstance(currentClazzUid);
+                    return classStudentListFragment;
                 }else if(fragClass.equals(ClazzLogListFragment.class)) {
                     return ClazzLogListFragment.newInstance(currentClazzUid);
                 }else if(fragClass.equals(ClazzActivityListFragment.class)) {
@@ -285,6 +285,7 @@ public class ClazzDetailActivity extends UstadBaseActivity implements
         @Override
         public CharSequence getPageTitle(int position){
             Class fragClass = fragPosMap.get(position);
+            assert fragClass != null;
             if(fragClass.equals(ClazzStudentListFragment.class)) {
                 return ((String) getText(R.string.students_literal)).toUpperCase();
             }else if(fragClass.equals(ClazzLogListFragment.class)) {
