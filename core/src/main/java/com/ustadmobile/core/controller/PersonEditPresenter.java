@@ -560,7 +560,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context);
     }
 
-    private static void generateFeedsForPersonUpdate(UmAppDatabase repository, Person mUpdatedPerson){
+    static void generateFeedsForPersonUpdate(UmAppDatabase repository, Person mUpdatedPerson){
         //All edits trigger a feed
         List<ClazzWithNumStudents> personClazzes = repository.getClazzDao()
                 .findAllClazzesByPersonUidAsList(mUpdatedPerson.getPersonUid());
