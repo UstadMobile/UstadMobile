@@ -1,13 +1,13 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
-import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.FeedListView;
 import com.ustadmobile.core.view.ReportSelectionView;
@@ -37,8 +37,6 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
 
     private UmAppDatabase repository;
 
-    private UmLiveData<ClazzAverage> averageUmLiveData;
-
     /**
      * Overridden onCreate in order:
      *      1. Gets the UmProvider types FeedEntry list and sets it as a provider to the view.
@@ -56,18 +54,16 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         updateFeedEntries();
 
         //All clazz's average live data
-        averageUmLiveData = repository.getClazzDao().getClazzSummaryLiveData();
-        averageUmLiveData.observe(FeedListPresenter.this,
+        UmLiveData<ClazzAverage> averageLiveData = repository.getClazzDao().getClazzSummaryLiveData();
+        averageLiveData.observe(FeedListPresenter.this,
                 FeedListPresenter.this::handleAveragesChanged);
 
         //Check permissions
         checkPermissions();
     }
 
-    public void updateFeedEntries(){
-        feedEntryUmProvider = repository.getFeedEntryDao()
-                .findByPersonUid(loggedInPersonUid);
-
+    private void updateFeedEntries(){
+        feedEntryUmProvider = repository.getFeedEntryDao().findByPersonUid(loggedInPersonUid);
         updateFeedProviderToView();
     }
 
@@ -87,6 +83,9 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         checkPermissions();
     }
 
+    /**
+     * Checks permission and updates the view.
+     */
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_REPORTS_VIEW,
@@ -151,9 +150,12 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
     }
 
 
+    /**
+     * Goes to Report selection
+     */
     public void handleClickViewReports(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_REPORT_NAME, "Test Report");
         impl.go(ReportSelectionView.VIEW_NAME, args, view.getContext());
     }
@@ -172,6 +174,5 @@ public class FeedListPresenter extends UstadBaseController<FeedListView>{
         impl.go(linkViewName, args, view.getContext());
 
     }
-
 
 }

@@ -10,13 +10,12 @@ import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
-import java.util.concurrent.TimeUnit;
 
 import static com.ustadmobile.core.view.Login2View.ARG_STARTSYNCING;
 
 public class Login2Presenter extends UstadBaseController<Login2View> {
 
-    public static final String ARG_NEXT = "next";
+    private static final String ARG_NEXT = "next";
 
     public static final String ARG_SERVER_URL = "apiUrl";
 
@@ -49,6 +48,13 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
         view.updateVersionOnLogin(version);
     }
 
+    /**
+     * Handles login. If successful, will go to the next main destination. If not it will show
+     * an error message on the view.
+     * @param username  Username in plain text
+     * @param password  Password in plain text
+     * @param serverUrl Server url in plain text
+     */
     public void handleClickLogin(String username, String password, String serverUrl) {
         view.setInProgress(true);
         view.setErrorMessage("");

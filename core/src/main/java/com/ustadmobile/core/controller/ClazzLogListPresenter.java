@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.ThresholdResult;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -29,6 +30,7 @@ import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_MONTH;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_WEEK;
 import static com.ustadmobile.core.view.ClassLogListView.CHART_DURATION_LAST_YEAR;
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
 
 /**
  * The Presenter/Controller for ClazzLogListFragment. This is responsible for the logic behind
@@ -58,6 +60,9 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
         checkPermissions();
     }
 
+    /**
+     * Check permission and update the view accordingly
+     */
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, currentClazzUid,
@@ -232,29 +237,14 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
 
         //Calculate attendance average numbers for the bar chart.
         ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
-        clazzMemberDao.getAttendanceAverageAsListForClazzBetweenDates(currentClazzUid, fromDate,
-                toDate, new UmCallback<List<Float>>() {
+
+        clazzMemberDao.findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(STATUS_ATTENDED,
+                currentClazzUid, fromDate, toDate, new UmCallback<ThresholdResult>() {
                     @Override
-                    public void onSuccess(List<Float> result) {
-
-                        float attendanceGreenTotal = 0f;
-                        float attendanceOrangeTotal = 0f;
-                        float attendanceRedTotal = 0f;
-
-
-                        for(Float everyValue: result){
-                            if(everyValue > 0.79){
-                                attendanceGreenTotal += everyValue;
-                            }else if(everyValue > 0.59){
-                                attendanceOrangeTotal += everyValue;
-                            }else{
-                                attendanceRedTotal += everyValue;
-                            }
-                        }
-
-                        barDataMap.put(3f, attendanceGreenTotal/ result.size());
-                        barDataMap.put(2f, attendanceOrangeTotal/result.size());
-                        barDataMap.put(1f, attendanceRedTotal/result.size());
+                    public void onSuccess(ThresholdResult result) {
+                        barDataMap.put(3f, result.getHigh()/100);
+                        barDataMap.put(2f, result.getMid()/100);
+                        barDataMap.put(1f, result.getLow()/100);
                         view.updateAttendanceBarChart(barDataMap);
                     }
 
@@ -263,5 +253,6 @@ public class ClazzLogListPresenter extends UstadBaseController<ClassLogListView>
                         exception.printStackTrace();
                     }
                 });
+
     }
 }

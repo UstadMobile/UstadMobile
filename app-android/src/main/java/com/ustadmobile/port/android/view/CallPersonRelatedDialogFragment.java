@@ -28,7 +28,7 @@ import io.reactivex.annotations.NonNull;
 import static com.ustadmobile.core.controller.CallPersonRelatedDialogPresenter.NUMBER_FATHER;
 import static com.ustadmobile.core.controller.CallPersonRelatedDialogPresenter.NUMBER_MOTHER;
 import static com.ustadmobile.core.controller.CallPersonRelatedDialogPresenter.NUMBER_RETENTION_OFFICER;
-import static com.ustadmobile.core.controller.CallPersonRelatedDialogPresenter.NUMBER_TEACHR;
+import static com.ustadmobile.core.controller.CallPersonRelatedDialogPresenter.NUMBER_TEACHER;
 
 public class CallPersonRelatedDialogFragment extends UstadDialogFragment implements
         CallPersonRelatedDialogView, AdapterView.OnItemSelectedListener,
@@ -99,7 +99,7 @@ public class CallPersonRelatedDialogFragment extends UstadDialogFragment impleme
                         motherEntry.setText(nameWithNumber.name);
                         motherEntry.setOnClickListener(v -> handleClickCall(nameWithNumber.number));
                         break;
-                    case NUMBER_TEACHR:
+                    case NUMBER_TEACHER:
                         teacherEntry.setText(nameWithNumber.name);
                         teacherEntry.setOnClickListener(v -> handleClickCall(nameWithNumber.number));
                         break;

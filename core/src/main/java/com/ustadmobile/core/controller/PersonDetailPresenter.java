@@ -42,8 +42,6 @@ import static com.ustadmobile.core.view.PersonAuthDetailView.ARG_PERSONAUTH_PERS
 import static com.ustadmobile.core.view.PersonDetailView.ARG_PERSON_UID;
 import static com.ustadmobile.core.view.PersonPictureDialogView.ARG_PERSON_IMAGE_PATH;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.CUSTOM_FIELD_MIN_UID;
-import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
-import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY;
@@ -57,6 +55,8 @@ import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER;
 import static com.ustadmobile.lib.db.entities.PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
+import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
 
 
 /**
@@ -88,7 +88,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     private String oneParentNumber = "";
 
-    private long loggedInPersonUid = 0L;
+    private long loggedInPersonUid;
 
     private UmProvider<ClazzWithNumStudents> assignedClazzes;
 
@@ -259,6 +259,9 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         checkPermissions();
     }
 
+    /**
+     * Check permission for logged in user and enable/disable view components
+     */
     public void checkPermissions(){
         ClazzDao clazzDao = repository.getClazzDao();
         clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_PERSON_UPDATE,
@@ -307,7 +310,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     }
 
-
+    /**
+     * Compresses the image and updates it on on the view.
+     * @param imageFile The image file object
+     */
     public void handleCompressedImage(File imageFile){
         PersonPictureDao personPictureDao = repository.getPersonPictureDao();
         PersonPicture personPicture = new PersonPicture();
@@ -343,7 +349,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         });
 
     }
-
 
 
     /**
@@ -551,10 +556,13 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         }
     }
 
+    /**
+     * Opens person picture (almost) fullscreen dialog
+     * @param imagePath The full path of the image
+     */
     public void openPictureDialog(String imagePath){
-        //Open Dialog
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_PERSON_IMAGE_PATH, imagePath);
         args.put(ARG_PERSON_UID, personUid);
         impl.go(PersonPictureDialogView.VIEW_NAME, args, context);

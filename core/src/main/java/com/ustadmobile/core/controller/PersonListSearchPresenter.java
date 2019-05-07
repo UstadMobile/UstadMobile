@@ -18,7 +18,6 @@ public class PersonListSearchPresenter extends CommonHandlerPresenter<PersonList
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
     private long currentClazzUid = 0;
-    private long loggedInPerson = 0L;
 
     public PersonListSearchPresenter(Object context, Hashtable arguments, PersonListSearchView view) {
         super(context, arguments, view);
@@ -27,7 +26,6 @@ public class PersonListSearchPresenter extends CommonHandlerPresenter<PersonList
             currentClazzUid = (long) arguments.get(ARGUMENT_CURRNET_CLAZZ_UID);
         }
 
-        loggedInPerson = UmAccountManager.getActiveAccount(context).getPersonUid();
     }
 
     /**

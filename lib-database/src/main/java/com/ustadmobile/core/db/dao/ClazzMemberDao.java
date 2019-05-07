@@ -18,6 +18,8 @@ import com.ustadmobile.lib.db.entities.PersonWithPersonPicture;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
+import static com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.STATUS_ATTENDED;
+
 @UmDao(
         inheritPermissionFrom = ClazzDao.class,
         inheritPermissionForeignKey = "clazzMemberClazzUid",
@@ -103,7 +105,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid " +
             "AND ClazzLog.done = 1 " +
             "AND ClazzLogAttendanceRecord.attendanceStatus = " +
-            ClazzLogAttendanceRecord.STATUS_ATTENDED +") * 1.0 " +
+            STATUS_ATTENDED +") * 1.0 " +
             " / " +
             "MAX(1.0, (SELECT COUNT(*) FROM ClazzLogAttendanceRecord " +
             " LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = " +
@@ -132,6 +134,41 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " AND num = :days")
     public abstract void findAllMembersForAttendanceOverConsecutiveDays(
             int type, int days, long clazzUid, UmCallback<List<PersonNameWithClazzName>> resultList);
+
+
+    @UmQuery("SELECT  " +
+            " SUM(CASE WHEN attendancePercentage >  79 AND attendancePercentage < 101 THEN 1 ELSE 0 END) *100 / " +
+            " (select COUNT(*) FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog on " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " WHERE ClazzLog.clazzLogClazzUid = :clazzUid " +
+            " AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
+            " AND ClazzLog.done = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)   " +
+            " AS high, " +
+            " SUM(CASE WHEN attendancePercentage >  59 AND attendancePercentage < 80 THEN 1 ELSE 0 END) *100 / " +
+            " (select COUNT(*) FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog on  " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " WHERE ClazzLog.clazzLogClazzUid = :clazzUid  " +
+            " AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  " +
+            " AND ClazzLog.done = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)    AS mid, " +
+            " SUM(CASE WHEN attendancePercentage >  0 AND attendancePercentage < 60 THEN 1 ELSE 0 END) *100 / " +
+            " (select COUNT(*) FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog on  " +
+            " ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            " WHERE ClazzLog.clazzLogClazzUid = :clazzUid " +
+            " AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime " +
+            " AND ClazzLog.done = 1 GROUP BY ClazzLogUid ORDER BY ClazzLog.logDate ASC LIMIT 1)    AS low " +
+            "  FROM ( " +
+            " SELECT ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid, " +
+            "  SUM(CASE attendanceStatus WHEN :type THEN 1 ELSE 0 END) * 100 / " +
+            "  (select count(*) FROM ClazzLog WHERE ClazzLog.clazzLogClazzUid = :clazzUid " +
+            "  AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime) AS attendancePercentage " +
+            "  FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog on " +
+            "  ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid " +
+            "  LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid " +
+            " WHERE ClazzLog.clazzLogClazzUid = :clazzUid  " +
+            "  AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  AND ClazzMember.role = 1 " +
+            " GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid ) " )
+    public abstract void findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(int type,
+            long clazzUid, long fromTime, long toTime, UmCallback<ThresholdResult> resultUmCallback);
 
     @UmQuery("SELECT * FROM Person where personUid IN ( " +
             " SELECT Person.personUid FROM ClazzMember " +

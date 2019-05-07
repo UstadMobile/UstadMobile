@@ -12,11 +12,11 @@ import com.ustadmobile.core.view.ClassDetailView;
 import com.ustadmobile.core.view.ClassLogDetailView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.ClazzListView;
-import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzLog;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
 import com.ustadmobile.lib.db.entities.Role;
+import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -47,7 +47,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
 
     Long loggedInPersonUid = 0L;
 
-    String searchQuery = "%";
+    private String searchQuery = "%";
 
     private Boolean recordAttendanceVisibility = false;
 
@@ -55,7 +55,7 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         return recordAttendanceVisibility;
     }
 
-    public void setRecordAttendanceVisibility(Boolean recordAttendanceVisibility) {
+    private void setRecordAttendanceVisibility(Boolean recordAttendanceVisibility) {
         this.recordAttendanceVisibility = recordAttendanceVisibility;
     }
 
@@ -85,11 +85,11 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        //clazzListProvider = repository.getClazzDao().findAllActiveClazzes();
-        loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+        UmAccount activeAccount = UmAccountManager.getActiveAccount(context);
 
-        if(loggedInPersonUid != null){
+        if(activeAccount != null){
 
+            loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
             idToOrderInteger = new Hashtable<>();
 
             //Update Sorting options drop down options. This will also trigger the default
@@ -101,11 +101,18 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         }
     }
 
+    /**
+     * Updates the search provider with the search value given to it.
+     * @param searchValue   The search value
+     */
     public void updateProviderWithSearch(String searchValue){
         searchQuery = "%" + searchValue + "%";
         getAndSetProvider(0);
     }
 
+    /**
+     * Checks permission and updates the view accordingly
+     */
     public void checkPermissions() {
         clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_INSERT,
             new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
@@ -113,7 +120,6 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                 public void onSuccess(Boolean result) {
                     view.showAddClassButton(result);
                     view.showAllClazzSettingsButton(result);
-
                 }
 
                 @Override
@@ -124,20 +130,23 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
         );
 
         clazzDao.personHasPermission(loggedInPersonUid, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT,
-                new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        setRecordAttendanceVisibility(result);
-                    }
+            new UmCallbackWithDefaultValue<>(false, new UmCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    setRecordAttendanceVisibility(result);
+                }
 
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                })
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            })
         );
     }
 
+    /**
+     * Updates the currently set Provider to the view
+     */
     private void updateProviderToView(){
         view.setClazzListProvider(clazzListProvider);
     }
@@ -245,8 +254,6 @@ public class ClazzListPresenter extends UstadBaseController<ClazzListView> {
                 exception.printStackTrace();
             }
         });
-
-
 
     }
 

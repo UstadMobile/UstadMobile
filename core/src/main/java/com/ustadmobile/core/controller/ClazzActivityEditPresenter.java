@@ -10,15 +10,12 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackWithDefaultValue;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.AddActivityChangeDialogView;
 import com.ustadmobile.core.view.ClazzActivityEditView;
-import com.ustadmobile.core.view.ClazzListView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzActivity;
 import com.ustadmobile.lib.db.entities.ClazzActivityChange;
-import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.ArrayList;
@@ -27,14 +24,13 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_LOGDATE;
+import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_UID;
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_BAD;
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_GOOD;
 import static com.ustadmobile.core.view.ClazzActivityEditView.THUMB_OFF;
 import static com.ustadmobile.core.view.ClazzListView.ARG_CLAZZ_UID;
-import static com.ustadmobile.core.view.ClazzActivityEditView.ARG_CLAZZACTIVITY_UID;
 
 
 /**
@@ -61,17 +57,13 @@ public class ClazzActivityEditPresenter
     private boolean measurementEntered = false;
 
     private long currentClazzActivityChangeUid = 0L;
-    private boolean activityEditable = false;
-    private long loggedInPersonUid = 0L;
+    private long loggedInPersonUid;
 
     //The current clazz activity being edited.
     private ClazzActivity currentClazzActivity;
 
     //The mapping of activity change uid to drop - down id on the view.
     private HashMap<Long, Long> changeToIdMap;
-    private HashMap<Long, Long> idToChangeMap;
-
-    private UmLiveData<List<ClazzActivityChange>> activityChangeLiveData;
 
     //Daos needed - ClazzActivtyDao and ClazzActivityChangeDao
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
@@ -96,8 +88,8 @@ public class ClazzActivityEditPresenter
             currentClazzUid = Long.parseLong(arguments.get(ARG_CLAZZ_UID).toString());
         }
         //Get Log Date
-        if(arguments.containsKey(ClazzListView.ARG_LOGDATE)){
-            String thisLogDate = arguments.get(ClazzListView.ARG_LOGDATE).toString();
+        if(arguments.containsKey(ARG_CLAZZACTIVITY_LOGDATE)){
+            String thisLogDate = arguments.get(ARG_CLAZZACTIVITY_LOGDATE).toString();
             currentLogDate = Long.parseLong(thisLogDate);
         }
         //Get Activity Uid (if editing)
@@ -125,12 +117,13 @@ public class ClazzActivityEditPresenter
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-        fillClazzActivity();
-
         //Check permissions
         checkPermissions();
     }
 
+    /**
+     * Checks permission and updates view accordingly
+     */
     public void checkPermissions(){
         clazzdao.personHasPermission(loggedInPersonUid, currentClazzUid,
                 Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT,
@@ -141,9 +134,7 @@ public class ClazzActivityEditPresenter
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         }));
 
     }
@@ -364,7 +355,7 @@ public class ClazzActivityEditPresenter
     private void updateActivityChangesOnView(List<ClazzActivityChange> result){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         changeToIdMap = new HashMap<>();
-        idToChangeMap = new HashMap<>();
+        HashMap<Long, Long> idToChangeMap = new HashMap<>();
         ArrayList<String> presetAL = new ArrayList<>();
 
         //Add Select one option
@@ -392,7 +383,9 @@ public class ClazzActivityEditPresenter
         }
 
         //set the presets to the view's activity change drop down (spinner)
-        view.setClazzActivityChangesDropdownPresets(presetAL.toArray(new String[presetAL.size()]));
+        String[] presetsArray = new String[presetAL.size()];
+        presetsArray = presetAL.toArray(presetsArray);
+        view.setClazzActivityChangesDropdownPresets(presetsArray);
 
         if(currentClazzActivityChangeUid != 0){
             view.setActivityChangeOption(idToChangeMap.get(currentClazzActivityChangeUid));
@@ -409,7 +402,8 @@ public class ClazzActivityEditPresenter
     private void updateChangeOptions(){
 
         //Get activity change list live data
-        activityChangeLiveData = activityChangeDao.findAllClazzActivityChangesAsyncLive();
+        UmLiveData<List<ClazzActivityChange>> activityChangeLiveData =
+                activityChangeDao.findAllClazzActivityChangesAsyncLive();
         //Observing it
         activityChangeLiveData.observe(ClazzActivityEditPresenter.this,
                 ClazzActivityEditPresenter.this::updateActivityChangesOnView);
@@ -434,13 +428,16 @@ public class ClazzActivityEditPresenter
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             });
         }
         //else maybe alert/nodd the user that you need to select and fill everything.
     }
 
+    /**
+     * Goes back in date and updates the view.
+     */
     public void handleClickGoBackDate(){
         long newDate = UMCalendarUtil.getDateInMilliPlusDaysRelativeTo(currentLogDate, -1);
         System.out.println("Go back: " + newDate);
@@ -448,6 +445,9 @@ public class ClazzActivityEditPresenter
     }
 
 
+    /**
+     * Goes forward in date and updates the view.
+     */
     public void handleClickGoForwardDate(){
         Date currentLogDateDate = new Date(currentLogDate);
 
@@ -461,7 +461,7 @@ public class ClazzActivityEditPresenter
         }
     }
 
-    public void updateViewDateHeading(){
+    private void updateViewDateHeading(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Date currentLogDateDate = new Date(currentLogDate);
         String prettyDate="";
@@ -481,7 +481,7 @@ public class ClazzActivityEditPresenter
      *
      * @param newDate The new date set
      */
-    public void reloadLogDetailForDate(long newDate){
+    private void reloadLogDetailForDate(long newDate){
         System.out.println("Reload for date: " + newDate);
 
         //1. Set currentLogDate to newDate
@@ -496,17 +496,13 @@ public class ClazzActivityEditPresenter
         //4. Update date heading
         updateViewDateHeading();
 
-
     }
 
-    public boolean isActivityEditable() {
-        return activityEditable;
+    private void setActivityEditable(boolean activityEditable) {
+        if(activityEditable){
+            fillClazzActivity();
+        }
+
     }
-
-    public void setActivityEditable(boolean activityEditable) {
-        this.activityEditable = activityEditable;
-    }
-
-
 
 }

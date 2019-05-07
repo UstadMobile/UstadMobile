@@ -15,25 +15,26 @@ import com.ustadmobile.lib.db.entities.ClazzActivityChange;
 
 
 /**
- * The AddActivityChangeDialog Presenter.
+ * The AddActivityChangeDialog Presenter. Usually triggered when editing a single Clazz Activity
+ * This presenter is responsible for persisting an edited/new ClazzActivity.
  */
 public class AddActivityChangeDialogPresenter
         extends UstadBaseController<AddActivityChangeDialogView> {
 
-    ClazzActivityChange currentChange;
-    HashMap<Integer, Integer> measurementToUOM;
+    //The current Clazz Activity Change that this Clazz Activity will be assigned to.
+    private ClazzActivityChange currentChange;
+    //Map of all the measurement type options's uid AND its position. Useful when we know what
+    //position from the view('s spinner) was selected so we can find the corresponding measurement
+    // type.
+    private HashMap<Integer, Integer> measurementToUOM;
+
+    //The Database repo
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
 
     public AddActivityChangeDialogPresenter(Object context, Hashtable arguments,
                                             AddActivityChangeDialogView view) {
         super(context, arguments, view);
-
-        //Get arguments and set them.
-        //eg: if(arguments.containsKey(ARG_CLAZZ_UID)){
-        //    currentClazzUid = (long) arguments.get(ARG_CLAZZ_UID);
-        //}
-
     }
 
     @Override
@@ -42,41 +43,36 @@ public class AddActivityChangeDialogPresenter
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
+        //Create a new activity change
         if(currentChange == null){
             currentChange = new ClazzActivityChange();
         }
 
-        ArrayList<String> dayAL = new ArrayList<>();
+        //We know all the measurement type. So we just populate them here..
+        ArrayList<String> measurementTypes = new ArrayList<>();
         measurementToUOM = new HashMap<>();
-        dayAL.add(impl.getString(MessageID.frequency, context));
+        measurementTypes.add(impl.getString(MessageID.frequency, context));
         measurementToUOM.put(0, ClazzActivityChange.UOM_FREQUENCY);
-        dayAL.add(impl.getString(MessageID.duration, context));
+        measurementTypes.add(impl.getString(MessageID.duration, context));
         measurementToUOM.put(1, ClazzActivityChange.UOM_DURATION);
-        dayAL.add(impl.getString(MessageID.yes_no, context));
+        measurementTypes.add(impl.getString(MessageID.yes_no, context));
         measurementToUOM.put(2, ClazzActivityChange.UOM_BINARY);
 
-        String[] d = new String[dayAL.size()];
-        d = dayAL.toArray(d);
+        String[] measurementTypesArray = new String[measurementTypes.size()];
+        measurementTypesArray = measurementTypes.toArray(measurementTypesArray);
 
-
-        view.setMeasurementDropdownPresets(d);
+        //.. and set them on the view.
+        view.setMeasurementDropdownPresets(measurementTypesArray);
     }
 
-    public void handleClickPrimaryActionButton(long selectedObjectUid) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        //Create arguments
-        Hashtable args = new Hashtable();
-        //eg: args.put(ARG_CLAZZ_UID, selectedObjectUid);
-
-        //Go to view
-        //eg: impl.go(SELEditView.VIEW_NAME, args, view.getContext());
-    }
-
+    /**
+     * Method that gets called when user clicks "Add" on the dialog (primary).
+     * This will persist the information added about this new Activity
+     */
     public void handleAddActivityChange(){
 
         ClazzActivityChangeDao clazzActivityChangeDao = repository.getClazzActivityChangeDao();
-        currentChange.setClazzActivityChangeActive(true);
+        currentChange.setClazzActivityChangeActive(true); //set active
         clazzActivityChangeDao.insertAsync(currentChange, new UmCallback<Long>() {
             @Override
             public void onSuccess(Long result) {
@@ -84,22 +80,30 @@ public class AddActivityChangeDialogPresenter
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
 
     }
 
+    /**
+     * Method that gets called when user clicks "Cancel" on the dialog (dismiss)
+     */
     public void handleCancelActivityChange(){
         currentChange = null;
     }
 
-    public void handleMeasurementSelected(int posiiton, long id){
-
-        currentChange.setClazzActivityUnitOfMeasure(measurementToUOM.get(posiiton));
+    /**
+     * Updates the unit of measurement selected for the clazz activity.
+     * @param position  The position of item selected from the drop down.
+     */
+    public void handleMeasurementSelected(int position){
+        currentChange.setClazzActivityUnitOfMeasure(measurementToUOM.get(position));
     }
 
+    /**
+     * Updates the title of the clazz activity.
+     * @param title The activity title
+     */
     public void handleTitleChanged(String title){
         currentChange.setClazzActivityChangeTitle(title);
     }

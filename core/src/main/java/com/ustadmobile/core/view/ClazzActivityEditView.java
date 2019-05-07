@@ -16,6 +16,7 @@ public interface ClazzActivityEditView extends UstadView {
 
     //Arguments
     String ARG_CLAZZACTIVITY_UID = "clazzActivityUid";
+    String ARG_CLAZZACTIVITY_LOGDATE = "ClazzActivityLogDate";
 
     /**
      * For Android: closes the activity.

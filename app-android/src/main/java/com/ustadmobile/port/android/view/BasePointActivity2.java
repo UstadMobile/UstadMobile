@@ -267,17 +267,8 @@ public class BasePointActivity2 extends UstadBaseActivity implements BasePointVi
         else if(i == R.id.menu_basepoint_sync){
             forceSync();
         }
-        //Testing. TODO: Remove
-        else if(i == R.id.menu_testing_create_clazzlogs){
-            testClazzLogs();
-        }
-        //End of testing.
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void testClazzLogs(){
-        ClazzLogScheduleWorker.queueClazzLogScheduleWorkerTesting(60000);
     }
 
     public void checkSyncFinished(){

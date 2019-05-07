@@ -7,6 +7,7 @@ import android.arch.paging.PagedList;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,8 +19,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -43,6 +42,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
     private TextView numClassesView, numStudentsView, attendancePercentageView;
     private FeedListPresenter mPresenter;
     private CardView summaryCard;
+    private SwipeRefreshLayout pullToRefresh;
 
     /**
      * The Diff callback
@@ -92,7 +92,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
         //Swipe trial:
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(),
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(Objects.requireNonNull(getContext()),
                 DividerItemDecoration.VERTICAL));
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback =
@@ -109,10 +109,13 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
         summaryCard = rootContainer.findViewById(R.id.fragment_feed_list_report_card);
 
+        pullToRefresh = rootContainer.findViewById(R.id.fragment_feed_list_swiperefreshlayout);
+
         //Create presenter and call its onCreate()
         mPresenter = new FeedListPresenter(getContext(), UMAndroidUtil.bundleToHashtable(
                 getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
 
         return rootContainer;
     }
@@ -183,7 +186,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
      */
     @Override
     public void updateAttendancePercentage(int per) {
-        String concatString = Integer.toString(per) + "%";
+        String concatString = per + "%";
         runOnUiThread(() -> attendancePercentageView.setText(concatString));
     }
 
@@ -226,7 +229,7 @@ public class FeedListFragment extends UstadBaseFragment implements FeedListView,
 
     // This event is triggered soon after onCreateView().
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
         updateTitle(getText(R.string.feed).toString());
 

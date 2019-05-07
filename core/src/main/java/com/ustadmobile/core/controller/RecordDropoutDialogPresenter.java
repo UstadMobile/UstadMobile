@@ -26,7 +26,7 @@ public class RecordDropoutDialogPresenter extends UstadBaseController<RecordDrop
 
     long personUid;
 
-    boolean otherNGO, move, cry, sickness, permission, school, transportation, personal, other;
+    private boolean otherNGO, move, cry, sickness, permission, school, transportation, personal, other;
 
     public RecordDropoutDialogPresenter(Object context, Hashtable arguments, RecordDropoutDialogView view) {
         super(context, arguments, view);

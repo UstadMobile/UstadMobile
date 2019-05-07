@@ -20,7 +20,6 @@ insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 public abstract class LocationDao implements SyncableDao<Location, LocationDao> {
 
-
     @UmInsert
     public abstract long insert(Location entity);
 
@@ -66,7 +65,8 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     public abstract void findTopLocationsAsync(UmCallback<List<Location>> resultList);
 
     @UmQuery("SELECT * FROM Location WHERE parentLocationUid = :uid AND locationActive = 1")
-    public abstract void findAllChildLocationsForUidAsync(long uid, UmCallback<List<Location>> resultList);
+    public abstract void findAllChildLocationsForUidAsync(long uid,
+                                                          UmCallback<List<Location>> resultList);
 
     @UmQuery("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     public abstract void findByTitleAsync(String name, UmCallback<List<Location>> resultList);

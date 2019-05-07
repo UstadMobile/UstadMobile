@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,7 +26,7 @@ import java.util.Objects;
 import io.reactivex.annotations.NonNull;
 
 /**
- * AddActivityChangeDialogFragment Android fragment extends UstadBaseFragment
+ * AddActivityChangeDialogFragment Android fragment
  */
 public class AddActivityChangeDialogFragment extends UstadDialogFragment implements
         AddActivityChangeDialogView, AdapterView.OnItemSelectedListener,
@@ -40,29 +41,33 @@ public class AddActivityChangeDialogFragment extends UstadDialogFragment impleme
     AddActivityChangeDialogPresenter mPresenter;
     TextInputLayout titleText;
 
+    @SuppressLint("InflateParams")
     @android.support.annotation.NonNull
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+        //Inflate
         LayoutInflater inflater =
                 (LayoutInflater) Objects.requireNonNull(getContext()).getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
         assert inflater != null;
         rootView = inflater.inflate(R.layout.fragment_add_activity_change_dialog, null);
 
+        //Get elements on view
         measurementSpinner =
                 rootView.findViewById(R.id.fragment_add_activity_change_dialog_measurement_spinner);
-
         titleText =
                 rootView.findViewById(R.id.fragment_add_activity_change_dialog_name_layout);
 
+        //Positive and Negative listeners
         DialogInterface.OnClickListener positiveOCL =
                 (dialog, which) -> mPresenter.handleAddActivityChange();
 
         DialogInterface.OnClickListener negativeOCL =
                 (dialog, which) -> mPresenter.handleCancelActivityChange();
 
+        //Create the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         builder.setTitle(R.string.add_activity_literal);
         builder.setView(rootView);
@@ -71,35 +76,29 @@ public class AddActivityChangeDialogFragment extends UstadDialogFragment impleme
         dialog = builder.create();
         dialog.setOnShowListener(this);
 
-
+        //Set up Presenter
         mPresenter = new AddActivityChangeDialogPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getArguments()));
 
-
-
+        //UoM listenere
         measurementSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mPresenter.handleMeasurementSelected(position, id);
+                mPresenter.handleMeasurementSelected(position);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        //Title listener on view
         Objects.requireNonNull(titleText.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {

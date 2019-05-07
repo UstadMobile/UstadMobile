@@ -16,7 +16,7 @@ public class PersonPictureDialogPresenter extends UstadBaseController<PersonPict
 
 
     UmAppDatabase repository;
-    long loggedInPersonUid = 0L;
+    long loggedInPersonUid;
     long personUid = 0L;
 
     public PersonPictureDialogPresenter(Object context, Hashtable arguments, PersonPictureDialogView view) {

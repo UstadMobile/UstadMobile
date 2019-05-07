@@ -14,7 +14,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddScheduleDialogView;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.core.view.SelectClazzFeaturesView;
-import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.lib.db.entities.CustomFieldValue;
@@ -22,7 +21,6 @@ import com.ustadmobile.lib.db.entities.CustomFieldValueOption;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.lib.db.entities.UMCalendar;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -255,9 +253,14 @@ public class ClazzEditPresenter
     private void handleAllHolidaysChanged(List<UMCalendar> umCalendar) {
         int selectedPosition = 0;
 
+        HashMap<Long, Integer> holidayCalendarUidToPosition = new HashMap<>();
+
         ArrayList<String> holidayList = new ArrayList<>();
+        int pos = 0;
         for(UMCalendar ec : umCalendar){
             holidayList.add(ec.getUmCalendarName());
+            holidayCalendarUidToPosition.put(ec.getUmCalendarUid(), pos);
+            pos++;
         }
         String[] holidayPreset = new String[holidayList.size()];
         holidayPreset = holidayList.toArray(holidayPreset);
@@ -266,9 +269,10 @@ public class ClazzEditPresenter
             mOriginalClazz = new Clazz();
         }
 
-        //TODO: Change this.
+        //TODOne: Changed this.
         if(mOriginalClazz.getClazzHolidayUMCalendarUid() != 0){
-            selectedPosition = (int) mOriginalClazz.getClazzHolidayUMCalendarUid();
+            selectedPosition = holidayCalendarUidToPosition.get(
+                    mOriginalClazz.getClazzHolidayUMCalendarUid());
         }
 
         view.setHolidayPresets(holidayPreset, selectedPosition);
@@ -449,7 +453,6 @@ public class ClazzEditPresenter
         //To delete schedule assigned to clazz
         ScheduleDao scheduleDao = repository.getScheduleDao();
         scheduleDao.disableSchedule((Long) arg);
-
     }
 
     public void handleClickFeaturesSelection() {

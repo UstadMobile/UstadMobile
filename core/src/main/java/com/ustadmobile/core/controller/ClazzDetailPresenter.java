@@ -31,7 +31,7 @@ public class ClazzDetailPresenter
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
     private ClazzDao clazzDao = repository.getClazzDao();
     private Clazz currentClazz;
-    private Long loggedInPersonUid = 0L;
+    private Long loggedInPersonUid;
 
     public ClazzDetailPresenter(Object context, Hashtable arguments, ClassDetailView view) {
         super(context, arguments, view);
@@ -43,7 +43,6 @@ public class ClazzDetailPresenter
             }else{
                 currentClazzUid = (Long) arguments.get(ARG_CLAZZ_UID);
             }
-
         }
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
@@ -128,9 +127,7 @@ public class ClazzDetailPresenter
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
         });
 
 
@@ -164,9 +161,12 @@ public class ClazzDetailPresenter
         impl.go(ClazzEditView.VIEW_NAME, args, view.getContext());
     }
 
+    /**
+     * Opens the search view for Clazz Members
+     */
     public void handleClickSearch(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable args = new Hashtable();
+        Hashtable<String, Long> args = new Hashtable<>();
         args.put(ARGUMENT_CURRNET_CLAZZ_UID, currentClazzUid);
         impl.go(PersonListSearchView.VIEW_NAME, args, context);
     }

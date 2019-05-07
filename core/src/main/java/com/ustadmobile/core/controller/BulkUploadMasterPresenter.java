@@ -1,12 +1,10 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
-import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.PersonGroupMemberDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -19,13 +17,11 @@ import com.ustadmobile.lib.db.entities.ClazzMember;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.PersonAuth;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonField;
 import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.Role;
 
-import java.sql.Time;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
@@ -97,7 +93,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
     }
 
-    public void processLocations(BulkUploadLine bulkLine){
+    private void processLocations(BulkUploadLine bulkLine){
 
         String location1Title = bulkLine.location1;
         String location2Title = bulkLine.location2;
@@ -235,7 +231,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         });
     }
 
-    public void processClazz(BulkUploadLine bulkLine, Location locationLeaf){
+    private void processClazz(BulkUploadLine bulkLine, Location locationLeaf){
         //2. Class
         String clazzName = bulkLine.class_name;
         String clazzLocation = bulkLine.class_location;
@@ -321,7 +317,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 });
     }
 
-    public void parseMasterListLineToDatabase(String line){
+    private void parseMasterListLineToDatabase(String line){
         System.out.println("Processing line of length: " + line.length());
 
         BulkUploadLine bulkLine = new BulkUploadLine(line);
@@ -423,14 +419,14 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         });
     }
 
-    public long getDOBFromString(String dateString){
+    private long getDOBFromString(String dateString){
         Locale currentLocale = Locale.getDefault();
         return UMCalendarUtil.getLongDateFromStringAndFormat(
                 dateString,"dd/MM/yyyy", currentLocale);
     }
 
-    public void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid,
-                                 int role){
+    private void checkClazzMember(Clazz thisClazz, BulkUploadLine bulkLine, long personPersonUid,
+                                  int role){
 
         repository.getClazzMemberDao().findByPersonUidAndClazzUidAsync(
                 personPersonUid, thisClazz.getClazzUid(),
@@ -588,13 +584,11 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
     }
 
-    public void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
+    private void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
         String personUid = bulkLine.person_id;
         String teacherUsername = bulkLine.teacher_username;
         String teacherFirstName = bulkLine.teacher_first_name;
         String teacherLastName = bulkLine.teacher_last_name;
-        String teacherPassword = bulkLine.teacher_password;
-        String teacherId = bulkLine.teacher_id;
         String teacherPhoneNo = bulkLine.teacher_phone_no;
 
         String studentUsername = bulkLine.username;
@@ -644,7 +638,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         person.setPhoneNum(teacherPhoneNo);
                         person.setUsername(username);
 
-                        PersonAuth personAuth = new PersonAuth();
                     }else{
                         person.setUsername(username);
                         person.setFirstNames(stuentFirstName);

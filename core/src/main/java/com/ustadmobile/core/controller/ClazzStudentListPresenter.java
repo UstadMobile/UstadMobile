@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
-import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -51,26 +50,14 @@ public class ClazzStudentListPresenter extends
         return canAddTeachers;
     }
 
-    public void setCanAddTeachers(boolean canAddTeachers) {
-        this.canAddTeachers = canAddTeachers;
-    }
-
     public boolean isCanAddStudents() {
         return canAddStudents;
     }
 
-    public void setCanAddStudents(boolean canAddStudents) {
-        this.canAddStudents = canAddStudents;
-    }
-
-    private long loggedInPerson = 0L;
+    private long loggedInPerson;
 
     public boolean isTeachersEditable() {
         return teachersEditable;
-    }
-
-    public void setTeachersEditable(boolean teachersEditable) {
-        this.teachersEditable = teachersEditable;
     }
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
@@ -123,7 +110,7 @@ public class ClazzStudentListPresenter extends
 
                 @Override
                 public void onFailure(Throwable exception) {
-
+                    exception.printStackTrace();
                 }
             }));
     }
@@ -168,17 +155,10 @@ public class ClazzStudentListPresenter extends
 
 
     /**
-     * Sets the provider set to this Presenter to the view.
-     */
-    private void setProviderToView(){
-        view.setPersonWithEnrollmentProvider(clazzPersonListProvider);
-    }
-
-    /**
      * Method logic for what happens when you click Add Student
      *
      */
-    public void goToAddStudentFragment(){
+    private void goToAddStudentFragment(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, Object> args = new Hashtable<>();
         args.put(ARG_CLAZZ_UID, currentClazzId);

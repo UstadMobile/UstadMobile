@@ -5,6 +5,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -38,6 +39,8 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
 
     Spinner sortSpinner;
     String[] sortSpinnerPresets;
+
+    private SwipeRefreshLayout pullToRefresh;
 
     /**
      * Generates a new Fragment for a page fragment
@@ -85,6 +88,7 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        pullToRefresh = rootContainer.findViewById(R.id.fragment_people_list_swiperefreshlayout);
 
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
 
@@ -98,6 +102,16 @@ public class PeopleListFragment extends UstadBaseFragment implements PeopleListV
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
+        });
+
+        pullToRefresh.setOnRefreshListener(() -> {
+            try {
+                Thread.sleep(300);
+                ((BasePointActivity2) Objects.requireNonNull(getActivity())).forceSync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            pullToRefresh.setRefreshing(false);
         });
 
         return rootContainer;
