@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
@@ -14,10 +16,12 @@ import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
  * * with a dropdown list for each different schema.
  */
 @UmEntity(tableId = TABLE_ID)
+@Entity
 //shortcode = ctnCat
 class ContentCategory {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var contentCategoryUid: Long = 0
 
     var ctnCatContentCategorySchemaUid: Long = 0

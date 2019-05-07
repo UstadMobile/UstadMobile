@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -8,9 +10,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * Represents an item (linked to a ContentEntryFile) which is part of a specific DownloadSet.
  */
 @UmEntity
+@Entity
 class DownloadSetItem {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     var dsiUid: Long = 0
 
     /**

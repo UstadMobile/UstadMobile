@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.Index
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndex
 import com.ustadmobile.lib.database.annotation.UmIndexField
@@ -9,9 +12,11 @@ import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 51, indices = [UmIndex(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])])
+@Entity(indices = [Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])])
 open class Container {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var containerUid: Long = 0
 
     @UmSyncLocalChangeSeqNum
@@ -34,7 +39,7 @@ open class Container {
 
     var remarks: String? = null
 
-    var isMobileOptimized: Boolean = false
+    var mobileOptimized: Boolean = false
 
     /**
      * Total number of entries in this container

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Embedded
 import com.ustadmobile.lib.database.annotation.UmEmbedded
 
 /**
@@ -8,5 +9,6 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded
 class DownloadJobItemWithDownloadSetItem : DownloadJobItem() {
 
     @UmEmbedded
+    @Embedded
     var downloadSetItem: DownloadSetItem? = null
 }

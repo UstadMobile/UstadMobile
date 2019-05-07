@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
@@ -8,9 +10,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * could also be related to behavior logs etc. in the future.
  */
 @UmEntity
+@Entity
 class ClazzLog : SyncableEntity {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     var clazzLogUid: Long = 0
 
     var clazzLogClazzUid: Long = 0

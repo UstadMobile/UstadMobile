@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -17,9 +19,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TABLE_ID
  * there should be the appropriate ContentEntryParentChildJoin entities present.
  */
 @UmEntity(tableId = TABLE_ID)
+@Entity
 open class ContentEntry {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var contentEntryUid: Long = 0
 
     var title: String? = null
@@ -76,7 +80,7 @@ open class ContentEntry {
 
     var languageVariantUid: Long = 0
 
-    var isLeaf: Boolean = false
+    var leaf: Boolean = false
 
     /**
      * Represents if this content entry is public for anyone to use
@@ -88,7 +92,7 @@ open class ContentEntry {
      *
      * @param publik true if this content entry is public for anyone to use, false otherwise
      */
-    var isPublik: Boolean = false
+    var publik: Boolean = false
 
     var contentTypeFlag: Int = 0
 
@@ -106,8 +110,8 @@ open class ContentEntry {
     constructor(title: String, description: String, leaf: Boolean, publik: Boolean) {
         this.title = title
         this.description = description
-        this.isLeaf = leaf
-        this.isPublik = publik
+        this.leaf = leaf
+        this.publik = publik
     }
 
     override fun equals(other: Any?): Boolean {
@@ -120,7 +124,7 @@ open class ContentEntry {
         if (licenseType != entry.licenseType) return false
         if (primaryLanguageUid != entry.primaryLanguageUid) return false
         if (languageVariantUid != entry.languageVariantUid) return false
-        if (isLeaf != entry.isLeaf) return false
+        if (leaf != entry.leaf) return false
         if (contentTypeFlag != entry.contentTypeFlag) return false
         if (if (title != null) title != entry.title else entry.title != null) return false
         if (if (description != null) description != entry.description else entry.description != null)
@@ -154,7 +158,7 @@ open class ContentEntry {
         result = 31 * result + (primaryLanguageUid xor primaryLanguageUid.ushr(32)).toInt()
         result = 31 * result + (languageVariantUid xor languageVariantUid.ushr(32)).toInt()
         result = 31 * result + contentTypeFlag
-        result = 31 * result + if (isLeaf) 1 else 0
+        result = 31 * result + if (leaf) 1 else 0
         return result
     }
 

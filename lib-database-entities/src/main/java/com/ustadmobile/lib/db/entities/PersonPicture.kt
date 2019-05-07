@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
@@ -9,9 +11,11 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 import com.ustadmobile.lib.db.entities.PersonPicture.Companion.TABLE_ID
 
 @UmEntity(tableId = TABLE_ID)
+@Entity
 class PersonPicture {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var personPictureUid: Long = 0
 
     var personPicturePersonUid: Long = 0

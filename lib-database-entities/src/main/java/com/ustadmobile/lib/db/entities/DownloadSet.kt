@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
@@ -22,14 +24,16 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  */
 
 @UmEntity
+@Entity
 class DownloadSet {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     var dsUid: Int = 0
 
     var destinationDir: String? = null
 
-    var isMeteredNetworkAllowed = false
+    var meteredNetworkAllowed = false
 
     var dsRootContentEntryUid: Long = 0
 }

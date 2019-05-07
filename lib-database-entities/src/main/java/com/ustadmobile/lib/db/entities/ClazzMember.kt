@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -12,6 +14,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
  * or a student. Each member has a joining date, and a leaving date.
  */
 @UmEntity(tableId = 11)
+@Entity
 class ClazzMember : SyncableEntity {
 
     /**
@@ -20,6 +23,7 @@ class ClazzMember : SyncableEntity {
      * @param clazzMemberUid
      */
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var clazzMemberUid: Long = 0
 
     @UmIndexField

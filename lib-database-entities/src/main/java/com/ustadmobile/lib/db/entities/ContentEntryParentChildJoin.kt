@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.Index
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TABLE_ID
 
@@ -9,9 +12,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TAB
  */
 //short code = cepcj
 @UmEntity(tableId = TABLE_ID, indices = [UmIndex(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
+@Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
 class ContentEntryParentChildJoin {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var cepcjUid: Long = 0
 
 

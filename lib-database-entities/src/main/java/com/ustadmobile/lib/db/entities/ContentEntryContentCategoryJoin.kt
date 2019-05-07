@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -14,9 +16,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin.Companion
  * Join entity to link ContentEntry many:many with ContentCategory
  */
 @UmEntity(tableId = TABLE_ID)
+@Entity
 class ContentEntryContentCategoryJoin {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var ceccjUid: Long = 0
 
     //TODO: Migration

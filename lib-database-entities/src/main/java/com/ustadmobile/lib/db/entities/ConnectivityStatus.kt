@@ -1,24 +1,28 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 @UmEntity
+@Entity
 class ConnectivityStatus {
 
     @UmPrimaryKey
+    @PrimaryKey
     var csUid = 1
 
     var connectivityState: Int = 0
 
     var wifiSsid: String? = null
 
-    var isConnectedOrConnecting: Boolean = false
+    var connectedOrConnecting: Boolean = false
 
     constructor()
     constructor(connectivityState: Int, connectedOrConnecting: Boolean, wifiSsid: String) {
         this.connectivityState = connectivityState
-        this.isConnectedOrConnecting = connectedOrConnecting
+        this.connectedOrConnecting = connectedOrConnecting
         this.wifiSsid = wifiSsid
     }
 
@@ -36,7 +40,7 @@ class ConnectivityStatus {
             `val` += " SSID = \"$wifiSsid\""
         }
 
-        `val` += " connectedOrConnecting = $isConnectedOrConnecting"
+        `val` += " connectedOrConnecting = $connectedOrConnecting"
 
         return `val`
     }

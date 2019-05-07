@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Embedded
 import com.ustadmobile.lib.database.annotation.UmEmbedded
 
 /**
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded
 class EntryStatusResponseWithNode : EntryStatusResponse {
 
     @UmEmbedded
+    @Embedded
     var networkNode: NetworkNode? = null
 
     constructor()

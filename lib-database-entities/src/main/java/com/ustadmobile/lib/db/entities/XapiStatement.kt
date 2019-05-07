@@ -1,10 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 class XapiStatement {
 
     @UmPrimaryKey
+    @PrimaryKey
     var uuid: String? = null
 
     var xapiAgentUid: Long = 0
@@ -19,9 +21,9 @@ class XapiStatement {
 
     var statementRef: String? = null
 
-    var isResultSuccess: Boolean = false
+    var resultSuccess: Boolean = false
 
-    var isResultComplete: Boolean = false
+    var resultComplete: Boolean = false
 
     var resultResponse: String? = null
 

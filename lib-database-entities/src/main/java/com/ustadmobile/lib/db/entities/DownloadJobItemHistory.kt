@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
@@ -9,9 +11,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * download items in the future.
  */
 @UmEntity
+@Entity
 class DownloadJobItemHistory {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey
     var id: Long = 0
 
     var url: String? = null
@@ -25,7 +29,7 @@ class DownloadJobItemHistory {
 
     var numBytes: Long = 0
 
-    var isSuccessful: Boolean = false
+    var successful: Boolean = false
 
     var startTime: Long = 0
 
@@ -36,7 +40,7 @@ class DownloadJobItemHistory {
     constructor(networkNode: Long, mode: Int, successful: Boolean, startTime: Long, endTime: Long) {
         this.networkNode = networkNode
         this.mode = mode
-        this.isSuccessful = successful
+        this.successful = successful
         this.startTime = startTime
         this.endTime = endTime
     }

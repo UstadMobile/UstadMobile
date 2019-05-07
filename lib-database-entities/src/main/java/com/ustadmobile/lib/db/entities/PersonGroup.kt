@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
@@ -7,9 +9,11 @@ import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 43)
+@Entity
 class PersonGroup {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var groupUid: Long = 0
 
     @UmSyncMasterChangeSeqNum

@@ -171,7 +171,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract void insertDeviceBits(SyncDeviceBits deviceBits);
 
     protected void onSuccessCreateAccessToken(long personUid, String username, UmCallback<UmAccount> callback) {
-        AccessToken accessToken = new AccessToken(UUID.randomUUID().toString(), personUid,
+        AccessToken accessToken = new AccessToken(personUid,
                 System.currentTimeMillis() + SESSION_LENGTH);
         insertAccessToken(accessToken);
         callback.onSuccess(new UmAccount(personUid, username, accessToken.getToken(),

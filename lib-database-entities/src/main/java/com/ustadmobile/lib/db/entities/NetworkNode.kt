@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -8,9 +10,11 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  * Created by mike on 1/29/18.
  */
 @UmEntity
+@Entity
 class NetworkNode {
 
     @UmPrimaryKey(autoIncrement = true)
+    @PrimaryKey(autoGenerate = true)
     var nodeId: Long = 0
 
     /**
@@ -117,18 +121,6 @@ class NetworkNode {
     val timeSinceNetworkServiceLastUpdated: Long
         get() = System.currentTimeMillis() - networkServiceLastUpdated
 
-    /**
-     * True if the node is expected to be active on the local network, false otherwise. This is set
-     * to true when it is discovered, and false when the service is lost (if the device has not been
-     * heard from, or if the network is changed)
-     *
-     * @return true if the node is expected to be active on the local network, false otherwise.
-     */
-    val isNsdActive: Boolean
-        get() = nsdServiceName != null
-
-    val isWifiDirectActive: Boolean
-        get() = timeSinceWifiDirectLastUpdated < WIFI_DIRECT_TIMEOUT
 
     /**
      * List of acquisition operations that have been performed from this node - used by the
