@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
@@ -51,6 +52,10 @@ public abstract class PersonPictureDao implements SyncableDao<PersonPicture, Per
     @UmQuery("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " +
             " picTimestamp DESC LIMIT 1")
     public abstract void findByPersonUidAsync(long personUid, UmCallback<PersonPicture> resultObject);
+
+    @UmQuery("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " +
+            " picTimestamp DESC LIMIT 1")
+    public abstract UmLiveData<PersonPicture> findByPersonUidLive(long personUid);
 
 
     @UmDbSetAttachment

@@ -30,7 +30,7 @@ public abstract class SalePaymentDao implements SyncableDao<SalePayment, SalePay
             "SELECT * FROM SalePayment WHERE salePaymentActive = 1";
     public static final String FIND_ALL_BY_SALE_UID_QUERY =
             "SELECT * FROM SalePayment WHERE salePaymentSaleUid = :saleUid AND " +
-                    "salePaymentActive = 1";
+                    "salePaymentActive = 1 ORDER BY salePaymentPaidDate DESC";
 
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmLiveData<List<SalePayment>> findAllActiveLive();

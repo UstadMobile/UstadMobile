@@ -57,6 +57,19 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
         UmLiveData<Person> personLive = repository.getPersonDao().findByUidLive(loggedInPersonUid);
         personLive.observe(BasePoint2Presenter.this,
                 BasePoint2Presenter.this::handlePersonValueChanged);
+
+        UmLiveData<PersonPicture> personPictureLive =
+                repository.getPersonPictureDao().findByPersonUidLive(loggedInPersonUid);
+        personPictureLive.observe(BasePoint2Presenter.this,
+                BasePoint2Presenter.this::handlePersonPictureChanged);
+
+
+    }
+
+    private void handlePersonPictureChanged(PersonPicture personPicture){
+        if (personPicture != null)
+            view.updateImageOnView(personPictureDao.getAttachmentPath(
+                    personPicture.getPersonPictureUid()));
     }
 
     /**

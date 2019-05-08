@@ -90,8 +90,6 @@ public class SalePaymentDetailActivity extends UstadBaseActivity implements Sale
         amountNP.setMaxValue(9999999);
         amountNP.setValue(1);
 
-
-
         final NumberPicker np = amountNP;
         np.setMaxValue(9999999); // max value 1000
         np.setMinValue(0);   // min value 0
@@ -107,40 +105,21 @@ public class SalePaymentDetailActivity extends UstadBaseActivity implements Sale
             }
         });
 
-        np.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
-                int stepSize = 10;
-                if(newVal%stepSize !=0){
-                    if(newVal < oldVal){
-                        numberPicker.setValue(((int)(newVal/stepSize)) *stepSize);
-                    }else{
-                        numberPicker.setValue((((int)(newVal/stepSize)) *stepSize ) +stepSize );
-                    }
-
-                }else{
-                    numberPicker.setValue(newVal);
-                }
-
-            }
-        });
-
-//        String[] minuteValues = new String[12];
+//        np.setOnValueChangedListener((numberPicker, oldVal, newVal) -> {
+//            int stepSize = 10;
+//            if(newVal%stepSize !=0){
+//                if(newVal < oldVal){
+//                    numberPicker.setValue((newVal/stepSize) *stepSize);
+//                }else{
+//                    numberPicker.setValue(((newVal/stepSize) *stepSize ) +stepSize );
+//                }
 //
-//        for (int i = 0; i < minuteValues.length; i++) {
-//            String number = Integer.toString(i*10);
-//            minuteValues[i] = number.length() < 2 ? "0" + number : number;
-//        }
-//        amountNP.setOnValueChangedListener((picker, oldVal, newVal) ->
-//                picker.setValue(Integer.parseInt(minuteValues[newVal])));
+//            }else{
+//                numberPicker.setValue(newVal);
+//            }
 //
-//        amountNP.setDisplayedValues(minuteValues);
+//        });
 
-//        NumberPicker.Formatter formatter = value -> {
-//            int temp = value * 5;
-//            return "" + temp;
-//        };
-//        amountNP.setFormatter(formatter);
 
         paymentDateET = findViewById(R.id.activity_sale_payment_detail_payment_date_et);
 
