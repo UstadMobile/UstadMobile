@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.CustomFieldDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
@@ -17,6 +19,8 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.CustomField;
+import com.ustadmobile.lib.db.entities.CustomFieldValue;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
@@ -26,9 +30,12 @@ import com.ustadmobile.lib.db.entities.PersonGroupMember;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMasterView> {
@@ -46,10 +53,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     private ClazzDao clazzDao;
     private ClazzMemberDao clazzMemberDao;
     private PersonDao personDao;
+    private CustomFieldDao customFieldDao;
+    private CustomFieldValueDao customFieldValueDao;
     private PersonGroupMemberDao personGroupMemberDao;
     private EntityRoleDao entityRoleDao;
     private PersonCustomFieldDao personFieldDao;
     private PersonCustomFieldValueDao personCustomFieldValueDao;
+    BulkUploadLine bulkLine;
 
     public BulkUploadMasterPresenter(Object context, Hashtable arguments,
                                      BulkUploadMasterView view) {
@@ -61,6 +71,8 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         personDao = repository.getPersonDao();
         personGroupMemberDao = repository.getPersonGroupMemberDao();
         entityRoleDao = repository.getEntityRoleDao();
+        customFieldDao = repository.getCustomFieldDao();
+        customFieldValueDao = repository.getCustomFieldValueDao();
         personFieldDao = repository.getPersonCustomFieldDao();
         personCustomFieldValueDao =repository.getPersonCustomFieldValueDao();
     }
@@ -86,10 +98,21 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         chosenTZ = allTZ.get(position);
     }
 
+    public void startParsing(){
+        //Start with header line at position 0:
+        String headerLine = lines.get(0);
+        bulkLine = new BulkUploadLine();
+        bulkLine.processHeader(headerLine);
+
+        //Continue with next line data.
+        processNextLine();
+
+    }
+
     /**
      * Start processing the next line
      */
-    public void processNextLine(){
+    private void processNextLine(){
         currentPosition ++;
         System.out.println("BULK UPLOAD LINE : " + currentPosition);
 
@@ -105,6 +128,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
     }
 
+
     /**
      * Every line to be parsed contains all the information including Student, Tecaher, Class,
      * Location, etc. This is why we need to run things in order.
@@ -116,7 +140,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     private void parseLine(String line){
         System.out.println("Processing line of length: " + line.length());
 
-        BulkUploadLine bulkLine = new BulkUploadLine(line);
+        bulkLine.setLine(line);
 
         //1. Location
         //2. Clazz
@@ -265,6 +289,21 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                 thisClazz.setClazzLocationUid(locationLeaf.getLocationUid());
 
                 clazzDao.update(thisClazz);
+
+                //Class Custom field
+                Iterator<Map.Entry<Long, Integer>> classCustomIterator =
+                        bulkLine.classCustomFieldToIndex.entrySet().iterator();
+                while(classCustomIterator.hasNext()){
+                    Map.Entry<Long, Integer> customFieldAndColMap = classCustomIterator.next();
+                    Long customFieldUid = customFieldAndColMap.getKey();
+                    Integer colIndex = customFieldAndColMap.getValue();
+                    String value = bulkLine.getData()[colIndex];
+                    if(value!= null && !value.isEmpty()){
+                        persistCustomFieldSync(customFieldUid, thisClazz.getClazzUid(), value);
+                    }
+                }
+
+
                 //Move on
                 checkPerson(thisClazz, bulkLine, ClazzMember.ROLE_TEACHER);
 
@@ -284,9 +323,27 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
     }
 
+    private void persistCustomFieldSync(long fieldUid, long entityUid, String value){
+        CustomFieldValue customValue =
+                customFieldValueDao.findValueByCustomFieldUidAndEntityUidSync(
+                        fieldUid, entityUid);
+
+        if(customValue == null) {
+            customValue = new CustomFieldValue();
+            customValue.setCustomFieldValueFieldUid(fieldUid);
+            customValue.setCustomFieldValueEntityUid(entityUid);
+            customValue.setCustomFieldValueValue(value);
+            customFieldValueDao.insert(customValue);
+        }else{
+            customValue.setCustomFieldValueValue(value);
+            customFieldValueDao.update(customValue);
+        }
+    }
+
     private void checkPerson(Clazz thisClazz, BulkUploadLine bulkLine, int role){
         String personUid = bulkLine.person_id;
         String teacherUsername = bulkLine.teacher_username;
+        String teacherId = bulkLine.teacher_id;
         String teacherFirstName = bulkLine.teacher_first_name;
         String teacherLastName = bulkLine.teacher_last_name;
         String teacherPhoneNo = bulkLine.teacher_phone_no;
@@ -295,15 +352,21 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         String studentLastName = bulkLine.last_name;
         String studentGender = bulkLine.gender;
         String studentMotherName = bulkLine.mother_name;
+        String studentMotherNum = bulkLine.mother_num;
         String studentPhoneNo = bulkLine.phone_no;
         String studentSchool = bulkLine.school;
         String studentAddress = bulkLine.address;
         String studentFatherName = bulkLine.father_name;
+        String studentFatherNum = bulkLine.father_num;
         String studentDateOfBirth = bulkLine.dob;
 
-
         String username;
+
+
         if(role == ClazzMember.ROLE_TEACHER){
+            if(teacherUsername.isEmpty() && !teacherId.isEmpty()){
+                teacherUsername = teacherId;
+            }
             username = teacherUsername;
         }else{
             username = personUid;
@@ -312,7 +375,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         Person thePerson = personDao.findByUsername(username);
 
         if(thePerson != null){
-            //person object exists
+            //person object exists - Not creating extra fields (inc custom fields)
 
             //Still create Entity Role for this different Clazz
             // and //Check for ClazzMember then  directly
@@ -326,16 +389,25 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
             if(role == ClazzMember.ROLE_TEACHER) {
                 person.setFirstNames(teacherFirstName);
                 person.setLastName(teacherLastName);
-                person.setPhoneNum(teacherPhoneNo);
+                if(!teacherPhoneNo.isEmpty())
+                    person.setPhoneNum(teacherPhoneNo);
                 person.setUsername(username);
 
             }else{
                 person.setUsername(username);
                 person.setFirstNames(stuentFirstName);
                 person.setLastName(studentLastName);
-                person.setMotherName(studentMotherName);
-                person.setFatherName(studentFatherName);
-                person.setAddress(studentAddress);
+                if(!studentMotherName.isEmpty())
+                    person.setMotherName(studentMotherName);
+                if(!studentMotherNum.isEmpty()){
+                    person.setMotherNum(studentMotherNum);
+                }
+                if(!studentFatherName.isEmpty())
+                    person.setFatherName(studentFatherName);
+                if(!studentFatherNum.isEmpty())
+                    person.setFatherNumber(studentFatherNum);
+                if(!studentAddress.isEmpty())
+                    person.setAddress(studentAddress);
                 person.setPhoneNum(studentPhoneNo);
                 person.setDateOfBirth(getDOBFromString(studentDateOfBirth));
                 if (studentGender.toLowerCase().startsWith("f")) {
@@ -354,6 +426,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                     Long personPersonUid = personWithGroup.getPersonUid();
                     Long personGroupUid = personWithGroup.getPersonGroupUid();
 
+                    //Creating custom fields (old way):
                     if(role == ClazzMember.ROLE_STUDENT) {
                         PersonField customField = personFieldDao.findByLabelMessageIdSync(
                                 String.valueOf(MessageID.current_formal_school));
@@ -372,6 +445,38 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
                         } else {
                             System.out.println("Unable to create Custom Value");
+                        }
+
+                    }
+
+                    //Creating custom fields (new way)
+                    if(role == ClazzMember.ROLE_STUDENT){
+
+                        //Student Custom field
+                        Iterator<Map.Entry<Long, Integer>> studentCustomIterator =
+                                bulkLine.studentCustomFieldToIndex.entrySet().iterator();
+                        while(studentCustomIterator.hasNext()){
+                            Map.Entry<Long, Integer> customFieldAndColMap = studentCustomIterator.next();
+                            Long customFieldUid = customFieldAndColMap.getKey();
+                            Integer colIndex = customFieldAndColMap.getValue();
+                            String value = bulkLine.getData()[colIndex];
+                            if(value!= null && !value.isEmpty()){
+                                persistCustomFieldSync(customFieldUid, person.getPersonUid(), value);
+                            }
+                        }
+
+                    }else if(role == ClazzMember.ROLE_TEACHER){
+                        //Teacher Custom field
+                        Iterator<Map.Entry<Long, Integer>> teacherCustomIterator =
+                                bulkLine.teacherCustomFieldToIndex.entrySet().iterator();
+                        while(teacherCustomIterator.hasNext()){
+                            Map.Entry<Long, Integer> customFieldAndColMap = teacherCustomIterator.next();
+                            Long customFieldUid = customFieldAndColMap.getKey();
+                            Integer colIndex = customFieldAndColMap.getValue();
+                            String value = bulkLine.getData()[colIndex];
+                            if(value!= null && !value.isEmpty()){
+                                persistCustomFieldSync(customFieldUid, person.getPersonUid(), value);
+                            }
                         }
 
                     }
@@ -577,77 +682,334 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
      */
     public class BulkUploadLine{
 
-        private static final String CSV_DELIMITTER = ",";
-        private static final int INDEX_PERSON_ID=0;
-        private static final int INDEX_FIRST_NAME=1;
-        private static final int INDEX_FATHER_NAME=2;
-        private static final int INDEX_FAMILY_NAME=3;
-        private static final int INDEX_USERNAME=4;
-        private static final int INDEX_PASSWORD=5;
-        private static final int INDEX_LAST_NAME=6;
-        private static final int INDEX_GENDER=7;
-        private static final int INDEX_DOB=8;
-        private static final int INDEX_MOTHER_NAME=9;
-        private static final int INDEX_PHONE_NO=10;
-        private static final int INDEX_ADDRESS=11;
-        private static final int INDEX_CURRENT_SCHOOL=12;
-        private static final int INDEX_LOCATION_NAME1=13;
-        private static final int INDEX_LOCATION_NAME2=14;
-        private static final int INDEX_LOCATION_NAME3=15;
-        private static final int INDEX_LOCATION_LEAF_NAME=16;
-        private static final int INDEX_LOCATION_ID=17;
-        private static final int INDEX_CLASS_NAME=18;
-        private static final int INDEX_CLASS_LOCATION=19;
-        private static final int INDEX_TEACHER_NAME=20;
-        private static final int INDEX_TEACHER_PHONE_NO=21;
-        private static final int INDEX_TEACHER_FIRST_NAME=22;
-        private static final int INDEX_TEACHER_LAST_NAME=23;
-        private static final int INDEX_TEACHER_ID=24;
-        private static final int INDEX_TEACHER_USERNAME=25;
-        private static final int INDEX_TEACHER_PASSWORD=26;
-
         private String line;
         private String[] data;
+        private String[] header;
+        private String headerLine;
+        private String[] customClassData;
+        private String[] customStudentData;
+        private String[] customTeacherData;
 
-        public String person_id, first_name, father_name, family_name, username, password,
-                last_name, gender, dob, mother_name, phone_no, address, school, location1, location2,
-                location3, locationLeaf, locationId, class_name, class_location, teacher_name,
-                teacher_phone_no, teacher_first_name, teacher_last_name, teacher_id, teacher_username,
-                teacher_password;
+        public HashMap<Long, Integer> studentCustomFieldToIndex;
+        public HashMap<Long, Integer> teacherCustomFieldToIndex;
+        public HashMap<Long, Integer> classCustomFieldToIndex;
+
+        public String[] getData() {
+            return data;
+        }
+
+        UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
+        CustomFieldDao customFieldDao = repository.getCustomFieldDao();
 
 
-        BulkUploadLine(String line){
-            this.line=line;
-            this.data = line.split(CSV_DELIMITTER);
-            person_id = data[INDEX_PERSON_ID];
-            first_name = data[INDEX_FIRST_NAME];
-            father_name = data[INDEX_FATHER_NAME];
-            family_name = data[INDEX_FAMILY_NAME];
-            username = data[INDEX_USERNAME];
-            password = data[INDEX_PASSWORD];
-            last_name = data[INDEX_LAST_NAME];
-            gender = data[INDEX_GENDER];
-            dob = data[INDEX_DOB];
-            mother_name = data[INDEX_MOTHER_NAME];
-            phone_no = data[INDEX_PHONE_NO];
-            address = data[INDEX_ADDRESS];
-            school = data[INDEX_CURRENT_SCHOOL];
-            location1 = data[INDEX_LOCATION_NAME1];
-            location2 = data[INDEX_LOCATION_NAME2];
-            location3 = data[INDEX_LOCATION_NAME3];
-            locationLeaf = data[INDEX_LOCATION_LEAF_NAME];
-            locationId = data[INDEX_LOCATION_ID];
-            class_name = data[INDEX_CLASS_NAME];
-            class_location = data[INDEX_CLASS_LOCATION];
-            teacher_name = data[INDEX_TEACHER_NAME];
-            teacher_phone_no = data[INDEX_TEACHER_PHONE_NO];
-            teacher_first_name = data[INDEX_TEACHER_FIRST_NAME];
-            teacher_last_name = data[INDEX_TEACHER_LAST_NAME];
-            teacher_id = data[INDEX_TEACHER_ID];
-            teacher_username = data[INDEX_TEACHER_USERNAME];
-            teacher_password = data[INDEX_TEACHER_PASSWORD];
+        String person_id = "", first_name = "", father_name = "", family_name = "", username = "",
+                password = "", last_name = "", gender = "", dob = "", mother_name = "",
+                phone_no = "", address = "", school = "", location1 = "", location2 = "",
+                location3 = "", locationLeaf = "", class_name = "", class_location = "",
+                teacher_name = "", teacher_phone_no = "", teacher_first_name = "",
+                teacher_last_name = "", teacher_id = "", teacher_username = "",
+                teacher_password = "", mother_num = "", father_num = "", location_id;
+
+        private String CSV_DELIMITTER = ",";
+
+        private int INDEX_PERSON_ID=-1;
+        private int INDEX_FIRST_NAME=-1;
+        private int INDEX_FATHER_NAME=-1;
+        private int INDEX_FAMILY_NAME=-1;
+        private int INDEX_USERNAME=-1;
+        private int INDEX_PASSWORD=-1;
+        private int INDEX_LAST_NAME=-1;
+        private int INDEX_GENDER=-1;
+        private int INDEX_DOB=-1;
+        private int INDEX_MOTHER_NAME=-1;
+        private int INDEX_MOTHER_NUMBER=-1;
+        private int INDEX_FATHER_NUMBER=-1;
+        private int INDEX_PHONE_NO=-1;
+        private int INDEX_ADDRESS=-1;
+        private int INDEX_CURRENT_SCHOOL=-1;
+        private int INDEX_LOCATION_NAME1=-1;
+        private int INDEX_LOCATION_NAME2=-1;
+        private int INDEX_LOCATION_NAME3=-1;
+        private int INDEX_LOCATION_LEAF_NAME=-1;
+        private int INDEX_CLASS_NAME=-1;
+        private int INDEX_CLASS_LOCATION=-1;
+        private int INDEX_TEACHER_NAME=-1;
+        private int INDEX_TEACHER_PHONE_NO=-1;
+        private int INDEX_TEACHER_FIRST_NAME=-1;
+        private int INDEX_TEACHER_LAST_NAME=-1;
+        private int INDEX_TEACHER_ID=-1;
+        private int INDEX_TEACHER_USERNAME=-1;
+        private int INDEX_TEACHER_PASSWORD=-1;
+        private int INDEX_LOCATION_ID = -1;
+
+        public static final int CUSTOM_FIELD_STUDENT = 1;
+        public static final int CUSTOM_FIELD_TEACHER = 2;
+        public static final int CUSTOM_FIELD_CLASS = 3;
+
+        BulkUploadLine(){
+            studentCustomFieldToIndex = new HashMap<>();
+            teacherCustomFieldToIndex = new HashMap<>();
+            classCustomFieldToIndex = new HashMap<>();
+        }
+
+        void reset(){
+            person_id  = ""; first_name  = ""; father_name  = ""; family_name  = ""; username  = "";
+            password  = ""; last_name  = ""; gender  = ""; dob  = ""; mother_name  = "";
+            phone_no  = ""; address  = ""; school  = ""; location1  = ""; location2  = "";
+            location3  = ""; locationLeaf  = ""; class_name  = ""; class_location  = "";
+            teacher_name  = ""; teacher_phone_no  = ""; teacher_first_name  = "";
+            teacher_last_name  = ""; teacher_id  = ""; teacher_username  = "";
+            teacher_password  = ""; mother_num  = ""; father_num  = ""; location_id = "";
 
         }
+        void setLine(String line){
+            this.line=line;
+            reset();
+            this.data = line.split(CSV_DELIMITTER);
+            //There might be a better way, but i cbb
+            if(INDEX_PERSON_ID>-1)
+            person_id = data[INDEX_PERSON_ID];
+            if(INDEX_FIRST_NAME>-1)
+            first_name = data[INDEX_FIRST_NAME];
+            if(INDEX_FATHER_NAME>-1)
+            father_name = data[INDEX_FATHER_NAME];
+            if(INDEX_FAMILY_NAME>-1)
+            family_name = data[INDEX_FAMILY_NAME];
+            if(INDEX_USERNAME>-1)
+            username = data[INDEX_USERNAME];
+            if(INDEX_PASSWORD>-1)
+            password = data[INDEX_PASSWORD];
+            if(INDEX_LAST_NAME>-1)
+            last_name = data[INDEX_LAST_NAME];
+            if(INDEX_GENDER>-1)
+            gender = data[INDEX_GENDER];
+            if(INDEX_DOB>-1)
+            dob = data[INDEX_DOB];
+            if(INDEX_MOTHER_NAME>-1)
+            mother_name = data[INDEX_MOTHER_NAME];
+            if(INDEX_PHONE_NO>-1)
+            phone_no = data[INDEX_PHONE_NO];
+            if(INDEX_ADDRESS>-1)
+            address = data[INDEX_ADDRESS];
+            if(INDEX_CURRENT_SCHOOL>-1)
+            school = data[INDEX_CURRENT_SCHOOL];
+            if(INDEX_LOCATION_NAME1>-1)
+            location1 = data[INDEX_LOCATION_NAME1];
+            if(INDEX_LOCATION_NAME2>-1)
+            location2 = data[INDEX_LOCATION_NAME2];
+            if(INDEX_LOCATION_NAME3>-1)
+            location3 = data[INDEX_LOCATION_NAME3];
+            if(INDEX_LOCATION_LEAF_NAME>-1)
+            locationLeaf = data[INDEX_LOCATION_LEAF_NAME];
+            if(INDEX_CLASS_NAME>-1)
+            class_name = data[INDEX_CLASS_NAME];
+            if(INDEX_CLASS_LOCATION>-1)
+            class_location = data[INDEX_CLASS_LOCATION];
+            if(INDEX_TEACHER_NAME>-1)
+            teacher_name = data[INDEX_TEACHER_NAME];
+            if(INDEX_TEACHER_PHONE_NO>-1)
+            teacher_phone_no = data[INDEX_TEACHER_PHONE_NO];
+            if(INDEX_TEACHER_FIRST_NAME>-1)
+            teacher_first_name = data[INDEX_TEACHER_FIRST_NAME];
+            if(INDEX_TEACHER_LAST_NAME>-1)
+            teacher_last_name = data[INDEX_TEACHER_LAST_NAME];
+            if(INDEX_TEACHER_ID>-1)
+            teacher_id = data[INDEX_TEACHER_ID];
+            if(INDEX_TEACHER_USERNAME>-1)
+            teacher_username = data[INDEX_TEACHER_USERNAME];
+            if(INDEX_TEACHER_PASSWORD>-1)
+            teacher_password = data[INDEX_TEACHER_PASSWORD];
+            if(INDEX_MOTHER_NUMBER>-1)
+            mother_num = data[INDEX_MOTHER_NUMBER];
+            if(INDEX_FATHER_NUMBER>-1)
+            father_num = data[INDEX_FATHER_NUMBER];
+            if(INDEX_LOCATION_ID>-1)
+            location_id = data[INDEX_LOCATION_ID];
+
+        }
+
+        String getCamelCaseFromTypeCase(String typeCase){
+
+            String titleCase = "";
+            typeCase = typeCase.toLowerCase();
+            String[] allWords = typeCase.split(" ");
+            boolean first = true;
+            for(int i=0; i< allWords.length;i++){
+                String word = allWords[i];
+                if(!word.isEmpty()){
+                    String camelWord = word;
+                    if(first){
+                        first=false;
+                    }else{
+                        camelWord = word.substring(0, 1).toUpperCase() + word.substring(1);
+                    }
+
+                    titleCase = titleCase + camelWord;
+                }
+            }
+            return titleCase;
+        }
+
+        void processHeader(String headerLine){
+            this.headerLine = headerLine;
+            int colIndex = 0;
+            this.header = headerLine.split(CSV_DELIMITTER);
+
+            for(int i=0;i<header.length;i++){
+
+                String everyHeader = header[i];
+                everyHeader = everyHeader.trim();
+                everyHeader = everyHeader.replaceAll("\\P{Print}", "");
+                everyHeader = everyHeader.replace("\uFEFF", "");
+                everyHeader = everyHeader.toLowerCase();
+                if(everyHeader.startsWith("student ")){
+                    String fieldTC = getCamelCaseFromTypeCase(everyHeader.substring("student ".length()));
+                    switch (fieldTC){
+                        case "personId":
+                            INDEX_PERSON_ID = colIndex;
+                            break;
+                        case "firstNames":
+                            INDEX_FIRST_NAME = colIndex;
+                            break;
+                        case "lastName":
+                            INDEX_LAST_NAME = colIndex;
+                            break;
+                        case "gender":
+                            INDEX_GENDER = colIndex;
+                            break;
+                        case "dob":
+                            INDEX_DOB = colIndex;
+                            break;
+                        case "motherName":
+                            INDEX_MOTHER_NAME = colIndex;
+                            break;
+                        case "motherNum":
+                            INDEX_MOTHER_NUMBER = colIndex;
+                            break;
+                        case "fatherName":
+                            INDEX_FATHER_NAME = colIndex;
+                            break;
+                        case "fatherNumber":
+                             INDEX_FATHER_NUMBER = colIndex;
+                            break;
+                        case "address":
+                            INDEX_ADDRESS = colIndex;
+                            break;
+                        default:
+                            System.out.println("Custom value for Student " + fieldTC);
+                            //Lookup custom field
+                            findCustomField(fieldTC, Person.TABLE_ID, colIndex, CUSTOM_FIELD_STUDENT);
+                            break;
+                    }
+
+                }else if(everyHeader.startsWith("teacher ")){
+                    String fieldTC = getCamelCaseFromTypeCase(everyHeader.substring("teacher ".length()));
+                    switch (fieldTC){
+                        case "id":
+                            INDEX_TEACHER_ID = colIndex;
+                            break;
+                        case "firstNames":
+                            INDEX_TEACHER_FIRST_NAME = colIndex;
+                            break;
+                        case "lastName":
+                            INDEX_TEACHER_LAST_NAME = colIndex;
+                            break;
+                        case "phoneNum":
+                            INDEX_TEACHER_PHONE_NO = colIndex;
+                            break;
+                        case "username":
+                            INDEX_TEACHER_USERNAME = colIndex;
+                            break;
+                        default:
+                            System.out.println("Custom value for Teacher " + fieldTC);
+                            findCustomField(fieldTC, Person.TABLE_ID, colIndex, CUSTOM_FIELD_TEACHER);
+                            break;
+
+                    }
+                }else if(everyHeader.startsWith("class ")){
+                    String fieldTC = getCamelCaseFromTypeCase(everyHeader.substring("class ".length()));
+                    switch (fieldTC){
+                        case "name":
+                            INDEX_CLASS_NAME = colIndex;
+                            break;
+                        case "locationName":
+                            INDEX_CLASS_LOCATION = colIndex;
+                            break;
+                        default:
+                            //Find Custom
+                            System.out.println("Custom value for Class " + fieldTC);
+                            findCustomField(fieldTC, Clazz.TABLE_ID, colIndex, CUSTOM_FIELD_CLASS);
+                            break;
+
+                    }
+
+                }else if(everyHeader.startsWith("location ")){
+                    String fieldTC = getCamelCaseFromTypeCase(everyHeader.substring("location ".length()));
+                    switch (fieldTC){
+                        case "id":
+                            INDEX_LOCATION_ID = colIndex;
+                            break;
+                        case "governorate":
+                            INDEX_LOCATION_NAME1 = colIndex;
+                            break;
+                        case "district":
+                            INDEX_LOCATION_NAME2 = colIndex;
+                            break;
+                        case "town":
+                            INDEX_LOCATION_NAME3 = colIndex;
+                            break;
+                        case "name":
+                            INDEX_LOCATION_LEAF_NAME = colIndex;
+                            break;
+                        default:
+                            //NO CUSTOM FIELD FOR LOCATION.
+                            //TODO: Log error
+                            System.out.println("Can't find location value: " + fieldTC);
+                            break;
+
+                    }
+
+                }//else nothing to process. Error log it ?
+                else{
+                    System.out.println("Error cannot figure what this is: " + everyHeader);
+                }
+
+                colIndex++;
+            }
+
+            System.out.println("Finished getting headers");
+
+        }
+
+        void findCustomField(String fieldName, int entity, int colIndex, int type){
+            customFieldDao.findByFieldNameAndEntityTypeAsync(fieldName, entity,
+                    new UmCallback<List<CustomField>>() {
+                @Override
+                public void onSuccess(List<CustomField> result) {
+                    CustomField cf;
+                    if(result!=null && result.size()>0){
+                        cf = result.get(0);
+                        switch (type){
+                            case CUSTOM_FIELD_STUDENT:
+                                studentCustomFieldToIndex.put(cf.getCustomFieldUid(), colIndex);
+                                break;
+                            case CUSTOM_FIELD_TEACHER:
+                                teacherCustomFieldToIndex.put(cf.getCustomFieldUid(), colIndex);
+                                break;
+                            case CUSTOM_FIELD_CLASS:
+                                classCustomFieldToIndex.put(cf.getCustomFieldUid(), colIndex);
+                                break;
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }
+
 
 
     }

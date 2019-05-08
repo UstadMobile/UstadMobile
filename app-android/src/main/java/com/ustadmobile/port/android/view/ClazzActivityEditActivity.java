@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -33,9 +32,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
-
-import static com.ustadmobile.core.controller.ClazzActivityEditPresenter.FALSE_ID;
-import static com.ustadmobile.core.controller.ClazzActivityEditPresenter.TRUE_ID;
 
 
 /**

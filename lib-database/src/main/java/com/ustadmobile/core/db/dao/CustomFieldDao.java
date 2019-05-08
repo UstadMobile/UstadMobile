@@ -37,4 +37,14 @@ public abstract class CustomFieldDao implements SyncableDao<CustomField, CustomF
 
     @UmQuery("UPDATE CustomField SET customFieldActive = 0 WHERE customFieldUid = :customFieldUid")
     public abstract void deleteCustomField(long customFieldUid, UmCallback<Integer> resultCallback);
+
+    @UmQuery("SELECT * FROM CustomField WHERE customFieldName = :fieldName COLLATE NOCASE AND " +
+            "customFieldEntityType = :tableId AND customFieldActive = 1 ")
+    public abstract void findByFieldNameAndEntityTypeAsync(String fieldName, int tableId,
+                                               UmCallback<List<CustomField>> listResultCallback);
+
+    //For debugging
+
+    @UmQuery("SELECT * FROM CustomField")
+    public abstract List<CustomField> findAll();
 }

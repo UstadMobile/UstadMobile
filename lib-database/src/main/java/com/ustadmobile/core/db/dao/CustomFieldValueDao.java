@@ -24,4 +24,10 @@ public abstract class CustomFieldValueDao
     @UmQuery("SELECT * FROM CustomFieldValue WHERE customFieldValueFieldUid = :fieldUid AND " +
             " customFieldValueEntityUid = :entityUid ")
     public abstract void findValueByCustomFieldUidAndEntityUid(long fieldUid, long entityUid, UmCallback<CustomFieldValue> resultCallback);
+
+    @UmQuery("SELECT * FROM CustomFieldValue WHERE customFieldValueFieldUid = :fieldUid AND " +
+            " customFieldValueEntityUid = :entityUid ")
+    public abstract CustomFieldValue findValueByCustomFieldUidAndEntityUidSync(long fieldUid, long entityUid);
+
+
 }
