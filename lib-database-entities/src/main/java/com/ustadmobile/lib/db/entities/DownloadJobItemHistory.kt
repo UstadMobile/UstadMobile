@@ -15,7 +15,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 class DownloadJobItemHistory {
 
     @UmPrimaryKey(autoIncrement = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 
     var url: String? = null

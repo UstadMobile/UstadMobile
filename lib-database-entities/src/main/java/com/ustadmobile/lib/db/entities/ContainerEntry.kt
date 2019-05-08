@@ -11,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 open class ContainerEntry {
 
     @UmPrimaryKey(autoIncrement = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var ceUid: Long = 0
 
     @UmIndexField
