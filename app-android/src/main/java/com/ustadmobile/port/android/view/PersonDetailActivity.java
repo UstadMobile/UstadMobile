@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -25,14 +26,21 @@ import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -44,6 +52,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
@@ -63,6 +72,7 @@ import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_PHONE_NUMBER;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.port.android.view.ClazzEditActivity.dpToPx;
 import static com.ustadmobile.port.android.view.PersonEditActivity.ADD_PERSON_ICON;
 
 /**
@@ -90,6 +100,9 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     public static final String TEXT_ICON_NAME = "ic_textsms_bcd4_24dp";
 
     private LinearLayout enrollInClassLL, recordDropoutLL;
+
+    LinearLayout customFieldsLL;
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -143,6 +156,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
         enrollInClassLL = findViewById(R.id.activity_person_detail_action_ll_enroll_in_class_ll);
         recordDropoutLL = findViewById(R.id.activity_person_detail_action_ll_record_dropout_ll);
+
+        customFieldsLL = findViewById(R.id.activity_person_detail_custom_fields_ll);
 
         //Call the Presenter
         mPresenter = new PersonDetailPresenter(this,
@@ -489,6 +504,50 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
     }
 
     @Override
+    public void addComponent(String value, String label) {
+
+        LinearLayout hll = new LinearLayout(this);
+        hll.setOrientation(LinearLayout.HORIZONTAL);
+        hll.setPadding(16,16,16,16);
+
+
+        String iconName = ADD_PERSON_ICON;
+
+        int iconResId = getResourceId(iconName, "drawable", getPackageName());
+        AppCompatImageView icon = new AppCompatImageView(this);
+        icon.setImageResource(iconResId);
+        if(iconName.equals(ADD_PERSON_ICON)) icon.setAlpha(0);
+        icon.setPadding(16,0,4,0);
+        hll.addView(icon);
+
+
+        LinearLayout vll = new LinearLayout(this);
+        vll.setOrientation(LinearLayout.VERTICAL);
+        vll.setPadding(16,0,0,0);
+
+        TextView fieldValue = new TextView(this);
+        if(value.toString() == ""){
+            value = "-";
+        }
+        fieldValue.setText(value.toString());
+        fieldValue.setPadding(16,4,4,0);
+        vll.addView(fieldValue);
+
+        if (label != null) {
+            TextView fieldLabel = new TextView(this);
+            fieldLabel.setTextSize(10);
+            fieldLabel.setText(label);
+            fieldLabel.setPadding(16, 0, 4, 4);
+            vll.addView(fieldLabel);
+        }
+
+        hll.addView(vll);
+
+        customFieldsLL.addView(hll);
+
+    }
+
+    @Override
     public void setClazzListProvider(UmProvider<ClazzWithNumStudents> clazzListProvider) {
 
         SimpleClazzListRecyclerAdapter recyclerAdapter =
@@ -533,4 +592,92 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
                     return oldItem.equals(newItem);
                 }
             };
+
+
+    @Override
+    public void addCustomFieldText(CustomField label, String value) {
+        //customFieldsLL
+
+        //Calculate the width of the screen.
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+
+        //The field is an input type. So we are gonna add a TextInputLayout:
+        TextInputLayout fieldTextInputLayout = new TextInputLayout(this);
+        int viewId = View.generateViewId();
+        mPresenter.addToMap(viewId, label.getCustomFieldUid());
+        fieldTextInputLayout.setId(viewId);
+        //Edit Text is inside a TextInputLayout
+        TextInputLayout.LayoutParams textInputLayoutParams =
+                new TextInputLayout.LayoutParams(displayWidth,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+        int widthWithPadding = displayWidth - dpToPx(28);
+        //The EditText
+        EditText fieldEditText = new EditText(this);
+        fieldEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        ViewGroup.LayoutParams editTextParams =
+                new LinearLayout.LayoutParams(
+                        widthWithPadding,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+        fieldEditText.setLayoutParams(editTextParams);
+        fieldEditText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        fieldEditText.setText(value);
+
+        fieldEditText.setHint(label.getCustomFieldName());
+
+        fieldTextInputLayout.addView(fieldEditText, textInputLayoutParams);
+        fieldTextInputLayout.setPadding(dpToPx(8),0,0,0);
+        customFieldsLL.addView(fieldTextInputLayout);
+    }
+
+    @Override
+    public void addCustomFieldDropdown(CustomField label, String[] options, int selected) {
+        //Calculate the width of the screen.
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+
+        //The field is an input type. So we are gonna add a TextInputLayout:
+        //Edit Text is inside a TextInputLayout
+        TextInputLayout.LayoutParams textInputLayoutParams =
+                new TextInputLayout.LayoutParams(displayWidth,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+        int widthWithPadding = displayWidth - dpToPx(28);
+
+        //Spinner time
+        Spinner spinner = new Spinner(this);
+        ArrayAdapter<String> spinnerArrayAdapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                        options);
+        spinner.setAdapter(spinnerArrayAdapter);
+
+        //Spinner label
+        TextView labelTV = new TextView(this);
+        labelTV.setText(label.getCustomFieldName());
+
+        int viewId = View.generateViewId();
+        mPresenter.addToMap(viewId, label.getCustomFieldUid());
+
+        //VLL
+        LinearLayout vll = new LinearLayout(this);
+        vll.setId(viewId);
+        vll.setLayoutParams(textInputLayoutParams)  ;
+        vll.setOrientation(LinearLayout.VERTICAL);
+
+        vll.addView(labelTV);
+        vll.addView(spinner);
+
+        vll.setPadding(dpToPx(8),0,0,0);
+        customFieldsLL.addView(vll);
+    }
+
+    @Override
+    public void clearAllCustomFields() {
+        customFieldsLL.removeAllViews();
+    }
+
+
 }

@@ -5,6 +5,9 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.ClazzMemberDao;
+import com.ustadmobile.core.db.dao.CustomFieldDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
 import com.ustadmobile.core.db.dao.PersonDao;
@@ -23,6 +26,9 @@ import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.core.view.PersonPictureDialogView;
 import com.ustadmobile.core.view.RecordDropoutDialogView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.CustomField;
+import com.ustadmobile.lib.db.entities.CustomFieldValue;
+import com.ustadmobile.lib.db.entities.CustomFieldValueOption;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldWithPersonCustomFieldValue;
@@ -32,6 +38,7 @@ import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -98,6 +105,12 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
+    private HashMap<Integer, Long> viewIdToCustomFieldUid;
+
+    private CustomFieldDao customFieldDao;
+    private CustomFieldValueDao customFieldValueDao;
+    private CustomFieldValueOptionDao optionDao;
+
     /**
      * Presenter's constructor where we are getting arguments and setting the personUid
      *
@@ -111,6 +124,12 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         personUid = Long.parseLong(arguments.get(ARG_PERSON_UID).toString());
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
+
+        viewIdToCustomFieldUid = new HashMap<>();
+    }
+
+    public void addToMap(int viewId, long fieldId){
+        viewIdToCustomFieldUid.put(viewId, fieldId);
     }
 
     /**
@@ -131,6 +150,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 repository.getClazzMemberDao();
         PersonCustomFieldDao personCustomFieldDao =
                 repository.getPersonCustomFieldDao();
+
+        customFieldDao = repository.getCustomFieldDao();
+        customFieldValueDao = repository.getCustomFieldValueDao();
+        optionDao = repository.getCustomFieldValueOptionDao();
 
         personDao.findByUidAsync(personUid, new UmCallback<Person>() {
             @Override
@@ -164,6 +187,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                 exception.printStackTrace();
             }
         });
+
+        getAllClazzCustomFields();
 
         //Get all headers and fields
         personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewMode(
@@ -200,6 +225,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                                     blankCustomMap);
                         }
 
+                        //Custom field: OLD WAY
                         //Get all the custom fields and their values (if applicable)
                         personCustomFieldValueDao.findByPersonUidAsync2(personUid,
                           new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
@@ -241,6 +267,8 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                                 exception.printStackTrace();
                             }
                         });
+
+
                     }
 
                     @Override
@@ -257,6 +285,90 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         });
 
         checkPermissions();
+    }
+
+    private void getAllClazzCustomFields(){
+        //0. Clear all added custom fields on view.
+        view.runOnUiThread(() -> view.clearAllCustomFields());
+
+        //1. Get all custom fields
+        customFieldDao.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID,
+                new UmCallback<List<CustomField>>() {
+                    @Override
+                    public void onSuccess(List<CustomField> result) {
+                        for(CustomField c: result){
+
+                            //Get value as well
+                            customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                                    c.getCustomFieldUid(), personUid,
+                                    new UmCallback<CustomFieldValue>() {
+                                        @Override
+                                        public void onSuccess(CustomFieldValue result) {
+                                            String valueString = "";
+                                            int valueSelection = 0;
+
+
+
+                                            if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
+
+                                                if(result != null) {
+                                                    valueString = result.getCustomFieldValueValue();
+                                                }
+                                                final String[] finalValueString = {valueString};
+                                                view.runOnUiThread(() -> {
+                                                    if(finalValueString[0].isEmpty()){
+                                                        finalValueString[0] ="-";
+                                                    }
+                                                    //view.addCustomFieldText(c, finalValueString);
+                                                    view.addComponent(finalValueString[0], c.getCustomFieldName());
+                                                });
+
+                                            }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
+                                                if(result != null) {
+                                                    valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
+                                                }
+                                                int finalValueSelection = valueSelection;
+                                                optionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
+                                                        new UmCallback<List<CustomFieldValueOption>>() {
+                                                            @Override
+                                                            public void onSuccess(List<CustomFieldValueOption> result) {
+                                                                List<String> options = new ArrayList<>();
+
+                                                                for(CustomFieldValueOption o:result){
+                                                                    options.add(o.getCustomFieldValueOptionName());
+                                                                }
+
+                                                                view.runOnUiThread(() ->
+                                                                {
+                                                                    view.addCustomFieldDropdown(c,
+                                                                            options.toArray(new String[options.size()]),
+                                                                            finalValueSelection);
+                                                                });
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(Throwable exception) {
+                                                                exception.printStackTrace();}
+                                                        });
+
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable exception) {
+
+                                        }
+                                    });
+
+
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {exception.printStackTrace();}
+                });
     }
 
     /**
@@ -303,9 +415,7 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                     }
 
                     @Override
-                    public void onFailure(Throwable exception) {
-
-                    }
+                    public void onFailure(Throwable exception) { exception.printStackTrace(); }
                 }));
 
     }

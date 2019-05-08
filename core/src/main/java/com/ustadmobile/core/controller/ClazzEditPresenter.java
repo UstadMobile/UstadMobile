@@ -75,7 +75,7 @@ public class ClazzEditPresenter
         viewIdToCustomFieldUid.put(viewId, fieldId);
     }
 
-    public void getAllClazzCustomFields(){
+    private void getAllClazzCustomFields(){
         //0. Clear all added custom fields on view.
         view.runOnUiThread(() -> view.clearAllCustomFields());
 
@@ -142,9 +142,6 @@ public class ClazzEditPresenter
 
                             }
                         });
-
-
-
                 }
             }
 
@@ -219,7 +216,6 @@ public class ClazzEditPresenter
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
 
                 getAllClazzCustomFields();
-
 
             }
 

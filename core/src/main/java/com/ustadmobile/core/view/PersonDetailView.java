@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.CustomField;
 
 /**
  * View responsible for Person detail view.
@@ -76,4 +77,11 @@ public interface PersonDetailView extends UstadView {
 
     void showDropout(boolean show);
 
+    void addCustomFieldText(CustomField label, String value);
+
+    void addCustomFieldDropdown(CustomField label, String[] options, int selected);
+
+    void clearAllCustomFields();
+
+    void addComponent(String value, String label);
 }
