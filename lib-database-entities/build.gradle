@@ -9,10 +9,9 @@ buildscript {
     }
 }
 
-
+//Kotlin plugin applied using subprojects DSL on the root project as advised by documentation
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
-apply plugin: 'kotlin'
 
 
 dependencies {
