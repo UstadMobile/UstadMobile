@@ -32,11 +32,9 @@ package com.ustadmobile.core.contentformats.epub.opf
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlSerializer
-import java.io.IOException
-import java.util.*
+import org.kmp.io.KMPPullParser
+import org.kmp.io.KMPSerializerParser
+import org.kmp.io.KMPXmlParser
 
 /**
  *
@@ -79,7 +77,7 @@ class OpfDocument {
     internal var creators: MutableList<OpfCreator>? = null
 
     //As per the OPF spec a dc:language tag is required
-    private val languages = Vector<String>()
+    private val languages = mutableListOf<String>()
 
     /**
      * Gets an array of linear hrefs from the spine
@@ -137,14 +135,12 @@ class OpfDocument {
     /*
      * xpp: Parser of the OPF
      */
-    @Throws(XmlPullParserException::class, IOException::class)
-    @JvmOverloads
-    fun loadFromOPF(xpp: XmlPullParser, parseFlags: Int = PARSE_METADATA or PARSE_MANIFEST) {
+    fun loadFromOPF(xpp: KMPXmlParser, parseFlags: Int = PARSE_METADATA or PARSE_MANIFEST) {
         val parseMetadata = parseFlags and PARSE_METADATA == PARSE_METADATA
         val parseManifest = parseFlags and PARSE_MANIFEST == PARSE_MANIFEST
 
 
-        var evtType = xpp.eventType
+        var evtType = xpp.getEventType()
         var filename: String?
         var itemMediaType: String?
         var id: String?
@@ -163,8 +159,8 @@ class OpfDocument {
 
             //If we are parsing the manifest
             if (parseManifest) {
-                if (evtType == XmlPullParser.START_TAG) {
-                    tagName = xpp.name
+                if (evtType == KMPPullParser.START_TAG) {
+                    tagName = xpp.getName()
                     if (tagName != null && tagName == "item") {
 
                         filename = xpp.getAttributeValue(null, "href")!!
@@ -192,7 +188,7 @@ class OpfDocument {
 
                         manifestItems[id] = item2
 
-                    } else if (xpp.name != null && xpp.name == "itemref") {
+                    } else if (xpp.getName() != null && xpp.getName() == "itemref") {
                         //for each itemRef in spine
                         idref = xpp.getAttributeValue(null, "idref")
                         isLinearStrVal = xpp.getAttributeValue(null, "linear")
@@ -213,25 +209,25 @@ class OpfDocument {
             }
 
             if (parseMetadata) {
-                if (evtType == XmlPullParser.START_TAG) {
-                    if (uniqueIdentifier == null && xpp.name == "package") {
+                if (evtType == KMPPullParser.START_TAG) {
+                    if (uniqueIdentifier == null && xpp.getName() == "package") {
                         uniqueIdentifier = xpp.getAttributeValue(null,
                                 "unique-identifier")
-                    } else if (!inMetadata && xpp.name == "metadata") {
+                    } else if (!inMetadata && xpp.getName() == "metadata") {
                         inMetadata = true
                     }
 
                     if (inMetadata) {
-                        if (xpp.name == "dc:title") {
+                        if (xpp.getName() == "dc:title") {
                             title = xpp.nextText()
-                        } else if (xpp.name == "dc:identifier") {
+                        } else if (xpp.getName() == "dc:identifier") {
                             val idAttr = xpp.getAttributeValue(null, "id")
                             if (idAttr != null && idAttr == uniqueIdentifier) {
                                 this.id = xpp.nextText()
                             }
-                        } else if (xpp.name == "dc:description") {
+                        } else if (xpp.getName() == "dc:description") {
                             description = xpp.nextText()
-                        } else if (xpp.name == "link") {
+                        } else if (xpp.getName() == "link") {
                             val linkEl = LinkElement()
                             linkEl.href = xpp.getAttributeValue(null, LinkElement.ATTR_HREF)
                             linkEl.id = xpp.getAttributeValue(null, LinkElement.ATTR_ID)
@@ -239,28 +235,28 @@ class OpfDocument {
                             linkEl.rel = xpp.getAttributeValue(null, LinkElement.ATTR_REL)
                             linkEl.refines = xpp.getAttributeValue(null, LinkElement.ATTR_REFINES)
                             if (links == null)
-                                links = Vector()
+                                links = mutableListOf()
 
                             links!!.add(linkEl)
-                        } else if (xpp.name == "dc:creator") {
+                        } else if (xpp.getName() == "dc:creator") {
                             creator = OpfCreator()
                             creator.id = xpp.getAttributeValue(null, LinkElement.ATTR_ID)
-                            if (xpp.next() == XmlPullParser.TEXT)
-                                creator.creator = xpp.text
+                            if (xpp.next() == KMPPullParser.TEXT)
+                                creator.creator = xpp.getText()
 
                             if (creators == null)
                                 creators = ArrayList()
 
                             creators!!.add(creator)
-                        } else if (xpp.name == "dc:language") {
-                            if (xpp.next() == XmlPullParser.TEXT) {
-                                tagVal = xpp.text
+                        } else if (xpp.getName() == "dc:language") {
+                            if (xpp.next() == KMPPullParser.TEXT) {
+                                tagVal = xpp.getText()!!
                                 languages.add(tagVal)
                             }
                         }
                     }
-                } else if (evtType == XmlPullParser.END_TAG) {
-                    if (inMetadata && xpp.name == "metadata") {
+                } else if (evtType == KMPPullParser.END_TAG) {
+                    if (inMetadata && xpp.getName() == "metadata") {
                         inMetadata = false
                     }
                 }
@@ -269,7 +265,7 @@ class OpfDocument {
 
             evtType = xpp.next()
 
-        } while (evtType != XmlPullParser.END_DOCUMENT)
+        } while (evtType != KMPPullParser.END_DOCUMENT)
     }
 
     /**
@@ -279,25 +275,24 @@ class OpfDocument {
      *
      * @throws IOException if an IOException occurs in the underlying IO
      */
-    @Throws(IOException::class)
-    fun serialize(xs: XmlSerializer) {
-        xs.startDocument("UTF-8", java.lang.Boolean.FALSE)
+    fun serialize(xs: KMPSerializerParser) {
+        xs.startDocument("UTF-8", false)
         xs.setPrefix("", NAMESPACE_OPF)
 
         xs.startTag(NAMESPACE_OPF, "package")
         xs.attribute(null, "version", "3.0")
-        xs.attribute(null, "unique-identifier", uniqueIdentifier)
+        xs.attribute(null, "unique-identifier", uniqueIdentifier!!)
 
         xs.setPrefix("dc", NAMESPACE_DC)
         xs.startTag(NAMESPACE_OPF, "metadata")
 
         xs.startTag(NAMESPACE_DC, "identifier")
-        xs.attribute(null, "id", uniqueIdentifier)
-        xs.text(id)
+        xs.attribute(null, "id", uniqueIdentifier!!)
+        xs.text(id!!)
         xs.endTag(NAMESPACE_DC, "identifier")
 
         xs.startTag(NAMESPACE_DC, "title")
-        xs.text(title)
+        xs.text(title!!)
         xs.endTag(NAMESPACE_DC, "title")
 
         xs.endTag(NAMESPACE_OPF, "metadata")
@@ -305,11 +300,11 @@ class OpfDocument {
         xs.startTag(NAMESPACE_OPF, "manifest")
         for (item in manifestItems.values) {
             xs.startTag(NAMESPACE_OPF, "item")
-            xs.attribute(null, "id", item.id)
-            xs.attribute(null, "href", item.href)
-            xs.attribute(null, "media-type", item.mediaType)
+            xs.attribute(null, "id", item.id!!)
+            xs.attribute(null, "href", item.href!!)
+            xs.attribute(null, "media-type", item.mediaType!!)
             if (item.properties != null)
-                xs.attribute(null, "properties", item.properties)
+                xs.attribute(null, "properties", item.properties!!)
             xs.endTag(NAMESPACE_OPF, "item")
         }
         xs.endTag(NAMESPACE_OPF, "manifest")
@@ -317,7 +312,7 @@ class OpfDocument {
         xs.startTag(NAMESPACE_OPF, "spine")
         for (item in spine) {
             xs.startTag(NAMESPACE_OPF, "itemref")
-            xs.attribute(null, "idref", item.id)
+            xs.attribute(null, "idref", item.id!!)
             xs.endTag(NAMESPACE_OPF, "itemref")
         }
         xs.endTag(NAMESPACE_OPF, "spine")
@@ -374,7 +369,6 @@ class OpfDocument {
      *
      * @return OpfItem representing the cover image
      */
-    @SuppressWarnings("unused")
     fun getCoverImage(mimeType: String): OpfItem? {
         return if (coverImages.isEmpty()) null else coverImages[0]
 

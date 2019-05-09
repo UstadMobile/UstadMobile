@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import org.xmlpull.v1.XmlPullParserException
 import kotlinx.io.*
+import org.kmp.io.KMPPullParserException
 
 /**
  * Created by mike on 9/13/17.
@@ -61,8 +62,8 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
                     handleTinCanXmlLoaded(response.responseBody!!)
                 } catch (e: IOException) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e)
-                    onFailure(call, IOException(e))
-                } catch (e: XmlPullParserException) {
+                    onFailure(call, e)
+                } catch (e: KMPPullParserException) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e)
                     onFailure(call, IOException(e))
                 }

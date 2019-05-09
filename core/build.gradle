@@ -11,9 +11,6 @@ buildscript {
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
-        maven {
-            url "https://kotlin.bintray.com/kotlinx"
-        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
@@ -100,6 +97,8 @@ kotlin {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.soywiz:klock-metadata:$version_klock"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
               /*  implementation project(':lib-database')
                 compileOnly project(':lib-database-entities')
                 compileOnly project(':core-compile-only')
