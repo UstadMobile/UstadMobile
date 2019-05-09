@@ -124,7 +124,7 @@ class UMStorageDir
     }
 
     override fun toString(): String {
-        val sb = String(dirURI!!)
+        val sb = StringBuilder()
         sb.append(dirURI).append(" (").append(name).append(" )")
         sb.append(" available: ").append(isAvailable)
         sb.append(" removable: ").append(isRemovableMedia)

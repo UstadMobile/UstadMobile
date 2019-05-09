@@ -70,7 +70,7 @@ object LocaleUtil {
             return message
         }
 
-        val sb = StringBuffer()
+        val sb = StringBuilder()
         if (i != 0) {
             sb.append(message.substring(0, i))
         }

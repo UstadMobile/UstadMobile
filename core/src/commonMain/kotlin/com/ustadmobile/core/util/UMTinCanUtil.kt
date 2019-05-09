@@ -41,6 +41,7 @@ import org.json.JSONException
 import org.json.JSONObject
 
 import java.util.Vector
+import kotlin.math.floor
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -168,15 +169,15 @@ object UMTinCanUtil {
      */
     fun format8601Duration(duration: Long): String {
         val msPerHour = 1000 * 60 * 60
-        val hours = Math.floor((duration / msPerHour).toDouble()).toInt()
+        val hours = floor((duration / msPerHour).toDouble()).toInt()
         var durationRemaining = duration % msPerHour
 
         val msPerMin = 60 * 1000
-        val mins = Math.floor((durationRemaining / msPerMin).toDouble()).toInt()
+        val mins = floor((durationRemaining / msPerMin).toDouble()).toInt()
         durationRemaining = durationRemaining % msPerMin
 
         val msPerS = 1000
-        val secs = Math.floor((durationRemaining / msPerS).toDouble()).toInt()
+        val secs = floor((durationRemaining / msPerS).toDouble()).toInt()
 
         return "PT" + hours + "H" + mins + "M" + secs + "S"
     }

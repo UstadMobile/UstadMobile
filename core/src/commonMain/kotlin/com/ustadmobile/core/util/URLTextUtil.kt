@@ -21,6 +21,7 @@
 package com.ustadmobile.core.util
 
 
+import kotlinx.serialization.toUtf8Bytes
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
@@ -45,7 +46,7 @@ class URLTextUtil {
          * @return the URL-encoded string
          */
         protected fun urlEncode(rs: ByteArray): String {
-            val result = StringBuffer(rs.size * 2)
+            val result = StringBuilder(rs.size * 2)
 
             // Does the URLEncoding.  We could use the java.net one, but
             // it does not eat byte[]s.
@@ -88,7 +89,6 @@ class URLTextUtil {
          * @throws UnsupportedEncodingException If the encoding is unknown.
          * @throws IllegalArgumentException If the byte array is not a valid string.
         </P> */
-        @Throws(UnsupportedEncodingException::class, IllegalArgumentException::class)
         protected fun urlDecode(bytes: ByteArray?, encoding: String): String? {
             if (bytes == null) {
                 return null
@@ -140,7 +140,7 @@ class URLTextUtil {
             val rs: ByteArray
 
             try {
-                rs = text.toByteArray(charset("UTF-8"))
+                rs = text.toUtf8Bytes()
                 return urlEncode(rs)
             } catch (e: UnsupportedEncodingException) {
                 throw RuntimeException("UTF-8 not supported!?!")
@@ -210,7 +210,6 @@ class URLTextUtil {
          * @throws UnsupportedEncodingException If the encoding is unknown
          * @throws IllegalArgumentException If the data cannot be decoded.
          */
-        @Throws(UnsupportedEncodingException::class, IllegalArgumentException::class)
         fun urlDecode(data: String, encoding: String): String? {
             // Presumably, the same caveats apply as in FileSystemProvider.
             // Don't see why it would be horribly kludgy, though.

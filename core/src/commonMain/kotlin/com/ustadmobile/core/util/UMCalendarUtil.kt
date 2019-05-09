@@ -137,7 +137,7 @@ object UMCalendarUtil {
      * @param sb StringBuffer to append it two
      * @return The stringbuffer
      */
-    private fun appendTwoDigits(i: Int, sb: StringBuffer): StringBuffer {
+    private fun appendTwoDigits(i: Int, sb: StringBuilder): StringBuilder {
         if (i < 10) {
             sb.append('0')
         }
