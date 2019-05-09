@@ -155,10 +155,10 @@ object UMTinCanUtil {
         val accountUsername = account?.username
         val accountEndpoint = account?.endpointUrl
         return if (accountUsername != null && accountEndpoint != null) {
-            UMTinCanUtil.makeActorFromUserAccount(accountUsername,
+            makeActorFromUserAccount(accountUsername,
                     accountEndpoint)
         } else {
-            UMTinCanUtil.makeActorFromUserAccount("anonymous",
+            makeActorFromUserAccount("anonymous",
                     UmAccountManager.getActiveEndpoint(context)!!)
         }
 
