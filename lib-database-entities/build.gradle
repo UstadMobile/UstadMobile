@@ -1,3 +1,15 @@
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    }
+}
+
+//Kotlin plugin applied using subprojects DSL on the root project as advised by documentation
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
@@ -7,8 +19,11 @@ dependencies {
     implementation project(':lib-database-runtime')
     compileOnly project(":lib-room-annotations")
 
-    api "net.sf.kxml:kxml2:$version_kxml";
+    api "net.sf.kxml:kxml2:$version_kxml"
     api project(":lib-util")
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 }
 
 task sourceJar(type: Jar) {

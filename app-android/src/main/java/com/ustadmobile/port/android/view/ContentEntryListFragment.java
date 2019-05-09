@@ -76,7 +76,7 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public void setCategorySchemaSpinner(Map<Long, ? extends List<? extends DistinctCategorySchema>> spinnerData) {
+    public void setCategorySchemaSpinner(Map<Long, ? extends List<DistinctCategorySchema>> spinnerData) {
         runOnUiThread(() -> {
             if (contentEntryListener != null) {
                 // TODO tell activiity to create the spinners
@@ -86,10 +86,10 @@ public class ContentEntryListFragment extends UstadBaseFragment implements Conte
     }
 
     @Override
-    public void setLanguageOptions(List<? extends Language> result) {
+    public void setLanguageOptions(List<Language> result) {
         runOnUiThread(() -> {
             if (contentEntryListener != null) {
-                contentEntryListener.setLanguageFilterSpinner((List<Language>) result);
+                contentEntryListener.setLanguageFilterSpinner(result);
             }
         });
     }

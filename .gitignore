@@ -212,3 +212,5 @@ app-gwt/*
 .classpath
 .settings
 
+lib-content-editor/
+

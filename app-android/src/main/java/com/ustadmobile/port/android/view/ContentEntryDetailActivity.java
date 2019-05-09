@@ -301,7 +301,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void setAvailableTranslations(List<? extends ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
+    public void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
         FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
         flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
         flexBox.setLayoutManager(flexboxLayoutManager);

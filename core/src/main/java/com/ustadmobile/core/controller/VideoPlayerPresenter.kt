@@ -53,14 +53,16 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
             override fun onSuccess(result: List<ContainerEntryWithContainerEntryFile>?) {
 
                 for (entry in result!!) {
-
                     val fileInContainer = entry.cePath
-                    if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
-                        videoPath = entry.containerEntryFile.cefPath
-                    } else if (fileInContainer == "audio.c2") {
-                        audioPath = entry.containerEntryFile.cefPath
-                    } else if (fileInContainer == "subtitle.srt") {
-                        srtPath = entry.containerEntryFile.cefPath
+                    val containerEntryFile = entry.containerEntryFile
+                    if(fileInContainer != null && containerEntryFile != null) {
+                        if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
+                            videoPath = containerEntryFile.cefPath
+                        } else if (fileInContainer == "audio.c2") {
+                            audioPath = containerEntryFile.cefPath
+                        } else if (fileInContainer == "subtitle.srt") {
+                            srtPath = containerEntryFile.cefPath
+                        }
                     }
                 }
 

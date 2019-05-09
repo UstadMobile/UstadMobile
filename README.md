@@ -30,8 +30,6 @@ implementation (a Room Persistence Framework database generated from lib-databas
 * [lib-database-annotation-processor-core](lib-database-annotation-processor-core/): database annotation processor
   used to generate DAOs and database classes for different platforms.
 * [lib-database-entities](lib-database-entities/) contains database POJO entity classes.
-* [lib-database-entity-processor](lib-database-entity-processor/) executable that adds Room Persistence Framework
-annotations to POJOs from lib-entities and outputs them to lib-database-android.
 * [lib-util](lib-util/): Small utility functions
 
 
