@@ -70,17 +70,6 @@ object UMIOUtils {
 
     }
 
-    fun closeQuietly(closeable: Closeable?) {
-        if (closeable != null) {
-            try {
-                closeable.close()
-            } catch (e: IOException) {
-
-            }
-
-        }
-    }
-
     /**
      * Close the given output stream if not null
      *

@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.UstadViewWithNotifications
 import org.xmlpull.v1.XmlPullParserException
 
 import kotlinx.io.IOException
+import org.kmp.io.KMPPullParserException
 
 /**
  *
@@ -60,7 +61,7 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
                 })
             } catch (e: IOException) {
                 e.printStackTrace()
-            } catch (x: XmlPullParserException) {
+            } catch (x: KMPPullParserException) {
                 x.printStackTrace()
             }
 

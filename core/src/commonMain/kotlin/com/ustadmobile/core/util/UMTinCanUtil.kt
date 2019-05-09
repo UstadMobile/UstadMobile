@@ -33,7 +33,6 @@ package com.ustadmobile.core.util
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.tincan.TinCanStatement
 import com.ustadmobile.lib.db.entities.UmAccount
 
 import org.json.JSONArray
@@ -65,78 +64,7 @@ object UMTinCanUtil {
     val VERB_ANSWERED = ADL_PREFIX_VERB + "answered"
 
 
-    /**
-     * Generate a JSON Object representing a TinCan statement for 'experience' a
-     * given page.
-     *
-     * Statement ID will be the EPUB ID/pageName
-     *
-     * @param pageTitle Title of the page
-     * @param pageLang language of the page for tincan purposes (e.g. en-US)
-     * @param duration Duration viewed in ms
-     * @param actor TinCan actor JSONObject
-     *
-     * @return JSONObject representing the TinCan stmt, null if error
-     */
-    fun makePageViewStmt(tinCanID: String, pageTitle: String, pageLang: String, duration: Long, actor: JSONObject): JSONObject {
-        val stmtObject = JSONObject()
-        try {
-            stmtObject.put("actor", actor)
 
-            val activityDef = JSONObject()
-            activityDef.put("type", "http://adlnet.gov/expapi/activities/module")
-            activityDef.put("name", makeLangMapVal(pageLang, pageTitle))
-            activityDef.put("description", makeLangMapVal(pageLang, pageTitle))
-
-            val objectDef = JSONObject()
-            objectDef.put("id", tinCanID)
-            objectDef.put("definition", activityDef)
-            objectDef.put("objectType", "Activity")
-            stmtObject.put("object", objectDef)
-
-
-            val verbDef = JSONObject()
-            verbDef.put("id", "http://adlnet.gov/expapi/verbs/experienced")
-            val verbDisplay = JSONObject()
-            verbDisplay.put("en-US", "experienced")
-            verbDef.put("display", verbDisplay)
-            stmtObject.put("verb", verbDef)
-
-            val stmtDuration = format8601Duration(duration)
-            val resultDef = JSONObject()
-            resultDef.put("duration", stmtDuration)
-            stmtObject.put("result", resultDef)
-
-            //Uncomment if required for debugging
-            //String totalStmtStr = stmtObject.toString();
-        } catch (e: JSONException) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 199, tinCanID, e)
-        }
-
-        return stmtObject
-    }
-
-    /**
-     * Generate a JSONObject representing an Activity which is simply referenced
-     * by it's ID.  Using just the ID is a good idea when the activity is already
-     * known on the server end anyway.
-     *
-     * @param id ID of the Activity object
-     * @return JSONObject representing the Activity
-     */
-    fun makeActivityObjectById(id: String): JSONObject {
-        val obj = JSONObject()
-        val definitionVal: Any? = null
-        try {
-            obj.put("id", id)
-            obj.put("objectType", "Activity")
-            obj.put("definition", definitionVal)
-        } catch (e: JSONException) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 195, null, e)
-        }
-
-        return obj
-    }
 
     /**
      * TinCan generally wants values to be read as a language map e.g.
@@ -261,57 +189,7 @@ object UMTinCanUtil {
         return obj
     }
 
-    /**
-     * Given a string that represents a statement result from the GET api
-     * of a TinCan endpoint this method will convert them into an array
-     * of JSON Objects each representing the individual statements themselves.
-     *
-     * @param jsonStr The JSON returned by the server as a string
-     * @return
-     */
-    fun getStatementsFromResult(jsonStr: String): Array<TinCanStatement?>? {
-        var result: Array<TinCanStatement?>? = null
-        try {
-            val resultObj = JSONObject(jsonStr)
-            if (resultObj.has("statements")) {
-                //this is a StatementResult object
-                val stmtArray = resultObj.getJSONArray("statements")
-                result = arrayOfNulls(stmtArray.length())
-                for (i in result.indices) {
-                    result[i] = TinCanStatement(stmtArray.getJSONObject(i))
-                }
-            } else {
-                //this is an individual statement
-                result = arrayOf(TinCanStatement(resultObj))
-            }
-        } catch (e: JSONException) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 192, jsonStr, e)
-        }
-
-        return result
-    }
 
 
-    /**
-     * Gets the registration from a JSONObject representing an XAPI statement
-     * if it has one
-     *
-     * @param stmt JSONObject that represents a TinCan statement
-     * @return The registration UUID if present in the context of statement, null otherwise
-     */
-    fun getStatementRegistration(stmt: JSONObject): String? {
-        try {
-            if (stmt.has("context")) {
-                val context = stmt.getJSONObject("context")
-                if (context.has("registration")) {
-                    return context.getString("registration")
-                }
-            }
-        } catch (e: JSONException) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 194, null, e)
-        }
-
-        return null
-    }
 
 }

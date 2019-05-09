@@ -31,13 +31,12 @@ GNU General Public License for more details.
 package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.lib.util.Base64Coder
-import java.util.*
 
 /**
  *
  * @author mike
  */
+@Deprecated("will be replaced to ktor")
 class HTTPResult {
 
     var response: ByteArray? = null
@@ -102,7 +101,7 @@ class HTTPResult {
      * @param status the response code returned by the server
      * @param responseHeaders the headers returned by the server in a hashtable (all keys lower case)
      */
-    constructor(response: ByteArray, status: Int, responseHeaders: Hashtable<String,String>?) {
+    constructor(response: ByteArray, status: Int, responseHeaders: MutableMap<String,String>?) {
         this.response = response
         this.status = status
 
@@ -110,10 +109,10 @@ class HTTPResult {
         if (responseHeaders != null) {
             this.responseHeaders = mutableMapOf()
             var headerName: String
-            val keys = responseHeaders.keys()
-            while (keys.hasMoreElements()) {
-                headerName = keys.nextElement() as String
-                responseHeaders[headerName.toLowerCase()] = responseHeaders[headerName]
+            val keys = responseHeaders.keys.iterator()
+            while (keys.hasNext()) {
+                headerName = keys.next()
+               // responseHeaders[headerName.toLowerCase()] = responseHeaders[headerName]
             }
         }
     }
@@ -173,7 +172,7 @@ class HTTPResult {
                     charArr[p++] = c
                 }
             }
-            response = Base64Coder.decodeToByteArray(charArr.toString())
+            //response = Base64Coder.decodeToByteArray(charArr.toString())
             status = 200
         }
 

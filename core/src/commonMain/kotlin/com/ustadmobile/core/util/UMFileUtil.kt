@@ -32,10 +32,8 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-import java.util.HashMap
-import java.util.Vector
 import kotlin.jvm.JvmStatic
+import kotlin.math.round
 
 
 /**
@@ -53,9 +51,9 @@ object UMFileUtil {
     val PROTOCOL_FILE = "file:///"
 
 
-    private val UNIT_GB = Math.pow(1024.0, 3.0).toLong()
+    private val UNIT_GB = 1024L * 1024L * 1024L
 
-    private val UNIT_MB = Math.pow(1024.0, 2.0).toLong()
+    private val UNIT_MB = 1024L * 1024L
 
     private val UNIT_KB: Long = 1024
 
@@ -718,7 +716,7 @@ object UMFileUtil {
         }
 
         var unitSize = fileSize.toDouble() / factor.toDouble()
-        unitSize = Math.round(unitSize * 100) / 100.0
+        unitSize = round(unitSize * 100) / 100.0
         return "$unitSize $unit"
     }
 
@@ -744,8 +742,6 @@ object UMFileUtil {
                 indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1)
                 try {
                     index = currentKey.substring(indexStart, indexEnd).toInt()
-                    if (result.size < index + 1)
-                        result.setSize(index + 1)
 
                     argName = currentKey.substring(indexEnd + 1)
                     if (result.elementAt(index) != null) {
