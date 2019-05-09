@@ -140,6 +140,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
         }
         jvmTest {
@@ -150,6 +151,7 @@ kotlin {
         androidMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
             dependsOn jvmMain
         }

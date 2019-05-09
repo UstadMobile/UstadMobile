@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
+import kotlinx.coroutines.Runnable
 import org.xmlpull.v1.XmlPullParserException
 import kotlinx.io.*
 import org.kmp.io.KMPPullParserException
@@ -65,7 +66,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
                     onFailure(call, e)
                 } catch (e: KMPPullParserException) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e)
-                    onFailure(call, IOException(e))
+                    onFailure(call, e)
                 }
 
             }
@@ -79,7 +80,6 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
         view.mountContainer(containerUid, ZipMountedCallbackHandler())
     }
 
-    @Throws(IOException::class, XmlPullParserException::class)
     private fun handleTinCanXmlLoaded(tincanXmlBytes: ByteArray) {
         val xpp = UstadMobileSystemImpl.instance.newPullParser(
                 ByteArrayInputStream(tincanXmlBytes), "UTF-8")
