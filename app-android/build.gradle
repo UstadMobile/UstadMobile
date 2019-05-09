@@ -280,7 +280,6 @@ configurations.all {
 dependencies {
     api project(':core')
     api project(':sharedse')
-    api project(":lib-core-fs")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')
