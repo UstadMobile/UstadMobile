@@ -42,7 +42,7 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
 
-        versionName "0.98.7"
+        versionName "0.99.1"
 
         manifestPlaceholders = [applicationClass : "android.app.Application"]
 
