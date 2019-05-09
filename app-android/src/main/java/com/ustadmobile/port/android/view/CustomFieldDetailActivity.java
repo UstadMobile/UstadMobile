@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Contacts;
 import android.support.constraint.ConstraintLayout;
@@ -22,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CustomFieldDetailPresenter;
@@ -158,6 +160,7 @@ public class CustomFieldDetailActivity extends UstadBaseActivity implements Cust
         entityTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ((TextView) parent.getChildAt(0)).setTextColor(Color.BLACK);
                 mPresenter.handleEntityEntityChanged(position);
             }
 
@@ -168,6 +171,7 @@ public class CustomFieldDetailActivity extends UstadBaseActivity implements Cust
         fieldTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ((TextView) parent.getChildAt(0)).setTextColor(Color.BLACK);
                 mPresenter.handleFieldTypeChanged(position);
             }
 

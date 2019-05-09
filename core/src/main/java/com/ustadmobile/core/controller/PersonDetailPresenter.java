@@ -293,82 +293,80 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
         //1. Get all custom fields
         customFieldDao.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID,
-                new UmCallback<List<CustomField>>() {
-                    @Override
-                    public void onSuccess(List<CustomField> result) {
-                        for(CustomField c: result){
+        new UmCallback<List<CustomField>>() {
+            @Override
+            public void onSuccess(List<CustomField> result) {
+                for(CustomField c: result){
 
-                            //Get value as well
-                            customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
-                                    c.getCustomFieldUid(), personUid,
-                                    new UmCallback<CustomFieldValue>() {
+                    //Get value as well
+                    customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                    c.getCustomFieldUid(), personUid,
+                    new UmCallback<CustomFieldValue>() {
+                        @Override
+                        public void onSuccess(CustomFieldValue result) {
+                            String valueString = "";
+                            int valueSelection = 0;
+
+                            if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
+
+                                if(result != null) {
+                                    valueString = result.getCustomFieldValueValue();
+                                }
+                                final String[] finalValueString = {valueString};
+                                view.runOnUiThread(() -> {
+                                    if(finalValueString[0].isEmpty()){
+                                        finalValueString[0] ="-";
+                                    }
+                                    //view.addCustomFieldText(c, finalValueString);
+                                    view.addComponent(finalValueString[0], c.getCustomFieldName());
+                                });
+
+                            }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
+                                if(result != null) {
+                                    valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
+                                }
+                                int finalValueSelection = valueSelection;
+                                optionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
+                                    new UmCallback<List<CustomFieldValueOption>>() {
                                         @Override
-                                        public void onSuccess(CustomFieldValue result) {
-                                            String valueString = "";
-                                            int valueSelection = 0;
+                                        public void onSuccess(List<CustomFieldValueOption> result) {
+                                            List<String> options = new ArrayList<>();
 
-
-
-                                            if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
-
-                                                if(result != null) {
-                                                    valueString = result.getCustomFieldValueValue();
-                                                }
-                                                final String[] finalValueString = {valueString};
-                                                view.runOnUiThread(() -> {
-                                                    if(finalValueString[0].isEmpty()){
-                                                        finalValueString[0] ="-";
-                                                    }
-                                                    //view.addCustomFieldText(c, finalValueString);
-                                                    view.addComponent(finalValueString[0], c.getCustomFieldName());
-                                                });
-
-                                            }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
-                                                if(result != null) {
-                                                    valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
-                                                }
-                                                int finalValueSelection = valueSelection;
-                                                optionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
-                                                        new UmCallback<List<CustomFieldValueOption>>() {
-                                                            @Override
-                                                            public void onSuccess(List<CustomFieldValueOption> result) {
-                                                                List<String> options = new ArrayList<>();
-
-                                                                for(CustomFieldValueOption o:result){
-                                                                    options.add(o.getCustomFieldValueOptionName());
-                                                                }
-
-                                                                view.runOnUiThread(() ->
-                                                                {
-                                                                    view.addCustomFieldDropdown(c,
-                                                                            options.toArray(new String[options.size()]),
-                                                                            finalValueSelection);
-                                                                });
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(Throwable exception) {
-                                                                exception.printStackTrace();}
-                                                        });
-
+                                            for(CustomFieldValueOption o:result){
+                                                options.add(o.getCustomFieldValueOptionName());
                                             }
+                                            //Get value
+                                            String valueString = "-";
+                                            if(finalValueSelection > 0){
+                                                valueString = options.get(finalValueSelection);
+                                            }
+                                            String finalValueString = valueString;
+                                            view.runOnUiThread(() ->
+                                            {
 
+                                                view.addComponent(finalValueString, c.getCustomFieldName());
+
+                                            });
                                         }
 
                                         @Override
                                         public void onFailure(Throwable exception) {
-
-                                        }
+                                            exception.printStackTrace();}
                                     });
-
-
-
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable exception) {exception.printStackTrace();}
-                });
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
+        });
     }
 
     /**

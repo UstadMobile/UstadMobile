@@ -4,6 +4,9 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.ClazzDao;
+import com.ustadmobile.core.db.dao.CustomFieldDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueDao;
+import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao;
 import com.ustadmobile.core.db.dao.FeedEntryDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldDao;
 import com.ustadmobile.core.db.dao.PersonCustomFieldValueDao;
@@ -95,6 +98,12 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
     private Long loggedInPersonUid = 0L;
 
+    private HashMap<Integer, Long> viewIdToCustomFieldUid;
+
+    private CustomFieldDao customFieldDao;
+    private CustomFieldValueDao customFieldValueDao;
+    private CustomFieldValueOptionDao optionDao;
+
     public long getPersonUid() {
         return personUid;
     }
@@ -124,6 +133,12 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
         customFieldsToUpdate = new ArrayList<>();
 
+        viewIdToCustomFieldUid = new HashMap<>();
+
+    }
+
+    public void addToMap(int viewId, long fieldId){
+        viewIdToCustomFieldUid.put(viewId, fieldId);
     }
 
     /**
@@ -138,6 +153,10 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 repository.getPersonDetailPresenterFieldDao();
         PersonCustomFieldDao personCustomFieldDao = repository.getPersonCustomFieldDao();
+
+        customFieldDao = repository.getCustomFieldDao();
+        customFieldValueDao = repository.getCustomFieldValueDao();
+        optionDao = repository.getCustomFieldValueOptionDao();
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context).getPersonUid();
 

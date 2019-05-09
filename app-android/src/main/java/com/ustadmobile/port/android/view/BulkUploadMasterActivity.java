@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -68,6 +69,7 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         timeZoneSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ((TextView) parent.getChildAt(0)).setTextColor(Color.BLACK);
                 mPresenter.setTimeZoneSelected(position, id);
             }
 

@@ -67,10 +67,34 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="100dp"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_student_image">
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_student_image"/>
+
+
+            <View
+                android:id="@+id/activity_person_edit_divider3"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/listDivider"
+                android:visibility="visible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_fields_linear_layout" />
+
+
+            <LinearLayout
+                android:id="@+id/activity_person_edit_custom_fields_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="100dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_person_edit_divider3">
 
             </LinearLayout>
 

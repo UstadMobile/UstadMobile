@@ -84,4 +84,5 @@ public interface PersonDetailView extends UstadView {
     void clearAllCustomFields();
 
     void addComponent(String value, String label);
+
 }

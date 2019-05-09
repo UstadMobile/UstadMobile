@@ -35,10 +35,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -51,6 +53,7 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -69,6 +72,7 @@ import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_FIELD;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_HEADER;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_PHONE_NUMBER;
 import static com.ustadmobile.lib.db.entities.PersonField.FIELD_TYPE_TEXT;
+import static com.ustadmobile.port.android.view.ClazzEditActivity.dpToPx;
 
 /**
  * This activity is responsible for showing the edit page for a person. Used for editing a new
@@ -98,6 +102,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     private static final int CAMERA_IMAGE_CAPTURE_REQUEST = 101 ;
 
     ImageView personEditImage;
+    LinearLayout customFieldsLL;
 
 
     @Override
@@ -126,6 +131,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
         Button personEditImageButton = findViewById(R.id.activity_person_edit_student_image_button);
         personEditImageButton.setOnClickListener(v -> addImageFromCamera());
+
+        customFieldsLL = findViewById(R.id.activity_person_edit_custom_fields_ll);
 
 
     }
@@ -607,4 +614,90 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                 return oldItem.equals(newItem);
             }
         };
+
+
+    @Override
+    public void addCustomFieldText(CustomField label, String value) {
+        //customFieldsLL
+
+        //Calculate the width of the screen.
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+
+        //The field is an input type. So we are gonna add a TextInputLayout:
+        TextInputLayout fieldTextInputLayout = new TextInputLayout(this);
+        int viewId = View.generateViewId();
+        mPresenter.addToMap(viewId, label.getCustomFieldUid());
+        fieldTextInputLayout.setId(viewId);
+        //Edit Text is inside a TextInputLayout
+        TextInputLayout.LayoutParams textInputLayoutParams =
+                new TextInputLayout.LayoutParams(displayWidth,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+        int widthWithPadding = displayWidth - dpToPx(28);
+        //The EditText
+        EditText fieldEditText = new EditText(this);
+        fieldEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        ViewGroup.LayoutParams editTextParams =
+                new LinearLayout.LayoutParams(
+                        widthWithPadding,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+        fieldEditText.setLayoutParams(editTextParams);
+        fieldEditText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        fieldEditText.setText(value);
+
+        fieldEditText.setHint(label.getCustomFieldName());
+
+        fieldTextInputLayout.addView(fieldEditText, textInputLayoutParams);
+        fieldTextInputLayout.setPadding(dpToPx(8),0,0,0);
+        customFieldsLL.addView(fieldTextInputLayout);
+    }
+
+    @Override
+    public void addCustomFieldDropdown(CustomField label, String[] options, int selected) {
+        //Calculate the width of the screen.
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+
+        //The field is an input type. So we are gonna add a TextInputLayout:
+        //Edit Text is inside a TextInputLayout
+        TextInputLayout.LayoutParams textInputLayoutParams =
+                new TextInputLayout.LayoutParams(displayWidth,
+                        TextInputLayout.LayoutParams.MATCH_PARENT);
+
+        int widthWithPadding = displayWidth - dpToPx(28);
+
+        //Spinner time
+        Spinner spinner = new Spinner(this);
+        ArrayAdapter<String> spinnerArrayAdapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                        options);
+        spinner.setAdapter(spinnerArrayAdapter);
+
+        //Spinner label
+        TextView labelTV = new TextView(this);
+        labelTV.setText(label.getCustomFieldName());
+
+        int viewId = View.generateViewId();
+        mPresenter.addToMap(viewId, label.getCustomFieldUid());
+
+        //VLL
+        LinearLayout vll = new LinearLayout(this);
+        vll.setId(viewId);
+        vll.setLayoutParams(textInputLayoutParams)  ;
+        vll.setOrientation(LinearLayout.VERTICAL);
+
+        vll.addView(labelTV);
+        vll.addView(spinner);
+
+        vll.setPadding(dpToPx(8),0,0,0);
+        customFieldsLL.addView(vll);
+    }
+
+    @Override
+    public void clearAllCustomFields() {
+        customFieldsLL.removeAllViews();
+    }
 }

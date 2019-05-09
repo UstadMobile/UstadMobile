@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.CustomField;
 
 /**
  * View for the editing a person - responsible for creating edit fields with the right edit types
@@ -62,5 +63,11 @@ public interface PersonEditView extends UstadView {
      * any of the edit fields gets updated - ie the whole edit screen gets rendered again.
      */
     void clearAllFields();
+
+    void addCustomFieldText(CustomField label, String value);
+
+    void addCustomFieldDropdown(CustomField label, String[] options, int selected);
+
+    void clearAllCustomFields();
 
 }
