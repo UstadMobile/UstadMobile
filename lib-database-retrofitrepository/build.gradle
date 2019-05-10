@@ -6,6 +6,7 @@ dependencies {
     implementation project(':lib-database')
     implementation project(":lib-util")
     compileOnly project(path: ":lib-database-entities", configuration: "jvmDefault")
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-database-runtime")
 
     implementation "com.squareup.retrofit2:retrofit:$version_retrofit"

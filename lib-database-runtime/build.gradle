@@ -4,7 +4,7 @@ apply plugin: "maven-publish"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":lib-util")
-    implementation project(":lib-database-annotations")
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
     implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
     implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"

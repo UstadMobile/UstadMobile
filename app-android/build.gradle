@@ -283,7 +283,8 @@ dependencies {
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')
-    implementation project(":lib-database-entities")
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-util")
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

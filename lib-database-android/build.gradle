@@ -52,7 +52,7 @@ dependencies {
     implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database-runtime-android')
-    implementation project(":lib-database-annotations")
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-util")
     implementation project(":lib-database-retrofitrepository")
 

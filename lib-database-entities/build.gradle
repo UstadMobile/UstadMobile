@@ -26,8 +26,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation project(":lib-database-annotations")
-                implementation project(":lib-room-annotations")
+                compileOnly project(":lib-database-annotations")
+                compileOnly project(":lib-room-annotations")
                 implementation kotlin("stdlib-common:$version_kotlin")
             }
         }
