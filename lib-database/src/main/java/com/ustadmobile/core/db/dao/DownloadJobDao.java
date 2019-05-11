@@ -62,10 +62,6 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT * From DownloadJob WHERE djUid = :djUid")
     public abstract DownloadJob findByUid(long djUid);
 
-    @UmQuery("SELECT * FROM DownloadJob WHERE djDsUid = :downloadSetUid")
-    public abstract List<DownloadJob> findBySetUid(long downloadSetUid);
-
-
     /**
      * Get a list of all DownloadJob items. Used for debugging purposes.
      *

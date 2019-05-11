@@ -64,7 +64,7 @@ open class DownloadJobItem {
 
     constructor(djiDjUid: Long, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
         this.djiDjUid = djiDjUid
-        this.djiContainerUid = djiContentEntryUid
+        this.djiContentEntryUid = djiContentEntryUid
         this.djiContainerUid = djiContainerUid
         this.downloadLength = downloadLength
     }
