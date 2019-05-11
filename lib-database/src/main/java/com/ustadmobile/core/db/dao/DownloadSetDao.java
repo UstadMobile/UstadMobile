@@ -15,6 +15,7 @@ import java.util.List;
  * DAO for the DownloadSet entity.
  */
 @UmDao
+@Deprecated
 public abstract class DownloadSetDao {
 
     /**
@@ -42,31 +43,5 @@ public abstract class DownloadSetDao {
     @UmQuery("UPDATE DownloadSet SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE dsUid = :dsUid")
     public abstract void setMeteredConnectionBySetUid(long dsUid, boolean meteredNetworkAllowed);
 
-    @UmTransaction
-    public void cleanupUnused(long downloadSetUid){
-        deleteUnusedDownloadJobItems(downloadSetUid,null);
-        deleteUnusedDownloadJobs(downloadSetUid,null);
-        deleteUnusedDownloadSetItems(downloadSetUid,null);
-        deleteUnusedDownloadSet(downloadSetUid,null);
-    }
-
-    @UmQuery("DELETE FROM DownloadJobItem " +
-            "WHERE " +
-            "djiDsiUid IN (SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid) " +
-            "AND djiStatus = " + JobStatus.NOT_QUEUED)
-    public abstract void deleteUnusedDownloadJobItems(long downloadSetUid, UmCallback<Integer> callback);
-
-    @UmQuery("DELETE FROM DownloadJob WHERE djDsUid = :downloadSetUid AND djStatus = " + JobStatus.NOT_QUEUED)
-    public abstract void deleteUnusedDownloadJobs(long downloadSetUid, UmCallback<Integer> callback);
-
-
-    @UmQuery("DELETE FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid " +
-            "AND NOT EXISTS(SELECT djiUid FROM DownloadJobItem WHERE djiDsiUid = DownloadSetItem.dsiUid " +
-            "AND djiStatus = " + JobStatus.NOT_QUEUED +")")
-    public abstract void deleteUnusedDownloadSetItems(long downloadSetUid, UmCallback<Integer> callback);
-
-    @UmQuery("DELETE FROM DownloadSet WHERE dsUid = :downloadSetUid AND " +
-            "NOT EXISTS(SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid)")
-    public abstract void deleteUnusedDownloadSet(long downloadSetUid, UmCallback<Integer> callback);
 
 }
