@@ -1,17 +1,36 @@
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'maven-publish'
 }
 
-sourceCompatibility = "8"
-targetCompatibility = "8"
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
 }
 
+
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.js, 'js')
+        fromPreset(presets.android, 'android')
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation kotlin("stdlib-common:$version_kotlin")
+            }
+        }
+    }
+}
 
 publishing {
     publications {
@@ -19,12 +38,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 

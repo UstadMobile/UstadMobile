@@ -91,13 +91,13 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 val deltaBytesFoFar = bytesSoFar - djStatus.bytesSoFar
                 val deltaTotalBytes = totalBytes - djStatus.totalBytes
 
-                djStatus.setBytesSoFar(bytesSoFar)
-                djStatus.setTotalBytes(totalBytes)
+                djStatus.bytesSoFar = bytesSoFar
+                djStatus.totalBytes = totalBytes
                 progressChangedItems.add(djStatus)
 
                 onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
 
-                updateParentsProgress(djStatus.getJobItemUid(), djStatus.getParents(), deltaBytesFoFar,
+                updateParentsProgress(djStatus.jobItemUid, djStatus.parents, deltaBytesFoFar,
                         deltaTotalBytes)
             }
         }
@@ -112,10 +112,14 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
                 runOnAllParents(djStatus.jobItemUid, djStatus.parents) {parent ->
                     var parentChanged = false
-                    if(parent.children.all { it.status >= JobStatus.COMPLETE_MIN}){
-                        updateItemStatusInt(parent, JobStatus.COMPLETE.toByte(), updatedItems)
-                        parentChanged = true
+                    val parentsChildren = parent.children
+                    if(parentsChildren != null) {
+                        if(parentsChildren.all { it.status >= JobStatus.COMPLETE_MIN}){
+                            updateItemStatusInt(parent, JobStatus.COMPLETE.toByte(), updatedItems)
+                            parentChanged = true
+                        }
                     }
+
 
                     parentChanged
                 }
@@ -161,8 +165,9 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         while (parents != null && !parents.isEmpty()) {
             val nextParents = LinkedList<DownloadJobItemStatus>()
             for(parent in parents) {
-                if(fn.invoke(parent) && parent.parents != null)
-                    nextParents.addAll(parent.parents)
+                val parentParents = parent.parents
+                if(fn.invoke(parent) && parentParents != null)
+                    nextParents.addAll(parentParents)
 
             }
 

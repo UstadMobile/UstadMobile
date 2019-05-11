@@ -425,7 +425,7 @@ public class DownloadDialogPresenterTest {
 
         assertFalse("Job is allowed to run on un metered connection only",
                 umAppDatabase.getDownloadJobDao().findByUid((int)downloadJob.getDjUid())
-                        .isMeteredNetworkAllowed());
+                        .getMeteredNetworkAllowed());
     }
 
     @Test

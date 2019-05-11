@@ -76,12 +76,24 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     val licenseType = getLicenseType(result)
                     view.runOnUiThread(Runnable {
                         view.setContentEntryLicense(licenseType)
-                        view.setContentEntryAuthor(result.author)
-                        view.setContentEntryTitle(result.title)
-                        view.setContentEntryDesc(result.description)
-                        if (!result.thumbnailUrl.isNullOrEmpty()) {
-                            view.loadEntryDetailsThumbnail(result.thumbnailUrl)
+                        with(result) {
+                            val contentEntryAuthor = author
+                            if(contentEntryAuthor != null)
+                                view.setContentEntryAuthor(contentEntryAuthor)
+
+                            val contentEntryTitle = title
+                            if(contentEntryTitle != null)
+                                view.setContentEntryTitle(contentEntryTitle)
+
+                            val contentEntryDesc = result.description
+                            if(contentEntryDesc != null)
+                                view.setContentEntryDesc(contentEntryDesc)
+
+                            val contentThumbnailUrl = thumbnailUrl
+                            if(!contentThumbnailUrl.isNullOrEmpty())
+                                view.loadEntryDetailsThumbnail(contentThumbnailUrl)
                         }
+
                     })
                 }
 

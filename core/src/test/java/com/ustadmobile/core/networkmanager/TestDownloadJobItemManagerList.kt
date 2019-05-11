@@ -38,7 +38,7 @@ class TestDownloadJobItemManagerList {
         rootContentEntry1 = ContentEntry("title", "desc", false, true)
         rootContentEntry1?.contentEntryUid = appDatabaseRepo.contentEntryDao.insert(rootContentEntry1)
 
-        val rootContainer = Container(rootContentEntry1)
+        val rootContainer = Container(rootContentEntry1!!)
         rootContainer.containerUid = appDatabaseRepo.containerDao.insert(rootContainer)
 
         downloadJob1 = DownloadJob(rootContentEntry1!!.contentEntryUid, System.currentTimeMillis())

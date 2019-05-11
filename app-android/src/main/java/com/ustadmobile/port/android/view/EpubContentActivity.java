@@ -21,10 +21,9 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.EpubContentPresenter;
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem;
+import com.ustadmobile.core.controller.EpubContentPresenter;
 import com.ustadmobile.core.impl.AppConfig;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.EpubContentView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -178,7 +177,7 @@ public class EpubContentActivity extends ZippedContentActivity implements
 
     @Override
     public void setCoverImage(String imageUrl) {
-        Picasso.with(this).load(imageUrl).into(coverImageView);
+        Picasso.get().load(imageUrl).into(coverImageView);
     }
 
     @Override

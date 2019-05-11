@@ -175,7 +175,7 @@ public class ContentEntryListRecyclerViewAdapter extends
                 available = managerAndroidBle.isEntryLocallyAvailable(
                         entry.getMostRecentContainer());
 
-            if(entry.isLeaf()){
+            if(entry.getLeaf()){
                 holder.updateLocallyAvailabilityStatus(available);
             }
 
@@ -188,7 +188,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             if (entry.getThumbnailUrl() == null || entry.getThumbnailUrl().isEmpty()) {
                 holder.getThumbnailView().setImageDrawable(null);
             } else {
-                Picasso.with(holder.getThumbnailView().getContext())
+                Picasso.get()
                         .load(entry.getThumbnailUrl())
                         .into(holder.getThumbnailView());
             }
@@ -236,7 +236,7 @@ public class ContentEntryListRecyclerViewAdapter extends
                 iconView.setVisibility(View.VISIBLE);
             }
 
-            int viewVisibility = showLocallyAvailabilityViews && entry.isLeaf()
+            int viewVisibility = showLocallyAvailabilityViews && entry.getLeaf()
                     ? View.VISIBLE: View.GONE;
             holder.getAvailabilityIcon().setVisibility(viewVisibility);
             holder.getAvailabilityStatus().setVisibility(viewVisibility);
@@ -278,7 +278,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             boolean canBeMonitored = entry != null && (entry.getContentEntryStatus() == null ||
                     entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE)
                     && !containerUidsToMonitor.contains(entry.getMostRecentContainer())
-                    && entry.isLeaf();
+                    && entry.getLeaf();
             if (canBeMonitored) {
                 uidsToMonitor.add(entry.getMostRecentContainer());
             }
@@ -442,7 +442,8 @@ public class ContentEntryListRecyclerViewAdapter extends
 
                 return oldItem.getContentEntryStatus().getTotalSize() == newItem.getContentEntryStatus().getTotalSize();
 
-            } else return newItem.getContentEntryStatus() == oldItem.getContentEntryStatus();
+            } else return (newItem.getContentEntryStatus() == null && newItem.getContentEntryStatus() == null)
+                    || newItem.getContentEntryStatus().equals(oldItem.getContentEntryStatus());
         }
     };
 }

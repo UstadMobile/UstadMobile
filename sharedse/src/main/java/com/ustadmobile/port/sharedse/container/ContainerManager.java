@@ -305,7 +305,7 @@ public class ContainerManager {
         newContainer.setCntNumEntries(pathToEntryMap.size());
         newContainer.setContainerContentEntryUid(container.getContainerContentEntryUid());
         newContainer.setMimeType(container.getMimeType());
-        newContainer.setMobileOptimized(container.isMobileOptimized());
+        newContainer.setMobileOptimized(container.getMobileOptimized());
         newContainer.setRemarks(container.getRemarks());
         newContainer.setContainerUid(dbRepo.getContainerDao().insert(newContainer));
 

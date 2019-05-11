@@ -39,7 +39,7 @@ object ContentEntryUtil {
             }
 
             override fun onFailure(exception: Throwable?) {
-                if(exception != null){
+                if (exception != null) {
                     UmCallbackUtil.onFailIfNotNull(callback, exception)
                 }
             }
@@ -54,74 +54,82 @@ object ContentEntryUtil {
                                      context: Any,
                                      callback: UmCallback<Any>) {
 
-        if (entryStatus.contentEntryStatus != null && entryStatus.contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
+        val contentEntryStatus = entryStatus.contentEntryStatus
+        if (contentEntryStatus != null && contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
 
             dbRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entryStatus.contentEntryUid,
                     object : UmCallback<Container> {
-                override fun onSuccess(result: Container?) {
-                    val args = HashMap<String, String>()
-                    var viewName: String? = null
-                    when (result?.mimeType) {
-                        "application/zip", "application/tincan+zip" -> {
-                            args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                            viewName = XapiPackageContentView.VIEW_NAME
-                        }
-                        "video/mp4" -> {
-
-                            args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                            args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                            viewName = VideoPlayerView.VIEW_NAME
-                        }
-                        "application/webchunk+zip" -> {
-
-                            args[WebChunkView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                            args[WebChunkView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                            viewName = WebChunkView.VIEW_NAME
-                        }
-                        "application/epub+zip" -> {
-
-                            args[EpubContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                            viewName = EpubContentView.VIEW_NAME
-                        }
-                        "application/khan-video+zip" -> {
-
-                            args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
-                            args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
-                            viewName = VideoPlayerView.VIEW_NAME
-                        }
-                        else -> dbRepo.containerEntryDao.findByContainer(result?.containerUid!!, object : UmCallback<List<ContainerEntryWithContainerEntryFile>> {
-                            override fun onSuccess(resultList: List<ContainerEntryWithContainerEntryFile>?) {
-                                if (resultList?.isEmpty()!!) {
-                                    UmCallbackUtil.onFailIfNotNull(callback, IllegalArgumentException("No file found"))
-                                    return
-                                }
-
-                                val containerEntryWithContainerEntryFile = resultList[0]
-                                impl.openFileInDefaultViewer(context, containerEntryWithContainerEntryFile.containerEntryFile.cefPath,
-                                        result.mimeType!!, callback)
-
-
+                        override fun onSuccess(result: Container?) {
+                            if (result == null) {
+                                UmCallbackUtil.onFailIfNotNull(callback, IllegalArgumentException("No file found"))
+                                return
                             }
 
-                            override fun onFailure(exception: Throwable?) {
-                                if(exception != null){
-                                    UmCallbackUtil.onFailIfNotNull(callback, exception)
+                            val args = HashMap<String, String>()
+                            var viewName: String? = null
+                            when (result.mimeType) {
+                                "application/zip", "application/tincan+zip" -> {
+                                    args[XapiPackageContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
+                                    viewName = XapiPackageContentView.VIEW_NAME
                                 }
-                            }
-                        })
-                    }
-                    if (viewName != null) {
-                        impl.go(viewName, args, context)
-                        UmCallbackUtil.onSuccessIfNotNull(callback, Any())
-                    }
-                }
+                                "video/mp4" -> {
+                                    args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
+                                    args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
+                                    viewName = VideoPlayerView.VIEW_NAME
+                                }
+                                "application/webchunk+zip" -> {
 
-                override fun onFailure(exception: Throwable?) {
-                    if(exception != null){
-                        UmCallbackUtil.onFailIfNotNull(callback, exception)
-                    }
-                }
-            })
+                                    args[WebChunkView.ARG_CONTAINER_UID] = result.containerUid.toString()
+                                    args[WebChunkView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
+                                    viewName = WebChunkView.VIEW_NAME
+                                }
+                                "application/epub+zip" -> {
+
+                                    args[EpubContentView.ARG_CONTAINER_UID] = result.containerUid.toString()
+                                    viewName = EpubContentView.VIEW_NAME
+                                }
+                                "application/khan-video+zip" -> {
+
+                                    args[VideoPlayerView.ARG_CONTAINER_UID] = result.containerUid.toString()
+                                    args[VideoPlayerView.ARG_CONTENT_ENTRY_ID] = result.containerContentEntryUid.toString()
+                                    viewName = VideoPlayerView.VIEW_NAME
+                                }
+                                else -> dbRepo.containerEntryDao.findByContainer(result.containerUid, object : UmCallback<List<ContainerEntryWithContainerEntryFile>> {
+                                    override fun onSuccess(resultList: List<ContainerEntryWithContainerEntryFile>?) {
+                                        if (resultList?.isEmpty()!!) {
+                                            UmCallbackUtil.onFailIfNotNull(callback, IllegalArgumentException("No file found"))
+                                            return
+                                        }
+
+                                        val containerEntryFilePath = resultList[0].containerEntryFile?.cefPath
+
+                                        if(containerEntryFilePath != null) {
+                                            impl.openFileInDefaultViewer(context, containerEntryFilePath,
+                                                    result.mimeType!!, callback)
+                                        }else {
+                                            TODO("Show error message here")
+                                        }
+                                    }
+
+                                    override fun onFailure(exception: Throwable?) {
+                                        if (exception != null) {
+                                            UmCallbackUtil.onFailIfNotNull(callback, exception)
+                                        }
+                                    }
+                                })
+                            }
+                            if (viewName != null) {
+                                impl.go(viewName, args, context)
+                                UmCallbackUtil.onSuccessIfNotNull(callback, Any())
+                            }
+                        }
+
+                        override fun onFailure(exception: Throwable?) {
+                            if (exception != null) {
+                                UmCallbackUtil.onFailIfNotNull(callback, exception)
+                            }
+                        }
+                    })
 
         } else if (openEntryIfNotDownloaded) {
             val args = HashMap<String, String>()
@@ -133,9 +141,9 @@ object ContentEntryUtil {
     }
 
     private fun goToContentEntryBySourceUrl(sourceUrl: String, dbRepo: UmAppDatabase,
-                                    impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
-                                    context: Any,
-                                    callback: UmCallback<Any>) {
+                                            impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
+                                            context: Any,
+                                            callback: UmCallback<Any>) {
 
         dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatus(sourceUrl, object : UmCallback<ContentEntryWithContentEntryStatus> {
             override fun onSuccess(result: ContentEntryWithContentEntryStatus?) {
@@ -143,7 +151,7 @@ object ContentEntryUtil {
             }
 
             override fun onFailure(exception: Throwable?) {
-                if(exception != null){
+                if (exception != null) {
                     UmCallbackUtil.onFailIfNotNull(callback, exception)
                 }
             }
