@@ -153,6 +153,9 @@ public abstract class DownloadJobDao {
     public abstract void setMeteredConnectionAllowedByJobUid(int djUid, boolean meteredNetworkAllowed,
                                                       UmCallback<Integer> callback);
 
+    @UmQuery("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
+    public abstract void setMeteredConnectionAllowedByJobUidSync(int djUid, boolean meteredNetworkAllowed);
+
     @UmQuery("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
     public abstract UmLiveData<Boolean> getLiveMeteredNetworkAllowed(int djUid);
 

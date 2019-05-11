@@ -19,7 +19,6 @@ import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemParentChildJoinDao;
 import com.ustadmobile.core.db.dao.DownloadSetDao;
-import com.ustadmobile.core.db.dao.DownloadSetItemDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
@@ -72,7 +71,6 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
@@ -105,7 +103,7 @@ import java.util.Random;
 
 @UmDatabase(version = 22, entities = {
         DownloadSet.class,
-        DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
+        NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
         DownloadJobItemParentChildJoin.class,
@@ -661,8 +659,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract EntryStatusResponseDao getEntryStatusResponseDao();
 
     public abstract DownloadSetDao getDownloadSetDao();
-
-    public abstract DownloadSetItemDao getDownloadSetItemDao();
 
     public abstract DownloadJobDao getDownloadJobDao();
 

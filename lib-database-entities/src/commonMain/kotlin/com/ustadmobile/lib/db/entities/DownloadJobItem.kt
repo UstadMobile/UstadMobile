@@ -76,14 +76,5 @@ open class DownloadJobItem {
         this.downloadLength = downloadLength
     }
 
-    constructor(downloadJob: DownloadJob, downloadSetItem: DownloadSetItem,
-                container: Container) {
-        this.djiDjUid = downloadJob.djUid
-        this.djiDsiUid = downloadSetItem.dsiUid
-        this.djiContainerUid = container.containerUid
-    }
-
-
-
 
 }

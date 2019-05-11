@@ -19,7 +19,6 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
-import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -128,7 +127,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
-    private LiveDataWorkQueue<DownloadJobItemWithDownloadSetItem> downloadJobItemWorkQueue;
+    private LiveDataWorkQueue<DownloadJobItem> downloadJobItemWorkQueue;
 
     private Map<Long, List<EntryStatusResponse>> entryStatusResponses = new Hashtable<>();
 
@@ -188,10 +187,10 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         this.jobItemManagerList = jobItemManagerList;
     }
 
-    private LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>
-        mJobItemAdapter = new LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>() {
+    private LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem>
+        mJobItemAdapter = new LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem>() {
         @Override
-        public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
+        public Runnable makeRunnable(DownloadJobItem item) {
             return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
                     umAppDatabase, UmAccountManager.INSTANCE.getRepositoryForActiveAccount(mContext),
                     UmAccountManager.INSTANCE.getActiveEndpoint(mContext),
@@ -199,7 +198,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
 
         @Override
-        public long getUid(DownloadJobItemWithDownloadSetItem item) {
+        public long getUid(DownloadJobItem item) {
             return ((long)(Long.valueOf(item.getDjiUid()).hashCode()) << 32) | item.getNumAttempts();
         }
     };

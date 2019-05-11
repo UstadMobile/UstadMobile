@@ -75,6 +75,10 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
             UmAppDatabase umAppDatabase = UmAppDatabase.getInstance(getApplicationContext());
 
+            /*
+
+            TODO: fix this to use downloadjob instead
+
             List<Long> downloadSetItemUids = umAppDatabase.getDownloadSetItemDao()
                     .findBySetUid(downloadSetUid);
 
@@ -98,6 +102,7 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
             if(downloadSetItemUids.isEmpty())
                 return Result.success();
+                */
 
             return Result.success();
         }
