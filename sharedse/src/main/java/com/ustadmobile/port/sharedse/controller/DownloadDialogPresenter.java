@@ -171,7 +171,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     private void createDownloadJobRecursive() {
-        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(contentEntryUid);
+        DownloadJob newDownloadJob = new DownloadJob(contentEntryUid, System.currentTimeMillis());
+        newDownloadJob.setDjDestinationDir(destinationDir);
+        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob);
         downloadJobUid = jobItemManager.getDownloadJobUid();
         new DownloadJobPreparer(jobItemManager, appDatabase, appDatabaseRepo).run();
     }

@@ -64,7 +64,7 @@ class DownloadJobItemStatus {
     }
 
 
-    override fun equals(o: Any?): Boolean {
-        return o != null && o is DownloadJobItemStatus && (o as DownloadJobItemStatus).jobItemUid == this.jobItemUid
+    override fun equals(other: Any?): Boolean {
+        return other != null && other is DownloadJobItemStatus && other.jobItemUid == this.jobItemUid
     }
 }

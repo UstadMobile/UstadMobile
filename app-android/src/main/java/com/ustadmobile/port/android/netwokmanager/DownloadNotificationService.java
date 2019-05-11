@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -18,20 +17,17 @@ import android.support.v4.content.ContextCompat;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -138,13 +134,7 @@ public class DownloadNotificationService extends Service
 
     private long totalBytesDownloadedSoFar;
 
-
     private NotificationManagerCompat mNotificationManager;
-
-
-    private UmLiveData<List<DownloadJob>> activeDownloadJobData = null;
-
-    private UmObserver<List<DownloadJob>> activeDownloadJobObserver;
 
     private HashMap<Long, UmNotification> knownNotifications = new HashMap<>();
 
@@ -173,7 +163,6 @@ public class DownloadNotificationService extends Service
         bindService(networkServiceIntent, mNetworkServiceConnection, Context.BIND_AUTO_CREATE);
 
         impl = UstadMobileSystemImpl.Companion.getInstance();
-
     }
 
     @Override
@@ -256,6 +245,13 @@ public class DownloadNotificationService extends Service
 
             }else if(status.getStatus() >= JobStatus.COMPLETE_MIN) {
                 //job has completed and notification needs to be removed
+                UmNotification notification = knownNotifications.get((long)manager.getDownloadJobUid());
+                if(notification != null) {
+                    mNotificationManager.cancel(notification.notificationId);
+                    knownNotifications.remove((long)manager.getDownloadJobUid());
+                }else {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 699, "Cannot find notification for download!");
+                }
             }else {
                 totalBytesDownloadedSoFar = totalBytesDownloadedSoFar +
                         status.getBytesSoFar();
@@ -277,89 +273,6 @@ public class DownloadNotificationService extends Service
                         umNotification.getJobTitle(), umNotification.getJobTitle());
                 updateDownloadSummary();
             }
-        }
-    }
-
-    /**
-     * Handle whn job items changes
-     * @param activeJobs list of all jobs being monitored
-     */
-    private void handleJobListChanged(List<DownloadJob> activeJobs){
-        List<Long> inactiveDownloadJobs = new ArrayList<>();
-        for(Long knownDownloadId : knownNotifications.keySet()) {
-            boolean activeJobsContainedKnownId = false;
-            for(DownloadJob job : activeJobs) {
-                if(job.getDjUid() == knownDownloadId) {
-                    activeJobsContainedKnownId = true;
-                    break;
-                }
-            }
-
-            if(!activeJobsContainedKnownId) {
-                inactiveDownloadJobs.add(knownDownloadId);
-            }
-        }
-
-        for(Long inactiveDownloadUid : inactiveDownloadJobs) {
-            if(mNotificationManager != null){
-                mNotificationManager.cancel(knownNotifications.get(inactiveDownloadUid).notificationId);
-            }
-
-            knownNotifications.remove(inactiveDownloadUid);
-        }
-
-        for(DownloadJob job: activeJobs){
-            long downloadJobId = job.getDjUid();
-            UmNotification umNotification = knownNotifications.get(downloadJobId);
-            boolean isRunning = job.getDjStatus() >= JobStatus.RUNNING_MIN
-                    && job.getDjStatus() <= JobStatus.RUNNING_MAX;
-
-            if(umNotification == null){
-                totalBytesToBeDownloaded = totalBytesToBeDownloaded +
-                        job.getTotalBytesToDownload();
-                int notificationId = notificationIdRef.incrementAndGet();
-                String contentTitle = String.format(impl.getString(
-                        MessageID.download_downloading_placeholder,this),
-                        UMFileUtil.INSTANCE.formatFileSize(job.getBytesDownloadedSoFar()),
-                        UMFileUtil.INSTANCE.formatFileSize(job.getTotalBytesToDownload()));
-                umAppDatabase.getDownloadJobDao().getEntryTitleByJobUid(downloadJobId,
-                        new UmCallback<String>() {
-                    @Override
-                    public void onSuccess(String title) {
-                        Notification download = createNotification(downloadJobId, notificationId,
-                                title ,contentTitle,contentTitle,false);
-                        mNotificationManager.notify(notificationId,download);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable exception) {}
-                });
-
-            } else {
-                totalBytesDownloadedSoFar = totalBytesDownloadedSoFar +
-                        job.getBytesDownloadedSoFar();
-                int progress = (int)((double)job.getBytesDownloadedSoFar()
-                        / job.getTotalBytesToDownload() * 100);
-                Long timeCurrentUpdate = Calendar.getInstance().getTimeInMillis();
-                umNotification.setDownloadProgress(progress);
-
-                if(((timeCurrentUpdate - timeLastUpdate) < MAX_UPDATE_TIME_DELAY)
-                        && umNotification.getDownloadProgress() > 0 && isRunning)
-                    return;
-
-                timeLastUpdate = timeCurrentUpdate;
-                String contentTitle = String.format(impl.getString(
-                        MessageID.download_downloading_placeholder,this),
-                        UMFileUtil.INSTANCE.formatFileSize(job.getBytesDownloadedSoFar()),
-                        UMFileUtil.INSTANCE.formatFileSize(job.getTotalBytesToDownload()));
-                updateDownloadJobNotification(downloadJobId, progress,contentTitle,
-                        umNotification.getJobTitle(), umNotification.getJobTitle());
-                updateDownloadSummary();
-            }
-        }
-
-        if(activeJobs.isEmpty()){
-            stopForegroundService();
         }
     }
 
@@ -455,7 +368,7 @@ public class DownloadNotificationService extends Service
         builder.setGroup(NOTIFICATION_GROUP_KEY);
 
         if(!knownNotifications.containsKey(downloadJobId)){
-            knownNotifications.put(downloadJobId,umNotification);
+            knownNotifications.put(downloadJobId, umNotification);
         }
 
         Notification notification = builder.build();
@@ -528,7 +441,6 @@ public class DownloadNotificationService extends Service
             unbindService(mNetworkServiceConnection);
 
         knownNotifications.clear();
-        if(activeDownloadJobData != null)activeDownloadJobData.removeObserver(activeDownloadJobObserver);
     }
 
     private boolean isVersionLollipopOrAbove(){

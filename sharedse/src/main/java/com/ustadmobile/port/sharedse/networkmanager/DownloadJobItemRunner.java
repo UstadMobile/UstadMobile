@@ -321,6 +321,14 @@ public class DownloadJobItemRunner implements Runnable {
         //entryStatusLiveData.observeForever(entryStatusObserver);
 
         destinationDir = appDb.getDownloadJobDao().getDestinationDir(downloadJobId);
+        if(destinationDir == null) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "DownloadJobItemRunner destinationdir is null for " +
+                    downloadItem.getDjiDjUid());
+            UstadMobileSystemImpl.l(UMLog.CRITICAL, 699,
+                    mkLogPrefix() + " destinationDir = null", e);
+            throw e;
+        }
 
         startDownload();
     }
@@ -344,8 +352,14 @@ public class DownloadJobItemRunner implements Runnable {
         Container container = appDbRepo.getContainerDao()
                 .findByUid(downloadItem.getDjiContainerUid());
 
-        ContainerManager containerManager = new ContainerManager(container, appDb, appDbRepo,
-                destinationDir);
+        ContainerManager containerManager = null;
+        try {
+             containerManager = new ContainerManager(container, appDb, appDbRepo,
+                    destinationDir);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
 
         do {
             long currentTimeStamp = System.currentTimeMillis();
@@ -488,7 +502,7 @@ public class DownloadJobItemRunner implements Runnable {
     private boolean connectToCloudNetwork() {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 699, "Reconnecting cloud network");
         networkManager.restoreWifi();
-        WaitForLiveData.INSTANCE.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
+        WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
                     if(connectivityStatus == null)
                         return false;
@@ -606,6 +620,8 @@ public class DownloadJobItemRunner implements Runnable {
      */
     private void updateItemStatus(int itemStatus) {
         CountDownLatch latch = new CountDownLatch(1);
+        UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+                " Setting status to: " + JobStatus.statusToString(itemStatus));
         downloadJobItemManager.updateStatus((int)downloadItem.getDjiUid(), itemStatus,
                 (aVoid) -> latch.countDown());
         try { latch.await(5, TimeUnit.SECONDS); }

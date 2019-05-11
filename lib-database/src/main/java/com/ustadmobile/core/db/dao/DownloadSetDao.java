@@ -38,18 +38,9 @@ public abstract class DownloadSetDao {
     @UmQuery("SELECT * FROM DownloadSet WHERE dsUid = :dsUid")
     public abstract DownloadSet findByUid(int dsUid);
 
-    @UmQuery("SELECT * FROM DownloadSet WHERE dsUid = :dsUid")
-    public abstract UmLiveData<DownloadSet> getLiveDownloadSet(int dsUid);
-
-    @UmQuery("SELECT meteredNetworkAllowed FROM DownloadSet  WHERE dsUid = :dsUid")
-    public abstract UmLiveData<Boolean> getLiveMeteredNetworkAllowed(long dsUid);
-
 
     @UmQuery("UPDATE DownloadSet SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE dsUid = :dsUid")
     public abstract void setMeteredConnectionBySetUid(long dsUid, boolean meteredNetworkAllowed);
-
-    @UmQuery("SELECT dsUid FROM DownloadSet WHERE dsRootContentEntryUid = :contentEntryUid")
-    public abstract long findDownloadSetUidByRootContentEntryUid(long contentEntryUid);
 
     @UmTransaction
     public void cleanupUnused(long downloadSetUid){
@@ -77,11 +68,5 @@ public abstract class DownloadSetDao {
     @UmQuery("DELETE FROM DownloadSet WHERE dsUid = :downloadSetUid AND " +
             "NOT EXISTS(SELECT dsiUid FROM DownloadSetItem WHERE dsiDsUid = :downloadSetUid)")
     public abstract void deleteUnusedDownloadSet(long downloadSetUid, UmCallback<Integer> callback);
-
-    @UmQuery("UPDATE DownloadSet SET destinationDir = :destinationDir WHERE dsUid = :dsUid")
-    public abstract void updateDestinationDirectory(long dsUid, String destinationDir, UmCallback<Integer> callback);
-
-    @UmQuery("SELECT destinationDir FROM DownloadSet WHERE dsUid = :dsUid")
-    public abstract String getDestinationDir(long dsUid);
 
 }
