@@ -382,7 +382,7 @@ object UMUtil {
                     val haystack = seperateEndTagRequiredElements
                     if (lastEvent == XmlPullParser.START_TAG
                             && seperateEndTagRequiredElements != null
-                            && UMUtil.indexInArray(haystack as Array<Any>, tagName) != -1) {
+                            && indexInArray(haystack as Array<Any>, tagName) != -1) {
                         xs.text(" ")
                     }
 

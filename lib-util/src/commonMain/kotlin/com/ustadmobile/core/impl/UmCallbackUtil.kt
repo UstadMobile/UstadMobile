@@ -1,5 +1,7 @@
 package com.ustadmobile.core.impl
 
+import kotlin.jvm.JvmStatic
+
 object UmCallbackUtil {
 
     @JvmStatic

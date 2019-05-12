@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.util
 
-import java.io.ByteArrayOutputStream
+import kotlin.jvm.JvmStatic
 
 /**
  * Class responsible for encoding and decoding data

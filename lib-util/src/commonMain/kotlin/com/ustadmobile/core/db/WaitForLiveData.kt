@@ -1,8 +1,5 @@
 package com.ustadmobile.core.db
 
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-
 object WaitForLiveData {
 
     interface WaitForChecker<T> {
