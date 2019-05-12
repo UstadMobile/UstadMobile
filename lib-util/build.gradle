@@ -1,4 +1,3 @@
-
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
@@ -29,8 +28,30 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common:$version_kotlin")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
             }
         }
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
+            }
+        }
+        commonJvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+            }
+        }
+
+        jvmMain {
+            dependsOn commonJvmMain
+        }
+        androidMain {
+            dependsOn commonJvmMain
+        }
+
+
     }
 }
 

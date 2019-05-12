@@ -101,6 +101,7 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation project(':lib-database-entities')
+                implementation project(":lib-util")
                 //implementation project(':lib-database')
               /*  compileOnly project(':lib-database-entities')
                 compileOnly project(':core-compile-only')
@@ -141,7 +142,7 @@ kotlin {
         }
         jvmMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
         }
@@ -152,7 +153,7 @@ kotlin {
         }
         androidMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
             dependsOn jvmMain
@@ -165,13 +166,6 @@ kotlin {
 
     }
 }
-
-
-/* test {
-    testLogging {
-        exceptionFormat = 'full'
-    }
-} */
 
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
@@ -223,6 +217,22 @@ task prepareLocale {
     outFile << '}'
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId rootProject.group
+            artifactId project.name
+            version rootProject.version
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
+
 
 /*
  * Added to overcome limitation on Android studio as per:
@@ -235,36 +245,3 @@ task prepareLocale {
     into "${buildDir}/classes/test"
 }
 processTestResources.dependsOn copyTestResources */
-
-
- /*publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId rootProject.group
-            artifactId project.name
-            version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            url rootProject.ext.buildConfigProperties['repo.dir']
-        }
-    }
-} */
-/*compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-} */

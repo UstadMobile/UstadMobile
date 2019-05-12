@@ -81,7 +81,7 @@ dependencies {
     implementation project(":lib-database-jdbc")
     implementation "org.jsoup:jsoup:$version_jsoup"
     implementation "com.google.code.gson:gson:$version_gson"
-    implementation project(":core")
+    implementation project(path: ":core", configuration: "jvmDefault")
     implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
     implementation project(":app-javase")
     implementation "commons-io:commons-io:$version_commons_io"

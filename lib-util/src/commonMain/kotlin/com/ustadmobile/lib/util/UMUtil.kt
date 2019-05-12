@@ -30,14 +30,12 @@
  */
 package com.ustadmobile.lib.util
 
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlSerializer
-
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.util.Enumeration
-import java.util.Vector
+import kotlinx.io.ByteArrayOutputStream
+import kotlinx.serialization.stringFromUtf8Bytes
+import org.kmp.io.KMPPullParser
+import org.kmp.io.KMPSerializerParser
+import org.kmp.io.KMPXmlParser
+import kotlin.jvm.JvmOverloads
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -111,14 +109,14 @@ object UMUtil {
      *
      * @return A vector with the string tokens as elements in the order in which they were found
      */
-    fun tokenize(str: String, deliminators: CharArray, start: Int, end: Int): Vector<*> {
+    fun tokenize(str: String, deliminators: CharArray, start: Int, end: Int): MutableList<*> {
         var inToken = false
         var isDelim: Boolean
 
         var c: Char
         var i: Int = start
         var j: Int
-        val tokens = Vector<String>()
+        val tokens = mutableListOf<String>()
         var tStart = 0
 
 
@@ -139,7 +137,7 @@ object UMUtil {
                 tStart = i
                 inToken = true
             } else if (inToken && (isDelim || i == end - 1)) {
-                tokens.addElement(str.substring(tStart, if (isDelim) i else i + 1))
+                tokens.add(str.substring(tStart, if (isDelim) i else i + 1))
                 inToken = false
             }
             i++
@@ -193,48 +191,16 @@ object UMUtil {
     }
 
     /**
-     * Convert an enumeration into an array of Strings (where each element in
-     * the enumeration is a string)
-     *
-     * @param enu Enumeration to convert
-     * @return String array
-     */
-    fun enumerationToStringArray(enu: Enumeration<Any>): MutableList<Int> {
-        val listVector = Vector<String>()
-        while (enu.hasMoreElements()) {
-            listVector.addElement(enu.nextElement() as String?)
-        }
-        val list = mutableListOf(listVector.size)
-        listVector.copyInto(list.toTypedArray())
-        return list
-    }
-
-    /**
-     * Add all elements from an enumeration to the given vector
-     *
-     * @param e Enumeration
-     * @param v Vector
-     * @return The same vector as was given as an argument
-     */
-    fun addEnumerationToVector(e: Enumeration<Any>, v: Vector<Any>): Vector<*> {
-        while (e.hasMoreElements()) {
-            v.addElement(e.nextElement())
-        }
-        return v
-    }
-
-    /**
      * Add all the elements from one vector to another
      *
      * @param vector The vector elements will be added to
      * @param toAdd The vector elements will be added from
      * @return the vector with all the elements (same as vector argument)
      */
-    fun addVectorToVector(vector: Vector<Any>, toAdd: Vector<Any>): Vector<Any> {
+    fun addVectorToVector(vector: MutableList<Any>, toAdd: MutableList<Any>): MutableList<Any> {
         val numElements = toAdd.size
-        vector.ensureCapacity(vector.size + toAdd.size)
         for (i in 0 until numElements) {
-            vector.addElement(toAdd.elementAt(i))
+            vector.add(toAdd.elementAt(i))
         }
 
         return vector
@@ -300,8 +266,7 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun passXmlThrough(parser: XmlPullParser, serializer: XmlSerializer,
+    fun passXmlThrough(parser: KMPXmlParser, serializer: KMPSerializerParser,
                        seperateEndTagRequiredElements: Array<String>) {
         val filter: PassXmlThroughFilter? = null
         passXmlThrough(parser, serializer, seperateEndTagRequiredElements, filter)
@@ -316,8 +281,7 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun passXmlThrough(parser: XmlPullParser, serializer: XmlSerializer) {
+    fun passXmlThrough(parser: KMPXmlParser, serializer: KMPSerializerParser) {
         val filter: PassXmlThroughFilter? = null
         passXmlThrough(parser, serializer, null, filter)
     }
@@ -334,8 +298,7 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
+    fun passXmlThrough(xpp: KMPXmlParser, xs: KMPSerializerParser,
                        separateHtmlEndTagRequiredElements: Boolean,
                        filter: PassXmlThroughFilter) {
         passXmlThrough(xpp, xs,
@@ -355,38 +318,37 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
+    fun passXmlThrough(xpp: KMPXmlParser, xs: KMPSerializerParser,
                        seperateEndTagRequiredElements: Array<String>?,
                        filter: PassXmlThroughFilter?) {
 
-        var evtType = xpp.eventType
+        var evtType = xpp.getEventType()
         var lastEvent = -1
         var tagName: String
-        while (evtType != XmlPullParser.END_DOCUMENT) {
+        while (evtType != KMPPullParser.END_DOCUMENT) {
             if (filter != null && !filter.beforePassthrough(evtType, xpp, xs))
                 return
 
             when (evtType) {
-                XmlPullParser.START_TAG -> {
-                    xs.startTag(xpp.namespace, xpp.name)
-                    for (i in 0 until xpp.attributeCount) {
+                KMPPullParser.START_TAG -> {
+                    xs.startTag(xpp.getNamespace(), xpp.getName().toString())
+                    for (i in 0 until xpp.getAttributeCount()) {
                         xs.attribute(xpp.getAttributeNamespace(i),
-                                xpp.getAttributeName(i), xpp.getAttributeValue(i))
+                                xpp.getAttributeName(i).toString(), xpp.getAttributeValue(i).toString())
                     }
                 }
-                XmlPullParser.TEXT -> xs.text(xpp.text)
-                XmlPullParser.END_TAG -> {
-                    tagName = xpp.name
+                KMPPullParser.TEXT -> xs.text(xpp.getText().toString())
+                KMPPullParser.END_TAG -> {
+                    tagName = xpp.getName().toString()
 
                     val haystack = seperateEndTagRequiredElements
-                    if (lastEvent == XmlPullParser.START_TAG
+                    if (lastEvent == KMPPullParser.START_TAG
                             && seperateEndTagRequiredElements != null
                             && indexInArray(haystack as Array<Any>, tagName) != -1) {
                         xs.text(" ")
                     }
 
-                    xs.endTag(xpp.namespace, tagName)
+                    xs.endTag(xpp.getNamespace(), tagName)
                 }
             }
             if (filter != null && !filter.afterPassthrough(evtType, xpp, xs))
@@ -409,19 +371,17 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
+    fun passXmlThrough(xpp: KMPXmlParser, xs: KMPSerializerParser,
                        seperateEndTagRequiredElements: Array<String>?,
                        endTagName: String) {
         passXmlThrough(xpp, xs, seperateEndTagRequiredElements, object : PassXmlThroughFilter {
-            @Throws(IOException::class, XmlPullParserException::class)
-            override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
-                return !(evtType == XmlPullParser.END_TAG && parser.name != null
-                        && parser.name == endTagName)
+
+            override fun beforePassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
+                return !(evtType == KMPPullParser.END_TAG && parser.getName() != null
+                        && parser.getName() == endTagName)
             }
 
-            @Throws(IOException::class, XmlPullParserException::class)
-            override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
+            override fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
                 return true
             }
         })
@@ -444,8 +404,7 @@ object UMUtil {
          * @throws IOException
          * @throws XmlPullParserException
          */
-        @Throws(IOException::class, XmlPullParserException::class)
-        fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
+        fun beforePassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean
 
         /**
          * Called after the given event was passed through to the XmlSerializer.
@@ -458,21 +417,19 @@ object UMUtil {
          * @throws IOException
          * @throws XmlPullParserException
          */
-        @Throws(IOException::class, XmlPullParserException::class)
-        fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
+        fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean
 
     }
 
 
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun passXmlThroughToString(xpp: XmlPullParser, endTagName: String, xs: XmlSerializer): String {
+    fun passXmlThroughToString(xpp: KMPXmlParser, endTagName: String, xs: KMPSerializerParser): String {
         val bout = ByteArrayOutputStream()
         xs.setOutput(bout, "UTF-8")
-        xs.startDocument("UTF-8", java.lang.Boolean.FALSE)
+        xs.startDocument("UTF-8", false)
         passXmlThrough(xpp, xs, null, endTagName)
         xs.endDocument()
         bout.flush()
-        return String(bout.toByteArray())
+        return stringFromUtf8Bytes(bout.toByteArray())
     }
 
     /**
@@ -517,7 +474,7 @@ object UMUtil {
      * next object, and so on.
      */
     fun joinStrings(objects: Array<Any>, joiner: String): String {
-        val buffer = StringBuffer()
+        val buffer = StringBuilder()
         for (i in objects.indices) {
             buffer.append(objects.toString())
 
@@ -551,8 +508,8 @@ object UMUtil {
      * @return A single string formed by each object's toString method, followed by the joiner, the
      * next object, and so on.
      */
-    fun joinStrings(objects: Vector<*>, joiner: String): String {
-        val buffer = StringBuffer()
+    fun joinStrings(objects: MutableList<*>, joiner: String): String {
+        val buffer = StringBuilder()
         for (i in objects.indices) {
             buffer.append(objects.elementAt(i))
 
@@ -564,16 +521,16 @@ object UMUtil {
     }
 
 
-    /**
-     * Encode a username and password as a basic auth header
-     * @param username
-     * @param password
-     * @return
-     */
-    fun encodeBasicAuth(username: String, password: String): String {
-        return "Basic " + Base64Coder.encodeToString(username +
-                ':'.toString() + password)
-    }
+    /* /**
+      * Encode a username and password as a basic auth header
+      * @param username
+      * @param password
+      * @return
+      */
+     fun encodeBasicAuth(username: String, password: String): String {
+         return "Basic " + Base64Coder.encodeToString(username +
+                 ':'.toString() + password)
+     } */
 
 
 }

@@ -33,7 +33,7 @@ allprojects {
 }
 
 subprojects {
-    if(Arrays.asList("lib-util", "core", "lib-database-runtime", "lib-database",
+    if(Arrays.asList("lib-database-runtime", "lib-database",
             "lib-database-runtime-jdbc", "lib-database-jdbc", "lib-database-retrofitrepository",
             "sharedse", "lib-database-annotation-processor", "lib-core-fs", "app-rest-server",
             "core-tests", "lib-content-scrapers").contains(name)) {

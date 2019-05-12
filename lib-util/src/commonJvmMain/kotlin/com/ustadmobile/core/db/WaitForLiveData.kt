@@ -1,9 +1,15 @@
 package com.ustadmobile.core.db
 
-expect object WaitForLiveData {
+import com.ustadmobile.core.db.UmLiveData
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import com.ustadmobile.core.db.UmObserver
+import java.lang.InterruptedException
 
-    interface WaitForChecker<T> {
-        fun done(value: T): Boolean
+actual object WaitForLiveData {
+
+    actual interface WaitForChecker<T> {
+        actual fun done(value: T): Boolean
     }
 
     /**
@@ -15,13 +21,13 @@ expect object WaitForLiveData {
      * @param checker interface to check for value
      * @param <T> The type of value returned by the live data
     </T> */
-    fun <T> observeUntil(liveData: UmLiveData<T>, timeout: Long, checker: WaitForChecker<T>) //{
+    actual fun <T> observeUntil(liveData: UmLiveData<T>, timeout: Long, checker: WaitForChecker<T>) {
 
-       /* val latch = CountDownLatch(1)
+        val latch = CountDownLatch(1)
 
         val observer = object : UmObserver<T> {
             override fun onChanged(t: T?) {
-                if(t != null){
+                if (t != null) {
                     if (checker.done(t))
                         latch.countDown()
                 }
@@ -29,13 +35,13 @@ expect object WaitForLiveData {
         }
         liveData.observeForever(observer)
         try {
-            latch.await(timeout, timeoutUnit)
+            latch.await(timeout, TimeUnit.MILLISECONDS)
         } catch (e: InterruptedException) {
             //should not happen
         }
 
-        liveData.removeObserver(observer) */
-   // }
+        liveData.removeObserver(observer)
+    }
 
 
 }
