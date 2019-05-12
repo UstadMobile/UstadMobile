@@ -1,5 +1,7 @@
 package com.ustadmobile.core.impl.http
 
+import kotlinx.io.IOException
+
 /**
  * Simple wrapper for asynchronous http
  */
@@ -19,6 +21,6 @@ interface UmHttpResponseCallback {
      * @param call The call that has failed
      * @param exception exception that occurred
      */
-    fun onFailure(call: UmHttpCall, exception: Exception)
+    fun onFailure(call: UmHttpCall, exception: IOException)
 
 }

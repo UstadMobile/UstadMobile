@@ -46,7 +46,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                     return
                 }
                 val resultTitle = result.title
-                if(resultTitle != null)
+                if (resultTitle != null)
                     fragmentViewContract.setToolbarTitle(resultTitle)
             }
 
@@ -55,21 +55,22 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
             }
         })
 
-        contentEntryDao!!.findUniqueLanguagesInList(parentUid!!, object : UmCallback<List<Language>> {
-            override fun onSuccess(result: List<Language>?) {
-                val languages = LinkedList(result)
-                if (languages.size > 1) {
-                    val selectLang = Language()
-                    selectLang.name = "Language"
-                    selectLang.langUid = 0
-                    languages.add(0, selectLang)
+        contentEntryDao!!.findUniqueLanguagesInList(parentUid!!, object : UmCallback<MutableList<Language>> {
+            override fun onSuccess(result: MutableList<Language>?) {
+                if (result != null) {
+                    if (result.size > 1) {
+                        val selectLang = Language()
+                        selectLang.name = "Language"
+                        selectLang.langUid = 0
+                        result.add(0, selectLang)
 
-                    val allLang = Language()
-                    allLang.name = "All"
-                    allLang.langUid = 0
-                    languages.add(1, allLang)
+                        val allLang = Language()
+                        allLang.name = "All"
+                        allLang.langUid = 0
+                        result.add(1, allLang)
 
-                    fragmentViewContract.setLanguageOptions(languages)
+                        fragmentViewContract.setLanguageOptions(result)
+                    }
                 }
             }
 
