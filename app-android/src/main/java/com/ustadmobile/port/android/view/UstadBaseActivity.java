@@ -34,7 +34,7 @@ import com.squareup.seismic.ShakeDetector;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AppConfig;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMLogger;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.core.view.ViewWithErrorNotifier;
@@ -386,7 +386,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         final Resources res = newBase.getResources();
         final Configuration config = res.getConfiguration();
         String languageSetting = UstadMobileSystemImpl.Companion.getInstance().getLocale(newBase);
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
+        UstadMobileSystemImpl.l(UMLogger.DEBUG, 652, "Base Activity: set language to  '"
                 + languageSetting + "'");
 
         if (Build.VERSION.SDK_INT >= 17) {

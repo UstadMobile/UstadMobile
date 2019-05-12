@@ -77,7 +77,7 @@ public class UmFileUtilSe {
             FileInputStream fin = new FileInputStream(src);
             FileOutputStream fout = new FileOutputStream(dst);
         ) {
-            UMIOUtils.INSTANCE.readFully(fin, fout, bufferSize);
+            UMIOUtils.readFully(fin, fout, bufferSize);
         }
     }
 

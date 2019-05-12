@@ -59,7 +59,7 @@ import com.toughra.ustadmobile.BuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.NoAppFoundException;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMLogger;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmCallbackUtil;
@@ -82,7 +82,6 @@ import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageContentView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
-import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
@@ -297,10 +296,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             File systemBaseDir = new File(getSystemBaseDir(context));
             if (!systemBaseDir.exists()) {
                 if (systemBaseDir.mkdirs()) {
-                    l(UMLog.INFO, 0, "Created base system dir: " +
+                    l(UMLogger.INFO, 0, "Created base system dir: " +
                             systemBaseDir.getAbsolutePath());
                 } else {
-                    l(UMLog.CRITICAL, 0, "Failed to created system base dir" +
+                    l(UMLogger.CRITICAL, 0, "Failed to created system base dir" +
                             systemBaseDir.getAbsolutePath());
                 }
             }
@@ -308,7 +307,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             Context appContext = ((Context) context).getApplicationContext();
 
             Picasso.Builder picassoBuilder = new Picasso.Builder(appContext);
-            picassoBuilder.addRequestHandler(new UmHttpCachePicassoRequestHandler(appContext));
             Picasso.setSingletonInstance(picassoBuilder.build());
             initRan = true;
         }
@@ -567,7 +565,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public UMLog getLogger() {
+    public UMLogger getLogger() {
         return logger;
     }
 
@@ -601,7 +599,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             versionInfo = 'v' + pInfo.versionName + " (#" + pInfo.versionCode + ')';
         } catch (PackageManager.NameNotFoundException e) {
-            l(UMLog.ERROR, 90, null, e);
+            l(UMLogger.ERROR, 90, null, e);
         }
         return versionInfo;
     }
@@ -613,7 +611,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return pInfo.lastUpdateTime;
         } catch (PackageManager.NameNotFoundException e) {
-            l(UMLog.ERROR, 90, null, e);
+            l(UMLogger.ERROR, 90, null, e);
         }
 
         return 0;
@@ -638,7 +636,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 return metaData.getString(key);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, UMLog.ERROR, key, e);
+            UstadMobileSystemImpl.l(UMLogger.ERROR, UMLogger.ERROR, key, e);
         }
 
         return null;

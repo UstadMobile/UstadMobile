@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.sync.entities.SyncablePrimaryKey;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 import static com.ustadmobile.core.db.dao.PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1;

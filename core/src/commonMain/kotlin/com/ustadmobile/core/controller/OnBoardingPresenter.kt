@@ -4,6 +4,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
+import kotlinx.coroutines.Runnable
 
 class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: OnBoardingView) : UstadBaseController<OnBoardingView>(context, arguments!!, view) {
 

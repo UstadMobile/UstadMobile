@@ -30,16 +30,7 @@
  */
 
 package com.ustadmobile.core.impl
-import com.ustadmobile.lib.util.UMUtil
-import kotlinx.io.IOException
 import kotlinx.io.InputStream
-
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlSerializer
-
-import java.io.IOException
-import java.util.Hashtable
 import kotlin.jvm.JvmStatic
 
 
@@ -134,15 +125,6 @@ expect class UstadMobileSystemImpl : UstadMobileSystemBaseImpl {
      * @return Build timestamp in ms since epoch
      */
     fun getBuildTimestamp(context: Any): Long
-
-    /**
-     * Return absolute path of the application setup file. Asynchronous.
-     *
-     * @param context System context
-     * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
-     */
-    override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>)
 
 
     /**

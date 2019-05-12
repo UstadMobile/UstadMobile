@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.coroutines.Runnable
 
 class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: VideoPlayerView)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
@@ -55,12 +56,15 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                 for (entry in result!!) {
 
                     val fileInContainer = entry.cePath
-                    if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
-                        videoPath = entry.containerEntryFile.cefPath
-                    } else if (fileInContainer == "audio.c2") {
-                        audioPath = entry.containerEntryFile.cefPath
-                    } else if (fileInContainer == "subtitle.srt") {
-                        srtPath = entry.containerEntryFile.cefPath
+                    val containerEntryFile = entry.containerEntryFile
+                    if(fileInContainer != null && containerEntryFile != null) {
+                        if (fileInContainer.endsWith(".mp4") || fileInContainer.endsWith(".webm")) {
+                            videoPath = containerEntryFile.cefPath
+                        } else if (fileInContainer == "audio.c2") {
+                            audioPath = containerEntryFile.cefPath
+                        } else if (fileInContainer == "subtitle.srt") {
+                            srtPath = containerEntryFile.cefPath
+                        }
                     }
                 }
 

@@ -15,10 +15,12 @@ import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTENT_ENTRY_ID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.coroutines.Runnable
 
 class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView)
     : UstadBaseController<WebChunkView>(context, arguments, view) {
 
+    lateinit var cs: ContentEntry
     private var navigation: String? = null
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -35,7 +37,11 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
         contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
-                view.runOnUiThread(Runnable { view.setToolbarTitle(result!!.title) })
+                view.runOnUiThread(Runnable {
+                    val resultTitle = result?.title
+                    if(resultTitle != null)
+                        view.setToolbarTitle(resultTitle)
+                })
             }
 
             override fun onFailure(exception: Throwable?) {

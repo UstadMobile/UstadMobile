@@ -25,6 +25,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import org.kmp.io.*
+
+import kotlin.system.*
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
@@ -77,12 +80,24 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     val licenseType = getLicenseType(result)
                     view.runOnUiThread(Runnable {
                         view.setContentEntryLicense(licenseType)
-                        view.setContentEntryAuthor(result.author)
-                        view.setContentEntryTitle(result.title)
-                        view.setContentEntryDesc(result.description)
-                        if (!result.thumbnailUrl.isNullOrEmpty()) {
-                            view.loadEntryDetailsThumbnail(result.thumbnailUrl)
+                        with(result) {
+                            val contentEntryAuthor = author
+                            if(contentEntryAuthor != null)
+                                view.setContentEntryAuthor(contentEntryAuthor)
+
+                            val contentEntryTitle = title
+                            if(contentEntryTitle != null)
+                                view.setContentEntryTitle(contentEntryTitle)
+
+                            val contentEntryDesc = result.description
+                            if(contentEntryDesc != null)
+                                view.setContentEntryDesc(contentEntryDesc)
+
+                            val contentThumbnailUrl = thumbnailUrl
+                            if(!contentThumbnailUrl.isNullOrEmpty())
+                                view.loadEntryDetailsThumbnail(contentThumbnailUrl)
                         }
+
                     })
                 }
 
@@ -183,11 +198,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         if (!isDownloadComplete) {
-            val currentTimeStamp = System.currentTimeMillis()
+            val currentTimeStamp = getTimeMillis()
             val minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1)
             val maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
                     TIME_INTERVAL_FROM_LAST_FAILURE.toLong())
-
             Thread {
 
                 val container = containerDao!!.getMostRecentContainerForContentEntry(entryUuid)

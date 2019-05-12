@@ -1,34 +1,59 @@
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.multiplatform'
+}
+
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
+}
+
 apply plugin: "maven-publish"
-apply plugin: 'kotlin'
 
-buildscript {
-    repositories {
-        mavenCentral()
+
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.js, 'js')
+        fromPreset(presets.android, 'android')
     }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation kotlin("stdlib-common:$version_kotlin")
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
+            }
+        }
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
+            }
+        }
+        commonJvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+            }
+        }
+
+        jvmMain {
+            dependsOn commonJvmMain
+        }
+        androidMain {
+            dependsOn commonJvmMain
+        }
+
+
     }
 }
-
-dependencies {
-    implementation "net.sf.kxml:kxml2:$version_kxml"
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
-}
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
 
 publishing {
     publications {
@@ -36,12 +61,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 
@@ -49,27 +68,5 @@ publishing {
         maven {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
-    }
-}
-buildscript {
-    ext.kotlin_version = '1.3.21'
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-repositories {
-    mavenCentral()
-}
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 }

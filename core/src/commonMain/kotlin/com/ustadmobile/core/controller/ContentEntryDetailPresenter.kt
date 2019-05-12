@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmLiveData
@@ -22,6 +23,8 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.coroutines.Runnable
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -77,11 +80,22 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     val licenseType = getLicenseType(result)
                     view.runOnUiThread(Runnable {
                         view.setContentEntryLicense(licenseType)
-                        view.setContentEntryAuthor(result.author)
-                        view.setContentEntryTitle(result.title)
-                        view.setContentEntryDesc(result.description)
-                        if (!result.thumbnailUrl.isNullOrEmpty()) {
-                            view.loadEntryDetailsThumbnail(result.thumbnailUrl)
+                        with(result) {
+                            val contentEntryAuthor = author
+                            if (contentEntryAuthor != null)
+                                view.setContentEntryAuthor(contentEntryAuthor)
+
+                            val contentEntryTitle = title
+                            if (contentEntryTitle != null)
+                                view.setContentEntryTitle(contentEntryTitle)
+
+                            val contentEntryDesc = description
+                            if (contentEntryDesc != null)
+                                view.setContentEntryDesc(contentEntryDesc)
+
+                            val contentThumbnailUrl = thumbnailUrl
+                            if (!contentThumbnailUrl.isNullOrEmpty())
+                                view.loadEntryDetailsThumbnail(contentThumbnailUrl)
                         }
                     })
                 }
@@ -183,7 +197,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         if (!isDownloadComplete) {
-            val currentTimeStamp = DateTime
+            val currentTimeStamp = System.inmillis
             val minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1)
             val maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
                     TIME_INTERVAL_FROM_LAST_FAILURE.toLong())
@@ -247,13 +261,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     if (exception != null) {
                         val message = exception.message
                         if (exception is NoAppFoundException) {
-                            view.runOnUiThread(Runnable {
+                            view.runOnUiThread(run {
                                 view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
                                         MessageID.get_app,
                                         exception.mimeType!!)
                             })
                         } else {
-                            view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
+                            view.runOnUiThread(run { view.showFileOpenError(message!!) })
                         }
                     }
                 }
@@ -265,7 +279,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
             //hard coded strings because these are actually in sharedse
             args["contentEntryUid"] = this.entryUuid.toString()
-            view.runOnUiThread(Runnable { view.showDownloadOptionsDialog(args) })
+            view.runOnUiThread(run { view.showDownloadOptionsDialog(args) })
         }
 
     }

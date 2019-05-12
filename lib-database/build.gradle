@@ -26,10 +26,12 @@ compileJava {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly project(":lib-database-entities")
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
     compileOnly project(":lib-database-runtime-core-compileonly")
     implementation project(':lib-database-runtime')
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-util")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
 
     annotationProcessor project(':lib-database-annotation-processor')
 

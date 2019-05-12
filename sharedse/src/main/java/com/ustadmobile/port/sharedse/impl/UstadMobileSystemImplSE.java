@@ -36,7 +36,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -69,7 +68,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return (UstadMobileSystemImplSE)Companion.getInstance();
     }
 
-    //Remove usage of HTTP cache
     @Override
     public void init(Object context) {
         super.init(context);
@@ -85,7 +83,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      *
      * @return
      */
-    @Deprecated
     public abstract URLConnection openConnection(URL url) throws IOException;
 
     /**
@@ -96,7 +93,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     protected abstract String getSystemBaseDir(Object context);
 
 
-    //JVM
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
@@ -104,7 +100,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
 
-    //JVM
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
@@ -141,7 +136,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return retVal;
     }
 
-    //JVM
     @Override
     public void getStorageDirs(Object context, UmResultCallback<List<UMStorageDir>> callback) {
 
@@ -164,7 +158,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
     }
 
-    //JVM
     /**
      * Provides a list of paths to removable stoage (e.g. sd card) directories
      *
@@ -174,7 +167,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return new String[0];
     }
 
-    //JVM and Android - just put it in both
     /**
      * Will return language_COUNTRY e.g. en_US
      *
@@ -186,14 +178,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
 
-    //JVM
     public XmlPullParser newPullParser() throws XmlPullParserException {
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
         return parser;
     }
 
-    //JVM
     public XmlSerializer newXMLSerializer() {
         XmlSerializer serializer = null;
         try {
@@ -215,7 +205,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
      */
     public abstract NetworkManagerBle getNetworkManagerBle();
 
-    @Deprecated
     @Override
     public UmHttpCall makeRequestAsync(UmHttpRequest request, final UmHttpResponseCallback callback) {
         Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
@@ -245,13 +234,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return umCall;
     }
 
-    @Deprecated
     @Override
     public UmHttpCall sendRequestAsync(UmHttpRequest request, UmHttpResponseCallback responseListener) {
         return makeRequestAsync(request, responseListener);
     }
 
-    @Deprecated
     @Override
     public UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException{
         Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
@@ -259,13 +246,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         return new UmHttpResponseSe(call.execute());
     }
 
-    @Deprecated
     @Override
     public UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException {
         return getHttpCache(request.getContext()).getSync(request);
     }
 
-    @Deprecated
     @Override
     public HttpCache getHttpCache(Object context) {
         if(httpCache == null)
@@ -275,10 +260,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     }
 
 
-    //Jvm only
     public abstract InputStream getAssetSync(Object context, String path) throws IOException;
 
-    //JVM version
     @Override
     public String getAppConfigString(String key, String defaultVal, Object context) {
         if(appConfig == null) {

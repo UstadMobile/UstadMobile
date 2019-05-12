@@ -1,12 +1,14 @@
 package com.ustadmobile.core.impl
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
-import kotlinx.io.IOException
+import org.kmp.io.KMPSerializerParser
+import org.kmp.io.KMPXmlParser
 import kotlin.jvm.JvmStatic
 
 /**
@@ -22,6 +24,7 @@ abstract class UstadMobileSystemBaseImpl {
      */
     private var isInitialized: Boolean = false
 
+
     /**
      * The currently active locale
      */
@@ -33,12 +36,11 @@ abstract class UstadMobileSystemBaseImpl {
      * This must make the shared content directory if it does not already exist
      */
     open fun init(context: Any) {
-        UMLog.l(UMLog.DEBUG, 519, null)
+        l(UMLog.DEBUG, 519, null)
         //We don't need to do init again
         if (isInitialized) {
             return
         }
-
         isInitialized = true
     }
 
@@ -210,9 +212,8 @@ abstract class UstadMobileSystemBaseImpl {
      * @return A new default options XmlPullParser
      */
 
-    fun newPullParser(): XmlPullParser{
-        val factory = XmlPullParserFactory.newInstance()
-        return factory.newPullParser()
+    fun newPullParser(): KMPXmlParser{
+        return KMPXmlParser()
     }
 
     /**
@@ -220,17 +221,8 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return New instance of an XML Serializer
      */
-    fun newXMLSerializer(): XmlSerializer{
-        var serializer: XmlSerializer? = null
-        try {
-            if (xmlPullParserFactory == null) {
-                xmlPullParserFactory = XmlPullParserFactory.newInstance()
-            }
-            serializer = xmlPullParserFactory.newSerializer()
-        } catch (e: XmlPullParserException) {
-            UMLog.l(UMLog.ERROR, 92, "", e)
-        }
-        return serializer
+    fun newXMLSerializer(): KMPSerializerParser{
+        return KMPSerializerParser()
     }
 
 
@@ -372,7 +364,6 @@ abstract class UstadMobileSystemBaseImpl {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
 
-
     companion object {
 
         var mainInstance: Any? = null
@@ -432,27 +423,41 @@ abstract class UstadMobileSystemBaseImpl {
 
         /**
          * Convenience shortcut for logging
-         * @see UMLog.l
          * @param level log level
          * @param code log code
          * @param message log message
          * @param exception exception that occurred to log
          */
         @JvmStatic
-        fun l(level: Int, code: Int, message: String?, exception: Exception) {
-            UMLog.l(level, code, message!!, exception)
+         fun l(level: Int, code: Int, message: String?, exception: Exception) {
+            val logMessage = "$code : $message"
+            when (level) {
+                UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception)
+                UMLog.INFO -> Napier.i(message=logMessage, throwable= exception)
+                UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception)
+                UMLog.WARN -> Napier.w(message=logMessage, throwable= exception)
+                UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception)
+                UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception)
+            }
         }
 
         /**
          * Convenience shortcut for logging
-         * @see UMLog.l
          * @param level log level
          * @param code log code
          * @param message message to log
          */
         @JvmStatic
         fun l(level: Int, code: Int, message: String?) {
-            UMLog.l(level, code, message.toString())
+            val logMessage = "$code : $message"
+            when (level) {
+                UMLog.DEBUG -> Napier.d(message=logMessage)
+                UMLog.INFO -> Napier.i(message=logMessage)
+                UMLog.CRITICAL -> Napier.wtf(message=logMessage)
+                UMLog.WARN -> Napier.w(message=logMessage)
+                UMLog.VERBOSE -> Napier.v(message=logMessage)
+                UMLog.ERROR -> Napier.e(message=logMessage)
+            }
         }
     }
 }

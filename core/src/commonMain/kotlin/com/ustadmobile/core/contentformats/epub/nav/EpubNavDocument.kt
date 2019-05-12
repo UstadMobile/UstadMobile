@@ -30,15 +30,9 @@
  */
 package com.ustadmobile.core.contentformats.epub.nav
 
-import kotlinx.io.IOException
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlSerializer
-
-import java.io.IOException
-import java.util.Arrays
-import java.util.Hashtable
-import java.util.Vector
+import org.kmp.io.KMPPullParser
+import org.kmp.io.KMPSerializerParser
+import org.kmp.io.KMPXmlParser
 
 /**
  * This class represents an EPUB navigation document as indicated by the OPF
@@ -78,9 +72,8 @@ class EpubNavDocument {
             return null
         }
 
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun load(xpp: XmlPullParser) {
-        xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
+    fun load(xpp: KMPXmlParser) {
+        xpp.setFeature(KMPPullParser.FEATURE_PROCESS_NAMESPACES, true)
 
         var evtType: Int = -1
         var currentNav: EpubNavItem? = null//represents the current nav tag
@@ -88,10 +81,10 @@ class EpubNavDocument {
         var itemDepth = 0
         var tagName: String
 
-        while ({evtType = xpp.next(); evtType}() != XmlPullParser.END_DOCUMENT) {
+        while ({evtType = xpp.next(); evtType}() != KMPPullParser.END_DOCUMENT) {
             when (evtType) {
-                XmlPullParser.START_TAG -> {
-                    tagName = xpp.name
+                KMPPullParser.START_TAG -> {
+                    tagName = xpp.getName()?: ""
                     if (tagName == "nav") {
                         currentNav = EpubNavItem(null, null, null, 0)
                         val navTypeAttr = xpp.getAttributeValue(NAMESPACE_OPS,
@@ -112,15 +105,15 @@ class EpubNavDocument {
                         itemDepth++
                     } else if (tagName == "a") {
                         currentItem!!.href = xpp.getAttributeValue(null, "href")
-                        if (xpp.next() == XmlPullParser.TEXT) {
-                            currentItem.title = xpp.text
+                        if (xpp.next() == KMPPullParser.TEXT) {
+                            currentItem.title = xpp.getText()
                         }
                     }
                 }
 
-                XmlPullParser.END_TAG -> if (xpp.name == "nav") {
+                KMPPullParser.END_TAG -> if (xpp.getName() == "nav") {
                     currentNav = null
-                } else if (xpp.name == "li") {
+                } else if (xpp.getName() == "li") {
                     currentItem = currentItem!!.parent
                     itemDepth--
                 }
@@ -128,8 +121,7 @@ class EpubNavDocument {
         }
     }
 
-    @Throws(IOException::class)
-    fun serialize(xs: XmlSerializer) {
+    fun serialize(xs: KMPSerializerParser) {
         xs.startDocument("UTF-8", false)
         xs.setPrefix("", NAMESPACE_XHTML)
         xs.setPrefix("epub", NAMESPACE_OPS)
@@ -145,11 +137,11 @@ class EpubNavDocument {
         for (navItem in navElements) {
             xs.startTag(NAMESPACE_XHTML, "nav")
             if (navItem.id != null)
-                xs.attribute(null, "id", navItem.id)
+                xs.attribute(null, "id", navItem.id!!)
 
             if (navItem.navElEpubTypeAttr != null)
                 xs.attribute(NAMESPACE_OPS, "type",
-                        navItem.navElEpubTypeAttr)
+                        navItem.navElEpubTypeAttr!!)
 
             xs.startTag(NAMESPACE_XHTML, "ol")
             for (childItem in navItem.getChildren()!!) {
@@ -164,12 +156,11 @@ class EpubNavDocument {
         xs.endDocument()
     }
 
-    @throw(IOException::class)
-    private fun writeNavItem(item: EpubNavItem, xs: XmlSerializer) {
+    private fun writeNavItem(item: EpubNavItem, xs: KMPSerializerParser) {
         xs.startTag(NAMESPACE_XHTML, "li")
                 .startTag(NAMESPACE_XHTML, "a")
-                .attribute(null, "href", item.href)
-                .text(item.title)
+                .attribute(null, "href", item.href!!)
+                .text(item.title!!)
                 .endTag(NAMESPACE_XHTML, "a")
 
         if (item.hasChildren()) {

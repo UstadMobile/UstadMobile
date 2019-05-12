@@ -32,20 +32,9 @@
 package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.http.UmHttpCall
-import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.lib.util.UMUtil
 import kotlinx.io.InputStream
-
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlSerializer
-
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -61,9 +50,6 @@ import kotlin.collections.ArrayList
 actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
 
     private var appConfig: Properties? = null
-
-
-    private var xmlPullParserFactory: XmlPullParserFactory? = null
 
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -216,7 +202,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
                 prefIn = getAssetSync(context, appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
-                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
+                l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
                 UMIOUtils.closeInputStream(prefIn)
             }
@@ -231,8 +217,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
 
     }
 
-    actual fun getAssetSync(context: Any, path: String): InputStream{
-        return null
+    actual fun getAssetSync(context: Any, path: String): InputStream {
+        TODO("not implemented")
     }
 
     actual fun getSystemBaseDir(context: Any): String{
@@ -256,5 +242,20 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
                 }
                 return mainInstance as UstadMobileSystemImpl
             }
+    }
+
+    /**
+     * Wrapper to retrieve preference keys from the system Manifest.
+     *
+     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
+     * On J2ME: uses the jad file
+     *
+     * @param key The key to lookup
+     * @param context System context object
+     *
+     * @return The value of the manifest preference key if found, null otherwise
+     */
+    actual override fun getManifestPreference(key: String, context: Any): String? {
+        return  ""
     }
 }

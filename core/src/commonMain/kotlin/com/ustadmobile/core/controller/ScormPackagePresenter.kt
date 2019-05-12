@@ -11,10 +11,12 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ScormPackageView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
+import kotlinx.coroutines.Runnable
 
 import org.xmlpull.v1.XmlPullParserException
 
 import kotlinx.io.IOException
+import org.kmp.io.KMPPullParserException
 
 /**
  *
@@ -53,14 +55,14 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
                 val defaultOrg = scormManifest!!.defaultOrganization
                 val startRes = scormManifest!!.getResourceByIdentifier(
                         defaultOrg.items[0].identifierRef!!)
-                view.runOnUiThread(Runnable  {
+                view.runOnUiThread(Runnable {
                     view.setTitle(scormManifest!!.defaultOrganization.title!!)
                     view.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
                             startRes.href!!))
                 })
             } catch (e: IOException) {
                 e.printStackTrace()
-            } catch (x: XmlPullParserException) {
+            } catch (x: KMPPullParserException) {
                 x.printStackTrace()
             }
 

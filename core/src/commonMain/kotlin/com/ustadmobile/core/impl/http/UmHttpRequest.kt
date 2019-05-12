@@ -1,7 +1,5 @@
 package com.ustadmobile.core.impl.http
 
-import kotlin.jvm.Synchronized
-
 
 /**
  * A wrapper that represents an HTTP request.
@@ -105,7 +103,7 @@ class UmHttpRequest {
      */
     fun addHeader(header: String, value: String): UmHttpRequest {
         if (headers == null)
-            headers = Hashtable()
+            headers = mutableMapOf()
 
         headers!![header] = value
         return this

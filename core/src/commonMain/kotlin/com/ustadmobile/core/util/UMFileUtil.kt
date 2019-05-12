@@ -32,12 +32,8 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-import java.util.HashMap
-import java.util.Vector
-
-
-
+import kotlin.jvm.JvmStatic
+import kotlin.math.round
 
 
 /**
@@ -55,9 +51,9 @@ object UMFileUtil {
     val PROTOCOL_FILE = "file:///"
 
 
-    private val UNIT_GB = Math.pow(1024.0, 3.0).toLong()
+    private val UNIT_GB = 1024L * 1024L * 1024L
 
-    private val UNIT_MB = Math.pow(1024.0, 2.0).toLong()
+    private val UNIT_MB = 1024L * 1024L
 
     private val UNIT_KB: Long = 1024
 
@@ -72,7 +68,7 @@ object UMFileUtil {
      */
     @JvmStatic
     fun joinPaths(vararg paths: String): String {
-        val result = StringBuffer()
+        val result = StringBuilder()
         for (i in paths.indices) {
             var pathComp = paths[i]
 
@@ -164,9 +160,9 @@ object UMFileUtil {
         val baseParts = splitString(base, FILE_SEP)
         val linkParts = splitString(link, FILE_SEP)
 
-        val resultVector = Vector<String>()
+        val resultVector = mutableListOf<String>()
         for (i in baseParts.indices) {
-            resultVector.addElement(baseParts[i])
+            resultVector.add(baseParts[i]!!)
         }
 
         for (i in linkParts.indices) {
@@ -175,13 +171,13 @@ object UMFileUtil {
             }
 
             if (linkParts[i] == "..") {
-                resultVector.removeElementAt(resultVector.size - 1)
+                resultVector.removeAt(resultVector.size - 1)
             } else {
-                resultVector.addElement(linkParts[i])
+                resultVector.add(linkParts[i]!!)
             }
         }
 
-        val resultSB = StringBuffer()
+        val resultSB = StringBuilder()
         val numElements = resultVector.size
         for (i in 0 until numElements) {
             resultSB.append(resultVector.elementAt(i))
@@ -231,7 +227,7 @@ object UMFileUtil {
     private fun splitString(str: String, splitChar: Char): Array<String?> {
         val numParts = countChar(str, splitChar)
         val splitStr = arrayOfNulls<String>(numParts + 1)
-        var buffer = StringBuffer()
+        var buffer = StringBuilder()
         var partCounter = 0
 
         var currentChar: Char
@@ -240,7 +236,7 @@ object UMFileUtil {
             if (currentChar == splitChar) {
                 splitStr[partCounter] = buffer.toString()
                 partCounter++
-                buffer = StringBuffer()
+                buffer = StringBuilder()
             } else {
                 buffer.append(currentChar)
             }
@@ -263,7 +259,7 @@ object UMFileUtil {
      */
     fun joinString(strArr: Array<String>, joinChar: Char): String {
         //TODO: Make this more efficient by calculating size first
-        val resultSB = StringBuffer()
+        val resultSB = StringBuilder()
 
         val numElements = strArr.size
         for (i in 0 until numElements) {
@@ -357,7 +353,7 @@ object UMFileUtil {
         var inQuotes = false
 
         val strLen = str.length
-        var sb = StringBuffer()
+        var sb = StringBuilder()
         var c: Char
 
         var lastChar: Char = 0.toChar()
@@ -388,11 +384,11 @@ object UMFileUtil {
                     params[sb.toString()] = ""
                 }
 
-                sb = StringBuffer()
+                sb = StringBuilder()
                 paramName = null
             } else if (c == '=') {
                 paramName = sb.toString()
-                sb = StringBuffer()
+                sb = StringBuilder()
             } else {
                 sb.append(c)
             }
@@ -433,7 +429,7 @@ object UMFileUtil {
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
     fun mapToQueryString(ht: Map<String, String>?): String {
-        val sb = StringBuffer()
+        val sb = StringBuilder()
 
         if (ht == null) {
             return ""
@@ -498,7 +494,7 @@ object UMFileUtil {
      * @return Filename with sensitive characters (: / \ * > < ? ) removed
      */
     fun filterFilename(filename: String): String {
-        val newStr = StringBuffer(filename.length)
+        val newStr = StringBuilder(filename.length)
         var c: Char
 
         for (i in 0 until filename.length) {
@@ -720,7 +716,7 @@ object UMFileUtil {
         }
 
         var unitSize = fileSize.toDouble() / factor.toDouble()
-        unitSize = Math.round(unitSize * 100) / 100.0
+        unitSize = round(unitSize * 100) / 100.0
         return "$unitSize $unit"
     }
 
@@ -729,8 +725,8 @@ object UMFileUtil {
      * @param prefix
      * @return
      */
-    fun splitCombinedViewArguments(args: Map<String, String>, prefix: String, argDelmininator: Char): Vector<*> {
-        val result = Vector<Any>()
+    fun splitCombinedViewArguments(args: Map<String, String>, prefix: String, argDelmininator: Char): MutableList<*> {
+        val result = mutableListOf<Any>()
         val allArgsKeys = args.keys.iterator()
 
         var currentKey: String
@@ -745,16 +741,14 @@ object UMFileUtil {
                 indexStart = currentKey.indexOf(argDelmininator) + 1
                 indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1)
                 try {
-                    index = Integer.parseInt(currentKey.substring(indexStart, indexEnd))
-                    if (result.size < index + 1)
-                        result.setSize(index + 1)
+                    index = currentKey.substring(indexStart, indexEnd).toInt()
 
                     argName = currentKey.substring(indexEnd + 1)
                     if (result.elementAt(index) != null) {
                         indexArgs = result.elementAt(index) as MutableMap<String, String?>
                     } else {
                         indexArgs = HashMap()
-                        result.setElementAt(indexArgs, index)
+                        result.add(index, indexArgs)
                     }
 
                     indexArgs[argName] = args[currentKey]

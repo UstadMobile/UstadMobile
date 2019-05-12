@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMLogger;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
@@ -66,7 +66,7 @@ public class ContentEntryListRecyclerViewAdapter extends
         List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
-            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+            UstadMobileSystemImpl.l(UMLogger.DEBUG,694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
         }
@@ -130,7 +130,7 @@ public class ContentEntryListRecyclerViewAdapter extends
                 available = managerAndroidBle.isEntryLocallyAvailable(
                         entry.getMostRecentContainer());
 
-            if(entry.isLeaf()){
+            if(entry.getLeaf()){
                 holder.updateLocallyAvailabilityStatus(available);
             }
 
@@ -205,13 +205,13 @@ public class ContentEntryListRecyclerViewAdapter extends
                 iconView.setVisibility(View.VISIBLE);
             }
 
-            int viewVisibility = showLocallyAvailabilityViews && entry.isLeaf()
+            int viewVisibility = showLocallyAvailabilityViews && entry.getLeaf()
                     ? View.VISIBLE: View.GONE;
             holder.getAvailabilityIcon().setVisibility(viewVisibility);
             holder.getAvailabilityStatus().setVisibility(viewVisibility);
 
             //add as a reference only if is a leaf entry
-            if(entry.isLeaf()){
+            if(entry.getLeaf()){
                 viewHolderWeakHashMap.put(entry.hashCode(),holder);
             }
 
@@ -241,7 +241,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             boolean canBeMonitored = entry != null && (entry.getContentEntryStatus() == null ||
                     entry.getContentEntryStatus().getDownloadStatus() != JobStatus.COMPLETE)
                     && !containerUidsToMonitor.contains(entry.getMostRecentContainer())
-                    && entry.isLeaf();
+                    && entry.getLeaf();
             if (canBeMonitored) {
                 uidsToMonitor.add(entry.getMostRecentContainer());
             }
@@ -364,7 +364,8 @@ public class ContentEntryListRecyclerViewAdapter extends
 
                 return oldItem.getContentEntryStatus().getTotalSize() == newItem.getContentEntryStatus().getTotalSize();
 
-            } else return newItem.getContentEntryStatus() == oldItem.getContentEntryStatus();
+            } else return (newItem.getContentEntryStatus() == null && newItem.getContentEntryStatus() == null)
+                    || newItem.getContentEntryStatus().equals(oldItem.getContentEntryStatus());
         }
     };
 }

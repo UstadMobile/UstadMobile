@@ -53,8 +53,8 @@ object ContentEntryUtil {
                                      impl: UstadMobileSystemImpl, openEntryIfNotDownloaded: Boolean,
                                      context: Any,
                                      callback: UmCallback<Any>) {
-
-        if (entryStatus.contentEntryStatus != null && entryStatus.contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
+        val contentEntryStatus = entryStatus.contentEntryStatus
+        if (contentEntryStatus != null && contentEntryStatus.downloadStatus == JobStatus.COMPLETE) {
 
             dbRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entryStatus.contentEntryUid,
                     object : UmCallback<Container> {
@@ -100,9 +100,13 @@ object ContentEntryUtil {
                                             return
                                         }
 
-                                        val containerEntryWithContainerEntryFile = resultList[0]
-                                        impl.openFileInDefaultViewer(context, containerEntryWithContainerEntryFile.containerEntryFile.cefPath,
-                                                result.mimeType!!, callback)
+                                        val containerEntryFilePath = resultList[0].containerEntryFile?.cefPath
+                                        if(containerEntryFilePath != null) {
+                                            impl.openFileInDefaultViewer(context, containerEntryFilePath,
+                                                    result.mimeType!!, callback)
+                                        }else {
+                                            TODO("Show error message here")
+                                        }
 
 
                                     }

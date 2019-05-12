@@ -33,15 +33,16 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-import org.xmlpull.v1.XmlPullParserException
-
-import java.io.ByteArrayOutputStream
-import java.io.Closeable
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.charset.Charset
+import kotlinx.io.ByteArrayOutputStream
+import kotlinx.io.IOException
+import kotlinx.io.InputStream
+import kotlinx.io.OutputStream
+import kotlinx.serialization.stringFromUtf8Bytes
+import org.kmp.io.KMPPullParserException
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
+import kotlin.math.max
+import kotlin.reflect.KClass
 
 /**
  *
@@ -67,17 +68,6 @@ object UMIOUtils {
         } catch (e: IOException) {
         }
 
-    }
-
-    fun closeQuietly(closeable: Closeable?) {
-        if (closeable != null) {
-            try {
-                closeable.close()
-            } catch (e: IOException) {
-
-            }
-
-        }
     }
 
     /**
@@ -106,7 +96,6 @@ object UMIOUtils {
      * Read from the given input stream and write to the given output stream.
      * This will not close the streams themselves
      */
-    @Throws(IOException::class)
     @JvmOverloads
     @JvmStatic
     fun readFully(`in`: InputStream, out: OutputStream, bufsize: Int = DEFAULT_BUFFER_SIZE) {
@@ -119,7 +108,6 @@ object UMIOUtils {
         out.flush()
     }
 
-    @Throws(IOException::class)
     @JvmOverloads
     @JvmStatic
     fun readStreamToString(`in`: InputStream, bufsize: Int = DEFAULT_BUFFER_SIZE): String {
@@ -127,10 +115,9 @@ object UMIOUtils {
         readFully(`in`, bout, bufsize)
         `in`.close()
 
-        return String(bout.toByteArray(), Charset.forName("UTF-8"))
+        return stringFromUtf8Bytes(bout.toByteArray())
     }
 
-    @Throws(IOException::class)
     @JvmOverloads
     @JvmStatic
     fun readStreamToByteArray(`in`: InputStream, bufsize: Int = DEFAULT_BUFFER_SIZE): ByteArray {
@@ -148,16 +135,14 @@ object UMIOUtils {
      * @return String from the given input stream in the given encoding
      * @throws IOException
      */
-    @Throws(IOException::class)
     fun readToString(`in`: InputStream, encoding: String): String {
         val bout = ByteArrayOutputStream()
         readFully(`in`, bout, 1024)
         `in`.close()
-        return String(bout.toByteArray(), Charset.forName(encoding))
+        return stringFromUtf8Bytes(bout.toByteArray())
     }
 
 
-    @Throws(IOException::class)
     fun throwIfNotNullIO(e: IOException?) {
         if (e != null) {
             throw e
@@ -173,15 +158,13 @@ object UMIOUtils {
      *
      * @throws T Throwable exception
     </T> */
-    @Throws(IOException::class)
-    fun <T : Throwable> throwIfNotNull(throwable: T?, clazz: Class<T>) {
+    fun <T : Throwable> throwIfNotNull(throwable: T?, clazz: KClass<T>) {
         if (throwable != null)
             throw throwable
     }
 
 
-    @Throws(XmlPullParserException::class)
-    fun throwIfNotNullXPE(xe: XmlPullParserException?) {
+    fun throwIfNotNullXPE(xe: KMPPullParserException?) {
         if (xe != null) {
             throw xe
         }
@@ -200,7 +183,6 @@ object UMIOUtils {
      *
      * @throws IOException
      */
-    @Throws(IOException::class)
     fun logAndThrowIfNotNullIO(e: IOException?, level: Int, code: Int, message: String) {
         if (e != null) {
             UstadMobileSystemImpl.l(level, code, message, e)
@@ -208,7 +190,6 @@ object UMIOUtils {
         }
     }
 
-    @Throws(Exception::class)
     fun throwIfNotNull(e: Exception?) {
         if (e != null) {
             throw e
@@ -218,7 +199,7 @@ object UMIOUtils {
     fun sanitizeIDForFilename(id: String): String {
         var c: Char
         val len = id.length
-        val retVal = StringBuffer()
+        val retVal = StringBuilder()
         for (i in 0 until len) {
             c = id[i]
             if (c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9' || c == '.' || c == '-' || c == '*' || c == '_') {
@@ -226,10 +207,108 @@ object UMIOUtils {
             } else if (c == ' ' || c == '\t' || c == '\n') {
                 retVal.append('_')
             } else {
-                retVal.append("_").append(Integer.toHexString(c.toInt()))
+                retVal.append("_").append(convertToHexString(c.toInt()))
             }
         }
         return retVal.toString()
+    }
+
+    fun convertToHexString(`val`: Int, shift: Int = 4): String {
+        // assert shift > 0 && shift <=5 : "Illegal shift value";
+        val mag = 32 - numberOfLeadingZeros(`val`)
+        val chars = max((mag + (shift - 1)) / shift, 1)
+        val buf = CharArray(chars)
+
+        formatUnsignedInt(`val`, shift, buf, 0, chars)
+
+        return String(buf)
+    }
+
+    private fun numberOfLeadingZeros(i: Int): Int {
+        var i = i
+        // HD, Figure 5-6
+        if (i == 0)
+            return 32
+        var n = 1
+        if (i.ushr(16) == 0) {
+            n += 16
+            i = i shl 16
+        }
+        if (i.ushr(24) == 0) {
+            n += 8
+            i = i shl 8
+        }
+        if (i.ushr(28) == 0) {
+            n += 4
+            i = i shl 4
+        }
+        if (i.ushr(30) == 0) {
+            n += 2
+            i = i shl 2
+        }
+        n -= i.ushr(31)
+        return n
+    }
+
+    private val digits = charArrayOf(
+            '0',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+            'a',
+            'b',
+            'c',
+            'd',
+            'e',
+            'f',
+            'g',
+            'h',
+            'i',
+            'j',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+            'q',
+            'r',
+            's',
+            't',
+            'u',
+            'v',
+            'w',
+            'x',
+            'y',
+            'z'
+    )
+
+    /**
+     * Format a long (treated as unsigned) into a character buffer.
+     * @param val the unsigned int to format
+     * @param shift the log2 of the base to format in (4 for hex, 3 for octal, 1 for binary)
+     * @param buf the character buffer to write to
+     * @param offset the offset in the destination buffer to start at
+     * @param len the number of characters to write
+     * @return the lowest character  location used
+     */
+    private fun formatUnsignedInt(`val`: Int, shift: Int, buf: CharArray, offset: Int, len: Int): Int {
+        var `val` = `val`
+        var charPos = len
+        val radix = 1 shl shift
+        val mask = radix - 1
+        do {
+            buf[offset + --charPos] = digits[`val` and mask]
+            `val` = `val` ushr shift
+        } while (`val` != 0 && charPos > 0)
+
+        return charPos
     }
 
 

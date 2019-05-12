@@ -27,6 +27,7 @@ compileTestJava {
 //sourceSets.test.java.srcDirs += ["$projectDir/tmp/java"]
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database-runtime-jdbc')
     implementation project(":lib-util")
@@ -34,6 +35,7 @@ dependencies {
     implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
     implementation "org.apache.commons:commons-text:$version_apache_commons_text"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
 
     //SQLite dependencies
     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"

@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: "kotlin-android"
 
 buildscript {
     repositories {
@@ -16,7 +17,7 @@ android {
 
 
     sourceSets {
-        main.java.srcDirs += ["build/generated/source/umentities", "build/generated/source/umdbprocessor"]
+        main.java.srcDirs += ["build/generated/source/umdbprocessor"]
     }
 
     defaultConfig {
@@ -44,27 +45,19 @@ android {
 
 }
 
-task generateRoomEntities {
-    inputs.files(fileTree(dir: rootProject.file("lib-database/src/main/java")).matching { include '**/*.java' })
-    outputs.dir("build/generated/source/umentities")
-}
-
-generateRoomEntities.dependsOn(":lib-database-entity-processor:runRoomProcessor")
-
-afterEvaluate {
-    android.libraryVariants.all { variant ->
-        variant.javaCompiler.dependsOn(generateRoomEntities)
-    }
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(':lib-database')
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database-runtime-android')
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-util")
     implementation project(":lib-database-retrofitrepository")
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"

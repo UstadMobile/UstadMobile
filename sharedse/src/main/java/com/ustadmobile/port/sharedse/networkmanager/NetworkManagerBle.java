@@ -529,7 +529,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
         for(List<EntryStatusResponse> responseList : entryStatusResponses.values()) {
             for(EntryStatusResponse response : responseList) {
-                if(response.isAvailable())
+                if(response.getAvailable())
                     locallyAvailableContainerUids.add(response.getErContainerUid());
             }
         }

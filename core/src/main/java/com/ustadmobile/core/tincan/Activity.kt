@@ -5,7 +5,6 @@
  */
 package com.ustadmobile.core.tincan
 
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
 import org.json.JSONException

@@ -31,6 +31,7 @@
 
 package com.ustadmobile.core.impl
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DialogFragment
 import android.content.Context
@@ -41,19 +42,21 @@ import android.os.AsyncTask
 import android.os.Environment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import com.ustadmobile.core.BuildConfig
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.util.UMUtil
 import kotlinx.io.InputStream
-
 import ustadmobile.core.impl.UMAndroidUtil
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
-
 import java.util.concurrent.Executors
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -81,12 +84,11 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
 
 
     private abstract class UmCallbackAsyncTask<A, P, R>
-    private constructor(protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
+    (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
 
         protected var error: Throwable? = null
 
-
-        protected override fun onPostExecute(r: R) {
+        override fun onPostExecute(r: R) {
             if (error == null) {
                 umCallback.onSuccess(r)
             } else {
@@ -100,11 +102,9 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
      */
-    private class GetSetupFileAsyncTask
-    private constructor(doneCallback: UmCallback<*>, private val context: Context) : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback) {
-
-        protected override fun doInBackground(vararg booleans: Boolean): String {
-            val apkFile = File(context.getApplicationInfo().sourceDir)
+    private class GetSetupFileAsyncTask (doneCallback: UmCallback<*>, private val context: Context) : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback) {
+        override fun doInBackground(vararg params: Boolean?): String {
+            val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
             val impl = UstadMobileSystemImpl.instance
 
@@ -113,12 +113,11 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
 
 
             var apkFileIn: FileInputStream? = null
-            val ctx = context
-            val outDir = File(ctx.filesDir, "shared")
+            val outDir = File(context.filesDir, "shared")
             if (!outDir.isDirectory)
                 outDir.mkdirs()
 
-            if (booleans[0]) {
+            if (params[0]!!) {
                 var zipOut: ZipOutputStream? = null
                 val outZipFile = File(outDir, "$baseName.zip")
                 try {
@@ -152,6 +151,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
                 return outApkFile.absolutePath
             }
         }
+
     }
 
 
@@ -184,7 +184,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
                 if (args != null)
                     dialog.arguments = argsBundle
                 val activity = context as AppCompatActivity
-                dialog.show(activity.getSupportFragmentManager(), TAG_DIALOG_FRAGMENT)
+                dialog.show(activity.supportFragmentManager, TAG_DIALOG_FRAGMENT)
             } catch (e: InstantiationException) {
                 Log.wtf(TAG, "Could not instantiate dialog", e)
                 toastMsg = "Dialog error: $e"
@@ -335,7 +335,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
             val pInfo = ctx.packageManager.getPackageInfo(context.packageName, 0)
             versionInfo = 'v'.toString() + pInfo.versionName + " (#" + pInfo.versionCode + ')'.toString()
         } catch (e: PackageManager.NameNotFoundException) {
-            UMLog.l(UMLog.ERROR, 90, null, e)
+            l(UMLog.ERROR, 90, null, e)
         }
 
         return versionInfo!!
@@ -354,7 +354,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
             val pInfo = ctx.packageManager.getPackageInfo(context.packageName, 0)
             return pInfo.lastUpdateTime
         } catch (e: PackageManager.NameNotFoundException) {
-            UMLog.l(UMLog.ERROR, 90, null, e)
+           l(UMLog.ERROR, 90, null, e)
         }
         return 0
     }
@@ -394,7 +394,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
                 return metaData.getString(key)
             }
         } catch (e: PackageManager.NameNotFoundException) {
-            UMLog.l(UMLog.ERROR, UMLog.ERROR, key, e)
+            l(UMLog.ERROR, UMLog.ERROR, key, e)
         }
         return null
     }

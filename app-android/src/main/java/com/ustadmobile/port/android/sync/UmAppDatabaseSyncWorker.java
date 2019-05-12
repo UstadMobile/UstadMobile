@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMLogger;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.lib.db.entities.UmAccount;
@@ -50,9 +50,9 @@ public class UmAppDatabaseSyncWorker extends Worker {
             umAppDb.syncWith(
                     UmAccountManager.INSTANCE.getRepositoryForActiveAccount(getApplicationContext()),
                     activeAccount != null ? activeAccount.getPersonUid() : 0, 100, 100);
-            UstadMobileSystemImpl.l(UMLog.INFO, 100, "database syncWith repo ran");
+            UstadMobileSystemImpl.l(UMLogger.INFO, 100, "database syncWith repo ran");
         }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.WARN, 101, "Exception running syncWith :" +
+            UstadMobileSystemImpl.l(UMLogger.WARN, 101, "Exception running syncWith :" +
                     e.getMessage());
         }
 

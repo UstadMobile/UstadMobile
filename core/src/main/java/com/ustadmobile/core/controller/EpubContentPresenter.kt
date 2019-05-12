@@ -64,7 +64,6 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.http.UmHttpCall

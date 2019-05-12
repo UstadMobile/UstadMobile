@@ -76,7 +76,7 @@ abstract class UstadMobileSystemImpl {
      *
      * @return Platform logger
      */
-    abstract val logger: UMLog
+    abstract val logger: UMLogger
 
     /**
      * Do any required startup operations: init will be called on creation
@@ -571,7 +571,7 @@ abstract class UstadMobileSystemImpl {
 
         /**
          * Convenience shortcut for logging
-         * @see UMLog.l
+         * @see UMLogger.l
          * @param level log level
          * @param code log code
          * @param message log message
@@ -584,7 +584,7 @@ abstract class UstadMobileSystemImpl {
 
         /**
          * Convenience shortcut for logging
-         * @see UMLog.l
+         * @see UMLogger.l
          * @param level log level
          * @param code log code
          * @param message message to log

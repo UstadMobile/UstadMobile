@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
 import java.util.HashMap
@@ -432,7 +431,7 @@ object UMFileUtil {
      * @param ht map of param keys to values (keys and values must be strings)
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
-    fun mapToQueryString(ht: Map<String, String>?): String {
+    fun mapToQueryString(ht: Map<String, String?>): String {
         val sb = StringBuffer()
 
         if (ht == null) {
@@ -807,7 +806,7 @@ object UMFileUtil {
     }
 
 
-    fun clearTopFromReferrerPath(viewname: String, args: Map<String, String>?, referrerPath: String): String {
+    fun clearTopFromReferrerPath(viewname: String, args: Map<String, String?>, referrerPath: String): String {
         val lastIndex = referrerPath.lastIndexOf("/$viewname?")
         return if (lastIndex != -1) {
             referrerPath.substring(0, referrerPath.indexOf("/", lastIndex))

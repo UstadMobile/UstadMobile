@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.ShowErrorUmCallback
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.http.ShowErrorUmHttpResponseCallback
 import com.ustadmobile.core.impl.http.UmHttpCall

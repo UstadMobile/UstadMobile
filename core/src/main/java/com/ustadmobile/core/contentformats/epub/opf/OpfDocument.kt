@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.contentformats.epub.opf
 
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException

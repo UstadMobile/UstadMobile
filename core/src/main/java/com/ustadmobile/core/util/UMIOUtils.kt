@@ -31,7 +31,7 @@
 
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UMLogger
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
 import org.xmlpull.v1.XmlPullParserException
@@ -196,7 +196,7 @@ object UMIOUtils {
      * @param code Exception code
      * @param message Message if any
      *
-     * @see UMLog
+     * @see UMLogger
      *
      * @throws IOException
      */

@@ -6,7 +6,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMLogger;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -49,7 +49,7 @@ public class EmbeddedHttpdService extends Service {
         try {
             httpd.start();
         }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.CRITICAL, 0, "Could not start httpd server");
+            UstadMobileSystemImpl.l(UMLogger.CRITICAL, 0, "Could not start httpd server");
             throw new RuntimeException("Could not start httpd server", e);
         }
     }

@@ -74,10 +74,13 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.util.UMUtil
+import kotlinx.coroutines.Runnable
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.util.*
 import kotlinx.io.*
+import org.kmp.io.KMPPullParser
+import org.kmp.io.KMPPullParserException
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -137,7 +140,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
 
                 } catch (e: IOException) {
                     e.printStackTrace()
-                } catch (x: XmlPullParserException) {
+                } catch (x: KMPPullParserException) {
                     x.printStackTrace()
                 }
 
@@ -200,7 +203,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                         context, navXhtmlUrl), navCallbackHandler)
             } catch (e: IOException) {
                 e.printStackTrace()
-            } catch (x: XmlPullParserException) {
+            } catch (x: KMPPullParserException) {
                 x.printStackTrace()
             }
 
@@ -217,13 +220,13 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
             try {
                 val xpp = UstadMobileSystemImpl.instance.newPullParser(
                         ByteArrayInputStream(response.responseBody), "UTF-8")
-                xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
+                xpp.setFeature(KMPPullParser.FEATURE_PROCESS_NAMESPACES, true)
                 navDocument.load(xpp)
                 epubContentView!!.runOnUiThread(Runnable  { epubContentView.setTableOfContents(navDocument.toc!!) })
                 view.runOnUiThread(Runnable  { view.setProgressBarVisible(false) })
             } catch (e: IOException) {
                 e.printStackTrace()
-            } catch (x: XmlPullParserException) {
+            } catch (x: KMPPullParserException) {
                 x.printStackTrace()
             }
 
@@ -236,7 +239,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val containerUid = java.lang.Long.parseLong(arguments.get(EpubContentView.ARG_CONTAINER_UID))
+        val containerUid = (arguments[EpubContentView.ARG_CONTAINER_UID]?.toLong() ?: 0)
         view.setProgressBarProgress(-1)
         view.setProgressBarVisible(true)
         view.mountContainer(containerUid, mountedCallbackHandler)

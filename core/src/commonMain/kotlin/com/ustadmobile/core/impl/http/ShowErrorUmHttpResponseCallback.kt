@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl.http
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ViewWithErrorNotifier
+import kotlinx.coroutines.Runnable
 import kotlinx.io.IOException
 
 
@@ -23,7 +24,7 @@ abstract class ShowErrorUmHttpResponseCallback(private val view: ViewWithErrorNo
         }
     }
 
-    override fun onFailure(call: UmHttpCall, exception: IOException) {
+    override fun onFailure(call: UmHttpCall, exception: Exception) {
         view.runOnUiThread(Runnable {
             view.showErrorNotification(UstadMobileSystemImpl.instance.getString(errorMessageId,
                 view.context), Runnable { }, 0)

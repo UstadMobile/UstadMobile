@@ -31,12 +31,8 @@
 
 package com.ustadmobile.core.contentformats.epub.ocf
 
-import kotlinx.io.IOException
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-
-import java.io.IOException
-import java.util.ArrayList
+import org.kmp.io.KMPPullParser
+import org.kmp.io.KMPXmlParser
 
 
 /**
@@ -54,20 +50,19 @@ class OcfDocument {
     }
 
 
-    @Throws(XmlPullParserException::class, IOException::class)
-    fun loadFromParser(xpp: XmlPullParser) {
+    fun loadFromParser(xpp: KMPXmlParser) {
         var evtType: Int
 
         do {
             evtType = xpp.next()
-            if (evtType == XmlPullParser.START_TAG) {
-                if (ROOTFILETAG == xpp.name) {
+            if (evtType == KMPPullParser.START_TAG) {
+                if (ROOTFILETAG == xpp.getName()) {
                     val fullPath = xpp.getAttributeValue(null, "full-path")
                     val mediaType = xpp.getAttributeValue(null, "media-type")
                     rootFiles.add(OcfRootFile(fullPath, mediaType))
                 }
             }
-        } while (evtType != XmlPullParser.END_DOCUMENT)
+        } while (evtType != KMPPullParser.END_DOCUMENT)
     }
 
     fun getRootFiles(): List<OcfRootFile> {
