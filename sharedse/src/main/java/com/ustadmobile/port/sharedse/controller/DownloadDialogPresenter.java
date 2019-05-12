@@ -15,6 +15,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogView> {
 
@@ -48,15 +49,14 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private NetworkManagerBle networkManagerBle;
 
-    private Map<String , String>  args;
-
     private DownloadJobItemManager jobItemManager;
+
+    private AtomicInteger downloadJobStatus = new AtomicInteger(0);
 
     public DownloadDialogPresenter(Object context, NetworkManagerBle networkManagerBle,
                                    Map<String , String>  arguments, DownloadDialogView view,
                                    UmAppDatabase appDatabase, UmAppDatabase appDatabaseRepo) {
         super(context, arguments, view);
-        this.args = arguments;
         this.networkManagerBle = networkManagerBle;
         this.appDatabase = appDatabase;
         this.appDatabaseRepo = appDatabaseRepo;
@@ -107,6 +107,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     private void handleDownloadJobStatusChange(DownloadJob downloadJob){
         if(downloadJob != null){
             int downloadStatus = downloadJob.getDjStatus();
+            downloadJobStatus.set(downloadStatus);
             getView().setCalculatingViewVisible(false);
             getView().setWifiOnlyOptionVisible(true);
             if(downloadStatus >= JobStatus.COMPLETE_MIN){
@@ -196,8 +197,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
      * @param dismissAfter flag to indicate if the dialog will be dismissed after the selection
      */
     public void handleClickNegative(boolean dismissAfter) {
+        if(downloadJobStatus.get() == 0) {
+            new Thread(() -> networkManagerBle.deleteUnusedDownloadJob((int)downloadJobUid)).start();
+        }
+
         //if the download has not been started
-        new Thread(() -> appDatabase.getDownloadJobDao().cleanupUnused((int)downloadJobUid)).start();
         if(dismissAfter)
             dismissDialog();
     }

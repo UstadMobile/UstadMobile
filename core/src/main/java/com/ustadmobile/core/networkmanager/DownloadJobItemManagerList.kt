@@ -88,5 +88,18 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         }
     }
 
+    fun deleteUnusedDownloadJob(downloadJobUid: Int) {
+        val downloadJobManager = managerMap[downloadJobUid]
+        val rootItemStatus = downloadJobManager?.rootItemStatus
+        if(downloadJobManager != null && rootItemStatus != null)  {
+            downloadJobManager.updateStatus(rootItemStatus.jobItemUid, JobStatus.CANCELED, null)
+        }
+
+        if(downloadJobManager != null) {
+            managerMap.remove(downloadJobUid)
+        }
+
+        appDatabase.downloadJobDao.cleanupUnused(downloadJobUid)
+    }
 
 }

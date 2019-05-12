@@ -136,7 +136,7 @@ public class DownloadNotificationService extends Service
 
     private NotificationManagerCompat mNotificationManager;
 
-    private HashMap<Long, UmNotification> knownNotifications = new HashMap<>();
+    private HashMap<Long, UmNotification> downloadJobIdToNotificationMap = new HashMap<>();
 
     private AtomicInteger notificationIdRef = new AtomicInteger(9);
 
@@ -176,7 +176,7 @@ public class DownloadNotificationService extends Service
         if(intent != null && intent.getAction() != null && intent.getExtras() != null){
             String action = intent.getAction();
             long downloadJobId = intent.getExtras().getLong(JOB_ID_TAG);
-            UmNotification umNotification = knownNotifications.get(downloadJobId);
+            UmNotification umNotification = downloadJobIdToNotificationMap.get(downloadJobId);
 
             switch (action){
                 case ACTION_START_FOREGROUND_SERVICE:
@@ -218,11 +218,13 @@ public class DownloadNotificationService extends Service
     public void onDownloadJobItemChange(@Nullable DownloadJobItemStatus status, @NotNull DownloadJobItemManager manager) {
         if(status != null && manager.getRootContentEntryUid() == status.getContentEntryUid()) {
             long downloadJobId = manager.getDownloadJobUid();
-            UmNotification umNotification = knownNotifications.get(downloadJobId);
+            UmNotification umNotification = downloadJobIdToNotificationMap.get(downloadJobId);
             boolean isRunning = status.getStatus() >= JobStatus.RUNNING_MIN
                     && status.getStatus() <= JobStatus.RUNNING_MAX;
 
             if(umNotification == null){
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 699,
+                        "Creating new notification for download #" + downloadJobId);
                 totalBytesToBeDownloaded = totalBytesToBeDownloaded +
                         status.getTotalBytes();
                 int notificationId = notificationIdRef.incrementAndGet();
@@ -245,10 +247,12 @@ public class DownloadNotificationService extends Service
 
             }else if(status.getStatus() >= JobStatus.COMPLETE_MIN) {
                 //job has completed and notification needs to be removed
-                UmNotification notification = knownNotifications.get((long)manager.getDownloadJobUid());
+                UmNotification notification = downloadJobIdToNotificationMap.get((long)manager.getDownloadJobUid());
                 if(notification != null) {
                     mNotificationManager.cancel(notification.notificationId);
-                    knownNotifications.remove((long)manager.getDownloadJobUid());
+                    downloadJobIdToNotificationMap.remove((long)manager.getDownloadJobUid());
+                    if(downloadJobIdToNotificationMap.isEmpty())
+                        stopForegroundService();
                 }else {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 699, "Cannot find notification for download!");
                 }
@@ -363,13 +367,15 @@ public class DownloadNotificationService extends Service
                     .setContentTitle(contentTitle)
                     .setContentText(contentText)
                     .setSubText(contentSubText);
+
+            if(!downloadJobIdToNotificationMap.containsKey(downloadJobId)){
+                downloadJobIdToNotificationMap.put(downloadJobId, umNotification);
+            }
         }
 
         builder.setGroup(NOTIFICATION_GROUP_KEY);
 
-        if(!knownNotifications.containsKey(downloadJobId)){
-            knownNotifications.put(downloadJobId, umNotification);
-        }
+
 
         Notification notification = builder.build();
 
@@ -392,7 +398,7 @@ public class DownloadNotificationService extends Service
      */
     private void updateDownloadJobNotification(long downloadJobId, int progress, String contentTitle ,
                                                String contentText, String contentSubText){
-        UmNotification umNotification = knownNotifications.get(downloadJobId);
+        UmNotification umNotification = downloadJobIdToNotificationMap.get(downloadJobId);
         if(umNotification != null){
             NotificationCompat.Builder builder = umNotification.getBuilder();
             builder.setContentTitle(contentTitle)
@@ -408,7 +414,7 @@ public class DownloadNotificationService extends Service
      * Update summary notification to show progress as the sum of all download notifications
      */
     private void updateDownloadSummary(){
-        UmNotification umNotification = knownNotifications.get(GROUP_SUMMARY_ID);
+        UmNotification umNotification = downloadJobIdToNotificationMap.get(GROUP_SUMMARY_ID);
         if(umNotification != null){
             String summaryLabel = impl.getString(MessageID.download_downloading_placeholder,
                     getApplicationContext());
@@ -440,7 +446,7 @@ public class DownloadNotificationService extends Service
         if(mNetworkServiceBound.get())
             unbindService(mNetworkServiceConnection);
 
-        knownNotifications.clear();
+        downloadJobIdToNotificationMap.clear();
     }
 
     private boolean isVersionLollipopOrAbove(){

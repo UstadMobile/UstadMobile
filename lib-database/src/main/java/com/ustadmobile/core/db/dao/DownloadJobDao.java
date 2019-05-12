@@ -166,10 +166,12 @@ public abstract class DownloadJobDao {
 
     @UmQuery("DELETE FROM DownloadJobItem " +
             "WHERE djiDjUid = :downloadJobUid " +
-            "AND djiStatus = " + JobStatus.NOT_QUEUED)
+            "AND (djiStatus = " + JobStatus.NOT_QUEUED +
+            " OR djiStatus = " + JobStatus.CANCELED + ")")
     public abstract void deleteUnusedDownloadJobItems(int downloadJobUid);
 
-    @UmQuery("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = " + JobStatus.NOT_QUEUED)
+    @UmQuery("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = "
+            + JobStatus.NOT_QUEUED  + " OR djStatus = " + JobStatus.CANCELED)
     public abstract void deleteUnusedDownloadJob(int downloadJobUid);
 
 }
