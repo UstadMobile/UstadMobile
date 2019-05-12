@@ -14,7 +14,6 @@ import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import kotlinx.coroutines.Runnable
-import org.xmlpull.v1.XmlPullParserException
 import kotlinx.io.*
 import org.kmp.io.KMPPullParserException
 

@@ -47,7 +47,7 @@ abstract class UstadBaseController<V : UstadView> (override val context : Any,
                                                    val arguments: Map<String, String?>, val view: V)
     :  UmLifecycleOwner {
 
-    private val lifecycleListeners = List<UmLifecycleListener>()
+    private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
 
     private val lifecycleStatus = AtomicInteger(0)
 

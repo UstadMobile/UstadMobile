@@ -23,6 +23,8 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.coroutines.Runnable
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -87,7 +89,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                             if (contentEntryTitle != null)
                                 view.setContentEntryTitle(contentEntryTitle)
 
-                            val contentEntryDesc = it.description
+                            val contentEntryDesc = description
                             if (contentEntryDesc != null)
                                 view.setContentEntryDesc(contentEntryDesc)
 

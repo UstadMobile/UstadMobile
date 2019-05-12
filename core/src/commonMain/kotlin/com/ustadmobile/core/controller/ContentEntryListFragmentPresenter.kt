@@ -80,7 +80,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
         contentEntryDao!!.findListOfCategories(parentUid!!, object : UmCallback<List<DistinctCategorySchema>> {
             override fun onSuccess(result: List<DistinctCategorySchema>?) {
-                if (result != null && !result.isEmpty()) {
+                if (!result.isNullOrEmpty()) {
 
                     val schemaMap = HashMap<Long, List<DistinctCategorySchema>>()
                     for (schema in result) {

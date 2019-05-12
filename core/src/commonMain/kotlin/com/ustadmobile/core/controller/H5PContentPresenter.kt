@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.core.view.UstadView
+import kotlinx.coroutines.Runnable
 
 import org.json.JSONObject
 
@@ -22,7 +23,7 @@ import kotlinx.io.*
  * Created by mike on 2/15/18.
  */
 
-class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: H5PContentView) :
+class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H5PContentView) :
         UstadBaseController<H5PContentView>(context, arguments, view) {
 
     private var containerUid = 0L
@@ -58,13 +59,13 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
     private val contentFrameLoadedCallback = object : UmCallback<InputStream> {
 
         override fun onSuccess(result: InputStream?) {
-            if(result != null){
+            if (result != null) {
                 try {
                     var htmlStr = UMIOUtils.readStreamToString(result)
                     htmlStr = htmlStr.replace("\$DISTPATH", h5pDistMountUrl!!)
                     val h5pMountUrl2 = h5pFileMountUrl!!.substring(0, h5pFileMountUrl!!.length - 1)
                     val subHtmlStr = htmlStr.replace("\$CONTENTPATH", h5pMountUrl2)
-                    view.runOnUiThread (Runnable {
+                    view.runOnUiThread(Runnable {
                         view.setContentHtml(h5pFileMountUrl!!, subHtmlStr)
                     })
                     val h5PJsonRequest = UmHttpRequest(context,
@@ -88,7 +89,7 @@ class H5PContentPresenter(context: Any, arguments : Map<String, String?>, view: 
                 if (response.isSuccessful) {
                     val jsonStr = UMIOUtils.readStreamToString(response.responseAsStream!!)
                     val jsonObj = JSONObject(jsonStr)
-                    view.runOnUiThread(Runnable  {
+                    view.runOnUiThread(Runnable {
                         view.setTitle(
                                 jsonObj.getString("title"))
                     })
