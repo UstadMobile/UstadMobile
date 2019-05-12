@@ -43,6 +43,12 @@ kotlin {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
             }
         }
+
+        androidMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+            }
+        }
     }
 }
 

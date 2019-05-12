@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -18,9 +19,11 @@ class PersonGroupMember {
     var groupMemberUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var groupMemberPersonUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var groupMemberGroupUid: Long = 0
 
     @UmSyncMasterChangeSeqNum

@@ -64,7 +64,6 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
             database.getNetworkNodeDao().deleteAll(null);
             database.getEntryStatusResponseDao().deleteAll(null);
             database.getDownloadJobItemHistoryDao().deleteAll(null);
-            database.getDownloadSetDao().deleteAll(null);
             database.getDownloadJobDao().deleteAll(null);
             database.getDownloadJobItemDao().deleteAll(null);
             database.getContentEntryStatusDao().deleteAll(null);

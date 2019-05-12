@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -26,6 +27,7 @@ class NetworkNode {
      * @param bluetoothMacAddress Device bluetooth address
      */
     @UmIndexField
+    @ColumnInfo(index = true)
     var bluetoothMacAddress: String? = null
 
     /**
@@ -70,6 +72,7 @@ class NetworkNode {
      * Method which used to set last node update time by Wi-Fi Direct service.
      */
     @UmIndexField
+    @ColumnInfo(index = true)
     var lastUpdateTimeStamp: Long = 0
 
     /**

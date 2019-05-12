@@ -48,10 +48,6 @@ open class DownloadJob {
      */
     constructor()
 
-    constructor(downloadSet: DownloadSet) {
-        this.djDsUid = downloadSet.dsUid.toLong()
-    }
-
     constructor(contentEntryEntryUid: Long, timeCreated: Long) {
         djRootContentEntryUid = contentEntryEntryUid
         this.timeCreated = timeCreated

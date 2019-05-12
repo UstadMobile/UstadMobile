@@ -18,7 +18,6 @@ import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemParentChildJoinDao;
-import com.ustadmobile.core.db.dao.DownloadSetDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
@@ -70,7 +69,6 @@ import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
-import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
@@ -102,7 +100,6 @@ import java.util.Random;
 
 
 @UmDatabase(version = 22, entities = {
-        DownloadSet.class,
         NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
@@ -645,6 +642,14 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             }
         });
 
+        builder.addMigration(new UmDbMigration(20, 22) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                db.execSql("DROP TABLE DownloadSet");
+                db.execSql("DROP TABLE DownloadSetItem");
+            }
+        });
+
         return builder;
     }
 
@@ -657,8 +662,6 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract NetworkNodeDao getNetworkNodeDao();
 
     public abstract EntryStatusResponseDao getEntryStatusResponseDao();
-
-    public abstract DownloadSetDao getDownloadSetDao();
 
     public abstract DownloadJobDao getDownloadJobDao();
 

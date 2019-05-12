@@ -12,7 +12,6 @@ import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer;
@@ -67,9 +66,6 @@ public class DownloadDialogPresenterTest {
     private ContentEntry rootEntry;
 
     private DownloadJob downloadJob;
-
-    @Deprecated
-    private DownloadSet downloadSet;
 
     private Container container;
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -35,11 +36,13 @@ open class DownloadJobItem {
     var currentSpeed: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var timeStarted: Long = 0
 
     var timeFinished: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var djiStatus: Int = 0
 
     var destinationFile: String? = null

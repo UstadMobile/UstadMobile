@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 
 import java.io.File;

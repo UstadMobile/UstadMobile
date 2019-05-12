@@ -5,7 +5,5 @@ package com.ustadmobile.lib.database.annotation
  */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
-/*
- Kotlin translation: removed [] as this does not translate to javascript
- */
-annotation class UmEntity(/*val primaryKeys: Array<String> = [], val indices: Array<UmIndex> = [], */val tableId: Int = 0)
+
+annotation class UmEntity(val primaryKeys: Array<String> = arrayOf(), val indices: Array<UmIndex> = arrayOf(), val tableId: Int = 0)

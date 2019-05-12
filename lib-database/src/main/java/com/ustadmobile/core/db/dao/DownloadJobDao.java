@@ -131,8 +131,7 @@ public abstract class DownloadJobDao {
 
 
     @UmQuery("SELECT ContentEntry.title FROM DownloadJob " +
-            "LEFT JOIN DownloadSet ON DownloadJob.djDsUid = DownloadSet.dsUid " +
-            "LEFT JOIN ContentEntry ON DownloadSet.dsRootContentEntryUid = ContentEntry.contentEntryUid " +
+            "LEFT JOIN ContentEntry ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE DownloadJob.djUid = :downloadJobId")
     public abstract void getEntryTitleByJobUid(long downloadJobId, UmCallback<String> callback);
 
