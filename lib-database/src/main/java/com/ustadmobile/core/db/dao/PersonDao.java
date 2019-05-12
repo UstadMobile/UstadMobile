@@ -93,14 +93,17 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
                 if(person == null) {
                     callback.onSuccess(null);
                 }else if(person.getPasswordHash().startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                        && !person.getPasswordHash().substring(2).equals(password)) {
-                    callback.onSuccess(null);
-                }else if(person.getPasswordHash().startsWith(ENCRYPTED_PASS_PREFIX)
-                        && !PersonAuthDao.authenticateEncryptedPassword(password,
-                            person.getPasswordHash().substring(2))) {
-                    callback.onSuccess(null);
-                }else {
+                        && person.getPasswordHash().substring(2).equals(password)) {
                     onSuccessCreateAccessToken(person.getPersonUid(), username, callback);
+                }else if(person.getPasswordHash().startsWith(ENCRYPTED_PASS_PREFIX)
+                        && PersonAuthDao.authenticateEncryptedPassword(password,
+                            person.getPasswordHash().substring(2))) {
+                    onSuccessCreateAccessToken(person.getPersonUid(), username, callback);
+                }else if(PersonAuthDao.authenticateEncryptedPassword(password,
+                        person.getPasswordHash())){
+                    onSuccessCreateAccessToken(person.getPersonUid(), username, callback);
+                }else {
+                    callback.onSuccess(null);
                 }
             }
 

@@ -129,7 +129,7 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
                 @Override
                 public void onSuccess(Integer result) {
 
-                    personAuthDao.selfResetPassword(currentPassword, updatePassword, loggedInPersonUid,
+                    personAuthDao.selfResetPassword(currentPerson.getUsername(), currentPassword, updatePassword, loggedInPersonUid,
                       new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {

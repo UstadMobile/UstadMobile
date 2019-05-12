@@ -2,12 +2,15 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
 import com.ustadmobile.lib.database.annotation.UmRestAccessible;
 import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam;
 import com.ustadmobile.lib.database.annotation.UmUpdate;
+import com.ustadmobile.lib.db.entities.AccessToken;
 import com.ustadmobile.lib.db.entities.PersonAuth;
+import com.ustadmobile.lib.db.entities.UmAccount;
 import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.util.Base64Coder;
 
@@ -16,6 +19,8 @@ import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+
+import static com.ustadmobile.core.db.dao.PersonDao.SESSION_LENGTH;
 
 @UmDao
 @UmRepository
@@ -70,7 +75,7 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
     public void resetPassword(long personUid, String password,
                               @UmRestAuthorizedUidParam long loggedInPersonUid,
                               UmCallback<Integer> resetCallback) {
-        String passwordHash = encryptPassword(password);
+        String passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(password);
 
         if(loggedInPersonUid != personUid){
             if(isPersonAdmin(loggedInPersonUid)){
@@ -108,9 +113,20 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
 
     }
 
+    @UmInsert
+    public abstract void insertAccessToken(AccessToken token);
+
+    protected void onSuccessCreateAccessToken(long personUid, String username, UmCallback<UmAccount> callback) {
+        AccessToken accessToken = new AccessToken(personUid,
+                System.currentTimeMillis() + SESSION_LENGTH);
+        insertAccessToken(accessToken);
+        callback.onSuccess(new UmAccount(personUid, username, accessToken.getToken(),
+                null));
+    }
+
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    public void authenticate(long loggedInPersonUid, String oldPassword, UmCallback<Void> resetCallback){
+    public void authenticate(String username, long loggedInPersonUid, String oldPassword, UmCallback<UmAccount> resetCallback){
         //Authenticate with current password first.
         findByUidAsync(loggedInPersonUid, new UmCallback<PersonAuth>() {
             @Override
@@ -121,18 +137,22 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
                     String passwordHash = personAuthResult.getPasswordHash();
 
                     if (passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                            && !passwordHash.substring(2).equals(oldPassword)) {
-                        resetCallback.onSuccess(null);
+                            && passwordHash.substring(2).equals(oldPassword)) {
+                        System.out.println("ok1");
+                        onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback);
 
                     } else if (passwordHash.startsWith(ENCRYPTED_PASS_PREFIX)
-                            && !PersonAuthDao.authenticateEncryptedPassword(oldPassword,
+                            && PersonAuthDao.authenticateEncryptedPassword(oldPassword,
                             passwordHash.substring(2))) {
-                        resetCallback.onSuccess(null);
-                    }else if(!PersonAuthDao.authenticateEncryptedPassword(oldPassword,
+                        System.out.println("ok2");
+                        onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback);
+                    }else if(PersonAuthDao.authenticateEncryptedPassword(oldPassword,
                             passwordHash)){
-                        resetCallback.onSuccess(null);
+                        System.out.println("ok3");
+                        onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback);
                     }else{
-                        resetCallback.onFailure(null);
+                        System.out.println("nope1");
+                        resetCallback.onSuccess(null);
                     }
                 }
 
@@ -150,42 +170,48 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
 
     @UmRestAccessible
     @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
-    public void selfResetPassword(String oldPassword, String newPassword,
+    public void selfResetPassword(String username, String oldPassword, String newPassword,
                               @UmRestAuthorizedUidParam long loggedInPersonUid,
                               UmCallback<Integer> resetCallback) {
 
         //Generate password Hash
-        String passwordHash = encryptPassword(newPassword);
+        String passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(newPassword);
 
-        authenticate(loggedInPersonUid, oldPassword, new UmCallback<Void>() {
+        authenticate(username, loggedInPersonUid, oldPassword, new UmCallback<UmAccount>() {
             @Override
-            public void onSuccess(Void result) {
-                //Create new person auth entry if it doesnt exist
-                PersonAuth existingPersonAuth = findByUid(loggedInPersonUid);
-                if(existingPersonAuth == null){
-                    PersonAuth personAuth = new PersonAuth(loggedInPersonUid, passwordHash);
-                    insert(personAuth);
-                }
+            public void onSuccess(UmAccount result) {
+                if(result == null){
+                    resetCallback.onFailure(new Exception());
+                }else{
+                    //Create new person auth entry if it doesnt exist
+                    PersonAuth existingPersonAuth = findByUid(loggedInPersonUid);
+                    if(existingPersonAuth == null){
+                        PersonAuth personAuth = new PersonAuth(loggedInPersonUid, passwordHash);
+                        insert(personAuth);
+                    }
 
-                //Update password for Person
-                updatePasswordForPersonUid(loggedInPersonUid, passwordHash,
-                        new UmCallback<Integer>() {
-                            @Override
-                            public void onSuccess(Integer result) {
-                                if(result > 0) {
-                                    System.out.println("Update password success");
-                                    resetCallback.onSuccess(1);
-                                }else{
+                    //Update password for Person
+                    updatePasswordForPersonUid(loggedInPersonUid, passwordHash,
+                            new UmCallback<Integer>() {
+                                @Override
+                                public void onSuccess(Integer result) {
+                                    if(result > 0) {
+                                        System.out.println("Update password success");
+                                        resetCallback.onSuccess(1);
+                                    }else{
+                                        resetCallback.onFailure(new Exception());
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    System.out.println("Update password fail");
                                     resetCallback.onFailure(new Exception());
                                 }
-                            }
+                            });
+                }
 
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                System.out.println("Update password fail");
-                                resetCallback.onFailure(new Exception());
-                            }
-                        });
+
             }
 
             @Override
