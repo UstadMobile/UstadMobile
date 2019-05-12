@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
@@ -151,8 +152,9 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
             new Thread(() -> {
                 int totalDownloadJobItems = appDatabase.getDownloadJobItemDao()
                         .getTotalDownloadJobItems(downloadJobUid);
+                DownloadJobItemStatus rootStatus = jobItemManager.getRootItemStatus();
                 getView().runOnUiThread(() -> getView().setStatusText(statusMessage, totalDownloadJobItems,
-                        UMFileUtil.INSTANCE.formatFileSize(downloadJob.getTotalBytesToDownload())));
+                        UMFileUtil.INSTANCE.formatFileSize(rootStatus != null ? rootStatus.getTotalBytes() : 0)));
             }).start();
 
         }
