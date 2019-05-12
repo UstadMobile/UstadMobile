@@ -95,15 +95,17 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-metadata:$version_klock"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
-              /*  implementation project(':lib-database')
-                compileOnly project(':lib-database-entities')
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation project(':lib-database-entities')
+                //implementation project(':lib-database')
+              /*  compileOnly project(':lib-database-entities')
                 compileOnly project(':core-compile-only')
                 implementation project(':lib-database-runtime')
-                implementation project(":lib-util") */
+                implementation project(":lib-util")
             }
         }
         commonTest {
@@ -220,6 +222,7 @@ task prepareLocale {
     }
     outFile << '}'
 }
+
 
 /*
  * Added to overcome limitation on Android studio as per:

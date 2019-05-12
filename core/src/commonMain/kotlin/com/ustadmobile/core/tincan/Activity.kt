@@ -7,14 +7,11 @@ package com.ustadmobile.core.tincan
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonException
+import kotlinx.serialization.json.JsonObject
 
-import org.json.JSONException
-import org.json.JSONObject
-
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-/* $endif$ */
+import kotlin.jvm.JvmOverloads
 
 
 /**
@@ -51,13 +48,13 @@ class Activity @JvmOverloads constructor(id: String, internal var aType: String,
      * Returns a minimal xAPI statement which references the ID of this activity
      * @return
      */
-    val activityJSON: JSONObject?
+    val activityJSON: JsonObject?
         get() {
-            var activityDef: JSONObject? = null
+            var activityDef: JsonObject? = null
             try {
-                activityDef = JSONObject()
+                activityDef = JsonObject()
                 activityDef.put("id", this.id)
-            } catch (e: JSONException) {
+            } catch (e: JsonException) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 187, null, e)
             }
 

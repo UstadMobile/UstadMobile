@@ -25,6 +25,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import org.kmp.io.*
+
+import kotlin.system.*
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
@@ -195,11 +198,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         if (!isDownloadComplete) {
-            val currentTimeStamp = System.currentTimeMillis()
+            val currentTimeStamp = getTimeMillis()
             val minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1)
             val maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
                     TIME_INTERVAL_FROM_LAST_FAILURE.toLong())
-
             Thread {
 
                 val container = containerDao!!.getMostRecentContainerForContentEntry(entryUuid)

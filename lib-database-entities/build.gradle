@@ -1,34 +1,41 @@
 
-buildscript {
-    repositories {
-        mavenCentral()
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.multiplatform'
+}
+
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
+}
+
+
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.js, 'js')
+        fromPreset(presets.android, 'android')
     }
 
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    sourceSets {
+        commonMain {
+            dependencies {
+                compileOnly project(":lib-database-annotations")
+                compileOnly project(":lib-room-annotations")
+                implementation kotlin("stdlib-common:$version_kotlin")
+            }
+        }
     }
 }
 
 //Kotlin plugin applied using subprojects DSL on the root project as advised by documentation
-apply plugin: 'java-library'
 apply plugin: "maven-publish"
-
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':lib-database-runtime')
-    compileOnly project(":lib-room-annotations")
-
-    api "net.sf.kxml:kxml2:$version_kxml"
-    api project(":lib-util")
-
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
 
 
 publishing {
@@ -37,12 +44,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 
@@ -53,6 +54,3 @@ publishing {
     }
 }
 
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"

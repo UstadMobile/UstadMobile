@@ -17,7 +17,8 @@ dependencies {
 
     implementation project(":core")
     implementation project(":lib-database-jdbc")
-    implementation project(":lib-database-entities")
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
     implementation project(':lib-database')
     implementation project(":lib-database-runtime")
     implementation project(':lib-database-runtime-jdbc')

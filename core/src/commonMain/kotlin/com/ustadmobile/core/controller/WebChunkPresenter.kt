@@ -20,6 +20,7 @@ import kotlinx.coroutines.Runnable
 class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView)
     : UstadBaseController<WebChunkView>(context, arguments, view) {
 
+    lateinit var cs: ContentEntry
     private var navigation: String? = null
 
     override fun onCreate(savedState: Map<String, String?>?) {

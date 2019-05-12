@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: "kotlin-android"
 
 buildscript {
     repositories {
@@ -48,11 +49,15 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(':lib-database')
-    implementation project(":lib-database-entities")
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database-runtime-android')
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-util")
     implementation project(":lib-database-retrofitrepository")
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"

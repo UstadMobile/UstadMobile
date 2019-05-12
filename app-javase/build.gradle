@@ -18,7 +18,6 @@ task runOrmLiteGeneration(type: JavaExec) {
 dependencies {
     implementation project(":core")
     implementation project(":sharedse")
-    implementation project(":lib-core-fs")
     implementation project(":lib-util")
     implementation project(':lib-database-runtime-jdbc')
 
