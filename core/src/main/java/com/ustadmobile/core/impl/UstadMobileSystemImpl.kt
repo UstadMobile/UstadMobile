@@ -401,7 +401,6 @@ abstract class UstadMobileSystemImpl {
      * Wrapper to retrieve preference keys from the system Manifest.
      *
      * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
      *
      * @param key The key to lookup
      * @param defaultVal The default value to return if the key is not found

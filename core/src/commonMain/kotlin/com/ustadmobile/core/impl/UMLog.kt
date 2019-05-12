@@ -34,29 +34,31 @@ package com.ustadmobile.core.impl
  * Logging interface to be implemented by the System Implementation
  * @author mike
  */
-abstract class UMLog {
+expect class UMLog {
 
-
-    /**
-     * Log the given message
-     *
-     * @param level
-     * @param code An Error code to assist debugging
-     * @param message  (May be null)
-     */
-    abstract fun l(level: Int, code: Int, message: String)
-
-    /**
-     * Log the message given and the exception
-     *
-     * @param level
-     * @param code An Error code to assist debugging
-     * @param message
-     * @param exception
-     */
-    abstract fun l(level: Int, code: Int, message: String, exception: Exception)
 
     companion object {
+
+
+        /**
+         * Log the given message
+         *
+         * @param level
+         * @param code An Error code to assist debugging
+         * @param message  (May be null)
+         */
+        fun l(level: Int, code: Int, message: String?)
+
+        /**
+         * Log the message given and the exception
+         *
+         * @param level
+         * @param code An Error code to assist debugging
+         * @param message
+         * @param exception
+         */
+        fun l(level: Int, code: Int, message: String, exception: Exception)
+
 
         const val CRITICAL = 0
 
@@ -70,6 +72,4 @@ abstract class UMLog {
 
         const val DEBUG = 5
     }
-
-
 }

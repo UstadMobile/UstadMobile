@@ -151,6 +151,7 @@ kotlin {
         androidMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+                implementation 'com.android.support:support-v4:28.0.0'
             }
             dependsOn jvmMain
         }

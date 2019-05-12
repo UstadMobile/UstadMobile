@@ -6,7 +6,7 @@ import java.io.InputStream;
 /**
  * Created by mike on 12/27/17.
  */
-
+//JVM only
 public interface UstadMobileSystemImplFs {
 
     HttpCache getHttpCache(Object context);
