@@ -101,7 +101,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
 
         }
 
-        override fun onFailure(call: UmHttpCall, exception: IOException) {
+        override fun onFailure(call: UmHttpCall, exception: Exception) {
 
         }
     }

@@ -66,7 +66,7 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
 
         }
 
-        override fun onFailure(call: UmHttpCall, exception: IOException) {
+        override fun onFailure(call: UmHttpCall, exception: Exception) {
 
         }
     }

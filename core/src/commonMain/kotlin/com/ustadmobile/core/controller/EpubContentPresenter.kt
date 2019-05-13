@@ -67,6 +67,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
@@ -75,9 +76,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.util.UMUtil
 import kotlinx.coroutines.Runnable
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import java.util.*
 import kotlinx.io.*
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPPullParserException
@@ -102,7 +100,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
      * First HTTP callback: run this once the container has been mounted to an http directory
      *
      */
-    private val mountedCallbackHandler : UmCallback<String> = object : UmCallback<String> {
+    private val mountedCallbackHandler: UmCallback<String> = object : UmCallback<String> {
 
         override fun onSuccess(result: String?) {
             mountedUrl = result
@@ -112,9 +110,9 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
         }
 
         override fun onFailure(exception: Throwable?) {
-            if(exception != null){
+            if (exception != null) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 500, "Exception mounting container")
-                exception.printStackTrace()
+                dumpException(exception)
             }
         }
     }
@@ -139,15 +137,15 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                             UmHttpRequest(context, opfUrl), opfHttpCallbackHandler)
 
                 } catch (e: IOException) {
-                    e.printStackTrace()
+                    dumpException(e)
                 } catch (x: KMPPullParserException) {
-                    x.printStackTrace()
+                    dumpException(x)
                 }
 
             }
         }
 
-        override fun onFailure(call: UmHttpCall, exception: IOException) {
+        override fun onFailure(call: UmHttpCall, exception: Exception) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 500, "Exception loading container")
         }
     }
@@ -167,7 +165,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                 opfBaseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
                         mountedUrl!!, ocf!!.rootFiles[0].fullPath!!))
 
-                linearSpineUrls = Array(linearSpineHrefsRelative.size){""}
+                linearSpineUrls = Array(linearSpineHrefsRelative.size) { "" }
 
                 for (i in linearSpineHrefsRelative.indices) {
                     linearSpineUrls!![i] = UMFileUtil.joinPaths(opfBaseUrl!!,
@@ -180,7 +178,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                 else
                     null
 
-                epubContentView!!.runOnUiThread(Runnable  {
+                epubContentView!!.runOnUiThread(Runnable {
                     epubContentView.setContainerTitle(opf.title!!)
                     epubContentView.setSpineUrls(linearSpineUrls!!)
                     if (opfCoverImageItem != null) {
@@ -202,15 +200,15 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                 UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
                         context, navXhtmlUrl), navCallbackHandler)
             } catch (e: IOException) {
-                e.printStackTrace()
+                dumpException(e)
             } catch (x: KMPPullParserException) {
-                x.printStackTrace()
+                dumpException(x)
             }
 
         }
 
-        override fun onFailure(call: UmHttpCall, exception: IOException) {
-            exception.printStackTrace()
+        override fun onFailure(call: UmHttpCall, exception: Exception) {
+            dumpException(exception)
         }
     }
 
@@ -222,18 +220,18 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                         ByteArrayInputStream(response.responseBody), "UTF-8")
                 xpp.setFeature(KMPPullParser.FEATURE_PROCESS_NAMESPACES, true)
                 navDocument.load(xpp)
-                epubContentView!!.runOnUiThread(Runnable  { epubContentView.setTableOfContents(navDocument.toc!!) })
-                view.runOnUiThread(Runnable  { view.setProgressBarVisible(false) })
+                epubContentView!!.runOnUiThread(Runnable { epubContentView.setTableOfContents(navDocument.toc!!) })
+                view.runOnUiThread(Runnable { view.setProgressBarVisible(false) })
             } catch (e: IOException) {
-                e.printStackTrace()
+                dumpException(e)
             } catch (x: KMPPullParserException) {
-                x.printStackTrace()
+                dumpException(x)
             }
 
         }
 
-        override fun onFailure(call: UmHttpCall, exception: IOException) {
-            exception.printStackTrace()
+        override fun onFailure(call: UmHttpCall, exception: Exception) {
+            dumpException(exception)
         }
     }
 
