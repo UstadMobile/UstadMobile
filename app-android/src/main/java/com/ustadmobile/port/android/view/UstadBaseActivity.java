@@ -39,7 +39,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.core.view.ViewWithErrorNotifier;
 import com.ustadmobile.port.android.impl.UserFeedbackException;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
@@ -51,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.ustadmobile.core.impl.UstadMobileSystemImpl.*;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.getInstance;
 
 /**
@@ -143,7 +143,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         getInstance().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UstadMobileSystemImpl.ACTION_LOCALE_CHANGE);
+        intentFilter.addAction(ACTION_LOCALE_CHANGE);
         LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
                 intentFilter);
         super.onCreate(savedInstanceState);
@@ -250,7 +250,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE:
+                case UstadMobileSystemImpl.ACTION_LOCALE_CHANGE:
                     localeChanged = true;
                     break;
             }
@@ -345,7 +345,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
+                UstadMobileSystemImpl impl = getInstance();
                 impl.go(impl.getAppConfigString(AppConfig.INSTANCE.getKEY_FIRST_DEST(), null,
                         this), this);
                 return true;
@@ -388,8 +388,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         final Resources res = newBase.getResources();
         final Configuration config = res.getConfiguration();
         String languageSetting = getInstance().getLocale(newBase);
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
-                + languageSetting + "'");
 
         if (Build.VERSION.SDK_INT >= 17) {
             Locale locale = languageSetting.equals(UstadMobileSystemImpl.LOCALE_USE_SYSTEM)

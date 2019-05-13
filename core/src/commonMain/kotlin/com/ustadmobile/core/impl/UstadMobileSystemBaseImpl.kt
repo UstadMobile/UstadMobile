@@ -93,7 +93,7 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return The value of the manifest preference key if found, otherwise the default value
      */
-    actual fun getManifestPreference(key: String, defaultVal: String, context: Any): String {
+    open fun getManifestPreference(key: String, defaultVal: String, context: Any): String {
         val `val` = getManifestPreference(key, context)
         return `val` ?: defaultVal
     }
@@ -107,7 +107,7 @@ abstract class UstadMobileSystemBaseImpl {
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
      */
-    fun go(destination: String?, context: Any) {
+    open fun go(destination: String?, context: Any) {
         val destinationQueryPos = destination!!.indexOf('?')
         if (destinationQueryPos == -1) {
             go(destination, mapOf(), context)
@@ -117,7 +117,7 @@ abstract class UstadMobileSystemBaseImpl {
         }
     }
 
-    fun go(viewName: String, args: Map<String, String?>, context: Any) {
+    open fun go(viewName: String, args: Map<String, String?>, context: Any) {
         go(viewName, args, context, 0)
     }
 
@@ -162,7 +162,7 @@ abstract class UstadMobileSystemBaseImpl {
      * @param defaultVal default value to return if not set
      * @return value of the preference if set, defaultVal otherwise
      */
-    fun getAppPref(key: String, defaultVal: String, context: Any): String {
+    open fun getAppPref(key: String, defaultVal: String, context: Any): String {
         val valFound = getAppPref(key, context)
         return valFound ?: defaultVal
     }
@@ -184,7 +184,7 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return The locale as the user sees it.
      */
-    fun getDisplayedLocale(context: Any): String? {
+    open fun getDisplayedLocale(context: Any): String? {
         var locale = getLocale(context)
         if (locale == LOCALE_USE_SYSTEM)
             locale = getSystemLocale(context)
@@ -195,7 +195,7 @@ abstract class UstadMobileSystemBaseImpl {
     /**
      * Starts the user interface for the app
      */
-    fun startUI(context: Any) {
+    open fun startUI(context: Any) {
         val activeAccount = UmAccountManager.getActiveAccount(context)
 
         if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
@@ -212,7 +212,7 @@ abstract class UstadMobileSystemBaseImpl {
      * @return A new default options XmlPullParser
      */
 
-    fun newPullParser(): KMPXmlParser{
+    open fun newPullParser(): KMPXmlParser{
         return KMPXmlParser()
     }
 
@@ -221,7 +221,7 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return New instance of an XML Serializer
      */
-    fun newXMLSerializer(): KMPSerializerParser{
+    open fun newXMLSerializer(): KMPSerializerParser{
         return KMPSerializerParser()
     }
 
@@ -343,7 +343,7 @@ abstract class UstadMobileSystemBaseImpl {
      * @param context System context object
      * @return The integer value of the value if found, otherwise the default value
      */
-    fun getAppConfigInt(key: String, defaultVal: Int, context: Any): Int {
+    open fun getAppConfigInt(key: String, defaultVal: Int, context: Any): Int {
         return getAppConfigString(key, "" + defaultVal, context)!!.toInt()
     }
 
@@ -354,7 +354,7 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return
      */
-    internal fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
+    open fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
         val currentlyDisplayedLocale = getDisplayedLocale(context)
         return !(currentlyDisplayedLocale != null && oldLocale != null
                 && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
@@ -365,50 +365,7 @@ abstract class UstadMobileSystemBaseImpl {
     }
 
 
-
-    /**
-     * Convenience shortcut for logging
-     * @param level log level
-     * @param code log code
-     * @param message log message
-     * @param exception exception that occurred to log
-     */
-    @JvmStatic
-    fun l(level: Int, code: Int, message: String?, exception: Exception) {
-        val logMessage = "$code : $message"
-        when (level) {
-            UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception)
-            UMLog.INFO -> Napier.i(message=logMessage, throwable= exception)
-            UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception)
-            UMLog.WARN -> Napier.w(message=logMessage, throwable= exception)
-            UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception)
-            UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception)
-        }
-    }
-
-    /**
-     * Convenience shortcut for logging
-     * @param level log level
-     * @param code log code
-     * @param message message to log
-     */
-    @JvmStatic
-    fun l(level: Int, code: Int, message: String?) {
-        val logMessage = "$code : $message"
-        when (level) {
-            UMLog.DEBUG -> Napier.d(message=logMessage)
-            UMLog.INFO -> Napier.i(message=logMessage)
-            UMLog.CRITICAL -> Napier.wtf(message=logMessage)
-            UMLog.WARN -> Napier.w(message=logMessage)
-            UMLog.VERBOSE -> Napier.v(message=logMessage)
-            UMLog.ERROR -> Napier.e(message=logMessage)
-        }
-    }
-
-
     companion object {
-
-        var mainInstance: Any? = null
 
         /**
          * Suggested name to create for content on Devices
@@ -454,13 +411,43 @@ abstract class UstadMobileSystemBaseImpl {
         const val GO_FLAG_CLEAR_TOP = 67108864
 
 
-
         /**
-         * Only for testing purposes (e.g. to use a mockito spy)
+         * Convenience shortcut for logging
+         * @param level log level
+         * @param code log code
+         * @param message log message
+         * @param exception exception that occurred to log
          */
         @JvmStatic
-        fun setMainInstance(instance: UstadMobileSystemBaseImpl?) {
-            mainInstance = instance
+        fun l(level: Int, code: Int, message: String?, exception: Exception) {
+            val logMessage = "$code : $message"
+            when (level) {
+                UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception)
+                UMLog.INFO -> Napier.i(message=logMessage, throwable= exception)
+                UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception)
+                UMLog.WARN -> Napier.w(message=logMessage, throwable= exception)
+                UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception)
+                UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception)
+            }
+        }
+
+        /**
+         * Convenience shortcut for logging
+         * @param level log level
+         * @param code log code
+         * @param message message to log
+         */
+        @JvmStatic
+        fun l(level: Int, code: Int, message: String?) {
+            val logMessage = "$code : $message"
+            when (level) {
+                UMLog.DEBUG -> Napier.d(message=logMessage)
+                UMLog.INFO -> Napier.i(message=logMessage)
+                UMLog.CRITICAL -> Napier.wtf(message=logMessage)
+                UMLog.WARN -> Napier.w(message=logMessage)
+                UMLog.VERBOSE -> Napier.v(message=logMessage)
+                UMLog.ERROR -> Napier.e(message=logMessage)
+            }
         }
 
     }

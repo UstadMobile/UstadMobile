@@ -35,6 +35,9 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import kotlinx.io.InputStream
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileWriter
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -62,14 +65,14 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int){
-
+        TODO("not implemented")
     }
 
     /**
      * Get a string for use in the UI
      */
     actual fun getString(messageCode: Int, context: Any): String{
-        return ""
+        TODO("not implemented")
     }
 
 
@@ -124,7 +127,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      *
      */
     actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>){
-
+        TODO("not implemented")
     }
 
     /**
@@ -134,7 +137,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String?{
-        return null
+        TODO("not implemented")
     }
 
 
@@ -144,7 +147,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @param value value to be set
      */
     actual fun setAppPref(key: String, value: String?, context: Any){
-
+        TODO("not implemented")
     }
 
 
@@ -154,7 +157,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @return String with version number
      */
     actual fun getVersion(context: Any): String{
-        return ""
+        TODO("not implemented")
     }
 
     /**
@@ -165,7 +168,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @return Build timestamp in ms since epoch
      */
     actual fun getBuildTimestamp(context: Any): Long{
-        return 0
+        TODO("not implemented")
     }
 
     /**
@@ -176,7 +179,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @param callback callback to call when complete or if any error occurs.
      */
     actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>){
-
+        TODO("not implemented")
     }
 
 
@@ -214,7 +217,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
 
     actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String,
                                          callback: UmCallback<Any>){
-
+        TODO("not implemented")
     }
 
     actual fun getAssetSync(context: Any, path: String): InputStream {
@@ -222,27 +225,9 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
     }
 
     actual fun getSystemBaseDir(context: Any): String{
-        return ""
+        TODO("not implemented")
     }
 
-
-
-    actual companion object {
-        /**
-         * Get an instance of the system implementation - relies on the platform
-         * specific factory method
-         *
-         * @return A singleton instance
-         */
-        @JvmStatic
-        actual val instance: UstadMobileSystemImpl
-            get() {
-                if (mainInstance == null) {
-                    mainInstance = UstadMobileSystemImpl()
-                }
-                return mainInstance as UstadMobileSystemImpl
-            }
-    }
 
     /**
      * Wrapper to retrieve preference keys from the system Manifest.
@@ -256,6 +241,44 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl(){
      * @return The value of the manifest preference key if found, null otherwise
      */
     actual override fun getManifestPreference(key: String, context: Any): String? {
-        return  ""
+        TODO("not implemented")
+    }
+
+    /**
+     * Check if the directory is writable
+     * @param dir Directory to be checked
+     * @return True if is writable otherwise is read only
+     */
+    actual fun canWriteFileInDir(dirPath: String): Boolean {
+        var canWriteFiles = false
+        val testFile = File(dirPath, System.currentTimeMillis().toString() + ".txt")
+        try {
+            val writer = FileWriter(testFile)
+            writer.append("sampletest")
+            writer.flush()
+            writer.close()
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            canWriteFiles = false
+        } catch (e: IOException) {
+            e.printStackTrace()
+            canWriteFiles = false
+        }
+
+        if (testFile.exists()) {
+            canWriteFiles = testFile.delete()
+        }
+        return canWriteFiles
+    }
+
+    actual companion object {
+        /**
+         * Get an instance of the system implementation - relies on the platform
+         * specific factory method
+         *
+         * @return A singleton instance
+         */
+        @JvmStatic
+        actual val instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
     }
 }

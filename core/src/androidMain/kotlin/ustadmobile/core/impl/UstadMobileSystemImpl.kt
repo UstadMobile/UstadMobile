@@ -52,10 +52,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
 import kotlinx.io.InputStream
 import ustadmobile.core.impl.UMAndroidUtil
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.zip.ZipEntry
@@ -76,11 +73,28 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
 
     private val sdCardStorageIndex = 1
 
-    private var initRan = false
-
     private val bgExecutorService = Executors.newCachedThreadPool()
 
     private var appPreferences: SharedPreferences? = null
+
+
+    private val viewNameToAndroidImplMap = mapOf<String,Any>(
+            "DownloadDialog" to Class.forName("${packageName}DownloadDialogFragment"),
+            VideoPlayerView.VIEW_NAME to Class.forName("${packageName}VideoPlayerActivity"),
+            WebChunkView.VIEW_NAME to Class.forName("${packageName}WebChunkActivity"),
+            Register2View.VIEW_NAME to Class.forName("${packageName}Register2Activity"),
+            DummyView.VIEW_NAME to Class.forName("${packageName}DummyActivity"),
+            OnBoardingView.VIEW_NAME to Class.forName("${packageName}OnBoardingActivity"),
+            Login2View.VIEW_NAME to Class.forName("${packageName}Login2Activity"),
+            EpubContentView.VIEW_NAME to Class.forName("${packageName}EpubContentActivity"),
+            BasePointView.VIEW_NAME to Class.forName("${packageName}BasePointActivity"),
+            AboutView.VIEW_NAME to Class.forName("${packageName}AboutActivity"),
+            XapiPackageContentView.VIEW_NAME to Class.forName("${packageName}XapiPackageContentActivity"),
+            ScormPackageView.VIEW_NAME to Class.forName("${packageName}ScormPackageActivity"),
+            H5PContentView.VIEW_NAME to Class.forName("${packageName}H5PContentActivity"),
+            ContentEntryListFragmentView.VIEW_NAME to Class.forName("${packageName}ContentEntryListActivity"),
+            ContentEntryDetailView.VIEW_NAME to Class.forName("${packageName}ContentEntryDetailActivity"))
+
 
 
     private abstract class UmCallbackAsyncTask<A, P, R>
@@ -111,7 +125,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
      */
-    private class GetSetupFileAsyncTask (doneCallback: UmCallback<*>, private val context: Context) : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback) {
+    private class GetSetupFileAsyncTask (doneCallback: UmCallback<*>, private val context: Context)
+        : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback as UmCallback<String>) {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
@@ -186,7 +201,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
             return
         }
 
-        if (DialogFragment::class.java.isAssignableFrom(androidImplClass)) {
+        if (DialogFragment::class.java.isAssignableFrom(androidImplClass as Class<*>)) {
             var toastMsg: String? = null
             try {
                 val dialog = androidImplClass.newInstance() as DialogFragment
@@ -270,7 +285,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.phone_memory, context), true,
-                    true, false, UmFileUtilSe.canWriteFileInDir(umDir)))
+                    true, false, canWriteFileInDir(umDir.absolutePath)))
 
             if (storageOptions.size > 1) {
                 val sdCardStorage = storageOptions[sdCardStorageIndex]
@@ -278,7 +293,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
                 if (!umDir.exists()) umDir.mkdirs()
                 dirList.add(UMStorageDir(umDir.absolutePath,
                         getString(MessageID.memory_card, context), true,
-                        true, false, UmFileUtilSe.canWriteFileInDir(umDir)))
+                        true, false, canWriteFileInDir(umDir.absolutePath)))
             }
 
             callback.onDone(dirList)
@@ -445,7 +460,6 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
         }
     }
 
-
     private fun getAppSharedPreferences(context: Context): SharedPreferences {
         if (appPreferences == null) {
             appPreferences = context.getSharedPreferences(APP_PREFERENCES_NAME,
@@ -474,30 +488,44 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
     }
 
 
-    actual companion object{
-
-        private val viewNameToAndroidImplMap = HashMap<String, Class<*>>()
-        init {
-            viewNameToAndroidImplMap[Login2View.VIEW_NAME] = Login2Activity::class.java
-            viewNameToAndroidImplMap[EpubContentView.VIEW_NAME] = EpubContentActivity::class.java
-            viewNameToAndroidImplMap[BasePointView.VIEW_NAME] = BasePointActivity::class.java
-            viewNameToAndroidImplMap[AboutView.VIEW_NAME] = AboutActivity::class.java
-            viewNameToAndroidImplMap[XapiPackageContentView.VIEW_NAME] = XapiPackageContentActivity::class.java
-            viewNameToAndroidImplMap[ScormPackageView.VIEW_NAME] = ScormPackageActivity::class.java
-            viewNameToAndroidImplMap[H5PContentView.VIEW_NAME] = H5PContentActivity::class.java
-            viewNameToAndroidImplMap[DownloadDialogView.VIEW_NAME] = DownloadDialogFragment::class.java
-            viewNameToAndroidImplMap[ContentEntryListFragmentView.VIEW_NAME] = ContentEntryListActivity::class.java
-            viewNameToAndroidImplMap[ContentEntryDetailView.VIEW_NAME] = ContentEntryDetailActivity::class.java
-            viewNameToAndroidImplMap[DummyView.VIEW_NAME] = DummyActivity::class.java
-            viewNameToAndroidImplMap[OnBoardingView.VIEW_NAME] = OnBoardingActivity::class.java
-            viewNameToAndroidImplMap[Register2View.VIEW_NAME] = Register2Activity::class.java
-            viewNameToAndroidImplMap[WebChunkView.VIEW_NAME] = WebChunkActivity::class.java
-            viewNameToAndroidImplMap[VideoPlayerView.VIEW_NAME] = VideoPlayerActivity::class.java
+    /**
+     * Check if the directory is writable
+     * @param dir Directory to be checked
+     * @return True if is writable otherwise is read only
+     */
+    actual fun canWriteFileInDir(dirPath: String): Boolean {
+        var canWriteFiles = false
+        val testFile = File(dirPath, System.currentTimeMillis().toString() + ".txt")
+        try {
+            val writer = FileWriter(testFile)
+            writer.append("sampletest")
+            writer.flush()
+            writer.close()
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            canWriteFiles = false
+        } catch (e: IOException) {
+            e.printStackTrace()
+            canWriteFiles = false
         }
+
+        if (testFile.exists()) {
+            canWriteFiles = testFile.delete()
+        }
+        return canWriteFiles
+    }
+
+
+
+    actual companion object {
 
         const val TAG = "UstadMobileImplAndroid"
 
+        private const val packageName = "com.ustadmobile.port.android.view."
+
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
+
+        const val LOCALE_USE_SYSTEM = UstadMobileSystemBaseImpl.LOCALE_USE_SYSTEM
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
@@ -512,13 +540,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
          * @return A singleton instance
          */
         @JvmStatic
-        actual val instance: UstadMobileSystemImpl
-            get() {
-                if (mainInstance == null) {
-                    mainInstance = UstadMobileSystemImpl()
-                }
-                return mainInstance as UstadMobileSystemImpl
-            }
+        actual val instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
+
     }
 
 }
