@@ -32,7 +32,6 @@
 package com.ustadmobile.core.impl
 
 import android.app.Activity
-import android.app.DialogFragment
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -40,11 +39,13 @@ import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
+import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import com.ustadmobile.core.BuildConfig
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils

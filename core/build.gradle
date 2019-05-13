@@ -174,7 +174,13 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "com.github.aakira:napier-android:$version_napier"
+                implementation "com.android.support:support-core-utils:$version_android_support_lib"
                 implementation "com.android.support:appcompat-v7:$version_android_support_lib"
+                implementation "com.android.support:cardview-v7:$version_android_support_lib"
+                implementation "com.android.support:design:$version_android_support_lib"
+                implementation "com.android.support:support-v4:$version_android_support_lib"
+                implementation "com.android.support:recyclerview-v7:$version_android_support_lib"
+                implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
             }
             dependsOn commonJvm
         }
