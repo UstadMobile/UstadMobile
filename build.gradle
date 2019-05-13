@@ -29,13 +29,13 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.99.1"
+version = "0.99.2"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
 
-    ustadVersionCode = 197
+    ustadVersionCode = 199
 
     version_gradle_buildconfig_plugin = "1.1.7"
 

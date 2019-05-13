@@ -932,7 +932,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         case "name":
                             INDEX_CLASS_NAME = colIndex;
                             break;
-                        case "locationName":
+                        case "location":
                             INDEX_CLASS_LOCATION = colIndex;
                             break;
                         default:
