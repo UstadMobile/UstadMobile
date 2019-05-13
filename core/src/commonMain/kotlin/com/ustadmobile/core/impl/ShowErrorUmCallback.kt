@@ -11,7 +11,7 @@ import kotlinx.coroutines.Runnable
 </T> */
 abstract class ShowErrorUmCallback<T>(private val view: ViewWithErrorNotifier, private val errorMessage: Int) : UmCallback<T> {
 
-    fun onFailure(exception: Throwable?) {
+    override fun onFailure(exception: Throwable?) {
         view.showErrorNotification(UstadMobileSystemImpl.instance.getString(
                 errorMessage, view.context), Runnable { }, 0)
     }

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
@@ -72,7 +73,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
                             UMFileUtil.joinPaths(h5pFileMountUrl!!, "h5p.json"))
                     UstadMobileSystemImpl.instance.makeRequestAsync(h5PJsonRequest, h5pResponseCallback)
                 } catch (e: IOException) {
-                    e.printStackTrace()
+                    dumpException(e)
                 }
             }
 
@@ -95,7 +96,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
                     })
                 }
             } catch (e: IOException) {
-                e.printStackTrace()
+                dumpException(e)
             }
 
         }
