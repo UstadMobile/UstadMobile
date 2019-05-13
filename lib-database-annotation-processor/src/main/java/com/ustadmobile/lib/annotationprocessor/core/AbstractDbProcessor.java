@@ -47,7 +47,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,15 +62,14 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -397,7 +395,8 @@ public abstract class AbstractDbProcessor {
                 if(!subMethod.getSimpleName().equals(method.getSimpleName()))
                     continue;
 
-                if(areMethodParamSignaturesMatching(method, subMethod, daoClass))
+                if(processingEnv.getTypeUtils().isSubsignature((ExecutableType)method.asType(),
+                        (ExecutableType)subMethod.asType()))
                     return true;
             }
 
@@ -410,33 +409,19 @@ public abstract class AbstractDbProcessor {
         return false;
     }
 
-    private boolean areMethodParamSignaturesMatching(ExecutableElement method1,
-                                                     ExecutableElement method2,
-                                                     TypeElement implementingClass) {
-        if(method1.getParameters().size() != method2.getParameters().size())
-            return false;
-
-        for(int i = 0; i < method1.getParameters().size(); i++) {
-            TypeMirror method1ResolvedType = DbProcessorUtils.resolveType(
-                    method1.getParameters().get(i).asType(), implementingClass, processingEnv);
-            TypeMirror method2ResolvedType = DbProcessorUtils.resolveType(
-                    method2.getParameters().get(i).asType(), implementingClass, processingEnv);
-
-            //check if these are the same as far as the method signature is concerned - use toString
-            if(!method1ResolvedType.toString().equals(method2ResolvedType.toString()))
-                return false;
-        }
-
-        return true;
-    }
-
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     protected boolean listContainsMethod(ExecutableElement method, List<ExecutableElement> methodList,
-                                       TypeElement implementingClass) {
+                                         TypeElement implementingClass) {
+        DeclaredType classDeclaredType = (DeclaredType)implementingClass.asType();
+        ExecutableType methodResolved = (ExecutableType)processingEnv.getTypeUtils().asMemberOf(
+                classDeclaredType, method);
         for(ExecutableElement checkMethod : methodList) {
+            ExecutableType checkMethodResolved = (ExecutableType)processingEnv.getTypeUtils()
+                    .asMemberOf(classDeclaredType, checkMethod);
             if(!checkMethod.getSimpleName().equals(method.getSimpleName()))
                 continue;
 
-            if(areMethodParamSignaturesMatching(method, checkMethod, implementingClass))
+            if(processingEnv.getTypeUtils().isSubsignature(checkMethodResolved, methodResolved))
                 return true;
         }
 
@@ -457,36 +442,8 @@ public abstract class AbstractDbProcessor {
      */
     public static MethodSpec.Builder overrideAndResolve(ExecutableElement method, TypeElement childClass,
                                                  ProcessingEnvironment processingEnv) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(method.getSimpleName().toString())
-                .returns(TypeName.get(DbProcessorUtils.resolveType(method.getReturnType(),
-                        childClass, processingEnv)))
-                .addAnnotation(Override.class);
-
-        if(method.getModifiers().contains(Modifier.PUBLIC))
-            methodBuilder.addModifiers(Modifier.PUBLIC);
-        else if(method.getModifiers().contains(Modifier.PROTECTED))
-            methodBuilder.addModifiers(Modifier.PROTECTED);
-
-
-        for(TypeMirror thrown : method.getThrownTypes()) {
-            methodBuilder.addException(TypeName.get(thrown));
-        }
-
-        for(VariableElement variableElement : method.getParameters()) {
-            TypeMirror varTypeMirror = variableElement.asType();
-            varTypeMirror = DbProcessorUtils.resolveType(varTypeMirror, childClass, processingEnv);
-
-            ParameterSpec.Builder paramSpec = ParameterSpec.builder(TypeName.get(varTypeMirror),
-                    variableElement.getSimpleName().toString());
-            for(AnnotationMirror mirror: variableElement.getAnnotationMirrors()) {
-                paramSpec.addAnnotation(AnnotationSpec.get(mirror));
-            }
-
-            paramSpec.addModifiers(variableElement.getModifiers());
-            methodBuilder.addParameter(paramSpec.build());
-        }
-
-        return methodBuilder;
+        return MethodSpec.overriding(method, (DeclaredType)childClass.asType(),
+                processingEnv.getTypeUtils());
     }
 
     protected int findAsyncParamIndex(ExecutableElement method) {
@@ -1540,12 +1497,18 @@ public abstract class AbstractDbProcessor {
         DaoMethodInfo methodInfo = new DaoMethodInfo(method, daoType, processingEnv);
         TypeMirror inputStreamTypeEl = processingEnv.getElementUtils().getTypeElement(
                 InputStream.class.getName()).asType();
-        for(VariableElement param : method.getParameters()) {
+        List<? extends VariableElement> paramElements = method.getParameters();
+        ExecutableType resolvedMethodType = (ExecutableType)processingEnv.getTypeUtils()
+                .asMemberOf((DeclaredType)daoType.asType(), method);
+        List<? extends TypeMirror> resolvedParamTypes = resolvedMethodType.getParameterTypes();
+
+        for(int i = 0; i < paramElements.size(); i++) {
+            VariableElement param = paramElements.get(i);
+
             if(umCallbackTypeElement.equals(processingEnv.getTypeUtils().asElement(param.asType())))
                 continue;
 
-            TypeMirror paramTypeMirror = DbProcessorUtils.resolveType(param.asType(), daoType,
-                    processingEnv);
+            TypeMirror paramTypeMirror = resolvedParamTypes.get(i);
 
             if(typeSubstitutions != null && typeSubstitutions.containsKey(paramTypeMirror)) {
                 paramTypeMirror = typeSubstitutions.get(paramTypeMirror);
