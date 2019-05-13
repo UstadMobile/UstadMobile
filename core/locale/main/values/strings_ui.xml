@@ -366,7 +366,30 @@
     <string name="gallery">Gallery</string>
     <string name="unable_open_image">Unable to open that image</string>
 
-
+    <!-- Sprint 3 -->
+    <string name="create_new_subcategory">Create a new subcategory</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="title_english">Title (English)</string>
+    <string name="title_dari">Title (Dari)</string>
+    <string name="title_pashto">Title (Pashto)</string>
+    <string name="desc_english">Description (English)</string>
+    <string name="desc_dari">Description (Dari)</string>
+    <string name="desc_pashto">Description (Pahto)</string>
+    <string name="parent_categories">Parent categories</string>
+    <string name="change_photo">Change photo</string>
+    <string name="take_photo">Take photo</string>
+    <string name="choose_photo">Choose photo</string>
+    <string name="create_new_item">Create a new item</string>
+    <string name="categories">Categories</string>
+    <string name="item_added_to_catalog">Item added to catalog</string>
+    <string name="undo">Undo</string>
+    <string name="item">Item</string>
+    <string name="subcategory">Subcategory</string>
+    <string name="sign_in">Sign in</string>
+    <string name="confirm_fingerprint">Confirm fingerprint to continur</string>
+    <string name="use_password">Use password</string>
+    <string name="touch_sensor">Touch sensor</string>
 
     <string name="sale_list_sort_by_name">name</string>
     <string name="sale_list_sort_by_total_asc">total (asc)</string>

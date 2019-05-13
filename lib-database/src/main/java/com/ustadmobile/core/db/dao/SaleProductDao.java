@@ -44,6 +44,19 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     @UmQuery(ALL_ACTIVE_QUERY)
     public abstract UmProvider<SaleProduct> findAllActiveProvider();
 
+    public static final String ALL_ACTIVE_CATEGORY_QUERY = ALL_ACTIVE_QUERY +
+            " AND SaleProductCategory = 1";
+
+    //FIND ALL CATEGORIES
+
+    @UmQuery(ALL_ACTIVE_CATEGORY_QUERY)
+    public abstract void findAllCategoriesAsync(UmCallback<List<SaleProduct>> allActiveCallback);
+
+    @UmQuery(ALL_ACTIVE_CATEGORY_QUERY)
+    public abstract UmProvider<SaleProduct> findAllCateogoriesProvider();
+
+
+
     public static final String ALL_ACTIVE_NAME_WITH_IMAGE_QUERY =
             "SELECT SaleProduct.saleProductName as name, " +
             " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +

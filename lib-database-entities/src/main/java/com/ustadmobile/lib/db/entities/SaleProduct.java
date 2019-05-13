@@ -12,17 +12,34 @@ public class SaleProduct {
     @UmPrimaryKey(autoGenerateSyncable = true)
     private long saleProductUid;
 
+    //Name eg: Blue ribbon
     private String saleProductName;
 
+    private String saleProductNameDari;
+
+    private String saleProductDescDari;
+
+    private String saleProductNamePashto;
+
+    private String saleProductDescPashto;
+
+    //Description eg: A blue ribbon used for gift wrapping.
     private String saleProductDesc;
 
+    //Date added in unix datetime
     private long saleProductDateAdded;
 
+    //Person who added this product (person uid)
     private long saleProductPersonAdded;
 
+    //Picture uid <-> SaleProductPicture 's pk
     private long saleProductPictureUid;
 
+    //If the product active . False is effectively delete
     private boolean saleProductActive;
+
+    //If it is a category it is true. If it is a product it is false (default)
+    private boolean saleProductCategory;
 
     @UmSyncMasterChangeSeqNum
     private long saleProductMCSN;
@@ -34,15 +51,14 @@ public class SaleProduct {
     private int saleProductLCB;
 
     public SaleProduct(){
-
+        this.saleProductCategory = false;
     }
 
     public SaleProduct(String name, String decs){
         this.saleProductName = name;
         this.saleProductDesc = decs;
         this.saleProductActive = true;
-        //TODO:
-        //this.saleProductPictureUid = defaultProductPictureUid;
+        this.saleProductCategory = false;
 
     }
 
@@ -126,4 +142,43 @@ public class SaleProduct {
         this.saleProductLCB = saleProductLCB;
     }
 
+    public boolean isSaleProductCategory() {
+        return saleProductCategory;
+    }
+
+    public void setSaleProductCategory(boolean saleProductCategory) {
+        this.saleProductCategory = saleProductCategory;
+    }
+
+    public String getSaleProductNameDari() {
+        return saleProductNameDari;
+    }
+
+    public void setSaleProductNameDari(String saleProductNameDari) {
+        this.saleProductNameDari = saleProductNameDari;
+    }
+
+    public String getSaleProductDescDari() {
+        return saleProductDescDari;
+    }
+
+    public void setSaleProductDescDari(String saleProductDescDari) {
+        this.saleProductDescDari = saleProductDescDari;
+    }
+
+    public String getSaleProductNamePashto() {
+        return saleProductNamePashto;
+    }
+
+    public void setSaleProductNamePashto(String saleProductNamePashto) {
+        this.saleProductNamePashto = saleProductNamePashto;
+    }
+
+    public String getSaleProductDescPashto() {
+        return saleProductDescPashto;
+    }
+
+    public void setSaleProductDescPashto(String saleProductDescPashto) {
+        this.saleProductDescPashto = saleProductDescPashto;
+    }
 }

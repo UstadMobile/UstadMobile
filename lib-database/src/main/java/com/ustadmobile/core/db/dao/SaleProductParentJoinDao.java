@@ -12,12 +12,19 @@ import java.util.List;
 @UmDao
 public abstract class SaleProductParentJoinDao implements BaseDao<SaleProductParentJoin> {
 
-//    /**
-//     * Basically find all SaleProduct with no
-//     */
-//    @UmQuery("")
-//    public abstract void findAllSaleProductsWithNoParentAsync(UmCallback<List<SaleProduct>> resultListCallback);
-//
-//    @UmQuery("")
-//    public abstract void findAllJoinByChildSaleProductAsync(long childSaleProductUid, UmCallback<List<SaleProduct>> resultListCallback);
+    //@UmQuery("")
+    //public abstract void findAllSaleProductsWithNoParentAsync(UmCallback<List<SaleProduct>>
+    // resultListCallback);
+
+    /**
+     * Find all SaleProduct a given SaleProduct is a child of.
+     * @param childSaleProductUid   The child sale product uid
+     * @param resultListCallback    Return callback of list of SaleProduct
+     */
+    @UmQuery("SELECT SaleProduct.* FROM SaleProductParentJoin LEFT JOIN SaleProduct ON " +
+            " SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+            " WHERE SaleProductParentJoin.saleProductParentJoinChildUid = :childSaleProductUid")
+    public abstract void findAllJoinByChildSaleProductAsync(long childSaleProductUid,
+                                                UmCallback<List<SaleProduct>> resultListCallback);
+
 }
