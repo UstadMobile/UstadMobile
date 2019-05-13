@@ -374,15 +374,15 @@ abstract class UstadMobileSystemBaseCommon {
      * @param exception exception that occurred to log
      */
     @JvmStatic
-    fun l(level: Int, code: Int, message: String?, exception: Exception) {
+    fun l(level: Int, code: Int, message: String?, exception: Any) {
         val logMessage = "$code : $message"
         when (level) {
-            UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception)
-            UMLog.INFO -> Napier.i(message=logMessage, throwable= exception)
-            UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception)
-            UMLog.WARN -> Napier.w(message=logMessage, throwable= exception)
-            UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception)
-            UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception)
+            UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception as Exception)
+            UMLog.INFO -> Napier.i(message=logMessage, throwable= exception as Exception)
+            UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception as Exception)
+            UMLog.WARN -> Napier.w(message=logMessage, throwable= exception as Exception)
+            UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception as Exception)
+            UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception as Exception)
         }
     }
 

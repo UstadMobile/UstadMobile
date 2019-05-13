@@ -77,6 +77,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
 
     private var appPreferences: SharedPreferences? = null
 
+    var messageIdMap: Map<Int, Int> = mapOf()
+
 
     private val viewNameToAndroidImplMap = mapOf<String,Any>(
             "DownloadDialog" to Class.forName("${packageName}DownloadDialogFragment"),
@@ -250,9 +252,9 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
      * Get a string for use in the UI
      */
     actual fun getString(messageCode: Int, context: Any): String{
-        val androidId = MessageIDMap.ID_MAP.get(messageCode)
+        val androidId = messageIdMap.get(messageCode)
         return if (androidId != null) {
-            (context as Context).resources.getString(androidId!!)
+            (context as Context).resources.getString(androidId)
         } else {
            return ""
         }
@@ -439,7 +441,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String,
+    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
                                          callback: UmCallback<Any>){
         var mMimeType = mimeType;
         val ctx = context as Context

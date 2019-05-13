@@ -155,7 +155,7 @@ expect class UstadMobileSystemImpl : UstadMobileSystemBaseCommon {
     override fun getManifestPreference(key: String, context: Any): String?
 
 
-    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String,
+    fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
                                          callback: UmCallback<Any>)
 
     /**
