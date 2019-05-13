@@ -66,7 +66,7 @@ import java.util.zip.ZipOutputStream
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
+actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
 
 
     private val deviceStorageIndex = 0
@@ -225,17 +225,17 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
             if (ctx is Activity) {
                 var referrer = ""
                 if (ctx.intent.extras != null) {
-                    referrer = ctx.intent.extras!!.getString(UstadMobileSystemBaseImpl.ARG_REFERRER, "")
+                    referrer = ctx.intent.extras!!.getString(ARG_REFERRER, "")
                 }
 
-                if (flags and UstadMobileSystemBaseImpl.GO_FLAG_CLEAR_TOP > 0) {
+                if (flags and GO_FLAG_CLEAR_TOP > 0) {
                     referrer = UMFileUtil.clearTopFromReferrerPath(viewName, args,
                             referrer)
                 } else {
                     referrer += "/" + viewName + "?" + UMFileUtil.mapToQueryString(args)
                 }
 
-                startIntent.putExtra(UstadMobileSystemBaseImpl.ARG_REFERRER, referrer)
+                startIntent.putExtra(ARG_REFERRER, referrer)
             }
             startIntent.flags = flags
             startIntent.putExtras(argsBundle)
@@ -525,7 +525,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
-        const val LOCALE_USE_SYSTEM = UstadMobileSystemBaseImpl.LOCALE_USE_SYSTEM
+        const val LOCALE_USE_SYSTEM = UstadMobileSystemBaseCommon.LOCALE_USE_SYSTEM
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 

@@ -126,8 +126,7 @@ public class WebChunkWebViewClient extends WebViewClient {
                 }
                 if (e.getKey().contains("/api/internal/user/task/practice/") &&
                         requestUrl.toString().contains("/api/internal/user/task/practice/")) {
-                    view.post(() ->
-                            view.loadUrl(getUrl()));
+                    view.post(() -> view.loadUrl(getUrl()));
                     return super.shouldInterceptRequest(view, request);
                 }
                 if (e.getKey().contains("/assessment_item") && requestUrl.toString().contains("/assessment_item")) {

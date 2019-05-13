@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
-import com.ustadmobile.core.impl.UMLogger;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
@@ -66,7 +66,7 @@ public class ContentEntryListRecyclerViewAdapter extends
         List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
-            UstadMobileSystemImpl.l(UMLogger.DEBUG,694,
+            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
         }

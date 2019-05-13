@@ -41,7 +41,7 @@ import kotlin.jvm.JvmStatic
  *
  * @author mike, kileha3
  */
-expect class UstadMobileSystemImpl : UstadMobileSystemBaseImpl {
+expect class UstadMobileSystemImpl : UstadMobileSystemBaseCommon {
 
 
     /**

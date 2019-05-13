@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.XapiPackageContentPresenter;
-import com.ustadmobile.core.impl.UMLogger;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.XapiPackageContentView;
 
@@ -97,7 +97,7 @@ public class XapiPackageContentActivity extends ZippedContentActivity implements
 
     @Override
     public void loadUrl(String url) {
-        UstadMobileSystemImpl.l(UMLogger.INFO, 0, "Xapi: Loading: " +url);
+        UstadMobileSystemImpl.l(UMLog.INFO, 0, "Xapi: Loading: " +url);
         mWebView.loadUrl(url);
     }
 

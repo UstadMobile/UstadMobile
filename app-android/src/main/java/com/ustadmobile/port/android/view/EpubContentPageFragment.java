@@ -23,7 +23,7 @@ import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.impl.UMLogger;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 
@@ -116,7 +116,7 @@ public class EpubContentPageFragment extends Fragment {
                     container, false);
             webView = viewGroup.findViewById(R.id.fragment_container_page_webview);
         }else {
-            UstadMobileSystemImpl.l(UMLogger.DEBUG, 517, "Containerpage: recycled onCreateView");
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView");
         }
 
         webView.setTag(mPageIndex);

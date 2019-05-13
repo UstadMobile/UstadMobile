@@ -34,7 +34,7 @@ package com.ustadmobile.core.impl
  * Logging interface to be implemented by the System Implementation
  * @author mike
  */
-class UMLog {
+open class UMLog {
 
     companion object {
 
