@@ -45,7 +45,6 @@ import android.support.v4.content.FileProvider
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
-import com.ustadmobile.core.BuildConfig
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -130,7 +129,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
         override fun doInBackground(vararg params: Boolean?): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
-            val impl = UstadMobileSystemImpl.instance
+            val impl = instance
 
             val baseName = impl.getAppConfigString(AppConfig.KEY_APP_BASE_NAME, "", context) + "-" +
                     impl.getVersion(context)
