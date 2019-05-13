@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentformats.scorm.ScormManifest
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
@@ -12,9 +13,6 @@ import com.ustadmobile.core.view.ScormPackageView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import kotlinx.coroutines.Runnable
-
-import org.xmlpull.v1.XmlPullParserException
-
 import kotlinx.io.IOException
 import org.kmp.io.KMPPullParserException
 
@@ -61,9 +59,9 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
                             startRes.href!!))
                 })
             } catch (e: IOException) {
-                e.printStackTrace()
+                dumpException(e)
             } catch (x: KMPPullParserException) {
-                x.printStackTrace()
+                dumpException(x)
             }
 
         }
