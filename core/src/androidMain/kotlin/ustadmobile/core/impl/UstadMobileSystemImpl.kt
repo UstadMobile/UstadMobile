@@ -31,7 +31,6 @@
 
 package com.ustadmobile.core.impl
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DialogFragment
 import android.content.Context
@@ -39,6 +38,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.AsyncTask
+import android.os.Bundle
 import android.os.Environment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
@@ -95,6 +95,15 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
                 umCallback.onFailure(error)
             }
         }
+    }
+
+
+    fun handleActivityCreate(mContext: Activity, savedInstanceState: Bundle) {
+        init(mContext)
+    }
+
+    fun handleActivityDestroy(mContext: Activity) {
+
     }
 
 
@@ -166,7 +175,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int){
-        val androidImplClass = viewNameToAndroidImplMap.get(viewName)
+        val androidImplClass = viewNameToAndroidImplMap[viewName]
         val ctx = context as Context
         val argsBundle = UMAndroidUtil.mapToBundle(args)
 
@@ -466,6 +475,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseImpl() {
 
 
     actual companion object{
+
         private val viewNameToAndroidImplMap = HashMap<String, Class<*>>()
         init {
             viewNameToAndroidImplMap[Login2View.VIEW_NAME] = Login2Activity::class.java

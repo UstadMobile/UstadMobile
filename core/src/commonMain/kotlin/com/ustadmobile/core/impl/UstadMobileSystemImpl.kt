@@ -182,5 +182,24 @@ expect class UstadMobileSystemImpl : UstadMobileSystemBaseImpl {
          */
         @JvmStatic
         val instance: UstadMobileSystemImpl
+
+        /**
+         * Log the given message
+         *
+         * @param level
+         * @param code An Error code to assist debugging
+         * @param message  (May be null)
+         */
+        fun l(level: Int, code: Int, message: String?)
+
+        /**
+         * Log the message given and the exception
+         *
+         * @param level
+         * @param code An Error code to assist debugging
+         * @param message
+         * @param exception
+         */
+        fun l(level: Int, code: Int, message: String, exception: Exception)
     }
 }

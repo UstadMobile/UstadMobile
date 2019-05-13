@@ -184,7 +184,7 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return The locale as the user sees it.
      */
-    private fun getDisplayedLocale(context: Any): String? {
+    fun getDisplayedLocale(context: Any): String? {
         var locale = getLocale(context)
         if (locale == LOCALE_USE_SYSTEM)
             locale = getSystemLocale(context)
@@ -354,7 +354,7 @@ abstract class UstadMobileSystemBaseImpl {
      *
      * @return
      */
-    fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
+    internal fun hasDisplayedLocaleChanged(oldLocale: String?, context: Any): Boolean {
         val currentlyDisplayedLocale = getDisplayedLocale(context)
         return !(currentlyDisplayedLocale != null && oldLocale != null
                 && oldLocale.substring(0, 2) == currentlyDisplayedLocale.substring(0, 2))
@@ -363,6 +363,48 @@ abstract class UstadMobileSystemBaseImpl {
     protected fun getContentDirName(context: Any): String? {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
+
+
+
+    /**
+     * Convenience shortcut for logging
+     * @param level log level
+     * @param code log code
+     * @param message log message
+     * @param exception exception that occurred to log
+     */
+    @JvmStatic
+    fun l(level: Int, code: Int, message: String?, exception: Exception) {
+        val logMessage = "$code : $message"
+        when (level) {
+            UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception)
+            UMLog.INFO -> Napier.i(message=logMessage, throwable= exception)
+            UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception)
+            UMLog.WARN -> Napier.w(message=logMessage, throwable= exception)
+            UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception)
+            UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception)
+        }
+    }
+
+    /**
+     * Convenience shortcut for logging
+     * @param level log level
+     * @param code log code
+     * @param message message to log
+     */
+    @JvmStatic
+    fun l(level: Int, code: Int, message: String?) {
+        val logMessage = "$code : $message"
+        when (level) {
+            UMLog.DEBUG -> Napier.d(message=logMessage)
+            UMLog.INFO -> Napier.i(message=logMessage)
+            UMLog.CRITICAL -> Napier.wtf(message=logMessage)
+            UMLog.WARN -> Napier.w(message=logMessage)
+            UMLog.VERBOSE -> Napier.v(message=logMessage)
+            UMLog.ERROR -> Napier.e(message=logMessage)
+        }
+    }
+
 
     companion object {
 
@@ -421,43 +463,5 @@ abstract class UstadMobileSystemBaseImpl {
             mainInstance = instance
         }
 
-        /**
-         * Convenience shortcut for logging
-         * @param level log level
-         * @param code log code
-         * @param message log message
-         * @param exception exception that occurred to log
-         */
-        @JvmStatic
-         fun l(level: Int, code: Int, message: String?, exception: Exception) {
-            val logMessage = "$code : $message"
-            when (level) {
-                UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception)
-                UMLog.INFO -> Napier.i(message=logMessage, throwable= exception)
-                UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception)
-                UMLog.WARN -> Napier.w(message=logMessage, throwable= exception)
-                UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception)
-                UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception)
-            }
-        }
-
-        /**
-         * Convenience shortcut for logging
-         * @param level log level
-         * @param code log code
-         * @param message message to log
-         */
-        @JvmStatic
-        fun l(level: Int, code: Int, message: String?) {
-            val logMessage = "$code : $message"
-            when (level) {
-                UMLog.DEBUG -> Napier.d(message=logMessage)
-                UMLog.INFO -> Napier.i(message=logMessage)
-                UMLog.CRITICAL -> Napier.wtf(message=logMessage)
-                UMLog.WARN -> Napier.w(message=logMessage)
-                UMLog.VERBOSE -> Napier.v(message=logMessage)
-                UMLog.ERROR -> Napier.e(message=logMessage)
-            }
-        }
     }
 }
