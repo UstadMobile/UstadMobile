@@ -179,7 +179,7 @@ if (rootProject.file("buildconfig.local.properties").exists()) {
  */
 task prepareLocale {
     inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("src/main/java/com/ustadmobile/core/generated/locale/MessageID.kt")
+    File outFile = project.file("src/commonMain/kotlin/com/ustadmobile/core/generated/locale/MessageID.kt")
     outFile.text = ''
     outFile << 'package com.ustadmobile.core.generated.locale\n\n'
     outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
