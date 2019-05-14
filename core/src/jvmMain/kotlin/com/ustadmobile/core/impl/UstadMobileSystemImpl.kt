@@ -205,7 +205,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
                 prefIn = getAssetSync(context, appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
-                l(UMLog.ERROR, 685, appPrefResource, e)
+                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
                 UMIOUtils.closeInputStream(prefIn)
             }

@@ -47,7 +47,7 @@ public class DownloadJobPreparer implements Runnable {
         int downloadJobUid = jobItemManager.getDownloadJobUid();
         long contentEntryUid = jobItemManager.getRootContentEntryUid();
 
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadJobPreparer: start " +
+        UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: start " +
                 "entry uid = " + contentEntryUid + " download job uid = " + downloadJobUid);
 
         int numItemsCreated = 0;
@@ -78,7 +78,7 @@ public class DownloadJobPreparer implements Runnable {
         do {
             statusList.clear();
             childItemsToCreate = jobItemDao.findByParentContentEntryUuids(parentUids);
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadJobPreparer: found " +
+            UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: found " +
                     childItemsToCreate.size() + " child items on from parents " +
                     UMUtil.debugPrintList(parentUids));
 
@@ -117,7 +117,7 @@ public class DownloadJobPreparer implements Runnable {
 
             appDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
         }while(!parentUids.isEmpty());
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 420, "Created " + numItemsCreated +
+        UMLog.l(UMLog.VERBOSE, 420, "Created " + numItemsCreated +
                 " items. Time to prepare download job: " +
                 (System.currentTimeMillis() - startTime) + "ms");
         CountDownLatch latch = new CountDownLatch(1);

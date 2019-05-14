@@ -61,10 +61,10 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
                 try {
                     handleTinCanXmlLoaded(response.responseBody!!)
                 } catch (e: IOException) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e)
+                    UMLog.l(UMLog.ERROR, 75, null, e)
                     onFailure(call, e)
                 } catch (e: KMPPullParserException) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 75, null, e)
+                    UMLog.l(UMLog.ERROR, 75, null, e)
                     onFailure(call, e)
                 }
 

@@ -6,7 +6,6 @@
 package com.ustadmobile.core.tincan
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.serialization.json.JsonException
 import kotlinx.serialization.json.JsonObject
 
@@ -54,7 +53,7 @@ class Activity @JvmOverloads constructor(id: String, internal var aType: String,
                 activityDef = JsonObject()
                 activityDef.put("id", this.id)
             } catch (e: JsonException) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 187, null, e)
+                UMLog.l(UMLog.ERROR, 187, null, e)
             }
 
             return activityDef

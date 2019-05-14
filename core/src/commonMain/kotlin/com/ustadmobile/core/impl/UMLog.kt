@@ -65,12 +65,12 @@ open class UMLog {
         fun l(level: Int, code: Int, message: String?, exception: Any) {
             val logMessage = "$code : $message"
             when (level) {
-                DEBUG -> Napier.d(message=logMessage, throwable = exception as Exception)
-                INFO -> Napier.i(message=logMessage, throwable= exception as Exception)
-                CRITICAL -> Napier.wtf(message=logMessage, throwable= exception as Exception)
-                WARN -> Napier.w(message=logMessage, throwable= exception as Exception)
-                VERBOSE -> Napier.v(message=logMessage, throwable= exception as Exception)
-                ERROR -> Napier.e(message=logMessage, throwable= exception as Exception)
+                DEBUG -> Napier.d(message =logMessage, throwable = exception as Exception)
+                INFO -> Napier.i(message =logMessage, throwable = exception as Exception)
+                CRITICAL -> Napier.wtf(message =logMessage, throwable = exception as Exception)
+                WARN -> Napier.w(message = logMessage, throwable = exception as Exception)
+                VERBOSE -> Napier.v(message = logMessage, throwable = exception as Exception)
+                ERROR -> Napier.e(message = logMessage, throwable = exception as Exception)
             }
         }
 
@@ -84,12 +84,12 @@ open class UMLog {
         fun l(level: Int, code: Int, message: String?) {
             val logMessage = "$code : $message"
             when (level) {
-                DEBUG -> Napier.d(message=logMessage)
-                INFO -> Napier.i(message=logMessage)
-                CRITICAL -> Napier.wtf(message=logMessage)
-                WARN -> Napier.w(message=logMessage)
-                VERBOSE -> Napier.v(message=logMessage)
-                ERROR -> Napier.e(message=logMessage)
+                DEBUG -> Napier.d(message = logMessage)
+                INFO -> Napier.i(message = logMessage)
+                CRITICAL -> Napier.wtf(message = logMessage)
+                WARN -> Napier.w(message = logMessage)
+                VERBOSE -> Napier.v(message = logMessage)
+                ERROR -> Napier.e(message = logMessage)
             }
         }
     }

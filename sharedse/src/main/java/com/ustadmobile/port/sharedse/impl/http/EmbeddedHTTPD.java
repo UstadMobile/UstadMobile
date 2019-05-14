@@ -189,7 +189,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
             mountedZips.put(fullPath, zipFile);
             return toFullZipMountPath(mountPath);
         }catch(ZipException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 90, zipPath, e);
+            UMLog.l(UMLog.ERROR, 90, zipPath, e);
         }
 
         return null;
@@ -232,7 +232,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
             return PREFIX_MOUNT + URLEncoder.encode(mountPath, "UTF-8");
         }catch(UnsupportedEncodingException e){
             //Should enver happen
-            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, null, e);
+            UMLog.l(UMLog.ERROR, 0, null, e);
         }
 
         return null;
@@ -251,7 +251,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
             removeRoute(route);
             mountedZips.remove(toFullZipMountPath(mountPath));
         }catch(UnsupportedEncodingException e) {
-            UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 20, mountPath, e);
+            UMLog.l(UMLog.ERROR, 20, mountPath, e);
         }
     }
 
@@ -333,7 +333,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
      * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
      */
     public String mountZipOnHttp(String zipPath, String mountName) {
-        UstadMobileSystemImpl.Companion.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
+        UMLog.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
                 + this + "httpd server = " + this + " listening port = " + getListeningPort());
 
         mountName = mountZip(zipPath, mountName);

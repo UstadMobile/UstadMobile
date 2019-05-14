@@ -97,7 +97,7 @@ public class ContentEntryListRecyclerViewAdapter extends
 
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
-            UstadMobileSystemImpl.l(UMLog.DEBUG,694,
+            UMLog.l(UMLog.DEBUG,694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
         }
@@ -383,7 +383,7 @@ public class ContentEntryListRecyclerViewAdapter extends
 
         void onDownloadJobItemChange(DownloadJobItemStatus status) {
             if(status != null && status.getContentEntryUid() == contentEntryUid) {
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "ContentEntryList update " +
+                UMLog.l(UMLog.DEBUG, 420, "ContentEntryList update " +
                         "entryUid " + status.getContentEntryUid());
                 activity.runOnUiThread(() -> {
                     downloadView.setProgress(

@@ -187,7 +187,7 @@ public class DownloadJobItemRunner implements Runnable {
      */
     private void handleConnectivityStatusChanged(ConnectivityStatus newStatus) {
         this.connectivityStatus = newStatus;
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() +
+        UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() +
                 " Connectivity state changed: " + newStatus);
         if(waitingForLocalConnection.get())
             return;
@@ -218,7 +218,7 @@ public class DownloadJobItemRunner implements Runnable {
             meteredConnectionAllowed.set(meteredConnection ? 1 : 0);
             if(meteredConnectionAllowed.get() == 0 && connectivityStatus != null
                     && connectivityStatus.getConnectivityState() == STATE_METERED) {
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 699, mkLogPrefix() +
+                UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() +
                         " : no longer allowed to run on metered network - stopping");
                 stopAsync(JobStatus.WAITING_FOR_CONNECTION);
             }
@@ -325,7 +325,7 @@ public class DownloadJobItemRunner implements Runnable {
             IllegalArgumentException e = new IllegalArgumentException(
                     "DownloadJobItemRunner destinationdir is null for " +
                     downloadItem.getDjiDjUid());
-            UstadMobileSystemImpl.l(UMLog.CRITICAL, 699,
+            UMLog.l(UMLog.CRITICAL, 699,
                     mkLogPrefix() + " destinationDir = null", e);
             throw e;
         }
@@ -340,7 +340,7 @@ public class DownloadJobItemRunner implements Runnable {
      * Start downloading a file
      */
     private void startDownload(){
-        UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+        UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                 " StartDownload: ContainerUid = " + downloadItem.getDjiContainerUid());
         int attemptsRemaining = 3;
 
@@ -417,7 +417,7 @@ public class DownloadJobItemRunner implements Runnable {
 
             history.setUrl(downloadEndpoint);
 
-            UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+            UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                     " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                     " Attempts remaining= " + attemptsRemaining);
 
@@ -434,7 +434,7 @@ public class DownloadJobItemRunner implements Runnable {
                     history.setStartTime(System.currentTimeMillis());
 
                     int downloadedCount = 0;
-                    UstadMobileSystemImpl.l(UMLog.INFO, 699, "Downloading " +
+                    UMLog.l(UMLog.INFO, 699, "Downloading " +
                             entriesToDownload.size() + " ContainerEntryFiles from " + downloadEndpoint);
                     for(ContainerEntryWithMd5 entry : entriesToDownload) {
                         File destFile = new File(new File(destinationDir),
@@ -458,7 +458,7 @@ public class DownloadJobItemRunner implements Runnable {
                     downloaded = downloadedCount == entriesToDownload.size();
                 }
             }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR,699, mkLogPrefix() +
+                UMLog.l(UMLog.ERROR,699, mkLogPrefix() +
                         "Failed to download a file from " + endpointUrl, e);
             }
 
@@ -500,7 +500,7 @@ public class DownloadJobItemRunner implements Runnable {
      * @return true if file should be do downloaded from the cloud otherwise false.
      */
     private boolean connectToCloudNetwork() {
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 699, "Reconnecting cloud network");
+        UMLog.l(UMLog.DEBUG, 699, "Reconnecting cloud network");
         networkManager.restoreWifi();
         WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
                 (connectivityStatus) -> {
@@ -534,7 +534,7 @@ public class DownloadJobItemRunner implements Runnable {
         BleMessage requestGroupCreation = new BleMessage(WIFI_GROUP_REQUEST,
                 BleMessage.getNextMessageIdForReceiver(currentNetworkNode.getBluetoothMacAddress()),
                 BleMessageUtil.bleMessageLongToBytes(Collections.singletonList(1L)));
-        UstadMobileSystemImpl.l(UMLog.DEBUG,699, mkLogPrefix() +
+        UMLog.l(UMLog.DEBUG,699, mkLogPrefix() +
                 " connecting local network: requesting group credentials ");
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean connectionRequestActive = new AtomicBoolean(true);
@@ -542,7 +542,7 @@ public class DownloadJobItemRunner implements Runnable {
 
         networkManager.sendMessage(context,requestGroupCreation, currentNetworkNode,
                 ((sourceDeviceAddress, response, error) ->  {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+                    UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                             " BLE response received: from " + sourceDeviceAddress + ":" + response +
                             " error: " + error);
                     if(latch.getCount() > 0 && connectionRequestActive.get()
@@ -559,7 +559,7 @@ public class DownloadJobItemRunner implements Runnable {
                         appDb.getNetworkNodeDao().updateNetworkNodeGroupSsid(currentNetworkNode.getNodeId(),
                                 lWifiDirectGroup.getSsid(), acquiredEndPoint);
 
-                        UstadMobileSystemImpl.l(UMLog.INFO,699, mkLogPrefix() +
+                        UMLog.l(UMLog.INFO,699, mkLogPrefix() +
                                 "Connecting to P2P group network with SSID "+lWifiDirectGroup.getSsid());
                     }
                     latch.countDown();
@@ -571,7 +571,7 @@ public class DownloadJobItemRunner implements Runnable {
 
         //There was an exception trying to communicate with the peer to get the wifi direct group network
         if(wiFiDirectGroupBle.get() == null) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 699, mkLogPrefix() +
+            UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
                     "Requested group network" +
                     "from bluetooth address " + currentNetworkNode.getBluetoothMacAddress() +
                     "but did not receive group network credentials");
@@ -584,10 +584,10 @@ public class DownloadJobItemRunner implements Runnable {
             WaitForLiveData.INSTANCE.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
                     (connectivityStatus) -> connectivityStatus != null
                             && connectivityStatus.getConnectivityState() != ConnectivityStatus.STATE_UNMETERED);
-            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Disconnected existing wifi network");
+            UMLog.l(UMLog.INFO, 699, "Disconnected existing wifi network");
         }
 
-        UstadMobileSystemImpl.l(UMLog.INFO, 699, "Connection initiated to "
+        UMLog.l(UMLog.INFO, 699, "Connection initiated to "
                 + wiFiDirectGroupBle.get().getSsid());
 
         networkManager.connectToWiFi(wiFiDirectGroupBle.get().getSsid(),
@@ -620,7 +620,7 @@ public class DownloadJobItemRunner implements Runnable {
      */
     private void updateItemStatus(int itemStatus) {
         CountDownLatch latch = new CountDownLatch(1);
-        UstadMobileSystemImpl.l(UMLog.INFO, 699, mkLogPrefix() +
+        UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                 " Setting status to: " + JobStatus.statusToString(itemStatus));
         downloadJobItemManager.updateStatus((int)downloadItem.getDjiUid(), itemStatus,
                 (aVoid) -> latch.countDown());

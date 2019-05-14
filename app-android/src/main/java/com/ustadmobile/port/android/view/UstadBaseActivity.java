@@ -387,7 +387,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         String languageSetting = getInstance().getLocale(newBase);
 
         if (Build.VERSION.SDK_INT >= 17) {
-            Locale locale = languageSetting.equals(UstadMobileSystemImpl.LOCALE_USE_SYSTEM)
+            Locale locale = languageSetting.equals(UMLog.lOCALE_USE_SYSTEM)
                     ? Locale.getDefault() : new Locale(languageSetting);
             config.setLocale(locale);
             super.attachBaseContext(newBase.createConfigurationContext(config));

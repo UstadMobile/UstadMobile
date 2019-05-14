@@ -162,7 +162,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
         impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
-                UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
 
     }
 

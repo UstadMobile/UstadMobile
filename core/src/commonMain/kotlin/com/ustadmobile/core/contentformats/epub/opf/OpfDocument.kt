@@ -202,7 +202,7 @@ class OpfDocument {
                             }
                             spine.add(manifestItems[idref]!!)
                         } else {
-                            UstadMobileSystemImpl.l(UMLog.WARN, 209, idref)
+                            UMLog.l(UMLog.WARN, 209, idref)
                         }
                     }
                 }

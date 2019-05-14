@@ -753,7 +753,7 @@ object UMFileUtil {
 
                     indexArgs[argName] = args[currentKey]
                 } catch (e: NumberFormatException) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 680, currentKey, e)
+                    UMLog.l(UMLog.ERROR, 680, currentKey, e)
                 }
 
             }

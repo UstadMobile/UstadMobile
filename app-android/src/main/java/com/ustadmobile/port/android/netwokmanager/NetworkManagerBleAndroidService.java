@@ -112,7 +112,7 @@ public class NetworkManagerBleAndroidService extends Service {
     private void handleActiveJob(boolean anyActivityJob){
         if(!mHttpDownloadServiceActive.get() && anyActivityJob){
             Intent serviceIntent = new Intent(getApplicationContext(), DownloadNotificationService.class);
-            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Starting foreground notification");
+            UMLog.l(UMLog.INFO, 699, "Starting foreground notification");
             serviceIntent.setAction(ACTION_START_FOREGROUND_SERVICE);
             serviceIntent.putExtra(JOB_ID_TAG,GROUP_SUMMARY_ID);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

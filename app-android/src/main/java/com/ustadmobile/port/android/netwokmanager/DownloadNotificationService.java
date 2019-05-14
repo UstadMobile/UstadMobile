@@ -244,7 +244,7 @@ public class DownloadNotificationService extends Service
                     && status.getStatus() <= JobStatus.RUNNING_MAX;
 
             if(notificationHolder == null){
-                UstadMobileSystemImpl.l(UMLog.VERBOSE, 699,
+                UMLog.l(UMLog.VERBOSE, 699,
                         "Service #" + serviceInstanceId +
                                 " Creating new notification for download #" + downloadJobId);
                 totalBytesToBeDownloaded = totalBytesToBeDownloaded +
@@ -276,11 +276,11 @@ public class DownloadNotificationService extends Service
                     mNotificationManager.cancel(notification.notificationId);
                     downloadJobIdToNotificationMap.remove(manager.getDownloadJobUid());
                     if(downloadJobIdToNotificationMap.isEmpty()) {
-                        UstadMobileSystemImpl.l(UMLog.INFO, 699, "DownloadNotificationService: Stop");
+                        UMLog.l(UMLog.INFO, 699, "DownloadNotificationService: Stop");
                         stopForegroundService();
                     }
                 }else {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 699, "Cannot find notification for download!");
+                    UMLog.l(UMLog.ERROR, 699, "Cannot find notification for download!");
                 }
             }else {
                 totalBytesDownloadedSoFar = totalBytesDownloadedSoFar +

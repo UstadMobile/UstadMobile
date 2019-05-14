@@ -111,7 +111,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
 
         override fun onFailure(exception: Throwable?) {
             if (exception != null) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 500, "Exception mounting container")
+                UMLog.l(UMLog.ERROR, 500, "Exception mounting container")
                 dumpException(exception)
             }
         }
@@ -146,7 +146,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
         }
 
         override fun onFailure(call: UmHttpCall, exception: Exception) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 500, "Exception loading container")
+            UMLog.l(UMLog.ERROR, 500, "Exception loading container")
         }
     }
 

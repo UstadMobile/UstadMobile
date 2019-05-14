@@ -185,7 +185,7 @@ object UMIOUtils {
      */
     fun logAndThrowIfNotNullIO(e: IOException?, level: Int, code: Int, message: String) {
         if (e != null) {
-            UstadMobileSystemImpl.l(level, code, message, e)
+            UMLog.l(level, code, message, e)
             throw e
         }
     }

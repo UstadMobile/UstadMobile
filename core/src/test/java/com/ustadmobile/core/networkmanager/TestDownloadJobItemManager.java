@@ -137,7 +137,7 @@ public class TestDownloadJobItemManager {
     @Test
     public void givenDownloadWithChildren_whenItemAdded_thenShouldIncreaseTotalLength()
             throws InterruptedException{
-        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Test: " +
+        UMLog.l(UMLog.INFO, 420, "Test: " +
                 "givenDownloadWithChildren_whenItemAdded_thenShouldIncreaseTotalLength");
         setupDb();
         DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
@@ -166,7 +166,7 @@ public class TestDownloadJobItemManager {
     @Test
     public void givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch()
             throws InterruptedException{
-        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Test: " +
+        UMLog.l(UMLog.INFO, 420, "Test: " +
                 "givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch");
         setupDb();
         DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());
@@ -211,7 +211,7 @@ public class TestDownloadJobItemManager {
     @Test
     public void givenStatusSavedToDatabase_whenReloaded_thenTotalsShouldMatch()
             throws InterruptedException{
-        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Test: " +
+        UMLog.l(UMLog.INFO, 420, "Test: " +
                 "givenDownloadWithChildren_whenCommited_thenDatabaseShouldMatch");
         setupDb();
         DownloadJobItemManager manager = new DownloadJobItemManager(db, (int)downloadJob.getDjUid());

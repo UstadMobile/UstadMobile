@@ -50,9 +50,9 @@ public class UmAppDatabaseSyncWorker extends Worker {
             umAppDb.syncWith(
                     UmAccountManager.INSTANCE.getRepositoryForActiveAccount(getApplicationContext()),
                     activeAccount != null ? activeAccount.getPersonUid() : 0, 100, 100);
-            UstadMobileSystemImpl.l(UMLogger.INFO, 100, "database syncWith repo ran");
+            UMLog.l(UMLogger.INFO, 100, "database syncWith repo ran");
         }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLogger.WARN, 101, "Exception running syncWith :" +
+            UMLog.l(UMLogger.WARN, 101, "Exception running syncWith :" +
                     e.getMessage());
         }
 

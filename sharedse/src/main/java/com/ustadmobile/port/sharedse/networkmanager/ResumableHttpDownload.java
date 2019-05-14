@@ -186,15 +186,15 @@ public class ResumableHttpDownload {
 
                 if(validated) {
                     startFrom = dlPartFile.length();
-                    UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " validated to start from " + startFrom);
+                    UMLog.l(UMLog.DEBUG, 0, mkLogPrefix() + " validated to start from " + startFrom);
                 }else {
-                    UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " file exists but not validated");
+                    UMLog.l(UMLog.DEBUG, 0, mkLogPrefix() + " file exists but not validated");
                 }
             }
 
             if(startFrom == 0 && dlPartFile.exists()) {
                 //Part file exists but does not match the last modified and/or etag
-                UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " : startFrom = 0 and dlpart file exists");
+                UMLog.l(UMLog.DEBUG, 0, mkLogPrefix() + " : startFrom = 0 and dlpart file exists");
                 dlPartFile.delete();
             }
 
@@ -251,7 +251,7 @@ public class ResumableHttpDownload {
                 statusLock.lock();
 
                 if(isStopped()) {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 0, mkLogPrefix() + " stopped before output file is to be opened");
+                    UMLog.l(UMLog.INFO, 0, mkLogPrefix() + " stopped before output file is to be opened");
                     return false;
                 }
 
@@ -336,19 +336,19 @@ public class ResumableHttpDownload {
         }
 
         if(completed) {
-            UstadMobileSystemImpl.Companion.l(UMLog.INFO, 0, mkLogPrefix() + " completed, downloaded " +
+            UMLog.l(UMLog.INFO, 0, mkLogPrefix() + " completed, downloaded " +
                     downloadedSoFar + "bytes");
             synchronized (this) {
                 File destinationFile = new File(this.destinationFile);
                 if(overwriteDestination && destinationFile.exists()){
-                    UstadMobileSystemImpl.l(UMLog.INFO, 0, mkLogPrefix() +
+                    UMLog.l(UMLog.INFO, 0, mkLogPrefix() +
                             " download complete, overwrite enabled, deleting existing file" +
                             destinationFile.getAbsolutePath());
                     destinationFile.delete();
                 }
 
                 if(dlPartFile.renameTo(destinationFile)) {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 0,
+                    UMLog.l(UMLog.INFO, 0,
                             mkLogPrefix() + " download completed, moved " +
                             dlInfoFile.getAbsolutePath() + " to " + destinationFile.getAbsolutePath());
                 }else {
@@ -465,22 +465,22 @@ public class ResumableHttpDownload {
             stopped.incrementAndGet();
 
             //stopped.set(true);
-            UstadMobileSystemImpl.Companion.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
+            UMLog.l(UMLog.DEBUG, 0, mkLogPrefix() + " stop() called");
 
             //close the file output stream
             if(fileOut != null) {
                 try {
                     fileOut.flush();
-                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: flushed fileout OK");
+                    UMLog.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: flushed fileout OK");
                 }catch(IOException e) {
-                    UstadMobileSystemImpl.Companion.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception flushing fileOut", e);
+                    UMLog.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception flushing fileOut", e);
                 }
 
                 try {
                     fileOut.close();
-                    UstadMobileSystemImpl.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: closed fileout OK");
+                    UMLog.l(UMLog.DEBUG, 0, mkLogPrefix() + "stop: closed fileout OK");
                 }catch(IOException e) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception closing fileout", e);
+                    UMLog.l(UMLog.ERROR, 0, mkLogPrefix() + "stop: exception closing fileout", e);
                 }finally {
                     fileOut = null;
                 }

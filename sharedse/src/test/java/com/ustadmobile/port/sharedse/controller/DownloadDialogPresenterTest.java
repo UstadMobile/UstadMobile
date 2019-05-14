@@ -156,7 +156,7 @@ public class DownloadDialogPresenterTest {
 
     private void insertDownloadJobAndJobItems(boolean meteredNetworkAllowed, int status){
         Assert.assertNotEquals(0, rootEntry.getContentEntryUid());
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadDialogPresenterTest " +
+        UMLog.l(UMLog.DEBUG, 420, "DownloadDialogPresenterTest " +
                 "root entry uid = " + rootEntry.getContentEntryUid());
         downloadJob = new DownloadJob(rootEntry.getContentEntryUid(),
                 System.currentTimeMillis());

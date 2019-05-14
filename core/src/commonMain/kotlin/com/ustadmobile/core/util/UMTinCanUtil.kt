@@ -80,7 +80,7 @@ object UMTinCanUtil {
             retVal.put(lang, langValue)
         } catch (e: JSONException) {
             //this should never happen - all we did is put two strings in a JSON object
-            UstadMobileSystemImpl.l(UMLog.ERROR, 197, "$lang/$langValue",
+            UMLog.l(UMLog.ERROR, 197, "$lang/$langValue",
                     e)
         }
 
@@ -135,7 +135,7 @@ object UMTinCanUtil {
             actorObj.put("objectType", "Agent")
         } catch (e: JSONException) {
             //seriously... this should never happen putting strings together
-            UstadMobileSystemImpl.l(UMLog.ERROR, 195, null, e)
+            UMLog.l(UMLog.ERROR, 195, null, e)
         }
 
         return actorObj
@@ -184,7 +184,7 @@ object UMTinCanUtil {
             obj.put("id", id)
             obj.put("display", makeLangMapVal(lang, display))
         } catch (je: JSONException) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 195, "UMTinCanUtil.makeVerbObject", je)
+            UMLog.l(UMLog.ERROR, 195, "UMTinCanUtil.makeVerbObject", je)
         }
 
         return obj

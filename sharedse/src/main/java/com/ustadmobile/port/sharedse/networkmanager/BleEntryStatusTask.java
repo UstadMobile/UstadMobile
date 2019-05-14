@@ -132,7 +132,7 @@ public abstract class BleEntryStatusTask implements Runnable,BleMessageResponseL
                 }
                 Long [] rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList);
                 if(rowCount.length == entryFileStatusResponseList.size()){
-                    UstadMobileSystemImpl.Companion.l(UMLog.DEBUG,698, rowCount.length
+                    UMLog.l(UMLog.DEBUG,698, rowCount.length
                             + " response(s) logged from "+ sourceDeviceAddress);
                 }
 

@@ -117,9 +117,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         init(mContext)
     }
 
-    fun handleActivityDestroy(mContext: Activity) {
-
-    }
+    fun handleActivityDestroy(mContext: Activity) {}
 
 
     /**
@@ -360,7 +358,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val pInfo = ctx.packageManager.getPackageInfo(context.packageName, 0)
             versionInfo = 'v'.toString() + pInfo.versionName + " (#" + pInfo.versionCode + ')'.toString()
         } catch (e: PackageManager.NameNotFoundException) {
-            l(UMLog.ERROR, 90, null, e)
+            UMLog.l(UMLog.ERROR, 90, null, e)
         }
 
         return versionInfo!!
@@ -379,7 +377,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             val pInfo = ctx.packageManager.getPackageInfo(context.packageName, 0)
             return pInfo.lastUpdateTime
         } catch (e: PackageManager.NameNotFoundException) {
-           l(UMLog.ERROR, 90, null, e)
+           UMLog.l(UMLog.ERROR, 90, null, e)
         }
         return 0
     }
@@ -419,7 +417,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 return metaData.getString(key)
             }
         } catch (e: PackageManager.NameNotFoundException) {
-            l(UMLog.ERROR, UMLog.ERROR, key, e)
+            UMLog.l(UMLog.ERROR, UMLog.ERROR, key, e)
         }
         return null
     }
@@ -526,13 +524,9 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
-        const val LOCALE_USE_SYSTEM = UstadMobileSystemCommon.LOCALE_USE_SYSTEM
-
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
         const val ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change"
-
-        const val PREFKEY_LANG = "lang"
 
         /**
          * Get an instance of the system implementation - relies on the platform

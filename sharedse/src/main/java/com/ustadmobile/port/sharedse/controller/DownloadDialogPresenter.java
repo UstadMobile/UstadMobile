@@ -71,7 +71,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
         impl = UstadMobileSystemImpl.Companion.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
-        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Starting download presenter for " +
+        UMLog.l(UMLog.INFO, 420, "Starting download presenter for " +
                 "content entry uid: " + contentEntryUid);
         getView().setWifiOnlyOptionVisible(false);
 

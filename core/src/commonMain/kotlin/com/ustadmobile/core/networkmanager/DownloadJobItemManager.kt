@@ -55,7 +55,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     private fun loadFromDb() {
         val downloadJob = db.downloadJobDao.findByUid(downloadJobUid.toLong())
         rootContentEntryUid = downloadJob.djRootContentEntryUid
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadJobItemManager: load " +
+        UMLog.l(UMLog.DEBUG, 420, "DownloadJobItemManager: load " +
                 "Download job uid " + downloadJobUid + " root content entry uid = " +
                 rootContentEntryUid)
 
@@ -84,7 +84,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     fun updateProgress(djiUid: Int, bytesSoFar: Long, totalBytes: Long) {
         executor.execute {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Updating ID #" +
+            UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
                     djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes)
             val djStatus = jobItemUidToStatusMap[djiUid]
             if(djStatus != null) {
@@ -147,7 +147,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     private fun updateParentsProgress(djiUid: Int, parents: List<DownloadJobItemStatus>?, deltaBytesFoFar: Long,
                                       deltaTotalBytes: Long) {
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Updating ID #" +
+        UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
                 djiUid + " parents = " + UMUtil.debugPrintList(parents) +
                 " deltaBytesSoFar=" + deltaBytesFoFar + ", deltaTotalBytes=" + deltaTotalBytes)
         runOnAllParents(djiUid, parents) { parent ->
@@ -172,14 +172,14 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             }
 
             parents = nextParents
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "\tUpdating ID #" +
+            UMLog.l(UMLog.DEBUG, 420, "\tUpdating ID #" +
                     djiUid + " next parents = " + UMUtil.debugPrintList(parents))
         }
     }
 
     fun insertDownloadJobItems(items: List<DownloadJobItem>, callback: UmResultCallback<Void?>?) {
         executor.execute {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Adding download job items" + UMUtil.debugPrintList(items))
+            UMLog.l(UMLog.DEBUG, 420, "Adding download job items" + UMUtil.debugPrintList(items))
             db.downloadJobItemDao.insertListAndSetIds(items)
 
             for (item in items) {
@@ -214,18 +214,18 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     fun insertParentChildJoins(joins: List<DownloadJobItemParentChildJoin>,
                                callback: UmResultCallback<Void>?) {
         executor.execute {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "Adding parent-child joins" + UMUtil.debugPrintList(joins))
+            UMLog.l(UMLog.DEBUG, 420, "Adding parent-child joins" + UMUtil.debugPrintList(joins))
             for (join in joins) {
                 val childStatus = jobItemUidToStatusMap[join.djiChildDjiUid.toInt()]
                 val parentStatus = jobItemUidToStatusMap[join.djiParentDjiUid.toInt()]
                 if (childStatus == null || parentStatus == null) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 420,
+                    UMLog.l(UMLog.ERROR, 420,
                             "Parent child join requested: but child or parent uids invalid: $join")
                     throw IllegalArgumentException("Parent child join requested: but child or parent uids invalid")
                 }
 
                 if (join.djiChildDjiUid == join.djiParentDjiUid) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 420,
+                    UMLog.l(UMLog.ERROR, 420,
                             "Parent child join requested: child uid = parent uid: $join")
                     throw IllegalArgumentException("childItemUid = parentItemUid")
                 }
