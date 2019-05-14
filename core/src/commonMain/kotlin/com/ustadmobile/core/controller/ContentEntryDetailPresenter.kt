@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemBaseCommon.Companion.ARG_REFERRER
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
