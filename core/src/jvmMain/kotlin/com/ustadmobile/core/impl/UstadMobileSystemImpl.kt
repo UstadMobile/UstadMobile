@@ -215,7 +215,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon(){
     }
 
 
-    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String,
+    actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?,
                                          callback: UmCallback<Any>){
         TODO("not implemented")
     }

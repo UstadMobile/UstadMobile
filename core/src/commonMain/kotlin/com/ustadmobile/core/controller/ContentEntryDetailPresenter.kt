@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.UstadMobileSystemBaseCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
@@ -276,10 +277,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (lastEntryListArgs != null) {
             impl.go(ContentEntryListFragmentView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), context,
-                    UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                    UstadMobileSystemBaseCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemBaseCommon.GO_FLAG_SINGLE_TOP)
         } else {
             impl.go(DummyView.VIEW_NAME, mutableMapOf(), context,
-                    UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                    UstadMobileSystemBaseCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemBaseCommon.GO_FLAG_SINGLE_TOP)
         }
     }
 
