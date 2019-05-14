@@ -58,7 +58,8 @@ ext {
     version_kotlinx_serialization = "0.11.0"
     version_klock = "1.4.0"
     version_kmp = "0.0.1"
-    version_ktor = "1.2.0-rc"
+    version_ktor = "1.2.0-rc2"
+    version_coroutines = "1.2.1"
 
     version_junit = "4.12"
     version_nanohttpd = "2.3.1"
