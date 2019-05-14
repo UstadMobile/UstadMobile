@@ -36,6 +36,7 @@ import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
 import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -540,7 +541,7 @@ object UMUtil {
             return "[null list]"
 
         var isFirst = true
-        val sb = java.lang.StringBuilder()
+        val sb = StringBuilder()
         sb.append('[')
         for(obj in list) {
             if(!isFirst)
