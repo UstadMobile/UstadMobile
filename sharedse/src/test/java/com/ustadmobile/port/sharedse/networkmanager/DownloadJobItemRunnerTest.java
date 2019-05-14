@@ -7,6 +7,8 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManagerList;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.Container;
@@ -16,9 +18,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
-import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.container.ContainerManager;
@@ -30,12 +29,12 @@ import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -128,22 +127,15 @@ public class DownloadJobItemRunnerTest {
 
     private static final int MAX_THREAD_SLEEP_TIME = 2;
 
-
-    @BeforeClass
-    public static void setupDatabases() {
-//        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
-//                SharedSeTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true);
-//        DriverConnectionPoolInitializer.bindDataSource("clientdb",
-//                SharedSeTestConfig.TESTDB_JDBCURL_CLIENTUMAPPDATABASE, true);
-//        DriverConnectionPoolInitializer.bindDataSource("peerdb",
-//                SharedSeTestConfig.TESTDB_JDBCURL_PEERUMAPPDATABASE, true);
-    }
-
+    private DownloadJobItemManager downloadJobItemManager;
 
 
     @Before
     public void setup() throws IOException {
         context = PlatformTestUtil.getTargetContext();
+        UmAppDatabase.getInstance(context).clearAllTables();
+        clientDb = UmAppDatabase.getInstance(context, "clientdb");
+        clientDb.clearAllTables();
 
         webServerTmpDir = UmFileUtilSe.makeTempDir("webServerTmpDir",
                 ""+System.currentTimeMillis());
@@ -156,13 +148,16 @@ public class DownloadJobItemRunnerTest {
                 "" + System.currentTimeMillis());
 
         mockedNetworkManager = spy(NetworkManagerBle.class);
+        mockedNetworkManager.setDatabase(clientDb);
+        mockedNetworkManager.setContext(context);
+        mockedNetworkManager.setJobItemManagerList(new DownloadJobItemManagerList(clientDb));
 
         mockedNetworkManagerBleWorking.set(true);
 
         mockedNetworkManagerWifiConnectWorking.set(true);
 
         mockedEntryStatusTask = mock(BleEntryStatusTask.class);
-        mockedNetworkManager.setContext(context);
+
 
         EmbeddedHTTPD httpd = new EmbeddedHTTPD(0,context);
         httpd.start();
@@ -174,9 +169,6 @@ public class DownloadJobItemRunnerTest {
 
         clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis());
 
-        UmAppDatabase.getInstance(context).clearAllTables();
-        clientDb = UmAppDatabase.getInstance(context, "clientdb");
-        clientDb.clearAllTables();
         clientRepo = clientDb.getRepository("http://localhost/dummy/", "");
         networkNode = new NetworkNode();
         networkNode.setBluetoothMacAddress("00:3F:2F:64:C6:4F");
@@ -206,28 +198,21 @@ public class DownloadJobItemRunnerTest {
         clientRepo.getContainerDao().insert(container);
 
 
-        DownloadSet downloadSet = new DownloadSet();
-        downloadSet.setDestinationDir(clientContainerDir.getAbsolutePath());
-        downloadSet.setDsRootContentEntryUid(0L);
-        downloadSet.setDsUid((int) clientDb.getDownloadSetDao().insert(downloadSet));
-
-        DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet, contentEntry);
-        downloadSetItem.setDsiUid((int) clientDb.getDownloadSetItemDao().insert(downloadSetItem));
-
-        DownloadJob downloadJob = new DownloadJob(downloadSet);
-        downloadJob.setTimeCreated(System.currentTimeMillis());
+        DownloadJob downloadJob = new DownloadJob(contentEntry.getContentEntryUid(),
+                System.currentTimeMillis());
         downloadJob.setTimeRequested(System.currentTimeMillis());
         downloadJob.setDjStatus(JobStatus.QUEUED);
-        downloadJob.setDjUid((int) clientDb.getDownloadJobDao().insert(downloadJob));
+        downloadJob.setDjDestinationDir(clientContainerDir.getAbsolutePath());
 
-        downloadJobItem = new DownloadJobItem(downloadJob, downloadSetItem,
-                container);
+        downloadJobItemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob);
+
+        downloadJobItem = new DownloadJobItem(downloadJob, contentEntry.getContentEntryUid(),
+                container.getContainerUid(), container.getFileSize());
         downloadJobItem.setDjiStatus(JobStatus.QUEUED);
         downloadJobItem.setDownloadedSoFar(0);
         downloadJobItem.setDestinationFile(new File(clientContainerDir,
                 String.valueOf(TEST_CONTENT_ENTRY_FILE_UID)).getAbsolutePath());
-        downloadJobItem.setDjiUid(clientDb.getDownloadJobItemDao().insert(downloadJobItem));
-
+        downloadJobItemManager.insertDownloadJobItemsSync(Collections.singletonList(downloadJobItem));
 
 
         connectivityStatus = new ConnectivityStatus();
@@ -368,8 +353,8 @@ public class DownloadJobItemRunnerTest {
 
     @Test
     public void givenDownload_whenRun_shouldDownloadAndComplete() throws IOException{
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
@@ -377,7 +362,7 @@ public class DownloadJobItemRunnerTest {
 
         jobItemRunner.run();
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download task completed successfully",
@@ -397,8 +382,8 @@ public class DownloadJobItemRunnerTest {
 
         cloudServer.setNumTimesToFail(1);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -406,7 +391,7 @@ public class DownloadJobItemRunnerTest {
 
         jobItemRunner.run();
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download task retried and completed successfully",
@@ -426,8 +411,8 @@ public class DownloadJobItemRunnerTest {
 
         cloudServer.setNumTimesToFail(4);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -435,7 +420,7 @@ public class DownloadJobItemRunnerTest {
 
         jobItemRunner.run();
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download task retried and completed with failure status",
@@ -448,8 +433,8 @@ public class DownloadJobItemRunnerTest {
 
         cloudServer.setThrottle(512);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -466,7 +451,7 @@ public class DownloadJobItemRunnerTest {
                 TimeUnit.SECONDS,status-> status == JobStatus.WAITING_FOR_CONNECTION);
 
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download task stopped after network status " +
@@ -481,8 +466,8 @@ public class DownloadJobItemRunnerTest {
 
         cloudServer.setThrottle(512);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -498,7 +483,7 @@ public class DownloadJobItemRunnerTest {
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status == JobStatus.STOPPED);
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download job was stopped and status was updated",
@@ -512,11 +497,11 @@ public class DownloadJobItemRunnerTest {
 
         cloudServer.setThrottle(512/4);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
-        clientDb.getDownloadSetDao().setMeteredConnectionBySetUid(
-                item.getDownloadSetItem().getDsiDsUid(),true);
+        clientDb.getDownloadJobDao().setMeteredConnectionAllowedByJobUidSync(
+                (int)item.getDjiUid(),true);
 
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -537,14 +522,14 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
-        clientDb.getDownloadSetDao().setMeteredConnectionBySetUid(
-                item.getDownloadSetItem().getDsiDsUid(),false);
+        clientDb.getDownloadJobDao().setMeteredConnectionAllowedByJobUidSync(
+                (int)item.getDjiDjUid(),false);
 
         WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao()
                         .getLiveStatus(item.getDjiUid()), MAX_LATCH_WAITING_TIME,
                 TimeUnit.SECONDS, status -> status == JobStatus.WAITING_FOR_CONNECTION);
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
 
@@ -560,8 +545,8 @@ public class DownloadJobItemRunnerTest {
 
         cloudServer.setThrottle(512);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -580,7 +565,7 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download job is waiting for network after the network goes off",
@@ -594,8 +579,7 @@ public class DownloadJobItemRunnerTest {
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item = clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
@@ -608,7 +592,7 @@ public class DownloadJobItemRunnerTest {
         assertEquals("Cloud mock server received no requests", 0 ,
                 cloudServer.getRequestCount());
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertContainersHaveSameContent(container.getContainerUid(), container.getContainerUid(),
@@ -625,8 +609,7 @@ public class DownloadJobItemRunnerTest {
         entryStatusResponse.setErId((int)
                 clientDb.getEntryStatusResponseDao().insert(entryStatusResponse));
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item = clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -655,7 +638,7 @@ public class DownloadJobItemRunnerTest {
                         && cloudServer.getRequestCount() >= 1);
 
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
         assertEquals("File downloaded successfully",item.getDjiStatus(),
                 JobStatus.COMPLETE);
@@ -689,8 +672,7 @@ public class DownloadJobItemRunnerTest {
         clientDb.getDownloadJobItemHistoryDao().insertList(historyList);
 
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item = clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -730,8 +712,7 @@ public class DownloadJobItemRunnerTest {
                 "DIRECT-group");
 
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item = clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
@@ -744,7 +725,7 @@ public class DownloadJobItemRunnerTest {
         assertEquals("Cloud mock server received no requests", 0 ,
                 cloudServer.getRequestCount());
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
         assertEquals("File downloaded successfully",JobStatus.COMPLETE,
                 item.getDjiStatus());
@@ -768,8 +749,7 @@ public class DownloadJobItemRunnerTest {
 
         mockedNetworkManagerBleWorking.set(false);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item = clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -777,7 +757,7 @@ public class DownloadJobItemRunnerTest {
 
         jobItemRunner.run();
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File download task completed successfully",
@@ -806,8 +786,8 @@ public class DownloadJobItemRunnerTest {
 
         mockedNetworkManagerWifiConnectWorking.set(false);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb,clientRepo,
@@ -816,7 +796,7 @@ public class DownloadJobItemRunnerTest {
 
         jobItemRunner.run();
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
         assertEquals("File download task completed successfully",
                 JobStatus.COMPLETE, item.getDjiStatus());
@@ -843,8 +823,8 @@ public class DownloadJobItemRunnerTest {
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
 
         DownloadJobItemRunner jobItemRunner =
@@ -866,7 +846,7 @@ public class DownloadJobItemRunnerTest {
 
         verify(mockedNetworkManager).restoreWifi();
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File downloaded successfully from cloud",
@@ -879,8 +859,8 @@ public class DownloadJobItemRunnerTest {
         entryStatusResponse.setAvailable(true);
         clientDb.getEntryStatusResponseDao().insert(entryStatusResponse);
 
-        DownloadJobItemWithDownloadSetItem item =
-                clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        DownloadJobItem item =
+                clientDb.getDownloadJobItemDao().findByUid(
                         downloadJobItem.getDjiUid());
         DownloadJobItemRunner jobItemRunner =
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
@@ -917,7 +897,7 @@ public class DownloadJobItemRunnerTest {
         verify(mockedNetworkManager, atLeast(1))
                 .connectToWiFi(eq(groupBle.getSsid()),eq(groupBle.getPassphrase()));
 
-        item = clientDb.getDownloadJobItemDao().findWithDownloadSetItemByUid(
+        item = clientDb.getDownloadJobItemDao().findByUid(
                 downloadJobItem.getDjiUid());
 
         assertEquals("File failed to be downloaded from peer and status was updated",

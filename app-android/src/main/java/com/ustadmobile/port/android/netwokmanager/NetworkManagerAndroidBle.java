@@ -653,7 +653,8 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
      */
     @Override
     public boolean canDeviceAdvertise() {
-        return isAdvertiser() && bluetoothAdapter != null && bluetoothAdapter.isMultipleAdvertisementSupported();
+        return isAdvertiser() && bluetoothAdapter != null
+                && bluetoothAdapter.isMultipleAdvertisementSupported();
     }
 
     /**

@@ -42,6 +42,7 @@ import com.ustadmobile.port.android.impl.UserFeedbackException;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.port.sharedse.util.RunnableQueue;
 
 import org.acra.ACRA;
 
@@ -84,7 +85,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private Runnable afterPermissionMethodRunner;
 
-    private Runnable runAfterServiceConnection;
+    private RunnableQueue runWhenServiceConnectedQueue = new RunnableQueue();
 
     private String permissionDialogTitle;
 
@@ -115,11 +116,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
                     .getService().getNetworkManagerBle();
             bleServiceBound = true;
             onBleNetworkServiceBound(networkManagerBle);
-
-            if (runAfterServiceConnection != null) {
-                runAfterServiceConnection.run();
-                runAfterServiceConnection = null;
-            }
+            runWhenServiceConnectedQueue.setReady(true);
         }
 
         @Override
@@ -485,7 +482,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
      * @param runnable Future task to be executed
      */
     public void runAfterServiceConnection(Runnable runnable) {
-        this.runAfterServiceConnection = runnable;
+        runWhenServiceConnectedQueue.runWhenReady(runnable);
     }
 
     /**

@@ -17,8 +17,7 @@ import com.ustadmobile.core.db.dao.ContentEntryStatusDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
-import com.ustadmobile.core.db.dao.DownloadSetDao;
-import com.ustadmobile.core.db.dao.DownloadSetItemDao;
+import com.ustadmobile.core.db.dao.DownloadJobItemParentChildJoinDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.HttpCachedEntryDao;
@@ -69,8 +68,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.HttpCachedEntry;
@@ -101,11 +99,11 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 18, entities = {
-        DownloadSet.class,
-        DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
+@UmDatabase(version = 22, entities = {
+        NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
         HttpCachedEntry.class, DownloadJob.class, DownloadJobItem.class,
+        DownloadJobItemParentChildJoin.class,
         Person.class, Clazz.class, ClazzMember.class,
         PersonCustomField.class, PersonCustomFieldValue.class,
         ContentEntry.class, ContentEntryContentCategoryJoin.class,
@@ -622,6 +620,36 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
             }
         });
 
+        builder.addMigration(new UmDbMigration(18,20) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                switch (db.getDbType()) {
+                    case UmDbType.TYPE_SQLITE:
+                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid INTEGER NOT NULL");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid INTEGER NOT NULL");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN meteredNetworkAllowed INTEGER NOT NULL");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djDestinationDir TEXT");
+                        break;
+
+                    case UmDbType.TYPE_POSTGRES:
+                        db.execSql("ALTER TABLE DownloadJob ADD COLUMN djRootContentEntryUid BIGINT DEFAULT 0");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djiContentEntryUid BIGINT DEFAULT 0");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN meteredNetworkAllowed BOOL DEFAULT FALSE");
+                        db.execSql("ALTER TABLE DownloadJobItem ADD COLUMN djDestinationDir TEXT");
+                        break;
+
+                }
+            }
+        });
+
+        builder.addMigration(new UmDbMigration(20, 22) {
+            @Override
+            public void migrate(DoorDbAdapter db) {
+                db.execSql("DROP TABLE DownloadSet");
+                db.execSql("DROP TABLE DownloadSetItem");
+            }
+        });
+
         return builder;
     }
 
@@ -635,13 +663,11 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
 
     public abstract EntryStatusResponseDao getEntryStatusResponseDao();
 
-    public abstract DownloadSetDao getDownloadSetDao();
-
-    public abstract DownloadSetItemDao getDownloadSetItemDao();
-
     public abstract DownloadJobDao getDownloadJobDao();
 
     public abstract DownloadJobItemDao getDownloadJobItemDao();
+
+    public abstract DownloadJobItemParentChildJoinDao getDownloadJobItemParentChildJoinDao();
 
     public abstract DownloadJobItemHistoryDao getDownloadJobItemHistoryDao();
 

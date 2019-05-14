@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -76,6 +77,7 @@ open class ContentEntry {
 
     //TODO: Migration : add to migration
     @UmIndexField
+    @ColumnInfo(index = true)
     var primaryLanguageUid: Long = 0
 
     var languageVariantUid: Long = 0

@@ -24,10 +24,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-
-import static com.ustadmobile.lib.annotationprocessor.core.DbProcessorUtils.findElementWithAnnotation;
 
 /**
  * DaoMethodInfo is a convenience wrapper class that can work out information we frequently need
@@ -160,22 +159,21 @@ public class DaoMethodInfo {
      * @return TypeMirror representing the entity type
      */
     public TypeMirror resolveEntityParameterComponentType() {
+        ExecutableType methodTypeResolved = (ExecutableType)processingEnv.getTypeUtils()
+                .asMemberOf((DeclaredType)daoClass.asType(), method);
+
         TypeMirror entityTypeMirror;
         if(hasEntityListParam()) {
-            entityTypeMirror = ((DeclaredType)getFirstParam().asType()).getTypeArguments().get(0);
-        }else if(hasEntityArrayParam()) {
-            entityTypeMirror = ((ArrayType)getFirstParam().asType()).getComponentType();
+            entityTypeMirror = ((DeclaredType)methodTypeResolved.getParameterTypes().get(0))
+                    .getTypeArguments().get(0);
+        }else if(hasEntityListParam()) {
+            entityTypeMirror = ((ArrayType)methodTypeResolved.getParameterTypes().get(0))
+                    .getComponentType();
         }else {
-            entityTypeMirror = getFirstParam().asType();
+            entityTypeMirror = methodTypeResolved.getParameterTypes().get(0);
         }
 
-        entityTypeMirror = DbProcessorUtils.resolveType(entityTypeMirror, daoClass, processingEnv);
-
         return entityTypeMirror;
-    }
-
-    public TypeMirror resolveEntityParameterType() {
-        return DbProcessorUtils.resolveType(getFirstParam().asType(), daoClass, processingEnv);
     }
 
 
@@ -187,16 +185,21 @@ public class DaoMethodInfo {
      */
     public TypeMirror resolveResultType() {
         int asyncParamIndex = getAsyncParamIndex();
+        ExecutableType resolvedMethod = (ExecutableType)processingEnv.getTypeUtils().asMemberOf(
+                (DeclaredType)daoClass.asType(), method);
+
         TypeMirror resultType;
         if(asyncParamIndex != -1) {
-            DeclaredType callbackDeclaredType = (DeclaredType)method.getParameters()
-                    .get(asyncParamIndex).asType();
+            DeclaredType callbackDeclaredType = (DeclaredType)resolvedMethod.getParameterTypes()
+                .get(asyncParamIndex);
+
+
             resultType = callbackDeclaredType.getTypeArguments().get(0);
         }else {
-            resultType = method.getReturnType();
+            resultType = resolvedMethod.getReturnType();
         }
 
-        return DbProcessorUtils.resolveType(resultType, daoClass, processingEnv);
+        return resultType;
     }
 
     /**
@@ -208,8 +211,9 @@ public class DaoMethodInfo {
      */
     public TypeMirror resolveResultEntityType() {
         if(isLiveDataReturn()) {
-            TypeMirror resultType = ((DeclaredType)method.getReturnType()).getTypeArguments().get(0);
-            return DbProcessorUtils.resolveType(resultType, daoClass, processingEnv);
+            ExecutableType resolvedMethod = (ExecutableType) processingEnv.getTypeUtils()
+                    .asMemberOf((DeclaredType)daoClass.asType(), method);
+            return ((DeclaredType)resolvedMethod.getReturnType()).getTypeArguments().get(0);
         }else {
             return resolveResultType();
         }
@@ -242,7 +246,8 @@ public class DaoMethodInfo {
      * @return TypeMirror for the return type of the method, with any type variables resolved
      */
     public TypeMirror resolveReturnType() {
-        return DbProcessorUtils.resolveType(method.getReturnType(), daoClass, processingEnv);
+        return ((ExecutableType)processingEnv.getTypeUtils().asMemberOf((DeclaredType)daoClass.asType(), method)).getReturnType();
+
     }
 
     protected List<Element> getMethodParametersAsElements() {

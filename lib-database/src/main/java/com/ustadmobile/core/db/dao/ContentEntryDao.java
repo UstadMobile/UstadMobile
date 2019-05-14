@@ -112,11 +112,11 @@ public abstract class ContentEntryDao implements SyncableDao<ContentEntry, Conte
     public abstract UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> getChildrenByParentUidWithCategoryFilter(long parentUid, long langParam, long categoryParam0);
 
 
-    @UmQuery("SELECT ContentEntry.*, ContentEntryStatus.*, " +
-            "(SELECT containerUid FROM Container  " +
+    @UmQuery("SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, " +
+            "(SELECT containerUid FROM Container " +
             "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY lastModified DESC LIMIT 1) as mostRecentContainer " +
-            "FROM DownloadSet \n" +
-            "LEFT JOIN ContentEntry on  DownloadSet.dsRootContentEntryUid = ContentEntry.contentEntryUid\n" +
+            "FROM DownloadJob \n" +
+            "LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid\n" +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid \n ")
     public abstract UmProvider<ContentEntryWithStatusAndMostRecentContainerUid> getDownloadedRootItems();
 

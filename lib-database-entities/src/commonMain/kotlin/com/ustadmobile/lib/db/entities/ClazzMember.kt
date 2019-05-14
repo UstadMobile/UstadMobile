@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -27,9 +28,11 @@ class ClazzMember : SyncableEntity {
     var clazzMemberUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var clazzMemberPersonUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var clazzMemberClazzUid: Long = 0
 
     var dateJoined: Long = 0

@@ -2115,7 +2115,9 @@ public class DbProcessorJdbc extends AbstractDbProcessor implements QueryMethodG
      * @return suffix to use e.g. "Int" for integers, "String" for Strings, etc.
      */
     private String getPreparedStatementSetterGetterTypeName(TypeMirror variableType) {
-        if(variableType.getKind().equals(TypeKind.INT)) {
+        if(variableType.getKind().equals(TypeKind.BYTE)) {
+            return "Byte";
+        }else if(variableType.getKind().equals(TypeKind.INT)) {
             return "Int";
         }else if(variableType.getKind().equals(TypeKind.LONG)) {
             return "Long";

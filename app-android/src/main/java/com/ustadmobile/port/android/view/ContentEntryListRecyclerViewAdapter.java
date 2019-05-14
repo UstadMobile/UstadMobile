@@ -17,23 +17,27 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 public class ContentEntryListRecyclerViewAdapter extends
         PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid,
-        ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener {
+        ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener,
+        DownloadJobItemManager.OnDownloadJobItemChangeListener {
 
     private final AdapterViewListener listener;
 
@@ -41,34 +45,73 @@ public class ContentEntryListRecyclerViewAdapter extends
 
     private Set<Long> containerUidsToMonitor = new HashSet<>();
 
-    private WeakHashMap<Integer, ViewHolder> viewHolderWeakHashMap;
+    private final Set<ViewHolder> boundViewHolders;
 
     private NetworkManagerAndroidBle managerAndroidBle;
 
     private FragmentActivity activity;
 
+    private static final Map<Integer, Integer> CONTENT_TYPE_TO_ICON_RES_MAP = new HashMap<>();
+
+    static {
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.EBOOK_TYPE, R.drawable.ic_book_black_24dp);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.AUDIO_TYPE, R.drawable.ic_audiotrack_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.VIDEO_TYPE, R.drawable.ic_video_library_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.COLLECTION_TYPE,
+                R.drawable.ic_collections_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.DOCUMENT_TYPE, R.drawable.ic_file_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.INTERACTIVE_EXERICSE_TYPE,
+                R.drawable.ic_assignment_24px);
+        CONTENT_TYPE_TO_ICON_RES_MAP.put(ContentEntry.ARTICLE_TYPE, R.drawable.ic_newspaper);
+    }
+
     ContentEntryListRecyclerViewAdapter(FragmentActivity activity, AdapterViewListener listener,
-                                        LocalAvailabilityMonitor monitor) {
+                                        LocalAvailabilityMonitor monitor,
+                                        NetworkManagerAndroidBle managerAndroidBle) {
         super(DIFF_CALLBACK);
         this.listener = listener;
         this.monitor = monitor;
         this.activity = activity;
-        viewHolderWeakHashMap = new WeakHashMap<>();
+        boundViewHolders = new HashSet<>();
+        this.managerAndroidBle = managerAndroidBle;
     }
 
-    void setNetworkManager(NetworkManagerAndroidBle managerAndroidBle){
-        this.managerAndroidBle = managerAndroidBle;
+
+    public void addListeners() {
         managerAndroidBle.addLocalAvailabilityListener(this);
+        managerAndroidBle.addDownloadChangeListener(this);
+    }
+
+    public void removeListeners() {
+        managerAndroidBle.removeLocalAvailabilityListener(this);
+        managerAndroidBle.removeDownloadChangeListener(this);
     }
 
     @Override
     public void onLocalAvailabilityChanged(Set<Long> locallyAvailableEntries) {
-        List<ViewHolder> viewHoldersToNotify = new ArrayList<>(viewHolderWeakHashMap.values());
+
+        List<ViewHolder> viewHoldersToNotify;
+        synchronized (boundViewHolders) {
+            viewHoldersToNotify = new LinkedList<>(boundViewHolders);
+        }
+
         for(ViewHolder viewHolder : viewHoldersToNotify){
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
             UstadMobileSystemImpl.l(UMLog.DEBUG,694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
+        }
+    }
+
+    @Override
+    public void onDownloadJobItemChange(DownloadJobItemStatus status, DownloadJobItemManager manager) {
+        List<ViewHolder> holdersToNotify;
+        synchronized (boundViewHolders) {
+            holdersToNotify = new LinkedList<>(boundViewHolders);
+        }
+
+        for(ViewHolder viewHolder : holdersToNotify){
+            viewHolder.onDownloadJobItemChange(status);
         }
     }
 
@@ -80,13 +123,10 @@ public class ContentEntryListRecyclerViewAdapter extends
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
-
-        for(Map.Entry<Integer,ViewHolder> holderMap : viewHolderWeakHashMap.entrySet()){
-            if(holderMap.getValue().equals(holder)){
-                viewHolderWeakHashMap.remove(holderMap.getKey());
-                break;
-            }
+        synchronized (boundViewHolders) {
+            boundViewHolders.remove(holder);
         }
+
         super.onViewRecycled(holder);
 
     }
@@ -113,7 +153,13 @@ public class ContentEntryListRecyclerViewAdapter extends
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         ContentEntryWithStatusAndMostRecentContainerUid entry = getItem(position);
 
+        synchronized (boundViewHolders) {
+            boundViewHolders.add(holder);
+        }
+
         if (entry == null) {
+            holder.setContainerUid(0L);
+            holder.setContentEntryUid(0L);
             holder.getEntryTitle().setText("");
             holder.getEntryDescription().setText("");
             holder.getThumbnailView().setImageDrawable(null);
@@ -124,7 +170,6 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getAvailabilityStatus().setText("");
             holder.getAvailabilityIcon().setImageDrawable(null);
         } else {
-
             boolean available = false;
             if(managerAndroidBle != null)
                 available = managerAndroidBle.isEntryLocallyAvailable(
@@ -135,6 +180,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             }
 
             holder.setContainerUid(entry.getMostRecentContainer());
+            holder.setContentEntryUid(entry.getContentEntryUid());
 
             holder.getView().setTag(entry.getContentEntryUid());
             holder.getEntryTitle().setText(entry.getTitle());
@@ -157,10 +203,8 @@ public class ContentEntryListRecyclerViewAdapter extends
 
                 if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.getTotalSize() > 0) {
                     contentDescription = context.getString(R.string.download_entry_state_downloading);
-                    holder.getDownloadView().setProgress((int) ((status.getBytesDownloadSoFar() * 100) / status.getTotalSize()));
                 } else {
                     contentDescription = context.getString(R.string.download_entry_state_queued);
-                    holder.getDownloadView().setProgress(0);
                 }
 
                 if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
@@ -181,23 +225,10 @@ public class ContentEntryListRecyclerViewAdapter extends
 
             ImageView iconView = holder.getIconView();
             int iconFlag = entry.getContentTypeFlag();
-            if (iconFlag == ContentEntry.EBOOK_TYPE) {
-                iconView.setImageResource(R.drawable.ic_book_black_24dp);
-            } else if (iconFlag == ContentEntry.AUDIO_TYPE) {
-                iconView.setImageResource(R.drawable.ic_audiotrack_24px);
-            } else if (iconFlag == ContentEntry.VIDEO_TYPE) {
-                iconView.setImageResource(R.drawable.ic_video_library_24px);
-            } else if (iconFlag == ContentEntry.COLLECTION_TYPE) {
-                iconView.setImageResource(R.drawable.ic_collections_24px);
-            } else if (iconFlag == ContentEntry.DOCUMENT_TYPE) {
-                iconView.setImageResource(R.drawable.ic_file_24px);
-            } else if (iconFlag == ContentEntry.INTERACTIVE_EXERICSE_TYPE) {
-                iconView.setImageResource(R.drawable.ic_assignment_24px);
-            } else if (iconFlag == ContentEntry.ARTICLE_TYPE){
-                iconView.setImageResource(R.drawable.ic_newspaper);
-            } else{
-                iconView.setImageResource(R.drawable.ic_book_black_24dp);
-            }
+            iconView.setImageResource(
+                    CONTENT_TYPE_TO_ICON_RES_MAP.containsKey(entry.getContentTypeFlag()) ?
+                            CONTENT_TYPE_TO_ICON_RES_MAP.get(entry.getContentTypeFlag())
+                            : R.drawable.ic_book_black_24dp);
 
             if (iconFlag == ContentEntry.UNDEFINED_TYPE) {
                 iconView.setVisibility(View.GONE);
@@ -210,11 +241,6 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getAvailabilityIcon().setVisibility(viewVisibility);
             holder.getAvailabilityStatus().setVisibility(viewVisibility);
 
-            //add as a reference only if is a leaf entry
-            if(entry.getLeaf()){
-                viewHolderWeakHashMap.put(entry.hashCode(),holder);
-            }
-
             List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
             if(!containerUidList.isEmpty()){
                 containerUidsToMonitor.addAll(containerUidList);
@@ -224,9 +250,20 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getDownloadView().getImageResource().setContentDescription(contentDescription);
             holder.getView().setOnClickListener(view -> listener.contentEntryClicked(entry));
             holder.getDownloadView().setOnClickListener(view -> listener.downloadStatusClicked(entry));
+            holder.getDownloadView().setProgress(0);
+            managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(entry.getContentEntryUid(),
+                    (status) -> {
+                        if(status != null) {
+                            activity.runOnUiThread(() -> {
+                                holder.getDownloadView().setProgressVisibility(View.VISIBLE);
+                                holder.onDownloadJobItemChange(status);
+                            });
+                        }else {
+                            activity.runOnUiThread(() ->
+                                    holder.getDownloadView().setProgressVisibility(View.INVISIBLE));
+                        }
+                    });
         }
-
-
     }
 
     /**
@@ -250,7 +287,7 @@ public class ContentEntryListRecyclerViewAdapter extends
         return uidsToMonitor;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView entryTitle;
         final TextView entryDescription;
@@ -260,7 +297,10 @@ public class ContentEntryListRecyclerViewAdapter extends
         final TextView availabilityStatus;
         final DownloadStatusButton downloadView;
         final ImageView iconView;
+
         private long containerUid;
+
+        private long contentEntryUid;
 
         ViewHolder(View view) {
             super(view);
@@ -290,6 +330,14 @@ public class ContentEntryListRecyclerViewAdapter extends
 
         long getContainerUid() {
             return containerUid;
+        }
+
+        public long getContentEntryUid() {
+            return contentEntryUid;
+        }
+
+        public void setContentEntryUid(long contentEntryUid) {
+            this.contentEntryUid = contentEntryUid;
         }
 
         @Override
@@ -331,6 +379,36 @@ public class ContentEntryListRecyclerViewAdapter extends
 
         public TextView getAvailabilityStatus() {
             return availabilityStatus;
+        }
+
+        void onDownloadJobItemChange(DownloadJobItemStatus status) {
+            if(status != null && status.getContentEntryUid() == contentEntryUid) {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "ContentEntryList update " +
+                        "entryUid " + status.getContentEntryUid());
+                activity.runOnUiThread(() -> {
+                    downloadView.setProgress(
+                        status.getTotalBytes() > 0 ?
+                        (int)((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0);
+
+                    if(status.getTotalBytes() > 0) {
+                        if(status.getBytesSoFar() == status.getTotalBytes()) {
+                            /*
+                             * ContentEntryStatus will be changed, and that will trigger showing
+                             * the offline downloaded pin. We can now hide the progress view.
+                             */
+                            downloadView.setProgressVisibility(View.INVISIBLE);
+                        }else if(status.getTotalBytes() > 0
+                                && downloadView.getProgressVisibility() != View.VISIBLE){
+                            /*
+                             * The download just started. When this view was first shown, the download
+                             * was not in progress, so the progress view was made invisible. We need
+                             * to show it now that the download is underway.
+                             */
+                            downloadView.setProgressVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+            }
         }
     }
 

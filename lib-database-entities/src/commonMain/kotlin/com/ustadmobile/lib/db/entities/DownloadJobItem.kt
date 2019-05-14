@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -24,11 +25,9 @@ open class DownloadJobItem {
 
     var djiDjUid: Long = 0
 
-    @get:Deprecated("")
-    @set:Deprecated("")
-    var djiContentEntryFileUid: Long = 0
-
     var djiContainerUid: Long = 0
+
+    var djiContentEntryUid: Long = 0
 
     var downloadedSoFar: Long = 0
 
@@ -37,11 +36,13 @@ open class DownloadJobItem {
     var currentSpeed: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var timeStarted: Long = 0
 
     var timeFinished: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var djiStatus: Int = 0
 
     var destinationFile: String? = null
@@ -51,10 +52,32 @@ open class DownloadJobItem {
 
     constructor()
 
-    constructor(downloadJob: DownloadJob, downloadSetItem: DownloadSetItem,
-                container: Container) {
-        this.djiDjUid = downloadJob.djUid
-        this.djiDsiUid = downloadSetItem.dsiUid
-        this.djiContainerUid = container.containerUid
+    constructor(src: DownloadJobItem) {
+        djiUid = src.djiUid
+        downloadLength = src.downloadLength
+        downloadedSoFar = src.downloadedSoFar
+        djiContentEntryUid = src.djiContentEntryUid
+        djiDjUid = src.djiDjUid
+        djiStatus = src.djiStatus
+        djiContainerUid = src.djiContainerUid
+        currentSpeed = src.currentSpeed
+        destinationFile = src.destinationFile
+        numAttempts = src.numAttempts
     }
+
+    constructor(djiDjUid: Long, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
+        this.djiDjUid = djiDjUid
+        this.djiContentEntryUid = djiContentEntryUid
+        this.djiContainerUid = djiContainerUid
+        this.downloadLength = downloadLength
+    }
+
+    constructor(downloadJob: DownloadJob, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
+        djiDjUid = downloadJob.djUid
+        this.djiContentEntryUid = djiContentEntryUid
+        this.djiContainerUid = djiContainerUid
+        this.downloadLength = downloadLength
+    }
+
+
 }

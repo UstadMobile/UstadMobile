@@ -11,17 +11,15 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TAB
  * ContentEntry child - parent join entity
  */
 //short code = cepcj
-@UmEntity(tableId = TABLE_ID/*, indices = [UmIndex(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])]*/)
-@Entity(/*indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])]*/)
+@UmEntity(tableId = TABLE_ID, indices = arrayOf(UmIndex(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])))
+@Entity(indices = arrayOf(Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])))
 class ContentEntryParentChildJoin {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
     var cepcjUid: Long = 0
 
-
     var cepcjChildContentEntryUid: Long = 0
-
 
     var cepcjParentContentEntryUid: Long = 0
 

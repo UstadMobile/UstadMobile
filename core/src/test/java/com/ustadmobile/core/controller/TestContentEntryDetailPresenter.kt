@@ -16,6 +16,7 @@ import org.mockito.Mockito
 
 import java.util.Hashtable
 
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.timeout
@@ -27,6 +28,7 @@ class TestContentEntryDetailPresenter {
     internal var systemImplSpy: UstadMobileSystemImpl? = null
     private var mockView: ContentEntryDetailView? = null
     private var monitor: LocalAvailabilityMonitor? = null
+    private var statusProvider: DownloadJobItemStatusProvider? = null
 
     @Before
     fun setUp() {
@@ -38,6 +40,7 @@ class TestContentEntryDetailPresenter {
 
         mockView = Mockito.mock(ContentEntryDetailView::class.java)
         monitor = spy(LocalAvailabilityMonitor::class.java)
+        statusProvider = Mockito.mock(DownloadJobItemStatusProvider::class.java)
     }
 
     @After
@@ -55,7 +58,7 @@ class TestContentEntryDetailPresenter {
         args.put(UstadMobileSystemImpl.ARG_REFERRER, REFERRER_FULL_PATH)
 
         val presenter = ContentEntryDetailPresenter(PlatformTestUtil.targetContext,
-                args, mockView!!, monitor!!)
+                args, mockView!!, monitor!!, statusProvider!!)
         presenter.onCreate(args)
 
         val argsresult = Hashtable<String,String>()
@@ -76,7 +79,7 @@ class TestContentEntryDetailPresenter {
         args.put(UstadMobileSystemImpl.ARG_REFERRER, REFERRER_NO_PATH)
 
         val presenter = ContentEntryDetailPresenter(PlatformTestUtil.targetContext,
-                args, mockView!!, monitor!!)
+                args, mockView!!, monitor!!, statusProvider!!)
         presenter.onCreate(args)
 
         args.remove(UstadMobileSystemImpl.ARG_REFERRER)

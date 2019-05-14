@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -15,6 +16,7 @@ open class ContainerEntry {
     var ceUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var ceContainerUid: Long = 0
 
     var cePath: String? = null

@@ -101,53 +101,6 @@ public class DbProcessorUtils {
         return capitalize(name.toString());
     }
 
-    public static TypeMirror resolveType(TypeMirror variableMirror, TypeElement implementationClass,
-                                         boolean resolveTypeArgs, boolean resolveArrays,
-                                         ProcessingEnvironment processingEnv) {
-
-        if(resolveTypeArgs && variableMirror.getKind().equals(TypeKind.DECLARED)){
-            DeclaredType dt = (DeclaredType)variableMirror;
-            TypeMirror[] typeMirrors = new TypeMirror[dt.getTypeArguments().size()];
-            boolean declaredTypeArgumentsResolved = false;
-            for(int i = 0; i < dt.getTypeArguments().size(); i++) {
-                if(dt.getTypeArguments().get(i).getKind().equals(TypeKind.TYPEVAR)) {
-                    declaredTypeArgumentsResolved = true;
-                    typeMirrors[i] = resolveType(dt.getTypeArguments().get(i), implementationClass,
-                            true, resolveArrays, processingEnv);
-                }else {
-                    typeMirrors[i] = dt.getTypeArguments().get(i);
-                }
-            }
-
-            if(declaredTypeArgumentsResolved)
-                variableMirror = processingEnv.getTypeUtils().getDeclaredType(
-                        (TypeElement)processingEnv.getTypeUtils().asElement(variableMirror), typeMirrors);
-        }else if(resolveArrays && variableMirror.getKind().equals(TypeKind.ARRAY)
-                && ((ArrayType)variableMirror).getComponentType().getKind().equals(TypeKind.TYPEVAR)) {
-            TypeVariable arrayCompTypeVariable = (TypeVariable)((ArrayType)variableMirror)
-                    .getComponentType();
-            variableMirror = processingEnv.getTypeUtils().getArrayType(
-                    resolveType(arrayCompTypeVariable, implementationClass, resolveTypeArgs, true,
-                            processingEnv));
-        }
-
-        if(variableMirror.getKind().equals(TypeKind.TYPEVAR)) {
-            return implementationClass.asType().accept(new TypeVariableResolutionVisitor(
-                    (TypeVariable)variableMirror), new ArrayList<>());
-        }else {
-            return variableMirror;
-        }
-    }
-
-
-
-    public static TypeMirror resolveType(TypeMirror typeMirror, TypeElement implementationClass,
-                                         ProcessingEnvironment processingEnv) {
-        return resolveType(typeMirror, implementationClass, true, true,
-                processingEnv);
-    }
-
-
     /**
      * Determine if the given type can be transmitted as a query variable when using REST - e.g.
      * the parameter is either a primitive, String, or an array/list thereof.

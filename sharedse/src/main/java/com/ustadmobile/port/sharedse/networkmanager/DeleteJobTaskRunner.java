@@ -9,6 +9,8 @@ import java.util.Map;
  */
 public abstract class DeleteJobTaskRunner implements Runnable {
 
+    public static final String ARG_DOWNLOAD_JOB_UID = "downoad_job_uid";
+
     protected Map<String , String>  args;
 
     protected Object context;
