@@ -81,21 +81,21 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
 
 
     private val viewNameToAndroidImplMap = mapOf<String,Any>(
-            "DownloadDialog" to Class.forName("${packageName}DownloadDialogFragment"),
-            VideoPlayerView.VIEW_NAME to Class.forName("${packageName}VideoPlayerActivity"),
-            WebChunkView.VIEW_NAME to Class.forName("${packageName}WebChunkActivity"),
-            Register2View.VIEW_NAME to Class.forName("${packageName}Register2Activity"),
-            DummyView.VIEW_NAME to Class.forName("${packageName}DummyActivity"),
-            OnBoardingView.VIEW_NAME to Class.forName("${packageName}OnBoardingActivity"),
-            Login2View.VIEW_NAME to Class.forName("${packageName}Login2Activity"),
-            EpubContentView.VIEW_NAME to Class.forName("${packageName}EpubContentActivity"),
-            BasePointView.VIEW_NAME to Class.forName("${packageName}BasePointActivity"),
-            AboutView.VIEW_NAME to Class.forName("${packageName}AboutActivity"),
-            XapiPackageContentView.VIEW_NAME to Class.forName("${packageName}XapiPackageContentActivity"),
-            ScormPackageView.VIEW_NAME to Class.forName("${packageName}ScormPackageActivity"),
-            H5PContentView.VIEW_NAME to Class.forName("${packageName}H5PContentActivity"),
-            ContentEntryListFragmentView.VIEW_NAME to Class.forName("${packageName}ContentEntryListActivity"),
-            ContentEntryDetailView.VIEW_NAME to Class.forName("${packageName}ContentEntryDetailActivity"))
+            "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
+            VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
+            WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
+            Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
+            DummyView.VIEW_NAME to Class.forName("${PACKAGE_NAME}DummyActivity"),
+            OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
+            Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
+            EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
+            BasePointView.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity"),
+            AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
+            XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
+            ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
+            H5PContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}H5PContentActivity"),
+            ContentEntryListFragmentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
+            ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"))
 
 
 
@@ -523,7 +523,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
 
         const val TAG = "UstadMobileImplAndroid"
 
-        private const val packageName = "com.ustadmobile.port.android.view."
+        private const val PACKAGE_NAME = "com.ustadmobile.port.android.view."
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
