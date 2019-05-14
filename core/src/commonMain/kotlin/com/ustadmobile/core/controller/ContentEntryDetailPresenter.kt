@@ -296,13 +296,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     if (exception != null) {
                         val message = exception.message
                         if (exception is NoAppFoundException) {
-                            view.runOnUiThread(run {
+                            view.runOnUiThread(Runnable {
                                 view.showFileOpenError(impl.getString(MessageID.no_app_found, context),
                                         MessageID.get_app,
                                         exception.mimeType!!)
                             })
                         } else {
-                            view.runOnUiThread(run { view.showFileOpenError(message!!) })
+                            view.runOnUiThread(Runnable { view.showFileOpenError(message!!) })
                         }
                     }
                 }
@@ -314,7 +314,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
             //hard coded strings because these are actually in sharedse
             args["contentEntryUid"] = this.entryUuid.toString()
-            view.runOnUiThread(run { view.showDownloadOptionsDialog(args) })
+            view.runOnUiThread(Runnable { view.showDownloadOptionsDialog(args) })
         }
 
     }

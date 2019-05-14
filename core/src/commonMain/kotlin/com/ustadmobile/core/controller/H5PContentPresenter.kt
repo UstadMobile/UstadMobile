@@ -19,10 +19,16 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.HashMap
 import kotlinx.io.*
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.parse
 
 /**
  * Created by mike on 2/15/18.
  */
+
+
 
 class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H5PContentView) :
         UstadBaseController<H5PContentView>(context, arguments, view) {
@@ -84,15 +90,16 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
         }
     }
 
+
+    @ImplicitReflectionSerializer
     private val h5pResponseCallback = object : UmHttpResponseCallback {
         override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
             try {
                 if (response.isSuccessful) {
                     val jsonStr = UMIOUtils.readStreamToString(response.responseAsStream!!)
-                    val jsonObj = JSONObject(jsonStr)
+                    val jsonObj = Json.parse<Map<String, String>>(jsonStr)
                     view.runOnUiThread(Runnable {
-                        view.setTitle(
-                                jsonObj.getString("title"))
+                        view.setTitle(jsonObj["title"].toString())
                     })
                 }
             } catch (e: IOException) {

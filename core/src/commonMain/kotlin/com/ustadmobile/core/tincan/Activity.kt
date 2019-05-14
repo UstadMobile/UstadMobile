@@ -8,6 +8,7 @@ package com.ustadmobile.core.tincan
 import com.ustadmobile.core.impl.UMLog
 import kotlinx.serialization.json.JsonException
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.json
 
 import kotlin.jvm.JvmOverloads
 
@@ -48,16 +49,7 @@ class Activity @JvmOverloads constructor(id: String, internal var aType: String,
      */
     val activityJSON: JsonObject?
         get() {
-            var activityDef: JsonObject? = null
-            try {
-                activityDef = JsonObject()
-                activityDef.put("id", this.id)
-            } catch (e: JsonException) {
-                UMLog.l(UMLog.ERROR, 187, null, e)
-            }
-
-            return activityDef
-
+            return json { "id" to id}
         }
 
     init {
