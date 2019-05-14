@@ -24,8 +24,15 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
 
+
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
 }
 
 /*jar {
@@ -102,49 +109,58 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation project(':lib-database-entities')
                 implementation project(":lib-util")
+                implementation "com.github.aakira:napier:$version_napier"
                 //implementation project(':lib-database')
-              /*  compileOnly project(':lib-database-entities')
-                compileOnly project(':core-compile-only')
-                implementation project(':lib-database-runtime')
-                implementation project(":lib-util")
+                /*  compileOnly project(':lib-database-entities')
+                  compileOnly project(':core-compile-only')
+                  implementation project(':lib-database-runtime')
+                  implementation project(":lib-util")
+              }
+          }
+          commonTest {
+              dependencies {
+             /*     implementation project(":core-tests")
+                  implementation project(":sharedse")
+                  implementation project(":app-javase")
+                  implementation project(":lib-database-jdbc")
+                  implementation project(":lib-database-runtime-jdbc")
+                  implementation project(":lib-database-entities")
+                  implementation project(":app-rest-server")
+
+                  implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                  implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                  implementation "junit:junit:$version_junit"
+                  implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+
+                  //Jersey dependencies
+                  implementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
+                  implementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
+                  implementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
+                  implementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
+                  implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
+                  implementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
+                  implementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
+
+                  //JNDI and SQLite dependencies for test database
+                  implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                  implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                  implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                  implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2" */
             }
         }
-        commonTest {
-            dependencies {
-           /*     implementation project(":core-tests")
-                implementation project(":sharedse")
-                implementation project(":app-javase")
-                implementation project(":lib-database-jdbc")
-                implementation project(":lib-database-runtime-jdbc")
-                implementation project(":lib-database-entities")
-                implementation project(":app-rest-server")
 
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-                implementation "junit:junit:$version_junit"
-                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-                //Jersey dependencies
-                implementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
-                implementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
-                implementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
-                implementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
-                implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
-                implementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
-                implementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
-
-                //JNDI and SQLite dependencies for test database
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2" */
-            }
-        }
-        jvmMain {
+        commonJvm {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
             }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+            }
+            dependsOn commonJvm
         }
         jvmTest {
             dependencies {
@@ -153,10 +169,11 @@ kotlin {
         }
         androidMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "com.github.aakira:napier-android:$version_napier"
+                implementation "com.android.support:appcompat-v7:$version_android_support_lib"
+                implementation "com.android.support:support-v4:$version_android_support_lib"
             }
-            dependsOn jvmMain
+            dependsOn commonJvm
         }
         androidTest {
             dependencies {
@@ -238,10 +255,10 @@ publishing {
  * Added to overcome limitation on Android studio as per:
  *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
  */
- /*task copyTestResources(type: Copy) {
-    from "${projectDir}/src/test/resources"
-    from "${projectDir}/src/main/assets"
-    from "${projectDir}/../core-tests/src/main/resources"
-    into "${buildDir}/classes/test"
+/*task copyTestResources(type: Copy) {
+   from "${projectDir}/src/test/resources"
+   from "${projectDir}/src/main/assets"
+   from "${projectDir}/../core-tests/src/main/resources"
+   into "${buildDir}/classes/test"
 }
 processTestResources.dependsOn copyTestResources */

@@ -6,12 +6,14 @@
 package com.ustadmobile.port.sharedse.impl;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
@@ -34,7 +36,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -48,9 +49,11 @@ import okhttp3.Response;
  *
  * @author mike
  */
-public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
+public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl implements UstadMobileSystemImplFs {
 
     private XmlPullParserFactory xmlPullParserFactory;
+
+    private HttpCache httpCache;
 
     private final OkHttpClient client = new OkHttpClient();
 
@@ -68,6 +71,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public void init(Object context) {
         super.init(context);
+
+        if(httpCache == null)
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
     }
 
     /**
@@ -242,9 +248,16 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     @Override
     public UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException {
-        return sendRequestSync(request);
+        return getHttpCache(request.getContext()).getSync(request);
     }
 
+    @Override
+    public HttpCache getHttpCache(Object context) {
+        if(httpCache == null)
+            httpCache = new HttpCache(getCacheDir(SHARED_RESOURCE, context));
+
+        return httpCache;
+    }
 
 
     public abstract InputStream getAssetSync(Object context, String path) throws IOException;

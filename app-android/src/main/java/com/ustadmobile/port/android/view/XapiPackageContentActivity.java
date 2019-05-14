@@ -16,7 +16,6 @@ import com.ustadmobile.core.controller.XapiPackageContentPresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.XapiPackageContentView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.concurrent.atomic.AtomicReference;
 

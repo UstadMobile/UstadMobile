@@ -33,7 +33,6 @@ package com.ustadmobile.core.util
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.UmAccount
 
 import org.json.JSONArray
 import org.json.JSONException

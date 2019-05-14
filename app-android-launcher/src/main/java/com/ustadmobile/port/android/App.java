@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import com.toughra.ustadmobile.launcher.BuildConfig;
 import com.ustadmobile.core.db.UmAppDatabase;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.generated.MessageIDMap;
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 import org.acra.annotation.AcraHttpSender;
@@ -41,6 +43,7 @@ public class App extends UmBaseApplication {
         Context appContext = getApplicationContext();
         UmAppDatabase.getInstance(appContext).setAttachmentsDir(new File(appContext.getFilesDir(),
                 ATTACHMENTS_DIR).getAbsolutePath());
+        UstadMobileSystemImpl.getInstance().setMessageIdMap(MessageIDMap.ID_MAP);
     }
 
     @Override

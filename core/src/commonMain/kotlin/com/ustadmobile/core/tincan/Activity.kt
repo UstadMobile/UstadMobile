@@ -7,7 +7,6 @@ package com.ustadmobile.core.tincan
 
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonException
 import kotlinx.serialization.json.JsonObject
 
