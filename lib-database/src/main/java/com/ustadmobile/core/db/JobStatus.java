@@ -73,6 +73,24 @@ public class JobStatus {
 
     public static final int CANCELED = 28;
 
+    public static String statusToString(int status) {
+        switch(status) {
+            case NOT_QUEUED:
+                return "NOT_QUEUED";
+            case PAUSED:
+                return "PAUSED";
+            case QUEUED:
+                return "QUEUED";
+            case RUNNING:
+                return "RUNNING";
+            case COMPLETE:
+                return "COMPLETE";
+            case FAILED:
+                return "FAILED";
 
+        }
+
+        return ""+status;
+    }
     
 }

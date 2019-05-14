@@ -45,12 +45,12 @@ class DownloadJobItemHistory {
         this.endTime = endTime
     }
 
-    constructor(node: NetworkNode?, item: DownloadSetItem?, mode: Int, startTime: Long) {
+    constructor(node: NetworkNode?, item: DownloadJobItem?, mode: Int, startTime: Long) {
         if (node != null)
             networkNode = node.nodeId
 
         if (item != null)
-            downloadJobItemId = item.dsiUid
+            downloadJobItemId = item.djiUid
 
         this.mode = mode
         this.startTime = startTime

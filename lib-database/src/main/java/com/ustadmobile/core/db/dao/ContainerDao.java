@@ -29,6 +29,11 @@ public abstract class ContainerDao implements SyncableDao<Container, ContainerDa
             "ORDER BY Container.lastModified DESC LIMIT 1")
     public abstract Container getMostRecentContainerForContentEntry(long contentEntry);
 
+    @UmQuery("SELECT Container.fileSize FROM Container " +
+            "WHERE Container.containerContentEntryUid = :contentEntryUid " +
+            "ORDER BY Container.lastModified DESC LIMIT 1")
+    public abstract long getFileSizeOfMostRecentContainerForContentEntry(long contentEntryUid);
+
 
     @UmQuery("SELECT recent.* " +
             "FROM Container recent LEFT JOIN Container old " +

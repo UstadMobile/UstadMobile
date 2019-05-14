@@ -185,7 +185,7 @@ public class VideoPlayerActivity extends UstadBaseActivity implements VideoPlaye
                 Uri subTitleUri = Uri.parse(srtPath);
 
                 DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,
-                        Util.getUserAgent(this, "ustadmobile"));
+                        Util.getUserAgent(this, "com/ustadmobile"));
 
                 MediaSource subTitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory).
                         createMediaSource(subTitleUri, subtitleFormat, C.TIME_UNSET);

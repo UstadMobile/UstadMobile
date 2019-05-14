@@ -73,7 +73,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_point);
         Map<String , String> savedInstanceHt = bundleToMap(savedInstanceState);
-        String recreateWelcomeVal = UstadMobileSystemImpl.Companion.getInstance().getAppPref(
+        String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
         /*
@@ -83,7 +83,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
          * called by Android. Thus we look for a manually saved state.
          */
         if(recreateWelcomeVal != null) {
-            UstadMobileSystemImpl.Companion.getInstance().setAppPref(
+            UstadMobileSystemImpl.getInstance().setAppPref(
                     "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, null, this);
         }
 
@@ -141,7 +141,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
          * called by Android
          */
         String welcomeScreenDisplayed = String.valueOf(mBasePointController.isWelcomeScreenDisplayed());
-        UstadMobileSystemImpl.Companion.getInstance().setAppPref("recreate-"
+        UstadMobileSystemImpl.getInstance().setAppPref("recreate-"
                     + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, welcomeScreenDisplayed, this);
         super.recreate();
     }
@@ -168,7 +168,7 @@ recreate is manually called (e.g. in-app locale change) onSaveInstanceState is n
 
 
                 Menu drawerMenu = mDrawerNavigationView.getMenu();
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                 MenuItem item;
                 String iconName;
 

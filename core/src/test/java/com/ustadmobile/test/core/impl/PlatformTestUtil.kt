@@ -12,9 +12,11 @@ object PlatformTestUtil {
 
     internal var testContext = UmContextSe()
 
+    @JvmStatic
     val targetContext: Any
         get() = testContext
 
+    @JvmStatic
     fun getTestContext(): Any {
         return Any()
     }

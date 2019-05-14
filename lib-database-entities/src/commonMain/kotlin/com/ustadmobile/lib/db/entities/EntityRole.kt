@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -27,15 +28,19 @@ class EntityRole {
     var erLastChangedBy: Int = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var erTableId: Int = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var erEntityUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var erGroupUid: Long = 0
 
     @UmIndexField
+    @ColumnInfo(index = true)
     var erRoleUid: Long = 0
 
     constructor()

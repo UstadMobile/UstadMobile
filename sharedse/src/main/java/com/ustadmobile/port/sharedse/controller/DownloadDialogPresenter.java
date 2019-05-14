@@ -4,42 +4,35 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao;
-import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
-import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
+import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogView> {
 
     public static final String ARG_CONTENT_ENTRY_UID = "contentEntryUid";
 
-    public static final String ARG_DOWNLOAD_SET_UID = "downoad_set_uid";
-
     private boolean deleteFileOptions = false;
 
-    private UmAppDatabase umAppDatabase;
+    private UmAppDatabase appDatabase;
+
+    private UmAppDatabase appDatabaseRepo;
 
     private long contentEntryUid = 0L;
 
     private UmLiveData<DownloadJob> downloadDownloadJobLive;
 
     private UmLiveData<Boolean> allowedMeteredLive;
-
-    private volatile long downloadSetUid;
 
     private volatile long downloadJobUid = 0L;
 
@@ -57,24 +50,29 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private NetworkManagerBle networkManagerBle;
 
-    private Map<String , String>  args;
+    private DownloadJobItemManager jobItemManager;
+
+    private AtomicInteger downloadJobStatus = new AtomicInteger(0);
 
     public DownloadDialogPresenter(Object context, NetworkManagerBle networkManagerBle,
-                                   Map<String , String>  arguments, DownloadDialogView view) {
+                                   Map<String , String>  arguments, DownloadDialogView view,
+                                   UmAppDatabase appDatabase, UmAppDatabase appDatabaseRepo) {
         super(context, arguments, view);
-        this.args = arguments;
         this.networkManagerBle = networkManagerBle;
-
+        this.appDatabase = appDatabase;
+        this.appDatabaseRepo = appDatabaseRepo;
     }
 
     @Override
     public void onCreate(Map<String , String> savedState) {
         super.onCreate(savedState);
-        umAppDatabase = UmAppDatabase.getInstance(getContext());
+        appDatabase = UmAppDatabase.getInstance(getContext());
 
         impl = UstadMobileSystemImpl.Companion.getInstance();
         contentEntryUid = Long.parseLong(String.valueOf(getArguments()
                 .get(ARG_CONTENT_ENTRY_UID)));
+        UstadMobileSystemImpl.l(UMLog.INFO, 420, "Starting download presenter for " +
+                "content entry uid: " + contentEntryUid);
         getView().setWifiOnlyOptionVisible(false);
 
         impl.getStorageDirs(getContext(), result -> {
@@ -88,28 +86,29 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
     private void startObservingJob(){
         getView().runOnUiThread(() -> {
-            downloadDownloadJobLive = umAppDatabase.getDownloadJobDao().getJobLive(downloadJobUid);
+            downloadDownloadJobLive = appDatabase.getDownloadJobDao().getJobLive(downloadJobUid);
             downloadDownloadJobLive.observe(DownloadDialogPresenter.this,
                     this::handleDownloadJobStatusChange);
         });
     }
 
-    private void startObservingDownloadSetMeteredState(){
+    private void startObservingDownloadJobMeteredState(){
         getView().runOnUiThread(() -> {
-            allowedMeteredLive = umAppDatabase.getDownloadSetDao()
-                    .getLiveMeteredNetworkAllowed(downloadSetUid);
+            allowedMeteredLive = appDatabase.getDownloadJobDao()
+                    .getLiveMeteredNetworkAllowed((int)downloadJobUid);
             allowedMeteredLive.observe(DownloadDialogPresenter.this,
-                    this::handleDownloadSetMeteredStateChange);
+                    this::handleDownloadJobMeteredStateChange);
         });
     }
 
-    private void handleDownloadSetMeteredStateChange(Boolean meteredConnection){
+    private void handleDownloadJobMeteredStateChange(Boolean meteredConnection){
         getView().setDownloadOverWifiOnly(meteredConnection != null && !meteredConnection);
     }
 
     private void handleDownloadJobStatusChange(DownloadJob downloadJob){
         if(downloadJob != null){
             int downloadStatus = downloadJob.getDjStatus();
+            downloadJobStatus.set(downloadStatus);
             getView().setCalculatingViewVisible(false);
             getView().setWifiOnlyOptionVisible(true);
             if(downloadStatus >= JobStatus.COMPLETE_MIN){
@@ -151,114 +150,44 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
 
             new Thread(() -> {
-                int totalDownloadJobItems = umAppDatabase.getDownloadJobItemDao()
+                int totalDownloadJobItems = appDatabase.getDownloadJobItemDao()
                         .getTotalDownloadJobItems(downloadJobUid);
+                DownloadJobItemStatus rootStatus = jobItemManager.getRootItemStatus();
                 getView().runOnUiThread(() -> getView().setStatusText(statusMessage, totalDownloadJobItems,
-                        UMFileUtil.INSTANCE.formatFileSize(downloadJob.getTotalBytesToDownload())));
+                        UMFileUtil.INSTANCE.formatFileSize(rootStatus != null ? rootStatus.getTotalBytes() : 0)));
             }).start();
 
         }
     }
 
     private void setup() {
-        downloadSetUid = umAppDatabase.getDownloadSetDao()
-                .findDownloadSetUidByRootContentEntryUid(contentEntryUid);
-        if(downloadSetUid == 0)
-            downloadSetUid = umAppDatabase.getDownloadSetItemDao()
-                    .findDownloadSetUidByContentEntryUid(contentEntryUid);
-
-        if(downloadSetUid == 0)
-            createDownloadSet();
-
-        downloadJobUid = umAppDatabase.getDownloadJobDao().getLatestDownloadJobUidForDownloadSet(
-                downloadSetUid);
+        downloadJobUid = appDatabase.getDownloadJobDao()
+                .getLatestDownloadJobUidForContentEntryUid(contentEntryUid);
+        if(downloadJobUid == 0) {
+            createDownloadJobRecursive();
+        }
 
         startObservingJob();
 
-        startObservingDownloadSetMeteredState();
+        startObservingDownloadJobMeteredState();
 
     }
 
-    private void createDownloadSet() {
-        DownloadSet downloadSet = new DownloadSet();
-        downloadSet.setDestinationDir(destinationDir);
-        downloadSet.setDsRootContentEntryUid(contentEntryUid);
-
-        downloadSetUid = umAppDatabase.getDownloadSetDao().insert(downloadSet);
-        List<DownloadSetItem> downloadSetItems = new ArrayList<>();
-
-        List<ContentEntryParentChildJoinDao.ContentEntryParentChildJoinSummary> currentChildUids;
-        Set<Long> allChildUids = new HashSet<>();
-        List<Long> parentUids = new ArrayList<>();
-        parentUids.add(contentEntryUid);
-        allChildUids.add(contentEntryUid);
-
-        do {
-            currentChildUids = umAppDatabase.getContentEntryParentChildJoinDao()
-                    .findChildEntriesByParents(parentUids);
-            parentUids.clear();
-            for(ContentEntryParentChildJoinDao.ContentEntryParentChildJoinSummary child : currentChildUids){
-                if(!allChildUids.contains(child.getChildContentEntryUid())) {
-                    allChildUids.add(child.getChildContentEntryUid());
-                    if(!child.isLeaf())
-                        parentUids.add(child.getChildContentEntryUid());
-                }
-            }
-        }while(!parentUids.isEmpty());
-
-        for(long childUid : allChildUids) {
-            downloadSetItems.add(new DownloadSetItem(downloadSetUid, childUid));
-        }
-
-        umAppDatabase.getDownloadSetItemDao().insert(downloadSetItems);
-
-        createDownloadJob();
+    private void createDownloadJobRecursive() {
+        DownloadJob newDownloadJob = new DownloadJob(contentEntryUid, System.currentTimeMillis());
+        newDownloadJob.setDjDestinationDir(destinationDir);
+        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob);
+        downloadJobUid = jobItemManager.getDownloadJobUid();
+        new DownloadJobPreparer(jobItemManager, appDatabase, appDatabaseRepo).run();
     }
 
-    private void createDownloadJob() {
-        DownloadJob downloadJob = new DownloadJob();
-        downloadJob.setTimeRequested(System.currentTimeMillis());
-        downloadJob.setTimeCreated(System.currentTimeMillis());
-        downloadJob.setDjStatus(JobStatus.NOT_QUEUED);
-        downloadJob.setDjDsUid(downloadSetUid);
-        downloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(downloadJob));
-        downloadJobUid = downloadJob.getDjUid();
 
-
-        List<DownloadJobItemDao.DownloadJobItemToBeCreated> itemToBeCreated =
-                umAppDatabase.getDownloadJobItemDao()
-                        .findJobItemsToBeCreatedDownloadSet(downloadSetUid);
-
-        List<DownloadJobItem> jobItems = new ArrayList<>();
-        List<ContentEntryStatus> statusList = new ArrayList<>();
-        long totalSize = 0L;
-        for(DownloadJobItemDao.DownloadJobItemToBeCreated item: itemToBeCreated){
-            totalSize += item.getFileSize();
-            DownloadJobItem jobItem = new DownloadJobItem();
-            jobItem.setDjiContainerUid(item.getContainerUid());
-            jobItem.setDjiDjUid(downloadJobUid);
-            jobItem.setDjiStatus(JobStatus.NOT_QUEUED);
-            jobItem.setDownloadLength(item.getFileSize());
-            jobItem.setDjiDsiUid(item.getDownloadSetItemUid());
-            jobItem.setDestinationFile(UMFileUtil.INSTANCE.joinPaths(destinationDir,
-                    String.valueOf(item.getContainerUid())));
-            jobItems.add(jobItem);
-
-            statusList.add(new ContentEntryStatus(item.getContentEntryUid(),
-                    item.getFileSize() > 0, item.getFileSize()));
-        }
-        downloadJob.setTotalBytesToDownload(totalSize);
-        umAppDatabase.getContentEntryStatusDao().insertOrAbort(statusList);
-        umAppDatabase.getDownloadJobItemDao().insert(jobItems);
-        umAppDatabase.getDownloadJobItemDao().update(downloadJob);
-    }
 
 
 
     public void handleClickPositive() {
         if(deleteFileOptions){
-            args.put(ARG_DOWNLOAD_SET_UID,String.valueOf(downloadSetUid));
-            new Thread(() -> networkManagerBle.cancelAndDeleteDownloadSet(args)).start();
+            new Thread(() -> networkManagerBle.cancelAndDeleteDownloadJob((int)downloadJobUid)).start();
         }else{
             continueDownloading();
         }
@@ -270,8 +199,11 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
      * @param dismissAfter flag to indicate if the dialog will be dismissed after the selection
      */
     public void handleClickNegative(boolean dismissAfter) {
+        if(downloadJobStatus.get() == 0) {
+            new Thread(() -> networkManagerBle.deleteUnusedDownloadJob((int)downloadJobUid)).start();
+        }
+
         //if the download has not been started
-        umAppDatabase.getDownloadSetDao().cleanupUnused(downloadSetUid);
         if(dismissAfter)
             dismissDialog();
     }
@@ -283,7 +215,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     public void handleClickStackedButton(int idClicked) {
         switch (idClicked) {
             case STACKED_BUTTON_PAUSE:
-                new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+                new Thread(() -> appDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
                         JobStatus.PAUSED, JobStatus.PAUSING)).start();
                 break;
 
@@ -302,7 +234,7 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
 
 
     private void continueDownloading(){
-        new Thread(() -> umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
+        new Thread(() -> appDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
                 JobStatus.QUEUED, -1)).start();
     }
 
@@ -311,19 +243,19 @@ public class DownloadDialogPresenter extends UstadBaseController<DownloadDialogV
     }
 
     private void cancelDownload(){
-        new Thread(() -> umAppDatabase.getDownloadJobDao()
+        new Thread(() -> appDatabase.getDownloadJobDao()
                 .updateJobAndItems(downloadJobUid, JobStatus.CANCELED,
                         JobStatus.CANCELLING)).start();
     }
 
     public void handleWiFiOnlyOption(boolean wifiOnly){
-        new Thread(() -> umAppDatabase.getDownloadSetDao()
-                .setMeteredConnectionBySetUid(downloadSetUid,!wifiOnly)).start();
+        appDatabase.getDownloadJobDao().setMeteredConnectionAllowedByJobUid((int)downloadJobUid,
+                !wifiOnly, null);
     }
 
     public void handleStorageOptionSelection(String selectedDir){
-        new Thread(() -> umAppDatabase.getDownloadSetDao().updateDestinationDirectory(
-                downloadSetUid, selectedDir,null)).start();
+        appDatabase.getDownloadJobDao().updateDestinationDirectory(
+                (int)downloadJobUid, selectedDir,null);
     }
 
     /**

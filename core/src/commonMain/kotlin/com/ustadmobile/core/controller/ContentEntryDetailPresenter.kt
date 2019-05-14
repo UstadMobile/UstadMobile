@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmLiveData
@@ -8,17 +7,17 @@ import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
+import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
@@ -31,8 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
-                                  private val monitor: LocalAvailabilityMonitor)
-    : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract) {
+                                  private val monitor: LocalAvailabilityMonitor,
+                                  private val statusProvider: DownloadJobItemStatusProvider)
+    : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
+    DownloadJobItemManager.OnDownloadJobItemChangeListener{
 
     private var navigation: String? = null
 
@@ -46,6 +47,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     private var containerDao: ContainerDao? = null
 
     private val monitorStatus = AtomicBoolean(false)
+
+    private val isListeningToDownloadStatus = AtomicBoolean(false)
 
     private var statusUmLiveData: UmLiveData<ContentEntryStatus>? = null
 
@@ -176,6 +179,24 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 && status.downloadStatus >= JobStatus.RUNNING_MIN
                 && status.downloadStatus <= JobStatus.RUNNING_MAX)
 
+        if(isDownloading && isListeningToDownloadStatus.get()) {
+            isListeningToDownloadStatus.set(true)
+            statusProvider.addDownloadChangeListener(this)
+            statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
+                    object : UmResultCallback<DownloadJobItemStatus?> {
+                        override fun onDone(result: DownloadJobItemStatus?) {
+                            onDownloadJobItemChange(result)
+                        }
+                    })
+            view.setDownloadButtonVisible(false)
+            view.setDownloadProgressVisible(true)
+        }else if(!isDownloading && isListeningToDownloadStatus.get()) {
+            isListeningToDownloadStatus.set(false)
+            statusProvider.removeDownloadChangeListener(this)
+            view.setDownloadButtonVisible(true)
+            view.setDownloadProgressVisible(false)
+        }
+
         view.runOnUiThread(Runnable {
             view.setButtonTextLabel(buttonLabel)
             view.setDownloadButtonVisible(!isDownloading)
@@ -196,8 +217,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         }
 
+
         if (!isDownloadComplete) {
-            val currentTimeStamp = System.inmillis
+            val currentTimeStamp = System.currentTimeMillis()
             val minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1)
             val maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
                     TIME_INTERVAL_FROM_LAST_FAILURE.toLong())
@@ -230,6 +252,19 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     }
 
+    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, manager: DownloadJobItemManager) {
+        onDownloadJobItemChange(status)
+    }
+
+    fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
+        if(status != null && status.contentEntryUid == entryUuid) {
+            view.runOnUiThread(Runnable {
+                view.updateDownloadProgress(
+                        if(status.totalBytes > 0) (status.bytesSoFar.toFloat() / status.totalBytes.toFloat()) else 0F)
+            })
+        }
+    }
+
     fun handleClickTranslatedEntry(uid: Long) {
         val args = HashMap<String, String>()
         args[ARG_CONTENT_ENTRY_UID] = uid.toString()
@@ -241,10 +276,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (lastEntryListArgs != null) {
             impl.go(ContentEntryListFragmentView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), context,
-                    UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                    UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
             impl.go(DummyView.VIEW_NAME, mutableMapOf(), context,
-                    UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                    UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
     }
 
@@ -306,7 +341,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitorStatus.set(false)
             monitor.stopMonitoringAvailability(this)
         }
-        statusUmLiveData!!.removeObserver(statusUmObserver)
+
+        statusUmLiveData?.removeObserver(statusUmObserver)
+
+
+        if(isListeningToDownloadStatus.getAndSet(false)) {
+            statusProvider.removeDownloadChangeListener(this)
+        }
         super.onDestroy()
     }
 

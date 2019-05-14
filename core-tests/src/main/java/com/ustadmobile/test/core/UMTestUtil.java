@@ -1,6 +1,7 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileSystemCommon;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -35,7 +36,7 @@ public class UMTestUtil {
             entryIn = UMTestUtil.class.getResourceAsStream(resourcePath);
 
             Object context = PlatformTestUtil.getTargetContext();
-            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
+            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemCommon.SHARED_RESOURCE,
                     context);
             String outDir = storageDirs[0].getDirURI();
             if(new File(outDir).isDirectory()) {

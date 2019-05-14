@@ -36,13 +36,20 @@ open class DownloadJob {
      */
     var djStatus: Int = 0
 
+    var meteredNetworkAllowed: Boolean = false
+
+    var djRootContentEntryUid: Long = 0
+
+    var djDestinationDir: String? = null
+
 
     /**
      * Empty constructor
      */
     constructor()
 
-    constructor(downloadSet: DownloadSet) {
-        this.djDsUid = downloadSet.dsUid.toLong()
+    constructor(contentEntryEntryUid: Long, timeCreated: Long) {
+        djRootContentEntryUid = contentEntryEntryUid
+        this.timeCreated = timeCreated
     }
 }

@@ -1,12 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: "jacoco"
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.default.properties")))
-if (project.file("../app-android/buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.local.properties")))
-}
-
 //See:
 // https://developer.android.com/studio/projects/android-library.html
 

@@ -51,7 +51,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
 import kotlinx.io.InputStream
-import ustadmobile.core.impl.UMAndroidUtil
 import java.io.*
 import java.util.*
 import java.util.concurrent.Executors
@@ -66,7 +65,7 @@ import java.util.zip.ZipOutputStream
  *
  * @author mike, kileha3
  */
-actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
+actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
 
     private val deviceStorageIndex = 0
@@ -527,7 +526,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
-        const val LOCALE_USE_SYSTEM = UstadMobileSystemBaseCommon.LOCALE_USE_SYSTEM
+        const val LOCALE_USE_SYSTEM = UstadMobileSystemCommon.LOCALE_USE_SYSTEM
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
 
@@ -542,7 +541,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemBaseCommon() {
          * @return A singleton instance
          */
         @JvmStatic
-        actual val instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
+        actual val instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
 

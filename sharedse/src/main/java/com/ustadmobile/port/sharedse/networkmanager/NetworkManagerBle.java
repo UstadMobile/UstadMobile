@@ -7,13 +7,18 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UmResultCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManagerList;
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItemWithDownloadSetItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -29,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,8 +50,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
-
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
  *
@@ -54,7 +58,9 @@ import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.A
  */
 
 public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
-        LiveDataWorkQueue.OnQueueEmptyListener {
+        LiveDataWorkQueue.OnQueueEmptyListener,
+        /*DownloadJobItemManager.OnDownloadJobItemChangeListener,*/
+        DownloadJobItemStatusProvider {
 
     /**
      * Flag to indicate entry status request
@@ -121,7 +127,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     private Vector<WiFiDirectGroupListenerBle> wiFiDirectGroupListeners = new Vector<>();
 
-    private LiveDataWorkQueue<DownloadJobItemWithDownloadSetItem> downloadJobItemWorkQueue;
+    private LiveDataWorkQueue<DownloadJobItem> downloadJobItemWorkQueue;
 
     private Map<Long, List<EntryStatusResponse>> entryStatusResponses = new Hashtable<>();
 
@@ -141,6 +147,14 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     private Vector<LocalAvailabilityListener> localAvailabilityListeners = new Vector<>();
 
+    //private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
+
+    private DownloadJobItemManagerList jobItemManagerList;
+
+    @Deprecated
+    private final LinkedList<DownloadJobItemManager.OnDownloadJobItemChangeListener> downloadJobItemChangeListeners
+            = new LinkedList<>();
+
     /**
      * Constructor to be used when creating new instance
      * @param context Platform specific application context
@@ -152,20 +166,31 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     /**
      * Constructor to be used for testing purpose (mocks)
      */
-    public NetworkManagerBle(){ }
+    public NetworkManagerBle(){
+
+    }
 
     /**
      * Set platform specific context
      * @param context Platform's context to be set
      */
-    public void setContext(Object context){
+    public final void setContext(Object context){
         this.mContext = context;
     }
 
-    private LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>
-        mJobItemAdapter = new LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItemWithDownloadSetItem>() {
+    /**
+     * Only for testing - allows the unit test to set this without running the main onCreate method
+     *
+     * @param jobItemManagerList DownloadJobItemManagerList
+     */
+    public final void setJobItemManagerList(DownloadJobItemManagerList jobItemManagerList) {
+        this.jobItemManagerList = jobItemManagerList;
+    }
+
+    private LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem>
+        mJobItemAdapter = new LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem>() {
         @Override
-        public Runnable makeRunnable(DownloadJobItemWithDownloadSetItem item) {
+        public Runnable makeRunnable(DownloadJobItem item) {
             return new DownloadJobItemRunner(mContext, item, NetworkManagerBle.this,
                     umAppDatabase, UmAccountManager.INSTANCE.getRepositoryForActiveAccount(mContext),
                     UmAccountManager.INSTANCE.getActiveEndpoint(mContext),
@@ -173,7 +198,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         }
 
         @Override
-        public long getUid(DownloadJobItemWithDownloadSetItem item) {
+        public long getUid(DownloadJobItem item) {
             return ((long)(Long.valueOf(item.getDjiUid()).hashCode()) << 32) | item.getNumAttempts();
         }
     };
@@ -195,6 +220,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
      */
     public void onCreate() {
         umAppDatabase = UmAppDatabase.getInstance(mContext);
+        jobItemManagerList = new DownloadJobItemManagerList(umAppDatabase);
         downloadJobItemWorkQueue = new LiveDataWorkQueue<>(MAX_THREAD_COUNT);
         downloadJobItemWorkQueue.setAdapter(mJobItemAdapter);
         downloadJobItemWorkQueue.start(umAppDatabase.getDownloadJobItemDao().findNextDownloadJobItems());
@@ -467,20 +493,15 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
     /**
      * Cancel all download set and set items
-     * @param args Arguments to be passed to the task runner.
+     * @param downloadJobUid The download job uid that should be canceled and deleted
      */
-    public void cancelAndDeleteDownloadSet(Map<String , String>  args) {
-
-        long downloadSetUid = Long.parseLong(String.valueOf(args.get(ARG_DOWNLOAD_SET_UID)));
-        List<DownloadJob> downloadJobs = umAppDatabase.getDownloadJobDao().
-                findBySetUid(downloadSetUid);
-
-        for(DownloadJob downloadJob : downloadJobs){
-            umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
+    public void cancelAndDeleteDownloadJob(int downloadJobUid) {
+        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJobUid,
                     JobStatus.CANCELED, -1, JobStatus.CANCELED);
-        }
+        Map<String, String> taskArgs = new HashMap<>();
+        taskArgs.put(DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID, String.valueOf(downloadJobUid));
 
-        makeDeleteJobTask(mContext,args).run();
+        makeDeleteJobTask(mContext,taskArgs).run();
     }
 
 
@@ -537,10 +558,20 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         fireLocalAvailabilityChanged();
     }
 
-    //testing purpose
+    //testing purpose only
     public void clearHistories(){
         locallyAvailableContainerUids.clear();
         knownPeerNodes.clear();
+    }
+
+    /**
+     * Used for unit testing purposes only.
+     *
+     * @hide
+     * @param database
+     */
+    public void setDatabase(UmAppDatabase database) {
+        this.umAppDatabase = database;
     }
 
     /**
@@ -704,5 +735,47 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
     public abstract boolean isVersionLollipopOrAbove();
 
     public abstract boolean isVersionKitKatOrBelow();
+
+    /**
+     * Inserts a DownloadJob into the database for a given
+     *
+     * @param newDownloadJob the new DownloadJob to be created (with properties set)
+     *
+     * @return
+     */
+    public DownloadJobItemManager createNewDownloadJobItemManager(DownloadJob newDownloadJob) {
+        return jobItemManagerList.createNewDownloadJobItemManager(newDownloadJob);
+    }
+
+    public DownloadJobItemManager createNewDownloadJobItemManager(long rootContentEntryUid) {
+        return createNewDownloadJobItemManager(new DownloadJob(rootContentEntryUid,
+                System.currentTimeMillis()));
+    }
+
+
+    public DownloadJobItemManager getDownloadJobItemManager(int downloadJobId) {
+        return jobItemManagerList.getDownloadJobItemManager(downloadJobId);
+    }
+
+    public List<DownloadJobItemManager> getActiveDownloadJobItemManagers() {
+        return jobItemManagerList.getActiveDownloadJobItemManagers();
+    }
+
+    public void deleteUnusedDownloadJob(int downloadJobUid) {
+        jobItemManagerList.deleteUnusedDownloadJob(downloadJobUid);
+    }
+
+    public void findDownloadJobItemStatusByContentEntryUid(long contentEntryUid,
+                                                            UmResultCallback<DownloadJobItemStatus> callback) {
+        jobItemManagerList.findDownloadJobItemStatusByContentEntryUid(contentEntryUid, callback);
+    }
+
+    public void addDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
+        jobItemManagerList.addDownloadChangeListener(listener);
+    }
+
+    public void removeDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
+        jobItemManagerList.removeDownloadChangeListener(listener);
+    }
 
 }

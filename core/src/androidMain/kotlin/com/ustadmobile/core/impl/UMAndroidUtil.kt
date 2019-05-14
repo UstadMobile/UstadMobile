@@ -1,4 +1,4 @@
-package ustadmobile.core.impl
+package com.ustadmobile.core.impl
 
 import android.os.Build
 import android.os.Bundle

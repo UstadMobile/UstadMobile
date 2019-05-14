@@ -20,7 +20,7 @@ class ConnectivityStatus {
     var connectedOrConnecting: Boolean = false
 
     constructor()
-    constructor(connectivityState: Int, connectedOrConnecting: Boolean, wifiSsid: String) {
+    constructor(connectivityState: Int, connectedOrConnecting: Boolean, wifiSsid: String?) {
         this.connectivityState = connectivityState
         this.connectedOrConnecting = connectedOrConnecting
         this.wifiSsid = wifiSsid

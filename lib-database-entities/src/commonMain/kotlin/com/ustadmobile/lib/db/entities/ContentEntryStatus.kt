@@ -39,9 +39,12 @@ class ContentEntryStatus {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
 
-        val that = other as ContentEntryStatus?
+        if(other == null)
+            return false
 
-        if (cesUid != that!!.cesUid) return false
+        val that = other as ContentEntryStatus
+
+        if (cesUid != that.cesUid) return false
         if (totalSize != that.totalSize) return false
         if (bytesDownloadSoFar != that.bytesDownloadSoFar) return false
         if (downloadStatus != that.downloadStatus) return false

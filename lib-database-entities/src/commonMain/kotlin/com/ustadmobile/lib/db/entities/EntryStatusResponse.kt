@@ -10,8 +10,8 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 /**
  * Represents the response from a network node to whether or not a given entry is available locally
  */
-@UmEntity(/*indices = [UmIndex(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])]*/)
-@Entity(/*indices = [Index(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])]*/)
+@UmEntity(indices = arrayOf(UmIndex(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])))
+@Entity(indices = arrayOf(Index(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])))
 open class EntryStatusResponse {
 
     @UmPrimaryKey(autoIncrement = true)

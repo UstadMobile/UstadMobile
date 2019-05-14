@@ -30,6 +30,9 @@
  */
 package com.ustadmobile.core.impl
 
+import com.github.aakira.napier.Napier
+import kotlin.jvm.JvmStatic
+
 /**
  * Logging interface to be implemented by the System Implementation
  * @author mike
@@ -49,5 +52,45 @@ open class UMLog {
         const val VERBOSE = 4
 
         const val DEBUG = 5
+
+
+        /**
+         * Convenience shortcut for logging
+         * @param level log level
+         * @param code log code
+         * @param message log message
+         * @param exception exception that occurred to log
+         */
+        @JvmStatic
+        fun l(level: Int, code: Int, message: String?, exception: Any) {
+            val logMessage = "$code : $message"
+            when (level) {
+                DEBUG -> Napier.d(message=logMessage, throwable = exception as Exception)
+                INFO -> Napier.i(message=logMessage, throwable= exception as Exception)
+                CRITICAL -> Napier.wtf(message=logMessage, throwable= exception as Exception)
+                WARN -> Napier.w(message=logMessage, throwable= exception as Exception)
+                VERBOSE -> Napier.v(message=logMessage, throwable= exception as Exception)
+                ERROR -> Napier.e(message=logMessage, throwable= exception as Exception)
+            }
+        }
+
+        /**
+         * Convenience shortcut for logging
+         * @param level log level
+         * @param code log code
+         * @param message message to log
+         */
+        @JvmStatic
+        fun l(level: Int, code: Int, message: String?) {
+            val logMessage = "$code : $message"
+            when (level) {
+                DEBUG -> Napier.d(message=logMessage)
+                INFO -> Napier.i(message=logMessage)
+                CRITICAL -> Napier.wtf(message=logMessage)
+                WARN -> Napier.w(message=logMessage)
+                VERBOSE -> Napier.v(message=logMessage)
+                ERROR -> Napier.e(message=logMessage)
+            }
+        }
     }
 }

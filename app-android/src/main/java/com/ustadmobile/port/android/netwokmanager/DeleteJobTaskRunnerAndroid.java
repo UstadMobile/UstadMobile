@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.ustadmobile.core.db.UmAppDatabase;
-import com.ustadmobile.lib.db.entities.DownloadSet;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 
 import java.io.File;
@@ -17,8 +16,6 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-
-import static com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.ARG_DOWNLOAD_SET_UID;
 
 /**
  * Android implementation of {@link DeleteJobTaskRunner} which delete DownloadSet, DownloadSetItem,
@@ -46,9 +43,9 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
     public void run() {
 
         Data.Builder requestData = new  Data.Builder();
-        if(args != null && args.get(ARG_DOWNLOAD_SET_UID) != null){
-            requestData.putLong(ARG_DOWNLOAD_SET_UID,
-                    Long.parseLong(Objects.requireNonNull(args.get(ARG_DOWNLOAD_SET_UID))));
+        if(args != null && args.get(ARG_DOWNLOAD_JOB_UID) != null){
+            requestData.putLong(ARG_DOWNLOAD_JOB_UID,
+                    Long.parseLong(Objects.requireNonNull(args.get(ARG_DOWNLOAD_JOB_UID))));
 
         }
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(DeleteJobTaskWorker.class)
@@ -68,7 +65,7 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
         public DeleteJobTaskWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
             super(context, workerParams);
-            downloadSetUid = workerParams.getInputData().getLong(ARG_DOWNLOAD_SET_UID,0L);
+            downloadSetUid = workerParams.getInputData().getLong(ARG_DOWNLOAD_JOB_UID,0L);
         }
 
         @NonNull
@@ -76,6 +73,10 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
         public Result doWork() {
 
             UmAppDatabase umAppDatabase = UmAppDatabase.getInstance(getApplicationContext());
+
+            /*
+
+            TODO: fix this to use downloadjob instead
 
             List<Long> downloadSetItemUids = umAppDatabase.getDownloadSetItemDao()
                     .findBySetUid(downloadSetUid);
@@ -100,6 +101,7 @@ public class DeleteJobTaskRunnerAndroid extends DeleteJobTaskRunner {
 
             if(downloadSetItemUids.isEmpty())
                 return Result.success();
+                */
 
             return Result.success();
         }

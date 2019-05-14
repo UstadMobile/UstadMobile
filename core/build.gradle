@@ -103,10 +103,12 @@ kotlin {
         commonMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-metadata:$version_klock"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation project(':lib-database-entities')
                 implementation project(":lib-util")
                 implementation "com.github.aakira:napier:$version_napier"
@@ -114,7 +116,7 @@ kotlin {
                 /*  compileOnly project(':lib-database-entities')
                   compileOnly project(':core-compile-only')
                   implementation project(':lib-database-runtime')
-                  implementation project(":lib-util")
+                  implementation project(":lib-util") */
               }
           }
           commonTest {
@@ -152,16 +154,17 @@ kotlin {
         commonJvm {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
             }
         }
 
         jvmMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
             }
-
             dependsOn commonJvm
         }
         jvmTest {
@@ -171,12 +174,9 @@ kotlin {
         }
         androidMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.android.support:appcompat-v7:$version_android_support_lib"
                 implementation "com.android.support:support-v4:$version_android_support_lib"
-
             }
             dependsOn commonJvm
         }

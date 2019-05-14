@@ -1,6 +1,5 @@
 package com.ustadmobile.core.impl
 
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
@@ -11,12 +10,11 @@ import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
 import kotlin.jvm.JvmOverloads
-import kotlin.jvm.JvmStatic
 
 /**
  * Class has all the shared function across all supported platforms
  */
-abstract class UstadMobileSystemBaseCommon {
+abstract class UstadMobileSystemCommon {
 
     /**
      * Returns whether or not the init method has already been run
@@ -38,7 +36,7 @@ abstract class UstadMobileSystemBaseCommon {
      * This must make the shared content directory if it does not already exist
      */
     open fun init(context: Any) {
-        l(UMLog.DEBUG, 519, null)
+        UMLog.l(UMLog.DEBUG, 519, null)
         //We don't need to do init again
         if (isInitialized) {
             return
@@ -227,7 +225,6 @@ abstract class UstadMobileSystemBaseCommon {
         return KMPSerializerParser()
     }
 
-
     /**
      * Make a new XmlPullParser from a given inputstream
      * @param in InputStream to read from
@@ -237,7 +234,7 @@ abstract class UstadMobileSystemBaseCommon {
      */
     @JvmOverloads
     fun newPullParser(`in`: InputStream, encoding: String = UstadMobileConstants.UTF8): KMPXmlParser {
-        l(UMLog.DEBUG, 523, encoding)
+        UMLog.l(UMLog.DEBUG, 523, encoding)
         val xpp = newPullParser()
         xpp.setInput(`in`, encoding)
         return xpp
@@ -384,63 +381,27 @@ abstract class UstadMobileSystemBaseCommon {
 
 
 
-    /**
-     * Convenience shortcut for logging
-     * @param level log level
-     * @param code log code
-     * @param message log message
-     * @param exception exception that occurred to log
-     */
-    @JvmStatic
-    fun l(level: Int, code: Int, message: String?, exception: Any) {
-        val logMessage = "$code : $message"
-        when (level) {
-            UMLog.DEBUG -> Napier.d(message=logMessage, throwable= exception as Exception)
-            UMLog.INFO -> Napier.i(message=logMessage, throwable= exception as Exception)
-            UMLog.CRITICAL -> Napier.wtf(message=logMessage, throwable= exception as Exception)
-            UMLog.WARN -> Napier.w(message=logMessage, throwable= exception as Exception)
-            UMLog.VERBOSE -> Napier.v(message=logMessage, throwable= exception as Exception)
-            UMLog.ERROR -> Napier.e(message=logMessage, throwable= exception as Exception)
-        }
-    }
 
-    /**
-     * Convenience shortcut for logging
-     * @param level log level
-     * @param code log code
-     * @param message message to log
-     */
-    @JvmStatic
-    fun l(level: Int, code: Int, message: String?) {
-        val logMessage = "$code : $message"
-        when (level) {
-            UMLog.DEBUG -> Napier.d(message=logMessage)
-            UMLog.INFO -> Napier.i(message=logMessage)
-            UMLog.CRITICAL -> Napier.wtf(message=logMessage)
-            UMLog.WARN -> Napier.w(message=logMessage)
-            UMLog.VERBOSE -> Napier.v(message=logMessage)
-            UMLog.ERROR -> Napier.e(message=logMessage)
-        }
-    }
 
 
     companion object {
+        private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
+                "image/jpeg" to "jpg", "image/png"  to "png","image/gif" to "gif",
+                "image/svg" to "svg", "application/epub+zip" to "epub")
+
+        private val MIME_TYPES_REVERSE = MIME_TYPES.entries.associateBy({ it.value }) {it.key}
 
         /**
          * Suggested name to create for content on Devices
          */
-        const val DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent"
+        private const val DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent"
 
         /**
          * The return value from getLocale when the user has said to use the system's locale
          */
         const val LOCALE_USE_SYSTEM = ""
 
-        private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
-                "image/jpeg" to "jpg", "image/png"  to "png","image/gif" to "gif",
-                "image/svg" to "svg", "application/epub+zip" to "epub")
 
-        private val MIME_TYPES_REVERSE = MIME_TYPES.entries.associateBy({ it.value }) {it.key}
 
         /**
          * Ported from old CatalogPresenter
@@ -468,6 +429,5 @@ abstract class UstadMobileSystemBaseCommon {
          * As per Android Intent.FLAG_CLEAR_TOP
          */
         const val GO_FLAG_CLEAR_TOP = 67108864
-
     }
 }

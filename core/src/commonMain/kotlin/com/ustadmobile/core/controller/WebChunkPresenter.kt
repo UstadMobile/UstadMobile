@@ -1,11 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ARG_REFERRER
+import com.ustadmobile.core.impl.*
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
@@ -110,10 +107,10 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
                 null) {
             impl.go(ContentEntryDetailView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), view.context,
-                    UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                    UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
             impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
-                    UstadMobileSystemImpl.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                    UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
 
     }

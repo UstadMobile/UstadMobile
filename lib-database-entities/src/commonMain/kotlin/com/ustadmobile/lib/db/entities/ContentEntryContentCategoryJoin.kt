@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -23,8 +24,8 @@ class ContentEntryContentCategoryJoin {
     @PrimaryKey
     var ceccjUid: Long = 0
 
-    //TODO: Migration
     @UmIndexField
+    @ColumnInfo(index = true)
     var ceccjContentEntryUid: Long = 0
 
     var ceccjContentCategoryUid: Long = 0
