@@ -1,9 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
@@ -162,7 +160,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
         impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
-                UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 
     }
 

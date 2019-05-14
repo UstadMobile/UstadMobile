@@ -83,7 +83,7 @@ class TestContentEntryDetailPresenter {
 
         presenter.handleUpNavigation()
         verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go(DummyView.VIEW_NAME, mutableMapOf(),
-                PlatformTestUtil.targetContext, UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP)
+                PlatformTestUtil.targetContext, UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 
     }
 
@@ -91,7 +91,7 @@ class TestContentEntryDetailPresenter {
 
         private val REFERRER_FULL_PATH = "/DummyView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43"
         private val REFERRER_NO_PATH = ""
-        private val flags = UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemImpl.GO_FLAG_SINGLE_TOP
+        private val flags = UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP
     }
 
 }
