@@ -7,8 +7,10 @@ import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
+import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
 /**
@@ -223,6 +225,22 @@ abstract class UstadMobileSystemBaseCommon {
      */
     open fun newXMLSerializer(): KMPSerializerParser{
         return KMPSerializerParser()
+    }
+
+
+    /**
+     * Make a new XmlPullParser from a given inputstream
+     * @param in InputStream to read from
+     * @param encoding Encoding to be used e.g. UTF-8
+     *
+     * @return a new XmlPullParser with set with the given inputstream
+     */
+    @JvmOverloads
+    fun newPullParser(`in`: InputStream, encoding: String = UstadMobileConstants.UTF8): KMPXmlParser {
+        l(UMLog.DEBUG, 523, encoding)
+        val xpp = newPullParser()
+        xpp.setInput(`in`, encoding)
+        return xpp
     }
 
 
