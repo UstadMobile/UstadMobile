@@ -177,6 +177,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "com.soywiz:klock-js:$version_klock"
             }
         }
 
