@@ -3,7 +3,6 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 
 import java.util.HashMap
-import java.util.Hashtable
 
 interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
@@ -50,7 +49,7 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
     fun setDownloadButtonClickableListener(isDownloadComplete: Boolean)
 
-    fun showDownloadOptionsDialog(hashtable: HashMap<String, String>)
+    fun showDownloadOptionsDialog(args: HashMap<String, String>)
 
     companion object {
 
