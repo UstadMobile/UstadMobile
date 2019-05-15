@@ -166,6 +166,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.soywiz:klock-jvm:$version_klock"
             }
             dependsOn commonJvmMain
         }
@@ -179,6 +180,7 @@ kotlin {
                 implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.android.support:appcompat-v7:$version_android_support_lib"
                 implementation "com.android.support:support-v4:$version_android_support_lib"
+                implementation "com.soywiz:klock-android:$version_klock"
             }
             dependsOn commonJvmMain
         }
