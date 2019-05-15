@@ -219,12 +219,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
         if (!isDownloadComplete) {
-            val currentTimeStamp = System.currentTimeMillis()
-            val minLastSeen = currentTimeStamp - TimeUnit.MINUTES.toMillis(1)
-            val maxFailureFromTimeStamp = currentTimeStamp - TimeUnit.MINUTES.toMillis(
-                    TIME_INTERVAL_FROM_LAST_FAILURE.toLong())
+            val currentTimeStamp = getSystemTimeInMillis()
+            val minLastSeen = currentTimeStamp - 60000
+            val maxFailureFromTimeStamp = currentTimeStamp - 300000
 
-            Thread {
+            GlobalScope.launch {
 
                 val container = containerDao!!.getMostRecentContainerForContentEntry(entryUuid)
                 if (container != null) {
