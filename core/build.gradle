@@ -96,6 +96,7 @@ kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
+        fromPreset(presets.js, 'js')
     }
 
 
@@ -167,6 +168,15 @@ kotlin {
             }
             dependsOn commonJvm
         }
+
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+            }
+        }
+
         jvmTest {
             dependencies {
 
