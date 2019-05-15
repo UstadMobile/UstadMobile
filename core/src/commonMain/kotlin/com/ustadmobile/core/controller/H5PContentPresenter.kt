@@ -94,6 +94,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
         }
     }
 
+    @ImplicitReflectionSerializer
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         this.containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()

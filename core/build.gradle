@@ -152,7 +152,7 @@ kotlin {
             }
         }
 
-        commonJvm {
+        commonJvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -167,7 +167,7 @@ kotlin {
             dependencies {
                 implementation "com.github.aakira:napier-jvm:$version_napier"
             }
-            dependsOn commonJvm
+            dependsOn commonJvmMain
         }
         jvmTest {
             dependencies {
@@ -180,7 +180,7 @@ kotlin {
                 implementation "com.android.support:appcompat-v7:$version_android_support_lib"
                 implementation "com.android.support:support-v4:$version_android_support_lib"
             }
-            dependsOn commonJvm
+            dependsOn commonJvmMain
         }
         androidTest {
             dependencies {
