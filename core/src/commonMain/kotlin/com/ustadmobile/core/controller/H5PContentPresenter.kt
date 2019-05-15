@@ -3,31 +3,24 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
-import com.ustadmobile.core.impl.http.UmHttpCall
-import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.core.view.UstadView
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-
-import org.json.JSONObject
-
-import java.io.IOException
-import java.io.InputStream
-import java.util.HashMap
-import kotlinx.io.*
+import kotlinx.coroutines.launch
+import kotlinx.io.IOException
+import kotlinx.io.InputStream
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.parse
 
 /**
  * Created by mike on 2/15/18.
  */
-
 
 
 class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H5PContentView) :
@@ -63,6 +56,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
         }
     }
 
+    @ImplicitReflectionSerializer
     private val contentFrameLoadedCallback = object : UmCallback<InputStream> {
 
         override fun onSuccess(result: InputStream?) {
@@ -75,9 +69,17 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
                     view.runOnUiThread(Runnable {
                         view.setContentHtml(h5pFileMountUrl!!, subHtmlStr)
                     })
-                    val h5PJsonRequest = UmHttpRequest(context,
-                            UMFileUtil.joinPaths(h5pFileMountUrl!!, "h5p.json"))
-                    UstadMobileSystemImpl.instance.makeRequestAsync(h5PJsonRequest, h5pResponseCallback)
+                    val h5PJsonRequest = UMFileUtil.joinPaths(h5pFileMountUrl!!, "h5p.json")
+
+                    GlobalScope.launch {
+                        val client = HttpClient()
+                        val h4PContent = client.get<String>(h5PJsonRequest)
+                        val jsonObj = Json.parse<Map<String, String>>(h4PContent)
+                        view.runOnUiThread(Runnable {
+                            view.setTitle(jsonObj["title"].toString())
+                        })
+
+                    }
                 } catch (e: IOException) {
                     dumpException(e)
                 }
@@ -86,29 +88,6 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
         }
 
         override fun onFailure(exception: Throwable?) {
-
-        }
-    }
-
-
-    @ImplicitReflectionSerializer
-    private val h5pResponseCallback = object : UmHttpResponseCallback {
-        override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
-            try {
-                if (response.isSuccessful) {
-                    val jsonStr = UMIOUtils.readStreamToString(response.responseAsStream!!)
-                    val jsonObj = Json.parse<Map<String, String>>(jsonStr)
-                    view.runOnUiThread(Runnable {
-                        view.setTitle(jsonObj["title"].toString())
-                    })
-                }
-            } catch (e: IOException) {
-                dumpException(e)
-            }
-
-        }
-
-        override fun onFailure(call: UmHttpCall, exception: Exception) {
 
         }
     }

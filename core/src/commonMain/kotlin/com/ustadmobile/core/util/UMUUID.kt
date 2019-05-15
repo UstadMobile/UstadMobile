@@ -4,8 +4,6 @@
   
 */
 package com.ustadmobile.core.util
-
-import java.util.Random
 import kotlin.random.Random
 
 /**

@@ -2,19 +2,20 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.scorm.ScormManifest
 import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
-import com.ustadmobile.core.impl.http.UmHttpCall
-import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ScormPackageView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import kotlinx.io.IOException
+import kotlinx.io.StringReader
 import org.kmp.io.KMPPullParserException
+import org.kmp.io.KMPXmlParser
 
 /**
  *
@@ -33,41 +34,37 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
     private val zipMountedCallback = object : UmCallback<String> {
         override fun onSuccess(result: String?) {
             mountedPath = result
-            UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
-                    context,
-                    UMFileUtil.joinPaths(mountedPath!!, "imsmanifest.xml")),
-                    manifestLoadedCallback)
+
+            GlobalScope.launch {
+                try {
+                    val client = HttpClient()
+                    val manifestContent = client.get<String>(UMFileUtil.joinPaths(mountedPath!!, "imsmanifest.xml"))
+
+                    val xpp = KMPXmlParser()
+                    xpp.setInput(StringReader(manifestContent))
+
+                    scormManifest = ScormManifest()
+                    scormManifest!!.loadFromXpp(xpp)
+                    val defaultOrg = scormManifest!!.defaultOrganization
+                    val startRes = scormManifest!!.getResourceByIdentifier(
+                            defaultOrg.items[0].identifierRef!!)
+                    view.runOnUiThread(Runnable {
+                        view.setTitle(scormManifest!!.defaultOrganization.title!!)
+                        view.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
+                                startRes.href!!))
+                    })
+                } catch (e: IOException) {
+                    dumpException(e)
+                } catch (x: KMPPullParserException) {
+                    dumpException(x)
+                }
+
+            }
         }
 
         override fun onFailure(exception: Throwable?) {
             view.showNotification("ERROR: failed to open package file",
                     UstadViewWithNotifications.LENGTH_LONG)
-        }
-    }
-
-    private val manifestLoadedCallback = object : UmHttpResponseCallback {
-        override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
-            scormManifest = ScormManifest()
-            try {
-                scormManifest!!.loadFromInputStream(response.responseAsStream!!)
-                val defaultOrg = scormManifest!!.defaultOrganization
-                val startRes = scormManifest!!.getResourceByIdentifier(
-                        defaultOrg.items[0].identifierRef!!)
-                view.runOnUiThread(Runnable {
-                    view.setTitle(scormManifest!!.defaultOrganization.title!!)
-                    view.loadUrl(UMFileUtil.joinPaths(mountedPath!!,
-                            startRes.href!!))
-                })
-            } catch (e: IOException) {
-                dumpException(e)
-            } catch (x: KMPPullParserException) {
-                dumpException(x)
-            }
-
-        }
-
-        override fun onFailure(call: UmHttpCall, exception: Exception) {
-
         }
     }
 
