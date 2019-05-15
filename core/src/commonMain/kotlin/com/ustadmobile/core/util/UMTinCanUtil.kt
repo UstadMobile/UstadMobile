@@ -30,15 +30,9 @@
  */
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
-
-import java.util.Vector
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.json
 import kotlin.math.floor
 
 /* $if umplatform == 2  $
@@ -74,17 +68,8 @@ object UMTinCanUtil {
      * @param langValue Value of the string in that language
      * @return JSONObject with key lang and value of langValue
      */
-    fun makeLangMapVal(lang: String, langValue: String): JSONObject {
-        val retVal = JSONObject()
-        try {
-            retVal.put(lang, langValue)
-        } catch (e: JSONException) {
-            //this should never happen - all we did is put two strings in a JSON object
-            UMLog.l(UMLog.ERROR, 197, "$lang/$langValue",
-                    e)
-        }
-
-        return retVal
+    fun makeLangMapVal(lang: String, langValue: String): JsonObject {
+        return json { lang to langValue }
     }
 
     /**
@@ -101,7 +86,7 @@ object UMTinCanUtil {
 
         val msPerMin = 60 * 1000
         val mins = floor((durationRemaining / msPerMin).toDouble()).toInt()
-        durationRemaining = durationRemaining % msPerMin
+        durationRemaining %= msPerMin
 
         val msPerS = 1000
         val secs = floor((durationRemaining / msPerS).toDouble()).toInt()
@@ -124,21 +109,10 @@ object UMTinCanUtil {
      * @param username The user id used for authentication on the server
      * @param xAPIServer The XAPI server to use for the homePage.  Should be the base e.g. server.com/xapi not server.com/xapi/statements
      */
-    fun makeActorFromUserAccount(username: String, xAPIServer: String): JSONObject? {
-        var actorObj: JSONObject? = null
-        try {
-            actorObj = JSONObject()
-            val accountObj = JSONObject()
-            accountObj.put("homePage", xAPIServer)
-            accountObj.put("name", username)
-            actorObj.put("account", accountObj)
-            actorObj.put("objectType", "Agent")
-        } catch (e: JSONException) {
-            //seriously... this should never happen putting strings together
-            UMLog.l(UMLog.ERROR, 195, null, e)
-        }
-
-        return actorObj
+    fun makeActorFromUserAccount(username: String, xAPIServer: String): JsonObject? {
+        val accountObj = json { "homePage" to xAPIServer}.plus("name" to username)
+        val actorObj = json { "account" to accountObj}.plus("objectType" to "Agent")
+        return actorObj as JsonObject
     }
 
     /**
@@ -149,7 +123,7 @@ object UMTinCanUtil {
      * @param context Current context object
      * @return JSON Object representing the currently logged in user.
      */
-    fun makeActorFromActiveUser(context: Any): JSONObject? {
+    fun makeActorFromActiveUser(context: Any): JsonObject? {
         val account = UmAccountManager.getActiveAccount(context)
         val accountUsername = account?.username
         val accountEndpoint = account?.endpointUrl
@@ -178,19 +152,8 @@ object UMTinCanUtil {
      * @param display text to represent verb in that language : e.g. answered
      * @return
      */
-    fun makeVerbObject(id: String, lang: String, display: String): JSONObject {
-        val obj = JSONObject()
-        try {
-            obj.put("id", id)
-            obj.put("display", makeLangMapVal(lang, display))
-        } catch (je: JSONException) {
-            UMLog.l(UMLog.ERROR, 195, "UMTinCanUtil.makeVerbObject", je)
-        }
-
-        return obj
+    fun makeVerbObject(id: String, lang: String, display: String): JsonObject {
+        return json { "id" to id }.plus("display" to makeLangMapVal(lang, display)) as JsonObject
     }
-
-
-
 
 }
