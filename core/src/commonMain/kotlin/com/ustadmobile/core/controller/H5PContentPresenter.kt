@@ -33,6 +33,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
     private var h5pFileMountUrl: String? = null
 
 
+    @ImplicitReflectionSerializer
     private val mH5PDistMountedCallback = object : UmCallback<String> {
         override fun onSuccess(result: String?) {
             h5pDistMountUrl = result
@@ -44,6 +45,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
         }
     }
 
+    @ImplicitReflectionSerializer
     private val h5PFileMountedCallback = object : UmCallback<String> {
         override fun onSuccess(result: String?) {
             h5pFileMountUrl = result

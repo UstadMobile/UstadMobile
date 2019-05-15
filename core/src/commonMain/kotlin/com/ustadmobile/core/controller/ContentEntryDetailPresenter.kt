@@ -14,6 +14,7 @@ import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.getSystemTimeInMillis
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
@@ -23,17 +24,17 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.launch
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
                                   private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
-    DownloadJobItemManager.OnDownloadJobItemChangeListener{
+        DownloadJobItemManager.OnDownloadJobItemChangeListener {
 
     private var navigation: String? = null
 
@@ -46,9 +47,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var containerDao: ContainerDao? = null
 
-    private val monitorStatus = AtomicBoolean(false)
+    private val monitorStatus = atomic(false)
 
-    private val isListeningToDownloadStatus = AtomicBoolean(false)
+    private val isListeningToDownloadStatus = atomic(false)
 
     private var statusUmLiveData: UmLiveData<ContentEntryStatus>? = null
 
@@ -179,8 +180,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 && status.downloadStatus >= JobStatus.RUNNING_MIN
                 && status.downloadStatus <= JobStatus.RUNNING_MAX)
 
-        if(isDownloading && isListeningToDownloadStatus.get()) {
-            isListeningToDownloadStatus.set(true)
+        if (isDownloading && isListeningToDownloadStatus.value) {
+            isListeningToDownloadStatus.value = true
             statusProvider.addDownloadChangeListener(this)
             statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
                     object : UmResultCallback<DownloadJobItemStatus?> {
@@ -190,8 +191,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     })
             view.setDownloadButtonVisible(false)
             view.setDownloadProgressVisible(true)
-        }else if(!isDownloading && isListeningToDownloadStatus.get()) {
-            isListeningToDownloadStatus.set(false)
+        } else if (!isDownloading && isListeningToDownloadStatus.value) {
+            isListeningToDownloadStatus.value = false
             statusProvider.removeDownloadChangeListener(this)
             view.setDownloadButtonVisible(true)
             view.setDownloadProgressVisible(false)
@@ -231,8 +232,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     val localNetworkNode = networkNodeDao!!.findLocalActiveNodeByContainerUid(
                             containerUid!!, minLastSeen, BAD_NODE_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
 
-                    if (localNetworkNode == null && !monitorStatus.get()) {
-                        monitorStatus.set(true)
+                    if (localNetworkNode == null && !monitorStatus.value) {
+                        monitorStatus.value = true
                         monitor.startMonitoringAvailability(this,
                                 listOf(containerUid!!))
                     }
@@ -245,7 +246,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 }
 
 
-            }.start()
+            }
         }
 
 
@@ -256,10 +257,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
-        if(status != null && status.contentEntryUid == entryUuid) {
+        if (status != null && status.contentEntryUid == entryUuid) {
             view.runOnUiThread(Runnable {
                 view.updateDownloadProgress(
-                        if(status.totalBytes > 0) (status.bytesSoFar.toFloat() / status.totalBytes.toFloat()) else 0F)
+                        if (status.totalBytes > 0) (status.bytesSoFar.toFloat() / status.totalBytes.toFloat()) else 0F)
             })
         }
     }
@@ -336,15 +337,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
     override fun onDestroy() {
-        if (monitorStatus.get()) {
-            monitorStatus.set(false)
+        if (monitorStatus.value) {
+            monitorStatus.value = false
             monitor.stopMonitoringAvailability(this)
         }
 
         statusUmLiveData?.removeObserver(statusUmObserver)
 
 
-        if(isListeningToDownloadStatus.getAndSet(false)) {
+        if (isListeningToDownloadStatus.getAndSet(false)) {
             statusProvider.removeDownloadChangeListener(this)
         }
         super.onDestroy()
