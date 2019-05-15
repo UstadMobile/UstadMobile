@@ -1,11 +1,9 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.lib.util.UMUtil
-
-import java.util.Calendar
-import java.util.Date
-import java.util.TimeZone
-import java.util.Vector
+import com.soywiz.klock.DateFormat
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.ISO8601
+import com.soywiz.klock.parse
 
 /**
  * Basic calendar related utility methods. These are isolated in their own class as Calendar is not
@@ -13,12 +11,8 @@ import java.util.Vector
  */
 object UMCalendarUtil {
 
-    val HTTP_MONTH_NAMES = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-
-    val HTTP_DAYS = intArrayOf(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY)
-
-    val HTTP_DAY_LABELS = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-
+    private val httpDateFormat: DateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
+    private val iso8601DateFormat: DateFormat = ISO8601.DATE_CALENDAR_COMPLETE
 
     /**
      * Make a String for the date given by time as an HTTP Date as per
@@ -31,26 +25,8 @@ object UMCalendarUtil {
      * @return A string with a properly formatted HTTP Date
      */
     fun makeHTTPDate(time: Long): String {
-        val cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
-        cal.time = Date(time)
-        val sb = StringBuffer()
-
-        val `val` = cal.get(Calendar.DAY_OF_WEEK)
-        for (i in HTTP_MONTH_NAMES.indices) {
-            if (`val` == HTTP_DAYS[i]) {
-                sb.append(HTTP_DAY_LABELS[i]).append(", ")
-                break
-            }
-        }
-        appendTwoDigits(cal.get(Calendar.DAY_OF_MONTH), sb).append(' ')
-
-        sb.append(HTTP_MONTH_NAMES[cal.get(Calendar.MONTH)]).append(' ')
-        sb.append(checkYear(cal.get(Calendar.YEAR))).append(' ')
-        appendTwoDigits(cal.get(Calendar.HOUR_OF_DAY), sb).append(':')
-        appendTwoDigits(cal.get(Calendar.MINUTE), sb).append(':')
-        appendTwoDigits(cal.get(Calendar.SECOND), sb).append(" GMT")
-
-        return sb.toString()
+        val cal = DateTime(time)
+        return cal.format(httpDateFormat)
     }
 
     /**
@@ -61,47 +37,7 @@ object UMCalendarUtil {
      * @return
      */
     fun parseHTTPDate(httpDate: String): Long {
-        val delimChars = charArrayOf(' ', ':', '-')
-
-        val tokens = UMUtil.tokenize(httpDate, delimChars, 0, httpDate.length)
-        val cal: Calendar?
-
-        if (tokens.size == 8) {//this includes the timezone
-            cal = Calendar.getInstance(TimeZone.getTimeZone(
-                    tokens.elementAt(7) as String))
-            cal!!.set(Calendar.DAY_OF_MONTH, Integer.parseInt(
-                    tokens.elementAt(1) as String))
-            cal.set(Calendar.MONTH, UMUtil.getIndexInArrayIgnoreCase(
-                    tokens.elementAt(2) as String, HTTP_MONTH_NAMES))
-            cal.set(Calendar.YEAR, checkYear(Integer.parseInt(
-                    tokens.elementAt(3) as String)))
-
-            cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(
-                    tokens.elementAt(4) as String))
-            cal.set(Calendar.MINUTE, Integer.parseInt(
-                    tokens.elementAt(5) as String))
-            cal.set(Calendar.SECOND, Integer.parseInt(
-                    tokens.elementAt(6) as String))
-        } else if (tokens.size == 7) {
-            cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
-            cal!!.set(Calendar.MONTH, UMUtil.getIndexInArrayIgnoreCase(
-                    tokens.elementAt(1) as String, HTTP_MONTH_NAMES))
-            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(
-                    tokens.elementAt(2) as String))
-            cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(
-                    tokens.elementAt(3) as String))
-            cal.set(Calendar.MINUTE, Integer.parseInt(
-                    tokens.elementAt(4) as String))
-            cal.set(Calendar.SECOND, Integer.parseInt(
-                    tokens.elementAt(5) as String))
-
-            cal.set(Calendar.YEAR, checkYear(Integer.parseInt(
-                    tokens.elementAt(6) as String)))
-        } else {
-            return 0L
-        }
-
-        return cal.time.time
+        return httpDateFormat.parse(httpDate).local.unixMillisLong
     }
 
     /**
@@ -111,22 +47,8 @@ object UMCalendarUtil {
      * 2016-04-18T17:08:07.563789+00:00
      *
      */
-    fun parse8601Timestamp(timestamp: String): Calendar {
-        val cal = Calendar.getInstance()
-        cal.set(Calendar.YEAR, Integer.parseInt(timestamp.substring(0, 4)))
-        cal.set(Calendar.MONTH, Integer.parseInt(timestamp.substring(5, 7)))
-        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(timestamp.substring(8, 10)))
-
-        if (timestamp.length < 12) {
-            return cal
-        }
-
-        //There is a time section
-        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timestamp.substring(11, 13)))
-        cal.set(Calendar.MINUTE, Integer.parseInt(timestamp.substring(14, 16)))
-        cal.set(Calendar.SECOND, Integer.parseInt(timestamp.substring(17, 19)))
-
-        return cal
+    fun parse8601Timestamp(timestamp: String): Long {
+        return iso8601DateFormat.parse(timestamp).local.unixMillisLong
     }
 
 

@@ -113,6 +113,7 @@ kotlin {
                 implementation project(':lib-database-entities')
                 implementation project(":lib-util")
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
                 //implementation project(':lib-database')
                 /*  compileOnly project(':lib-database-entities')
                   compileOnly project(':core-compile-only')
@@ -152,21 +153,23 @@ kotlin {
             }
         }
 
-        commonJvm {
+        commonJvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
             }
         }
 
         jvmMain {
             dependencies {
                 implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.soywiz:klock-jvm:$version_klock"
             }
-            dependsOn commonJvm
+            dependsOn commonJvmMain
         }
 
         jsMain {
@@ -187,8 +190,9 @@ kotlin {
                 implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.android.support:appcompat-v7:$version_android_support_lib"
                 implementation "com.android.support:support-v4:$version_android_support_lib"
+                implementation "com.soywiz:klock-android:$version_klock"
             }
-            dependsOn commonJvm
+            dependsOn commonJvmMain
         }
         androidTest {
             dependencies {

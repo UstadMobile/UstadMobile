@@ -4,8 +4,6 @@
   
 */
 package com.ustadmobile.core.util
-
-import java.util.Random
 import kotlin.random.Random
 
 /**
@@ -30,7 +28,7 @@ class UMUUID(var mostSigBits: Long, var leastSigBits: Long) {
         internal val cDigits = charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
 
         fun randomUUID(): UMUUID {
-            val r = Random(System.currentTimeMillis())
+            val r = Random(getSystemTimeInMillis())
             return UMUUID(r.nextLong(), r.nextLong())
         }
 

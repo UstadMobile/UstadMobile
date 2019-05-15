@@ -66,19 +66,17 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
-import com.ustadmobile.core.impl.http.UmHttpCall
-import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.util.UMUtil
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import kotlinx.io.*
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPPullParserException
+import kotlinx.coroutines.launch
+import kotlinx.io.StringReader
+import org.kmp.io.KMPXmlParser
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -105,8 +103,75 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
         override fun onSuccess(result: String?) {
             mountedUrl = result
             val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
-            UstadMobileSystemImpl.instance.makeRequestAsync(
-                    UmHttpRequest(context, containerUri), containerHttpCallbackHandler)
+            GlobalScope.launch {
+                try {
+                    var client = HttpClient()
+                    var ocfContent = client.get<String>(containerUri)
+
+                    ocf = OcfDocument()
+                    val ocfParser = KMPXmlParser()
+                    ocfParser.setInput(StringReader(ocfContent))
+                    ocf!!.loadFromParser(ocfParser)
+
+                    //get and parse the first publication
+                    val opfUrl = UMFileUtil.joinPaths(mountedUrl!!,
+                            ocf!!.rootFiles[0].fullPath!!)
+                    var opfContent = client.get<String>(opfUrl)
+
+                    val opf = OpfDocument()
+                    val opfParser = KMPXmlParser()
+                    opfParser.setInput(StringReader(opfContent))
+                    opf.loadFromOPF(opfParser)
+                    val linearSpineHrefsRelative = opf.linearSpineHREFs
+
+                    opfBaseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
+                            mountedUrl!!, ocf!!.rootFiles[0].fullPath!!))
+
+                    linearSpineUrls = Array(linearSpineHrefsRelative.size) { "" }
+
+                    for (i in linearSpineHrefsRelative.indices) {
+                        linearSpineUrls!![i] = UMFileUtil.joinPaths(opfBaseUrl!!,
+                                linearSpineHrefsRelative[i])
+                    }
+
+                    val opfCoverImageItem = opf.getCoverImage("")
+                    val authorNames = if (opf.numCreators > 0)
+                        UMUtil.joinStrings(opf.creators!!, ", ")
+                    else
+                        null
+
+                    epubContentView!!.runOnUiThread(Runnable {
+                        epubContentView.setContainerTitle(opf.title!!)
+                        epubContentView.setSpineUrls(linearSpineUrls!!)
+                        if (opfCoverImageItem != null) {
+                            epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl!!,
+                                    opfCoverImageItem.href!!))
+                        }
+
+                        if (authorNames != null) {
+                            epubContentView.setAuthorName(authorNames)
+                        }
+                    })
+
+                    if (opf.navItem == null)
+                        throw IllegalArgumentException()
+
+                    val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
+                            mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
+
+                    var navContent = client.get<String>(navXhtmlUrl)
+
+                    val navDocument = EpubNavDocument()
+                    val navParser = KMPXmlParser()
+                    navParser.setInput(StringReader(navContent))
+                    navDocument.load(navParser)
+                    epubContentView.runOnUiThread(Runnable { epubContentView.setTableOfContents(navDocument.toc!!) })
+                    view.runOnUiThread(Runnable { view.setProgressBarVisible(false) })
+                } catch (e: Exception) {
+                    dumpException(e)
+                }
+
+            }
         }
 
         override fun onFailure(exception: Throwable?) {
@@ -114,124 +179,6 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                 UMLog.l(UMLog.ERROR, 500, "Exception mounting container")
                 dumpException(exception)
             }
-        }
-    }
-
-    /**
-     * Second HTTP callback: parses the container.xml file and finds the OPF
-     */
-    private val containerHttpCallbackHandler = object : UmHttpResponseCallback {
-        override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
-            if (response.isSuccessful) {
-                ocf = OcfDocument()
-
-                try {
-                    val xpp = UstadMobileSystemImpl.instance.newPullParser(
-                            ByteArrayInputStream(response.responseBody))
-                    ocf!!.loadFromParser(xpp)
-
-                    //get and parse the first publication
-                    val opfUrl = UMFileUtil.joinPaths(mountedUrl!!,
-                            ocf!!.rootFiles[0].fullPath!!)
-                    UstadMobileSystemImpl.instance.makeRequestAsync(
-                            UmHttpRequest(context, opfUrl), opfHttpCallbackHandler)
-
-                } catch (e: IOException) {
-                    dumpException(e)
-                } catch (x: KMPPullParserException) {
-                    dumpException(x)
-                }
-
-            }
-        }
-
-        override fun onFailure(call: UmHttpCall, exception: Exception) {
-            UMLog.l(UMLog.ERROR, 500, "Exception loading container")
-        }
-    }
-
-    /**
-     * Third HTTP callback: parses the OPF and sets up the view
-     */
-    private val opfHttpCallbackHandler = object : UmHttpResponseCallback {
-        override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
-            val opf = OpfDocument()
-            try {
-                val xpp = UstadMobileSystemImpl.instance.newPullParser(
-                        ByteArrayInputStream(response.responseBody))
-                opf.loadFromOPF(xpp)
-                val linearSpineHrefsRelative = opf.linearSpineHREFs
-
-                opfBaseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
-                        mountedUrl!!, ocf!!.rootFiles[0].fullPath!!))
-
-                linearSpineUrls = Array(linearSpineHrefsRelative.size) { "" }
-
-                for (i in linearSpineHrefsRelative.indices) {
-                    linearSpineUrls!![i] = UMFileUtil.joinPaths(opfBaseUrl!!,
-                            linearSpineHrefsRelative[i])
-                }
-
-                val opfCoverImageItem = opf.getCoverImage("")
-                val authorNames = if (opf.numCreators > 0)
-                    UMUtil.joinStrings(opf.creators!!, ", ")
-                else
-                    null
-
-                epubContentView!!.runOnUiThread(Runnable {
-                    epubContentView.setContainerTitle(opf.title!!)
-                    epubContentView.setSpineUrls(linearSpineUrls!!)
-                    if (opfCoverImageItem != null) {
-                        epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl!!,
-                                opfCoverImageItem.href!!))
-                    }
-
-                    if (authorNames != null) {
-                        epubContentView.setAuthorName(authorNames)
-                    }
-                })
-
-                if (opf.navItem == null)
-                    return
-
-                val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
-                        mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
-
-                UstadMobileSystemImpl.instance.makeRequestAsync(UmHttpRequest(
-                        context, navXhtmlUrl), navCallbackHandler)
-            } catch (e: IOException) {
-                dumpException(e)
-            } catch (x: KMPPullParserException) {
-                dumpException(x)
-            }
-
-        }
-
-        override fun onFailure(call: UmHttpCall, exception: Exception) {
-            dumpException(exception)
-        }
-    }
-
-    private val navCallbackHandler = object : UmHttpResponseCallback {
-        override fun onComplete(call: UmHttpCall, response: UmHttpResponse) {
-            val navDocument = EpubNavDocument()
-            try {
-                val xpp = UstadMobileSystemImpl.instance.newPullParser(
-                        ByteArrayInputStream(response.responseBody), "UTF-8")
-                xpp.setFeature(KMPPullParser.FEATURE_PROCESS_NAMESPACES, true)
-                navDocument.load(xpp)
-                epubContentView!!.runOnUiThread(Runnable { epubContentView.setTableOfContents(navDocument.toc!!) })
-                view.runOnUiThread(Runnable { view.setProgressBarVisible(false) })
-            } catch (e: IOException) {
-                dumpException(e)
-            } catch (x: KMPPullParserException) {
-                dumpException(x)
-            }
-
-        }
-
-        override fun onFailure(call: UmHttpCall, exception: Exception) {
-            dumpException(exception)
         }
     }
 
