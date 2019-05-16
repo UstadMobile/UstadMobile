@@ -1,0 +1,91 @@
+/**
+ * Core module build script : see buildconfig.core.default.gradle for configuration
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+    }
+}
+
+
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'com.android.library'
+apply plugin: "maven-publish"
+apply plugin: "kotlin-kapt"
+
+
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
+}
+
+kotlin {
+
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.android, 'android')
+        fromPreset(presets.js, 'js')
+    }
+
+    android {
+        publishLibraryVariants("release", "debug")
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+                compileOnly project(":lib-room-annotations")
+            }
+        }
+
+        commonTest {
+            dependencies {
+
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+            }
+        }
+
+        androidMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "androidx.room:room-runtime:2.1.0-beta01"
+            }
+        }
+
+
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+            }
+        }
+
+
+    }
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
+
+dependencies {
+    kapt "androidx.room:room-compiler:2.1.0-beta01"
+}

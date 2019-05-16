@@ -31,7 +31,10 @@ dependencies {
     implementation project(':lib-database-runtime')
     implementation project(':lib-database-runtime-jdbc')
     implementation project(":lib-util")
+    implementation project(path: ":lib-room-annotations", configuration: "jvmDefault")
     implementation "com.squareup:javapoet:$version_javapoet"
+    implementation "com.squareup:kotlinpoet:1.2.0"
+
     implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
     implementation "org.apache.commons:commons-text:$version_apache_commons_text"
