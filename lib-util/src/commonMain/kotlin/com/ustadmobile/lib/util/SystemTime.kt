@@ -1,3 +1,3 @@
-package com.ustadmobile.core.util
+package com.ustadmobile.lib.util
 
 expect fun getSystemTimeInMillis(): Long
