@@ -2,7 +2,7 @@ package com.ustadmobile.lib.annotationprocessor.core;
 
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleDatabase;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao;
-import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao_Retrofit;
+//import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableDao_Retrofit;
 import com.ustadmobile.lib.annotationprocessor.core.db.ExampleSyncableEntity;
 
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -28,7 +28,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 
 public class TestRetrofitInterface {
-
+    /*
     private HttpServer server;
 
     private ExampleSyncableDao_Retrofit exampleSyncableDaoRetrofit;
@@ -92,5 +92,5 @@ public class TestRetrofitInterface {
 
 
 
-
+*/
 }

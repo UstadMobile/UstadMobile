@@ -1,4 +1,4 @@
-include ':app-android', ':core-compile-only', ':lib-database-annotations', ':lib-database2', ':lib-database2-android',
+include ':app-android', ':core-compile-only', ':lib-database-annotations', ':lib-database2', ':lib-database2-android', ':lib-door-runtime',
         ':core',
         ':sharedse',
         ':core-tests',
