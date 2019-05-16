@@ -51,6 +51,9 @@ public class GroupListRecyclerAdapter extends
         });
 
         assert entity != null;
+        if(entity == null){
+            return;
+        }
         title.setText(entity.getGroupName());
         String membersString = theActivity.getText(R.string.members).toString();
         int count = entity.getMemberCount();

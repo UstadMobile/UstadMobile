@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:checked="true"
+            android:checked="false"
             android:text="@string/role_individual"
             android:textSize="12sp" />
 
@@ -45,6 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:checked="true"
             android:text="@string/role_group"
             android:textSize="12sp" />
     </RadioGroup>
@@ -66,11 +67,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_role_assignment_detail_appbar"
-        tools:text="@string/assign_role_to" />
+        android:text="@string/assign_role_to" />
 
     <TextView
         android:id="@+id/activity_role_assignment_group"

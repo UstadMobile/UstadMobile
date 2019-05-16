@@ -36,6 +36,12 @@ public interface RoleAssignmentDetailView extends UstadView {
 
     void updateScopeList(int tableId);
 
+    void individualClicked();
+
+    void groupClicked();
+
+    void updateGroupName(boolean individual);
+
     /**
      * Method to finish the screen / view.
      */

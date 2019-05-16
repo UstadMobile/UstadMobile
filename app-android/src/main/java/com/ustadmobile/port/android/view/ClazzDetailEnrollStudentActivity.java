@@ -49,6 +49,8 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
     //PersonGroup enrollment
     private long groupUid;
 
+    private boolean groupEnrollment = false;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -85,6 +87,9 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
         //PersonGroup enrollment
         if(getIntent().hasExtra(GROUP_UID)){
             groupUid = getIntent().getLongExtra(GROUP_UID, 0);
+            if(groupUid != 0){
+                groupEnrollment = true;
+            }
         }
 
         Button enrollNewClazzMemberButton =
@@ -128,7 +133,7 @@ public class ClazzDetailEnrollStudentActivity extends UstadBaseActivity implemen
 
         PersonWithEnrollmentRecyclerAdapter recyclerAdapter =
                 new PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK, getApplicationContext(),
-                        this, mPresenter, true, true);
+                        this, mPresenter, true, true, groupEnrollment);
 
         DataSource.Factory<Integer, PersonWithEnrollment> factory =
                 (DataSource.Factory<Integer, PersonWithEnrollment>)

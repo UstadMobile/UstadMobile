@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.ClazzDao;
 import com.ustadmobile.core.db.dao.EntityRoleDao;
 import com.ustadmobile.core.db.dao.LocationDao;
@@ -8,16 +9,7 @@ import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.core.db.dao.PersonGroupDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-
 import com.ustadmobile.core.view.RoleAssignmentDetailView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.EntityRole;
@@ -25,6 +17,11 @@ import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonGroup;
 import com.ustadmobile.lib.db.entities.Role;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.view.RoleAssignmentDetailView.ENTITYROLE_UID;
 
@@ -93,7 +90,21 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         if(arguments.containsKey(ENTITYROLE_UID)){
             currentEntityRoleUid = (long) arguments.get(ENTITYROLE_UID);
         }
+    }
 
+    public void updateGroupList(boolean individual){
+
+        if(individual) {
+            //Update group
+            groupUmLiveData = groupDao.findAllActivePersonPersonGroupLive();
+            groupUmLiveData.observe(RoleAssignmentDetailPresenter.this,
+                    RoleAssignmentDetailPresenter.this::handleAllGroupsChanged);
+        }else{
+            //Update group
+            groupUmLiveData = groupDao.findAllActiveGroupPersonGroupsLive();
+            groupUmLiveData.observe(RoleAssignmentDetailPresenter.this,
+                    RoleAssignmentDetailPresenter.this::handleAllGroupsChanged);
+        }
     }
 
     @Override
@@ -129,7 +140,9 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
                         RoleAssignmentDetailPresenter.this::handleAllClazzChanged);
                 break;
             case Location.TABLE_ID:
-                //TODO:
+                locationUmLiveData = locationDao.findAllActiveLocationsLive();
+                locationUmLiveData.observe(RoleAssignmentDetailPresenter.this,
+                        RoleAssignmentDetailPresenter.this::handleAllLocationsChanged);
                 break;
             case Person.TABLE_ID:
                 personUmLiveData = personDao.findAllActiveLive();
@@ -140,7 +153,7 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
 
     }
 
-    public void initFromEntityRole(long uid){
+    private void initFromEntityRole(long uid){
         this.currentEntityRoleUid = uid;
 
         UmLiveData<EntityRole> entityRoleLiveData =
@@ -153,17 +166,27 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
             public void onSuccess(EntityRole result) {
                 updatedEntityRole = result;
 
-                //Update group
-                groupUmLiveData = groupDao.findAllActivePersonGroupsLive();
-                groupUmLiveData.observe(RoleAssignmentDetailPresenter.this,
-                        RoleAssignmentDetailPresenter.this::handleAllGroupsChanged);
-
                 //Update roles
                 roleUmLiveData = roleDao.findAllActiveRolesLive();
                 roleUmLiveData.observe(RoleAssignmentDetailPresenter.this,
                         RoleAssignmentDetailPresenter.this::handleAllRolesChanged);
 
                 long groupUid = updatedEntityRole.getErGroupUid();
+                groupDao.findByUidAsync(groupUid, new UmCallback<PersonGroup>() {
+                    @Override
+                    public void onSuccess(PersonGroup result) {
+                        if(result != null && result.getGroupPersonUid() != 0){
+                            view.individualClicked();
+                            updateGroupList(true);
+                        }else{
+                            view.groupClicked();
+                            updateGroupList(false);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {exception.printStackTrace();}
+                });
                 long roleUid = updatedEntityRole.getErRoleUid();
                 int groupSelected = 0, roleSelected = 0;
                 if(groupUid != 0 && roleUid != 0 && groupIdToPosition != null
@@ -185,7 +208,7 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
     }
 
 
-    public void handleAllGroupsChanged(List<PersonGroup> groups){
+    private void handleAllGroupsChanged(List<PersonGroup> groups){
         int selectedPosition = 0;
 
         ArrayList<String> entityList = new ArrayList<>();
@@ -213,7 +236,7 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         view.setGroupPresets(groupPresets, selectedPosition);
     }
 
-    public void handleAllRolesChanged(List<Role> roles){
+    private void handleAllRolesChanged(List<Role> roles){
         int selectedPosition = 0;
 
         ArrayList<String> entityList = new ArrayList<>();
@@ -241,19 +264,38 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         view.setRolePresets(rolePresets, selectedPosition);
     }
 
-    public String[] getScopePresets() {
-        return scopePresets;
-    }
-
     public void setScopePresets(String[] scopePresets) {
         this.scopePresets = scopePresets;
     }
 
-    public void handleAllLocationsChanged(List<Location> locations){
+    private void handleAllLocationsChanged(List<Location> locations){
+        int selectedPosition = 0;
 
+        ArrayList<String> entityList = new ArrayList<>();
+        locationIdToPosition = new HashMap<>();
+        int posIter = 0;
+        for(Location everyEntity:locations){
+            entityList.add(everyEntity.getTitle());
+            locationIdToPosition.put(everyEntity.getLocationUid(), posIter);
+            locationPositionToId.put(posIter, everyEntity.getLocationUid());
+            posIter++;
+        }
+        assigneePresets = new String[entityList.size()];
+        assigneePresets = entityList.toArray(assigneePresets);
+        if(originalEntityRole == null){
+            originalEntityRole = new EntityRole();
+        }
+        if(originalEntityRole.getErEntityUid() != 0){
+            long entityUid = originalEntityRole.getErEntityUid();
+            if(locationIdToPosition.containsKey(entityUid)){
+                selectedPosition = locationIdToPosition.get(entityUid);
+            }
+        }
+
+        view.setAssigneePresets(assigneePresets, selectedPosition);
     }
 
-    public void handleAllClazzChanged(List<Clazz> clazzes){
+    private void handleAllClazzChanged(List<Clazz> clazzes){
         int selectedPosition = 0;
 
         ArrayList<String> entityList = new ArrayList<>();
@@ -281,7 +323,7 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         view.setAssigneePresets(assigneePresets, selectedPosition);
     }
 
-    public void handleAllPersonChanged(List<Person> people){
+    private void handleAllPersonChanged(List<Person> people){
         int selectedPosition = 0;
 
         ArrayList<String> entityList = new ArrayList<>();
@@ -359,7 +401,7 @@ public class RoleAssignmentDetailPresenter extends UstadBaseController<RoleAssig
         }
     }
 
-    public void handleEntityRoleChanged(EntityRole changedEntityRole){
+    private void handleEntityRoleChanged(EntityRole changedEntityRole){
         //set the og person value
         if(originalEntityRole == null)
             originalEntityRole = changedEntityRole;

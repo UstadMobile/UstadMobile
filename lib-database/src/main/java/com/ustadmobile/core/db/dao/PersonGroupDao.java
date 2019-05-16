@@ -34,6 +34,12 @@ public abstract class PersonGroupDao implements SyncableDao<PersonGroup, PersonG
     @UmQuery("SELECT * FROM PersonGroup WHERE groupActive = 1")
     public abstract UmLiveData<List<PersonGroup>> findAllActivePersonGroupsLive();
 
+    @UmQuery("SELECT * FROM PersonGroup WHERE groupActive = 1 AND groupPersonUid = 0")
+    public abstract UmLiveData<List<PersonGroup>> findAllActiveGroupPersonGroupsLive();
+
+    @UmQuery("SELECT * FROM PersonGroup WHERE groupActive = 1 AND groupPersonUid != 0")
+    public abstract UmLiveData<List<PersonGroup>> findAllActivePersonPersonGroupLive();
+
     @UmQuery("UPDATE PersonGroup SET groupActive = 0 WHERE groupUid = :uid")
     public abstract void inactivateGroupAsync(long uid, UmCallback<Integer> resultObject);
 

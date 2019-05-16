@@ -104,5 +104,33 @@
 
     </android.support.v7.widget.AppCompatSpinner>
 
+    <TextView
+        android:id="@+id/activity_bulk_upload_master_errors_heading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/errors"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_master_timezone_spinner" />
+
+    <LinearLayout
+        android:id="@+id/activity_bulk_upload_master_errors_ll"
+        android:layout_width="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_master_errors_heading"
+        >
+
+    </LinearLayout>
+
 
 </android.support.constraint.ConstraintLayout>

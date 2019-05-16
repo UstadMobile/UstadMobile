@@ -59,6 +59,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
     private EntityRoleDao entityRoleDao;
     private PersonCustomFieldDao personFieldDao;
     private PersonCustomFieldValueDao personCustomFieldValueDao;
+
+    private boolean thereWasAnError = false;
+
     BulkUploadLine bulkLine;
 
     public BulkUploadMasterPresenter(Object context, Hashtable arguments,
@@ -120,7 +123,17 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
         if(currentPosition >= lines.size()){
             //If at the end of the line, finish the activity.
-            view.finish();
+            if(view.getAllErrors().size()>0){
+                //Don't finish activity yet. Remain to show errors.
+                if(thereWasAnError){
+                    view.setErrorHeading(MessageID.please_review_errors);
+                }else{
+                    view.setErrorHeading(MessageID.please_review_warnings);
+                }
+
+            }else {
+                view.finish();
+            }
         }else {
             //Get the line and Start processing it.
             parseLine(lines.get(currentPosition));
@@ -138,19 +151,9 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
      * @param line  The bulk upload line
      */
     private void parseLine(String line){
-        System.out.println("Processing line of length: " + line.length());
-
         bulkLine.setLine(line);
-
-        //1. Location
-        //2. Clazz
-        //3. Teacher
-        //4. Student
-
         processLocations(bulkLine);
-
     }
-
 
     /**
      * Process the 4 levels of locations in the bulk upload line.
@@ -193,7 +196,11 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                     locationGovernorate.setLocationUid(location1s.get(0).getLocationUid());
                     move = true;
                 }else{
-                    System.out.println("ERROR: Location: 1st level: More than 1 with the same title");
+                    view.addError("WARNING: More than one instances of " + locationGovernorateTitle +
+                                    " location. Please delete duplicate Locations.",
+                            false);
+                    locationGovernorate.setLocationUid(location1s.get(0).getLocationUid());
+                    move = true;
                 }
 
                 if(move) {
@@ -209,7 +216,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         //Location already exists. Getting uid.
                         locationDistrict.setLocationUid(location2s.get(0).getLocationUid());
                     }else{
-                        System.out.println("ERROR: Location: 2nd level: More than 1 with the same title");
+                        view.addError("WARNING: More than one instances of " + locationDistrictTitle +
+                                        " location. Please delete duplicate Locations.",
+                                false);
+                        move2 = true;
+                        //Location already exists. Getting uid.
+                        locationDistrict.setLocationUid(location2s.get(0).getLocationUid());
+
                     }
 
                     if(move2){
@@ -223,8 +236,11 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             move3 = true;
                             locationTown.setLocationUid(location3s.get(0).getLocationUid());
                         }else{
-                            System.out.println("ERROR: Location: 3rd level: More than 1" +
-                                    " with the same title");
+                            view.addError("WARNING: More than one instances of " + locationTownTitle +
+                                            " location. Please delete duplicate Locations.",
+                                    false);
+                            move3 = true;
+                            locationTown.setLocationUid(location3s.get(0).getLocationUid());
                         }
 
                         if(move3){
@@ -244,8 +260,11 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                 locationLeaf.setLocationUid(locationLeafs.get(0).getLocationUid());
                                 moveOn = true;
                             }else{
-                                System.out.println("ERROR: Location Leaf: More than " +
-                                        "1 location leaf with the same title");
+                                view.addError("WARNING: More than one instances of " + locationLeafTitle +
+                                                " location. Please delete duplicate Locations.",
+                                        false);
+                                locationLeaf.setLocationUid(locationLeafs.get(0).getLocationUid());
+                                moveOn = true;
                             }
 
                             //Moving forward
@@ -281,7 +300,10 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
             //Add location
             List<Location> clazzLocations = locationDao.findByTitle(clazzLocation);
-            if (clazzLocations.size() == 1) {
+            if (clazzLocations.size() > 0) {
+                if(clazzLocations.size() > 1){
+                    //Maybe we alert user that multi locations ?
+                }
                 //Location exists and is unique
                 Location thisClazzLocation = clazzLocations.get(0);
                 thisClazz.setClazzLocationUid(thisClazzLocation.getLocationUid());
@@ -309,12 +331,14 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
             }else{
                 //Location does not exist.
-                System.out.println("FAIL: LOCATION : " + clazzLocation
-                        + " DOESN'T EXIST");
+                view.addError("ERROR: LOCATION : " + clazzLocation
+                        + " DOESN'T EXIST", true);
+                thereWasAnError = true;
             }
 
         }else if (clazzes.size() > 1){   //Multiple clazzes with that name (ERROR)
-            System.out.println("ERROR : MULTIPLE CLAZZ WITH NAME: " + clazzName);
+            view.addError("ERROR : MULTIPLE CLAZZ WITH NAME: " + clazzName, true);
+            thereWasAnError = true;
         }else{
             thisClazz = clazzes.get(0);
             //Not updating clazz. Moving on
@@ -444,7 +468,8 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             personCustomFieldValueDao.insert(personCustomFieldValue);
 
                         } else {
-                            System.out.println("Unable to create Custom Value");
+                            view.addError("Unable to create Custom Value", true);
+                            thereWasAnError = true;
                         }
 
                     }
@@ -509,11 +534,13 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                     checkClazzMember(thisClazz, bulkLine,
                                             personPersonUid, role);
                                 }else{
-                                    view.showMessage("Something went wrong in clazz entity roles");
+                                    view.addError("Something went wrong in clazz entity roles", true);
+                                    thereWasAnError = true;
                                 }
 
                             }else{
-                                view.showMessage("Something went wrong");
+                                view.addError("Unable to persist EntityRole ", true);
+                                thereWasAnError = true;
                             }
 
                         }else{
@@ -523,7 +550,8 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                         }
 
                     }else{
-                        System.out.println("ERROR: UNABLE TO PERSIST PERSON!");
+                        view.addError("ERROR: UNABLE TO PERSIST PERSON!", true);
+                        thereWasAnError = true;
                     }
                 }
 
@@ -562,7 +590,8 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
 
                 }
             }else{
-                System.out.println("ERROR: UNABLE TO PERSIST CLAZZMEMBER??");
+                view.addError("ERROR: UNABLE TO PERSIST CLAZZMEMBER??", true);
+                thereWasAnError = true;
             }
 
 
@@ -618,23 +647,18 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             checkClazzMember(thisClazz, bulkLine,
                                     personPersonUid, role);
                         }else{
-                            view.showMessage("Something went wrong in clazz entity roles");
+                            view.addError("Something went wrong in clazz entity roles", true);
+                            thereWasAnError = true;
                         }
-
-
                     }else{
-                        view.showMessage("Something went wrong");
+                        view.addError("Unable to persist entity role", true);
+                        thereWasAnError = true;
                     }
-
-
                 }else{
                     //Already created. continue.
                     checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
                 }
-
             }
-
-
         }else{
             checkClazzMember(thisClazz, bulkLine, personPersonUid, role);
         }
@@ -896,7 +920,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             INDEX_ADDRESS = colIndex;
                             break;
                         default:
-                            System.out.println("Custom value for Student " + fieldTC);
                             //Lookup custom field
                             findCustomField(fieldTC, Person.TABLE_ID, colIndex, CUSTOM_FIELD_STUDENT);
                             break;
@@ -921,7 +944,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             INDEX_TEACHER_USERNAME = colIndex;
                             break;
                         default:
-                            System.out.println("Custom value for Teacher " + fieldTC);
                             findCustomField(fieldTC, Person.TABLE_ID, colIndex, CUSTOM_FIELD_TEACHER);
                             break;
 
@@ -937,7 +959,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             break;
                         default:
                             //Find Custom
-                            System.out.println("Custom value for Class " + fieldTC);
                             findCustomField(fieldTC, Clazz.TABLE_ID, colIndex, CUSTOM_FIELD_CLASS);
                             break;
 
@@ -963,21 +984,20 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             break;
                         default:
                             //NO CUSTOM FIELD FOR LOCATION.
-                            //TODO: Log error
-                            System.out.println("Can't find location value: " + fieldTC);
+                            view.addError("Can't find location value: " + fieldTC, true);
+                            thereWasAnError = true;
                             break;
 
                     }
 
                 }//else nothing to process. Error log it ?
                 else{
-                    System.out.println("Error cannot figure what this is: " + everyHeader);
+                    view.addError("Error cannot figure what this is: " + everyHeader, true);
+                    thereWasAnError = true;
                 }
 
                 colIndex++;
             }
-
-            System.out.println("Finished getting headers");
 
         }
 

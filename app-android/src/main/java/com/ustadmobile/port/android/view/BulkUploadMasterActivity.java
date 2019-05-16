@@ -16,12 +16,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BulkUploadMasterPresenter;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BulkUploadMasterView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.util.UmAndroidUriUtil;
@@ -47,13 +50,20 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
     private Button selectFileButton;
     private AppCompatSpinner timeZoneSpinner;
 
+    private LinearLayout errorsLL;
+    private TextView errorHeading;
+
     private static final int FILE_PERMISSION_REQUEST = 400;
 
     private TextView heading;
 
+    private List<String> allErrors;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
+        allErrors = new ArrayList<>();
 
         //Set layout
         setContentView(R.layout.activity_bulk_upload_master);
@@ -87,6 +97,14 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
         //Button
         selectFileButton = findViewById(R.id.activity_bulk_upload_master_upload_button);
         selectFileButton.setOnClickListener(v -> chooseFileFromDevice());
+
+        //Errors and warnings:
+        errorsLL = findViewById(R.id.activity_bulk_upload_master_errors_ll);
+        errorHeading = findViewById(R.id.activity_bulk_upload_master_errors_heading);
+        errorsLL.removeAllViews();
+
+        errorsLL.setVisibility(View.INVISIBLE);
+        errorHeading.setVisibility(View.INVISIBLE);
 
         //Heading TextView
         heading = findViewById(R.id.activity_bulk_upload_select_file_text);
@@ -126,6 +144,38 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
             int value = (line*100/nlines);
             mProgressBar.setProgress(value);
         });
+    }
+
+    @Override
+    public void addError(String message, boolean error) {
+        if(!allErrors.contains(message)) {
+            allErrors.add(message);
+            runOnUiThread(() -> {
+                errorsLL.setVisibility(View.VISIBLE);
+                errorHeading.setVisibility(View.VISIBLE);
+                TextView errorView = new TextView(getApplicationContext());
+                errorView.setText(message);
+                if (error) {
+                    setErrorHeading(MessageID.errors);
+                    errorView.setTextColor(Color.RED);
+                }
+                errorsLL.addView(errorView);
+            });
+        }
+
+    }
+
+    @Override
+    public void addError(String message) {
+        addError(message, false);
+    }
+
+    @Override
+    public void setErrorHeading(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String message = impl.getString(messageId, getContext());
+        runOnUiThread(() -> errorHeading.setText(message));
+
     }
 
     @Override
@@ -247,6 +297,11 @@ public class BulkUploadMasterActivity extends UstadBaseActivity implements BulkU
                     break;
             }
         }
+    }
+
+    @Override
+    public List<String> getAllErrors() {
+        return allErrors;
     }
 
 }

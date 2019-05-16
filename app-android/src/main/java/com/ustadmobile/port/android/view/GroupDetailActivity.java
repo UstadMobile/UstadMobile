@@ -91,7 +91,7 @@ public class GroupDetailActivity extends UstadBaseActivity implements GroupDetai
         });
 
         ConstraintLayout addPersonCL = findViewById(R.id.activity_group_detail_add_cl);
-        addPersonCL.setOnClickListener(v -> mPresenter.handleClickAddStudent());
+        addPersonCL.setOnClickListener(v -> mPresenter.handleClickAddMember());
         //Call the Presenter
         mPresenter = new GroupDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);

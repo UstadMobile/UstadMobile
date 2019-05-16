@@ -60,7 +60,7 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     TextInputLayout classNameTIP;
     TextInputLayout classDescTIP;
     Button addScheduleButton;
-    Spinner holidaySpinner;
+    Spinner holidaySpinner, locationSpinner;
 
     TextView featuresTextView;
 
@@ -150,7 +150,18 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         holidaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setHolidaySelected(id);
+                setHolidaySelected(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        locationSpinner = findViewById(R.id.activity_clazz_edit_location_spinner);
+        locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setLocationSelected(position);
             }
 
             @Override
@@ -285,13 +296,27 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         holidaySpinner.setSelection(position);
     }
 
+    @Override
+    public void setLocationPresets(String[] presets, int position) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
+                R.layout.item_simple_spinner, presets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        locationSpinner.setAdapter(adapter);
+        locationSpinner.setSelection(position);
+    }
+
     /**
      * Handles holiday selected
-     * @param id    The id/position of the DateRange selected from the spinner.
+     * @param position    The id/position of the DateRange selected from the spinner.
      */
     @Override
-    public void setHolidaySelected(long id) {
-        mPresenter.updateHoliday(id);
+    public void setHolidaySelected(int position) {
+        mPresenter.updateHoliday(position);
+    }
+
+    @Override
+    public void setLocationSelected(int position){
+        mPresenter.updateLocation(position);
     }
 
     public static int dpToPx(int dp) {

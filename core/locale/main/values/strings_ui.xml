@@ -704,5 +704,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
 
     <string name='next'>Next</string>
     <string name='back'>Back</string>
+    <string name="errors">Errors</string>
+    <string name="please_review_errors">Please review errors below</string>
+    <string name="please_review_warnings">Bulk upload done. Please review warnings below.</string>
 
 </resources>

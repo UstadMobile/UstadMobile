@@ -49,8 +49,11 @@ public class ClazzEditPresenter
     private Clazz mOriginalClazz;
     private Clazz mUpdatedClazz;
 
+    private long tempClazzLocationUid;
+
     private UmProvider<Schedule> clazzScheduleLiveData;
     private UmLiveData<List<UMCalendar>> holidaysLiveData;
+    private UmLiveData<List<Location>> locationsLiveData;
 
     private long loggedInPersonUid = 0L;
 
@@ -61,6 +64,12 @@ public class ClazzEditPresenter
     private CustomFieldDao customFieldDao;
     private CustomFieldValueDao customFieldValueDao;
     private CustomFieldValueOptionDao customFieldValueOptionDao;
+
+    HashMap<Long, Integer> holidayCalendarUidToPosition;
+    HashMap<Integer, Long> positionToHolidayCalendarUid;
+
+    HashMap<Long, Integer> locationUidToPosition;
+    HashMap<Integer, Long> positionToLocationUid;
 
     public ClazzEditPresenter(Object context, Hashtable arguments, ClazzEditView view) {
         super(context, arguments, view);
@@ -132,15 +141,11 @@ public class ClazzEditPresenter
                                             public void onFailure(Throwable exception) {
                                                 exception.printStackTrace();}
                                         });
-
                                 }
-
                             }
 
                             @Override
-                            public void onFailure(Throwable exception) {
-
-                            }
+                            public void onFailure(Throwable exception) {exception.printStackTrace();}
                         });
                 }
             }
@@ -170,10 +175,13 @@ public class ClazzEditPresenter
             currentClazzUid = (long) getArguments().get(ARG_CLAZZ_UID);
             initFromClazz(currentClazzUid);
         }else if(getArguments().containsKey(ClazzEditView.ARG_NEW)){
-            repository.getLocationDao().insertAsync(new Location("Clazz Location",
-                    "Clazz Location", TimeZone.getDefault().getID()), new UmCallback<Long>() {
+            repository.getLocationDao().insertAsync(new Location("Temp Location",
+                    "Temp location",
+                    TimeZone.getDefault().getID()), new UmCallback<Long>() {
                 @Override
                 public void onSuccess(Long newLocationUid) {
+
+                    tempClazzLocationUid = newLocationUid;
 
                     clazzDao.insertAsync(new Clazz("", newLocationUid),
                             new UmCallback<Long>() {
@@ -211,9 +219,16 @@ public class ClazzEditPresenter
                 mUpdatedClazz = result;
                 currentClazzUid = mUpdatedClazz.getClazzUid();
                 view.runOnUiThread(() -> view.updateClazzEditView(result));
+
+                //Holidays
                 holidaysLiveData = repository.getUMCalendarDao().findAllHolidaysLiveData();
                 holidaysLiveData.observe(ClazzEditPresenter.this,
                         ClazzEditPresenter.this::handleAllHolidaysChanged);
+
+                //Locations
+                locationsLiveData = repository.getLocationDao().findAllActiveLocationsLive();
+                locationsLiveData.observe(ClazzEditPresenter.this,
+                        ClazzEditPresenter.this::handleAllLocationsChanged);
 
                 getAllClazzCustomFields();
 
@@ -249,13 +264,15 @@ public class ClazzEditPresenter
     private void handleAllHolidaysChanged(List<UMCalendar> umCalendar) {
         int selectedPosition = 0;
 
-        HashMap<Long, Integer> holidayCalendarUidToPosition = new HashMap<>();
+        holidayCalendarUidToPosition = new HashMap<>();
+        positionToHolidayCalendarUid = new HashMap<>();
 
         ArrayList<String> holidayList = new ArrayList<>();
         int pos = 0;
         for(UMCalendar ec : umCalendar){
             holidayList.add(ec.getUmCalendarName());
             holidayCalendarUidToPosition.put(ec.getUmCalendarUid(), pos);
+            positionToHolidayCalendarUid.put(pos, ec.getUmCalendarUid());
             pos++;
         }
         String[] holidayPreset = new String[holidayList.size()];
@@ -265,13 +282,48 @@ public class ClazzEditPresenter
             mOriginalClazz = new Clazz();
         }
 
-        //TODOne: Changed this.
         if(mOriginalClazz.getClazzHolidayUMCalendarUid() != 0){
-            selectedPosition = holidayCalendarUidToPosition.get(
+            if(holidayCalendarUidToPosition.containsKey(
+                    mOriginalClazz.getClazzHolidayUMCalendarUid()))
+                selectedPosition = holidayCalendarUidToPosition.get(
                     mOriginalClazz.getClazzHolidayUMCalendarUid());
         }
 
         view.setHolidayPresets(holidayPreset, selectedPosition);
+    }
+
+    /**
+     *
+     *
+     * @param locations The list of Locations available.
+     */
+    private void handleAllLocationsChanged(List<Location> locations) {
+        int selectedPosition = 0;
+
+        locationUidToPosition = new HashMap<>();
+        positionToLocationUid = new HashMap<>();
+
+        ArrayList<String> locationList = new ArrayList<>();
+        int pos = 0;
+        for(Location el : locations){
+            locationList.add(el.getTitle());
+            locationUidToPosition.put(el.getLocationUid(), pos);
+            positionToLocationUid.put(pos, el.getLocationUid());
+            pos++;
+        }
+        String[] locationPreset = new String[locationList.size()];
+        locationPreset = locationList.toArray(locationPreset);
+
+        if(mOriginalClazz == null){
+            mOriginalClazz = new Clazz();
+        }
+
+        if(mOriginalClazz.getClazzLocationUid() != 0){
+            if(locationUidToPosition.containsKey(mOriginalClazz.getClazzLocationUid()))
+                selectedPosition = locationUidToPosition.get(mOriginalClazz.getClazzLocationUid());
+        }
+
+        view.setLocationPresets(locationPreset, selectedPosition);
     }
 
     public void updateFeatures(Clazz clazz){
@@ -302,8 +354,18 @@ public class ClazzEditPresenter
      *
      * @param position The position of the DateRange Calendars from the DateRange drop down preset.
      */
-    public void updateHoliday(long position){
-        mUpdatedClazz.setClazzHolidayUMCalendarUid(position);
+    public void updateHoliday(int position){
+        if(positionToHolidayCalendarUid!=null&&positionToHolidayCalendarUid.containsKey(position)) {
+            long holidayCalendarUid = positionToHolidayCalendarUid.get(position);
+            mUpdatedClazz.setClazzHolidayUMCalendarUid(holidayCalendarUid);
+        }
+    }
+
+    public void updateLocation(int position){
+        if(positionToLocationUid != null && positionToLocationUid.containsKey(position)) {
+            long locationUid = positionToLocationUid.get(position);
+            mUpdatedClazz.setClazzLocationUid(locationUid);
+        }
     }
 
     /**
@@ -358,7 +420,8 @@ public class ClazzEditPresenter
                         CustomFieldValue customFieldValue;
                         if(result == null){
                             customFieldValue = new CustomFieldValue();
-                            customFieldValue.setCustomFieldValueEntityUid(mUpdatedClazz.getClazzUid());
+                            customFieldValue.setCustomFieldValueEntityUid(
+                                    mUpdatedClazz.getClazzUid());
                             customFieldValue.setCustomFieldValueFieldUid(customFieldUid);
                             customFieldValue.setCustomFieldValueValue(valueString);
                             customFieldValueDao.insert(customFieldValue);
@@ -377,13 +440,9 @@ public class ClazzEditPresenter
             }
             else if(type == CustomField.FIELD_TYPE_DROPDOWN){
                 int spinnerSelection = (int)value;
+                //TODO: Check if we need to do this.
             }
-
-
-
         }
-
-
     }
 
     /**
@@ -394,17 +453,22 @@ public class ClazzEditPresenter
      */
     public void handleClickDone() {
         mUpdatedClazz.setClazzActive(true);
-        repository.getLocationDao().findByUidAsync(mUpdatedClazz.getClazzLocationUid(), new UmCallback<Location>() {
+        repository.getLocationDao().findByUidAsync(mUpdatedClazz.getClazzLocationUid(),
+                new UmCallback<Location>() {
             @Override
             public void onSuccess(Location result) {
-                result.setTitle(mUpdatedClazz.getClazzName() + "'s default location");
-                result.setLocationActive(true);
-                repository.getLocationDao().update(result);
+                if(result.getLocationUid() == tempClazzLocationUid) {
+                    result.setTitle(mUpdatedClazz.getClazzName() + "'s default location");
+                    result.setLocationActive(true);
+                    repository.getLocationDao().update(result);
+                }
             }
 
             @Override
             public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
+
+
         clazzDao.updateClazzAsync(mUpdatedClazz, loggedInPersonUid, new UmCallback<Integer>(){
             @Override
             public void onSuccess(Integer result) {

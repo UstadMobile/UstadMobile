@@ -131,7 +131,7 @@ public class GroupDetailPresenter extends UstadBaseController<GroupDetailView> {
 
     }
 
-    public void handleClickAddStudent(){
+    public void handleClickAddMember(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
         args.put(GROUP_UID, currentGroupUid);

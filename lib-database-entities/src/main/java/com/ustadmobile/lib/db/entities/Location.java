@@ -55,7 +55,7 @@ public class Location {
         this.title = title;
         this.locationDesc = description;
         this.timeZone = timeZone;
-        this.locationActive = true;
+        this.locationActive = false;
     }
 
 

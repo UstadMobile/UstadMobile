@@ -35,12 +35,15 @@ public interface ClazzEditView extends UstadView {
     void updateClazzEditView(Clazz updatedClazz );
 
     void setHolidayPresets(String[] presets, int position);
+    void setLocationPresets(String[] presets, int position);
 
     /**
      * Handles holiday selected
-     * @param id    The id/position of the DateRange selected from the drop-down.
+     * @param position    The id/position of the DateRange selected from the drop-down.
      */
-    void setHolidaySelected(long id);
+    void setHolidaySelected(int position);
+
+    void setLocationSelected(int position);
 
 
     void addCustomFieldText(CustomField label, String value);

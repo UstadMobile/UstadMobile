@@ -110,7 +110,6 @@ public class ReportNumberOfDaysClassesOpenActivity extends UstadBaseActivity
             return prettyDate;
         });
 
-
         barChart.setTouchEnabled(false);
     }
 

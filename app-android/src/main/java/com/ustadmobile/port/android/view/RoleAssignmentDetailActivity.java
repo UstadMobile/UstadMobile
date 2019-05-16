@@ -8,8 +8,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RoleAssignmentDetailPresenter;
@@ -33,6 +35,8 @@ public class RoleAssignmentDetailActivity extends UstadBaseActivity implements R
     private RoleAssignmentDetailPresenter mPresenter;
     private RecyclerView mRecyclerView;
     private RadioGroup assignmentTypeRadioGroup;
+    private RadioButton individualRB, groupRB;
+    private TextView groupName;
     private Spinner groupSpinner, roleSpinner, scopeSpinner, assigneeSpinner;
 
 
@@ -54,6 +58,35 @@ public class RoleAssignmentDetailActivity extends UstadBaseActivity implements R
     }
 
     @Override
+    public void individualClicked(){
+        runOnUiThread(() -> {
+            individualRB.setChecked(true);
+            groupRB.setChecked(false);
+        });
+    }
+
+    @Override
+    public void groupClicked(){
+        runOnUiThread(() -> {
+            individualRB.setChecked(true);
+            groupRB.setChecked(false);
+        });
+
+    }
+
+    @Override
+    public void updateGroupName(boolean individual) {
+        runOnUiThread(() -> {
+            if(individual){
+                groupName.setText(R.string.person);
+            }else{
+                groupName.setText(R.string.role_group);
+            }
+        });
+
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -67,10 +100,24 @@ public class RoleAssignmentDetailActivity extends UstadBaseActivity implements R
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         assignmentTypeRadioGroup = findViewById(R.id.activity_role_assignment_detail_radio_options);
+        groupName = findViewById(R.id.activity_role_assignment_group);
         groupSpinner = findViewById(R.id.activity_role_assignment_group_spinner);
         roleSpinner = findViewById(R.id.activity_role_assignment_role_spinner);
         scopeSpinner = findViewById(R.id.activity_role_assignment_scope_spinner);
         assigneeSpinner = findViewById(R.id.activity_role_assignment_assignee_spinner);
+        individualRB = findViewById(R.id.activity_role_assignment_detail_user_option);
+        groupRB = findViewById(R.id.activity_role_assignment_detail_group_option);
+
+        //Update heading:
+        assignmentTypeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if(checkedId == R.id.activity_role_assignment_detail_user_option){
+                updateGroupName(true);
+                mPresenter.updateGroupList(true);
+            }else if(checkedId == R.id.activity_role_assignment_detail_group_option){
+                updateGroupName(false);
+                mPresenter.updateGroupList(false);
+            }
+        });
 
 
         //Call the Presenter

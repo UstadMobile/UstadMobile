@@ -155,6 +155,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentSortNameAsc();
 
 
+    //Testing for now:
     @UmQuery("SELECT Person.* , (0) AS clazzUid, " +
             " (0) AS attendancePercentage, " +
             " (0) AS clazzMemberRole, " +
@@ -163,7 +164,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             " DESC LIMIT 1) AS personPictureUid, " +
             " CASE WHEN EXISTS " +
             " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid) " +
+            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND PersonGroupMember.groupMemberActive = 1) " +
             "   THEN 1 " +
             "   ELSE 0 " +
             " END AS enrolled " +
@@ -536,10 +537,12 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
     }
 
     /**
-     * Crate person
+     * Insert the person given and create a PersonGroup for it and set it to individual.
+     * Note: this does not check if the person exists. The given person must not exist.
      *
-     * @param person
-     * @param callback
+     * @param person    The person object to persist. Must not already exist.
+     * @param callback  The callback that returns PersonWithGroup pojo object - basically
+     *                  Person Uids and PersonGroup Uids
      */
     public void createPersonWithGroupAsync(Person person, UmCallback<PersonWithGroup> callback){
         insertAsync(person, new UmCallback<Long>() {
@@ -549,8 +552,9 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
                 PersonGroup personGroup = new PersonGroup();
                 personGroup.setGroupName(person.getFirstNames()!= null?
-                        person.getFirstNames() + "'s group":
-                        "Person group");
+                        person.getFirstNames() + "'s individual group":
+                        "Person individual group");
+                personGroup.setGroupPersonUid(personUid);
                 insertPersonGroup(personGroup, new UmCallback<Long>() {
                     @Override
                     public void onSuccess(Long personGroupUid) {

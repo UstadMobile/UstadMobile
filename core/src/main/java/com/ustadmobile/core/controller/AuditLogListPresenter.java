@@ -3,10 +3,15 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.AuditLogDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AuditLogListView;
 import com.ustadmobile.lib.db.entities.AuditLog;
 import com.ustadmobile.lib.db.entities.AuditLogWithNames;
+import com.ustadmobile.lib.db.entities.Clazz;
+import com.ustadmobile.lib.db.entities.Person;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -34,7 +39,6 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
     private List<Long> clazzesList;
     private List<Long> peopleList;
     private List<Long> actorList;
-
 
 
     public AuditLogListPresenter(Object context, Hashtable arguments, AuditLogListView view) {
@@ -88,8 +92,54 @@ public class AuditLogListPresenter extends UstadBaseController<AuditLogListView>
 
     }
 
+    public void dataToCSV(){
 
-    public void handleClickDone() {
-        view.finish();
+        //Get all as list
+        List<String[]> data = new ArrayList<>();
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        String changedString= impl.getString(MessageID.changed,context);
+        String clazzType = impl.getString(MessageID.clazz,context);
+        String personType = impl.getString(MessageID.person,context);
+
+        providerDao.findAllAuditLogsWithNameFilterList(fromDate, toDate, locationList,
+            clazzesList, peopleList, actorList, new UmCallback<List<AuditLogWithNames>>() {
+            @Override
+            public void onSuccess(List<AuditLogWithNames> result) {
+                for(AuditLogWithNames entity : result){
+                    //"Actor changed Entity Type Entity Name at Time"
+                    String entityType = "";
+                    String entityName = "";
+                    switch(entity.getAuditLogTableUid()){
+                        case Clazz.TABLE_ID:
+                            entityType = clazzType;
+                            entityName = entity.getClazzName();
+                            break;
+                        case Person.TABLE_ID:
+                            entityType = personType;
+                            entityName = entity.getPersonName();
+                            break;
+                        default:
+                            break;
+                    }
+                    String logString = entity.getActorName() + " " + changedString + " " +
+                            entityType + " " + entityName;
+                    String[] a ={logString};
+                    data.add(a);
+
+                }
+                view.generateCSVReport(data);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
+
+
     }
+
 }

@@ -45,4 +45,11 @@ public interface BulkUploadMasterView extends UstadView{
      */
     void updateProgressValue(int line, int nlines);
 
+    void addError(String message, boolean error);
+
+    void addError(String message);
+
+    void setErrorHeading(int messageId);
+
+    public List<String> getAllErrors();
 }

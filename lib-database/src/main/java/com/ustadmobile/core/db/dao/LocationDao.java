@@ -35,6 +35,9 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     @UmInsert
     public abstract long insertAuditLog(AuditLog entity);
 
+    @UmQuery("SELECT * FROM Location WHERE locationActive = 1")
+    public abstract UmLiveData<List<Location>> findAllActiveLocationsLive();
+
     public  void createAuditLog(long toPersonUid, long fromPersonUid){
         AuditLog auditLog = new AuditLog(fromPersonUid, Location.TABLE_ID, toPersonUid);
 

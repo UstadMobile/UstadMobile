@@ -54,6 +54,7 @@ public class PersonWithEnrollmentRecyclerAdapter
     private CommonHandlerPresenter mPresenter;
     private boolean showAttendance;
     private boolean showEnrollment;
+    private boolean groupEnrollment = false;
 
     private boolean showAddStudent = false;
     private boolean showAddTeacher = false;
@@ -80,6 +81,19 @@ public class PersonWithEnrollmentRecyclerAdapter
         ClazzLogDetailViewHolder(View itemView){
             super(itemView);
         }
+    }
+
+    PersonWithEnrollmentRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<PersonWithEnrollment> diffCallback, Context context,
+            Activity activity, CommonHandlerPresenter presenter, boolean attendance,
+            boolean enrollment, boolean enrollToGroup){
+        super(diffCallback);
+        theContext = context;
+        theActivity = activity;
+        mPresenter = presenter;
+        showAttendance = attendance;
+        showEnrollment = enrollment;
+        groupEnrollment = enrollToGroup;
     }
 
     PersonWithEnrollmentRecyclerAdapter(
@@ -257,6 +271,11 @@ public class PersonWithEnrollmentRecyclerAdapter
 
         CheckBox checkBox =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_student_checkbox);
+        if(groupEnrollment){
+            checkBox.setText(R.string.enroll_group_member);
+        }else{
+            checkBox.setText(R.string.enroll_in_class);
+        }
         ImageView callImageView =
                 holder.itemView.findViewById(R.id.item_studentlist_student_simple_call_iv);
 
