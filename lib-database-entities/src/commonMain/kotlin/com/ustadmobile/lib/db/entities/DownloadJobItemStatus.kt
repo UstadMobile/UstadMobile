@@ -20,7 +20,7 @@ class DownloadJobItemStatus {
 
     var totalBytes: Long = 0
 
-    var status: Byte = 0
+    var status: Int = 0
 
     @field:Transient
     var children: MutableList<DownloadJobItemStatus>? = null
