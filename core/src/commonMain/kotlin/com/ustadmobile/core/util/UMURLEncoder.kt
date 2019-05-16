@@ -1,8 +1,6 @@
 package com.ustadmobile.core.util
 
-import kotlin.jvm.JvmStatic
-
-expect class URLEncoder {
+expect class UMURLEncoder {
 
    companion object{
        /**

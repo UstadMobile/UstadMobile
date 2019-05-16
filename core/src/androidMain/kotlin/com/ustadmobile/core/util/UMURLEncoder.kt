@@ -1,19 +1,19 @@
 package com.ustadmobile.core.util
 
-actual class URLEncoder {
+actual class UMURLEncoder {
     actual companion object {
         /**
          * Encode url string
          */
         actual fun encodeUTF8(text: String?): String {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("not implemented")
         }
 
         /**
          * Decode url string
          */
         actual fun decodeUTF8(text: String?): String {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("not implemented")
         }
 
     }

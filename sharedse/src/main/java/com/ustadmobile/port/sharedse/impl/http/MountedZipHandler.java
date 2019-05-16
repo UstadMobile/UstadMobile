@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.URLEncoder;
+import com.ustadmobile.core.util.UMURLEncoder;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -199,7 +199,7 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
 
     private void appendEntryLinksToBuffer(List<String> entries, StringBuffer buffer) {
         for(String entry : entries) {
-            buffer.append("<li><a href=\"").append(URLEncoder.encodeUTF8(entry))
+            buffer.append("<li><a href=\"").append(UMURLEncoder.encodeUTF8(entry))
                     .append("</a></li>\n");
         }
     }

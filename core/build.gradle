@@ -114,6 +114,7 @@ kotlin {
                 implementation project(":lib-util")
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
+                implementation "com.github.aakira:napier:$version_napier"
                 //implementation project(':lib-database')
                 /*  compileOnly project(':lib-database-entities')
                   compileOnly project(':core-compile-only')
@@ -178,6 +179,7 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-js:$version_klock"
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
 
