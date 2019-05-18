@@ -88,5 +88,6 @@ sourceCompatibility = "8"
 targetCompatibility = "8"
 
 dependencies {
-    kapt "androidx.room:room-compiler:2.1.0-beta01"
+    //kapt "androidx.room:room-compiler:2.1.0-beta01"
+    kapt project(":lib-database-annotation-processor")
 }

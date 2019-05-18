@@ -56,6 +56,12 @@ the jndi-config directory for tests).
 
 ## Debugging the annotation processor using IntelliJ
 
+### Using kapt
+
+```
+./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5005\,server=y\,suspend=n" lib-database-annotation-processor:compileTestJava
+```
+
 In gradle.properties, uncomment the lines:
 ```
 #org.gradle.daemon=true

@@ -6,7 +6,7 @@ import javax.sql.DataSource
 
 actual abstract class DoorDatabase {
 
-    private var dataSource: DataSource? = null
+    protected lateinit var dataSource: DataSource
 
     var jdbcDbType: Int = -1
 
@@ -33,7 +33,7 @@ actual abstract class DoorDatabase {
         var dbConnection = null as Connection?
         try{
             dbConnection = openConnection()
-            jdbcDbType = DoorDbType.typeIntFromProductName(dbConnection?.metaData?.databaseProductName ?: "")
+            jdbcDbType = DoorDbType.typeIntFromProductName(dbConnection.metaData?.databaseProductName ?: "")
             arraySupported = jdbcDbType == DoorDbType.POSTGRES
         }finally {
             dbConnection?.close()
@@ -41,7 +41,7 @@ actual abstract class DoorDatabase {
     }
 
 
-    fun openConnection() = dataSource?.connection
+    fun openConnection() = dataSource.connection
 
     abstract fun createAllTables()
 
