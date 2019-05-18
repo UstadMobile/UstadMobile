@@ -29,7 +29,7 @@ actual abstract class DoorDatabase {
         setupFromDataSource()
     }
 
-    private fun setupFromDataSource() {
+    protected fun setupFromDataSource() {
         var dbConnection = null as Connection?
         try{
             dbConnection = openConnection()

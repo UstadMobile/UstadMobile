@@ -104,8 +104,6 @@ dependencies {
     //Test implementation of Postgres
     testImplementation "org.postgresql:postgresql:$version_postgres_jdbc"
 
-
-    //testAnnotationProcessor project(':lib-database-annotation-processor')
     kaptTest project(":lib-database-annotation-processor")
 }
 

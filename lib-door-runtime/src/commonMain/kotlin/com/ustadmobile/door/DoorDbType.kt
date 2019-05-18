@@ -14,7 +14,7 @@ class DoorDbType {
 
         @JvmStatic
         val PRODUCT_NAME_MAP = mapOf("POSTGRES" to SQLITE,
-                "SQLITE" to SQLITE);
+                "SQLite" to SQLITE);
 
         fun typeIntFromProductName(productName: String) = PRODUCT_NAME_MAP[productName] ?: -1
 

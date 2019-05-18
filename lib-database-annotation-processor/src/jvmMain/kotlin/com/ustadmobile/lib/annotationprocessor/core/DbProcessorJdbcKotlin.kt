@@ -15,14 +15,19 @@ import javax.lang.model.element.*
 import javax.lang.model.type.*
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
+import com.ustadmobile.door.EntityInsertionAdapter
 import java.sql.Statement
-import java.util.ArrayList
 import javax.sql.DataSource
-import javax.tools.Diagnostic
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import java.sql.PreparedStatement
+import javax.lang.model.element.TypeElement
+import javax.lang.model.type.TypeKind
+import javax.lang.model.type.TypeMirror
+
+
 
 fun isList(type: TypeMirror, processingEnv: ProcessingEnvironment): Boolean =
-        processingEnv.typeUtils.isAssignable(type, processingEnv.elementUtils.getTypeElement("java.lang.List").asType())
+        type.kind == TypeKind.DECLARED && (processingEnv.typeUtils.asElement(type) as TypeElement).qualifiedName.toString() == "java.util.List"
 
 
 fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment) : TypeMirror {
@@ -117,6 +122,59 @@ fun getFieldSqlType(fieldEl: VariableElement, processingEnv: ProcessingEnvironme
 }
 
 
+fun overrideAndConvertToKotlin(method: ExecutableElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment): FunSpec.Builder {
+
+    val funSpec = FunSpec.builder(method.simpleName.toString())
+            .addModifiers(KModifier.OVERRIDE)
+    val resolvedExecutableType = processingEnv.typeUtils.asMemberOf(enclosing, method) as ExecutableType
+    for(i in 0 until method.parameters.size) {
+        if(isList(resolvedExecutableType.parameterTypes[i], processingEnv)) {
+            val paramType = (resolvedExecutableType.parameterTypes[i] as DeclaredType).typeArguments[0]
+            funSpec.addParameter(method.parameters[i].simpleName.toString(), List::class.asClassName()
+                    .parameterizedBy(paramType.asTypeName()))
+        }else {
+            funSpec.addParameter(method.parameters[i].simpleName.toString(),
+                    resolvedExecutableType.parameterTypes[0].asTypeName())
+        }
+    }
+
+    funSpec.returns(resolvedExecutableType.returnType.asTypeName())
+
+    return funSpec
+
+}
+
+private fun getPreparedStatementSetterGetterTypeName(variableType: TypeMirror, processingEnv: ProcessingEnvironment): String? {
+    if (variableType.kind == TypeKind.BYTE) {
+        return "Byte"
+    } else if (variableType.kind == TypeKind.INT) {
+        return "Int"
+    } else if (variableType.kind == TypeKind.LONG) {
+        return "Long"
+    } else if (variableType.kind == TypeKind.FLOAT) {
+        return "Float"
+    } else if (variableType.kind == TypeKind.DOUBLE) {
+        return "Double"
+    } else if (variableType.kind == TypeKind.BOOLEAN) {
+        return "Boolean"
+    } else if (variableType.kind == TypeKind.DECLARED) {
+        val className = (processingEnv.getTypeUtils().asElement(variableType) as TypeElement)
+                .qualifiedName.toString()
+        when (className) {
+            "java.sql.Array" -> return "Array"
+            "java.lang.String" -> return "String"
+            "java.lang.Integer" -> return "Int"
+            "java.lang.Long" -> return "Long"
+            "java.lang.Float" -> return "Float"
+            "java.lang.Double" -> return "Double"
+            "java.lang.Boolean" -> return "Boolean"
+        }
+    }
+
+    return null
+}
+
+
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedOptions(OPTION_OUTPUT_DIR)
@@ -154,10 +212,24 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
     fun generateDaoImplClass(daoTypeElement: TypeElement): FileSpec {
         val daoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT")
+        daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
         val daoImpl = TypeSpec.classBuilder("${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT")
                 .primaryConstructor(FunSpec.constructorBuilder().addParameter("_db",
                         DoorDatabase::class).build())
+                .addProperty(PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
                 .superclass(daoTypeElement.asClassName())
+
+        for(daoSubEl in daoTypeElement.enclosedElements) {
+            if(daoSubEl.kind != ElementKind.METHOD)
+                continue
+
+            val daoMethod = daoSubEl as ExecutableElement
+            if(daoMethod.getAnnotation(Insert::class.java) != null) {
+                daoImpl.addFunction(generateInsertFun(daoTypeElement, daoMethod, daoImpl))
+            }
+        }
+
+
 
         daoImplFile.addType(daoImpl.build())
         return daoImplFile.build()
@@ -173,7 +245,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .superclass(dbTypeElement.asClassName())
                 .addFunction(FunSpec.constructorBuilder()
                         .addParameter("dataSource", DataSource::class)
-                        .addCode("this.dataSource = dataSource").build())
+                        .addCode("this.dataSource = dataSource\n")
+                        .addCode("setupFromDataSource()\n").build())
         dbImplType.addFunction(generateCreateTablesFun(dbTypeElement))
         dbImplType.addFunction(generateClearAllTablesFun(dbTypeElement))
 
@@ -292,14 +365,59 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
     }
 
 
-    fun generateInsertFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement): FunSpec {
-        val insertFun = FunSpec.overriding(daoMethod, daoTypeElement.asType() as DeclaredType,
-                processingEnv.typeUtils)
+    fun generateInsertFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder): FunSpec {
+        val insertFun = overrideAndConvertToKotlin(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+
+        val entityType = entityTypeFromFirstParam(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+        val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
+
+        val fieldNames = mutableListOf<String>()
+        val parameterHolders = mutableListOf<String>()
+
+        val bindCodeBlock = CodeBlock.builder().add("var _fieldIndex = 1\n")
+
+        for(subEl in entityTypeEl.enclosedElements) {
+            if(subEl.kind != ElementKind.FIELD)
+                continue
+
+            fieldNames.add(subEl.simpleName.toString())
+            val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
+            if(pkAnnotation != null && pkAnnotation.autoGenerate) {
+                parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
+                bindCodeBlock.add("when(entity.${subEl.simpleName}){ 0L -> stmt.setObject(_fieldIndex++, null) else -> stmt.setLong(_fieldIndex++, entity.${subEl.simpleName})  }\n")
+            }else {
+                parameterHolders.add("?")
+                bindCodeBlock.add("stmt.set${getPreparedStatementSetterGetterTypeName(subEl.asType(),
+                        processingEnv)}(_fieldIndex++, entity.${subEl.simpleName})\n")
+            }
+        }
 
 
 
+        val sql = """INSERT INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()}) VALUES (${parameterHolders.joinToString()}) """
+        println(sql)
+
+        val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
+                .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
+                .addSuperclassConstructorParameter("_db.jdbcDbType")
+                .addFunction(FunSpec.builder("makeSql")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addCode("return \"\"\"%L\"\"\"", sql).build())
+                .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addParameter("stmt", PreparedStatement::class)
+                        .addParameter("entity", entityType.asTypeName())
+                        .addCode(bindCodeBlock.build()).build())
+
+        daoTypeBuilder.addProperty(PropertySpec.builder("_insertAdapter",
+                EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
+                .initializer("%L", insertAdapterSpec.build())
+                .build())
 
 
+        insertFun.addCode("_insertAdapter.insertList(${daoMethod.parameters[0].simpleName}, _db.openConnection(), _db.jdbcDbType)\n")
         return insertFun.build()
     }
 

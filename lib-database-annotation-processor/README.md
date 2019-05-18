@@ -59,13 +59,7 @@ the jndi-config directory for tests).
 ### Using kapt
 
 ```
-./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5005\,server=y\,suspend=n" lib-database-annotation-processor:compileTestJava
-```
-
-In gradle.properties, uncomment the lines:
-```
-#org.gradle.daemon=true
-#org.gradle.jvmargs=-Xmx3072m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006
+./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5006\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:jvmTest
 ```
 
 In IntelliJ select Run, Debug..., Add a remote configuration, and 
