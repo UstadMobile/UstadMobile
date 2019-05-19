@@ -45,6 +45,6 @@ actual abstract class DoorDatabase {
 
     abstract fun createAllTables()
 
-    abstract fun clearAllTables()
+    actual abstract fun clearAllTables()
 
 }
