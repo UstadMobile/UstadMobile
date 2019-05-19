@@ -2,6 +2,7 @@ package db2
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 
 @Dao
 abstract class ExampleDao2 {
@@ -11,5 +12,11 @@ abstract class ExampleDao2 {
 
     @Insert
     abstract fun insertOtherList(entityList: List<ExampleEntity2>)
+
+    @Insert
+    abstract fun insertAndReturn(entityList: List<ExampleEntity2>): List<Long>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replace(entityList: List<ExampleEntity2>)
 
 }

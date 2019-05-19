@@ -14,7 +14,9 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation project(":lib-database-annotations")
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.jetbrains.kotlin:kotlin-reflect:$version_kotlin"
                 implementation project(':lib-database-runtime')
                 implementation project(":lib-door-runtime")
                 implementation project(':lib-database-runtime-jdbc')
@@ -27,7 +29,7 @@ kotlin {
                 implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
                 implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
                 implementation "org.apache.commons:commons-text:$version_apache_commons_text"
-                implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+
 
                 //SQLite dependencies
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"

@@ -1,10 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import android.arch.persistence.room.ColumnInfo
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Insert
-import androidx.room.PrimaryKey
+import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.OPTION_OUTPUT_DIR
 import java.io.File
@@ -23,6 +20,9 @@ import java.sql.PreparedStatement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
+import kotlin.reflect.jvm.internal.impl.name.FqName
+import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
+
 
 
 
@@ -121,6 +121,18 @@ fun getFieldSqlType(fieldEl: VariableElement, processingEnv: ProcessingEnvironme
     return "UNKNOWN"
 }
 
+//As per https://github.com/square/kotlinpoet/issues/236
+private fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
+    (rawType.javaToKotlinType() as ClassName).parameterizedBy(
+            *typeArguments.map { it.javaToKotlinType() }.toTypedArray()
+    )
+} else {
+    val className = JavaToKotlinClassMap.INSTANCE
+            .mapJavaToKotlin(FqName(toString()))?.asSingleFqName()?.asString()
+    if (className == null) this
+    else ClassName.bestGuess(className)
+}
+
 
 fun overrideAndConvertToKotlin(method: ExecutableElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment): FunSpec.Builder {
 
@@ -128,20 +140,12 @@ fun overrideAndConvertToKotlin(method: ExecutableElement, enclosing: DeclaredTyp
             .addModifiers(KModifier.OVERRIDE)
     val resolvedExecutableType = processingEnv.typeUtils.asMemberOf(enclosing, method) as ExecutableType
     for(i in 0 until method.parameters.size) {
-        if(isList(resolvedExecutableType.parameterTypes[i], processingEnv)) {
-            val paramType = (resolvedExecutableType.parameterTypes[i] as DeclaredType).typeArguments[0]
-            funSpec.addParameter(method.parameters[i].simpleName.toString(), List::class.asClassName()
-                    .parameterizedBy(paramType.asTypeName()))
-        }else {
-            funSpec.addParameter(method.parameters[i].simpleName.toString(),
-                    resolvedExecutableType.parameterTypes[0].asTypeName())
-        }
+        funSpec.addParameter(method.parameters[i].simpleName.toString(),
+                resolvedExecutableType.parameterTypes[i].asTypeName().javaToKotlinType())
     }
 
-    funSpec.returns(resolvedExecutableType.returnType.asTypeName())
-
+    funSpec.returns(resolvedExecutableType.returnType.asTypeName().javaToKotlinType())
     return funSpec
-
 }
 
 fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeMirror, processingEnv: ProcessingEnvironment): String {
@@ -393,7 +397,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
 
-        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}"
+        val upsertMode = daoMethod.getAnnotation(Insert::class.java).onConflict == OnConflictStrategy.REPLACE
+        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_upsert$upsertMode"
         if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
             val fieldNames = mutableListOf<String>()
             val parameterHolders = mutableListOf<String>()
@@ -416,8 +421,22 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 }
             }
 
+            val upsertSuffix = if(upsertMode) {
+                val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
+                val nonPkFieldPairs = nonPkFields.map { "${it.simpleName}·=·excluded.${it.simpleName}" }
+                val pkField = entityTypeEl.enclosedElements.firstOrNull { it.getAnnotation(PrimaryKey::class.java) != null }
+                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.simpleName})·" +
+                        "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
+                        "else -> \"·ON CONFLICT REPLACE\" } } "
+            } else {
+                ""
+            }
 
-            val sql = """INSERT INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()}) VALUES (${parameterHolders.joinToString()}) """
+            val sql = """
+                INSERT INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
+                VALUES (${parameterHolders.joinToString()})
+                $upsertSuffix
+                """.trimIndent()
 
             val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
                     .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
@@ -446,7 +465,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
                 daoMethodResolved.returnType, processingEnv)
-        insertFun.addCode("${entityInserterPropName}.${insertMethodName}(${daoMethod.parameters[0].simpleName}, _db.openConnection())\n")
+        insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())\n")
         return insertFun.build()
     }
 
