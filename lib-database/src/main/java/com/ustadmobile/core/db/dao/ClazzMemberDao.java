@@ -235,7 +235,8 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             " (SELECT clazzMemberActive FROM ClazzMember " +
             "WHERE ClazzMember.clazzMemberClazzUid = :clazzUid " +
             " AND clazzMemberPersonUid = Person.personUid AND ClazzMember.role = "
-            + ClazzMember.ROLE_STUDENT + " ) AS enrolled FROM Person WHERE Person.active = 1 ")
+            + ClazzMember.ROLE_STUDENT + " ) AS enrolled FROM Person WHERE Person.active = 1 " +
+            " ORDER BY Person.firstNames ASC")
     public abstract UmProvider<PersonWithEnrollment> findAllStudentsWithEnrollmentForClassUid(long clazzUid);
 
 
@@ -255,7 +256,7 @@ public abstract class ClazzMemberDao implements SyncableDao<ClazzMember, ClazzMe
             "WHERE ClazzMember.clazzMemberPersonUid = Person.personUid " +
             "   AND ClazzMember.role = 1) as isClazzStudent " +
             " FROM Person WHERE Person.active = 1 " +
-            " AND isClazzStudent = 0")
+            " AND isClazzStudent = 0 ORDER BY Person.firstNames ASC")
     public abstract UmProvider<PersonWithEnrollment> findAllEligibleTeachersWithEnrollmentForClassUid(long clazzUid);
 
     @UmQuery("SELECT " +

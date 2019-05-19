@@ -56,6 +56,8 @@ public class ServletContextClass implements ServletContextListener
     private int fieldIndex = 0;
     private List<HeadersAndFields> allFields;
 
+    public static final int NEW_FIELDS_START_FROM = 22;
+
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {
         System.out.println("ServletContextListener destroyed");
@@ -953,48 +955,6 @@ public class ServletContextClass implements ServletContextListener
                 true,
                 true
         ));
-
-        //Custom fields:
-        allTheFields.add(new HeadersAndFields(
-                "",
-                "",
-                0,
-                0,
-                19,
-                PersonField.FIELD_TYPE_HEADER,
-                MessageID.background,
-                false,
-                true,
-                true
-        ));
-
-        HeadersAndFields cf1 = new HeadersAndFields(
-                "ic_done_all_black_24dp",
-                "ASER test result",
-                MessageID.aser_test_result,
-                0,
-                20,
-                PersonField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                true,
-                true
-        );
-
-        allTheFields.add(cf1);
-        HeadersAndFields cf2 = new HeadersAndFields(
-                "ic_account_balance_black_24dp",
-                "Schooling",
-                MessageID.current_formal_school,
-                0,
-                21,
-                PersonField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                true,
-                true
-        );
-        allTheFields.add(cf2);
 
         return allTheFields;
     }

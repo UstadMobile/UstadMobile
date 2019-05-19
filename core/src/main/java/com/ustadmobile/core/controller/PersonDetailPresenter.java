@@ -41,6 +41,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -142,14 +143,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         super.onCreate(savedState);
 
         PersonDao personDao = repository.getPersonDao();
-        PersonCustomFieldValueDao personCustomFieldValueDao =
-                repository.getPersonCustomFieldValueDao();
         PersonDetailPresenterFieldDao personDetailPresenterFieldDao =
                 repository.getPersonDetailPresenterFieldDao();
         ClazzMemberDao clazzMemberDao =
                 repository.getClazzMemberDao();
-        PersonCustomFieldDao personCustomFieldDao =
-                repository.getPersonCustomFieldDao();
 
         customFieldDao = repository.getCustomFieldDao();
         customFieldValueDao = repository.getCustomFieldValueDao();
@@ -188,87 +185,42 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
             }
         });
 
-        getAllClazzCustomFields();
+        getAllPersonCustomFields();
 
         //Get all headers and fields
         personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsViewMode(
                 new UmCallback<List<PersonDetailPresenterField>>() {
             @Override
             public void onSuccess(List<PersonDetailPresenterField> fields) {
+
+                //Remove old custom fields
+                Iterator<PersonDetailPresenterField> fieldsIterator = fields.iterator();
+                while(fieldsIterator.hasNext()){
+                    PersonDetailPresenterField field = fieldsIterator.next();
+                    int fieldIndex = field.getFieldIndex();
+                    if( fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21){
+                        fieldsIterator.remove();
+                    }
+                }
+
                 presenterFields = fields;
+                customFieldWithFieldValueMap = new HashMap<>();
 
-                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
-                        new UmCallback<List<PersonField>>() {
+                //Get the attendance average for this person.
+                clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid,
+                        new UmCallback<Float>() {
                     @Override
-                    public void onSuccess(List<PersonField> customFields) {
-
-                        //Create a list of every custom fields supposed to be and fill them with
-                        //blank values that will be used to display empty fields. If those fields
-                        //exists, then they will get replaced in the next Dao call.
-                        customFieldWithFieldValueMap = new HashMap<>();
-                        for(PersonField customField:customFields){
-
-                            //the blank custom field value.
-                            PersonCustomFieldValue blankCustomValue = new PersonCustomFieldValue();
-                            blankCustomValue.setFieldValue("");
-
-                            //Create a (custom field + custom value) map object
-                            PersonCustomFieldWithPersonCustomFieldValue blankCustomMap =
-                                    new PersonCustomFieldWithPersonCustomFieldValue();
-                            blankCustomMap.setFieldName(customField.getFieldName());
-                            blankCustomMap.setLabelMessageId(customField.getLabelMessageId());
-                            blankCustomMap.setFieldIcon(customField.getFieldIcon());
-                            blankCustomMap.setCustomFieldValue(blankCustomValue);
-
-                            //Set the custom field and the field+value object to the map.
-                            customFieldWithFieldValueMap.put(customField.getPersonCustomFieldUid(),
-                                    blankCustomMap);
+                    public void onSuccess(Float result) {
+                        if (result == null){
+                            attendanceAverage = "N/A";
+                        }else {
+                            attendanceAverage = result * 100 + "%";
                         }
 
-                        //Custom field: OLD WAY
-                        //Get all the custom fields and their values (if applicable)
-                        personCustomFieldValueDao.findByPersonUidAsync2(personUid,
-                          new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
-                            @Override
-                            public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
-                                //Store the values and fields in this Map
-
-                                for( PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue: result){
-                                    customFieldWithFieldValueMap.put(
-                                            fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
-                                }
-
-                                //Get the attendance average for this person.
-                                clazzMemberDao.getAverageAttendancePercentageByPersonUidAsync(personUid,
-                                  new UmCallback<Float>() {
-                                    @Override
-                                    public void onSuccess(Float result) {
-                                        if (result == null){
-                                            attendanceAverage = "N/A";
-                                        }else {
-                                            attendanceAverage = result * 100 + "%";
-                                        }
-
-                                        //Get person live data and observe
-                                        mPerson = personDao.findByUidLive(personUid);
-                                        mPerson.observe(PersonDetailPresenter.this,
-                                                PersonDetailPresenter.this::handlePersonDataChanged);
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable exception) {
-                                        exception.printStackTrace();
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                exception.printStackTrace();
-                            }
-                        });
-
-
+                        //Get person live data and observe
+                        mPerson = personDao.findByUidLive(personUid);
+                        mPerson.observe(PersonDetailPresenter.this,
+                                PersonDetailPresenter.this::handlePersonDataChanged);
                     }
 
                     @Override
@@ -287,7 +239,10 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
         checkPermissions();
     }
 
-    private void getAllClazzCustomFields(){
+    /**
+     * Getting custom fields (new way)
+     */
+    private void getAllPersonCustomFields(){
         //0. Clear all added custom fields on view.
         view.runOnUiThread(() -> view.clearAllCustomFields());
 
@@ -323,7 +278,11 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
 
                             }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
                                 if(result != null) {
-                                    valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
+                                    try {
+                                        valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
+                                    }catch (NumberFormatException nfe){
+                                        valueSelection = 0;
+                                    }
                                 }
                                 int finalValueSelection = valueSelection;
                                 optionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
@@ -343,7 +302,6 @@ public class PersonDetailPresenter extends UstadBaseController<PersonDetailView>
                                             String finalValueString = valueString;
                                             view.runOnUiThread(() ->
                                             {
-
                                                 view.addComponent(finalValueString, c.getCustomFieldName());
 
                                             });

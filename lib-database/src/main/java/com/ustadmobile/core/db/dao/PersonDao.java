@@ -168,7 +168,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             "   THEN 1 " +
             "   ELSE 0 " +
             " END AS enrolled " +
-            "  FROM Person WHERE Person.active = 1 ")
+            "  FROM Person WHERE Person.active = 1 ORDER BY Person.firstNames ASC")
     public abstract UmProvider<PersonWithEnrollment> findAllPeopleWithEnrollmentInGroup(long groupUid);
 
 

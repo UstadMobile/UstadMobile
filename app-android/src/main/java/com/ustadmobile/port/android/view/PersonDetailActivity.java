@@ -202,7 +202,8 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     @Override
     public void clearAllFields() {
-        mLinearLayout.removeAllViews();
+        runOnUiThread(() -> mLinearLayout.removeAllViews());
+
     }
 
     @Override
@@ -227,12 +228,14 @@ public class PersonDetailActivity extends UstadBaseActivity implements PersonDet
 
     @Override
     public void showEnrollInClass(boolean show) {
-        enrollInClassLL.setVisibility(show?View.VISIBLE:View.GONE);
+        runOnUiThread(() -> enrollInClassLL.setVisibility(show?View.VISIBLE:View.GONE));
+
     }
 
     @Override
     public void showDropout(boolean show) {
-        recordDropoutLL.setVisibility(show?View.VISIBLE:View.GONE);
+        runOnUiThread(() -> recordDropoutLL.setVisibility(show?View.VISIBLE:View.GONE));
+
     }
 
 

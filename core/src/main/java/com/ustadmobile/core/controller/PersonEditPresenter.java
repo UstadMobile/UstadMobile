@@ -23,6 +23,9 @@ import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.PersonDetailViewField;
 import com.ustadmobile.core.view.PersonEditView;
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents;
+import com.ustadmobile.lib.db.entities.CustomField;
+import com.ustadmobile.lib.db.entities.CustomFieldValue;
+import com.ustadmobile.lib.db.entities.CustomFieldValueOption;
 import com.ustadmobile.lib.db.entities.FeedEntry;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue;
@@ -37,6 +40,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,6 +108,8 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     private CustomFieldValueDao customFieldValueDao;
     private CustomFieldValueOptionDao optionDao;
 
+    private HashMap<Long, List<String>> customFieldDropDownOptions;
+
     public long getPersonUid() {
         return personUid;
     }
@@ -135,10 +141,104 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
 
         viewIdToCustomFieldUid = new HashMap<>();
 
+        customFieldDropDownOptions = new HashMap<>();
+
     }
 
     public void addToMap(int viewId, long fieldId){
         viewIdToCustomFieldUid.put(viewId, fieldId);
+    }
+
+    /**
+     * Getting custom fields (new way)
+     */
+    private void getAllPersonCustomFields(){
+        //0. Clear all added custom fields on view.
+        view.runOnUiThread(() -> view.clearAllCustomFields());
+
+        //1. Get all custom fields
+        customFieldDao.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID,
+        new UmCallback<List<CustomField>>() {
+            @Override
+            public void onSuccess(List<CustomField> result) {
+                for(CustomField c: result){
+                    //Get value as well
+                    customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                    c.getCustomFieldUid(), personUid,
+                    new UmCallback<CustomFieldValue>() {
+                        @Override
+                        public void onSuccess(CustomFieldValue result) {
+                            String valueString = "";
+                            int valueSelection = 0;
+
+                            if(c.getCustomFieldType() == CustomField.FIELD_TYPE_TEXT){
+
+                                if(result != null) {
+                                    valueString = result.getCustomFieldValueValue();
+                                }
+                                final String[] finalValueString = {valueString};
+                                view.runOnUiThread(() -> {
+
+                                    view.addCustomFieldText(c, finalValueString[0]);
+                                    //view.addComponent(finalValueString[0], c.getCustomFieldName());
+                                });
+
+                            }else if(c.getCustomFieldType() == CustomField.FIELD_TYPE_DROPDOWN){
+                                if(result != null) {
+                                    try{
+                                        valueSelection = Integer.valueOf(result.getCustomFieldValueValue());
+                                    }catch (NumberFormatException nfe){
+                                        valueSelection = 0;
+                                    }
+
+                                }
+                                int finalValueSelection = valueSelection;
+                                optionDao.findAllOptionsForFieldAsync(c.getCustomFieldUid(),
+                                    new UmCallback<List<CustomFieldValueOption>>() {
+                                    @Override
+                                    public void onSuccess(List<CustomFieldValueOption> result) {
+                                        List<String> options = new ArrayList<>();
+
+                                        for(CustomFieldValueOption o:result){
+                                            options.add(o.getCustomFieldValueOptionName());
+                                        }
+                                        //Get value
+                                        String valueString = "-";
+                                        if(finalValueSelection > 0){
+                                            valueString = options.get(finalValueSelection);
+                                        }
+                                        String finalValueString = valueString;
+
+                                        customFieldDropDownOptions.put(c.getCustomFieldUid(), options);
+                                        view.runOnUiThread(() ->
+                                        {
+                                            //view.addComponent(finalValueString, c.getCustomFieldName());
+                                            String[] a = new String[options.size()];
+                                            options.toArray(a);
+                                            view.addCustomFieldDropdown(c,a, finalValueSelection);
+                                            //view.addCustomFieldText(c, finalValueString);
+
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable exception) {
+                                        exception.printStackTrace();}
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {exception.printStackTrace();}
+        });
     }
 
     /**
@@ -164,73 +264,91 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             view.updateToolbarTitle(impl.getString(MessageID.new_person, context));
         }
 
+        getAllPersonCustomFields();
+
         //Get all the currently set headers and fields:
         personDetailPresenterFieldDao.findAllPersonDetailPresenterFieldsEditMode(
                 new UmCallback<List<PersonDetailPresenterField>>() {
             @Override
             public void onSuccess(List<PersonDetailPresenterField> result) {
 
+                //Remove old custom fields
+                Iterator<PersonDetailPresenterField> fieldsIterator = result.iterator();
+                while(fieldsIterator.hasNext()){
+                    PersonDetailPresenterField field = fieldsIterator.next();
+                    int fieldIndex = field.getFieldIndex();
+                    if( fieldIndex == 19 || fieldIndex == 20 || fieldIndex == 21){
+                        fieldsIterator.remove();
+                    }
+                }
+
                 headersAndFields = result;
 
-                //Get all custom fields (if any)
-                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
-                        new UmCallback<List<PersonField>>() {
-                    @Override
-                    public void onSuccess(List<PersonField> customFields) {
-                        //Create a list of every custom fields supposed to be and fill them with
-                        //blank values that will be used to display empty fields. If those fields
-                        //exists, then they will get replaced in the next Dao call.
-                        customFieldWithFieldValueMap = new HashMap<>();
-                        for(PersonField customField:customFields){
+                //Get person live data and observe
+                personLiveData = personDao.findByUidLive(personUid);
+                //Observe the live data
+                personLiveData.observe(PersonEditPresenter.this,
+                        PersonEditPresenter.this::handlePersonValueChanged);
 
-                            //the blank custom field value.
-                            PersonCustomFieldValue blankCustomValue = new PersonCustomFieldValue();
-                            blankCustomValue.setFieldValue("");
-
-                            //Create a (custom field + custom value) map object
-                            PersonCustomFieldWithPersonCustomFieldValue blankCustomMap =
-                                    new PersonCustomFieldWithPersonCustomFieldValue();
-                            blankCustomMap.setFieldName(customField.getFieldName());
-                            blankCustomMap.setLabelMessageId(customField.getLabelMessageId());
-                            blankCustomMap.setFieldIcon(customField.getFieldIcon());
-                            blankCustomMap.setCustomFieldValue(blankCustomValue);
-
-                            //Set the custom field and the field+value object to the map.
-                            customFieldWithFieldValueMap.put(customField.getPersonCustomFieldUid(),
-                                    blankCustomMap);
-                        }
-
-                        //Get all the custom fields and their values for this person (if applicable)
-                        personCustomFieldValueDao.findByPersonUidAsync2(personUid,
-                            new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
-                                @Override
-                                public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
-
-                                    //Store the values and fields in this Map
-
-                                    for (PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue : result) {
-                                        customFieldWithFieldValueMap.put(
-                                                fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
-                                    }
-
-                                    //Get person live data and observe
-                                    personLiveData = personDao.findByUidLive(personUid);
-                                    //Observe the live data
-                                    personLiveData.observe(PersonEditPresenter.this,
-                                            PersonEditPresenter.this::handlePersonValueChanged);
-                                }
-
-                                @Override
-                                public void onFailure(Throwable exception) {exception.printStackTrace();}
-                        });
-
-                    }
-
-                    @Override
-                    public void onFailure(Throwable exception) {
-                        exception.printStackTrace();
-                    }
-                });
+//                //Get all custom fields (if any) (old way)
+//                personCustomFieldDao.findAllCustomFields(CUSTOM_FIELD_MIN_UID,
+//                        new UmCallback<List<PersonField>>() {
+//                    @Override
+//                    public void onSuccess(List<PersonField> customFields) {
+//                        //Create a list of every custom fields supposed to be and fill them with
+//                        //blank values that will be used to display empty fields. If those fields
+//                        //exists, then they will get replaced in the next Dao call.
+//                        customFieldWithFieldValueMap = new HashMap<>();
+//                        for(PersonField customField:customFields){
+//
+//                            //the blank custom field value.
+//                            PersonCustomFieldValue blankCustomValue = new PersonCustomFieldValue();
+//                            blankCustomValue.setFieldValue("");
+//
+//                            //Create a (custom field + custom value) map object
+//                            PersonCustomFieldWithPersonCustomFieldValue blankCustomMap =
+//                                    new PersonCustomFieldWithPersonCustomFieldValue();
+//                            blankCustomMap.setFieldName(customField.getFieldName());
+//                            blankCustomMap.setLabelMessageId(customField.getLabelMessageId());
+//                            blankCustomMap.setFieldIcon(customField.getFieldIcon());
+//                            blankCustomMap.setCustomFieldValue(blankCustomValue);
+//
+//                            //Set the custom field and the field+value object to the map.
+//                            customFieldWithFieldValueMap.put(customField.getPersonCustomFieldUid(),
+//                                    blankCustomMap);
+//                        }
+//
+//                        //Get all the custom fields and their values for this person (if applicable)
+//                        personCustomFieldValueDao.findByPersonUidAsync2(personUid,
+//                            new UmCallback<List<PersonCustomFieldWithPersonCustomFieldValue>>() {
+//                                @Override
+//                                public void onSuccess(List<PersonCustomFieldWithPersonCustomFieldValue> result) {
+//
+//                                    //Store the values and fields in this Map
+//
+//                                    for (PersonCustomFieldWithPersonCustomFieldValue fieldWithFieldValue : result) {
+//                                        customFieldWithFieldValueMap.put(
+//                                                fieldWithFieldValue.getPersonCustomFieldUid(), fieldWithFieldValue);
+//                                    }
+//
+//                                    //Get person live data and observe
+//                                    personLiveData = personDao.findByUidLive(personUid);
+//                                    //Observe the live data
+//                                    personLiveData.observe(PersonEditPresenter.this,
+//                                            PersonEditPresenter.this::handlePersonValueChanged);
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Throwable exception) {exception.printStackTrace();}
+//                        });
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Throwable exception) {
+//                        exception.printStackTrace();
+//                    }
+//                });
 
             }
 
@@ -500,7 +618,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             personToUpdate.setAddress((String) value);
 
         } else {
-            //This is actually a custom field.
+            //This is actually a custom field. (old)
 
             personCustomFieldValueDao.findCustomFieldByFieldAndPersonAsync(fieldcode,
                     personToUpdate.getPersonUid(), new UmCallback<PersonCustomFieldValue>() {
@@ -521,9 +639,7 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
                 }
 
                 @Override
-                public void onFailure(Throwable exception) {
-
-                }
+                public void onFailure(Throwable exception) {exception.printStackTrace();}
             });
         }
 
@@ -547,12 +663,9 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
             if(person!= null){
                 setFieldsOnView(person, headersAndFields, view,
                         customFieldWithFieldValueMap);
-
                 mUpdatedPerson = person;
             }
-
         }
-
     }
 
     /**
@@ -657,6 +770,61 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     }
 
     /**
+     * Saves custom field values.
+     * @param viewId
+     * @param type
+     * @param value
+     */
+    public void handleSaveCustomFieldValues(int viewId, int type, Object value){
+
+        //Lookup viewId
+        if(viewIdToCustomFieldUid.containsKey(viewId)){
+            long customFieldUid = viewIdToCustomFieldUid.get(viewId);
+
+            String valueString = null;
+            if(type == CustomField.FIELD_TYPE_TEXT){
+                valueString = value.toString();
+
+            }
+            else if(type == CustomField.FIELD_TYPE_DROPDOWN){
+                int spinnerSelection = (int)value;
+                List<String> options = customFieldDropDownOptions.get(customFieldUid);
+                //valueString = options.get(spinnerSelection);
+                //or:
+                valueString = String.valueOf(spinnerSelection);
+            }
+
+            if(valueString!=null &&!valueString.isEmpty()){
+                String finalValueString = valueString;
+                customFieldValueDao.findValueByCustomFieldUidAndEntityUid(customFieldUid,
+                    personUid, new UmCallback<CustomFieldValue>() {
+                    @Override
+                    public void onSuccess(CustomFieldValue result) {
+                        CustomFieldValue customFieldValue;
+                        if(result == null){
+                            customFieldValue = new CustomFieldValue();
+                            customFieldValue.setCustomFieldValueEntityUid(personUid);
+                            customFieldValue.setCustomFieldValueFieldUid(customFieldUid);
+                            customFieldValue.setCustomFieldValueValue(finalValueString);
+                            customFieldValueDao.insert(customFieldValue);
+                        }else{
+                            customFieldValue = result;
+                            customFieldValue.setCustomFieldValueValue(finalValueString);
+                            customFieldValueDao.update(customFieldValue);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+                        exception.printStackTrace();
+                    }
+                });
+            }
+
+        }
+    }
+
+    /**
      * Done click handler on the Edit / Enrollment page: Clicking done will persist and save it and
      * end the activity.
      *
@@ -664,8 +832,6 @@ public class PersonEditPresenter extends UstadBaseController<PersonEditView> {
     public void handleClickDone(){
         mUpdatedPerson.setActive(true);
         personDao.updatePersonAsync(mUpdatedPerson, loggedInPersonUid, new UmCallback<Integer>(){
-        //personDao.updateAsync(mUpdatedPerson, new UmCallback<Integer>(){
-
             @Override
             public void onSuccess(Integer result) {
 

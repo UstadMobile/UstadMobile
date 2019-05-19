@@ -383,6 +383,8 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
                         options);
         spinner.setAdapter(spinnerArrayAdapter);
 
+        spinner.setSelection(selected);
+
         //Spinner label
         TextView labelTV = new TextView(this);
         labelTV.setText(label.getCustomFieldName());

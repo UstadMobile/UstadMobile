@@ -71,6 +71,10 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     public abstract void findAllChildLocationsForUidAsync(long uid,
                                                           UmCallback<List<Location>> resultList);
 
+    @UmQuery("SELECT * FROM Location WHERE parentLocationUid = :uid AND locationActive = 1 AND Location.locationUid != :suid ")
+    public abstract void findAllChildLocationsForUidExceptSelectedUidAsync(long uid, long suid,
+                                                          UmCallback<List<Location>> resultList);
+
     @UmQuery("SELECT * FROM Location WHERE title = :name AND locationActive = 1")
     public abstract void findByTitleAsync(String name, UmCallback<List<Location>> resultList);
 
@@ -83,7 +87,7 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     @UmQuery("SELECT *, " +
             " (SELECT COUNT(*) FROM Location WHERE Location.parentLocationUid = LOC.locationUid) " +
             " AS subLocations  " +
-            "FROM Location AS LOC")
+            "FROM Location AS LOC ORDER BY LOC.title ASC")
     public abstract UmProvider<LocationWithSubLocationCount> findAllLocationsWithCount();
 
 

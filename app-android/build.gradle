@@ -391,6 +391,12 @@ dependencies {
 
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
+    // shake detector
+    implementation "com.squareup:seismic:$version_android_seismic"
+
+    //Crash reporting
+    implementation "ch.acra:acra-http:$version_android_acra"
+
 }
 
 task sourceJar(type: Jar) {

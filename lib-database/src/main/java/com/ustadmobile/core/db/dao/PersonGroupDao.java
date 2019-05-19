@@ -25,7 +25,7 @@ public abstract class PersonGroupDao implements SyncableDao<PersonGroup, PersonG
             " (SELECT COUNT(*) FROM PersonGroupMember " +
             "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
             "  groupMemberActive = 1) AS memberCount " +
-            "FROM PersonGroup WHERE groupActive = 1")
+            "FROM PersonGroup WHERE groupActive = 1 ORDER BY PersonGroup.groupName ASC")
     public abstract UmProvider<GroupWithMemberCount> findAllActiveGroups();
 
     @UmQuery("SELECT *, 0 AS memberCount FROM PersonGroup WHERE groupActive = 1")

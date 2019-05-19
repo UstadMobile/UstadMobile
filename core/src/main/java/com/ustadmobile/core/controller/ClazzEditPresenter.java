@@ -411,10 +411,19 @@ public class ClazzEditPresenter
         if(viewIdToCustomFieldUid.containsKey(viewId)){
             long customFieldUid = viewIdToCustomFieldUid.get(viewId);
 
+            String valueString = null;
             if(type == CustomField.FIELD_TYPE_TEXT){
-                String valueString = value.toString();
+                valueString = value.toString();
+
+            }
+            else if(type == CustomField.FIELD_TYPE_DROPDOWN){
+                int spinnerSelection = (int)value;
+                valueString = String.valueOf(spinnerSelection);
+            }
+            if(valueString!=null &&!valueString.isEmpty()){
+                String finalValueString = valueString;
                 customFieldValueDao.findValueByCustomFieldUidAndEntityUid(customFieldUid,
-                        currentClazzUid, new UmCallback<CustomFieldValue>() {
+                    currentClazzUid, new UmCallback<CustomFieldValue>() {
                     @Override
                     public void onSuccess(CustomFieldValue result) {
                         CustomFieldValue customFieldValue;
@@ -423,11 +432,11 @@ public class ClazzEditPresenter
                             customFieldValue.setCustomFieldValueEntityUid(
                                     mUpdatedClazz.getClazzUid());
                             customFieldValue.setCustomFieldValueFieldUid(customFieldUid);
-                            customFieldValue.setCustomFieldValueValue(valueString);
+                            customFieldValue.setCustomFieldValueValue(finalValueString);
                             customFieldValueDao.insert(customFieldValue);
                         }else{
                             customFieldValue = result;
-                            customFieldValue.setCustomFieldValueValue(valueString);
+                            customFieldValue.setCustomFieldValueValue(finalValueString);
                             customFieldValueDao.update(customFieldValue);
                         }
                     }
@@ -438,10 +447,7 @@ public class ClazzEditPresenter
                     }
                 });
             }
-            else if(type == CustomField.FIELD_TYPE_DROPDOWN){
-                int spinnerSelection = (int)value;
-                //TODO: Check if we need to do this.
-            }
+
         }
     }
 

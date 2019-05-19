@@ -708,4 +708,10 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="please_review_errors">Please review errors below</string>
     <string name="please_review_warnings">Bulk upload done. Please review warnings below.</string>
 
+    <string name="shake_feedback">Shake for feedback</string>
+    <string name="feedback_hint">Please enter your feedback</string>
+    <string name="send_feedback">Send feedback</string>
+    <string name="feedback_thanks">Thank you for the feedback.</string>
+
+
 </resources>

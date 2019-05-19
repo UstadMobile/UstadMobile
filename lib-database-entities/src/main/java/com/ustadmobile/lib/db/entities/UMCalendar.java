@@ -1,8 +1,5 @@
 package com.ustadmobile.lib.db.entities;
 
-import android.arch.persistence.room.Entity;
-
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
@@ -38,6 +35,9 @@ public class UMCalendar{
     //active
     private boolean umCalendarActive;
 
+    //Tester method- Please remove me later
+    private boolean umCalendarFlag;
+
     public UMCalendar(String name, int category){
         this.umCalendarName = name;
         this.umCalendarCategory = category;
@@ -48,7 +48,6 @@ public class UMCalendar{
 
     }
 
-    //todo: seems like wrong prefix
     @UmSyncMasterChangeSeqNum
     private long umCalendarMasterChangeSeqNum;
 
@@ -105,5 +104,13 @@ public class UMCalendar{
 
     public void setUmCalendarLastChangedBy(int umCalendarLastChangedBy) {
         this.umCalendarLastChangedBy = umCalendarLastChangedBy;
+    }
+
+    public boolean isUmCalendarFlag() {
+        return umCalendarFlag;
+    }
+
+    public void setUmCalendarFlag(boolean umCalendarFlag) {
+        this.umCalendarFlag = umCalendarFlag;
     }
 }

@@ -47,6 +47,7 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
     LocationDao locationDao;
     HashMap<String, Long> selectedOptions;
     List<Long> selectedLocationList;
+    private long currentLocationUid;
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -126,6 +127,11 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
 
         for(Location every_location : locations){
             long childLocationUid = every_location.getLocationUid();
+
+            if(childLocationUid == currentLocationUid){
+                continue;
+            }
+
             boolean selected = false;
             if(selectedLocationList!= null && selectedLocationList.contains(childLocationUid)){
                 selected = true;
@@ -141,7 +147,7 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
 
         for(TreeNode childNode : nodes) {
             long childLocationUid = ((LocationLayoutType) childNode.getContent()).getUid();
-            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
+            locationDao.findAllChildLocationsForUidExceptSelectedUidAsync(childLocationUid, currentLocationUid,
                     new LocationDetailActivity.PopulateTreeNodeCallback(childNode));
         }
 
@@ -167,7 +173,8 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
                             //Find all child's children and add then to the node
                             // (via PopulateTreeNodeCallback class)
                             long childLocationUid = ((LocationLayoutType) childNode.getContent()).getUid();
-                            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
+                            locationDao.findAllChildLocationsForUidExceptSelectedUidAsync(
+                                    childLocationUid,currentLocationUid,
                                     new LocationDetailActivity.PopulateTreeNodeCallback(childNode));
                         }
                     }
@@ -195,12 +202,13 @@ public class LocationDetailActivity extends UstadBaseActivity implements Locatio
     @Override
     public void updateLocationOnView(Location location) {
         if(location != null){
-            locationTitle.setText(location.getTitle());
+            //Set current location uid so that we can avoid it.
+            currentLocationUid = location.getLocationUid();
 
+            //Set title and add its uid to selected Location list so we can show it.
+            locationTitle.setText(location.getTitle());
             selectedLocationList = new ArrayList<>();
             selectedLocationList.add(location.getParentLocationUid());
-
-
         }
     }
 

@@ -55,7 +55,7 @@ public class LocationDetailPresenter extends CommonLocationHandlerPresenter<Loca
 
     }
 
-    public void getTopLocations(){
+    private void getTopLocations(){
         LocationDao locationDao = repository.getLocationDao();
         locationDao.findTopLocationsAsync(new UmCallback<List<Location>>() {
             @Override
@@ -95,7 +95,7 @@ public class LocationDetailPresenter extends CommonLocationHandlerPresenter<Loca
         }
     }
 
-    public void initFromLocation(long locationUid){
+    private void initFromLocation(long locationUid){
         this.currentLocationUid = locationUid;
 
         UmLiveData<Location> locationUmLiveData =
@@ -116,7 +116,7 @@ public class LocationDetailPresenter extends CommonLocationHandlerPresenter<Loca
 
     }
 
-    public void handleLocationChanged(Location changedLocation){
+    private void handleLocationChanged(Location changedLocation){
         if(currentLocation == null){
             currentLocation = changedLocation;
         }

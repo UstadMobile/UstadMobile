@@ -121,6 +121,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         //Get the header & fields layout
         mLinearLayout = findViewById(R.id.activity_person_edit_fields_linear_layout);
 
+        customFieldsLL = findViewById(R.id.activity_person_edit_custom_fields_ll);
+
         //Call the presenter
         mPresenter = new PersonEditPresenter(this, UMAndroidUtil.bundleToHashtable(
                 getIntent().getExtras()), this);
@@ -132,7 +134,7 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         Button personEditImageButton = findViewById(R.id.activity_person_edit_student_image_button);
         personEditImageButton.setOnClickListener(v -> addImageFromCamera());
 
-        customFieldsLL = findViewById(R.id.activity_person_edit_custom_fields_ll);
+
 
 
     }
@@ -352,10 +354,16 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
 
                     //date listener - opens a new date picker.
                     DatePickerDialog dateFieldPicker = new DatePickerDialog(
-                            PersonEditActivity.this, date, myCalendar.get(Calendar.YEAR),
+                            PersonEditActivity.this,
+                            //android.R.style.Widget_Holo_DatePicker,
+                            //android.R.style.Theme_Holo_Dialog,
+                            R.style.CustomDatePickerDialogTheme,
+                            date, myCalendar.get(Calendar.YEAR),
                             myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
                     dateFieldPicker.getDatePicker().setMaxDate(System.currentTimeMillis());
-
+                    dateFieldPicker.getDatePicker().setSpinnersShown(true);
+                    dateFieldPicker.getDatePicker().setCalendarViewShown(false);
+                    dateFieldPicker.getDatePicker().setLayoutMode(1);
                     fieldEditText.setOnClickListener(v -> dateFieldPicker.show());
 
 
@@ -432,12 +440,37 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
         int i = item.getItemId();
         //If this activity started from other activity
         if (i == R.id.menu_catalog_entry_presenter_share) {
-            mPresenter.handleClickDone();
+            handleClickDone();
 
             return super.onOptionsItemSelected(item);
         } else {
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void handleClickDone(){
+        int customCount = customFieldsLL.getChildCount();
+        for(int i=0; i< customCount; i++){
+            View field = customFieldsLL.getChildAt(i);
+            int fieldId = field.getId();
+            int type = 0;
+            Object valueObject = null;
+            if(field instanceof TextInputLayout){
+                //Text custom field
+                type = CustomField.FIELD_TYPE_TEXT;
+                TextInputLayout til = (TextInputLayout)field;
+                valueObject = til.getEditText().getText().toString();
+
+            }else if(field instanceof LinearLayout){
+                LinearLayout vll = (LinearLayout) field;
+                type = CustomField.FIELD_TYPE_DROPDOWN;
+                Spinner s = (Spinner) vll.getChildAt(1);
+                valueObject = s.getSelectedItemPosition();
+            }
+            mPresenter.handleSaveCustomFieldValues(fieldId,type, valueObject);
+        }
+
+        mPresenter.handleClickDone();
     }
 
     /**
@@ -676,6 +709,8 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
                         options);
         spinner.setAdapter(spinnerArrayAdapter);
 
+        spinner.setSelection(selected);
+
         //Spinner label
         TextView labelTV = new TextView(this);
         labelTV.setText(label.getCustomFieldName());
@@ -700,4 +735,5 @@ public class PersonEditActivity extends UstadBaseActivity implements PersonEditV
     public void clearAllCustomFields() {
         customFieldsLL.removeAllViews();
     }
+
 }
