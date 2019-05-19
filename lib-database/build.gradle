@@ -43,7 +43,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation project(":lib-util")
                 implementation project(":lib-database-entities")
-                //implementation project(':lib-database-runtime')
+                implementation project(':lib-door-runtime')
                 implementation project(":lib-database-annotations")
                 //compileOnly project(":lib-database-runtime-core-compileonly")
                 compileOnly project(":lib-room-annotations")

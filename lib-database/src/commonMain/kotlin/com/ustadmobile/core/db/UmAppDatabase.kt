@@ -1,9 +1,12 @@
 package com.ustadmobile.core.db
 
 import androidx.room.Database
-import androidx.room.RoomDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.door.DoorDatabase
+import com.ustadmobile.lib.database.annotation.UmClearAll
+import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges
+import com.ustadmobile.lib.database.annotation.UmSyncOutgoing
 import com.ustadmobile.lib.db.entities.*
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
@@ -23,7 +26,7 @@ import kotlin.jvm.Volatile
     ContentEntryStatus::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class
 ], version = 22)
-abstract class UmAppDatabase : RoomDatabase() {
+abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
 
@@ -105,8 +108,7 @@ abstract class UmAppDatabase : RoomDatabase() {
 
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
-    @get:UmDbContext
-    abstract val context: Any
+
 
 
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
