@@ -2,6 +2,7 @@ package db2
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.Query
 import androidx.room.OnConflictStrategy
 
 @Dao
@@ -24,6 +25,9 @@ abstract class ExampleDao2 {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entityList: List<ExampleEntity2>)
+
+    @Query("SELECT * FROM ExampleEntity2 WHERE uid = :uid")
+    abstract fun findByUid(uid: Long): ExampleEntity2
 
 
 }

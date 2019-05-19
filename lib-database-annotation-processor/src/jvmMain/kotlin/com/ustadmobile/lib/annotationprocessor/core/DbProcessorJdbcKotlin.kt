@@ -17,6 +17,7 @@ import java.sql.Statement
 import javax.sql.DataSource
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.sql.PreparedStatement
+import java.sql.ResultSet
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
@@ -224,6 +225,46 @@ private fun getPreparedStatementSetterGetterTypeName(variableType: TypeMirror, p
     return null
 }
 
+/**
+ * For SQL with named parameters (e.g. "SELECT * FROM Table WHERE uid = :paramName") return a
+ * list of all named parameters.
+ *
+ * @param querySql SQL that may contain named parameters
+ * @return String list of named parameters (e.g. "paramName"). Empty if no named parameters are present.
+ */
+private fun getQueryNamedParameters(querySql: String): List<String> {
+    val namedParams = mutableListOf<String>()
+    var insideQuote = false
+    var insideDoubleQuote = false
+    var lastC: Char = 0.toChar()
+    var startNamedParam = -1
+    for (i in 0 until querySql.length) {
+        val c = querySql[i]
+        if (c == '\'' && lastC != '\\')
+            insideQuote = !insideQuote
+        if (c == '\"' && lastC != '\\')
+            insideDoubleQuote = !insideDoubleQuote
+
+        if (!insideQuote && !insideDoubleQuote) {
+            if (c == ':') {
+                startNamedParam = i
+            } else if (!(Character.isLetterOrDigit(c) || c == '_') && startNamedParam != -1) {
+                //process the parameter
+                namedParams.add(querySql.substring(startNamedParam + 1, i))
+                startNamedParam = -1
+            } else if (i == querySql.length - 1 && startNamedParam != -1) {
+                namedParams.add(querySql.substring(startNamedParam + 1, i + 1))
+                startNamedParam = -1
+            }
+        }
+
+
+        lastC = c
+    }
+
+    return namedParams
+}
+
 
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -276,6 +317,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             val daoMethod = daoSubEl as ExecutableElement
             if(daoMethod.getAnnotation(Insert::class.java) != null) {
                 daoImpl.addFunction(generateInsertFun(daoTypeElement, daoMethod, daoImpl))
+            }else if(daoMethod.getAnnotation(Query::class.java) != null) {
+                daoImpl.addFunction(generateQueryFun(daoTypeElement, daoMethod, daoImpl))
             }
         }
 
@@ -501,7 +544,46 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         return insertFun.build()
     }
 
+    fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder) : FunSpec {
+        val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
+                daoMethod)  as ExecutableType
+        val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
 
+        val funSpec = overrideAndConvertToKotlin(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+        val codeBlock = CodeBlock.builder()
+
+        val resultVarName = "_result"
+        val querySql = daoMethod.getAnnotation(Query::class.java).value
+
+        val namedParams = getQueryNamedParameters(querySql)
+        var preparedStatementSql = querySql
+        namedParams.forEach { preparedStatementSql = preparedStatementSql.replace(":$it", "?") }
+
+        codeBlock.add("var _con = null as %T?\n", Connection::class)
+                .add("var _stmt = null as %T?\n", PreparedStatement::class)
+                .add("var _resultSet = null as %T?\n", ResultSet::class)
+                .beginControlFlow("try")
+                .add("_con = _db.openConnection()\n")
+                .add("_stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
+
+        val paramTypes = daoMethod.parameters.map { it.simpleName.toString() to it.asType() }
+        val paramTypesResolved = daoMethodResolved.parameterTypes
+        for(i in 0 until paramTypes.size) {
+            codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramTypesResolved[i], processingEnv)}(" +
+                "${i + 1}, ${daoMethod.parameters[i].simpleName})\n")
+        }
+
+        codeBlock.add("_resultSet = _stmt.executeQuery()\n")
+
+        codeBlock.nextControlFlow("finally")
+                .add("_stmt?.close()\n")
+                .add("_con?.close()\n")
+                .endControlFlow()
+
+        funSpec.addCode(codeBlock.build())
+        return funSpec.build()
+    }
 
 
     companion object {
