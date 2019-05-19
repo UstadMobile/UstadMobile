@@ -8,12 +8,9 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UmResultCallback;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
-import com.ustadmobile.core.networkmanager.DownloadJobItemManagerList;
-import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
+import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.DownloadJob;
@@ -274,7 +271,7 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
 
                 node.setLastUpdateTimeStamp(System.currentTimeMillis());
 
-                networkNodeDao.updateLastSeen(node.getBluetoothMacAddress(),
+                networkNodeDao.updateLastSeenAsync(node.getBluetoothMacAddress(),
                         node.getLastUpdateTimeStamp(), new UmCallback<Integer>() {
                     @Override
                     public void onSuccess(Integer result) {
@@ -770,11 +767,11 @@ public abstract class NetworkManagerBle implements LocalAvailabilityMonitor,
         jobItemManagerList.findDownloadJobItemStatusByContentEntryUid(contentEntryUid, callback);
     }
 
-    public void addDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
+    public void addDownloadChangeListener(OnDownloadJobItemChangeListener listener) {
         jobItemManagerList.addDownloadChangeListener(listener);
     }
 
-    public void removeDownloadChangeListener(DownloadJobItemManager.OnDownloadJobItemChangeListener listener) {
+    public void removeDownloadChangeListener(OnDownloadJobItemChangeListener listener) {
         jobItemManagerList.removeDownloadChangeListener(listener);
     }
 

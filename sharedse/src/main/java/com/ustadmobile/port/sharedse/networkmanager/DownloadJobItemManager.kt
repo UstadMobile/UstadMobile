@@ -1,19 +1,15 @@
-package com.ustadmobile.core.networkmanager
+package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmResultCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.UMUtil
-
-import java.util.Arrays
-import java.util.HashMap
-import java.util.HashSet
-import java.util.LinkedList
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -35,12 +31,6 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     @Volatile
     var rootContentEntryUid: Long = 0
         private set
-
-    interface OnDownloadJobItemChangeListener {
-
-        fun onDownloadJobItemChange(status: DownloadJobItemStatus?, manager: DownloadJobItemManager)
-
-    }
 
     init {
         executor.scheduleWithFixedDelay({ this.doCommit() }, 1000, 1000, TimeUnit.MILLISECONDS)
@@ -87,7 +77,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
                     djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes)
             val djStatus = jobItemUidToStatusMap[djiUid]
-            if(djStatus != null) {
+            if (djStatus != null) {
                 val deltaBytesFoFar = bytesSoFar - djStatus.bytesSoFar
                 val deltaTotalBytes = totalBytes - djStatus.totalBytes
 
@@ -95,7 +85,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 djStatus.totalBytes = totalBytes
                 progressChangedItems.add(djStatus)
 
-                onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
+                onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, downloadJobUid)
 
                 updateParentsProgress(djStatus.jobItemUid, djStatus.parents, deltaBytesFoFar,
                         deltaTotalBytes)
@@ -103,19 +93,19 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         }
     }
 
-    fun updateStatus(djiUid: Int, status: Int, callback : UmResultCallback<Void?>?) {
+    fun updateStatus(djiUid: Int, status: Int, callback: UmResultCallback<Void?>?) {
         executor.execute {
             val updatedItems = LinkedList<DownloadJobItemStatus>()
             val djStatus = jobItemUidToStatusMap[djiUid]
-            if(djStatus != null) {
-                updateItemStatusInt(djStatus, status.toByte(), updatedItems)
+            if (djStatus != null) {
+                updateItemStatusInt(djStatus, status, updatedItems)
 
-                runOnAllParents(djStatus.jobItemUid, djStatus.parents) {parent ->
+                runOnAllParents(djStatus.jobItemUid, djStatus.parents) { parent ->
                     var parentChanged = false
                     val parentsChildren = parent.children
-                    if(parentsChildren != null) {
-                        if(parentsChildren.all { it.status >= JobStatus.COMPLETE_MIN}){
-                            updateItemStatusInt(parent, JobStatus.COMPLETE.toByte(), updatedItems)
+                    if (parentsChildren != null) {
+                        if (parentsChildren.all { it.status >= JobStatus.COMPLETE_MIN }) {
+                            updateItemStatusInt(parent, JobStatus.COMPLETE, updatedItems)
                             parentChanged = true
                         }
                     }
@@ -128,7 +118,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 db.contentEntryStatusDao.updateDownloadStatusByList(updatedItems)
 
                 val updatedRoot = updatedItems.firstOrNull { it.contentEntryUid == rootContentEntryUid }
-                if(updatedRoot != null) {
+                if (updatedRoot != null) {
                     db.downloadJobDao.updateStatus(downloadJobUid, updatedRoot.status)
                 }
             }
@@ -137,11 +127,11 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         }
     }
 
-    private fun updateItemStatusInt(djStatus: DownloadJobItemStatus, status: Byte,
+    private fun updateItemStatusInt(djStatus: DownloadJobItemStatus, status: Int,
                                     updatedItems: MutableList<DownloadJobItemStatus>) {
         djStatus.status = status
         updatedItems.add(djStatus)
-        onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, this)
+        onDownloadJobItemChangeListener?.onDownloadJobItemChange(djStatus, downloadJobUid)
     }
 
 
@@ -154,19 +144,19 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
             parent.incrementTotalBytes(deltaTotalBytes)
             parent.incrementBytesSoFar(deltaBytesFoFar)
             progressChangedItems.add(parent)
-            onDownloadJobItemChangeListener?.onDownloadJobItemChange(parent, this)
+            onDownloadJobItemChangeListener?.onDownloadJobItemChange(parent, downloadJobUid)
             true
         }
     }
 
     private fun runOnAllParents(djiUid: Int, startParents: List<DownloadJobItemStatus>?,
-                                fn : (DownloadJobItemStatus) -> Boolean) {
+                                fn: (DownloadJobItemStatus) -> Boolean) {
         var parents = startParents
         while (parents != null && !parents.isEmpty()) {
             val nextParents = LinkedList<DownloadJobItemStatus>()
-            for(parent in parents) {
+            for (parent in parents) {
                 val parentParents = parent.parents
-                if(fn.invoke(parent) && parentParents != null)
+                if (fn.invoke(parent) && parentParents != null)
                     nextParents.addAll(parentParents)
 
             }
@@ -197,7 +187,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     fun insertDownloadJobItemsSync(items: List<DownloadJobItem>) {
         val latch = CountDownLatch(1)
-        insertDownloadJobItems(items, object: UmResultCallback<Void?> {
+        insertDownloadJobItems(items, object : UmResultCallback<Void?> {
             override fun onDone(result: Void?) {
                 latch.countDown()
             }

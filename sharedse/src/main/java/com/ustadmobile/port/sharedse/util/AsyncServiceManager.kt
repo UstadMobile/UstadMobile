@@ -1,13 +1,10 @@
-package com.ustadmobile.core.util
+package com.ustadmobile.port.sharedse.util
 
 import kotlinx.coroutines.Runnable
-import java.util.ArrayList
-import java.util.Vector
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.jvm.JvmOverloads
-import kotlin.jvm.Volatile
 
 /**
  * Utility class to help manage a service that starts and stops asynchronously.

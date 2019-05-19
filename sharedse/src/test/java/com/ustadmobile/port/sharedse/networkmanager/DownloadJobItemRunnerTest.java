@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.WaitForLiveData;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.networkmanager.DownloadJobItemManagerList;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -444,7 +443,7 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
-        clientDb.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
+        clientDb.getConnectivityStatusDao().updateStateAsync(ConnectivityStatus.STATE_METERED, null);
 
         WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
                 item.getDjiUid()), MAX_LATCH_WAITING_TIME,
@@ -507,7 +506,7 @@ public class DownloadJobItemRunnerTest {
                 new DownloadJobItemRunner(context,item, mockedNetworkManager, clientDb, clientRepo,
                         cloudEndPoint, connectivityStatus);
 
-        clientDb.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_METERED, null);
+        clientDb.getConnectivityStatusDao().updateStateAsync(ConnectivityStatus.STATE_METERED, null);
 
 
 
@@ -556,7 +555,7 @@ public class DownloadJobItemRunnerTest {
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(MAX_THREAD_SLEEP_TIME));
 
-        clientDb.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+        clientDb.getConnectivityStatusDao().updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED, null);
 
 
         WaitForLiveData.INSTANCE.observeUntil(clientDb.getDownloadJobItemDao().getLiveStatus(
@@ -867,7 +866,7 @@ public class DownloadJobItemRunnerTest {
                         cloudEndPoint, connectivityStatus);
 
         doAnswer((invocation -> {
-            clientDb.getConnectivityStatusDao().updateState(ConnectivityStatus.STATE_CONNECTING_LOCAL,null);
+            clientDb.getConnectivityStatusDao().updateStateAsync(ConnectivityStatus.STATE_CONNECTING_LOCAL,null);
             return null;
         })).when(mockedNetworkManager).connectToWiFi(eq(groupBle.getSsid()), eq(groupBle.getPassphrase()));
 
