@@ -33,8 +33,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
 import com.ustadmobile.core.view.UstadView
-
-import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.atomicfu.atomic
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -43,13 +42,13 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * @author mike
  */
-abstract class UstadBaseController<V : UstadView> (override val context : Any,
-                                                   val arguments: Map<String, String?>, val view: V)
-    :  UmLifecycleOwner {
+abstract class UstadBaseController<V : UstadView>(override val context: Any,
+                                                  val arguments: Map<String, String?>, val view: V)
+    : UmLifecycleOwner {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
 
-    private val lifecycleStatus = AtomicInteger(0)
+    private val lifecycleStatus = atomic(0)
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
@@ -63,7 +62,7 @@ abstract class UstadBaseController<V : UstadView> (override val context : Any,
             }
         }
 
-        lifecycleStatus.set(CREATED)
+        lifecycleStatus.value = CREATED
     }
 
     /**
@@ -76,7 +75,7 @@ abstract class UstadBaseController<V : UstadView> (override val context : Any,
             }
         }
 
-        lifecycleStatus.set(STARTED)
+        lifecycleStatus.value = STARTED
     }
 
     /**
@@ -89,7 +88,7 @@ abstract class UstadBaseController<V : UstadView> (override val context : Any,
             }
         }
 
-        lifecycleStatus.set(RESUMED)
+        lifecycleStatus.value = RESUMED
     }
 
     /**
@@ -102,7 +101,7 @@ abstract class UstadBaseController<V : UstadView> (override val context : Any,
             }
         }
 
-        lifecycleStatus.set(STOPPED)
+        lifecycleStatus.value = STOPPED
     }
 
     /**
@@ -115,13 +114,13 @@ abstract class UstadBaseController<V : UstadView> (override val context : Any,
             }
         }
 
-        lifecycleStatus.set(DESTROYED)
+        lifecycleStatus.value = DESTROYED
     }
 
     override fun addLifecycleListener(listener: UmLifecycleListener) {
         lifecycleListeners.add(listener)
 
-        when (lifecycleStatus.get()) {
+        when (lifecycleStatus.value) {
             CREATED -> listener.onLifecycleCreate(this)
 
             STARTED -> listener.onLifecycleStart(this)

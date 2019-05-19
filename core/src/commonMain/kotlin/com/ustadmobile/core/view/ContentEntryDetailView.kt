@@ -2,9 +2,6 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 
-import java.util.HashMap
-import java.util.Hashtable
-
 interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
     val allKnowAvailabilityStatus: Set<Long>

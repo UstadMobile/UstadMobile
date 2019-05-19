@@ -10,9 +10,10 @@ import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.WebChunkView.Companion.ARG_CONTENT_ENTRY_ID
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView)
     : UstadBaseController<WebChunkView>(context, arguments, view) {
@@ -32,42 +33,39 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
         navigation = arguments[ARG_REFERRER] ?: ""
 
-        contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry> {
-            override fun onSuccess(result: ContentEntry?) {
+        GlobalScope.launch {
+            try {
+                val result = contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.runOnUiThread(Runnable {
                     val resultTitle = result?.title
-                    if(resultTitle != null)
+                    if (resultTitle != null)
                         view.setToolbarTitle(resultTitle)
                 })
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
-            }
-        })
-
-        containerDao.findByUid(containerUid, object : UmCallback<Container> {
-
-            override fun onSuccess(result: Container?) {
-                view.mountChunk(result!!, object : UmCallback<String> {
-                    override fun onSuccess(result: String?) {
-                        if (result != null) {
-                            view.loadUrl(result)
-                        } else {
-                            view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
-                    }
+            } catch (e: Exception) {
+                view.runOnUiThread(Runnable {
+                    view.showError(UstadMobileSystemImpl.instance
+                            .getString(MessageID.error_opening_file, context))
                 })
             }
+        }
 
-            override fun onFailure(exception: Throwable?) {
+        GlobalScope.launch {
+            val result = containerDao.findByUidAsync(containerUid)
+            view.mountChunk(result!!, object : UmCallback<String> {
+                override fun onSuccess(result: String?) {
+                    if (result != null) {
+                        view.loadUrl(result)
+                    } else {
+                        view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
+                    }
+                }
 
-            }
-        })
+                override fun onFailure(exception: Throwable?) {
+                    view.runOnUiThread(Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
+                }
+            })
+
+        }
     }
 
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
