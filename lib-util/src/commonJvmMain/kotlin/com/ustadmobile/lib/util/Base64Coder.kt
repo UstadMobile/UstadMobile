@@ -1,16 +1,11 @@
-package com.ustadmobile.port.sharedse.util
+package com.ustadmobile.lib.util
 
-import java.io.ByteArrayOutputStream
+import kotlinx.io.ByteArrayOutputStream
+import kotlin.jvm.JvmStatic
 
-/**
- * Class responsible for encoding and decoding data
- *
- * @author kileha3
- */
+actual object Base64Coder {
 
-object Base64Coder {
-
-    val table = intArrayOf(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    actual val table = intArrayOf(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1,
             -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
             -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1, -1,
@@ -21,28 +16,28 @@ object Base64Coder {
 
 
     @JvmStatic
-    fun encodeToString(value: String): String {
+    actual fun encodeToString(value: String): String {
         return String(value.toByteArray().encodeBase64())
     }
 
     @JvmStatic
-    fun encodeToByteArray(value: String): ByteArray {
+    actual fun encodeToByteArray(value: String): ByteArray {
         return value.toByteArray().encodeBase64()
     }
 
     @JvmStatic
-    fun encodeToString(value: ByteArray): String {
+    actual fun encodeToString(value: ByteArray): String {
         return String(value.encodeBase64())
     }
 
     @JvmStatic
-    fun decodeBase64(value: String): String {
+    actual fun decodeBase64(value: String): String {
         return  String(value.toByteArray().decodeBase64())
     }
 
 
     @JvmStatic
-    fun decodeToByteArray(value: String): ByteArray {
+    actual fun decodeToByteArray(value: String): ByteArray {
         return value.toByteArray().decodeBase64()
     }
 
