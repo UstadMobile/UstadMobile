@@ -43,7 +43,7 @@ kotlin {
         androidMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-                implementation "androidx.room:room-runtime:2.1.0-beta01"
+                implementation "androidx.room:room-runtime:$version_android_room"
             }
         }
     }

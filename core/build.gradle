@@ -115,6 +115,7 @@ kotlin {
                 implementation project(":lib-util")
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
+                implementation project(':lib-door-runtime')
                 //implementation project(':lib-database')
                 /*  compileOnly project(':lib-database-entities')
                   compileOnly project(':core-compile-only')
@@ -183,6 +184,7 @@ kotlin {
                 implementation "com.android.support:appcompat-v7:$version_android_support_lib"
                 implementation "com.android.support:support-v4:$version_android_support_lib"
                 implementation "com.soywiz:klock-android:$version_klock"
+                implementation "androidx.room:room-runtime:$version_android_room"
             }
             dependsOn commonJvmMain
         }

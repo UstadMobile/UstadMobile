@@ -279,7 +279,7 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
-    implementation "android.arch.persistence.room:runtime:$version_android_room"
+    implementation "androidx.room:room-runtime:$version_android_room"
 
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"

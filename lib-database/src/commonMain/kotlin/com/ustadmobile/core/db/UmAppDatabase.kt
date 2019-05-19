@@ -3,7 +3,6 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.lib.database.annotation.UmClearAll
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing
@@ -115,9 +114,6 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     // val deviceBits: Int
     //     get() = syncablePrimaryKeyDao.getDeviceBits()
-
-    @UmClearAll
-    abstract fun clearAllTables()
 
     @UmRepository
     abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
