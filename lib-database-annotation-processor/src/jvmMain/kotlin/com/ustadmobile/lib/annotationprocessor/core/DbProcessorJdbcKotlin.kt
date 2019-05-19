@@ -144,6 +144,21 @@ fun overrideAndConvertToKotlin(method: ExecutableElement, enclosing: DeclaredTyp
 
 }
 
+fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeMirror, processingEnv: ProcessingEnvironment): String {
+    var methodName = "insert"
+    if(isList(paramType, processingEnv)) {
+        methodName += "List"
+        if(returnType.kind != TypeKind.VOID)
+            methodName += "AndReturnIds"
+    }else {
+        if(returnType.kind != TypeKind.VOID) {
+            methodName += "AndReturnId"
+        }
+    }
+
+    return methodName
+}
+
 private fun getPreparedStatementSetterGetterTypeName(variableType: TypeMirror, processingEnv: ProcessingEnvironment): String? {
     if (variableType.kind == TypeKind.BYTE) {
         return "Byte"
@@ -369,58 +384,71 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val insertFun = overrideAndConvertToKotlin(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv)
 
+        val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
+                daoMethod) as ExecutableType
+
+
         val entityType = entityTypeFromFirstParam(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv)
+
         val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
 
-        val fieldNames = mutableListOf<String>()
-        val parameterHolders = mutableListOf<String>()
+        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}"
+        if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
+            val fieldNames = mutableListOf<String>()
+            val parameterHolders = mutableListOf<String>()
 
-        val bindCodeBlock = CodeBlock.builder().add("var _fieldIndex = 1\n")
+            val bindCodeBlock = CodeBlock.builder().add("var _fieldIndex = 1\n")
 
-        for(subEl in entityTypeEl.enclosedElements) {
-            if(subEl.kind != ElementKind.FIELD)
-                continue
+            for(subEl in entityTypeEl.enclosedElements) {
+                if(subEl.kind != ElementKind.FIELD)
+                    continue
 
-            fieldNames.add(subEl.simpleName.toString())
-            val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
-            if(pkAnnotation != null && pkAnnotation.autoGenerate) {
-                parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
-                bindCodeBlock.add("when(entity.${subEl.simpleName}){ 0L -> stmt.setObject(_fieldIndex++, null) else -> stmt.setLong(_fieldIndex++, entity.${subEl.simpleName})  }\n")
-            }else {
-                parameterHolders.add("?")
-                bindCodeBlock.add("stmt.set${getPreparedStatementSetterGetterTypeName(subEl.asType(),
-                        processingEnv)}(_fieldIndex++, entity.${subEl.simpleName})\n")
+                fieldNames.add(subEl.simpleName.toString())
+                val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
+                if(pkAnnotation != null && pkAnnotation.autoGenerate) {
+                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
+                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ 0L -> stmt.setObject(_fieldIndex++, null) else -> stmt.setLong(_fieldIndex++, entity.${subEl.simpleName})  }\n")
+                }else {
+                    parameterHolders.add("?")
+                    bindCodeBlock.add("stmt.set${getPreparedStatementSetterGetterTypeName(subEl.asType(),
+                            processingEnv)}(_fieldIndex++, entity.${subEl.simpleName})\n")
+                }
             }
+
+
+            val sql = """INSERT INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()}) VALUES (${parameterHolders.joinToString()}) """
+
+            val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
+                    .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
+                    .addSuperclassConstructorParameter("_db.jdbcDbType")
+                    .addFunction(FunSpec.builder("makeSql")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addCode("return \"\"\"%L\"\"\"", sql).build())
+                    .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addParameter("stmt", PreparedStatement::class)
+                            .addParameter("entity", entityType.asTypeName())
+                            .addCode(bindCodeBlock.build()).build())
+
+            daoTypeBuilder.addProperty(PropertySpec.builder(entityInserterPropName,
+                    EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
+                    .initializer("%L", insertAdapterSpec.build())
+                    .build())
         }
 
 
+        val returnType = daoMethodResolved.returnType
 
-        val sql = """INSERT INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()}) VALUES (${parameterHolders.joinToString()}) """
-        println(sql)
+        if(returnType.kind != TypeKind.VOID) {
+            insertFun.addCode("return ")
+        }
 
-        val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
-                .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
-                .addSuperclassConstructorParameter("_db.jdbcDbType")
-                .addFunction(FunSpec.builder("makeSql")
-                        .addModifiers(KModifier.OVERRIDE)
-                        .addCode("return \"\"\"%L\"\"\"", sql).build())
-                .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
-                        .addModifiers(KModifier.OVERRIDE)
-                        .addParameter("stmt", PreparedStatement::class)
-                        .addParameter("entity", entityType.asTypeName())
-                        .addCode(bindCodeBlock.build()).build())
-
-        daoTypeBuilder.addProperty(PropertySpec.builder("_insertAdapter",
-                EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
-                .initializer("%L", insertAdapterSpec.build())
-                .build())
-
-
-        insertFun.addCode("_insertAdapter.insertList(${daoMethod.parameters[0].simpleName}, _db.openConnection(), _db.jdbcDbType)\n")
+        val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
+                daoMethodResolved.returnType, processingEnv)
+        insertFun.addCode("${entityInserterPropName}.${insertMethodName}(${daoMethod.parameters[0].simpleName}, _db.openConnection())\n")
         return insertFun.build()
     }
-
 
 
 

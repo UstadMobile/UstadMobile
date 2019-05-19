@@ -9,4 +9,7 @@ abstract class ExampleDao2 {
     @Insert
     abstract fun insertList(entityList: List<ExampleEntity2>)
 
+    @Insert
+    abstract fun insertOtherList(entityList: List<ExampleEntity2>)
+
 }
