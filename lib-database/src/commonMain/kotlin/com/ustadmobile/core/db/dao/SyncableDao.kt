@@ -2,17 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import com.ustadmobile.lib.database.annotation.UmRestAccessible
-import com.ustadmobile.lib.database.annotation.UmRestAuthorizedUidParam
-import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanInsert
-import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate
-import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges
-import com.ustadmobile.lib.database.annotation.UmSyncFindAllChanges
-import com.ustadmobile.lib.database.annotation.UmSyncFindLocalChanges
-import com.ustadmobile.lib.database.annotation.UmSyncIncoming
-import com.ustadmobile.lib.database.annotation.UmSyncOutgoing
-import com.ustadmobile.lib.db.sync.SyncResponse
-import com.ustadmobile.lib.db.sync.UmSyncExistingEntity
+import com.ustadmobile.lib.database.annotation.*
 
 /**
  * A base interface for DAOs which support synchronization.
@@ -46,9 +36,9 @@ interface SyncableDao<T, D> : BaseDao<T> {
      */
     @UmSyncIncoming
     @UmRestAccessible
-    fun handleIncomingSync(incomingChanges: List<T>, fromLocalChangeSeqNum: Long,
+   /* fun handleIncomingSync(incomingChanges: List<T>, fromLocalChangeSeqNum: Long,
                            fromMasterChangeSeqNum: Long, @UmRestAuthorizedUidParam userId: Long,
-                           deviceId: Int, limit: Int): SyncResponse<T>
+                           deviceId: Int, limit: Int): SyncResponse<T> */
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun replaceList(entities: List<T>)
@@ -82,7 +72,7 @@ interface SyncableDao<T, D> : BaseDao<T> {
                            deviceId: Int, limit: Int): List<T>
 
     @UmSyncCheckIncomingCanUpdate
-    fun syncFindExistingEntities(primaryKeys: List<Long>, accountPersonUid: Long): List<UmSyncExistingEntity>
+    //fun syncFindExistingEntities(primaryKeys: List<Long>, accountPersonUid: Long): List<UmSyncExistingEntity>
 
     @UmSyncCheckIncomingCanInsert
     fun syncAccountCanInsert(accountPersonUid: Long): Boolean

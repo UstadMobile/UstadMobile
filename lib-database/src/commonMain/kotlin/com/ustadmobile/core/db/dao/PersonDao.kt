@@ -2,20 +2,17 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.authenticateEncryptedPassword
+import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 
 @UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
@@ -24,16 +21,6 @@ import kotlin.random.Random
 @Dao
 @UmRepository
 abstract class PersonDao : SyncableDao<Person, PersonDao> {
-
-    @Query("SELECT (((SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY + ") << 32) \n" +
-            "           | (SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = " + Person.TABLE_ID + " )) AS newPrimaryKey")
-    protected abstract fun primaryKey(): Long
-
-    @Query("SELECT sequenceNumber FROM SyncablePrimaryKey WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun sequenceNum(): Int
-
-    @Query("SELECT deviceBits FROM SyncDeviceBits WHERE id = " + SyncDeviceBits.PRIMARY_KEY)
-    abstract fun deviceBits(): Long
 
     internal inner class PersonUidAndPasswordHash {
         var passwordHash: String = ""
@@ -50,7 +37,7 @@ abstract class PersonDao : SyncableDao<Person, PersonDao> {
             null
         } else if (person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX) && person.passwordHash.substring(2) != password) {
             null
-        } else if (person.passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) && !PersonAuthDao.authenticateEncryptedPassword(password,
+        } else if (person.passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) && !authenticateEncryptedPassword(password,
                         person.passwordHash.substring(2))) {
             null
         } else {
@@ -69,7 +56,7 @@ abstract class PersonDao : SyncableDao<Person, PersonDao> {
             //OK to go ahead and create
             newPerson.personUid = insert(newPerson)
             val newPersonAuth = PersonAuth(newPerson.personUid,
-                    ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(password))
+                    ENCRYPTED_PASS_PREFIX + encryptPassword(password))
             insertPersonAuth(newPersonAuth)
             return onSuccessCreateAccessTokenAsync(newPerson.personUid, newPerson.username!!)
         } else {
@@ -82,9 +69,6 @@ abstract class PersonDao : SyncableDao<Person, PersonDao> {
 
     @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
     protected abstract fun incrementPrimaryKey()
-
-    @Insert
-    abstract fun insertDeviceBits(deviceBits: SyncDeviceBits)
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,

@@ -118,7 +118,7 @@ abstract class UmAppDatabase : RoomDatabase() {
     abstract fun clearAllTables()
 
     @UmRepository
-    abstract fun getRepository(baseUrl: String, auth: String): UmAppDatabase
+    abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
 
     @UmSyncOutgoing
     abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
@@ -141,7 +141,6 @@ abstract class UmAppDatabase : RoomDatabase() {
         @Volatile
         private var instance: UmAppDatabase? = null
 
-        @Volatile
         private val namedInstances = mutableMapOf<String, UmAppDatabase>()
 
         /**
@@ -170,7 +169,7 @@ abstract class UmAppDatabase : RoomDatabase() {
         }
 
         @Synchronized
-        fun getInstance(context: Any): UmAppDatabase? {
+        fun getInstance(context: Any): UmAppDatabase {
             if (instance == null) {
                /* var builder = UmDbBuilder
                         .builder(UmAppDatabase::class, context)
@@ -178,7 +177,7 @@ abstract class UmAppDatabase : RoomDatabase() {
                 instance = addCallbacks(builder).build() */
             }
 
-            return instance
+            return instance!!
         }
 
         @Synchronized

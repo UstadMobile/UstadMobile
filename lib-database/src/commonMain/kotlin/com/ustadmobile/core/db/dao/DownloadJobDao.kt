@@ -126,7 +126,7 @@ abstract class DownloadJobDao {
     abstract suspend fun getEntryTitleByJobUidAsync(downloadJobId: Long): String?
 
     @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :downloadJobId")
-    abstract fun updateStatus(downloadJobId: Int, djStatus: Byte)
+    abstract fun updateStatus(downloadJobId: Int, djStatus: Int)
 
     @Query("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
     abstract fun findDownloadJobUidByRootContentEntryUid(rootContentEntryUid: Long): Long

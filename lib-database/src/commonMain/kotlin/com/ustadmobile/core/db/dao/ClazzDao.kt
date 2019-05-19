@@ -10,7 +10,6 @@ import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CON
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.database.annotation.UmSyncCheckIncomingCanUpdate
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.Location
@@ -49,13 +48,13 @@ abstract class ClazzDao : SyncableDao<Clazz, ClazzDao> {
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
     abstract suspend fun personHasPermission(accountPersonUid: Long, permission: Long): Boolean
 
-    @Query("SELECT Clazz.clazzUid as primaryKey, " +
-            "(" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
-            " AS userCanUpdate " +
-            " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
-    @UmSyncCheckIncomingCanUpdate
-    abstract override fun syncFindExistingEntities(primaryKeys: List<Long>,
-                                                   accountPersonUid: Long): List<UmSyncExistingEntity>
+//    @Query("SELECT Clazz.clazzUid as primaryKey, " +
+//            "(" + ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_UPDATE + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") " +
+//            " AS userCanUpdate " +
+//            " FROM Clazz WHERE Clazz.clazzUid in (:primaryKeys)")
+//    @UmSyncCheckIncomingCanUpdate
+//    abstract override fun syncFindExistingEntities(primaryKeys: List<Long>,
+//                                                   accountPersonUid: Long): List<UmSyncExistingEntity>
 
     @Query("SELECT COUNT(*) FROM Clazz " +
             "WHERE " +
