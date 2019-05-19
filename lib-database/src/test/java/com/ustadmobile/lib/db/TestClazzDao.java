@@ -47,14 +47,14 @@ public class TestClazzDao extends AbstractDaoTest{
                 clientDb.getClazzDao().findByUid(otherClazz.getClazzUid()));
 
         AtomicReferenceCallback<Boolean> callbackRef = new AtomicReferenceCallback<>();
-        clientDb.getClazzDao().personHasPermission(accountPerson.getPersonUid(),
+        clientDb.getClazzDao().personHasPermissionAsync(accountPerson.getPersonUid(),
                 myClazz.getClazzUid(), Role.PERMISSION_CLAZZ_SELECT, callbackRef);
         Assert.assertTrue("DAO answers that user has permission to select their clazz",
                 callbackRef.getResult(5, TimeUnit.SECONDS));
 
 
         callbackRef = new AtomicReferenceCallback<>();
-        clientDb.getClazzDao().personHasPermission(accountPerson.getPersonUid(),
+        clientDb.getClazzDao().personHasPermissionAsync(accountPerson.getPersonUid(),
                 otherClazz.getClazzUid(), Role.PERMISSION_CLAZZ_SELECT, callbackRef);
         Assert.assertFalse("DAO answers that user does not have permission to selec other clazz",
                 callbackRef.getResult(5, TimeUnit.SECONDS));

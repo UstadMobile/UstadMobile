@@ -8,7 +8,6 @@ import com.ustadmobile.lib.db.entities.ContainerEntry;
 import com.ustadmobile.lib.db.entities.ContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile;
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5;
-import com.ustadmobile.port.sharedse.util.Base64Coder;
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 
 import java.io.File;

@@ -114,7 +114,7 @@ public class AbstractDaoTest {
 
         AtomicReferenceCallback<UmAccount> callbackRef = new AtomicReferenceCallback<>();
         clientDb.getRepository(TEST_URI, "").getPersonDao()
-                .login(TEST_USERNAME, TEST_PASSWORD, callbackRef);
+                .loginAsync(TEST_USERNAME, TEST_PASSWORD, callbackRef);
 
         accessToken = callbackRef.getResult(5, TimeUnit.SECONDS).getAuth();
         clientRepo = clientDb.getRepository(TEST_URI, accessToken);

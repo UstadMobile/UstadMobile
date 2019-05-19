@@ -2,7 +2,14 @@ package com.ustadmobile.core.impl
 
 import kotlinx.io.InputStream
 
-actual class UstadMobileSystemImpl :UstadMobileSystemCommon() {
+/**
+ * SystemImpl provides system methods for tasks such as copying files, reading
+ * http streams etc. independently of the underlying system.
+ *
+ *
+ * @author mike, kileha3
+ */
+actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -165,6 +172,10 @@ actual class UstadMobileSystemImpl :UstadMobileSystemCommon() {
          *
          * @return A singleton instance
          */
-        actual val instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
+        actual val instance: UstadMobileSystemImpl
+            get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
     }
+
+
 }

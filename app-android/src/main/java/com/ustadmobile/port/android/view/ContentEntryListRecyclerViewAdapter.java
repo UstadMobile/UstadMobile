@@ -16,8 +16,6 @@ import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener;
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor;
 import com.ustadmobile.lib.db.entities.ContentEntry;
@@ -25,6 +23,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus;
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid;
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
+import com.ustadmobile.port.sharedse.networkmanager.DownloadJobItemManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;

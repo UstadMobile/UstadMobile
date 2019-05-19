@@ -9,21 +9,18 @@ import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
-import com.ustadmobile.core.networkmanager.DownloadJobItemManager
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
+import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.getSystemTimeInMillis
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
-import kotlinx.atomicfu.AtomicBoolean
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -34,7 +31,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
-        DownloadJobItemManager.OnDownloadJobItemChangeListener {
+        OnDownloadJobItemChangeListener {
 
     private var navigation: String? = null
 
@@ -78,73 +75,52 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments.getValue(ARG_REFERRER) ?: ""
 
-        contentEntryDao.getContentByUuid(entryUuid, object : UmCallback<ContentEntry?> {
-            override fun onSuccess(result: ContentEntry?) {
-                if (result != null) {
-                    val licenseType = getLicenseType(result)
-                    view.runOnUiThread(Runnable {
-                        view.setContentEntryLicense(licenseType)
-                        with(result) {
-                            val contentEntryAuthor = author
-                            if (contentEntryAuthor != null)
-                                view.setContentEntryAuthor(contentEntryAuthor)
+        GlobalScope.launch {
+            val result = contentEntryDao.getContentByUuidAsync(entryUuid)
+            if (result != null) {
+                val licenseType = getLicenseType(result)
+                view.runOnUiThread(Runnable {
+                    view.setContentEntryLicense(licenseType)
+                    with(result) {
+                        val contentEntryAuthor = author
+                        if (contentEntryAuthor != null)
+                            view.setContentEntryAuthor(contentEntryAuthor)
 
-                            val contentEntryTitle = title
-                            if (contentEntryTitle != null)
-                                view.setContentEntryTitle(contentEntryTitle)
+                        val contentEntryTitle = title
+                        if (contentEntryTitle != null)
+                            view.setContentEntryTitle(contentEntryTitle)
 
-                            val contentEntryDesc = description
-                            if (contentEntryDesc != null)
-                                view.setContentEntryDesc(contentEntryDesc)
+                        val contentEntryDesc = description
+                        if (contentEntryDesc != null)
+                            view.setContentEntryDesc(contentEntryDesc)
 
-                            val contentThumbnailUrl = thumbnailUrl
-                            if (!contentThumbnailUrl.isNullOrEmpty())
-                                view.loadEntryDetailsThumbnail(contentThumbnailUrl)
-                        }
-                    })
-                }
-
-            }
-
-            override fun onFailure(exception: Throwable?) {
-            }
-        })
-
-        containerDao!!.findFilesByContentEntryUid(entryUuid, object : UmCallback<List<Container>> {
-            override fun onSuccess(result: List<Container>?) {
-                if (result != null) {
-                    view.runOnUiThread(Runnable {
-                        view.setDetailsButtonEnabled(result.isNotEmpty())
-                        if (result.isNotEmpty()) {
-                            val container = result[0]
-                            view.setDownloadSize(container.fileSize)
-                        }
-                    })
-                }
-            }
-
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
-
-        contentRelatedEntryDao.findAllTranslationsForContentEntry(entryUuid,
-                object : UmCallback<List<ContentEntryRelatedEntryJoinWithLanguage>> {
-
-                    override fun onSuccess(result: List<ContentEntryRelatedEntryJoinWithLanguage>?) {
-                        if (result != null) {
-                            view.runOnUiThread(Runnable {
-                                view.setTranslationLabelVisible(result.isNotEmpty())
-                                view.setFlexBoxVisible(result.isNotEmpty())
-                                view.setAvailableTranslations(result, entryUuid)
-                            })
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-
+                        val contentThumbnailUrl = thumbnailUrl
+                        if (!contentThumbnailUrl.isNullOrEmpty())
+                            view.loadEntryDetailsThumbnail(contentThumbnailUrl)
                     }
                 })
+            }
+        }
+
+        GlobalScope.launch {
+            val result = containerDao!!.findFilesByContentEntryUid(entryUuid)
+            view.runOnUiThread(Runnable {
+                view.setDetailsButtonEnabled(result.isNotEmpty())
+                if (result.isNotEmpty()) {
+                    val container = result[0]
+                    view.setDownloadSize(container.fileSize)
+                }
+            })
+        }
+
+        GlobalScope.launch {
+            val result = contentRelatedEntryDao.findAllTranslationsForContentEntryAsync(entryUuid)
+            view.runOnUiThread(Runnable {
+                view.setTranslationLabelVisible(result.isNotEmpty())
+                view.setFlexBoxVisible(result.isNotEmpty())
+                view.setAvailableTranslations(result, entryUuid)
+            })
+        }
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
@@ -186,7 +162,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
                     object : UmResultCallback<DownloadJobItemStatus?> {
                         override fun onDone(result: DownloadJobItemStatus?) {
-                            onDownloadJobItemChange(result)
+                            onDownloadJobItemChange(result, result?.jobItemUid ?: 0)
                         }
                     })
             view.setDownloadButtonVisible(false)
@@ -252,11 +228,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, manager: DownloadJobItemManager) {
-        onDownloadJobItemChange(status)
-    }
-
-    fun onDownloadJobItemChange(status: DownloadJobItemStatus?) {
+    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
         if (status != null && status.contentEntryUid == entryUuid) {
             view.runOnUiThread(Runnable {
                 view.updateDownloadProgress(

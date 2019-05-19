@@ -2,8 +2,6 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 
-import java.util.HashMap
-
 interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
     val allKnowAvailabilityStatus: Set<Long>
@@ -49,7 +47,7 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
 
     fun setDownloadButtonClickableListener(isDownloadComplete: Boolean)
 
-    fun showDownloadOptionsDialog(args: HashMap<String, String>)
+    fun showDownloadOptionsDialog(hashtable: HashMap<String, String>)
 
     companion object {
 

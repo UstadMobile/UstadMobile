@@ -61,8 +61,8 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
             UstadMobileSystemImpl.Companion.getInstance().go(AboutView.VIEW_NAME, getContext());
         } else if (itemId == R.id.action_clear_history) {
             UmAppDatabase database = UmAppDatabase.getInstance(this);
-            database.getNetworkNodeDao().deleteAll(null);
-            database.getEntryStatusResponseDao().deleteAll(null);
+            database.getNetworkNodeDao().deleteAllAsync(null);
+            database.getEntryStatusResponseDao().deleteAllAsync(null);
             database.getDownloadJobItemHistoryDao().deleteAll(null);
             database.getDownloadJobDao().deleteAll(null);
             database.getDownloadJobItemDao().deleteAll(null);
