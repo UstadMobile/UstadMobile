@@ -139,23 +139,54 @@ fun overrideAndConvertToKotlin(method: ExecutableElement, enclosing: DeclaredTyp
     val funSpec = FunSpec.builder(method.simpleName.toString())
             .addModifiers(KModifier.OVERRIDE)
     val resolvedExecutableType = processingEnv.typeUtils.asMemberOf(enclosing, method) as ExecutableType
+
+    var suspendedReturnType = null as TypeName?
     for(i in 0 until method.parameters.size) {
-        funSpec.addParameter(method.parameters[i].simpleName.toString(),
-                resolvedExecutableType.parameterTypes[i].asTypeName().javaToKotlinType())
+        val resolvedTypeName = resolvedExecutableType.parameterTypes[i].asTypeName().javaToKotlinType()
+
+        if(isContinuationParam(resolvedTypeName)) {
+            suspendedReturnType = suspendedReturnTypeFromContinuationParam(resolvedTypeName)
+            funSpec.addModifiers(KModifier.SUSPEND)
+        }else {
+            funSpec.addParameter(method.parameters[i].simpleName.toString(), resolvedTypeName)
+        }
     }
 
-    funSpec.returns(resolvedExecutableType.returnType.asTypeName().javaToKotlinType())
+    if(suspendedReturnType != null && suspendedReturnType != UNIT) {
+        funSpec.returns(suspendedReturnType)
+    }else if(suspendedReturnType == null) {
+        funSpec.returns(resolvedExecutableType.returnType.asTypeName().javaToKotlinType())
+    }
+
     return funSpec
 }
 
-fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeMirror, processingEnv: ProcessingEnvironment): String {
+fun isContinuationParam(paramTypeName: TypeName) = paramTypeName is ParameterizedTypeName &&
+        paramTypeName.rawType.canonicalName == "kotlin.coroutines.Continuation"
+
+fun suspendedReturnTypeFromContinuationParam(continuationParam: TypeName) =
+        (((continuationParam as ParameterizedTypeName).typeArguments[0] as WildcardTypeName).inTypes[0] as ClassName).javaToKotlinType()
+
+/**
+ * Figures out the return type of a method. This will also figure out the return type of a suspended method
+ */
+fun resolveReturnTypeIfSuspended(method: ExecutableType) : TypeName {
+    val continuationParam = method.parameterTypes.firstOrNull { isContinuationParam(it.asTypeName()) }
+    if(continuationParam != null) {
+        return suspendedReturnTypeFromContinuationParam(continuationParam.asTypeName())
+    }else {
+        return method.returnType.asTypeName()
+    }
+}
+
+fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeName, processingEnv: ProcessingEnvironment): String {
     var methodName = "insert"
     if(isList(paramType, processingEnv)) {
         methodName += "List"
-        if(returnType.kind != TypeKind.VOID)
+        if(returnType != UNIT)
             methodName += "AndReturnIds"
     }else {
-        if(returnType.kind != TypeKind.VOID) {
+        if(returnType != UNIT) {
             methodName += "AndReturnId"
         }
     }
@@ -398,7 +429,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
 
         val upsertMode = daoMethod.getAnnotation(Insert::class.java).onConflict == OnConflictStrategy.REPLACE
-        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_upsert$upsertMode"
+        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""} "
         if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
             val fieldNames = mutableListOf<String>()
             val parameterHolders = mutableListOf<String>()
@@ -463,8 +494,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             insertFun.addCode("return ")
         }
 
+        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved)
         val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
-                daoMethodResolved.returnType, processingEnv)
+                resolvedReturnType, processingEnv)
         insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())\n")
         return insertFun.build()
     }
