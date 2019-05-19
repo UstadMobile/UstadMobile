@@ -64,7 +64,7 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
 
     //Room persistence
-    implementation "android.arch.persistence.room:runtime:$version_android_room"
+    implementation "androidx.room:room-runtime:$version_android_room"
     annotationProcessor "android.arch.persistence.room:compiler:$version_android_room"
 
     // Paging

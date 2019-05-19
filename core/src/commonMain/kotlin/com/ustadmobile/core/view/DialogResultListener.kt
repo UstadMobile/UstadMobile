@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view
 
-import java.util.Hashtable
-
 /**
  *
  *
@@ -15,6 +13,6 @@ interface DialogResultListener {
      * @param commandId
      * @param args
      */
-    fun onDialogResult(commandId: Int, dialog: DismissableDialog, args: Hashtable<*, *>)
+    fun onDialogResult(commandId: Int, dialog: DismissableDialog, args: MutableMap<*, *>)
 
 }

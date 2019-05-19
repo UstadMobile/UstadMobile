@@ -4,14 +4,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-
-import java.util.HashMap
+import kotlinx.coroutines.launch
 
 class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View)
     : UstadBaseController<Register2View>(context, arguments, view) {
@@ -58,54 +56,36 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
         view.runOnUiThread(Runnable { view.setInProgress(true) })
 
         val systemImpl = UstadMobileSystemImpl.instance
-        if (umAppDatabase == null) {
+        if (umAppDatabase === null) {
             umAppDatabase = UmAppDatabase.getInstance(context).getRepository(serverUrl,
                     "")
         }
 
-        if (repo == null) {
+        if (repo === null) {
             repo = UmAccountManager.getRepositoryForActiveAccount(context)
         }
 
-        repo!!.personDao
-                .register(person, password, object : UmCallback<UmAccount> {
-                    override fun onSuccess(result: UmAccount?) {
-                        if (result != null) {
-                            person.personUid = result.personUid
-                            umAppDatabase!!.personDao.insertAsync(person, object : UmCallback<Long> {
-                                override fun onSuccess(personUid: Long?) {
-                                    result.endpointUrl = serverUrl
-                                    view.runOnUiThread(Runnable { view.setInProgress(false) })
-                                    UmAccountManager.setActiveAccount(result, context)
-                                    systemImpl.go(mNextDest, context)
-                                }
+        GlobalScope.launch {
 
-                                override fun onFailure(exception: Throwable?) {
-                                    //simple insert - this should not happen
-                                    view.runOnUiThread(Runnable {
-                                        view.setErrorMessageView(systemImpl.getString(
-                                                MessageID.err_registering_new_user, context))
-                                    })
-                                }
-                            })
-
-                        } else {
-                            view.runOnUiThread (Runnable{
-                                view.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
-                                        context))
-                                view.setInProgress(false)
-                            })
-                        }
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        view.runOnUiThread(Runnable {
-                            view.setInProgress(false)
-                            view.setErrorMessageView(systemImpl.getString(
-                                    MessageID.login_network_error, context))
-                        })
-                    }
+            try {
+                val result = repo!!.personDao.registerAsync(person, password)
+                if (result != null) {
+                    person.personUid = result.personUid
+                    umAppDatabase!!.personDao.insertAsync(person)
+                    result.endpointUrl = serverUrl
+                    view.runOnUiThread(Runnable { view.setInProgress(false) })
+                    UmAccountManager.setActiveAccount(result, context)
+                    systemImpl.go(mNextDest, context)
+                }
+            } catch (e: Exception) {
+                view.runOnUiThread(Runnable {
+                    view.setErrorMessageView(systemImpl.getString(MessageID.err_registering_new_user,
+                            context))
+                    view.setInProgress(false)
                 })
+            }
+
+        }
     }
 
     companion object {

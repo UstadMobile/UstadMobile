@@ -42,6 +42,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
             }
         }
 

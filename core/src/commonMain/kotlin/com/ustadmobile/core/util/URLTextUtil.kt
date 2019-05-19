@@ -21,9 +21,10 @@
 package com.ustadmobile.core.util
 
 
+import kotlinx.io.charsets.Charset
+import kotlinx.io.core.String
+import kotlinx.io.core.toByteArray
 import kotlinx.serialization.toUtf8Bytes
-import java.io.UnsupportedEncodingException
-import java.nio.charset.Charset
 
 
 /**
@@ -103,7 +104,7 @@ class URLTextUtil {
                     when (bytes[count]) {
                         '+'.toByte() -> decodeBytes[decodedByteCount++] = ' '.toByte()
 
-                        '%'.toByte()  -> decodeBytes[decodedByteCount++] = ((HEX_DIGITS.indexOf(HEX_DIGITS,bytes[++count].toInt()) shl 4) + HEX_DIGITS.indexOf(HEX_DIGITS,bytes[++count].toInt())).toByte()
+                        '%'.toByte() -> decodeBytes[decodedByteCount++] = ((HEX_DIGITS.indexOf(HEX_DIGITS, bytes[++count].toInt()) shl 4) + HEX_DIGITS.indexOf(HEX_DIGITS, bytes[++count].toInt())).toByte()
 
                         else -> decodeBytes[decodedByteCount++] = bytes[count]
                     }
@@ -116,11 +117,7 @@ class URLTextUtil {
 
             var processedPageName: String?
 
-            try {
-                processedPageName = String(decodeBytes, 0, decodedByteCount, Charset.forName(encoding))
-            } catch (e: UnsupportedEncodingException) {
-                throw UnsupportedEncodingException("UTF-8 encoding not supported on this platform")
-            }
+            processedPageName = String(decodeBytes, 0, decodedByteCount, Charset.forName(encoding))
 
             return processedPageName
         }
@@ -137,15 +134,9 @@ class URLTextUtil {
                 return ""
             }
 
-            val rs: ByteArray
+            val rs: ByteArray = text.toUtf8Bytes()
 
-            try {
-                rs = text.toUtf8Bytes()
-                return urlEncode(rs)
-            } catch (e: UnsupportedEncodingException) {
-                throw RuntimeException("UTF-8 not supported!?!")
-            }
-
+            return urlEncode(rs)
         }
 
         /**
@@ -156,15 +147,9 @@ class URLTextUtil {
          * @return A plain, normal string.
          */
         fun urlDecodeUTF8(utf8: String?): String? {
-            val rs: String?
+            val rs: String? = urlDecode(utf8?.toByteArray(Charset.forName("ISO-8859-1")), "UTF-8")
 
             if (utf8 == null) return null
-
-            try {
-                rs = urlDecode(utf8.toByteArray(charset("ISO-8859-1")), "UTF-8")
-            } catch (e: UnsupportedEncodingException) {
-                throw RuntimeException("UTF-8 or ISO-8859-1 not supported!?!")
-            }
 
             return rs
         }
@@ -185,14 +170,9 @@ class URLTextUtil {
             // Presumably, the same caveats apply as in FileSystemProvider.
             // Don't see why it would be horribly kludgy, though.
             if ("UTF-8" == encoding) {
-                return URLTextUtil.urlEncodeUTF8(data)
+                return urlEncodeUTF8(data)
             }
-
-            try {
-                return URLTextUtil.urlEncode(data.toByteArray(charset(encoding)))
-            } catch (uee: UnsupportedEncodingException) {
-                throw RuntimeException("Could not encode String into$encoding")
-            }
+            return urlEncode(data.toByteArray(Charset.forName(encoding)))
 
         }
 
@@ -214,14 +194,9 @@ class URLTextUtil {
             // Presumably, the same caveats apply as in FileSystemProvider.
             // Don't see why it would be horribly kludgy, though.
             if ("UTF-8" == encoding) {
-                return URLTextUtil.urlDecodeUTF8(data)
+                return urlDecodeUTF8(data)
             }
-
-            try {
-                return URLTextUtil.urlDecode(data.toByteArray(charset(encoding)), encoding)
-            } catch (uee: UnsupportedEncodingException) {
-                throw RuntimeException("Could not decode String into$encoding")
-            }
+            return urlDecode(data.toByteArray(Charset.forName(encoding)), encoding)
 
         }
     }

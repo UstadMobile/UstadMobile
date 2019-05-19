@@ -41,7 +41,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
-import com.ustadmobile.core.util.AsyncServiceManager;
 import com.ustadmobile.lib.db.entities.ConnectivityStatus;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -51,6 +50,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle;
+import com.ustadmobile.port.sharedse.util.AsyncServiceManager;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -465,7 +465,7 @@ public class NetworkManagerAndroidBle extends NetworkManagerBle
         connectivityStatusRef.set(new ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null));
         umAppDatabase.getConnectivityStatusDao()
-                .updateState(ConnectivityStatus.STATE_DISCONNECTED, null);
+                .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED, null);
     }
 
 

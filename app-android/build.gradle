@@ -16,6 +16,7 @@ buildscript {
         classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
@@ -24,6 +25,7 @@ apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlinx-serialization'
 
 
 configurations.all {
@@ -268,6 +270,7 @@ dependencies {
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
     androidTestImplementation project(":core-tests")
 
@@ -276,7 +279,7 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
-    implementation "android.arch.persistence.room:runtime:$version_android_room"
+    implementation "androidx.room:room-runtime:$version_android_room"
 
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"

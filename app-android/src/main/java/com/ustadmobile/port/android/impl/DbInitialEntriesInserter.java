@@ -19,9 +19,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
+import kotlinx.io.InputStream;
 
 import androidx.work.ListenableWorker;
 import androidx.work.Worker;

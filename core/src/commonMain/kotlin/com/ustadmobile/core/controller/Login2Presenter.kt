@@ -4,11 +4,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login2View)
     : UstadBaseController<Login2View>(context, arguments, view) {
@@ -40,31 +40,31 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
         val loginRepoDb = UmAppDatabase.getInstance(context).getRepository(serverUrl,
                 "")
         val systemImpl = UstadMobileSystemImpl.instance
-        loginRepoDb.personDao.login(username, password, object : UmCallback<UmAccount> {
-            override fun onSuccess(result: UmAccount?) {
+        GlobalScope.launch {
+            try {
+                val result = loginRepoDb.personDao.loginAsync(username, password)
                 if (result != null) {
                     result.endpointUrl = serverUrl
-                    view.runOnUiThread (Runnable { view.setInProgress(false) })
+                    view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(result, context)
                     systemImpl.go(mNextDest, context)
                 } else {
-                    view.runOnUiThread(Runnable  {
+                    view.runOnUiThread(Runnable {
                         view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,
                                 context))
                         view.setPassword("")
                         view.setInProgress(false)
                     })
                 }
-            }
 
-            override fun onFailure(exception: Throwable?) {
-                view.runOnUiThread(Runnable  {
+            } catch (e: Exception) {
+                view.runOnUiThread(Runnable {
                     view.setErrorMessage(systemImpl.getString(
                             MessageID.login_network_error, context))
                     view.setInProgress(false)
                 })
             }
-        })
+        }
     }
 
     companion object {
