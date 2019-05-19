@@ -75,7 +75,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
 
 
-    implementation project(":core")
+    implementation project(path: ":core", configuration: "jvmDefault")
     testImplementation project (':lib-database-jdbc')
     implementation project(":lib-database")
     implementation project(":lib-database-runtime")
