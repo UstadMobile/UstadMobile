@@ -4,7 +4,9 @@ export const environment = {
   colorPrimary :  'teal darken-1',
   colorPrimaryDark: 'teal darken-3',
   colorTextPrimary: 'black-text',
-  colorTextSecondary: 'blue-grey -text text-darken-2',
+  colorTextSecondary: 'grey-text text-darken-2',
+  colorTextSubSecondary: 'grey-text text-darken-1',
+  colorTextAcent: 'text-orange text-darken-2',
   colorAcent: 'orange darken-2',
   production: false
 };

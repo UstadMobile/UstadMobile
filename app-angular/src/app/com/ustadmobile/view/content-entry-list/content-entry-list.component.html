@@ -1,3 +1,17 @@
-<p>
-  content-entry-list works!
-</p>
+<div class="row">
+    <div class="col s4" *ngFor="let entry of entries">
+        <div class="card">
+            <div class="card-image">
+              <img src="{{entry.entry_image}}">
+            </div>
+            <div class="card-content content">
+                <p class="entry-title {{env.colorTextPrimary}} truncate">{{entry.entry_name}}</p>
+              <p class="entry-description {{env.colorTextSecondary}}">{{entry.entry_description | umWordLimit:6}}</p>
+              <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.entry_licence}}</p>
+            </div>
+            <div class="card-action">
+              <a class="{{env.colorTextAcent}}">OPEN</a>
+            </div>
+          </div>
+    </div>
+  </div>

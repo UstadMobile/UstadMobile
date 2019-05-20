@@ -5,12 +5,14 @@ import { MzButtonModule , MzCardModule, MzSidenavModule, MzNavbarModule} from 'n
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
+import { UmWordLimitPipe } from './com/ustadmobile/util/pipes/um-word-limit.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     ContentEntryListComponent,
-    HomeComponent
+    HomeComponent,
+    UmWordLimitPipe
   ],
   imports: [
     BrowserModule,

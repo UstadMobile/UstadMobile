@@ -49,6 +49,7 @@ main {
 
   .content-app-wrapper {
     margin-top: 33px;
+    padding-top: 16px;
     margin-left: 30px;
     margin-right: 30px;
   }
@@ -102,7 +103,9 @@ main {
     padding-bottom: 50px;
   }
 
+
   .content-app-wrapper {
+    padding-top: 16px;
     margin-right: 8px;
     margin-left: 8px;
     margin-top: 50px;

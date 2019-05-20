@@ -1,22 +1,20 @@
 <title>{{env.appName}}</title>
 <header>
 
-
-  <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
+  <div class="navbar-fixed">
+    <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
       <mz-navbar-item-container [align]="'left'">
-        <mz-navbar-item><a class= "header-title-label">Entries Entries</a></mz-navbar-item>
+        <mz-navbar-item><a class="header-title-label">Entries Entries</a></mz-navbar-item>
       </mz-navbar-item-container>
     </mz-navbar>
+  </div>
+
 
   <!-- side nav starts here-->
-  
-  <mz-sidenav #sidenav
-    [fixed]=true
-    [id]="'sidenav-demo'"
-    [collapseButtonId]="'btn-sidenav-demo'"
-    [edge]="'right'">
 
-    <mz-sidenav-header >
+  <mz-sidenav #sidenav [fixed]=true [id]="'sidenav-demo'" [collapseButtonId]="'btn-sidenav-demo'" [edge]="'right'">
+
+    <mz-sidenav-header>
       <div class="user-view">
         <img class="circle avatar" src="../../../../../assets/images/guest_user_icon.png">
         <div class="white-text name">UstadMobile FZ</div>
@@ -36,7 +34,7 @@
       </a>
     </mz-sidenav-link>
 
-</mz-sidenav>
+  </mz-sidenav>
 
   <!-- side nav ends here-->
 
@@ -44,7 +42,7 @@
 
 <!-- Content section starts here-->
 <main>
-  <div class="content-app-wrapper" >
+  <div class="content-app-wrapper">
     <router-outlet></router-outlet>
   </div>
 </main>
