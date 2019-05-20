@@ -32,3 +32,8 @@ content {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+ }

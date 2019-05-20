@@ -10,7 +10,7 @@
               <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.entry_licence}}</p>
             </div>
             <div class="card-action">
-              <a class="{{env.colorTextAcent}}">OPEN</a>
+              <a [routerLink]="['/home/entryList', entry.entry_uid]" routerLinkActive="active-link"  [class.disabled]="true" class="{{env.colorTextAcent}}" (click)="navigate(entry.entry_uid)">DETAILS</a>
             </div>
           </div>
     </div>

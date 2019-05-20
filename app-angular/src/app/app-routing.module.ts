@@ -6,7 +6,7 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 const routes: Routes = [
   {path: 'home', component: HomeComponent,
         children: [
-          {path: 'entryList', component: ContentEntryListComponent}
+          {path: 'entryList/:entryUid', component: ContentEntryListComponent}
         ]
   }
 ];

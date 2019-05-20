@@ -8,8 +8,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit{
+
+  rootEntryUid = "E130B099-5C18-E0899-6817-009BCAC1111E6";
+  
   constructor(private router: Router){}
   ngOnInit(): void {
-    this.router.navigate(['/home/entryList']);
+    this.router.navigate(['/home/entryList/' + this.rootEntryUid]);
   }
 }

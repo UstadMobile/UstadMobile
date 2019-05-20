@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { dataSample } from '../../util/UmDataSample';
-import { environment } from 'src/environments/environment.prod';
+import {Component,OnInit} from '@angular/core';
+import {dataSample} from '../../util/UmDataSample';
+import {environment} from 'src/environments/environment.prod';
+import {Router,ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-content-entry-list',
@@ -8,12 +9,27 @@ import { environment } from 'src/environments/environment.prod';
   styleUrls: ['./content-entry-list.component.css']
 })
 export class ContentEntryListComponent implements OnInit {
-  entries = dataSample;
+  entries = [];
   env = environment;
+  currentEntryUid = "";
 
-  constructor() { }
+  constructor(private router: Router, private activeRoute: ActivatedRoute) {
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function () {
+      return false;
+    };
+
+    this.activeRoute.params.subscribe(val => {
+      this.currentEntryUid = val.entryUid;
+    });
+  }
 
   ngOnInit() {
+    this.entries = dataSample[this.currentEntryUid];
+  }
+
+  navigate(entryUid) {
+    this.router.navigate(['/home/entryList/' + entryUid]);
 
   }
 
