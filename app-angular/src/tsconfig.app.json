@@ -2,10 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "types": [
-      "jquery",
-      "materialize-css"
-    ]
+    "types": []
   },
   "exclude": [
     "test.ts",

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "app-angular": {
+    "sample": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/app-angular",
+            "outputPath": "dist/sample",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -24,11 +24,12 @@
             ],
             "styles": [
               "src/styles.css",
-              "node_modules/materialize-css/dist/css/materialize.min.css"
+              "./node_modules/materialize-css/dist/css/materialize.min.css"
+
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/materialize-css/dist/js/materialize.min.js"
+              "./node_modules/jquery/dist/jquery.min.js",
+              "./node_modules/materialize-css/dist/js/materialize.min.js"
             ],
             "es5BrowserSupport": true
           },
@@ -62,18 +63,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "app-angular:build"
+            "browserTarget": "sample:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "app-angular:build:production"
+              "browserTarget": "sample:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "app-angular:build"
+            "browserTarget": "sample:build"
           }
         },
         "test": {
@@ -107,7 +108,7 @@
         }
       }
     },
-    "app-angular-e2e": {
+    "sample-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -116,11 +117,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "app-angular:serve"
+            "devServerTarget": "sample:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "app-angular:serve:production"
+              "devServerTarget": "sample:serve:production"
             }
           }
         },
@@ -136,5 +137,5 @@
       }
     }
   },
-  "defaultProject": "app-angular"
+  "defaultProject": "sample"
 }
