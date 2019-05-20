@@ -88,7 +88,6 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
             Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
-            BasePointView.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity"),
             AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
             ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
