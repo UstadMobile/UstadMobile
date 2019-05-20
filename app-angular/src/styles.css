@@ -24,6 +24,14 @@ main {
   color: white;
 }
 
+.title-label{
+  font-size: 1.2em;
+  font-weight: 500;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: black;
+}
+
 
 /*
   #Device = laptop
@@ -42,7 +50,9 @@ main {
   }
 
   .empty-state-view {
-    padding-top: 150px;
+    background: white;
+    min-height: 520px !important;
+    padding-top: 20% !important;
     padding-bottom: 100px;
 
   }
@@ -99,6 +109,8 @@ main {
   }
 
   .empty-state-view {
+    min-height: 200px !important;
+    background: white;
     padding-top: 100px;
     padding-bottom: 50px;
   }

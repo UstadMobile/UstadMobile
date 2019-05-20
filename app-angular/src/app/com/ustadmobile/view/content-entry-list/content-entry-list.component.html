@@ -10,8 +10,13 @@
               <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.entry_licence}}</p>
             </div>
             <div class="card-action">
-              <a [routerLink]="['/home/entryList', entry.entry_uid]" routerLinkActive="active-link"  [class.disabled]="true" class="{{env.colorTextAcent}}" (click)="navigate(entry.entry_uid)">DETAILS</a>
+              <a class="{{env.colorTextAcent}}" (click)="navigate(entry)">DETAILS</a>
             </div>
           </div>
     </div>
+
+    <div class="center empty-state-view grey-text z-depth-1" *ngIf="!entries">
+        <i class="material-icons  large extra">library_books</i>
+        <p class="title-label empty grey-text">No libraries Found</p>
+      </div>
   </div>

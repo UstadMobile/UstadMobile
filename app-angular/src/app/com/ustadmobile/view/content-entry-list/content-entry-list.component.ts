@@ -2,6 +2,7 @@ import {Component,OnInit} from '@angular/core';
 import {dataSample} from '../../util/UmDataSample';
 import {environment} from 'src/environments/environment.prod';
 import {Router,ActivatedRoute} from '@angular/router';
+import { HttpParams } from "@angular/common/http";
 
 @Component({
   selector: 'app-content-entry-list',
@@ -28,9 +29,11 @@ export class ContentEntryListComponent implements OnInit {
     this.entries = dataSample[this.currentEntryUid];
   }
 
-  navigate(entryUid) {
-    this.router.navigate(['/home/entryList/' + entryUid]);
-
+  navigate(entry) {
+    const basePath = '/home/entryList/' + entry.entry_uid;
+    /* const navigateWithParam = entry.entry_root === true ? {}:
+     { queryParams: { entryUid: entry.entry_uid , section: 'details'} }; */
+    this.router.navigate([basePath]);
   }
 
 }
