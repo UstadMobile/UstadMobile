@@ -13,7 +13,8 @@ export class AppComponent implements OnInit{
   
   constructor(private router: Router){}
   ngOnInit(): void {
-    this.router.navigate(['/home/entryList/' + this.rootEntryUid]);
+    const args = { queryParams: { rootEntryUid: this.rootEntryUid} }
+    this.router.navigate(['/home/contentEntryList/'], args);
   }
 
   ngOnDestroy(): void {}

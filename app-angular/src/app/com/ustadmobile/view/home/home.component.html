@@ -4,7 +4,10 @@
   <div class="navbar-fixed">
     <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
       <mz-navbar-item-container [align]="'left'">
-        <mz-navbar-item><a class="header-title-label">Entries Entries</a></mz-navbar-item>
+          <mz-navbar-item>
+            <i (click)="goBack()" class="material-icons large white-text go-back-icon">arrow_back</i>
+          </mz-navbar-item>
+        <mz-navbar-item class="default-margin-left"><button class="header-title-label">Entries Entries</button></mz-navbar-item>
       </mz-navbar-item-container>
     </mz-navbar>
   </div>

@@ -1,21 +1,28 @@
+import { UmContextWrapper } from './../../util/UmContextWrapper';
 import { dataSample } from './../../util/UmDataSample';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
+import {ContentEntryDetailView, ContentEntryDetailPresenter} from 'core/';
 
 @Component({
-  selector: 'app-content-entry-details',
-  templateUrl: './content-entry-details.component.html',
-  styleUrls: ['./content-entry-details.component.css']
+  selector: 'app-content-entry-detail',
+  templateUrl: './content-entry-detail.component.html',
+  styleUrls: ['./content-entry-detail.component.css']
 })
-export class ContentEntryDetailsComponent implements OnInit {
+export class ContentEntryDetailComponent implements OnInit, ContentEntryDetailView {
 
   env = environment;
-  contentEntryUid = ""
-  entryTitle = ""
+  contentEntryUid = "";
+  entryTitle = "";
   entryLicence = "";
   entryDescription = "";
   entryThumbnail = "";
+
+  context : UmContextWrapper;
+
+  presenter: ContentEntryDetailPresenter;
+
 
   entryLanguages = [
     {name: "Language 1", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
@@ -28,6 +35,7 @@ export class ContentEntryDetailsComponent implements OnInit {
   ]
 
   constructor(private router: Router, private route: ActivatedRoute) {
+    this.context = new UmContextWrapper(router);
     this.route.params.subscribe(val => {
       this.contentEntryUid = val.entryUid;
       const entry = dataSample["E130B099-5C18-E0899-6817-009BCAC1111E6"][0];
@@ -42,6 +50,11 @@ export class ContentEntryDetailsComponent implements OnInit {
 
   navigateToLanguage(language){
     console.log("language", language)
+  }
+
+
+  setContentEntryTitle(title: string){
+
   }
 
   ngOnDestroy(): void {}

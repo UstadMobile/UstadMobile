@@ -11,9 +11,25 @@ main {
   cursor: pointer
 }
 
+.go-back-icon{
+  margin-top: 34% !important;
+  margin-left: 20px !important;
+  cursor: pointer;
+}
+
+.header-title-label {
+  font-size: 1.5em;
+  margin-top: 14px;
+  margin-left: 30px;
+  text-decoration: none;
+  color: white;
+  background: transparent;
+  border: 0px solid transparent;
+  cursor: default
+}
 
 .default-margin-left {
-  margin-left: 20px;
+  margin-left: 4% !important;
 }
 
 .default-margin-right{
@@ -45,10 +61,8 @@ main {
 }
 
 
-.header-title-label {
-  font-size: 1.5em;
-  margin-top: 12px;
-  color: white;
+.header-title-label :hover{
+  background: transparent;
 }
 
 .title-label{

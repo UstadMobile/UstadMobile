@@ -15,25 +15,25 @@ export class ContentEntryListComponent implements OnInit {
   currentEntryUid = "";
 
   constructor(private router: Router, private activeRoute: ActivatedRoute) {
-    // override the route reuse strategy
-    this.router.routeReuseStrategy.shouldReuseRoute = function () {
-      return false;
-    };
-
-    this.activeRoute.params.subscribe(val => {
-      this.currentEntryUid = val.entryUid;
+    
+    this.activeRoute.queryParams.subscribe(args => {
+      this.currentEntryUid = args["rootEntryUid"];
+      this.entries = dataSample[this.currentEntryUid];
     });
   }
 
-  ngOnInit() {
-    this.entries = dataSample[this.currentEntryUid];
-  }
+  ngOnInit() {}
 
   navigate(entry) {
-    const basePath = (entry.entry_root === true ? '/home/entryList/' :'/home/entry/') + entry.entry_uid;
-    /* const navigateWithParam = entry.entry_root === true ? {}:
-     { queryParams: { entryUid: entry.entry_uid , section: 'details'} }; */
-    this.router.navigate([basePath]);
+    const rootEntry = entry.entry_root === true;
+    const basePath = rootEntry ? '/home/contentEntryList/' :'/home/contentEntryDetail/';
+
+    const args: any = {
+      relativeTo: this.activeRoute,
+      queryParams: rootEntry ? {rootEntryUid: entry.entry_uid}: {entryUid: entry.entry_uid},
+      queryParamsHandling: 'merge',
+    };
+    this.router.navigate([basePath], args);
   }
 
   ngOnDestroy(): void {}

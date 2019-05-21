@@ -7,7 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
 import { UmWordLimitPipe } from './com/ustadmobile/util/pipes/um-word-limit.pipe';
-import { ContentEntryDetailsComponent } from './com/ustadmobile/view/content-entry-details/content-entry-details.component';
+import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +15,7 @@ import { ContentEntryDetailsComponent } from './com/ustadmobile/view/content-ent
     ContentEntryListComponent,
     HomeComponent,
     UmWordLimitPipe,
-    ContentEntryDetailsComponent
+    ContentEntryDetailComponent
   ],
   imports: [
     BrowserModule,
