@@ -450,29 +450,6 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                     Long personPersonUid = personWithGroup.getPersonUid();
                     Long personGroupUid = personWithGroup.getPersonGroupUid();
 
-                    //Creating custom fields (old way):
-                    if(role == ClazzMember.ROLE_STUDENT) {
-                        PersonField customField = personFieldDao.findByLabelMessageIdSync(
-                                String.valueOf(MessageID.current_formal_school));
-
-                        if (customField != null) {
-                            PersonCustomFieldValue personCustomFieldValue =
-                                    new PersonCustomFieldValue();
-                            personCustomFieldValue.setFieldValue(studentSchool);
-                            personCustomFieldValue
-                                    .setPersonCustomFieldValuePersonUid(personPersonUid);
-                            personCustomFieldValue
-                                    .setPersonCustomFieldValuePersonCustomFieldUid(
-                                            customField.getPersonCustomFieldUid());
-
-                            personCustomFieldValueDao.insert(personCustomFieldValue);
-
-                        } else {
-                            view.addError("Unable to create Custom Value", true);
-                            thereWasAnError = true;
-                        }
-
-                    }
 
                     //Creating custom fields (new way)
                     if(role == ClazzMember.ROLE_STUDENT){
@@ -921,14 +898,14 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             break;
                         default:
                             //Lookup custom field
-                            findCustomField(fieldTC, Person.TABLE_ID, colIndex, CUSTOM_FIELD_STUDENT);
+                            findCustomField(everyHeader.substring("student ".length()), Person.TABLE_ID, colIndex, CUSTOM_FIELD_STUDENT);
                             break;
                     }
 
                 }else if(everyHeader.startsWith("teacher ")){
                     String fieldTC = getCamelCaseFromTypeCase(everyHeader.substring("teacher ".length()));
                     switch (fieldTC){
-                        case "id":
+                        case "personId":
                             INDEX_TEACHER_ID = colIndex;
                             break;
                         case "firstNames":
@@ -944,7 +921,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             INDEX_TEACHER_USERNAME = colIndex;
                             break;
                         default:
-                            findCustomField(fieldTC, Person.TABLE_ID, colIndex, CUSTOM_FIELD_TEACHER);
+                            findCustomField(everyHeader.substring("teacher ".length()), Person.TABLE_ID, colIndex, CUSTOM_FIELD_TEACHER);
                             break;
 
                     }
@@ -959,7 +936,7 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                             break;
                         default:
                             //Find Custom
-                            findCustomField(fieldTC, Clazz.TABLE_ID, colIndex, CUSTOM_FIELD_CLASS);
+                            findCustomField(everyHeader.substring("class ".length()), Clazz.TABLE_ID, colIndex, CUSTOM_FIELD_CLASS);
                             break;
 
                     }
@@ -1002,6 +979,8 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
         }
 
         void findCustomField(String fieldName, int entity, int colIndex, int type){
+            //Convert name to space name
+
             customFieldDao.findByFieldNameAndEntityTypeAsync(fieldName, entity,
                     new UmCallback<List<CustomField>>() {
                 @Override
@@ -1020,6 +999,21 @@ public class BulkUploadMasterPresenter extends UstadBaseController<BulkUploadMas
                                 classCustomFieldToIndex.put(cf.getCustomFieldUid(), colIndex);
                                 break;
                         }
+                    }else{
+                        String typeString = "";
+                        switch (type){
+                            case CUSTOM_FIELD_STUDENT:
+                                typeString = "Student";
+                                break;
+                            case CUSTOM_FIELD_TEACHER:
+                                typeString = "Teacher";
+                                break;
+                            case CUSTOM_FIELD_CLASS:
+                                typeString = "Class";
+                                break;
+                        }
+                        view.addError("Cannot process " + typeString + " custom field : " +
+                                fieldName, false);
                     }
                 }
 
