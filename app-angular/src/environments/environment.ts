@@ -2,6 +2,7 @@
 export const environment = {
   appName: 'UstadMobile',
   colorPrimary :  'teal darken-1',
+  colorPrimaryText :  'teal-text text-darken-1',
   colorPrimaryDark: 'teal darken-3',
   colorTextPrimary: 'black-text',
   colorTextSecondary: 'grey-text text-darken-2',

@@ -15,4 +15,6 @@ export class AppComponent implements OnInit{
   ngOnInit(): void {
     this.router.navigate(['/home/entryList/' + this.rootEntryUid]);
   }
+
+  ngOnDestroy(): void {}
 }

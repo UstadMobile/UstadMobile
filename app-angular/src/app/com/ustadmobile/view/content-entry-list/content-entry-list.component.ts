@@ -30,10 +30,12 @@ export class ContentEntryListComponent implements OnInit {
   }
 
   navigate(entry) {
-    const basePath = '/home/entryList/' + entry.entry_uid;
+    const basePath = (entry.entry_root === true ? '/home/entryList/' :'/home/entry/') + entry.entry_uid;
     /* const navigateWithParam = entry.entry_root === true ? {}:
      { queryParams: { entryUid: entry.entry_uid , section: 'details'} }; */
     this.router.navigate([basePath]);
   }
+
+  ngOnDestroy(): void {}
 
 }

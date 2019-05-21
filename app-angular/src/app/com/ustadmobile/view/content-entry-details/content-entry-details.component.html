@@ -1,0 +1,31 @@
+<div class="row white default-padding-top default-content-padding-bottom default-content-padding-left z-depth-1">
+  <div class="col s5">
+    <img class="responsive-img img-margin-top" src="{{entryThumbnail}}"/>
+  </div>
+
+  <div class="col s7">
+    <p class="entry-title">{{entryTitle}}</p>
+    <p class="entry-creator {{env.colorPrimaryText}}">Created by UstadMobile</p>
+    <label>Content Lisence</label>
+    <p class="entry-content">{{entryLicence}}</p> 
+    <label>Description</label>
+    <p class="entry-content">{{entryDescription}}</p>
+    <div class="divider default-margin-bottom"></div>
+    <label>Available languages</label>
+    <div class="row default-padding-top">
+        
+      <mz-chip class="open-content" *ngFor="let language of entryLanguages" (click)="navigateToLanguage(language)">
+      {{language.name}}
+      </mz-chip>
+    </div>
+
+    <div class="row default-padding-top right default-margin-right">
+        <button mz-button class="orange darken-2">
+            OPEN
+          </button>
+          
+    </div>
+  
+
+  </div>
+</div>

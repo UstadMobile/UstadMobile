@@ -7,11 +7,38 @@ main {
   min-height: 600px !important;
 }
 
+.open-content{
+  cursor: pointer
+}
+
 
 .default-margin-left {
   margin-left: 20px;
 }
 
+.default-margin-right{
+  margin-right: 3% !important;
+}
+
+.default-margin-bottom{
+  margin-bottom: 4% !important;
+}
+
+.default-content-padding-bottom{
+  padding-bottom: 10% !important;
+}
+
+.default-content-padding-left{
+  padding-left: 2% !important;
+}
+
+.default-content-padding-right{
+  padding-right: 2% !important;
+}
+
+.default-padding-top{
+  padding-top: 16px !important;
+}
 
 .top-nav-height {
   height: 90px !important;
