@@ -64,6 +64,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
     private SaleListFragment saleListFragment;
     private ComingSoonFragment comingSoonFragment;
+    private CatalogListFragment catalogListFragment;
 
     public static final int VIEW_POSITION_POSITION_CATALOG = 0;
     public static final int VIEW_POSITION_POSITION_INVENTORY = 1;
@@ -401,9 +402,9 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
             }else{
                 switch(position){
                     case 0:
-                        comingSoonFragment = ComingSoonFragment.newInstance();
-                        this.positionMap.put(position, comingSoonFragment);
-                        return comingSoonFragment;
+                        catalogListFragment = CatalogListFragment.newInstance();
+                        this.positionMap.put(position, catalogListFragment);
+                        return catalogListFragment;
                     case 1:
                         comingSoonFragment = ComingSoonFragment.newInstance();
                         this.positionMap.put(position, comingSoonFragment);

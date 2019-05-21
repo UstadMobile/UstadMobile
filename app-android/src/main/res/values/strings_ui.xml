@@ -383,6 +383,7 @@
     <string name="create_new_item">Create a new item</string>
     <string name="categories">Categories</string>
     <string name="item_added_to_catalog">Item added to catalog</string>
+    <string name="category_added_to_catalog">Catalog added to catalog</string>
     <string name="undo">Undo</string>
     <string name="item">Item</string>
     <string name="subcategory">Subcategory</string>
@@ -396,4 +397,6 @@
     <string name="sale_list_sort_by_total_desc">total (desc)</string>
     <string name="sale_list_sort_by_date_desc">date (desc)</string>
     <string name="sale_list_sort_by_date_asc">date (asc)</string>
+
+    <string name="category">Category</string>
 </resources>

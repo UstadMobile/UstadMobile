@@ -19,6 +19,9 @@ public class SaleProductGroup {
     //Name of collection. eg: Eid Collection or Toys
     private String saleProductGroupName;
 
+    //Desc eg: This if for eid holidays
+    private String saleProductGroupDesc;
+
     //If collection is to be displayed from one start date
     private long saleProductGroupStartDate;
 
@@ -46,12 +49,14 @@ public class SaleProductGroup {
         this.saleProductGroupActive = true;
         this.saleProductGroupCreationDate = System.currentTimeMillis();
         this.saleProductGroupType  = PRODUCT_GROUP_TYPE_CATEGORY;
+        this.saleProductGroupDesc = "";
     }
     public SaleProductGroup(String name){
         this.saleProductGroupActive = true;
         this.saleProductGroupCreationDate = System.currentTimeMillis();
         this.saleProductGroupType  = PRODUCT_GROUP_TYPE_CATEGORY;
         this.saleProductGroupName = name;
+        this.saleProductGroupDesc = "";
     }
 
 
@@ -133,5 +138,13 @@ public class SaleProductGroup {
 
     public void setSaleProductGroupLCB(int saleProductGroupLCB) {
         this.saleProductGroupLCB = saleProductGroupLCB;
+    }
+
+    public String getSaleProductGroupDesc() {
+        return saleProductGroupDesc;
+    }
+
+    public void setSaleProductGroupDesc(String saleProductGroupDesc) {
+        this.saleProductGroupDesc = saleProductGroupDesc;
     }
 }

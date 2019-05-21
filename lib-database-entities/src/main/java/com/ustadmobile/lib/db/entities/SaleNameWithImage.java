@@ -1,12 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
-import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_CATEGORY;
-import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION;
-import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_PRODUCT;
-
 public class SaleNameWithImage {
 
     private String name;
+    private String description;
     private long pictureUid;
     private int type;
     private long productUid;
@@ -51,5 +48,13 @@ public class SaleNameWithImage {
 
     public void setProductGroupUid(long productGroupUid) {
         this.productGroupUid = productGroupUid;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

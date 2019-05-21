@@ -11,6 +11,8 @@
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
     <color name="fab">#FF5722</color>
+    <color name="fab_pressed">#FF4322</color>
+    <color name="fab_ripple">#99FFFFFF</color>
 
     <color name="bottom_navigation_unselected">#FFDFB2</color>
     <color name="bottom_navigation_selected">#FFFFFF</color>

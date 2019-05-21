@@ -59,7 +59,7 @@ public abstract class SaleProductGroupDao implements SyncableDao<SaleProductGrou
     public abstract UmProvider<SaleProductGroup> findAllTypedActiveProvider(int type);
 
     public static final String ALL_ACTIVE_TYPED_SNWI_QUERY =
-            "SELECT SaleProductGroup.saleProductGroupName as name, " +
+            "SELECT SaleProductGroup.saleProductGroupName as name, SaleProductGroup.saleProductGroupDesc as description, " +
             " (SELECT SaleProductPicture.saleProductPictureUid FROM SaleProductPicture " +
             "  WHERE saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
             "  ORDER BY saleProductPictureTimestamp DESC LIMIT 1) as pictureUid, " +
@@ -74,7 +74,7 @@ public abstract class SaleProductGroupDao implements SyncableDao<SaleProductGrou
             "   WHERE SaleProductGroupJoin.saleProductGroupJoinGroupUid = " +
             "   SaleProductGroup.saleProductGroupUid " +
             "    ORDER BY SaleProductGroupJoin.saleProductGroupJoinDateCreated DESC LIMIT 1) " +
-            "WHERE SaleProductGroup.saleProductGroupActive = 1 AND saleProductGroupType = :type";
+            " WHERE SaleProductGroup.saleProductGroupActive = 1 AND saleProductGroupType = :type ";
 
     @UmQuery(ALL_ACTIVE_TYPED_SNWI_QUERY)
     public abstract UmLiveData<List<SaleNameWithImage>> findAllTypedActiveSNWILive(int type);
@@ -111,7 +111,6 @@ public abstract class SaleProductGroupDao implements SyncableDao<SaleProductGrou
 
     @UmQuery(INACTIVATE_QUERY)
     public abstract void inactivateEntityAsync(long uid, UmCallback<Integer> inactivateCallback);
-
 
     //UPDATE:
 

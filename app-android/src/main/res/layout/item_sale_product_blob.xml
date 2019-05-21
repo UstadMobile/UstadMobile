@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:attr/selectableItemBackground"
     android:layout_width="wrap_content"
+    android:elevation="@dimen/dimen_4dp"
     android:layout_height="wrap_content">
 
     <ImageView
@@ -31,4 +32,14 @@
         app:layout_constraintBottom_toBottomOf="@+id/item_sale_product_blob_image"
         app:layout_constraintEnd_toEndOf="@+id/item_sale_product_blob_image"
         app:layout_constraintStart_toStartOf="@+id/item_sale_product_blob_image" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/item_sale_product_blob_dots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_more_vert_black_24dp" />
 </android.support.constraint.ConstraintLayout>

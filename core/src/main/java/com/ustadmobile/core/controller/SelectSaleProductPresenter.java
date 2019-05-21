@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.SaleProductGroupDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SaleItemDetailView;
+import com.ustadmobile.core.view.SaleProductDetailView;
 import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 
@@ -14,6 +15,9 @@ import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
+import static com.ustadmobile.core.view.SaleProductDetailView.ARG_NEW_CATEGORY;
+import static com.ustadmobile.core.view.SaleProductDetailView.ARG_NEW_TITLE;
+import static com.ustadmobile.core.view.SaleProductDetailView.ARG_SALE_PRODUCT_UID;
 import static com.ustadmobile.core.view.SelectProducerView.ARG_PRODUCER_UID;
 import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_CATEGORY;
 import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION;
@@ -32,12 +36,15 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
     SaleProductDao saleProductDao;
     SaleProductGroupDao saleProductGroupDao;
+    UstadMobileSystemImpl impl;
 
     private long producerUid, saleItemUid;
 
 
     public SelectSaleProductPresenter(Object context, Hashtable arguments, SelectSaleProductView view) {
         super(context, arguments, view);
+
+        impl = UstadMobileSystemImpl.getInstance();
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
@@ -84,7 +91,7 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
     public void handleClickProduct(long productUid) {
 
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_SALE_ITEM_PRODUCT_UID, String.valueOf(productUid));
         args.put(ARG_PRODUCER_UID, String.valueOf(producerUid));
@@ -94,5 +101,25 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
         view.finish();
     }
 
+    public void handleClickAddItem(){
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_NEW_TITLE, "true");
+        impl.go(SaleProductDetailView.VIEW_NAME, args, context);
 
+    }
+
+    public void handleClickAddSubCategory(){
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_NEW_CATEGORY, "true");
+        impl.go(SaleProductDetailView.VIEW_NAME, args, context);
+    }
+
+
+    public void handleEditSaleProduct(long productUid) {
+        //TODO
+    }
+
+    public void handleDelteSaleProduct(long productUid) {
+        //TODO
+    }
 }

@@ -5,14 +5,14 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectSaleProductPresenter;
@@ -21,86 +21,87 @@ import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.Objects;
+public class CatalogListFragment extends UstadBaseFragment implements SelectSaleProductView {
 
-public class SelectSaleProductActivity extends UstadBaseActivity implements SelectSaleProductView {
-
-    private Toolbar toolbar;
+    View rootContainer;
     private SelectSaleProductPresenter mPresenter;
     private RecyclerView recentRV;
     private RecyclerView categoryRV;
     private RecyclerView collectionRV;
 
-
-    /**
-     * Creates the options on the toolbar - specifically the Done tick menu item
-     * @param menu  The menu options
-     * @return  true. always.
-     */
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search, menu);
-
-        return true;
-    }
-
-    /**
-     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
-     * the activity goes back when the back button is pressed.
-     *
-     * @param item The item selected
-     * @return true if accounted for
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public static CatalogListFragment newInstance(){
+        CatalogListFragment fragment = new CatalogListFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        //Setting layout:
-        setContentView(R.layout.activity_select_sale_product);
 
-        //Toolbar:
-        toolbar = findViewById(R.id.activity_select_sale_product_toolbar);
-        toolbar.setTitle(getText(R.string.add_item));
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
+        //Inflate view
+        rootContainer = inflater.inflate(R.layout.activity_select_sale_product, container,false);
+        setHasOptionsMenu(true);
+
+        //Set recycler views
         //RecyclerView - Recent
-        recentRV = findViewById(
+        recentRV = rootContainer.findViewById(
                 R.id.activity_select_sale_product_recent_rv);
         LinearLayoutManager layoutManager
-                = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recentRV.setLayoutManager(layoutManager);
 
         //RecyclerView - Category
-        categoryRV = findViewById(
+        categoryRV = rootContainer.findViewById(
                 R.id.activity_select_sale_product_category_rv);
         LinearLayoutManager layoutManager2
-                = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         categoryRV.setLayoutManager(layoutManager2);
 
         //Recyclerview - Collection
-        collectionRV = findViewById(
+        collectionRV = rootContainer.findViewById(
                 R.id.activity_select_sale_product_collection_rv);
         LinearLayoutManager layoutManager3
-                = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         collectionRV.setLayoutManager(layoutManager3);
 
+        //Set other views
+
         //Call the Presenter
-        mPresenter = new SelectSaleProductPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+        mPresenter = new SelectSaleProductPresenter(getContext(),
+                UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        //Set listeners
 
+        rootContainer.findViewById(R.id.activity_select_sale_product_fab_subcategory)
+                .setOnClickListener(v -> mPresenter.handleClickAddSubCategory());
+
+        rootContainer.findViewById(R.id.activity_select_sale_product_fab_item)
+                .setOnClickListener(v -> mPresenter.handleClickAddItem());
+
+        return rootContainer;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        //Hide the appbar
+        rootContainer.findViewById(R.id.activity_select_sale_product_appbar)
+                .setVisibility(View.GONE);
+    }
+
+    @Override
+    public void finish() {
 
     }
 
@@ -126,7 +127,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     public void setRecentProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
                 new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
-                        getApplicationContext());
+                        getContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
@@ -146,7 +147,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     public void setCategoryProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
                 new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
-                        getApplicationContext());
+                        getContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
@@ -166,7 +167,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     public void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
                 new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
-                        getApplicationContext());
+                        getContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected

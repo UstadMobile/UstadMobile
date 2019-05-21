@@ -58,7 +58,7 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
 
 
     public static final String ALL_ACTIVE_NAME_WITH_IMAGE_QUERY =
-            "SELECT SaleProduct.saleProductName as name, " +
+            "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
             " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
             " SaleProductPicture.saleProductPictureUid as pictureUid, " +
                     PRODUCT_GROUP_TYPE_PRODUCT + " as type " +

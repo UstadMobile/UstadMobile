@@ -1,24 +1,24 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.app.Activity;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectSaleProductPresenter;
-
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 
@@ -31,8 +31,9 @@ public class SelectSaleProductRecyclerAdapter extends
                 SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
 
     private static final int IMAGE_WITH = 26;
-    Context theContext;
-    Activity theActivity;
+    private Context theContext;
+    private Activity theActivity;
+    private Fragment theFragment;
     SelectSaleProductPresenter mPresenter;
 
     @NonNull
@@ -69,8 +70,8 @@ public class SelectSaleProductRecyclerAdapter extends
         SaleNameWithImage entity = getItem(position);
         ImageView imageView = holder.itemView.findViewById(R.id.item_sale_product_blob_image);
         TextView name = holder.itemView.findViewById(R.id.item_sale_product_blob_title);
+        ImageView dots = holder.itemView.findViewById(R.id.item_sale_product_blob_dots);
 
-        //TODO: Get picture
         long pictureUid = entity.getPictureUid();
         String imagePath = "";
         if (pictureUid != 0) {
@@ -85,6 +86,54 @@ public class SelectSaleProductRecyclerAdapter extends
 
         name.setText(entity.getName());
 
+        //Options to Edit/Delete every schedule in the list
+        dots.setOnClickListener((View v) -> {
+            if(theActivity != null){
+                //creating a popup menu
+                PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+                popup.setOnMenuItemClickListener(item -> {
+                    int i = item.getItemId();
+                    if (i == R.id.edit) {
+                        mPresenter.handleEditSaleProduct(entity.getProductUid());
+                        return true;
+                    } else if (i == R.id.delete) {
+                        mPresenter.handleDelteSaleProduct(entity.getProductUid());
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+
+                //inflating menu from xml resource
+                popup.inflate(R.menu.menu_edit_delete);
+                popup.getMenu().findItem(R.id.edit).setVisible(true);
+                //displaying the popup
+                popup.show();
+            }else if(theFragment != null){
+                //creating a popup menu
+                PopupMenu popup = new PopupMenu(theFragment.getContext(), v);
+                popup.setOnMenuItemClickListener(item -> {
+                    int i = item.getItemId();
+                    if (i == R.id.edit) {
+                        mPresenter.handleEditSaleProduct(entity.getProductUid());
+                        return true;
+                    } else if (i == R.id.delete) {
+                        mPresenter.handleDelteSaleProduct(entity.getProductUid());
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+
+                //inflating menu from xml resource
+                popup.inflate(R.menu.menu_edit_delete);
+                popup.getMenu().findItem(R.id.edit).setVisible(true);
+                //displaying the popup
+                popup.show();
+            }
+
+        });
+
         holder.itemView.setOnClickListener(v -> {
             if(entity.getType() == PRODUCT_GROUP_TYPE_PRODUCT) {
                 mPresenter.handleClickProduct(entity.getProductUid());
@@ -93,13 +142,13 @@ public class SelectSaleProductRecyclerAdapter extends
 
     }
 
-    protected class SelectSaleProductViewHolder extends RecyclerView.ViewHolder {
-        protected SelectSaleProductViewHolder(View itemView) {
+    class SelectSaleProductViewHolder extends RecyclerView.ViewHolder {
+        SelectSaleProductViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    protected SelectSaleProductRecyclerAdapter(
+    SelectSaleProductRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SaleNameWithImage> diffCallback,
             SelectSaleProductPresenter thePresenter,
             Activity activity,
@@ -107,6 +156,17 @@ public class SelectSaleProductRecyclerAdapter extends
         super(diffCallback);
         mPresenter = thePresenter;
         theActivity = activity;
+        theContext = context;
+    }
+
+    SelectSaleProductRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<SaleNameWithImage> diffCallback,
+            SelectSaleProductPresenter thePresenter,
+            Fragment fragment,
+            Context context) {
+        super(diffCallback);
+        mPresenter = thePresenter;
+        theFragment = fragment;
         theContext = context;
     }
 

@@ -41,6 +41,5 @@ public interface BasePoint2View extends UstadView {
 
     void updateImageOnView(String imagePath);
 
-
 }
 

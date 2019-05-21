@@ -83,6 +83,7 @@ import com.ustadmobile.core.view.Register2View;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SalePaymentDetailView;
+import com.ustadmobile.core.view.SaleProductDetailView;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.core.view.SelectProducerView;
@@ -111,6 +112,7 @@ import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.SaleDetailActivity;
 import com.ustadmobile.port.android.view.SaleItemDetailActivity;
 import com.ustadmobile.port.android.view.SalePaymentDetailActivity;
+import com.ustadmobile.port.android.view.SaleProductDetailActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
 import com.ustadmobile.port.android.view.SelectLanguageDialogFragment;
 import com.ustadmobile.port.android.view.SelectProducerActivity;
@@ -199,6 +201,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(UserProfileView.VIEW_NAME, UserProfileActivity.class);
         viewNameToAndroidImplMap.put(ChangePasswordView.VIEW_NAME, ChangePasswordActivity.class);
         viewNameToAndroidImplMap.put(SelectLanguageDialogView.VIEW_NAME, SelectLanguageDialogFragment.class);
+        viewNameToAndroidImplMap.put(SaleProductDetailView.VIEW_NAME, SaleProductDetailActivity.class);
 
     }
 
