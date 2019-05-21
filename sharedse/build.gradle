@@ -9,18 +9,19 @@ buildscript {
     }
 
     dependencies {
-        classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
+        // classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
-apply plugin: 'java-library'
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
-apply plugin: "de.fuerstenau.buildconfig"
+//apply plugin: "de.fuerstenau.buildconfig"
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
 
 repositories {
     mavenCentral()
@@ -29,7 +30,17 @@ repositories {
     }
 }
 
-buildConfig {
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
+}
+
+/*buildConfig {
     appName = "sharedse"
 
     sourceSets {
@@ -41,25 +52,75 @@ buildConfig {
             buildConfigField 'String', 'TESTDB_JDBCURL_PEERUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.peerdb.url']
         }
     }
-}
+} */
 
 /*
  * Added to overcome limitation on Android studio as per:
  *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
  */
-task copyTestResources(type: Copy) {
+/*task copyTestResources(type: Copy) {
     from "${projectDir}/src/test/resources"
     from "${projectDir}/../core-tests/src/main/resources"
     from "${projectDir}/../sharedse-tests/src/main/resources"
     into "${buildDir}/classes/test"
 }
-processTestResources.dependsOn copyTestResources
+processTestResources.dependsOn copyTestResources */
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
+kotlin {
+
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.android, 'android')
+    }
+    sourceSets {
+
+        commonJvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
+
+                implementation project(":core")
+                implementation project(":lib-database")
+                implementation project(":lib-door-runtime")
+                compileOnly project(':lib-database-entities')
+                implementation project(":lib-util")
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+                implementation "org.json:json:$version_json"
+
+
+                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+            }
+        }
+        jvmMain {
+            dependencies {
+            }
+            dependsOn commonJvmMain
+        }
+
+        androidMain {
+            dependencies {
+
+            }
+            dependsOn commonJvmMain
+        }
+
+    }
+
 }
 
-dependencies {
+
+/*dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -80,7 +141,13 @@ dependencies {
     implementation project(":lib-database")
     implementation project(":lib-database-runtime")
     compileOnly project(path: ':lib-database-entities', configuration: 'jvmDefault')
-    implementation project(":lib-util")
+    implementation project(path: ":lib-util", configuration: "jvmDefault")
+
+    implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+
+
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
@@ -100,7 +167,7 @@ dependencies {
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
     testImplementation project(":app-javase")
-}
+} */
 
 publishing {
     publications {
@@ -108,12 +175,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 
