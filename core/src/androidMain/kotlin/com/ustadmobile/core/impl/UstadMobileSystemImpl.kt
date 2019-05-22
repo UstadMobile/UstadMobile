@@ -39,12 +39,12 @@ import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.FileProvider
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.fragment.app.DialogFragment
 import com.ustadmobile.core.BuildConfig
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
@@ -88,7 +88,6 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
             Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
-            BasePointView.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePointActivity"),
             AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
             XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
             ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),

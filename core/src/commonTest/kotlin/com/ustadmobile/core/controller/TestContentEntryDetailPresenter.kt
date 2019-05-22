@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.CoreTestConfig
@@ -95,3 +96,4 @@ class TestContentEntryDetailPresenter {
     }
 
 }
+*/

@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':lib-database')
-    implementation project(":lib-util")
+    implementation project(path: ":lib-util", configuration: "jvmDefault")
     compileOnly project(path: ":lib-database-entities", configuration: "jvmDefault")
     implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-database-runtime")

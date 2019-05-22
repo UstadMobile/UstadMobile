@@ -17,7 +17,7 @@ task runOrmLiteGeneration(type: JavaExec) {
 
 dependencies {
     implementation project(path: ":core", configuration: "jvmDefault")
-    implementation project(":sharedse")
+    implementation project(path: ":sharedse", configuration: "jvmDefault")
     implementation project(path: ":lib-util", configuration: "jvmDefault")
     implementation project(':lib-database-runtime-jdbc')
 

@@ -104,7 +104,7 @@ class ScormManifest {
                         currentOrg.items.add(currentOrgItem)
                     } else if (currentOrgItem != null && TAG_TITLE == tagName
                             && xpp.next() == KMPPullParser.TEXT) {
-                        currentOrgItem.title = xpp.getName()
+                        currentOrgItem.title = xpp.getText()
                     } else if (currentOrg != null && TAG_TITLE == tagName
                             && xpp.next() == KMPPullParser.TEXT) {
                         currentOrg.title = xpp.getText()
@@ -121,12 +121,10 @@ class ScormManifest {
                 KMPPullParser.END_TAG -> {
                     tagName = xpp.getName()?: ""
 
-                    if (TAG_ORGANIZATION == tagName) {
-                        currentOrg = null
-                    } else if (TAG_ITEM == tagName) {
-                        currentOrgItem = null
-                    } else if (TAG_RESOURCE == tagName) {
-                        currentResource = null
+                    when {
+                        TAG_ORGANIZATION == tagName -> currentOrg = null
+                        TAG_ITEM == tagName -> currentOrgItem = null
+                        TAG_RESOURCE == tagName -> currentResource = null
                     }
                 }
             }

@@ -15,7 +15,7 @@ dependencies {
 
     implementation "javax.ws.rs:javax.ws.rs-api:2.1"
 
-    implementation project(":core")
+    implementation project(path: ":core",configuration: "jvmDefault")
     implementation project(":lib-database-jdbc")
     implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"

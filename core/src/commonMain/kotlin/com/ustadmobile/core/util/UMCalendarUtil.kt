@@ -12,7 +12,10 @@ import com.soywiz.klock.parse
 object UMCalendarUtil {
 
     private val httpDateFormat: DateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
+    private val httpDateFormat2: DateFormat = DateFormat("EEE, dd-MMM-yyyy HH:mm:ss z")
     private val iso8601DateFormat: DateFormat = ISO8601.DATE_CALENDAR_COMPLETE
+
+    private val listOfFormats = listOf(httpDateFormat, httpDateFormat2, iso8601DateFormat)
 
     /**
      * Make a String for the date given by time as an HTTP Date as per
@@ -27,17 +30,6 @@ object UMCalendarUtil {
     fun makeHTTPDate(time: Long): String {
         val cal = DateTime(time)
         return cal.format(httpDateFormat)
-    }
-
-    /**
-     * Parse the given http date according to :
-     * http://tools.ietf.org/html/rfc2616#section-3.3
-     *
-     * @param httpDate
-     * @return
-     */
-    fun parseHTTPDate(httpDate: String): Long {
-        return httpDateFormat.parse(httpDate).local.unixMillisLong
     }
 
     /**

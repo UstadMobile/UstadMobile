@@ -99,6 +99,7 @@ kotlin {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
         fromPreset(presets.js, 'js')
+        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
 
 
@@ -113,7 +114,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation project(':lib-database-entities')
-                implementation project(':lib-database')
+                compileOnly project(':lib-database')
                 implementation project(":lib-util")
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
@@ -164,6 +165,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+
             }
         }
 

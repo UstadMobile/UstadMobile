@@ -1,11 +1,12 @@
 package com.ustadmobile.lib.database;
 
-import android.arch.persistence.db.SupportSQLiteDatabase;
-import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
-import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.support.annotation.NonNull;
+
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.ustadmobile.lib.db.AbstractDoorwayDbBuilder;
 import com.ustadmobile.lib.db.DbCallback;

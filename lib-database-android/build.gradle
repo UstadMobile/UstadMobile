@@ -17,7 +17,7 @@ android {
 
 
     sourceSets {
-        main.java.srcDirs += ["build/generated/source/umdbprocessor"]
+        main.java.srcDirs += ["../lib-database/src/commonMain/kotlin"]
     }
 
     defaultConfig {
@@ -48,11 +48,9 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation project(':lib-database')
-    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
-    implementation project(':lib-database-runtime')
-    implementation project(':lib-database-runtime-android')
-    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
+    implementation project(":lib-database-entities")
+    implementation project(':lib-door-runtime')
+    implementation project(":lib-database-annotations")
     implementation project(":lib-util")
     implementation project(":lib-database-retrofitrepository")
 
@@ -62,10 +60,11 @@ dependencies {
     //ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
     annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
     //Room persistence
     implementation "androidx.room:room-runtime:$version_android_room"
-    annotationProcessor "android.arch.persistence.room:compiler:$version_android_room"
+    //kapt "androidx.room:room-compiler:$version_android_room"
 
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"

@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlin.jvm.JvmStatic
 import kotlin.math.round
@@ -718,48 +717,6 @@ object UMFileUtil {
         var unitSize = fileSize.toDouble() / factor.toDouble()
         unitSize = round(unitSize * 100) / 100.0
         return "$unitSize $unit"
-    }
-
-    /**
-     * @param args
-     * @param prefix
-     * @return
-     */
-    fun splitCombinedViewArguments(args: Map<String, String>, prefix: String, argDelmininator: Char): MutableList<*> {
-        val result = mutableListOf<Any>()
-        val allArgsKeys = args.keys.iterator()
-
-        var currentKey: String
-        var argName: String
-        var index: Int
-        var indexStart: Int
-        var indexEnd: Int
-        var indexArgs: MutableMap<String, String?>
-        while (allArgsKeys.hasNext()) {
-            currentKey = allArgsKeys.next()
-            if (currentKey.startsWith(prefix)) {
-                indexStart = currentKey.indexOf(argDelmininator) + 1
-                indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1)
-                try {
-                    index = currentKey.substring(indexStart, indexEnd).toInt()
-
-                    argName = currentKey.substring(indexEnd + 1)
-                    if (result.elementAt(index) != null) {
-                        indexArgs = result.elementAt(index) as MutableMap<String, String?>
-                    } else {
-                        indexArgs = HashMap()
-                        result.add(index, indexArgs)
-                    }
-
-                    indexArgs[argName] = args[currentKey]
-                } catch (e: NumberFormatException) {
-                    UMLog.l(UMLog.ERROR, 680, currentKey, e)
-                }
-
-            }
-        }
-
-        return result
     }
 
     /**
