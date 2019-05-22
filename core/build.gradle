@@ -112,7 +112,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation project(':lib-database-entities')
-                implementation project(':lib-database')
+                compileOnly project(':lib-database')
                 implementation project(":lib-util")
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"

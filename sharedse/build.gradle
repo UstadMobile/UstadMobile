@@ -70,13 +70,10 @@ kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
+        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
+        // the project to avoid it being seen as an extra jvm variant
         //fromPreset(presets.jvm, 'commonJvm')
     }
-
-//    compilations.main.kotlinOptions {
-//        // Setup the Kotlin compiler options for the 'main' compilation:
-//        jvmTarget = "1.8"
-//    }
 
     sourceSets {
 
@@ -87,11 +84,11 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
-                implementation project(path: ":core", configuration: "jvmDefault")
-                implementation project(":lib-database")
+                implementation project(":core")
+                compileOnly project(":lib-database")
                 implementation project(":lib-door-runtime")
                 compileOnly project(':lib-database-entities')
-                implementation project(path: ":lib-util", configuration: "jvmDefault")
+                implementation project(":lib-util")
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -109,6 +106,9 @@ kotlin {
         }
 
         androidMain {
+            dependencies {
+                implementation "androidx.room:room-runtime:$version_android_room"
+            }
             dependsOn commonJvmMain
         }
         jvmMain{

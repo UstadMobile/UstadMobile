@@ -38,7 +38,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation project(":lib-database-runtime")
+    implementation project(":lib-door-runtime")
     implementation "androidx.room:room-runtime:$version_android_room"
 
     implementation "com.android.support:appcompat-v7:$version_android_support_lib"

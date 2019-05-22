@@ -1,10 +1,10 @@
 package com.ustadmobile.lib.database;
 
-import android.arch.persistence.db.SupportSQLiteProgram;
-import android.arch.persistence.db.SupportSQLiteQuery;
-import android.arch.persistence.room.RoomDatabase;
 import android.database.Cursor;
 
+import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteProgram;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 import java.util.ArrayList;
 import java.util.List;
