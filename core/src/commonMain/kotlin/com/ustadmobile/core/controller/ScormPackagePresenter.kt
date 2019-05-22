@@ -26,6 +26,7 @@ import org.kmp.io.KMPXmlParser
  */
 class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view: ScormPackageView)
     : UstadBaseController<ScormPackageView>(context, arguments, view) {
+/*
 
     private var scormManifest: ScormManifest? = null
 
@@ -72,5 +73,6 @@ class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view:
         view.mountZip(args[UstadView.ARG_CONTAINER_UID]!!,
                 zipMountedCallback)
     }
+*/
 
 }

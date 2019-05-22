@@ -178,5 +178,9 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     }
 
+    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
 }

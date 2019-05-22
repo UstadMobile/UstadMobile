@@ -166,6 +166,8 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
      */
     fun getAssetSync(context: Any, path: String): InputStream
 
+    suspend fun getAssetAsync(context: Any, path: String): ByteArray
+
     /**
      * Returns the system base directory to work from
      *

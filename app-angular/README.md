@@ -22,12 +22,7 @@ npm install
 ## Development
 We have used [Jar2Npm Plugin](https://github.com/svok/kotlin-jar2npm-plugin) to create Node package from kotlin multiplatform generated Jar file. To create node package follow the following procedures.
 
-* Compile Kotlin JS to get source files
-```
-./gradlew core:compileKotlinJs
-```
-
-* Generate Jar from compiled source
+* Generate Jar from Kotlin Multiplatform source
 ```
 ./gradlew core:jsJar
 ```

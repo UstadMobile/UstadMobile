@@ -1,6 +1,6 @@
 import { UmContextWrapper } from './../../util/UmContextWrapper';
 import { dataSample } from './../../util/UmDataSample';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import {ContentEntryDetailView, ContentEntryDetailPresenter} from 'core/';
@@ -18,6 +18,7 @@ export class ContentEntryDetailComponent implements OnInit, ContentEntryDetailVi
   entryLicence = "";
   entryDescription = "";
   entryThumbnail = "";
+  args : Params = null;
 
   context : UmContextWrapper;
 
@@ -44,10 +45,11 @@ export class ContentEntryDetailComponent implements OnInit, ContentEntryDetailVi
       this.entryThumbnail = entry.entry_image;
       this.entryLicence = entry.entry_licence;
     });
+    this.args = this.route.snapshot.queryParams;
    }
 
   ngOnInit() {
-    //this.presenter = ContentEntryDetailPresenter();
+    //this.presenter = ContentEntryDetailPresenter(this.context, );
   }
 
   navigateToLanguage(language){
