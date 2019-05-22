@@ -4,6 +4,10 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import androidx.work.ListenableWorker;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -19,13 +23,9 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
-import kotlinx.io.InputStream;
-
-import androidx.work.ListenableWorker;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
 
 public class DbInitialEntriesInserter {
 

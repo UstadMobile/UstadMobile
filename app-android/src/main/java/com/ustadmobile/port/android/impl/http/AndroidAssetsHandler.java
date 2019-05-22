@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.impl.http;
 
 import android.content.Context;
 
-import com.ustadmobile.core.impl.UMLogger;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -34,12 +34,12 @@ public class AndroidAssetsHandler implements RouterNanoHTTPD.UriResponder {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             assetIn = context.getAssets().open(UMFileUtil.joinPaths("http", assetPath));
 
-            UMIOUtils.INSTANCE.readFully(assetIn, bout, 1024);
+            UMIOUtils.readFully(assetIn, bout, 1024);
             byte[] assetBytes = bout.toByteArray();
             String extension = UMFileUtil.INSTANCE.getExtension(assetPath);
 
             response = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                    UstadMobileSystemImpl.Companion.getInstance().getMimeTypeFromExtension(extension),
+                    UstadMobileSystemImpl.getInstance().getMimeTypeFromExtension(extension),
                     new ByteArrayInputStream(assetBytes), assetBytes.length);
             response.addHeader("Cache-Control", "cache, max-age=86400");
             response.addHeader("Content-Length", String.valueOf(assetBytes.length));

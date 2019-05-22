@@ -37,7 +37,7 @@ dependencies {
 
     implementation "javax.ws.rs:javax.ws.rs-api:2.1"
 
-    compile project(path: ':lib-util')
+    compile project(path: ":lib-util", configuration: "jvmDefault")
 }
 
 task sourceJar(type: Jar) {

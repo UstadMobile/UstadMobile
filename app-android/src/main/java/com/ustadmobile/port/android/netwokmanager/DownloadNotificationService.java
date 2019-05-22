@@ -42,7 +42,7 @@ import static android.support.v4.app.NotificationCompat.GROUP_ALERT_SUMMARY;
  * This services monitors the download job statuses and act accordingly
  */
 public class DownloadNotificationService extends Service
-        implements DownloadJobItemManager.OnDownloadJobItemChangeListener {
+        implements OnDownloadJobItemChangeListener {
 
     /**
      * Holder class for the entire notification

@@ -21,9 +21,9 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-multiplatform'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
-apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
@@ -31,6 +31,13 @@ apply plugin: 'kotlinx-serialization'
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
+}
+
+kotlin {
+
+    targets {
+        fromPreset(presets.android, 'android')
+    }
 }
 
 /*
@@ -261,16 +268,16 @@ configurations.all {
 dependencies {
     api project(':core')
     api project(':sharedse')
-    implementation project(':lib-database-runtime')
-    implementation project(':lib-database')
+    implementation project(':lib-door-runtime')
     implementation project(':lib-database-android')
-    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
-    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
+    implementation project(":lib-database-entities")
+    implementation project(":lib-database-annotations")
     implementation project(":lib-util")
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     androidTestImplementation project(":core-tests")
 

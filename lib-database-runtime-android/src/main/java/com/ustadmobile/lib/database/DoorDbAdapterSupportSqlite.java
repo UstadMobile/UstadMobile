@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.database;
 
-import android.arch.persistence.db.SupportSQLiteDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.ustadmobile.lib.db.DoorDbAdapter;
 import com.ustadmobile.lib.db.UmDbType;

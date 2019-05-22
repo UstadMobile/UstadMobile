@@ -21,6 +21,8 @@ import com.ustadmobile.core.view.DummyView;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
+import kotlinx.coroutines.GlobalScope;
+
 import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID;
 import static com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_DOWNLOADED_CONTENT;
 
@@ -58,15 +60,15 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         int itemId = item.getItemId();
 
         if (itemId == R.id.action_open_about) {
-            UstadMobileSystemImpl.Companion.getInstance().go(AboutView.VIEW_NAME, getContext());
+            UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, getContext());
         } else if (itemId == R.id.action_clear_history) {
             UmAppDatabase database = UmAppDatabase.getInstance(this);
-            database.getNetworkNodeDao().deleteAllAsync(null);
-            database.getEntryStatusResponseDao().deleteAllAsync(null);
-            database.getDownloadJobItemHistoryDao().deleteAll(null);
-            database.getDownloadJobDao().deleteAll(null);
-            database.getDownloadJobItemDao().deleteAll(null);
-            database.getContentEntryStatusDao().deleteAll(null);
+            database.getNetworkNodeDao().deleteAllAsync();
+            database.getEntryStatusResponseDao().deleteAllAsync();
+            database.getDownloadJobItemHistoryDao().deleteAllAsync();
+            database.getDownloadJobDao().deleteAllAsync();
+            database.getDownloadJobItemDao().deleteAllAsync();
+            database.getContentEntryStatusDao().deleteAllAsync();
             networkManagerBle.clearHistories();
         } else if (itemId == R.id.action_send_feedback) {
             hearShake();

@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.database;
 
-import android.arch.persistence.db.SupportSQLiteQuery;
-import android.arch.persistence.db.SupportSQLiteStatement;
+import androidx.sqlite.db.SupportSQLiteQuery;
+import androidx.sqlite.db.SupportSQLiteStatement;
 
 public interface UmRoomDbManagerWithSyncablePk {
 
