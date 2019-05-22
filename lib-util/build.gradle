@@ -19,6 +19,7 @@ apply plugin: "maven-publish"
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
+        //fromPreset(presets.jvm, 'commonJvm') comment this out for code completion
         fromPreset(presets.js, 'js')
         fromPreset(presets.android, 'android')
     }

@@ -14,7 +14,7 @@ apply plugin: 'java-library'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    api project(":core")
+    api project(path: ":core",configuration: "jvmDefault")
     api project(":sharedse")
     compileOnly project(':lib-database-entities')
 

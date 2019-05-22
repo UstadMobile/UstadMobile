@@ -67,22 +67,26 @@ android {
 processTestResources.dependsOn copyTestResources */
 
 kotlin {
-
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
     }
+
+//    compilations.main.kotlinOptions {
+//        // Setup the Kotlin compiler options for the 'main' compilation:
+//        jvmTarget = "1.8"
+//    }
+
     sourceSets {
 
         commonJvmMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation kotlin("stdlib-jdk8")
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
 
-                implementation project(":core")
+                implementation project(path: ":core", configuration: "jvmDefault")
                 implementation project(":lib-database")
                 implementation project(":lib-door-runtime")
                 compileOnly project(':lib-database-entities')
@@ -102,16 +106,11 @@ kotlin {
                 implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
             }
         }
-        jvmMain {
-            dependencies {
-            }
-            dependsOn commonJvmMain
-        }
 
         androidMain {
-            dependencies {
-
-            }
+            dependsOn commonJvmMain
+        }
+        jvmMain{
             dependsOn commonJvmMain
         }
 
