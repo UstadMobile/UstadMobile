@@ -118,7 +118,7 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
         /**
          * The string that is added
          */
-        val URI_ROUTE_POSTFIX = "(.)+"
+        const val URI_ROUTE_POSTFIX = "(.)+"
 
         private val HTML_EXTENSIONS = ArrayList<String>()
 

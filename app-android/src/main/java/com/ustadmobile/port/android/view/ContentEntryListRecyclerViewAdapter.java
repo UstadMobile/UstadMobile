@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -35,8 +36,8 @@ import java.util.Set;
 
 public class ContentEntryListRecyclerViewAdapter extends
         PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid,
-        ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener,
-        DownloadJobItemManager.OnDownloadJobItemChangeListener {
+                ContentEntryListRecyclerViewAdapter.ViewHolder> implements LocalAvailabilityListener,
+        OnDownloadJobItemChangeListener {
 
     private final AdapterViewListener listener;
 
@@ -94,22 +95,22 @@ public class ContentEntryListRecyclerViewAdapter extends
             viewHoldersToNotify = new LinkedList<>(boundViewHolders);
         }
 
-        for(ViewHolder viewHolder : viewHoldersToNotify){
+        for (ViewHolder viewHolder : viewHoldersToNotify) {
             boolean available = locallyAvailableEntries.contains(viewHolder.getContainerUid());
-            UMLog.l(UMLog.DEBUG,694,
+            UMLog.l(UMLog.DEBUG, 694,
                     "Entry status check received  " + available);
             activity.runOnUiThread(() -> viewHolder.updateLocallyAvailabilityStatus(available));
         }
     }
 
     @Override
-    public void onDownloadJobItemChange(DownloadJobItemStatus status, DownloadJobItemManager manager) {
+    public void onDownloadJobItemChange(@Nullable DownloadJobItemStatus status, Integer downloadJobUid) {
         List<ViewHolder> holdersToNotify;
         synchronized (boundViewHolders) {
             holdersToNotify = new LinkedList<>(boundViewHolders);
         }
 
-        for(ViewHolder viewHolder : holdersToNotify){
+        for (ViewHolder viewHolder : holdersToNotify) {
             viewHolder.onDownloadJobItemChange(status);
         }
     }
@@ -139,10 +140,9 @@ public class ContentEntryListRecyclerViewAdapter extends
     }
 
 
-
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        if(monitor != null){
+        if (monitor != null) {
             containerUidsToMonitor.clear();
         }
         super.onDetachedFromRecyclerView(recyclerView);
@@ -170,11 +170,11 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getAvailabilityIcon().setImageDrawable(null);
         } else {
             boolean available = false;
-            if(managerAndroidBle != null)
+            if (managerAndroidBle != null)
                 available = managerAndroidBle.isEntryLocallyAvailable(
                         entry.getMostRecentContainer());
 
-            if(entry.getLeaf()){
+            if (entry.getLeaf()) {
                 holder.updateLocallyAvailabilityStatus(available);
             }
 
@@ -236,14 +236,14 @@ public class ContentEntryListRecyclerViewAdapter extends
             }
 
             int viewVisibility = showLocallyAvailabilityViews && entry.getLeaf()
-                    ? View.VISIBLE: View.GONE;
+                    ? View.VISIBLE : View.GONE;
             holder.getAvailabilityIcon().setVisibility(viewVisibility);
             holder.getAvailabilityStatus().setVisibility(viewVisibility);
 
             List<Long> containerUidList = getUniqueContainerUidsListTobeMonitored();
-            if(!containerUidList.isEmpty()){
+            if (!containerUidList.isEmpty()) {
                 containerUidsToMonitor.addAll(containerUidList);
-                monitor.startMonitoringAvailability(monitor,containerUidList);
+                monitor.startMonitoringAvailability(monitor, containerUidList);
             }
 
             holder.getDownloadView().getImageResource().setContentDescription(contentDescription);
@@ -252,12 +252,12 @@ public class ContentEntryListRecyclerViewAdapter extends
             holder.getDownloadView().setProgress(0);
             managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(entry.getContentEntryUid(),
                     (status) -> {
-                        if(status != null) {
+                        if (status != null) {
                             activity.runOnUiThread(() -> {
                                 holder.getDownloadView().setProgressVisibility(View.VISIBLE);
                                 holder.onDownloadJobItemChange(status);
                             });
-                        }else {
+                        } else {
                             activity.runOnUiThread(() ->
                                     holder.getDownloadView().setProgressVisibility(View.INVISIBLE));
                         }
@@ -314,7 +314,7 @@ public class ContentEntryListRecyclerViewAdapter extends
             availabilityStatus = view.findViewById(R.id.content_entry_local_availability_status);
         }
 
-        void updateLocallyAvailabilityStatus(boolean available){
+        void updateLocallyAvailabilityStatus(boolean available) {
             int icon = available ? R.drawable.ic_nearby_black_24px :
                     R.drawable.ic_cloud_download_black_24dp;
             int status = available ? R.string.download_locally_availability :
@@ -381,23 +381,23 @@ public class ContentEntryListRecyclerViewAdapter extends
         }
 
         void onDownloadJobItemChange(DownloadJobItemStatus status) {
-            if(status != null && status.getContentEntryUid() == contentEntryUid) {
+            if (status != null && status.getContentEntryUid() == contentEntryUid) {
                 UMLog.l(UMLog.DEBUG, 420, "ContentEntryList update " +
                         "entryUid " + status.getContentEntryUid());
                 activity.runOnUiThread(() -> {
                     downloadView.setProgress(
-                        status.getTotalBytes() > 0 ?
-                        (int)((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0);
+                            status.getTotalBytes() > 0 ?
+                                    (int) ((status.getBytesSoFar() * 100) / status.getTotalBytes()) : 0);
 
-                    if(status.getTotalBytes() > 0) {
-                        if(status.getBytesSoFar() == status.getTotalBytes()) {
+                    if (status.getTotalBytes() > 0) {
+                        if (status.getBytesSoFar() == status.getTotalBytes()) {
                             /*
                              * ContentEntryStatus will be changed, and that will trigger showing
                              * the offline downloaded pin. We can now hide the progress view.
                              */
                             downloadView.setProgressVisibility(View.INVISIBLE);
-                        }else if(status.getTotalBytes() > 0
-                                && downloadView.getProgressVisibility() != View.VISIBLE){
+                        } else if (status.getTotalBytes() > 0
+                                && downloadView.getProgressVisibility() != View.VISIBLE) {
                             /*
                              * The download just started. When this view was first shown, the download
                              * was not in progress, so the progress view was made invisible. We need
@@ -441,8 +441,9 @@ public class ContentEntryListRecyclerViewAdapter extends
 
                 return oldItem.getContentEntryStatus().getTotalSize() == newItem.getContentEntryStatus().getTotalSize();
 
-            } else return (newItem.getContentEntryStatus() == null && newItem.getContentEntryStatus() == null)
-                    || newItem.getContentEntryStatus().equals(oldItem.getContentEntryStatus());
+            } else
+                return (newItem.getContentEntryStatus() == null && newItem.getContentEntryStatus() == null)
+                        || newItem.getContentEntryStatus().equals(oldItem.getContentEntryStatus());
         }
     };
 }

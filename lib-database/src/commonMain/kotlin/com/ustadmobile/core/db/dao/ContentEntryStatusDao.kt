@@ -13,7 +13,7 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     }
 
     @Query("DELETE FROM ContentEntryStatus")
-    abstract fun deleteAllAsync()
+    abstract suspend fun deleteAllAsync()
 
     @Query("UPDATE ContentEntryStatus SET bytesDownloadSoFar = :bytesDownloadSoFar " + "WHERE cesUid = :contentEntryUid")
     abstract fun updateLeafBytesDownloaded(contentEntryUid: Long, bytesDownloadSoFar: Long)

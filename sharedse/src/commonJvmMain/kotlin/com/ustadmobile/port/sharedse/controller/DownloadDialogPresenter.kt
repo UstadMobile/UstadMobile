@@ -256,12 +256,12 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     companion object {
 
-        val ARG_CONTENT_ENTRY_UID = "contentEntryUid"
+        const val ARG_CONTENT_ENTRY_UID = "contentEntryUid"
 
-        val STACKED_BUTTON_PAUSE = 0
+        const val STACKED_BUTTON_PAUSE = 0
 
-        val STACKED_BUTTON_CANCEL = 1
+        const val STACKED_BUTTON_CANCEL = 1
 
-        val STACKED_BUTTON_CONTINUE = 2
+        const val STACKED_BUTTON_CONTINUE = 2
     }
 }
