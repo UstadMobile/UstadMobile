@@ -19,11 +19,11 @@ open class DownloadJobItem {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
-    var djiUid: Long = 0
+    var djiUid: Int = 0
 
-    var djiDsiUid: Long = 0
+    var djiDsiUid: Int = 0
 
-    var djiDjUid: Long = 0
+    var djiDjUid: Int = 0
 
     var djiContainerUid: Long = 0
 
@@ -65,7 +65,7 @@ open class DownloadJobItem {
         numAttempts = src.numAttempts
     }
 
-    constructor(djiDjUid: Long, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
+    constructor(djiDjUid: Int, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
         this.djiDjUid = djiDjUid
         this.djiContentEntryUid = djiContentEntryUid
         this.djiContainerUid = djiContainerUid

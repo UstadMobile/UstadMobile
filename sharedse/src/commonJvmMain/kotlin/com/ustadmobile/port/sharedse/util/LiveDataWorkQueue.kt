@@ -2,9 +2,7 @@ package com.ustadmobile.port.sharedse.util
 
 import com.ustadmobile.core.db.UmLiveData
 import com.ustadmobile.core.db.UmObserver
-
-import java.util.HashSet
-import java.util.Hashtable
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
@@ -62,7 +60,7 @@ class LiveDataWorkQueue<T>
     }
 
 
-    private inner class RunWrapper<T> private constructor(private val item: T, internal var adapter: WorkQueueItemAdapter<T>) : Runnable {
+    private inner class RunWrapper<T>(private val item: T, var adapter: WorkQueueItemAdapter<T>) : Runnable {
 
         override fun run() {
             adapter.makeRunnable(item).run()
@@ -84,7 +82,11 @@ class LiveDataWorkQueue<T>
      */
     fun start(workSource: UmLiveData<List<T>>) {
         this.workSource = workSource
-        workObserver = UmObserver<List<T>> { this.handleWorkSourceChanged(it) }
+        workObserver = object : UmObserver<List<T>> {
+            override fun onChanged(t: List<T>?) {
+                handleWorkSourceChanged(t)
+            }
+        }
         workSource.observeForever(workObserver!!)
     }
 
@@ -96,7 +98,7 @@ class LiveDataWorkQueue<T>
         workSource!!.removeObserver(workObserver!!)
     }
 
-    private fun handleWorkSourceChanged(sourceData: List<T>) {
+    private fun handleWorkSourceChanged(sourceData: List<T>?) {
         try {
             lock.lock()
             currentQueue.set(sourceData)
@@ -117,7 +119,7 @@ class LiveDataWorkQueue<T>
                 val uid = adapter!!.getUid(sourceItem)
                 if (activeItems.size < maxThreads && !activeItems.containsKey(uid)
                         && !completedItems.contains(uid)) {
-                    val wrapper = RunWrapper(sourceItem, adapter)
+                    val wrapper = RunWrapper(sourceItem, adapter!!)
                     activeItems[uid] = wrapper
                     executor.submit(wrapper)
                 }

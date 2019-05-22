@@ -3,27 +3,17 @@ package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.container.ContainerManager
-
+import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.exception.ZipException
-
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Date
-import java.util.HashMap
-import java.util.Hashtable
-import java.util.StringTokenizer
-import java.util.Vector
-
-import fi.iki.elonen.NanoHTTPD
-import fi.iki.elonen.router.RouterNanoHTTPD
+import java.util.*
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -86,8 +76,11 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
         val response = super.serve(session)
         if (!responseListeners.isEmpty() && response != null) {
             fireResponseStarted(session, response)
-            response.data = InputStreamWithCloseListener(response.data
-            ) { fireResponseFinished(session, response) }
+            response.data = InputStreamWithCloseListener(response.data, object : InputStreamWithCloseListener.OnCloseListener {
+                override fun onStreamClosed() {
+                    fireResponseFinished(session, response)
+                }
+            })
         }
 
         return response
@@ -141,7 +134,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
 
     @JvmOverloads
     fun mountContainer(containerUid: Long, mountPath: String,
-                       filters: List<MountedContainerResponder.MountedContainerFilter> = ArrayList<MountedContainerFilter>()): String? {
+                       filters: List<MountedContainerResponder.MountedContainerFilter> = ArrayList()): String? {
         val container = repository.containerDao.findByUid(containerUid) ?: return null
 
         val containerManager = ContainerManager(container, appDatabase, repository)
@@ -203,7 +196,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
      *
      * @return ZipFile object for the zip that was mounted on that path, null if it's not mounted.
      */
-    fun getMountedZip(mountPath: String): ZipFile {
+    fun getMountedZip(mountPath: String): ZipFile? {
         return mountedZips[mountPath]
     }
 

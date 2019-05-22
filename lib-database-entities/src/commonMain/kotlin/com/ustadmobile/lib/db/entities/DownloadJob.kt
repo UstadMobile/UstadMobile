@@ -17,9 +17,9 @@ open class DownloadJob {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
-    var djUid: Long = 0
+    var djUid: Int = 0
 
-    var djDsUid: Long = 0
+    var djDsUid: Int = 0
 
     var timeCreated: Long = 0
 

@@ -1,12 +1,9 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.ContainerEntryFile
-
-import java.io.File
-
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import java.io.File
 
 class ContainerEntryFileResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -25,7 +22,7 @@ class ContainerEntryFileResponder : FileResponder(), RouterNanoHTTPD.UriResponde
         try {
             val entryFile = db.containerEntryFileDao.findByUid(
                     java.lang.Long.parseLong(entryFileUid))
-            if (entryFile == null || entryFile.cefPath == null) {
+            if (entryFile?.cefPath == null) {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
                         "application/octet", null)
             }

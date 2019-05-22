@@ -1,17 +1,12 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.EntryStatusResponseDao
-import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
-
-import java.util.ArrayList
-
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_RESPONSE
+import java.util.*
 
 /**
  * This is an abstract class which is used to implement platform specific BleEntryStatus
@@ -31,23 +26,23 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
      * Get BleMessage instance
      * @return Created BleMessage
      */
-    var message: BleMessage
+    var message: BleMessage? = null
         protected set
 
     /**
      * Get NetworkNode instance
      * @return Created NetworkNode
      */
-    var networkNode: NetworkNode
+    lateinit var networkNode: NetworkNode
         protected set
 
-    protected var context: Any
+    internal lateinit var context: Any
 
     private var entryUidsToCheck: List<Long>? = null
 
-    private val responseListener: BleMessageResponseListener?
+    private var responseListener: BleMessageResponseListener? = null
 
-    private var managerBle: NetworkManagerBle? = null
+    private lateinit var managerBle: NetworkManagerBle
 
     /**
      * Constructor which will be used when creating new instance of a task
@@ -136,7 +131,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
                     val containerUid = entryUidsToCheck!![entryCounter]
 
                     entryFileStatusResponseList.add(EntryStatusResponse(containerUid, time,
-                            networkNodeId, statusCheckResponse[entryCounter] != 0))
+                            networkNodeId, statusCheckResponse[entryCounter] != 0L))
 
                 }
                 val rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList)
@@ -145,7 +140,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
                             + " response(s) logged from " + sourceDeviceAddress)
                 }
 
-                managerBle!!.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList)
+                managerBle.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList)
             }
         }
 

@@ -14,13 +14,14 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider, OnDownloadJobItemChangeListener {
 
+
     private val managerMap = mutableMapOf<Int, DownloadJobItemManager>()
 
     private val changeListeners = mutableListOf<OnDownloadJobItemChangeListener>()
 
     fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
-        newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob)
-        val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid.toInt())
+        newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
+        val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid)
         manager.onDownloadJobItemChangeListener = this
         managerMap[newDownloadJob.djUid.toInt()] = manager
 
@@ -35,7 +36,8 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         return managerMap.values.toList()
     }
 
-    override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long, callback: UmResultCallback<DownloadJobItemStatus?>) {
+
+    override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long, callback: UmResultCallback<DownloadJobItemStatus?>){
         if (managerMap.isEmpty()) {
             callback.onDone(null)
             return

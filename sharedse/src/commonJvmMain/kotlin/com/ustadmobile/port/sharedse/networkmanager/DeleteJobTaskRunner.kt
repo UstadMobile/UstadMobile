@@ -7,9 +7,9 @@ package com.ustadmobile.port.sharedse.networkmanager
  */
 abstract class DeleteJobTaskRunner : Runnable {
 
-    protected var args: Map<String, String>
+    protected lateinit var args: Map<String, String>
 
-    protected var context: Any
+    protected lateinit var context: Any
 
     /**
      * Constructor for testing purpose

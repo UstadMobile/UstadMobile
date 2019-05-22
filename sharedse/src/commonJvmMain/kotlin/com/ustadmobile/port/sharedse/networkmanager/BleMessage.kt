@@ -1,17 +1,14 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.util.UMIOUtils
-
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.DEFAULT_MTU_SIZE
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.util.Arrays
-import java.util.Hashtable
+import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE
 
 /**
  * This class converts bytes
@@ -203,14 +200,14 @@ class BleMessage {
             val gis = GZIPInputStream(`is`, BUFFER_SIZE)
             val data = ByteArray(BUFFER_SIZE)
             var bytesRead: Int
-            while ((bytesRead = gis.read(data)) != -1) {
+            while (gis.read(data).also { bytesRead = it } != -1) {
                 bout.write(data, 0, bytesRead)
             }
             bout.flush()
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
-            UMIOUtils.closeQuietly(bout)
+            UMIOUtils.closeOutputStream(bout)
         }
         return bout.toByteArray()
     }
@@ -243,7 +240,7 @@ class BleMessage {
                 e.printStackTrace()
                 return arrayOf()
             } finally {
-                UMIOUtils.closeQuietly(outputStream)
+                UMIOUtils.closeOutputStream(outputStream)
             }
             val totalPayLoad = outputStream.toByteArray()
             val packets = Array(numPackets) { ByteArray(mtu) }
@@ -275,7 +272,7 @@ class BleMessage {
                 try {
                     outputStream.write(packetContent, 1, packetContent.size - 1)
                 } finally {
-                    UMIOUtils.closeQuietly(outputStream)
+                    UMIOUtils.closeOutputStream(outputStream)
                 }
             }
             return outputStream.toByteArray()
@@ -295,7 +292,7 @@ class BleMessage {
         }
 
         if (onPacketReceivedCount < packetReceiveBuffer!!.size) {
-            packetReceiveBuffer[onPacketReceivedCount++] = packet
+            packetReceiveBuffer!![onPacketReceivedCount++] = packet
         }
 
         if (onPacketReceivedCount == packetReceiveBuffer!!.size) {
@@ -342,11 +339,9 @@ class BleMessage {
          * @return unique message identifier
          */
         fun getNextMessageIdForReceiver(receiverAddr: String): Byte {
-            val lastMessageId = messageIds[receiverAddr]
+            val lastMessageId = messageIds[receiverAddr] ?: (-128).toByte()
             val nextMessageId: Byte
-            if (lastMessageId == null) {
-                nextMessageId = (-128).toByte()
-            } else if (lastMessageId == 127) {
+            if (lastMessageId == 127.toByte()) {
                 nextMessageId = (-128).toByte()
             } else {
                 nextMessageId = (lastMessageId + 1).toByte()

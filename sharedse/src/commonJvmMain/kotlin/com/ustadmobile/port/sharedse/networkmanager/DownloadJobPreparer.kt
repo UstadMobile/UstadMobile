@@ -3,20 +3,12 @@ package com.ustadmobile.port.sharedse.networkmanager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DownloadJobItemDao
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.DownloadJobItemManager
-import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
 import com.ustadmobile.lib.util.UMUtil
-
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Collections
-import java.util.HashMap
-import java.util.HashSet
-import java.util.LinkedList
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -42,12 +34,12 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
         val rootEntryContainer = appDatabaseRepo.containerDao
                 .getMostRecentContainerForContentEntry(contentEntryUid)
         val rootDownlaodJobItem = DownloadJobItem(
-                jobItemManager.downloadJobUid.toLong(), contentEntryUid,
+                jobItemManager.downloadJobUid, contentEntryUid,
                 rootEntryContainer?.containerUid ?: 0,
                 rootEntryContainer?.fileSize ?: 0)
         jobItemManager.insertDownloadJobItemsSync(listOf(rootDownlaodJobItem))
 
-        val contentEntryUidToDjiUidMap = HashMap<Long, Long>()
+        val contentEntryUidToDjiUidMap = HashMap<Long, Int>()
         val parentUids = ArrayList<Long>()
         parentUids.add(contentEntryUid)
         contentEntryUidToDjiUidMap[contentEntryUid] = rootDownlaodJobItem.djiUid
@@ -70,7 +62,7 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
 
             for (child in childItemsToCreate) {
                 if (!contentEntryUidToDjiUidMap.containsKey(child.contentEntryUid)) {
-                    val newItem = DownloadJobItem(downloadJobUid.toLong(),
+                    val newItem = DownloadJobItem(downloadJobUid,
                             child.contentEntryUid, child.containerUid, child.fileSize)
                     jobItemManager.insertDownloadJobItemsSync(listOf(newItem))
                     numItemsCreated++
@@ -90,8 +82,8 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
 
                 if (!createdJoinCepjUids.contains(child.cepcjUid)) {
                     jobItemManager.insertParentChildJoins(listOf(DownloadJobItemParentChildJoin(
-                            contentEntryUidToDjiUidMap[child.parentEntryUid],
-                            contentEntryUidToDjiUidMap[child.contentEntryUid],
+                            contentEntryUidToDjiUidMap[child.parentEntryUid]!!,
+                            contentEntryUidToDjiUidMap[child.contentEntryUid]!!,
                             child.cepcjUid)), null)
                     createdJoinCepjUids.add(child.cepcjUid)
                 }
@@ -103,7 +95,12 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 " items. Time to prepare download job: " +
                 (System.currentTimeMillis() - startTime) + "ms")
         val latch = CountDownLatch(1)
-        jobItemManager.commit({ aVoid -> latch.countDown() })
+        jobItemManager.commit(object: UmResultCallback<Void>{
+            override fun onDone(result: Void?) {
+                latch.countDown()
+            }
+
+        })
         try {
             latch.await(5, TimeUnit.SECONDS)
         } catch (e: InterruptedException) {

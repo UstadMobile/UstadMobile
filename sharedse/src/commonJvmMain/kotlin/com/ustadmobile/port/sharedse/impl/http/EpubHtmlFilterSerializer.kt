@@ -2,11 +2,10 @@ package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.util.UMUtil
-
+import org.kmp.io.KMPSerializerParser
+import org.kmp.io.KMPXmlParser
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlSerializer
-
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -38,25 +37,25 @@ class EpubHtmlFilterSerializer {
             xs.startDocument("UTF-8", false)
             UMUtil.passXmlThrough(xpp, xs, true, object : UMUtil.PassXmlThroughFilter {
                 @Throws(IOException::class)
-                fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
-                    if (evtType == XmlPullParser.END_TAG && parser.name == "head") {
-                        serializer.startTag(parser.namespace, "meta")
-                        serializer.attribute(parser.namespace, "name", "viewport")
-                        serializer.attribute(parser.namespace, "content",
+                override fun beforePassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
+                    if (evtType == XmlPullParser.END_TAG && parser.getName() == "head") {
+                        serializer.startTag(parser.getNamespace(), "meta")
+                        serializer.attribute(parser.getNamespace(), "name", "viewport")
+                        serializer.attribute(parser.getNamespace(), "content",
                                 "height=device-height, initial-scale=1,user-scalable=no")
-                        serializer.endTag(parser.namespace, "meta")
+                        serializer.endTag(parser.getNamespace(), "meta")
                     }
                     return true
                 }
 
                 @Throws(IOException::class, XmlPullParserException::class)
-                fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
-                    if (evtType == XmlPullParser.START_TAG && parser.name == "body") {
-                        serializer.startTag(parser.namespace, "script")
-                        serializer.attribute(parser.namespace, "src", scriptSrcToAdd)
-                        serializer.attribute(parser.namespace, "type", "text/javascript")
+                override fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
+                    if (evtType == XmlPullParser.START_TAG && parser.getName() == "body") {
+                        serializer.startTag(parser.getNamespace(), "script")
+                        serializer.attribute(parser.getNamespace(), "src", scriptSrcToAdd?: "")
+                        serializer.attribute(parser.getNamespace(), "type", "text/javascript")
                         serializer.text(" ")
-                        serializer.endTag(parser.namespace, "script")
+                        serializer.endTag(parser.getNamespace(), "script")
                     }
 
                     return true

@@ -97,7 +97,7 @@ kotlin {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
         fromPreset(presets.js, 'js')
-       // fromPreset(presets.jvm,'commonJvm') uncomment for code completion
+        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
 
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.util
 
-import java.util.Vector
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -18,7 +18,7 @@ class WorkQueue(private val source: WorkQueueSource, private val maxThreads: Int
 
     interface WorkQueueSource {
 
-        fun nextItem(): Runnable
+        fun nextItem(): Runnable?
 
     }
 
@@ -43,16 +43,18 @@ class WorkQueue(private val source: WorkQueueSource, private val maxThreads: Int
     }
 
     fun checkQueue() {
-        var nextItem: Runnable
+
         synchronized(activeItems) {
-            while (activeItems.size < maxThreads && (nextItem = source.nextItem()) != null) {
+            var nextItem = source.nextItem()
+            while (activeItems.size < maxThreads && nextItem != null) {
                 val runWrapper = {
-                    nextItem.run()
-                    activeItems.remove(nextItem)
+                    nextItem!!.run()
+                    activeItems.remove(nextItem!!)
                     checkQueue()
                 }
                 activeItems.add(nextItem)
                 executor!!.submit(runWrapper)
+                nextItem = source.nextItem()
             }
 
             if (activeItems.isEmpty()) {

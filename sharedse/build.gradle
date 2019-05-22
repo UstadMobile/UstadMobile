@@ -70,6 +70,7 @@ kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
+        //fromPreset(presets.jvm, 'commonJvm')
     }
 
 //    compilations.main.kotlinOptions {
@@ -90,7 +91,7 @@ kotlin {
                 implementation project(":lib-database")
                 implementation project(":lib-door-runtime")
                 compileOnly project(':lib-database-entities')
-                implementation project(":lib-util")
+                implementation project(path: ":lib-util", configuration: "jvmDefault")
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"

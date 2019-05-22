@@ -1,22 +1,19 @@
 package com.ustadmobile.port.sharedse.impl.http
 
+
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.URLTextUtil
-
-import org.xmlpull.v1.XmlPullParserException
-
-import java.io.ByteArrayInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.util.ArrayList
-import java.util.regex.Pattern
+import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.FileHeader
-
-
-import fi.iki.elonen.NanoHTTPD
-import fi.iki.elonen.router.RouterNanoHTTPD
+import org.xmlpull.v1.XmlPullParserException
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.util.*
+import java.util.regex.Pattern
 
 /**
  * A RouterNanoHTTPD UriResponder that when mounted serves files from the zip for content viewing
@@ -37,48 +34,44 @@ class MountedZipHandler : FileResponder(), RouterNanoHTTPD.UriResponder {
 
     class FilteredHtmlSource(private val src: FileResponder.IFileSource, private val scriptPath: String) : FileResponder.IFileSource {
 
-        private var inputStream: ByteArrayInputStream? = null
+        private var filteredLen = -1L
 
-        private var length: Long = -1
+        override val length: Long
+            get() {
+                try {
+                    inputStream
+                }catch (e: IOException){
+
+                }
+                return filteredLen
+            }
+
+        override val inputStream: InputStream by lazy {
+            //init and filter
+            val srcIn = src.inputStream
+            try {
+                val filterSerializer = EpubHtmlFilterSerializer()
+                filterSerializer.scriptSrcToAdd = scriptPath
+                filterSerializer.setIntput(srcIn)
+                val filteredBytes = filterSerializer.output
+                filteredLen = filteredBytes.size.toLong()
+                ByteArrayInputStream(filteredBytes)
+            } catch (x: XmlPullParserException) {
+                throw IOException(x)
+            }
+        }
+
+        override val exists: Boolean
+            get() = src.exists
+
+        //private var length: Long = -1
 
         override val lastModifiedTime: Long
             get() = src.lastModifiedTime
 
-        override val name: String
+        override val name: String?
             get() = src.name
 
-        override fun getLength(): Long {
-            try {
-                getInputStream()
-            } catch (e: IOException) {
-            }
-
-            return length
-        }
-
-        @Throws(IOException::class)
-        override fun getInputStream(): InputStream {
-            if (inputStream == null) {
-                //init and filter
-                val srcIn = src.inputStream
-                try {
-                    val filterSerializer = EpubHtmlFilterSerializer()
-                    filterSerializer.scriptSrcToAdd = scriptPath
-                    filterSerializer.setIntput(srcIn)
-                    val filteredBytes = filterSerializer.output
-                    length = filteredBytes.size.toLong()
-                    inputStream = ByteArrayInputStream(filteredBytes)
-                } catch (x: XmlPullParserException) {
-                    throw IOException(x)
-                }
-
-            }
-            return inputStream
-        }
-
-        override fun exists(): Boolean {
-            return src.exists()
-        }
     }
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
@@ -119,9 +112,9 @@ class MountedZipHandler : FileResponder(), RouterNanoHTTPD.UriResponder {
             dirInZip += "/"
 
 
-        val entries: List<FileHeader>
+        val entries: MutableList<FileHeader>
         try {
-            entries = zipfile.fileHeaders
+            entries = zipfile.fileHeaders as MutableList<FileHeader>
         } catch (ze: ZipException) {
             ze.printStackTrace()
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
@@ -134,7 +127,7 @@ class MountedZipHandler : FileResponder(), RouterNanoHTTPD.UriResponder {
         var pathAfterDir: String
         var lastSepPos: Int
         for (currentEntry in entries) {
-            if (currentEntry.getFileName().substring(0, dirInZip.length) == dirInZip) {
+            if (currentEntry.fileName.substring(0, dirInZip.length) == dirInZip) {
                 pathAfterDir = currentEntry.getFileName().substring(dirInZip.length)
 
                 lastSepPos = pathAfterDir.indexOf('/')

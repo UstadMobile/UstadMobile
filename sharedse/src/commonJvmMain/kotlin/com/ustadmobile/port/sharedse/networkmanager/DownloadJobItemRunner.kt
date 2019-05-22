@@ -1,47 +1,34 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
-import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmObserver
-import com.ustadmobile.core.db.WaitForLiveData
+import com.ustadmobile.core.db.*
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.DownloadJobItemManager
+import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
+import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService
-
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.File
 import java.io.IOException
-import java.util.Arrays
-import java.util.Collections
-import java.util.Timer
-import java.util.TimerTask
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-
-import retrofit2.Call
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
-
-import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
-import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
-import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
-import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -155,7 +142,7 @@ class DownloadJobItemRunner
      * Handle changes triggered when connectivity status changes.
      * @param newStatus changed connectivity status
      */
-    private fun handleConnectivityStatusChanged(newStatus: ConnectivityStatus) {
+    private fun handleConnectivityStatusChanged(newStatus: ConnectivityStatus?) {
         this.connectivityStatus = newStatus
         UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() +
                 " Connectivity state changed: " + newStatus)
@@ -163,7 +150,7 @@ class DownloadJobItemRunner
             return
 
         if (connectivityStatus != null) {
-            when (newStatus.connectivityState) {
+            when (newStatus!!.connectivityState) {
                 STATE_METERED -> if (meteredConnectionAllowed.get() == 0) {
                     stopAsync(JobStatus.WAITING_FOR_CONNECTION)
                 }
@@ -257,12 +244,12 @@ class DownloadJobItemRunner
         runnerStatus.set(JobStatus.RUNNING)
         updateItemStatus(JobStatus.RUNNING)
         val downloadJobId = downloadItem.djiDjUid.toInt()
-        appDb.downloadJobDao.update(downloadJobId.toLong(), JobStatus.RUNNING)
+        appDb.downloadJobDao.update(downloadJobId, JobStatus.RUNNING)
 
         networkManager.startMonitoringAvailability(this,
                 listOf(downloadItem.djiContainerUid))
 
-        statusLiveData = appDb.connectivityStatusDao.getStatusLive()
+        statusLiveData = appDb.connectivityStatusDao.statusLive()
         downloadJobItemLiveData = appDb.downloadJobItemDao.getLiveStatus(downloadItem.djiUid)
 
         //get the download set
@@ -272,9 +259,22 @@ class DownloadJobItemRunner
         //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
         //                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
-        downloadSetConnectivityObserver = UmObserver<Boolean> { this.handleDownloadSetMeteredConnectionAllowedChanged(it) }
-        statusObserver = UmObserver<ConnectivityStatus> { this.handleConnectivityStatusChanged(it) }
-        downloadJobItemObserver = UmObserver<Int> { this.handleDownloadJobItemStatusChanged(it) }
+        downloadSetConnectivityObserver = object : UmObserver<Boolean> {
+            override fun onChanged(t: Boolean?) {
+                handleDownloadSetMeteredConnectionAllowedChanged(t)
+            }
+        }
+        statusObserver = object : UmObserver<ConnectivityStatus> {
+            override fun onChanged(t: ConnectivityStatus?) {
+                handleConnectivityStatusChanged(t)
+            }
+        }
+
+        downloadJobItemObserver = object : UmObserver<Int> {
+            override fun onChanged(t: Int?) {
+                handleDownloadJobItemStatusChanged(t)
+            }
+        }
         //entryStatusObserver = this::handleContentEntryFileStatus;
         statusLiveData!!.observeForever(statusObserver!!)
         downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
@@ -312,8 +312,8 @@ class DownloadJobItemRunner
 
         var containerManager: ContainerManager? = null
         try {
-            containerManager = ContainerManager(container, appDb, appDbRepo,
-                    destinationDir)
+            containerManager = ContainerManager(container!!, appDb, appDbRepo,
+                    destinationDir!!)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -384,7 +384,8 @@ class DownloadJobItemRunner
                 if (response.isSuccessful) {
                     val containerEntryList = response.body()
                     val entriesToDownload = containerManager!!
-                            .linkExistingItems(containerEntryList)//returns items we don't have yet
+                            .linkExistingItems(containerEntryList
+                                    ?: arrayListOf())//returns items we don't have yet
                     completedEntriesBytesDownloaded.set(appDb.containerEntryFileDao
                             .sumContainerFileEntrySizes(container!!.containerUid))
                     history.startTime = System.currentTimeMillis()
@@ -402,7 +403,7 @@ class DownloadJobItemRunner
                         httpDownloadRef.set(httpDownload)
                         if (httpDownload!!.download()) {
                             completedEntriesBytesDownloaded.addAndGet(destFile.length())
-                            containerManager.addEntry(destFile, entry.cePath,
+                            containerManager.addEntry(destFile, entry.cePath!!,
                                     ContainerManager.OPTION_COPY)
                             downloadedCount++
                         }
@@ -434,7 +435,10 @@ class DownloadJobItemRunner
         httpDownloadRef.set(null)
 
         if (downloaded) {
-            appDb.downloadJobDao.updateBytesDownloadedSoFar(downloadItem.djiDjUid, null)
+
+            GlobalScope.launch {
+                appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
+            }
             val totalDownloaded = completedEntriesBytesDownloaded.get() + if (httpDownload != null) httpDownload!!.downloadedSoFar else 0
 
             downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
@@ -459,20 +463,20 @@ class DownloadJobItemRunner
     private fun connectToCloudNetwork(): Boolean {
         UMLog.l(UMLog.DEBUG, 699, "Reconnecting cloud network")
         networkManager.restoreWifi()
-        WaitForLiveData.observeUntil(statusLiveData, CONNECTION_TIMEOUT, TimeUnit.SECONDS,
-                { connectivityStatus ->
-                    if (connectivityStatus == null)
-                        return@WaitForLiveData.observeUntil false
+        WaitForLiveData.observeUntil(statusLiveData!!, (CONNECTION_TIMEOUT * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
+            override fun done(value: ConnectivityStatus): Boolean {
+                if (connectivityStatus == null)
+                    return false
 
-                    if (connectivityStatus!!.getConnectivityState() === ConnectivityStatus.STATE_UNMETERED) {
-                        networkManager.lockWifi(downloadWiFiLock)
-                        return@WaitForLiveData.observeUntil true
-                    }
+                if (connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED) {
+                    networkManager.lockWifi(downloadWiFiLock)
+                    return true
+                }
 
-                    connectivityStatus!!.getConnectivityState() === ConnectivityStatus.STATE_METERED && meteredConnectionAllowed.get() == 1
+                return connectivityStatus!!.connectivityState == STATE_METERED && meteredConnectionAllowed.get() == 1
+            }
 
-                })
-
+        })
         return connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED || meteredConnectionAllowed.get() == 1 && connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_METERED
     }
 
@@ -484,36 +488,39 @@ class DownloadJobItemRunner
     private fun connectToLocalNodeNetwork(): Boolean {
         waitingForLocalConnection.set(true)
         val requestGroupCreation = BleMessage(WIFI_GROUP_REQUEST,
-                BleMessage.getNextMessageIdForReceiver(currentNetworkNode!!.bluetoothMacAddress),
+                BleMessage.getNextMessageIdForReceiver(currentNetworkNode!!.bluetoothMacAddress!!),
                 BleMessageUtil.bleMessageLongToBytes(listOf(1L)))
         UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() + " connecting local network: requesting group credentials ")
         val latch = CountDownLatch(1)
         val connectionRequestActive = AtomicBoolean(true)
         networkManager.lockWifi(downloadWiFiLock)
 
-        networkManager.sendMessage(context, requestGroupCreation, currentNetworkNode
-        ) { sourceDeviceAddress, response, error ->
-            UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                    " BLE response received: from " + sourceDeviceAddress + ":" + response +
-                    " error: " + error)
-            if (latch.count > 0 && connectionRequestActive.get()
-                    && response != null
-                    && response.requestType == WIFI_GROUP_CREATION_RESPONSE) {
-                connectionRequestActive.set(false)
-                val lWifiDirectGroup = networkManager.getWifiGroupInfoFromBytes(response.payload)
-                wiFiDirectGroupBle.set(lWifiDirectGroup)
-
-                val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
-                        + lWifiDirectGroup.port + "/")
-                currentNetworkNode!!.endpointUrl = acquiredEndPoint
-                appDb.networkNodeDao.updateNetworkNodeGroupSsid(currentNetworkNode!!.nodeId,
-                        lWifiDirectGroup.ssid, acquiredEndPoint)
-
+        networkManager.sendMessage(context, requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
+            override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception) {
                 UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                        "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
+                        " BLE response received: from " + sourceDeviceAddress + ":" + response +
+                        " error: " + error)
+                if (latch.count > 0 && connectionRequestActive.get()
+                        && response != null
+                        && response.requestType == WIFI_GROUP_CREATION_RESPONSE) {
+                    connectionRequestActive.set(false)
+                    val lWifiDirectGroup = networkManager.getWifiGroupInfoFromBytes(response.payload!!)
+                    wiFiDirectGroupBle.set(lWifiDirectGroup)
+
+                    val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
+                            + lWifiDirectGroup.port + "/")
+                    currentNetworkNode!!.endpointUrl = acquiredEndPoint
+                    appDb.networkNodeDao.updateNetworkNodeGroupSsid(currentNetworkNode!!.nodeId,
+                            lWifiDirectGroup.ssid, acquiredEndPoint)
+
+                    UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+                            "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
+                }
+                latch.countDown()
+
             }
-            latch.countDown()
-        }
+
+        })
         try {
             latch.await(20, TimeUnit.SECONDS)
         } catch (ignored: InterruptedException) {
@@ -533,8 +540,12 @@ class DownloadJobItemRunner
 
         //disconnect first
         if (connectivityStatus!!.connectivityState != ConnectivityStatus.STATE_DISCONNECTED && connectivityStatus!!.wifiSsid != null) {
-            WaitForLiveData.INSTANCE.observeUntil(statusLiveData, 10, TimeUnit.SECONDS,
-                    { connectivityStatus -> connectivityStatus != null && connectivityStatus!!.getConnectivityState() !== ConnectivityStatus.STATE_UNMETERED })
+            WaitForLiveData.observeUntil(statusLiveData!!, 10 * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
+                override fun done(value: ConnectivityStatus): Boolean {
+                    return connectivityStatus != null && connectivityStatus!!.connectivityState != ConnectivityStatus.STATE_UNMETERED
+                }
+
+            })
             UMLog.l(UMLog.INFO, 699, "Disconnected existing wifi network")
         }
 
@@ -544,20 +555,16 @@ class DownloadJobItemRunner
                 wiFiDirectGroupBle.get().passphrase)
 
         val statusRef = AtomicReference<ConnectivityStatus>()
-        WaitForLiveData.INSTANCE.observeUntil(statusLiveData, lWiFiConnectionTimeout, TimeUnit.SECONDS,
-                { connectivityStatus ->
-                    statusRef.set(connectivityStatus)
-                    if (connectivityStatus == null)
-                        return@WaitForLiveData.INSTANCE.observeUntil false
+        WaitForLiveData.observeUntil(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
+            override fun done(value: ConnectivityStatus): Boolean {
+                statusRef.set(value)
+                if (value == null)
+                    return false
 
-                    //connected OK and ready to go
-                    isExpectedWifiDirectGroup(connectivityStatus!!)
+                return isExpectedWifiDirectGroup(value)
+            }
 
-                    //TODO: pin down what status messages to expect to know that the attempt has failed
-                    //                    return connectivityStatus.getConnectivityState() == ConnectivityStatus.STATE_DISCONNECTED
-                    //                            || connectivityStatus.getConnectivityState() ==  ConnectivityStatus.STATE_UNMETERED;
-                })
-
+        })
         waitingForLocalConnection.set(false)
         return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get())
     }
@@ -573,7 +580,11 @@ class DownloadJobItemRunner
         UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                 " Setting status to: " + JobStatus.statusToString(itemStatus))
         downloadJobItemManager!!.updateStatus(downloadItem.djiUid.toInt(), itemStatus,
-                { aVoid -> latch.countDown() })
+                object : UmResultCallback<Void?> {
+                    override fun onDone(result: Void?) {
+                        latch.countDown()
+                    }
+                })
         try {
             latch.await(5, TimeUnit.SECONDS)
         } catch (e: InterruptedException) {/* should not happen */

@@ -1,18 +1,12 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.util.UMFileUtil
-
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStream
+import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.FileHeader
-
-import fi.iki.elonen.NanoHTTPD
-import fi.iki.elonen.router.RouterNanoHTTPD
+import java.io.*
 
 /**
  * This is a RouterNanoHTTPD Responder that can be used to serve files from the file system or
@@ -65,14 +59,14 @@ abstract class FileResponder {
          *
          * @return The base name of the file
          */
-        val name: String
+        val name: String?
 
         /**
          * Determine if the file or zip entry exists
          *
          * @return True if file exists, false otherwise
          */
-        fun exists(): Boolean
+        val exists: Boolean
 
     }
 
@@ -91,9 +85,7 @@ abstract class FileResponder {
         override val name: String
             get() = src.name
 
-        override fun exists(): Boolean {
-            return src.exists()
-        }
+        override val exists: Boolean = src.exists()
     }
 
     class ZipEntrySource : IFileSource {
@@ -123,6 +115,9 @@ abstract class FileResponder {
         override val name: String
             get() = entry!!.fileName
 
+        override val exists: Boolean
+            get() =  entry != null//must exist if there is an entry here
+
         /**
          *
          * @param entry
@@ -143,9 +138,6 @@ abstract class FileResponder {
 
         }
 
-        override fun exists(): Boolean {
-            return entry != null//must exist if there is an entry here
-        }
     }
 
     companion object {
@@ -172,7 +164,7 @@ abstract class FileResponder {
                 val ifNoneMatchHeader: String?
                 var retInputStream: InputStream?
 
-                if (!file.exists()) {
+                if (!file.exists) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, "text/plain",
                             if (isHeadRequest) null else "File not found")
                 }
@@ -187,7 +179,7 @@ abstract class FileResponder {
                 //Check to see if the etag provided by the client matches: in which case we can send 302 not modified
                 val etag = Integer.toHexString((file.name + lastModifiedTime + "" +
                         totalLength).hashCode())
-                val extension = UMFileUtil.getExtension(fileName)
+                val extension = UMFileUtil.getExtension(fileName!!)
                 ifNoneMatchHeader = session.headers["if-none-match"]
                 if (ifNoneMatchHeader != null && ifNoneMatchHeader == etag) {
                     val r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_MODIFIED,
@@ -199,8 +191,8 @@ abstract class FileResponder {
                 range = parseRangeRequest(session, totalLength)
                 retInputStream = if (isHeadRequest) null else file.inputStream
                 if (range != null) {
-                    if (range[0] != -1) {
-                        retInputStream = if (isHeadRequest) null else RangeInputStream(retInputStream, range[0], range[1])
+                    if (range[0] != -1L) {
+                        retInputStream = if (isHeadRequest) null else RangeInputStream(retInputStream!!, range[0], range[1])
                         val contentLength = range[1] + 1 - range[0]
                         val r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
                                 mimeType, retInputStream, contentLength)

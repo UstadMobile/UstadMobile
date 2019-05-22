@@ -63,7 +63,7 @@ abstract class DownloadJobItemDao {
      * @param jobRunItem DownloadJobItem to insert
      */
     @Insert
-    abstract fun insert(jobRunItem: DownloadJobItem): Long
+    abstract fun insert(jobRunItem: DownloadJobItem): Int
 
     @Query("DELETE FROM DownloadJobItem")
     abstract suspend fun deleteAllAsync()
@@ -110,15 +110,15 @@ abstract class DownloadJobItemDao {
 
 
     @Query("UPDATE DownloadJobItem SET numAttempts = numAttempts + 1 WHERE djiUid = :djiUid")
-    abstract fun incrementNumAttempts(djiUid: Long)
+    abstract fun incrementNumAttempts(djiUid: Int)
 
     @Query("SELECT DownloadJobItem.* FROM " +
             "DownloadJobItem " +
             "WHERE DownloadJobItem.djiUid = :djiUid")
-    abstract fun findByUid(djiUid: Long): DownloadJobItem?
+    abstract fun findByUid(djiUid: Int): DownloadJobItem?
 
     @Query("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
-    abstract fun getLiveStatus(djiUid: Long): UmLiveData<Int>
+    abstract fun getLiveStatus(djiUid: Int): UmLiveData<Int>
 
     @Query("SELECT * FROM DownloadJobItem")
     abstract fun findAllLive(): UmLiveData<List<DownloadJobItem>>
@@ -127,7 +127,7 @@ abstract class DownloadJobItemDao {
     abstract fun findAll(): List<DownloadJobItem>
 
     @Query("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
-    abstract fun getTotalDownloadJobItems(djiDjUid: Long): Int
+    abstract fun getTotalDownloadJobItems(djiDjUid: Int): Int
 
     @Query("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
     abstract fun countDownloadJobItems(djiDjUid: Long): UmLiveData<Int>
@@ -179,7 +179,7 @@ abstract class DownloadJobItemDao {
             "djiStatus AS status " +
             "FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiDjUid = :downloadJobUid")
-    abstract fun findStatusByDownlaodJobUid(downloadJobUid: Long): List<DownloadJobItemStatus>
+    abstract fun findStatusByDownlaodJobUid(downloadJobUid: Int): List<DownloadJobItemStatus>
 
     @Query("SELECT ContentEntryParentChildJoin.cepcjUid AS cepcjUid, " +
             " ContentEntryParentChildJoin.cepcjChildContentEntryUid AS contentEntryUid," +

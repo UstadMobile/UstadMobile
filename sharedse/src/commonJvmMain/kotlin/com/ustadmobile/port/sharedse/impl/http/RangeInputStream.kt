@@ -124,7 +124,7 @@ constructor(`in`: InputStream, start: Long, private val end: Long) : FilterInput
     @Synchronized
     @Throws(IOException::class)
     override fun reset() {
-        if (resetPos != -1 && pos < resetInvalidate) {
+        if (resetPos != -1L && pos < resetInvalidate) {
             `in`.reset()
             pos = resetPos
         }

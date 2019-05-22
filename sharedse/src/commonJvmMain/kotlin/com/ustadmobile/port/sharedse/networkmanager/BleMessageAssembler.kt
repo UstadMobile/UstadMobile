@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
-import java.util.Hashtable
+import java.util.*
 
 /**
  * BleMessageAssembler
@@ -28,12 +28,12 @@ class BleMessageAssembler {
     }
 
     init {
-        clientAddrToMessagesMap = Hashtable()
+        clientAddrToMessagesMap = mutableMapOf()
     }
 
     @Synchronized
     fun handleIncomingPacket(senderAddr: String, packet: ByteArray): BleMessage? {
-        var clientMessageIdToMessageMap: MutableMap<Byte, BleMessageInProgress>? = clientAddrToMessagesMap[senderAddr]
+        var clientMessageIdToMessageMap: MutableMap<Byte, BleMessageInProgress>? = clientAddrToMessagesMap[senderAddr] as MutableMap<Byte, BleMessageInProgress>?
         if (clientMessageIdToMessageMap == null) {
             clientMessageIdToMessageMap = Hashtable()
             clientAddrToMessagesMap[senderAddr] = clientMessageIdToMessageMap

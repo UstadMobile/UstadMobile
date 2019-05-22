@@ -3,9 +3,6 @@ package com.ustadmobile.port.sharedse.impl.http
 import com.google.gson.Gson
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 
@@ -20,8 +17,8 @@ class ContainerEntryListResponder : RouterNanoHTTPD.UriResponder {
         val appDatabase = uriResource.initParameter(PARAM_APPDB_INDEX, UmAppDatabase::class.java)
 
         try {
-            val containerUid = if (session.parameters.containsKey(PARAM_CONTAINER_UID) && !session.parameters[PARAM_CONTAINER_UID].isEmpty())
-                java.lang.Long.parseLong(session.parameters[PARAM_CONTAINER_UID].get(0))
+            val containerUid = if (session.parameters.containsKey(PARAM_CONTAINER_UID) && session.parameters[PARAM_CONTAINER_UID]!!.isNotEmpty())
+                session.parameters[PARAM_CONTAINER_UID]!![0].toLong()
             else
                 null
             if (containerUid != null) {

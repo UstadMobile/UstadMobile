@@ -87,7 +87,7 @@ class DodgyInputStream
         val streamReadCount = super.read(b, off, len)
         bytesRead += streamReadCount
 
-        if (cutoffAfter > 0 && bytesRead > cutoffAfter) {
+        if (cutoffAfter in 1 until bytesRead) {
             throw IOException("Forced error after $cutoffAfter bytes")
         }
 

@@ -16,14 +16,14 @@ class DownloadJobItemHistory {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
+    var id: Int = 0
 
     var url: String? = null
 
     //Foreign key for the networknode this is connected to
     var networkNode: Long = 0
 
-    var downloadJobItemId: Long = 0
+    var downloadJobItemId: Int = 0
 
     var mode: Int = 0
 

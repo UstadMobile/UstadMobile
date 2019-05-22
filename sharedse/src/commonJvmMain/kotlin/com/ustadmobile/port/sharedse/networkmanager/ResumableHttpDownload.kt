@@ -1,20 +1,11 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
-
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.Properties
-import java.util.TreeMap
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 
@@ -118,8 +109,8 @@ class ResumableHttpDownload(private val httpSrc: String, private val destination
     //divide delta in byte download by delta time (ms), multiply by 1000 to get speed in bytes per second
     val currentDownloadSpeed: Long
         get() {
-            val firstEntry: Entry<Long, Long>
-            val lastEntry: Entry<Long, Long>
+            var firstEntry: Map.Entry<Long, Long>
+            var lastEntry: Map.Entry<Long, Long>
 
             synchronized(downloadProgressHistory) {
                 if (downloadProgressHistory.size < 2)
@@ -302,7 +293,7 @@ class ResumableHttpDownload(private val httpSrc: String, private val destination
             httpIn = con!!.inputStream
 
             var currentTime: Long
-            while ((bytesRead = httpIn!!.read(buf)) != -1) {
+            while(httpIn!!.read(buf).also { bytesRead = it } != -1){
                 try {
                     statusLock.lock()
 
@@ -334,7 +325,6 @@ class ResumableHttpDownload(private val httpSrc: String, private val destination
                     }
                 }
             }
-
             try {
                 statusLock.lock()
                 if (!isStopped) {

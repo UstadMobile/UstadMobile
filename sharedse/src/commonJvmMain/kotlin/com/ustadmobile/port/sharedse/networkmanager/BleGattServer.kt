@@ -1,16 +1,14 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
-import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.impl.UmAccountManager
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_RESPONSE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_CREATION_RESPONSE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.WIFI_GROUP_REQUEST
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_REQUEST
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_RESPONSE
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * This is an abstract class which is used to implement platform specific BleGattServer.
@@ -73,7 +71,7 @@ abstract class BleGattServer {
                 for (containerUid in bleMessageBytesToLong(requestReceived.payload!!)) {
 
                     val foundLocalContainerUid = containerDao.findLocalAvailabilityByUid(containerUid)
-                    entryStatusResponse.add(if (foundLocalContainerUid != null && foundLocalContainerUid != 0)
+                    entryStatusResponse.add(if (foundLocalContainerUid != null && foundLocalContainerUid != 0L)
                         1L
                     else
                         0L)

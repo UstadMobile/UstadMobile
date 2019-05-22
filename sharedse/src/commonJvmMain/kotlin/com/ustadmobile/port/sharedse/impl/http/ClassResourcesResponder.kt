@@ -1,14 +1,13 @@
 package com.ustadmobile.port.sharedse.impl.http
 
+import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
-import java.util.Hashtable
-
-import fi.iki.elonen.NanoHTTPD
-import fi.iki.elonen.router.RouterNanoHTTPD
+import java.util.*
 
 /**
  * Implemented for purposes of running unit tests. This HTTP server will serve resources from
@@ -18,9 +17,9 @@ import fi.iki.elonen.router.RouterNanoHTTPD
 class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
 
-    class ResourceFileSource(resourcePath: URL?, lastModifiedTime: Long) : FileResponder.IFileSource {
+    class ResourceFileSource(resourcePath: URL?, lastModifiedTime: Long) : IFileSource {
 
-        private val length: Int = 0
+        private val resourceFilelength: Int = 0
 
         override var lastModifiedTime: Long = 0
             private set
@@ -34,6 +33,14 @@ class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
             @Throws(IOException::class)
             get() = ByteArrayInputStream(contentBuf!!)
 
+        override val length: Long
+            get() {
+                return if (contentBuf != null)
+                    contentBuf!!.size.toLong()
+                else
+                    -1
+            }
+
         init {
             var resIn: InputStream? = null
 
@@ -44,7 +51,7 @@ class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
                     resIn = resourcePath.openStream()
                     val buf = ByteArray(1024)
                     var bytesRead: Int
-                    while ((bytesRead = resIn!!.read(buf)) != -1) {
+                    while(resIn!!.read(buf).also { bytesRead = it } != -1 ){
                         bout.write(buf, 0, bytesRead)
                     }
                 } catch (e: IOException) {
@@ -64,13 +71,7 @@ class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
             }
         }
 
-        override fun getLength(): Long {
-            return (if (contentBuf != null) contentBuf!!.size else -1).toLong()
-        }
-
-        override fun exists(): Boolean {
-            return contentBuf != null
-        }
+        override var exists: Boolean = contentBuf != null
     }
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
@@ -78,11 +79,11 @@ class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
         val resPath = '/' + session.uri.substring(prefix.length)
 
         val cutOffAfter = if (session.parameters.containsKey("cutoffafter"))
-            java.lang.Long.parseLong(session.parameters["cutoffafter"].get(0))
+            session.parameters["cutoffafter"]!![0].toLong()
         else
             0L
         val speedLimit = if (session.parameters.containsKey("speedLimit"))
-            Integer.parseInt(session.parameters["speedLimit"].get(0))
+            session.parameters["speedLimit"]!![0].toInt()
         else
             0
 
@@ -95,7 +96,7 @@ class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
         val fileSource = ResourceFileSource(resourceUrl, lastModTime)
 
-        val response = FileResponder.newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource, null)
+        val response = newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource, null)
 
 
         if (cutOffAfter > 0 || speedLimit > 0) {
@@ -135,7 +136,7 @@ class ClassResourcesResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
             val fileSource = ResourceFileSource(javaClass.getResource(resPath),
                     lastModTime)
 
-            return FileResponder.newResponseFromFile(NanoHTTPD.Method.HEAD, uriResource, session, fileSource, null)
+            return newResponseFromFile(NanoHTTPD.Method.HEAD, uriResource, session, fileSource, null)
         }
 
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.METHOD_NOT_ALLOWED,

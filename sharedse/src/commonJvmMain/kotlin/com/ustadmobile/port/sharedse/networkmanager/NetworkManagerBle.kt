@@ -2,44 +2,23 @@ package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.EntryStatusResponseDao
-import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UmResultCallback
+import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.lib.db.entities.EntryStatusResponse
-import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
-
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.DataInputStream
-import java.io.DataOutputStream
-import java.io.IOException
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
-import java.util.Hashtable
-import java.util.LinkedHashMap
-import java.util.LinkedList
-import java.util.SortedSet
-import java.util.TreeSet
-import java.util.UUID
-import java.util.Vector
-import java.util.concurrent.ExecutorService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.*
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -84,7 +63,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
 
     private var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>? = null
 
-    private val entryStatusResponses = Hashtable<Long, List<EntryStatusResponse>>()
+    private val entryStatusResponses = Hashtable<Long, MutableList<EntryStatusResponse>>()
 
     private val locallyAvailableContainerUids = HashSet<Long>()
 
@@ -105,27 +84,31 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
     @Deprecated("")
-    private val downloadJobItemChangeListeners = LinkedList<DownloadJobItemManager.OnDownloadJobItemChangeListener>()
+    private val downloadJobItemChangeListeners = LinkedList<OnDownloadJobItemChangeListener>()
 
     private val mJobItemAdapter = object : LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem> {
         override fun makeRunnable(item: DownloadJobItem): Runnable {
-            return DownloadJobItemRunner(mContext, item, this@NetworkManagerBle,
-                    umAppDatabase, UmAccountManager.getRepositoryForActiveAccount(mContext!!),
-                    UmAccountManager.getActiveEndpoint(mContext!!),
+            return DownloadJobItemRunner(mContext!!, item, this@NetworkManagerBle,
+                    umAppDatabase!!, UmAccountManager.getRepositoryForActiveAccount(mContext!!),
+                    UmAccountManager.getActiveEndpoint(mContext!!)!!,
                     connectivityStatusRef.get())
         }
 
         override fun getUid(item: DownloadJobItem): Long {
-            return java.lang.Long.valueOf(item.djiUid).hashCode().toLong() shl 32 or item.numAttempts
+            return item.djiUid.hashCode().toLong() shl 32 or item.numAttempts.toLong()
         }
     }
 
     private val nodeLastSeenTrackerTask = Runnable {
         if (knownPeerNodes.size > 0) {
             val nodeMap = HashMap(knownPeerNodes)
-            umAppDatabase!!.networkNodeDao.updateNodeLastSeen(nodeMap)
-            UMLog.l(UMLog.DEBUG, 694, "Updating "
-                    + knownPeerNodes.size + " nodes from the Db")
+            GlobalScope.launch {
+                umAppDatabase!!.networkNodeDao.updateNodeLastSeen(nodeMap)
+                UMLog.l(UMLog.DEBUG, 694, "Updating "
+                        + knownPeerNodes.size + " nodes from the Db")
+            }
+
+
         }
     }
 
@@ -209,7 +192,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      * Start web server, advertising and discovery
      */
     open fun onCreate() {
-        umAppDatabase = UmAppDatabase.getInstance(mContext)
+        umAppDatabase = UmAppDatabase.getInstance(mContext!!)
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase!!)
         downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)
         downloadJobItemWorkQueue!!.adapter = mJobItemAdapter
@@ -237,40 +220,36 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
     fun handleNodeDiscovered(node: NetworkNode) {
         synchronized(knownNodesLock) {
 
-            val networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao()
+            val networkNodeDao = UmAppDatabase.getInstance(mContext!!).networkNodeDao
 
             if (!knownPeerNodes.containsKey(node.bluetoothMacAddress)) {
 
                 node.lastUpdateTimeStamp = System.currentTimeMillis()
 
-                networkNodeDao.updateLastSeenAsync(node.bluetoothMacAddress!!,
-                        node.lastUpdateTimeStamp, object : UmCallback<Int> {
-                    override fun onSuccess(result: Int?) {
-                        knownPeerNodes[node.bluetoothMacAddress] = node.lastUpdateTimeStamp
-                        if (result == 0) {
-                            networkNodeDao.insertAsync(node, null!!)
-                            UMLog.l(UMLog.DEBUG, 694, "New node with address "
-                                    + node.bluetoothMacAddress + " found, added to the Db")
+                GlobalScope.launch {
+                    val result = networkNodeDao.updateLastSeenAsync(node.bluetoothMacAddress!!,
+                            node.lastUpdateTimeStamp)
+                    knownPeerNodes[node.bluetoothMacAddress!!] = node.lastUpdateTimeStamp
+                    if (result == 0) {
+                        networkNodeDao.insertAsync(node)
+                        UMLog.l(UMLog.DEBUG, 694, "New node with address "
+                                + node.bluetoothMacAddress + " found, added to the Db")
 
-                            val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
+                        val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
 
-                            if (!isStopMonitoring) {
-                                if (entryUidsToMonitor.size > 0) {
-                                    val entryStatusTask = makeEntryStatusTask(mContext, entryUidsToMonitor, node)
-                                    entryStatusTasks.add(entryStatusTask)
-                                    entryStatusTaskExecutorService.execute(entryStatusTask)
-                                }
+                        if (!isStopMonitoring) {
+                            if (entryUidsToMonitor.size > 0) {
+                                val entryStatusTask = makeEntryStatusTask(mContext, entryUidsToMonitor, node)
+                                entryStatusTasks.add(entryStatusTask)
+                                entryStatusTaskExecutorService.execute(entryStatusTask)
                             }
                         }
                     }
 
-                    override fun onFailure(exception: Throwable?) {
 
-                    }
-                })
-
+                }
             } else {
-                knownPeerNodes.put(node.bluetoothMacAddress, System.currentTimeMillis())
+                knownPeerNodes.put(node.bluetoothMacAddress!!, System.currentTimeMillis())
             }
         }
     }
@@ -303,8 +282,8 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
             UMLog.l(UMLog.DEBUG, 694, "Registered a monitor with "
                     + entryUidsToMonitor.size + " entry(s) to be monitored")
 
-            val networkNodeDao = UmAppDatabase.getInstance(mContext).getNetworkNodeDao()
-            val responseDao = UmAppDatabase.getInstance(mContext).getEntryStatusResponseDao()
+            val networkNodeDao = UmAppDatabase.getInstance(mContext!!).networkNodeDao
+            val responseDao = UmAppDatabase.getInstance(mContext!!).entryStatusResponseDao
 
             val lastUpdateTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1)
 
@@ -320,15 +299,15 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
                     System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2))
 
             //Group entryUUid by node where their status will be checked from
-            val nodeToCheckEntryList = LinkedHashMap<Int, List<Long>>()
+            val nodeToCheckEntryList = LinkedHashMap<Int, MutableList<Long>>()
 
             for (entryResponse in entryWithoutRecentResponses) {
 
                 val nodeIdToCheckFrom = entryResponse.nodeId
                 if (!nodeToCheckEntryList.containsKey(nodeIdToCheckFrom))
-                    nodeToCheckEntryList[nodeIdToCheckFrom] = ArrayList()
+                    nodeToCheckEntryList[nodeIdToCheckFrom] = arrayListOf()
 
-                nodeToCheckEntryList[nodeIdToCheckFrom].add(entryResponse.containerUid)
+                nodeToCheckEntryList[nodeIdToCheckFrom]!!.add(entryResponse.containerUid)
             }
 
             UMLog.l(UMLog.DEBUG, 694,
@@ -339,11 +318,11 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
             for (nodeId in nodeToCheckEntryList.keys) {
                 val networkNode = networkNodeDao.findNodeById(nodeId.toLong())
                 val entryStatusTask = makeEntryStatusTask(mContext,
-                        nodeToCheckEntryList[nodeId], networkNode)
+                        nodeToCheckEntryList[nodeId]!!, networkNode)
                 entryStatusTasks.add(entryStatusTask)
                 entryStatusTaskExecutorService.execute(entryStatusTask)
                 UMLog.l(UMLog.DEBUG, 694,
-                        "Status check started for " + nodeToCheckEntryList[nodeId].size
+                        "Status check started for " + nodeToCheckEntryList[nodeId]!!.size
                                 + " entry(s) task from " + networkNode!!.bluetoothMacAddress)
             }
         } catch (e: RejectedExecutionException) {
@@ -438,7 +417,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      * @param downloadJobUid The download job uid that should be canceled and deleted
      */
     fun cancelAndDeleteDownloadJob(downloadJobUid: Int) {
-        umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobUid.toLong(),
+        umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobUid,
                 JobStatus.CANCELED, -1, JobStatus.CANCELED)
         val taskArgs = HashMap<String, String>()
         taskArgs[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] = downloadJobUid.toString()
@@ -479,15 +458,15 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      * All all availability statuses received from the peer node
      * @param responses response received
      */
-    fun handleLocalAvailabilityResponsesReceived(responses: List<EntryStatusResponse>) {
+    fun handleLocalAvailabilityResponsesReceived(responses: MutableList<EntryStatusResponse>) {
         if (responses.isEmpty())
             return
 
         val nodeId = responses[0].erNodeId
         if (!entryStatusResponses.containsKey(nodeId))
-            entryStatusResponses[nodeId] = Vector()
+            entryStatusResponses[nodeId] = mutableListOf()
 
-        entryStatusResponses[nodeId].addAll(responses)
+        entryStatusResponses[nodeId]!!.addAll(responses)
         locallyAvailableContainerUids.clear()
 
         for (responseList in entryStatusResponses.values) {
@@ -550,7 +529,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
                             + " for " + bluetoothAddress)
         }
 
-        if (knownBadNodeTrackList[bluetoothAddress].get() > 5) {
+        if (knownBadNodeTrackList[bluetoothAddress]!!.get() > 5) {
             UMLog.l(UMLog.DEBUG, 694,
                     "Bad node counter exceeded threshold (5), removing node with address "
                             + bluetoothAddress + " from the list")
@@ -568,7 +547,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      * @param bluetoothAddress node bluetooth address
      * @return bad node
      */
-    fun getBadNodeTracker(bluetoothAddress: String): AtomicInteger {
+    fun getBadNodeTracker(bluetoothAddress: String): AtomicInteger? {
         return knownBadNodeTrackList[bluetoothAddress]
     }
 
@@ -635,8 +614,8 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
-            UMIOUtils.closeQuietly(outputStream)
-            UMIOUtils.closeQuietly(bos)
+            UMIOUtils.closeOutputStream(outputStream)
+            UMIOUtils.closeOutputStream(bos)
         }
         return infoAsbytes
     }
@@ -658,8 +637,8 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
-            UMIOUtils.closeQuietly(inputStream)
-            UMIOUtils.closeQuietly(dataInputStream)
+            UMIOUtils.closeInputStream(dataInputStream)
+            UMIOUtils.closeInputStream(inputStream)
         }
 
         UMLog.l(UMLog.INFO, 699,
@@ -692,16 +671,16 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid)
     }
 
-    fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long,
-                                                   callback: UmResultCallback<DownloadJobItemStatus>) {
+    override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long,
+                                                            callback: UmResultCallback<DownloadJobItemStatus?>) {
         jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid, callback)
     }
 
-    fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
+    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
         jobItemManagerList!!.addDownloadChangeListener(listener)
     }
 
-    fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
+    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
         jobItemManagerList!!.removeDownloadChangeListener(listener)
     }
 

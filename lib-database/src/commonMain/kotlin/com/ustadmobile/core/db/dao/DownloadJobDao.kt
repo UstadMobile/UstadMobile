@@ -12,10 +12,10 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 abstract class DownloadJobDao {
 
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
-    abstract fun lastJobLive(): UmLiveData<DownloadJob>
+    abstract fun lastJobLive(): UmLiveData<DownloadJob?>
 
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
-    abstract fun lastJob(): DownloadJob
+    abstract fun lastJob(): DownloadJob?
 
     @Query("SELECT * From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
@@ -67,7 +67,7 @@ abstract class DownloadJobDao {
      * @return The DownloadJob with the given id, or null if no such DownloadJob exists
      */
     @Query("SELECT * From DownloadJob WHERE djUid = :djUid")
-    abstract fun findByUid(djUid: Long): DownloadJob
+    abstract fun findByUid(djUid: Int): DownloadJob?
 
     /**
      * Get a list of all DownloadJob items. Used for debugging purposes.
@@ -76,28 +76,28 @@ abstract class DownloadJobDao {
      */
 
     @Query("SELECT * FROM DownloadJob WHERE djUid = :djUid")
-    abstract fun getJobLive(djUid: Long): UmLiveData<DownloadJob>
+    abstract fun getJobLive(djUid: Int): UmLiveData<DownloadJob?>
 
     @Query("SELECT * FROM DownloadJob WHERE djStatus = :jobStatus")
     abstract fun getJobsLive(jobStatus: Int): UmLiveData<List<DownloadJob>>
 
     @Query("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
-    abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Long
+    abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int?
 
     @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
-    abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Long
+    abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int?
 
 
     @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
-    abstract fun update(djUid: Long, djStatus: Int)
+    abstract fun update(djUid: Int, djStatus: Int)
 
 
     @Query("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " + "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
-    abstract fun updateJobItems(djUid: Long, djiStatus: Int, jobStatusFrom: Int,
+    abstract fun updateJobItems(djUid: Int, djiStatus: Int, jobStatusFrom: Int,
                                 jobStatusTo: Int)
 
     @Transaction
-    fun updateJobAndItems(djUid: Long, djStatus: Int, activeJobItemsStatus: Int,
+    fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
                           completeJobItemStatus: Int) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
@@ -110,14 +110,14 @@ abstract class DownloadJobDao {
         update(djUid, djStatus)
     }
 
-    fun updateJobAndItems(djUid: Long, djStatus: Int, activeJobItemsStatus: Int) {
+    fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int) {
         updateJobAndItems(djUid, djStatus, activeJobItemsStatus, -1)
     }
 
     @Query("UPDATE DownloadJob SET bytesDownloadedSoFar = " +
             "(SELECT SUM(downloadedSoFar) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) " +
             "WHERE djUid = :downloadJobId")
-    abstract suspend fun updateBytesDownloadedSoFarAsync(downloadJobId: Long): Int
+    abstract suspend fun updateBytesDownloadedSoFarAsync(downloadJobId: Int): Int
 
 
     @Query("SELECT ContentEntry.title FROM DownloadJob " +

@@ -3,26 +3,11 @@ package com.ustadmobile.port.sharedse.container
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntry
-import com.ustadmobile.lib.db.entities.ContainerEntryFile
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.ArrayList
-import java.util.Enumeration
-import java.util.HashMap
-import java.util.Hashtable
-import java.util.LinkedList
-import java.util.zip.ZipEntry
+import java.io.*
+import java.util.*
 import java.util.zip.ZipFile
 
 
@@ -34,9 +19,10 @@ class ContainerManager {
 
     private var container: Container? = null
 
-    private val pathToEntryMap = Hashtable<String, ContainerEntryWithContainerEntryFile>()
+    private var pathToEntryMap: MutableMap<String, ContainerEntryWithContainerEntryFile> =
+        Hashtable<String, ContainerEntryWithContainerEntryFile>()
 
-    private val newFileDir: File?
+    private var newFileDir: File? = null
 
     val containerUid: Long
         get() = container!!.containerUid
@@ -74,7 +60,7 @@ class ContainerManager {
         val entryList = db!!.containerEntryDao
                 .findByContainer(container!!.containerUid)
         for (entry in entryList) {
-            pathToEntryMap[entry.cePath] = entry
+            pathToEntryMap[entry.cePath!!] = entry
         }
     }
 
@@ -97,7 +83,7 @@ class ContainerManager {
                 .findEntriesByMd5Sums(ArrayList(fileToMd5Map.values))
         val md5ToExistingFileMap = HashMap<String, ContainerEntryFile>()
         for (entryFile in existingFiles) {
-            md5ToExistingFileMap[entryFile.cefMd5] = entryFile
+            md5ToExistingFileMap[entryFile.cefMd5!!] = entryFile
         }
 
         val containerEntriesToDelete = LinkedList<ContainerEntry>()
@@ -127,13 +113,13 @@ class ContainerManager {
                 }
             }
 
-            val containerEntry = ContainerEntryWithContainerEntryFile(pathInContainer,
+            val containerEntry = ContainerEntryWithContainerEntryFile(pathInContainer!!,
                     container!!, containerEntryFile)
             newContainerEntries.add(containerEntry)
 
             if (pathToEntryMap.containsKey(pathInContainer)) {
                 //this file is already here. the existing entity needs deleted
-                containerEntriesToDelete.add(pathToEntryMap[pathInContainer])
+                containerEntriesToDelete.add(pathToEntryMap[pathInContainer]!!)
             }
         }
 
@@ -142,7 +128,7 @@ class ContainerManager {
 
         db!!.containerEntryDao.insertAndSetIds(ArrayList(newContainerEntries))
         for (file in newContainerEntries) {
-            pathToEntryMap[file.cePath] = file
+            pathToEntryMap[file.cePath!!] = file
         }
 
         if (options and OPTION_UPDATE_TOTALS == OPTION_UPDATE_TOTALS) {
@@ -235,7 +221,7 @@ class ContainerManager {
     fun linkExistingItems(newEntriesList: List<ContainerEntryWithMd5>): Collection<ContainerEntryWithMd5> {
         val newEntryPathToEntryMap = HashMap<String, ContainerEntryWithMd5>()
         for (item in newEntriesList) {
-            newEntryPathToEntryMap[item.cePath] = item
+            newEntryPathToEntryMap[item.cePath!!] = item
         }
 
         //remove those already in our list
@@ -245,7 +231,7 @@ class ContainerManager {
 
         val remainingMd5ToPathMap = HashMap<String, String>()
         for (item in newEntryPathToEntryMap.values) {
-            remainingMd5ToPathMap[item.cefMd5] = item.cePath
+            remainingMd5ToPathMap[item.cefMd5!!] = item.cePath!!
         }
 
         //look for those items which are missing for which we have the md5
@@ -255,7 +241,7 @@ class ContainerManager {
         for (existingFile in existingFiles) {
             val entryPath = remainingMd5ToPathMap[existingFile.cefMd5]
             newEntries.add(ContainerEntryWithContainerEntryFile(
-                    entryPath, container!!, existingFile))
+                    entryPath!!, container!!, existingFile))
             newEntryPathToEntryMap.remove(entryPath)
         }
         db!!.containerEntryDao.insertList(ArrayList(newEntries))
@@ -264,7 +250,7 @@ class ContainerManager {
     }
 
 
-    fun getEntry(pathInContainer: String): ContainerEntryWithContainerEntryFile {
+    fun getEntry(pathInContainer: String): ContainerEntryWithContainerEntryFile? {
         return pathToEntryMap[pathInContainer]
     }
 
@@ -306,7 +292,7 @@ class ContainerManager {
 
         db!!.containerEntryDao.insertList(newContainerEntryList)
 
-        return ContainerManager(newContainer, db, dbRepo, newFileDir!!.absolutePath,
+        return ContainerManager(newContainer, db!!, dbRepo!!, newFileDir!!.absolutePath,
                 newEntryMap)
     }
 

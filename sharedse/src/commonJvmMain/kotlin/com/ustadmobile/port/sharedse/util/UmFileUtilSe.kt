@@ -2,18 +2,10 @@ package com.ustadmobile.port.sharedse.util
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.container.ContainerManager
-
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.FileWriter
-import java.io.IOException
-import java.io.InputStream
+import java.io.*
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.zip.ZipFile
@@ -86,7 +78,8 @@ object UmFileUtilSe {
             val digest = MessageDigest.getInstance("MD5")
 
             var bytesRead: Int
-            while ((bytesRead = `in`.read(buf)) != -1) {
+
+            while (`in`.read(buf).also { bytesRead = it } != -1) {
                 digest.update(buf, 0, bytesRead)
             }
 
@@ -106,7 +99,7 @@ object UmFileUtilSe {
                 val digest = MessageDigest.getInstance("MD5")
 
                 var bytesRead: Int
-                while ((bytesRead = fin.read(buf)) != -1) {
+                while (fin.read(buf).also { bytesRead = it } != -1) {
                     digest.update(buf, 0, bytesRead)
                 }
 
