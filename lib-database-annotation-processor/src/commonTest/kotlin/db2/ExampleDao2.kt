@@ -27,10 +27,10 @@ abstract class ExampleDao2 {
     abstract fun replace(entityList: List<ExampleEntity2>)
 
     @Query("SELECT * FROM ExampleEntity2 WHERE uid = :uid")
-    abstract fun findByUid(uid: Long): ExampleEntity2
+    abstract fun findByUid(uid: Long): ExampleEntity2?
 
     @Query("SELECT * FROM ExampleEntity2 WHERE uid > :uid AND someNumber > :min")
-    abstract suspend fun findLarge(uid: Long, min: Long): ExampleEntity2
+    abstract suspend fun findLarge(uid: Long, min: Long): ExampleEntity2?
 
 
 
