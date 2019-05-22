@@ -1,11 +1,11 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import android.arch.persistence.room.ColumnInfo
+import android.arch.persistence.room.Embedded
 import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.OPTION_OUTPUT_DIR
 import java.io.File
-import java.sql.Connection
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
@@ -13,22 +13,23 @@ import javax.lang.model.type.*
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.EntityInsertionAdapter
-import java.sql.Statement
 import javax.sql.DataSource
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import java.sql.PreparedStatement
-import java.sql.ResultSet
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import kotlin.reflect.jvm.internal.impl.name.FqName
 import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
-
-
+import org.sqlite.SQLiteDataSource
+import java.sql.*
+import java.util.*
+import javax.tools.Diagnostic
+import kotlin.coroutines.Continuation
 
 
 fun isList(type: TypeMirror, processingEnv: ProcessingEnvironment): Boolean =
         type.kind == TypeKind.DECLARED && (processingEnv.typeUtils.asElement(type) as TypeElement).qualifiedName.toString() == "java.util.List"
+
 
 
 fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment) : TypeMirror {
@@ -43,6 +44,18 @@ fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType,
         return firstParamType
     }
 }
+
+/**
+ * Given an input result type (e.g. Entity, Entity[], List<Entity>, String, int, etc), figure out
+ * what the actual entity type is
+ */
+fun resolveEntityFromResultType(type: TypeName) =
+        if(type is ParameterizedTypeName && type.rawType.canonicalName == "kotlin.collections.List") {
+            type.typeArguments[0]
+        }else {
+            type
+        }
+
 
 fun pkgNameOfElement(element: Element, processingEnv: ProcessingEnvironment) =
         processingEnv.elementUtils.getPackageOf(element).qualifiedName.toString()
@@ -180,6 +193,16 @@ fun resolveReturnTypeIfSuspended(method: ExecutableType) : TypeName {
     }
 }
 
+/**
+ * If the return type is LiveData, Factory, etc. then unwrap that into the result type.
+ */
+fun resolveQueryResultType(returnTypeName: TypeName)  =
+        if(returnTypeName is ParameterizedTypeName && returnTypeName.rawType.canonicalName == "androidx.lifecycle.LiveData") {
+            returnTypeName.typeArguments[0]
+        }else {
+            returnTypeName
+        }
+
 fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeName, processingEnv: ProcessingEnvironment): String {
     var methodName = "insert"
     if(isList(paramType, processingEnv)) {
@@ -265,6 +288,45 @@ private fun getQueryNamedParameters(querySql: String): List<String> {
     return namedParams
 }
 
+/**
+ * Generate a map of all the fields that can be set on the given entity
+ */
+data class EntityFieldMap(val fieldMap: Map<String, Element>, val embeddedVarsList: List<Pair<String, Element>>)
+fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
+                           fieldMap: MutableMap<String, Element> = mutableMapOf(),
+                           embeddedVarsList: MutableList<Pair<String, Element>> = mutableListOf(),
+                           processingEnv: ProcessingEnvironment): EntityFieldMap {
+
+    ancestorsToList(entityTypeEl, processingEnv).forEach {
+        val listParted = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD }.partition { it.getAnnotation(Embedded::class.java) == null }
+        listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
+        listParted.second.forEach {
+            embeddedVarsList.add(Pair(prefix, it))
+            mapEntityFields(processingEnv.typeUtils.asElement(it.asType()) as TypeElement,
+                    "$prefix.${it.simpleName}", fieldMap, embeddedVarsList, processingEnv)
+        }
+    }
+
+    return EntityFieldMap(fieldMap, embeddedVarsList)
+}
+
+/**
+ *
+ */
+private fun ancestorsToList(child: TypeElement, processingEnv: ProcessingEnvironment): List<TypeElement> {
+    val entityAncestors = mutableListOf<TypeElement>()
+
+    var nextEntity = child as TypeElement?
+
+    do {
+        entityAncestors.add(nextEntity!!)
+        val nextElement = processingEnv.typeUtils.asElement(nextEntity.superclass)
+        nextEntity = if(nextElement is TypeElement) { nextElement } else { null }
+    }while(nextEntity != null)
+
+    return entityAncestors
+}
+
 
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -272,6 +334,8 @@ private fun getQueryNamedParameters(querySql: String): List<String> {
 class DbProcessorJdbcKotlin: AbstractProcessor() {
 
     private var messager: Messager? = null
+
+    private var dbConnection: Connection? = null
 
     override fun init(p0: ProcessingEnvironment?) {
         super.init(p0)
@@ -283,9 +347,20 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
         val outputDir = if(outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
 
+        val dataSource = SQLiteDataSource()
+        val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
+        dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
+        messager!!.printMessage(Diagnostic.Kind.NOTE, "Annotation processor db tmp file: ${dbTmpFile.absolutePath}")
+
         for(dbTypeEl in dbs) {
             val dbFileSpec = generateDbImplClass(dbTypeEl as TypeElement)
             dbFileSpec.writeTo(File(outputDir))
+        }
+
+        dbConnection = dataSource.connection
+        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {
+            val stmt = dbConnection!!.createStatement()
+            stmt.execute(makeCreateTableStatement(it, DoorDbType.SQLITE))
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -472,7 +547,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
 
         val upsertMode = daoMethod.getAnnotation(Insert::class.java).onConflict == OnConflictStrategy.REPLACE
-        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""} "
+        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""}"
         if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
             val fieldNames = mutableListOf<String>()
             val parameterHolders = mutableListOf<String>()
@@ -547,7 +622,26 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
     fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder) : FunSpec {
         val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                 daoMethod)  as ExecutableType
-        val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
+
+        // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
+        val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType().javaToKotlinType()
+
+        // The result, with any wrapper (e.g. LiveData or List) removed
+        val resultType = resolveQueryResultType(returnTypeResolved)
+
+        // The individual entity type e.g. Entity or String etc
+        val entityType = resolveEntityFromResultType(resultType)
+
+        val entityTypeElement = if(entityType is ClassName) {
+            processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
+        } else {
+            null
+        } as TypeElement?
+
+
+        val (settableProps, embeddedVarsList) = mapEntityFields(entityTypeEl = entityTypeElement as TypeElement,
+                processingEnv = processingEnv)
+
 
         val funSpec = overrideAndConvertToKotlin(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv)
@@ -555,8 +649,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val resultVarName = "_result"
         val querySql = daoMethod.getAnnotation(Query::class.java).value
-
         val namedParams = getQueryNamedParameters(querySql)
+
         var preparedStatementSql = querySql
         namedParams.forEach { preparedStatementSql = preparedStatementSql.replace(":$it", "?") }
 
@@ -570,11 +664,38 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val paramTypes = daoMethod.parameters.map { it.simpleName.toString() to it.asType() }
         val paramTypesResolved = daoMethodResolved.parameterTypes
         for(i in 0 until paramTypes.size) {
-            codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramTypesResolved[i], processingEnv)}(" +
-                "${i + 1}, ${daoMethod.parameters[i].simpleName})\n")
+            if(paramTypesResolved[i].asTypeName() != Continuation::class.asTypeName()) {
+                codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramTypesResolved[i], processingEnv)}(" +
+                        "${i + 1}, ${daoMethod.parameters[i].simpleName})\n")
+            }
         }
 
         codeBlock.add("_resultSet = _stmt.executeQuery()\n")
+
+        var execStmtSql = querySql
+        namedParams.forEach { execStmtSql = execStmtSql.replace(it, "null") }
+
+        var resultSet = null as ResultSet?
+        var execStmt = null as Statement?
+        try {
+            execStmt = dbConnection?.createStatement()
+            resultSet = execStmt?.executeQuery(execStmtSql)
+            val metaData = resultSet!!.metaData
+            val colNames = mutableListOf<String>()
+            for(i in 1 .. metaData.columnCount) {
+                colNames.add(metaData.getColumnName(i))
+            }
+
+            //TODO: use the last part fo the setter
+            codeBlock.add("val _entity = %T()\n", entityType)
+            colNames.fold(codeBlock, {builder, colName ->
+                val getterName = "get${getPreparedStatementSetterGetterTypeName(settableProps[".$colName"]!!.asType(), processingEnv) }"
+                //todo: lookup colname to find embedded properties
+                builder.add("_entity.$colName = _resultSet.$getterName(%S)\n", colName)
+            })
+        }catch(e: SQLException) {
+            messager!!.printMessage(Diagnostic.Kind.ERROR, "Exception running query SQL")
+        }
 
         codeBlock.nextControlFlow("finally")
                 .add("_stmt?.close()\n")
