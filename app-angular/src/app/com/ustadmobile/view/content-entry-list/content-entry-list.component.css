@@ -1,26 +1,25 @@
 .entry-title{
     font-size: 1.3em;
-    max-lines: 1;
-    font-weight: 350;
+    font-weight: 460;
     margin-bottom: 10px !important;
 }
 
 .entry-description{
-    max-lines: 2;
-    font-weight: 250;
-    min-height: 50px !important;
-    height: 50px !important;
+    font-weight: 400;
     font-size: 1em;
 }
 
 .entry-licence{
-    margin-top: 20px;
+    margin-top: 3% !important;
     font-size: 0.9em;
-    max-lines: 1;
     font-weight: 300;
 }
 
 a.disabled {
     pointer-events: none;
     cursor: default;
+ }
+
+ .entry-image{
+     margin-left: -44% !important;
  }

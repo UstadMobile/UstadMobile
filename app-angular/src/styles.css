@@ -1,10 +1,15 @@
 /* Ustadmobile global style */
 main {
   margin-top: -10px;
-  background: #ced7db;
+  background: #ffffff;
   padding-bottom: 20px;
   height: 100% !important;
   min-height: 600px !important;
+}
+
+.content-app-wrapper {
+  margin-top: 33px;
+  background: white;
 }
 
 .open-content{
@@ -17,16 +22,6 @@ main {
   cursor: pointer;
 }
 
-.header-title-label {
-  font-size: 1.5em;
-  margin-top: 14px;
-  margin-left: 30px;
-  text-decoration: none;
-  color: white;
-  background: transparent;
-  border: 0px solid transparent;
-  cursor: default
-}
 
 .default-margin-left {
   margin-left: 4% !important;
@@ -98,13 +93,6 @@ main {
 
   }
 
-  .content-app-wrapper {
-    margin-top: 33px;
-    padding-top: 16px;
-    margin-left: 30px;
-    margin-right: 30px;
-  }
-
 }
 
 /*
@@ -114,7 +102,7 @@ main {
 @media screen and (min-width: 1400px) {
   main {
     margin-top: -10px;
-    background: #ced7db;
+    background: #ffffff;
     padding-bottom: 20px;
     min-height: 900px !important;
   }
@@ -154,14 +142,6 @@ main {
     background: white;
     padding-top: 100px;
     padding-bottom: 50px;
-  }
-
-
-  .content-app-wrapper {
-    padding-top: 16px;
-    margin-right: 8px;
-    margin-left: 8px;
-    margin-top: 50px;
   }
 
 }

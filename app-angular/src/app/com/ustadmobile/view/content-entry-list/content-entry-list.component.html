@@ -1,11 +1,30 @@
-<div class="row">
-    <div class="col s4" *ngFor="let entry of entries">
+<div class="row white">
+
+    <ul class="collection default-padding-top">
+        <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="navigate(entry)">
+          <div class="row">
+            <div class="col s2 l2">
+                <img src="{{entry.entry_image}}" alt="" class="responsive-img entry-image">
+            </div>
+            <div class="col s10 l10"> 
+                <p class="entry-title {{env.colorTextPrimary}}">{{entry.entry_name}}</p>
+                <p class="entry-description {{env.colorTextSecondary}}">{{entry.entry_description}}</p>
+                <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.entry_licence}}</p>
+            </div>
+          </div>
+        </li>
+        
+        
+      </ul>
+
+
+    <!-- <div class="col s4" *ngFor="let entry of entries">
         <div class="card">
             <div class="card-image">
-              <img src="{{entry.entry_image}}">
+              <img src="">
             </div>
             <div class="card-content content">
-                <p class="entry-title {{env.colorTextPrimary}} truncate">{{entry.entry_name}}</p>
+                <p class="entry-title {{env.colorTextPrimary}} truncate"></p>
               <p class="entry-description {{env.colorTextSecondary}}">{{entry.entry_description | umWordLimit:6}}</p>
               <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.entry_licence}}</p>
             </div>
@@ -13,7 +32,7 @@
               <a class="{{env.colorTextAcent}} open-content" (click)="navigate(entry)">OPEN</a>
             </div>
           </div>
-    </div>
+    </div> -->
 
     <div class="center empty-state-view grey-text z-depth-1" *ngIf="!entries">
         <i class="material-icons  large extra">library_books</i>

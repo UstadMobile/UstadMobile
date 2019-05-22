@@ -46,7 +46,9 @@ export class ContentEntryDetailComponent implements OnInit, ContentEntryDetailVi
     });
    }
 
-  ngOnInit() {}
+  ngOnInit() {
+    //this.presenter = ContentEntryDetailPresenter();
+  }
 
   navigateToLanguage(language){
     console.log("language", language)
