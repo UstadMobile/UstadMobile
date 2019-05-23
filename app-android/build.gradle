@@ -23,7 +23,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
-apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-multiplatform'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
@@ -31,6 +31,12 @@ apply plugin: 'kotlinx-serialization'
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
+}
+
+kotlin {
+    targets {
+        fromPreset(presets.android, 'android')
+    }
 }
 
 /*
@@ -161,12 +167,12 @@ android {
  * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
  */
 gradle.taskGraph.useFilter { task ->
-    if(task.name.equals("connectedVanillaDebugAndroidTest")
-        || task.name.equals("createVanillaDebugCoverageReport")
-        || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")
-        || task.name.equals("processVanillaDebugAndroidTestManifest")
-        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
+    if (task.name.equals("connectedVanillaDebugAndroidTest")
+            || task.name.equals("createVanillaDebugCoverageReport")
+            || task.name.equals("testVanillaDebugUnitTest")
+            || task.name.equals("testVanillaReleaseUnitTest")
+            || task.name.equals("processVanillaDebugAndroidTestManifest")
+            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 
@@ -308,6 +314,8 @@ dependencies {
     implementation "com.android.support:support-v4:$version_android_support_lib"
     implementation "com.android.support:recyclerview-v7:$version_android_support_lib"
     implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"

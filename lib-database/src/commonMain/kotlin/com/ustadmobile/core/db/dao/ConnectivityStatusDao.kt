@@ -17,7 +17,7 @@ abstract class ConnectivityStatusDao {
     abstract fun status(): ConnectivityStatus?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insert(connectivityStatus: ConnectivityStatus): Long
+    abstract suspend fun insertAsync(connectivityStatus: ConnectivityStatus): Long
 
     @Query("UPDATE ConnectivityStatus SET connectivityState = :connectivityState")
     abstract suspend fun updateStateAsync(connectivityState: Int)
@@ -33,6 +33,6 @@ abstract class ConnectivityStatusDao {
         connectivityStatus.connectedOrConnecting = connectedOrConnecting
         connectivityStatus.connectivityState = state
         connectivityStatus.wifiSsid = wifiSsid
-        insert(connectivityStatus)
+        insertAsync(connectivityStatus)
     }
 }
