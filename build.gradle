@@ -125,6 +125,8 @@ ext {
     version_android_twitter_login = "3.3.0"
     version_android_seismic = "1.0.2"
 
+    version_js_node = "10.15.1"
+    version_js_yarn="1.13.0"
 }
 
 ext.buildConfigProperties = new Properties()

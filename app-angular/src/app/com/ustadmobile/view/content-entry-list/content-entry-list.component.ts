@@ -3,8 +3,7 @@ import {dataSample} from '../../util/UmDataSample';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { HttpParams } from "@angular/common/http";
-import {ContentEntryListFragmentView, LocalAvailabilityMonitor, 
-  ContentEntryListRecyclerViewAdapter, ContentEntryListFragmentPresenter} from 'core/';
+import { sample } from 'hello-ustad';
 import { UmContextWrapper } from '../../util/UmContextWrapper';
 
 @Component({
@@ -12,14 +11,13 @@ import { UmContextWrapper } from '../../util/UmContextWrapper';
   templateUrl: './content-entry-list.component.html',
   styleUrls: ['./content-entry-list.component.css']
 })
-export class ContentEntryListComponent implements OnInit , ContentEntryListFragmentView,
-ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor{
+export class ContentEntryListComponent implements OnInit {
   
   entries = [];
   env = environment;
   currentEntryUid = "";
+  ustadNameFromJs = "";
   private args: Params = null;
-  private presenter:  ContentEntryListFragmentPresenter;
   private context: UmContextWrapper;
 
   constructor(private router: Router, private route: ActivatedRoute) {
@@ -33,7 +31,12 @@ ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonito
   }
 
   ngOnInit() {
-    this.presenter = new ContentEntryListFragmentPresenter(this.context, this.args, this, this);
+
+    const ustad = new sample.HelloUstadSample();
+    ustad.printUstadName();
+    this.ustadNameFromJs = ustad.getUstadName();
+
+    //this.presenter = new controller.ContentEntryListFragmentPresenter(this.context, this.args, this, this);
   }
 
   navigate(entry) {

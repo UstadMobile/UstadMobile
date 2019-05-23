@@ -44,12 +44,12 @@ task runHttpTestServer(type: JavaExec) {
     args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"]
 }
 
-task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = "com.ustadmobile.test.http.UmTestServerManager"
-    args = ["--controlport", "8400", "--startport", "8500", "--endport", "8600", "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"] ]
-    waitForPort = 8400
-    workingDir = "$projectDir/"
-    standardOutput = "$projectDir/build/tmp/daemon.log"
-    errorOutput = "$projectDir/build/tmp/daemon-error.log"
-}
+//task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
+//    classpath = sourceSets.main.runtimeClasspath
+//    main = "com.ustadmobile.test.http.UmTestServerManager"
+//    args = ["--controlport", "8400", "--startport", "8500", "--endport", "8600", "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"] ]
+//    waitForPort = 8400
+//    workingDir = "$projectDir/"
+//    standardOutput = "$projectDir/build/tmp/daemon.log"
+//    errorOutput = "$projectDir/build/tmp/daemon-error.log"
+//}

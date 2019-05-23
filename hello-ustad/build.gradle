@@ -1,17 +1,7 @@
 plugins {
-    id 'com.android.library'
     id 'org.jetbrains.kotlin.multiplatform'
 }
 
-android {
-    compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
-
-    defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
-    }
-}
 
 apply plugin: "maven-publish"
 
@@ -28,7 +18,6 @@ kotlin {
                 outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
             }
         }
-        fromPreset(presets.android, 'android')
     }
 
     sourceSets {
@@ -41,24 +30,18 @@ kotlin {
         }
         jsMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-            }
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin" }
         }
         commonJvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
             }
         }
 
         jvmMain {
-            dependsOn commonJvmMain
+
         }
         androidMain {
-            dependsOn commonJvmMain
         }
 
 

@@ -93,12 +93,20 @@ android {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 } */
 
+
 kotlin {
 
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
-        fromPreset(presets.js, 'js')
+        fromPreset(presets.js, 'js') {
+            compilations.main.kotlinOptions {
+                metaInfo = true
+                sourceMap = true
+                moduleKind = "commonjs"
+                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
+            }
+        }
         //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
 

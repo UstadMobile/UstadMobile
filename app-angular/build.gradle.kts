@@ -82,5 +82,5 @@ tasks {
 }
 
 dependencies {
-  implementation(project(":core"))
+  implementation(project(":hello-ustad"))
 }

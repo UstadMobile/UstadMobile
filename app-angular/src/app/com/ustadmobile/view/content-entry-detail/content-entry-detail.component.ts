@@ -3,14 +3,13 @@ import { dataSample } from './../../util/UmDataSample';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
-import {ContentEntryDetailView, ContentEntryDetailPresenter} from 'core/';
 
 @Component({
   selector: 'app-content-entry-detail',
   templateUrl: './content-entry-detail.component.html',
   styleUrls: ['./content-entry-detail.component.css']
 })
-export class ContentEntryDetailComponent implements OnInit, ContentEntryDetailView {
+export class ContentEntryDetailComponent implements OnInit {
 
   env = environment;
   contentEntryUid = "";
@@ -21,8 +20,6 @@ export class ContentEntryDetailComponent implements OnInit, ContentEntryDetailVi
   args : Params = null;
 
   context : UmContextWrapper;
-
-  presenter: ContentEntryDetailPresenter;
 
 
   entryLanguages = [
