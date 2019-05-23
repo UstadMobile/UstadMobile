@@ -2,20 +2,15 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
 import android.widget.TextView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AboutController
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AboutView
-
-import java.util.Objects
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
-import com.ustadmobile.port.android.util.UMAndroidUtil.mapToBundle
+import java.util.*
 
 class AboutActivity : UstadBaseActivity(), AboutView {
 

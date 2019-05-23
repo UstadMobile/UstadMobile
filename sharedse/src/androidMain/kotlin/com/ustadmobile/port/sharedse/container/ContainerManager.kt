@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import kotlinx.io.IOException
 import java.io.*
 import java.util.*
 import java.util.zip.ZipFile

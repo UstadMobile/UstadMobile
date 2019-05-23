@@ -10,15 +10,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.rd.PageIndicatorView
 import com.rd.animation.type.AnimationType
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.OnBoardingPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 
@@ -30,7 +28,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 
     private var getStartedBtn: Button? = null
 
-    override val context: Any
+    override val viewContext: Any
         get() = this
 
     /**

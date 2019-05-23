@@ -496,7 +496,7 @@ class DownloadJobItemRunner
         networkManager.lockWifi(downloadWiFiLock)
 
         networkManager.sendMessage(context, requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
-            override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception) {
+            override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
                 UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                         " BLE response received: from " + sourceDeviceAddress + ":" + response +
                         " error: " + error)

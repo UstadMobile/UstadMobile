@@ -46,7 +46,7 @@ class TocListView : LinearLayout, View.OnClickListener, TocItemView.OnClickExpan
          * @return A list of objects representing the children for this node. If this object has no
          * children returning null or an empty list are both acceptable.
          */
-        abstract fun getChildren(node: Any?): List<*>
+        abstract fun getChildren(node: Any?): List<*>?
 
         /**
          * Return a view representing this node
@@ -111,7 +111,7 @@ class TocListView : LinearLayout, View.OnClickListener, TocItemView.OnClickExpan
     protected fun addChildren(node: Any?, startPos: Int, depth: Int) {
         val children = adapter!!.getChildren(node)
         var child: Any
-        for (i in children.indices) {
+        for (i in children!!.indices) {
             val itemView = TocItemView(context)
             child = children[i]!!
 
@@ -135,7 +135,7 @@ class TocListView : LinearLayout, View.OnClickListener, TocItemView.OnClickExpan
     protected fun removeChildren(node: Any?, startPos: Int) {
         val children = adapter!!.getChildren(node)
         var itemView: TocItemView
-        for (i in children.indices) {
+        for (i in children!!.indices) {
             itemView = getChildAt(startPos) as TocItemView
             if (itemView.isExpanded) {
                 //remove it's child views

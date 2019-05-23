@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.arch.paging.PagedListAdapter
-import android.content.Context
 import android.support.v4.app.FragmentActivity
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
@@ -10,25 +9,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
-import com.ustadmobile.port.sharedse.networkmanager.DownloadJobItemManager
-
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
-import java.util.LinkedList
+import java.util.*
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity, private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
@@ -230,18 +223,20 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             }
 
             holder.downloadView.imageResource!!.contentDescription = contentDescription
-            holder.view.setOnClickListener { view -> listener.contentEntryClicked(entry) }
-            holder.downloadView.setOnClickListener { view -> listener.downloadStatusClicked(entry) }
+            holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
+            holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
-                    { status ->
-                        if (status != null) {
-                            activity.runOnUiThread {
-                                holder.downloadView.progressVisibility = View.VISIBLE
-                                holder.onDownloadJobItemChange(status)
+                    object : UmResultCallback<DownloadJobItemStatus?> {
+                        override fun onDone(result: DownloadJobItemStatus?) {
+                            if (result != null) {
+                                activity.runOnUiThread {
+                                    holder.downloadView.progressVisibility = View.VISIBLE
+                                    holder.onDownloadJobItemChange(result)
+                                }
+                            } else {
+                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
                             }
-                        } else {
-                            activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
                         }
                     })
         }

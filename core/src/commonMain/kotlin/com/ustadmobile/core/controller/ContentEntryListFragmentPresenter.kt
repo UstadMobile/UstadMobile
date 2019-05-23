@@ -120,10 +120,10 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                 }
                 if (result.leaf) {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.viewContext)
                 }
             } catch (e: Exception) {
                 fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
@@ -144,7 +144,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
+        impl.go(DummyView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 
     }

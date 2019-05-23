@@ -29,6 +29,6 @@ interface DownloadDialogView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "DownloadDialog"
+        const val VIEW_NAME = "DownloadDialog"
     }
 }

@@ -133,7 +133,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
     }
 
     @JvmOverloads
-    fun mountContainer(containerUid: Long, mountPath: String,
+    fun mountContainer(containerUid: Long, mountPath: String?,
                        filters: List<MountedContainerResponder.MountedContainerFilter> = ArrayList()): String? {
         val container = repository.containerDao.findByUid(containerUid) ?: return null
 

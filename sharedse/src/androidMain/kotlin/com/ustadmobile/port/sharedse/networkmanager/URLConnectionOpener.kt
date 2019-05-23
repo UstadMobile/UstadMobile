@@ -12,4 +12,5 @@ interface URLConnectionOpener {
 
     @Throws(IOException::class)
     fun openConnection(url: URL): URLConnection
+
 }

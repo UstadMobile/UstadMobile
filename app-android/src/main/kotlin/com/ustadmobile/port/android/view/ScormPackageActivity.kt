@@ -9,8 +9,8 @@ import android.webkit.WebViewClient
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScormPackagePresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ScormPackageView
-import com.ustadmobile.port.android.util.UMAndroidUtil
 
 class ScormPackageActivity : ZippedContentActivity(), ScormPackageView {
 

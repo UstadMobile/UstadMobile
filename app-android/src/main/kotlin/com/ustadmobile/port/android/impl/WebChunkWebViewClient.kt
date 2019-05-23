@@ -39,7 +39,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
 
             val index = containerManager!!.getEntry("index.json")
 
-            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager!!.getInputStream(index)), IndexLog::class.java)
+            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager!!.getInputStream(index!!)), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
             url = firstUrlToOpen.url
@@ -49,7 +49,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                 indexMap[log.url!!] = log
             }
             val linksMap = indexLog.links
-            if (linksMap != null && !linksMap.isEmpty()) {
+            if (linksMap != null && linksMap.isNotEmpty()) {
                 for (link in linksMap.keys) {
                     linkPatterns[Pattern.compile(link)] = linksMap[link]!!
                 }
@@ -148,7 +148,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
-            val data = containerManager!!.getInputStream(containerManager!!.getEntry(log.path))
+            val data = containerManager!!.getInputStream(containerManager!!.getEntry(log.path!!)!!)
 
             return WebResourceResponse(log.mimeType, "utf-8", 200, "OK", log.headers, data)
         } catch (e: IOException) {

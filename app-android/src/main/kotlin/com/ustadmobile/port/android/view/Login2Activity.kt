@@ -5,13 +5,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Login2Presenter
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.port.android.util.UMAndroidUtil
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
 
 class Login2Activity : UstadBaseActivity(), Login2View {
 

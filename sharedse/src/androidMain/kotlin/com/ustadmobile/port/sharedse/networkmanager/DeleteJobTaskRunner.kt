@@ -9,7 +9,7 @@ abstract class DeleteJobTaskRunner : Runnable {
 
     protected lateinit var args: Map<String, String>
 
-    protected lateinit var context: Any
+    protected var context: Any?= null
 
     /**
      * Constructor for testing purpose
@@ -21,13 +21,13 @@ abstract class DeleteJobTaskRunner : Runnable {
      * @param context Platform application context
      * @param args arguments to be passed.
      */
-    constructor(context: Any, args: Map<String, String>) {
+    constructor(context: Any?, args: Map<String, String>) {
         this.args = args
         this.context = context
     }
 
     companion object {
 
-        val ARG_DOWNLOAD_JOB_UID = "downoad_job_uid"
+        const val ARG_DOWNLOAD_JOB_UID = "downoad_job_uid"
     }
 }

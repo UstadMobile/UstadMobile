@@ -380,7 +380,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      *
      * @see BleEntryStatusTask
      */
-    abstract fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>, peerToCheck: NetworkNode?): BleEntryStatusTask
+    abstract fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>, peerToCheck: NetworkNode?): BleEntryStatusTask?
 
     /**
      * Create entry status task for a specific peer device,
@@ -395,7 +395,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      */
     abstract fun makeEntryStatusTask(context: Any, message: BleMessage,
                                      peerToSendMessageTo: NetworkNode,
-                                     responseListener: BleMessageResponseListener): BleEntryStatusTask
+                                     responseListener: BleMessageResponseListener): BleEntryStatusTask?
 
     abstract fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner
 
@@ -408,7 +408,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      */
     fun sendMessage(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode,
                     responseListener: BleMessageResponseListener) {
-        makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener).run()
+        makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.run()
     }
 
 
@@ -689,44 +689,44 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         /**
          * Flag to indicate entry status request
          */
-        val ENTRY_STATUS_REQUEST = 111.toByte()
+        const val ENTRY_STATUS_REQUEST = 111.toByte()
 
         /**
          * Flag to indicate entry status response
          */
-        val ENTRY_STATUS_RESPONSE = 112.toByte()
+        const val ENTRY_STATUS_RESPONSE = 112.toByte()
 
         /**
          * Flag to indicate WiFi direct group request (for content download)
          */
-        val WIFI_GROUP_REQUEST = 113.toByte()
+        const val WIFI_GROUP_REQUEST = 113.toByte()
 
         /**
          * Flag to indicate WiFi direct group creation response
          */
-        val WIFI_GROUP_CREATION_RESPONSE = 114.toByte()
+        const val WIFI_GROUP_CREATION_RESPONSE = 114.toByte()
 
 
         /**
          * Commonly used MTU for android devices
          */
-        val DEFAULT_MTU_SIZE = 20
+        const val DEFAULT_MTU_SIZE = 20
 
         /**
          * Maximum MTU for the packet transfer
          */
-        val MAXIMUM_MTU_SIZE = 512
+        const val MAXIMUM_MTU_SIZE = 512
 
         /**
          * Bluetooth Low Energy service UUID for our app
          */
         val USTADMOBILE_BLE_SERVICE_UUID = UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a")
 
-        val WIFI_DIRECT_GROUP_SSID_PREFIX = "DIRECT-"
+        const val WIFI_DIRECT_GROUP_SSID_PREFIX = "DIRECT-"
 
-        private val MAX_THREAD_COUNT = 1
+        private const val MAX_THREAD_COUNT = 1
 
-        val DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000
+        const val DEFAULT_WIFI_CONNECTION_TIMEOUT = 30 * 1000
     }
 
 }

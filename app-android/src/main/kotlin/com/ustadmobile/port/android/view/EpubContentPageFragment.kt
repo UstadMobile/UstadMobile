@@ -10,20 +10,14 @@ import android.os.Environment
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.view.GestureDetectorCompat
-import android.view.GestureDetector
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.RelativeLayout
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 
 
@@ -56,7 +50,7 @@ class EpubContentPageFragment : Fragment() {
 
     private var gestureDetector: GestureDetectorCompat? = null
 
-    private val webViewClickCallback = { msg ->
+    private val webViewClickCallback = Handler.Callback{ msg ->
         if (msg.what == HANDLER_CLICK_ON_VIEW) {
             mTapToHideToolbarHandler!!.onTap(mPageIndex)
         }

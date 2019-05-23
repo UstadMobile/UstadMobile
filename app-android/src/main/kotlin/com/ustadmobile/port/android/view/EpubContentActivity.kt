@@ -7,33 +7,23 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.AdapterView
 import android.widget.ImageView
-import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
-
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.EpubContentView
-import com.ustadmobile.port.android.util.UMAndroidUtil
+import java.util.*
 
-import java.util.Hashtable
-import java.util.WeakHashMap
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
-
-class EpubContentActivity : ZippedContentActivity(), EpubContentView, ListView.OnItemClickListener, TocListView.OnItemClickListener, EpubContentPageFragment.TapToHideToolbarHandler {
+class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener, EpubContentPageFragment.TapToHideToolbarHandler {
 
 
     /** The ViewPager used to swipe between epub pages  */
@@ -52,7 +42,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, ListView.O
 
     private var coverImageView: ImageView? = null
 
-    override val context: Any
+    override val viewContext: Any
         get() = this
 
     override fun onCreate(saved: Bundle?) {
@@ -66,7 +56,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, ListView.O
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         if (!UstadMobileSystemImpl.instance.getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
-                        context)) {
+                          this)) {
             mDrawerLayout!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
 
@@ -118,7 +108,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, ListView.O
 
     override fun setSpineUrls(spineUrls: Array<String>?) {
         mPagerAdapter = ContainerViewPagerAdapter(supportFragmentManager,
-                spineUrls)
+                spineUrls!!)
         mPager!!.offscreenPageLimit = 1
         mPager!!.adapter = mPagerAdapter
     }
@@ -182,7 +172,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, ListView.O
         mPager!!.setCurrentItem(spinePos, true)
     }
 
-    private inner class ContainerTocListAdapter private constructor(private val rootItem: EpubNavItem) : TocListView.TocListViewAdapter() {
+    private inner class ContainerTocListAdapter(private val rootItem: EpubNavItem) : TocListView.TocListViewAdapter() {
 
         override val root: Any
             get() = rootItem

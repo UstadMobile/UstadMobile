@@ -8,26 +8,19 @@ import android.content.ServiceConnection
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmLiveData
 import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.ACTION_START_FOREGROUND_SERVICE
+import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.GROUP_SUMMARY_ID
+import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.JOB_ID_TAG
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.ACTION_START_FOREGROUND_SERVICE
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.ACTION_START_FOREGROUND_SERVICE
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.GROUP_SUMMARY_ID
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.JOB_ID_TAG
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.GROUP_SUMMARY_ID
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.JOB_ID_TAG
 
 /**
  * Wrapper class for NetworkManagerBle. A service is required as this encapsulates
@@ -38,7 +31,7 @@ import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.JO
  */
 class NetworkManagerBleAndroidService : Service() {
 
-    private val mBinder = NetworkManagerBleAndroidService.LocalServiceBinder()
+    private val mBinder = this.LocalServiceBinder()
 
     private val managerAndroidBleRef = AtomicReference<NetworkManagerAndroidBle>()
 

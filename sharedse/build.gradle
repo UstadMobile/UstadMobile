@@ -38,21 +38,13 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
     }
+
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 }
 
-/*buildConfig {
-    appName = "sharedse"
-
-    sourceSets {
-        test {
-            packageName = "com.ustadmobile.sharedse"
-            clsName = "SharedSeTestConfig"
-            buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
-            buildConfigField 'String', 'TESTDB_JDBCURL_CLIENTUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.clientdb.url']
-            buildConfigField 'String', 'TESTDB_JDBCURL_PEERUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.peerdb.url']
-        }
-    }
-} */
 
 /*
  * Added to overcome limitation on Android studio as per:
@@ -70,14 +62,14 @@ kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
-        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
-        // the project to avoid it being seen as an extra jvm variant
-        //fromPreset(presets.jvm, 'commonJvm')
     }
 
     sourceSets {
+        commonMain {
 
-        commonJvmMain {
+        }
+
+        androidMain {
             dependencies {
                 implementation kotlin("stdlib-jdk8")
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
@@ -102,18 +94,16 @@ kotlin {
                 implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+
+                compileOnly "androidx.room:room-runtime:$version_android_room"
+            }
+        }
+        jvmMain {
+            dependencies {
+
             }
         }
 
-        androidMain {
-            dependencies {
-                implementation "androidx.room:room-runtime:$version_android_room"
-            }
-            dependsOn commonJvmMain
-        }
-        jvmMain{
-            dependsOn commonJvmMain
-        }
 
     }
 

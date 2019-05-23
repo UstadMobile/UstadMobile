@@ -21,7 +21,7 @@ import java.util.*
  * @see DeleteJobTaskRunner
  */
 
-class DeleteJobTaskRunnerAndroid internal constructor(context: Any, args: Map<String, String>) : DeleteJobTaskRunner(context, args) {
+class DeleteJobTaskRunnerAndroid internal constructor(context: Any?, args: Map<String, String>) : DeleteJobTaskRunner(context, args) {
 
     override fun run() {
 

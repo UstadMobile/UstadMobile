@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock
  * Utility class to help manage a service that starts and stops asynchronously.
  *
  */
-abstract class AsyncServiceManager {
+abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (Runnable, Long) -> Unit) {
 
     @Volatile
     private var targetState: Int = 0
@@ -19,17 +19,11 @@ abstract class AsyncServiceManager {
     var state: Int = 0
         private set
 
-    private var delayedExecutor: DelayedExecutor? = null
+    //private var delayedExecutor: DelayedExecutor? = null
 
     private val lock = ReentrantLock()
 
     private val stateChangeListeners = ArrayList<OnStateChangeListener>()
-
-    interface DelayedExecutor {
-
-        fun runAfterDelay(runnable: Runnable, delay: Long)
-
-    }
 
     interface OnStateChangeListener {
         fun onStateChanged(serviceManager: AsyncServiceManager, newState: Int)
@@ -39,20 +33,14 @@ abstract class AsyncServiceManager {
         fun stopWaiting(newState: Int): Boolean
     }
 
-    constructor(initialState: Int, delayedExecutor: DelayedExecutor) {
-        state = initialState
-        targetState = initialState
-        this.delayedExecutor = delayedExecutor
-    }
+//    constructor(initialState: Int, delayedExecutor: (Runnable) -> Unit) {
+//        state = initialState
+//        targetState = initialState
+//        this.delayedExecutor = delayedExecutor
+//    }
 
     //Blank constructor required for mocking for tests
-    constructor() {
-
-    }
-
-    fun setDelayedExecutor(executor: DelayedExecutor) {
-        this.delayedExecutor = executor
-    }
+    constructor(): this(0, {runnable, i ->  })
 
     fun setEnabled(enabled: Boolean) {
         try {
@@ -68,13 +56,13 @@ abstract class AsyncServiceManager {
             if (targetState == STATE_STARTED && state == STATE_STOPPED) {
                 state = STATE_STARTING
                 fireStateChangedEvent(state)
-                delayedExecutor!!.runAfterDelay(Runnable { this.start() }, 0)
+                delayedExecutor.invoke(Runnable { this.start() } ,0)
             } else if (targetState == STATE_STOPPED && state == STATE_STARTED) {
                 state = STATE_STOPPING
                 fireStateChangedEvent(state)
-                delayedExecutor!!.runAfterDelay(Runnable { this.stop() }, 0)
+                delayedExecutor.invoke(Runnable { this.stop() }, 0)
             } else {
-                delayedExecutor!!.runAfterDelay(Runnable { this.checkState() }, 1000)
+                delayedExecutor.invoke(Runnable { this.checkState() }, 1000)
             }
         } finally {
             lock.unlock()
@@ -116,14 +104,14 @@ abstract class AsyncServiceManager {
         stateChangeListeners.remove(listener)
     }
 
-    fun await(checker: AsyncAwaitChecker, timeout: Long, timeoutUnit: TimeUnit) {
-        if (checker.stopWaiting(state))
+    fun await(checker: (Int) -> Boolean, timeout: Long, timeoutUnit: TimeUnit) {
+        if (checker.invoke(state))
             return
 
         val latch = CountDownLatch(1)
         val listener = object : OnStateChangeListener {
             override fun onStateChanged(serviceManager: AsyncServiceManager, newState: Int) {
-                if (checker.stopWaiting(newState))
+                if (checker.invoke(newState))
                     latch.countDown()
             }
         }

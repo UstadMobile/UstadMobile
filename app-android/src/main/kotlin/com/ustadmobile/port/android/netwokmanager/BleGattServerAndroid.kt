@@ -1,22 +1,15 @@
 package com.ustadmobile.port.android.netwokmanager
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattServer
-import android.bluetooth.BluetoothGattServerCallback
+import android.bluetooth.*
 import android.content.Context
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.annotation.VisibleForTesting
-
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer
-import com.ustadmobile.port.sharedse.networkmanager.BleMessage
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageAssembler
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.USTADMOBILE_BLE_SERVICE_UUID
 
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID
 
 /**
  * This class handle all the GATT server device's Bluetooth Low Energy callback
@@ -143,7 +136,7 @@ internal class BleGattServerAndroid
     }
 
     init {
-        this.gattServer = networkManager.bluetoothManager.openGattServer(context, gattServerCallback)
+        this.gattServer = networkManager.getBluetoothManager().openGattServer(context, gattServerCallback)
         setNetworkManager(networkManager)
     }
 }

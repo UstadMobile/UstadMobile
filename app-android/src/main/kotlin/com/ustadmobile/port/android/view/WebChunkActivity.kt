@@ -1,21 +1,19 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.webkit.WebView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.WebChunkPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
 
 class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifier {
 
@@ -39,14 +37,14 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
         mWebView!!.settings.allowUniversalAccessFromFileURLs = true
         mWebView!!.settings.allowFileAccessFromFileURLs = true
 
-        mPresenter = WebChunkPresenter(context,
+        mPresenter = WebChunkPresenter(this,
                 bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }
 
     override fun mountChunk(container: Container, callback: UmCallback<String>) {
-        webClient = WebChunkWebViewClient(container, mPresenter!!, context)
+        webClient = WebChunkWebViewClient(container, mPresenter!!, this)
         runOnUiThread {
             mWebView!!.webViewClient = webClient
             callback.onSuccess(webClient!!.url)
@@ -80,7 +78,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
     }
 
     override fun showError(message: String) {
-        showErrorNotification(message, null, 0)
+        showErrorNotification(message, {}, 0)
     }
 
     override fun setToolbarTitle(title: String) {
@@ -89,15 +87,14 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, ViewWithErrorNotifie
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
         showErrorNotification(message, {
-            val ctx = context as Context
             var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }
             try {
-                ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
             } catch (anfe: android.content.ActivityNotFoundException) {
-                ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
             }
         }, actionMessageId)
     }

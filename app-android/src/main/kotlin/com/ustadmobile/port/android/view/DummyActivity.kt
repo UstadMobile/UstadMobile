@@ -11,8 +11,9 @@ import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -20,9 +21,6 @@ import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
-
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -37,7 +35,7 @@ class DummyActivity : UstadBaseActivity(), DummyView {
         supportActionBar!!.setTitle(R.string.app_name)
 
         val viewPager = findViewById<ViewPager>(R.id.library_viewpager)
-        viewPager.adapter = LibraryPagerAdapter(supportFragmentManager, context as Context)
+        viewPager.adapter = LibraryPagerAdapter(supportFragmentManager, this)
         val tabLayout = findViewById<TabLayout>(R.id.tabs)
         tabLayout.setupWithViewPager(viewPager)
 
@@ -54,7 +52,7 @@ class DummyActivity : UstadBaseActivity(), DummyView {
         val itemId = item.itemId
 
         if (itemId == R.id.action_open_about) {
-            UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, context)
+            UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
         } else if (itemId == R.id.action_clear_history) {
             GlobalScope.launch {
                 val database = UmAppDatabase.getInstance(this)
@@ -77,9 +75,9 @@ class DummyActivity : UstadBaseActivity(), DummyView {
         super.onBleNetworkServiceBound(networkManagerBle)
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                { (networkManagerBle as NetworkManagerAndroidBle).checkP2PBleServices() },
-                impl.getString(MessageID.location_permission_title, context),
-                impl.getString(MessageID.location_permission_message, context))
+                Runnable { (networkManagerBle as NetworkManagerAndroidBle).checkP2PBleServices() },
+                impl.getString(MessageID.location_permission_title, this),
+                impl.getString(MessageID.location_permission_message, this))
     }
 
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {

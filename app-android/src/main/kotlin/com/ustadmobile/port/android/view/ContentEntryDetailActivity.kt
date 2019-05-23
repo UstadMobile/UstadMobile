@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -11,13 +10,15 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
@@ -27,12 +28,7 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
-
-import java.util.HashMap
-
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
+import java.util.*
 
 class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener, LocalAvailabilityMonitor, LocalAvailabilityListener {
 
@@ -65,7 +61,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
     internal var fileStatusIcon = HashMap<Int, Int>()
 
     override val allKnowAvailabilityStatus: Set<Long>
-        get() = managerAndroidBle!!.locallyAvailableContainerUids
+        get() = managerAndroidBle!!.getLocallyAvailableContainerUids()
 
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
@@ -76,7 +72,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         }
 
         managerAndroidBle = networkManagerBle as NetworkManagerAndroidBle?
-        entryDetailPresenter = ContentEntryDetailPresenter(context,
+        entryDetailPresenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
                 this, networkManagerBle)
         entryDetailPresenter!!.onCreate(bundleToMap(Bundle()))
@@ -182,21 +178,20 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     override fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String) {
         showErrorNotification(message, {
-            val ctx = context as Context
             var appPackageName = ContentEntryUtil.mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"
             }
             try {
-                ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
             } catch (anfe: android.content.ActivityNotFoundException) {
-                ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
             }
         }, actionMessageId)
     }
 
     override fun showFileOpenError(message: String) {
-        showErrorNotification(message, null, 0)
+        showErrorNotification(message, {}, 0)
     }
 
 
@@ -239,9 +234,9 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                { impl.go("DownloadDialog", args, context) },
-                impl.getString(MessageID.download_storage_permission_title, context),
-                impl.getString(MessageID.download_storage_permission_message, context))
+                Runnable{ impl.go("DownloadDialog", args, this) },
+                impl.getString(MessageID.download_storage_permission_title, this),
+                impl.getString(MessageID.download_storage_permission_message, this))
     }
 
     override fun selectContentEntryOfLanguage(uid: Long) {

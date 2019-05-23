@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view
 
-import kotlinx.coroutines.Runnable
-
 /**
  * Represents a view interface that has an error notification capability (e.g. Android Snackbar style)
  */
@@ -12,6 +10,6 @@ interface ViewWithErrorNotifier : UstadView {
      *
      * @param errorMessage Error message to show
      */
-    fun showErrorNotification(errorMessage: String, action: Runnable?, actionMessageId: Int?)
+    fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int)
 
 }

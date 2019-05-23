@@ -57,7 +57,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
         public override fun doInBackground(vararg strings: String): String {
             val mountedUri = httpd.mountZipOnHttp(strings[0], null)
             return UMFileUtil.joinPaths(httpd.localHttpUrl,
-                    mountedUri)
+                    mountedUri!!)
         }
 
         override fun onPostExecute(mountedPath: String) {
@@ -65,7 +65,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
         }
     }
 
-    private class MountContainerAsyncTask(callback: UmCallback<*>, private val httpd: EmbeddedHTTPD) : AsyncTask<Long, Void, String>() {
+    private class MountContainerAsyncTask(callback: UmCallback<*>?, private val httpd: EmbeddedHTTPD) : AsyncTask<Long, Void, String>() {
         private val callback: UmCallback<String>
 
         init {
@@ -75,7 +75,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
         override fun doInBackground(vararg p0: Long?): String {
             val mountedUri = httpd.mountContainer(p0[0]!!, null)
             return UMFileUtil.joinPaths(httpd.localHttpUrl,
-                    mountedUri)
+                    mountedUri!!)
         }
 
         override fun onPostExecute(mountedPath: String) {
@@ -100,16 +100,16 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
     }
 
     fun mountZip(zipUri: String, callback: UmCallback<String>) {
-        runWhenConnectedQueue.runWhenReady { MountZipAsyncTask(callback, httpdRef.get()).doInBackground(zipUri) }
+        runWhenConnectedQueue.runWhenReady(Runnable { MountZipAsyncTask(callback, httpdRef.get()).doInBackground(zipUri) })
     }
 
-    fun mountContainer(containerUid: Long, callback: UmCallback<String>) {
-        runWhenConnectedQueue.runWhenReady { MountContainerAsyncTask(callback, httpdRef.get()).execute(containerUid) }
+    fun mountContainer(containerUid: Long, callback: UmCallback<String>?) {
+        runWhenConnectedQueue.runWhenReady(Runnable { MountContainerAsyncTask(callback, httpdRef.get()).execute(containerUid) })
     }
 
-    fun unmountContainer(mountedUrl: String) {
+    fun unmountContainer(mountedUrl: String?) {
         //note: use -1 so we don't chop off first ./ included in local httpurl from the mounted path
-        val mountedPath = mountedUrl.substring(httpdRef.get().localHttpUrl.length - 1) + MountedContainerResponder.URI_ROUTE_POSTFIX
+        val mountedPath = mountedUrl?.substring(httpdRef.get().localHttpUrl.length - 1) + MountedContainerResponder.URI_ROUTE_POSTFIX
         httpdRef.get().unmountContainer(mountedPath)
     }
 

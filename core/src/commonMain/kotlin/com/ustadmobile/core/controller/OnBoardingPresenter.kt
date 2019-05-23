@@ -13,7 +13,7 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: O
         super.onCreate(savedState)
         view.runOnUiThread(Runnable  { view.setScreenList() })
 
-        val wasShown = impl.getAppPref(PREF_TAG, view.context)
+        val wasShown = impl.getAppPref(PREF_TAG, view.viewContext)
         if (wasShown!= null && wasShown.toBoolean()) {
             handleGetStarted()
         }
@@ -22,7 +22,7 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: O
 
     fun handleGetStarted() {
         val args: Map<String,String?> = arguments;
-        impl.setAppPref(PREF_TAG, true.toString(), view.context)
+        impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
         impl.go(DummyView.VIEW_NAME, args, context)
     }
 }

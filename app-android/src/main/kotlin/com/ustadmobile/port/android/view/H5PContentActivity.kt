@@ -2,21 +2,19 @@ package com.ustadmobile.port.android.view
 
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.H5PContentPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService
-import com.ustadmobile.port.android.util.UMAndroidUtil
-
+import kotlinx.serialization.ImplicitReflectionSerializer
 import java.util.concurrent.atomic.AtomicReference
 
 class H5PContentActivity : ZippedContentActivity(), H5PContentView {
@@ -27,6 +25,7 @@ class H5PContentActivity : ZippedContentActivity(), H5PContentView {
 
     private val mountedPath = AtomicReference<String>()
 
+    @ImplicitReflectionSerializer
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_h5p_content)
@@ -46,7 +45,7 @@ class H5PContentActivity : ZippedContentActivity(), H5PContentView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         mPresenter = H5PContentPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
-        runWhenHttpdReady { mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras)) }
+        runWhenHttpdReady(Runnable { mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras)) })
     }
 
     override fun mountH5PDist(callback: UmCallback<String>) {

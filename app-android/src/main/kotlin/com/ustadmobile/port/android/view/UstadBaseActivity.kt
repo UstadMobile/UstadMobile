@@ -35,6 +35,7 @@ import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidServic
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import com.ustadmobile.port.sharedse.util.RunnableQueue
+import kotlinx.coroutines.Runnable
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
@@ -139,7 +140,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
     }
 
-    override val context: Any
+    override val viewContext: Any
         get() = this
 
 
@@ -184,7 +185,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         builder.setView(dialogView)
         builder.setPositiveButton(R.string.send) { dialogInterface, whichButton ->
             ACRA.getErrorReporter().handleSilentException(UserFeedbackException(editText.text.toString()))
-            Toast.makeText(context as Context, R.string.feedback_thanks, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.feedback_thanks, Toast.LENGTH_LONG).show()
             dialogInterface.cancel()
         }
         builder.setNegativeButton(R.string.cancel) { dialogInterface, i -> dialogInterface.cancel() }
@@ -202,12 +203,12 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param actionMessageId id of action name
      * @param action          action listener
      */
-    open fun showErrorNotification(errorMessage: String, action: Runnable?, actionMessageId: Int) {
+    override fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
         val snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG)
-        if (action != null) {
-            val impl = instance
-            snackbar.setAction(impl.getString(actionMessageId, context)) { view -> action.run() }
-            snackbar.setActionTextColor(ContextCompat.getColor(context as Context, R.color.accent))
+        val impl = instance
+        if(actionMessageId != 0) {
+            snackbar.setAction(impl.getString(actionMessageId, this)) { action() }
+            snackbar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
         }
         snackbar.show()
     }

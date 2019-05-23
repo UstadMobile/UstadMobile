@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebChromeClient
@@ -11,16 +10,12 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiPackageContentView
-
 import java.util.concurrent.atomic.AtomicReference
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
 
 /**
  * Created by mike on 9/14/17.
@@ -106,7 +101,7 @@ class XapiPackageContentActivity : ZippedContentActivity(), XapiPackageContentVi
         super.onDestroy()
     }
 
-    override fun showErrorNotification(errorMessage: String, action: Runnable?, actionMessageId: Int?) {
+    override fun showErrorNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
         mProgressBar!!.progress = 0
         mProgressBar!!.visibility = View.GONE
     }

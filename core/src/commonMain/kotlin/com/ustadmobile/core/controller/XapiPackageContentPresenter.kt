@@ -66,7 +66,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
                     UMLog.l(UMLog.ERROR, 75, null, e)
                     view.runOnUiThread(Runnable {
                         view.showErrorNotification(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file,
-                                view.context), Runnable { }, 0)
+                                view.viewContext!!), { }, 0)
                     })
                 }
 

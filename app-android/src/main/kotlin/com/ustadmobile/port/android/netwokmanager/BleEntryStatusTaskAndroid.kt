@@ -1,28 +1,18 @@
 package com.ustadmobile.port.android.netwokmanager
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.annotation.VisibleForTesting
-
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.NetworkNode
-import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask
-import com.ustadmobile.port.sharedse.networkmanager.BleMessage
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
-
-import java.io.IOException
-
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST
+import com.ustadmobile.port.sharedse.networkmanager.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 /**
  * This class handles all android specific entry status check from a peer device also,
@@ -66,7 +56,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
     private var mGattClient: BluetoothGatt? = null
 
-    private val managerBle: NetworkManagerAndroidBle? = null
+    private var managerBle: NetworkManagerAndroidBle? = null
 
     /**
      * Constructor to be used when creating platform specific instance of BleEntryStatusTask
@@ -79,8 +69,8 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
         this.managerBle = managerAndroidBle
         this.context = context
         val messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck)
-        this.message = BleMessage(ENTRY_STATUS_REQUEST,
-                BleMessage.getNextMessageIdForReceiver(peerToCheck.bluetoothMacAddress),
+        this.message = BleMessage(NetworkManagerBle.ENTRY_STATUS_REQUEST,
+                BleMessage.getNextMessageIdForReceiver(peerToCheck.bluetoothMacAddress!!),
                 messagePayload)
     }
 
@@ -113,7 +103,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      */
     override fun run() {
         try {
-            gattClientCallback = BleMessageGattClientCallback(message)
+            gattClientCallback = BleMessageGattClientCallback(message!!)
             gattClientCallback!!.setOnResponseReceived(this)
             val destinationPeer = bluetoothManager!!.adapter
                     .getRemoteDevice(networkNode.bluetoothMacAddress)
@@ -121,13 +111,13 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
             //For device below lollipop they require autoConnect flag to be
             // TRUE otherwise they will always throw error 133.
             mGattClient = destinationPeer.connectGatt(
-                    context as Context, managerBle.isVersionKitKatOrBelow, gattClientCallback)
+                    context as Context, managerBle?.isVersionKitKatOrBelow?: false, gattClientCallback)
 
-            if (managerBle.isVersionLollipopOrAbove) {
+            if (managerBle?.isVersionLollipopOrAbove == true) {
                 mGattClient!!.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
             }
 
-            managerBle.handleNodeConnectionHistory(destinationPeer.address,
+            managerBle?.handleNodeConnectionHistory(destinationPeer.address,
                     mGattClient != null)
 
             if (mGattClient == null) {
@@ -135,11 +125,11 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
                         "Failed to connect to " + destinationPeer.address)
 
                 GlobalScope.launch {
-                    UmAppDatabase.getInstance(context).networkNodeDao
+                    UmAppDatabase.getInstance(context as Context).networkNodeDao
                             .updateRetryCountAsync(networkNode.nodeId)
                 }
 
-                onResponseReceived(networkNode.bluetoothMacAddress, null,
+                onResponseReceived(networkNode.bluetoothMacAddress!!, null,
                         IOException("BLE failed on connectGatt to " + networkNode.bluetoothMacAddress!!))
             } else {
                 UMLog.l(UMLog.DEBUG, 698,
@@ -152,7 +142,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
     }
 
-    override fun onResponseReceived(sourceDeviceAddress: String?, response: BleMessage?, error: Exception) {
+    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
         super.onResponseReceived(sourceDeviceAddress, response, error)
         //disconnect after finishing the task
         if (mGattClient != null)

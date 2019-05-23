@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.support.design.widget.TextInputEditText
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.ActionBar
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
@@ -11,17 +10,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Register2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.Person
-
-import java.util.HashMap
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
+import java.util.*
 
 
 class Register2Activity : UstadBaseActivity(), Register2View {

@@ -7,8 +7,8 @@ import android.support.annotation.RequiresApi
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.DEFAULT_MTU_SIZE
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.USTADMOBILE_BLE_SERVICE_UUID
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 

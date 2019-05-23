@@ -2,19 +2,16 @@ package com.ustadmobile.port.android.impl.http
 
 
 import android.content.Context
-
-import com.ustadmobile.core.impl.UMLogger
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-
+import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-
-import fi.iki.elonen.NanoHTTPD
-import fi.iki.elonen.router.RouterNanoHTTPD
 
 /**
  * Created by mike on 8/30/16.

@@ -7,15 +7,9 @@ import android.os.Bundle
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
+import android.view.View.*
 import android.widget.TextView
-
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.DefaultLoadControl
-import com.google.android.exoplayer2.DefaultRenderersFactory
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.Format
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.MergingMediaSource
@@ -28,16 +22,11 @@ import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.VideoPlayerPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
-
-import java.util.Objects
-
-import android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
+import java.util.*
 
 class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
@@ -81,7 +70,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
 
-        mPresenter = VideoPlayerPresenter(context,
+        mPresenter = VideoPlayerPresenter(this,
                 Objects.requireNonNull(bundleToMap(intent.extras)), this)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
     }

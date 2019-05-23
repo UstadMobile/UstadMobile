@@ -15,24 +15,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkInfo
-import android.net.NetworkRequest
+import android.net.*
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pGroup
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
 import android.os.Handler
+import android.os.Looper.getMainLooper
 import android.os.ParcelUuid
 import android.os.SystemClock
 import android.support.annotation.RequiresApi
 import android.support.annotation.VisibleForTesting
 import android.support.v4.app.ActivityCompat
 import android.support.v4.net.ConnectivityManagerCompat
-
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -40,32 +36,26 @@ import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.networkmanager.BleEntryStatusTask
-import com.ustadmobile.port.sharedse.networkmanager.BleMessage
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener
-import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupBle
+import com.ustadmobile.port.sharedse.networkmanager.*
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
-
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.net.InetAddress
-import java.util.ArrayList
+import java.net.URL
+import java.net.URLConnection
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-
-import fi.iki.elonen.NanoHTTPD
-
-import android.os.Looper.getMainLooper
-import com.ustadmobile.port.sharedse.networkmanager.URLConnectionOpener
 
 /**
  * This class provides methods to perform android network related communications.
@@ -87,7 +77,7 @@ class NetworkManagerAndroidBle
  *
  * @param context Platform specific application context
  */
-(context: Any, private val httpd: EmbeddedHTTPD) : NetworkManagerBle(context), EmbeddedHTTPD.ResponseListener {
+(context: Any, val httpServer: EmbeddedHTTPD) : NetworkManagerBle(context), EmbeddedHTTPD.ResponseListener {
 
     private var wifiManager: WifiManager? = null
 
@@ -102,7 +92,7 @@ class NetworkManagerAndroidBle
     /* Cast as required to avoid ClassNotFoundException on Android versions that dont support this */
     private var gattServerAndroid: Any? = null
 
-    private val mContext: Context
+    private val mContext: Context = context as Context
 
     private val parcelServiceUuid = ParcelUuid(NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID)
 
@@ -110,7 +100,7 @@ class NetworkManagerAndroidBle
 
     private var wifiP2pManager: WifiP2pManager? = null
 
-    private val umAppDatabase: UmAppDatabase
+    private val umAppDatabase: UmAppDatabase = UmAppDatabase.getInstance(context)
 
     private var connectivityManager: ConnectivityManager? = null
 
@@ -135,6 +125,14 @@ class NetworkManagerAndroidBle
     private val wifiDirectRequestLastCompletedTime = AtomicLong()
 
     private val numActiveRequests = AtomicInteger()
+
+    override val httpd: EmbeddedHTTPD
+        get() = httpServer
+
+    init {
+        startMonitoringNetworkChanges()
+    }
+
     /**
      *
      */
@@ -157,20 +155,20 @@ class NetworkManagerAndroidBle
     private val delayedExecutor = Executors.newSingleThreadScheduledExecutor()
 
     private val scanningServiceManager = object : AsyncServiceManager(
-            AsyncServiceManager.STATE_STOPPED,
+            STATE_STOPPED,
             { runnable, delay -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun start() {
             if (isBleCapable) {
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE scanning")
-                notifyStateChanged(AsyncServiceManager.Companion.STATE_STARTED)
+                notifyStateChanged(STATE_STARTED)
                 bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
                         bleScanCallback as BluetoothAdapter.LeScanCallback?)
                 UMLog.l(UMLog.DEBUG, 689,
                         "BLE Scanning started ")
             } else {
-                notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED, AsyncServiceManager.Companion.STATE_STOPPED)
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                 UMLog.l(UMLog.ERROR, 689,
                         "Not BLE capable, no need to start")
             }
@@ -179,12 +177,12 @@ class NetworkManagerAndroidBle
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun stop() {
             bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
-            notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED)
+            notifyStateChanged(STATE_STOPPED)
         }
     }
 
     private val advertisingServiceManager = object : AsyncServiceManager(
-            AsyncServiceManager.STATE_STOPPED,
+            STATE_STOPPED,
             { runnable, delay -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
         override fun start() {
             if (canDeviceAdvertise()) {
@@ -205,7 +203,7 @@ class NetworkManagerAndroidBle
                 if (gattServerAndroid == null
                         || (gattServerAndroid as BleGattServerAndroid).gattServer == null
                         || bleServiceAdvertiser == null) {
-                    notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED, AsyncServiceManager.Companion.STATE_STOPPED)
+                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                     return
                 }
 
@@ -226,20 +224,20 @@ class NetworkManagerAndroidBle
                             override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
                                 super.onStartSuccess(settingsInEffect)
                                 bleAdvertisingLastStartTime = System.currentTimeMillis()
-                                notifyStateChanged(AsyncServiceManager.Companion.STATE_STARTED)
+                                notifyStateChanged(STATE_STARTED)
                                 UMLog.l(UMLog.DEBUG, 689,
                                         "Service advertised successfully")
                             }
 
                             override fun onStartFailure(errorCode: Int) {
                                 super.onStartFailure(errorCode)
-                                notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED, AsyncServiceManager.Companion.STATE_STOPPED)
+                                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                                 UMLog.l(UMLog.ERROR, 689,
                                         "Service could'nt start, with error code $errorCode")
                             }
                         })
             } else {
-                notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED, AsyncServiceManager.Companion.STATE_STOPPED)
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
             }
         }
 
@@ -257,7 +255,7 @@ class NetworkManagerAndroidBle
                         "Exception trying to stop gatt server", e)
             }
 
-            notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED)
+            notifyStateChanged(STATE_STOPPED)
         }
     }
 
@@ -300,14 +298,14 @@ class NetworkManagerAndroidBle
     private val isAdvertiser: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
-    private class WifiDirectGroupAndroid private constructor(group: WifiP2pGroup, endpointPort: Int) : WiFiDirectGroupBle(group.networkName, group.passphrase) {
+    private class WifiDirectGroupAndroid(group: WifiP2pGroup, endpointPort: Int) : WiFiDirectGroupBle(group.networkName, group.passphrase) {
         init {
             port = endpointPort
             ipAddress = "192.168.49.1"
         }
     }
 
-    private class WifiP2PGroupServiceManager private constructor(private val networkManager: NetworkManagerAndroidBle) : AsyncServiceManager(AsyncServiceManager.Companion.STATE_STOPPED, { runnable, delay -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
+    private class WifiP2PGroupServiceManager(private val networkManager: NetworkManagerAndroidBle) : AsyncServiceManager(STATE_STOPPED, { runnable, delay -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
 
         private val wiFiDirectGroup = AtomicReference<WiFiDirectGroupBle>()
 
@@ -323,11 +321,11 @@ class NetworkManagerAndroidBle
                                 networkManager.httpd.listeningPort)
                     else
                         null)
-                    if (group == null && state == AsyncServiceManager.Companion.STATE_STARTING || group != null && state == AsyncServiceManager.Companion.STATE_STOPPING) {
-                        return@networkManager.wifiP2pManager.requestGroupInfo
+                    if (group == null && state == STATE_STARTING || group != null && state == STATE_STOPPING) {
+                        return@requestGroupInfo
                     }
 
-                    notifyStateChanged(if (group != null) AsyncServiceManager.Companion.STATE_STARTED else AsyncServiceManager.Companion.STATE_STOPPED)
+                    notifyStateChanged(if (group != null) STATE_STARTED else STATE_STOPPED)
                 }
             }
         }
@@ -343,7 +341,7 @@ class NetworkManagerAndroidBle
                         && timeNow - networkManager.wifiDirectRequestLastCompletedTime.get() > TIMEOUT_AFTER_LAST_REQUEST)
                 setEnabled(!timedOut)
 
-                if (state != AsyncServiceManager.Companion.STATE_STOPPED)
+                if (state != STATE_STOPPED)
                     timeoutCheckHandler.postDelayed(CheckTimeoutRunnable(),
                             TIMEOUT_CHECK_INTERVAL.toLong())
             }
@@ -356,7 +354,7 @@ class NetworkManagerAndroidBle
                 if (wifiP2pGroup != null) {
                     wiFiDirectGroup.set(WifiDirectGroupAndroid(wifiP2pGroup,
                             networkManager.httpd.listeningPort))
-                    notifyStateChanged(AsyncServiceManager.Companion.STATE_STARTED)
+                    notifyStateChanged(STATE_STARTED)
                 } else {
                     createNewGroup()
                 }
@@ -374,7 +372,7 @@ class NetworkManagerAndroidBle
                         override fun onFailure(reason: Int) {
                             UMLog.l(UMLog.ERROR, 692,
                                     "Failed to create a group with error code $reason")
-                            notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED, AsyncServiceManager.Companion.STATE_STOPPED)
+                            notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                         }
                     })
         }
@@ -386,7 +384,7 @@ class NetworkManagerAndroidBle
                     UMLog.l(UMLog.INFO, 693,
                             "Group removed successfully")
                     wiFiDirectGroup.set(null)
-                    notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED)
+                    notifyStateChanged(STATE_STOPPED)
                 }
 
                 override fun onFailure(reason: Int) {
@@ -400,10 +398,10 @@ class NetworkManagerAndroidBle
                         if (wifiP2pGroup != null) {
                             wiFiDirectGroup.set(WifiDirectGroupAndroid(wifiP2pGroup,
                                     networkManager.httpd.listeningPort))
-                            notifyStateChanged(AsyncServiceManager.Companion.STATE_STARTED, AsyncServiceManager.Companion.STATE_STARTED)
+                            notifyStateChanged(STATE_STARTED, STATE_STARTED)
                         } else {
                             wiFiDirectGroup.set(null)
-                            notifyStateChanged(AsyncServiceManager.Companion.STATE_STOPPED)
+                            notifyStateChanged(STATE_STOPPED)
                         }
                     }
                 }
@@ -452,8 +450,11 @@ class NetworkManagerAndroidBle
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.set(ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null))
-        umAppDatabase.connectivityStatusDao
-                .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
+        GlobalScope.launch {
+            umAppDatabase.connectivityStatusDao
+                    .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
+        }
+
     }
 
 
@@ -480,15 +481,20 @@ class NetworkManagerAndroidBle
         connectivityStatusRef.set(status)
 
         //get network SSID
-        if (ssid != null && ssid.startsWith(NetworkManagerBle.WIFI_DIRECT_GROUP_SSID_PREFIX)) {
+        if (ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
             if (isVersionLollipopOrAbove) {
-                localConnectionOpener = URLConnectionOpener { network!!.openConnection(it) }
+                localConnectionOpener = object : URLConnectionOpener {
+                    override fun openConnection(url: URL): URLConnection {
+                        return network!!.openConnection(url)
+                    }
+                }
             }
         }
 
-
-        umAppDatabase.connectivityStatusDao.insertAsync(status)
+        GlobalScope.launch {
+            umAppDatabase.connectivityStatusDao.insertAsync(status)
+        }
     }
 
 
@@ -504,11 +510,7 @@ class NetworkManagerAndroidBle
         return `val`
     }
 
-    init {
-        mContext = context as Context
-        this.umAppDatabase = UmAppDatabase.getInstance(context)
-        startMonitoringNetworkChanges()
-    }
+
 
     override fun onCreate() {
         if (wifiManager == null) {
@@ -530,11 +532,11 @@ class NetworkManagerAndroidBle
 
         if (isBleDeviceSDKVersion && isBleCapable) {
 
-            bleScanCallback = { device, rssi, scanRecord ->
+            bleScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
                 val networkNode = NetworkNode()
                 networkNode.bluetoothMacAddress = device.getAddress()
                 handleNodeDiscovered(networkNode)
-            } as BluetoothAdapter.LeScanCallback
+            }
 
             //setting up bluetooth connection listener
             val intentFilter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
@@ -565,7 +567,7 @@ class NetworkManagerAndroidBle
         }
     }
 
-    override fun responseFinished(session: NanoHTTPD.IHTTPSession, response: NanoHTTPD.Response) {
+    override fun responseFinished(session: NanoHTTPD.IHTTPSession, response: NanoHTTPD.Response?) {
         if (session.remoteIpAddress != null && session.remoteIpAddress.startsWith("192.168.49")) {
             numActiveRequests.decrementAndGet()
             wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis())
@@ -599,29 +601,29 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun isWiFiEnabled(): Boolean {
-        return wifiManager!!.isWifiEnabled
-    }
+    override val isWiFiEnabled: Boolean
+        get() = wifiManager!!.isWifiEnabled
 
     /**
      * {@inheritDoc}
      */
-    override fun isBleCapable(): Boolean {
-        return if (isBleDeviceSDKVersion)
-            BluetoothAdapter.getDefaultAdapter() != null && mContext.packageManager
-                    .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
-        else
-            false
+    override val isBleCapable: Boolean
+        get() {
+            return if (isBleDeviceSDKVersion)
+                BluetoothAdapter.getDefaultAdapter() != null && mContext.packageManager
+                        .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+            else
+                false
+        }
 
-    }
 
     /**
      * {@inheritDoc}
      */
-    override fun isBluetoothEnabled(): Boolean {
-        return (bluetoothAdapter != null && bluetoothAdapter!!.isEnabled
+    override val isBluetoothEnabled: Boolean
+        get() = (bluetoothAdapter != null && bluetoothAdapter!!.isEnabled
                 && bluetoothAdapter!!.state == BluetoothAdapter.STATE_ON)
-    }
+
 
     /**
      * {@inheritDoc}
@@ -663,7 +665,7 @@ class NetworkManagerAndroidBle
         deleteTemporaryWifiDirectSsids()
         endAnyLocalSession()
 
-        if (ssid.startsWith(NetworkManagerBle.WIFI_DIRECT_GROUP_SSID_PREFIX)) {
+        if (ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             temporaryWifiDirectSsids.add(ssid)
         }
 
@@ -808,7 +810,7 @@ class NetworkManagerAndroidBle
     private fun endAnyLocalSession() {
         if (connectivityStatusRef.get() == null
                 || connectivityStatusRef.get().wifiSsid == null
-                || !connectivityStatusRef.get().wifiSsid!!.startsWith(NetworkManagerBle.WIFI_DIRECT_GROUP_SSID_PREFIX))
+                || !connectivityStatusRef.get().wifiSsid!!.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
             return
 
         val endpoint = umAppDatabase.networkNodeDao.getEndpointUrlByGroupSsid(
@@ -857,11 +859,11 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun makeEntryStatusTask(context: Any, entryUidsToCheck: List<Long>,
-                                     peerToCheck: NetworkNode): BleEntryStatusTask? {
+    override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>,
+                                     peerToCheck: NetworkNode?): BleEntryStatusTask? {
         if (isBleDeviceSDKVersion) {
             val entryStatusTask = BleEntryStatusTaskAndroid(
-                    context as Context, this, entryUidsToCheck, peerToCheck)
+                    context as Context, this, entryUidsToCheck, peerToCheck!!)
             entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
             return entryStatusTask
         }
@@ -882,7 +884,7 @@ class NetworkManagerAndroidBle
         return null
     }
 
-    override fun makeDeleteJobTask(`object`: Any, args: Map<String, String>): DeleteJobTaskRunner {
+    override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner {
         return DeleteJobTaskRunnerAndroid(`object`, args)
     }
 
@@ -911,12 +913,6 @@ class NetworkManagerAndroidBle
         }
 
     }
-
-
-    override fun getHttpd(): EmbeddedHTTPD {
-        return httpd
-    }
-
 
     /**
      * Get bluetooth manager instance
@@ -978,13 +974,12 @@ class NetworkManagerAndroidBle
         super.onDestroy()
     }
 
-    override fun isVersionLollipopOrAbove(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-    }
+    override val isVersionLollipopOrAbove: Boolean
+        get() =  Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
-    override fun isVersionKitKatOrBelow(): Boolean {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
-    }
+    override val isVersionKitKatOrBelow: Boolean
+        get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
+
 
     /**
      * This class is used when creating a ActionListener proxy to be used on

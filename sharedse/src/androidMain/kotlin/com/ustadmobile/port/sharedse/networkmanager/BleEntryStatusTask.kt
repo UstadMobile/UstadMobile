@@ -36,7 +36,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
     lateinit var networkNode: NetworkNode
         protected set
 
-    internal lateinit var context: Any
+    lateinit var context: Any
 
     private var entryUidsToCheck: List<Long>? = null
 
@@ -83,7 +83,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
      * Set content, for test purpose
      * @param context Mocked context
      */
-    fun setContext(context: Any) {
+    fun setViewContext(context: Any) {
         this.context = context
     }
 
@@ -108,7 +108,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
      * @param sourceDeviceAddress Server device bluetooth MAC address
      * @param response Message received as a response from the server device.
      */
-    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception) {
+    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
 
         val responseRequestType = response?.requestType ?: -1
 

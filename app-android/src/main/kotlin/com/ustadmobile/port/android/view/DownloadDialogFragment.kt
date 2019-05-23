@@ -8,35 +8,24 @@ import android.support.v7.app.AlertDialog
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
-import android.widget.RelativeLayout
-import android.widget.Spinner
-import android.widget.TextView
-
+import android.widget.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
-
 import java.io.File
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.Objects
-
-import com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap
+import java.util.*
 
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
+    override val viewContext: Any
+        get() = context!!
 
     private var rootView: View? = null
 
@@ -65,7 +54,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             val managerBle = context.networkManagerBle
-            mPresenter = DownloadDialogPresenter(getContext(), managerBle,
+            mPresenter = DownloadDialogPresenter(getContext() as Context, managerBle,
                     bundleToMap(arguments), this, UmAppDatabase.getInstance(context),
                     UmAccountManager.getRepositoryForActiveAccount(context))
         }
@@ -220,10 +209,10 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        mPresenter!!.handleStorageOptionSelection(storageDirs!![position].dirURI)
+        mPresenter!!.handleStorageOptionSelection(storageDirs!![position].dirURI!!)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
-        mPresenter!!.handleStorageOptionSelection(storageDirs!![0].dirURI)
+        mPresenter!!.handleStorageOptionSelection(storageDirs!![0].dirURI!!)
     }
 }

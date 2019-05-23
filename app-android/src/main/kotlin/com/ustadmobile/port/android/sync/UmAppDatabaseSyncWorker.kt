@@ -2,21 +2,16 @@ package com.ustadmobile.port.android.sync
 
 import android.content.Context
 import androidx.work.*
-
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UMLogger
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
-
 import java.util.concurrent.TimeUnit
 
 class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
 
-    override fun doWork(): ListenableWorker.Result {
+    override fun doWork(): Result {
         val activeAccount = UmAccountManager.getActiveAccount(applicationContext)
 
         val umAppDb = UmAppDatabase.getInstance(applicationContext)
@@ -32,14 +27,16 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
         if (!isStopped) {
             val appRecentlyActive = UmAppDatabaseSyncService.isInForeground || System.currentTimeMillis() - UmAppDatabaseSyncService.lastForegroundTime < UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG
 
+            //TODO: Mike Update this to use new sync method
+            /*
             if (appRecentlyActive || umAppDb.countPendingLocalChanges(UmAccountManager.getActivePersonUid(
                             applicationContext), umAppDb.getDeviceBits()) > 0) {
                 queueSyncWorker((if (appRecentlyActive) 1 else 15).toLong(), TimeUnit.MINUTES)
-            }
+            }*/
         }
 
 
-        return ListenableWorker.Result.success()
+        return Result.success()
     }
 
     companion object {
