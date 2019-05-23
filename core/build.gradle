@@ -33,6 +33,10 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 }
 
 /*jar {
@@ -125,8 +129,29 @@ kotlin {
                   implementation project(":lib-util") */
             }
         }
-        commonTest {
+        commonJvmMain {
             dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.soywiz:klock-jvm:$version_klock"
+            }
+            dependsOn commonJvmMain
+        }
+        jvmTest {
+            dependencies {
+                    implementation "junit:junit:$version_junit"
+
                 /*     implementation project(":core-tests")
                      implementation project(":sharedse")
                      implementation project(":app-javase")
@@ -156,31 +181,6 @@ kotlin {
                      implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2" */
             }
         }
-
-        commonJvmMain {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
-
-            }
-        }
-
-        jvmMain {
-            dependencies {
-                implementation "com.github.aakira:napier-jvm:$version_napier"
-                implementation "com.soywiz:klock-jvm:$version_klock"
-            }
-            dependsOn commonJvmMain
-        }
-        jvmTest {
-            dependencies {
-
-            }
-        }
         androidMain {
             dependencies {
                 implementation "com.github.aakira:napier-android:$version_napier"
@@ -190,11 +190,6 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
             }
             dependsOn commonJvmMain
-        }
-        androidTest {
-            dependencies {
-
-            }
         }
         jsMain {
             dependencies {
