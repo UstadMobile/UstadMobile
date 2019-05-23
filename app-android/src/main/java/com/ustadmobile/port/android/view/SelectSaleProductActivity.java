@@ -13,10 +13,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectSaleProductPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -180,5 +182,16 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
 
         //set the adapter
         collectionRV.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void showMessage(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String toast = impl.getString(messageId, this);
+        runOnUiThread(() -> Toast.makeText(
+                this,
+                toast,
+                Toast.LENGTH_SHORT
+        ).show());
     }
 }

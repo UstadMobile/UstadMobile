@@ -35,6 +35,8 @@ public interface SelectSaleProductView extends UstadView {
 
     void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider);
 
+    void showMessage(int messageId);
+
 
 
 }

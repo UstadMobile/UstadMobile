@@ -388,7 +388,7 @@
     <string name="item">Item</string>
     <string name="subcategory">Subcategory</string>
     <string name="sign_in">Sign in</string>
-    <string name="confirm_fingerprint">Confirm fingerprint to continur</string>
+    <string name="confirm_fingerprint">Confirm fingerprint to continue</string>
     <string name="use_password">Use password</string>
     <string name="touch_sensor">Touch sensor</string>
 
@@ -400,4 +400,6 @@
 
     <string name="category">Category</string>
     <string name="add_subcategory">Add subcategory</string>
+    <string name="item_deleted">Item deleted from catalog</string>
+    <string name="category_deleted">Category deleted from catalog</string>
 </resources>

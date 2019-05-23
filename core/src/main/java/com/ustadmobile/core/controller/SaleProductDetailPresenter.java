@@ -1,24 +1,24 @@
 package com.ustadmobile.core.controller;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.ustadmobile.core.db.UmAppDatabase;
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao;
+import com.ustadmobile.core.db.dao.SaleProductPictureDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
-import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.SaleProductDetailView;
+import com.ustadmobile.lib.db.entities.SaleProduct;
+import com.ustadmobile.lib.db.entities.SaleProductParentJoin;
+import com.ustadmobile.lib.db.entities.SaleProductPicture;
+import com.ustadmobile.lib.db.entities.SaleProductSelected;
 
+import java.io.File;
 import java.util.Hashtable;
 import java.util.Iterator;
-
-import com.ustadmobile.core.view.SaleProductDetailView;
-
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.SaleProduct;
-
-import com.ustadmobile.core.db.dao.SaleProductDao;
-import com.ustadmobile.lib.db.entities.SaleProductParentJoin;
-import com.ustadmobile.lib.db.entities.SaleProductSelected;
 
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_ASSIGN_TO_CATEGORY_UID;
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_NEW_CATEGORY;
@@ -30,7 +30,6 @@ import static com.ustadmobile.core.view.SaleProductDetailView.ARG_SALE_PRODUCT_U
  **/
 public class SaleProductDetailPresenter extends UstadBaseController<SaleProductDetailView> {
 
-    private UmProvider<SaleProduct> umProvider;
     UmAppDatabase repository;
     private SaleProductDao saleProductDao;
     private SaleProductParentJoinDao productParentJoinDao;
@@ -39,8 +38,11 @@ public class SaleProductDetailPresenter extends UstadBaseController<SaleProductD
     UmProvider<SaleProductSelected> categoriesProvider;
     private boolean isCategory;
 
+    SaleProductPictureDao pictureDao;
+
     private Hashtable<Long, Boolean> selectedToCategoriesUid;
 
+    private UmLiveData<SaleProductPicture> pictureLiveData;
 
     public SaleProductDetailPresenter(Object context, Hashtable arguments, SaleProductDetailView view) {
         super(context, arguments, view);
@@ -50,6 +52,7 @@ public class SaleProductDetailPresenter extends UstadBaseController<SaleProductD
         //Get provider Dao
         saleProductDao = repository.getSaleProductDao();
         productParentJoinDao = repository.getSaleProductParentJoinDao();
+        pictureDao = repository.getSaleProductPictureDao();
 
         impl = UstadMobileSystemImpl.getInstance();
 
@@ -129,6 +132,34 @@ public class SaleProductDetailPresenter extends UstadBaseController<SaleProductD
                         itemUid);
         view.setListProvider(categoriesProvider);
 
+        //Update image on view
+        pictureDao.findBySaleProductUidAsync(currentSaleProduct.getSaleProductUid(), new UmCallback<SaleProductPicture>() {
+            @Override
+            public void onSuccess(SaleProductPicture productPicture) {
+                if(productPicture!=null){
+                    view.updateImageOnView(pictureDao.getAttachmentPath(productPicture.getSaleProductPictureUid()));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
+        //Observe the picture
+        pictureLiveData = pictureDao.findByProductUidLive(currentSaleProduct.getSaleProductUid());
+        pictureLiveData.observe(SaleProductDetailPresenter.this,
+                SaleProductDetailPresenter.this::handleProductPictureChanged);
+
+    }
+
+    private void handleProductPictureChanged(SaleProductPicture productPicture){
+        if(productPicture!=null){
+            view.runOnUiThread(() -> view.updateImageOnView(
+                    pictureDao.getAttachmentPath(productPicture.getSaleProductPictureUid())));
+
+        }
     }
 
     public void handleClickSave() {
@@ -178,5 +209,35 @@ public class SaleProductDetailPresenter extends UstadBaseController<SaleProductD
     }
     public void updateDescPashto(String desc){
         currentSaleProduct.setSaleProductDescPashto(desc);
+    }
+
+    public SaleProduct getCurrentSaleProduct() {
+        return currentSaleProduct;
+    }
+
+    public void handleCompressedImage(File imageFile) {
+
+        //Create picture entry
+
+        SaleProductPicture productPicture = new SaleProductPicture();
+        productPicture.setSaleProductPictureSaleProductUid(currentSaleProduct.getSaleProductUid());
+        productPicture.setSaleProductPictureTimestamp(System.currentTimeMillis());
+
+        pictureDao.insertAsync(productPicture, new UmCallback<Long>() {
+            @Override
+            public void onSuccess(Long productPictureUid) {
+                pictureDao.setAttachmentFromTmpFile(productPictureUid, imageFile);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
+    }
+
+    public void openPictureDialog(String imagePath) {
+        //TODO if needed.
+        //open dialog
     }
 }

@@ -13,11 +13,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionMenu;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectSaleProductPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -189,5 +191,16 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
 
         //set the adapter
         collectionRV.setAdapter(recyclerAdapter);
+    }
+
+    @Override
+    public void showMessage(int messageId) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String toast = impl.getString(messageId, getContext());
+        runOnUiThread(() -> Toast.makeText(
+                getContext(),
+                toast,
+                Toast.LENGTH_SHORT
+        ).show());
     }
 }

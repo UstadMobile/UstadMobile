@@ -95,10 +95,10 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
                 popup.setOnMenuItemClickListener(item -> {
                     int i = item.getItemId();
                     if (i == R.id.edit) {
-                        mPresenter.handleEditSaleProduct(entity.getProductUid());
+                        mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
                         return true;
                     } else if (i == R.id.delete) {
-                        mPresenter.handleDelteSaleProduct(entity.getProductUid());
+                        mPresenter.handleDelteSaleProduct(entity.getProductUid(), listCategory);
                         return true;
                     } else {
                         return false;
@@ -116,10 +116,10 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
                 popup.setOnMenuItemClickListener(item -> {
                     int i = item.getItemId();
                     if (i == R.id.edit) {
-                        mPresenter.handleEditSaleProduct(entity.getProductUid());
+                        mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
                         return true;
                     } else if (i == R.id.delete) {
-                        mPresenter.handleDelteSaleProduct(entity.getProductUid());
+                        mPresenter.handleDelteSaleProduct(entity.getProductUid(), listCategory);
                         return true;
                     } else {
                         return false;

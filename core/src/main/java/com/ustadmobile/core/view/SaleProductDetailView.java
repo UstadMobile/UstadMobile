@@ -42,7 +42,11 @@ public interface SaleProductDetailView extends UstadView {
 
     void addImageFromCamera();
 
+    void addImageFromGallery();
+
     void initFromSaleProduct(SaleProduct saleProduct);
+
+    void sendMessage(int messageId);
 
 }
 

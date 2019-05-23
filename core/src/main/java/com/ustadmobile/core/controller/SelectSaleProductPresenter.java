@@ -4,7 +4,9 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupDao;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SaleProductCategoryListView;
@@ -68,11 +70,9 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
     public void onCreate(Hashtable savedState) {
         super.onCreate(savedState);
 
-
         updateRecentProvider();
         updateCategoryProvider();
         updateCollectionProvider();
-
     }
 
     private void updateRecentProvider(){
@@ -129,12 +129,23 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
         impl.go(SaleProductDetailView.VIEW_NAME, args, context);
     }
 
+    public void handleDelteSaleProduct(long productUid, boolean isCategory) {
+        saleProductDao.inactivateEntityAsync(productUid, new UmCallback<Integer>() {
+            @Override
+            public void onSuccess(Integer result) {
+                //Send message to view
+                if(isCategory){
+                    view.runOnUiThread(() -> view.showMessage(MessageID.category_deleted));
 
-    public void handleEditSaleProduct(long productUid) {
-        //TODO
-    }
+                }else{
+                    view.runOnUiThread(() -> view.showMessage(MessageID.item_deleted));
+                }
+            }
 
-    public void handleDelteSaleProduct(long productUid) {
-        //TODO
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 }

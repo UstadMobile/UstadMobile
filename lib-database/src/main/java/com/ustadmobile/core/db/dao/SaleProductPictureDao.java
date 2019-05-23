@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmDbGetAttachment;
@@ -20,6 +21,14 @@ import java.io.InputStream;
         updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 public abstract class SaleProductPictureDao implements SyncableDao<SaleProductPicture, SaleProductPictureDao> {
+
+    @UmQuery("SELECT * FROM SaleProductPicture WHERE SaleProductPicture.saleProductPictureUid = :uid")
+    public abstract UmLiveData<SaleProductPicture> findByUidLive(long uid);
+
+
+    @UmQuery("SELECT * FROM SaleProductPicture where saleProductPictureSaleProductUid = :uid ORDER BY " +
+            " saleProductPictureTimestamp DESC LIMIT 1")
+    public abstract UmLiveData<SaleProductPicture> findByProductUidLive(long uid);
 
     @UmDbSetAttachment
     public abstract void setAttachment(long uid, InputStream pictureAttachment) throws IOException;
