@@ -9,14 +9,14 @@ powered by open standards:
 
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
 
-### Prerequisites
+## Prerequisites
 After acquiring a copy of this app, the first thing to do is to install [Node](https://nodejs.org/en/download/) v8 or above (Everything depends on it). After Node installation, install angular CLI. Finally, install all dependencies used in the project since node_modules directory is git ignored. 
 
-### Installing Angular CLI
+* Installing Angular CLI
 ```
 npm install -g @angular/cli
 ```
-### Installing all dependencies
+* Installing all dependencies
 ```
 npm install
 ```
