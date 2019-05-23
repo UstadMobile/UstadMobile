@@ -24,6 +24,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-multiplatform'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
@@ -168,12 +169,12 @@ android {
  * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
  */
 gradle.taskGraph.useFilter { task ->
-    if(task.name.equals("connectedVanillaDebugAndroidTest")
-        || task.name.equals("createVanillaDebugCoverageReport")
-        || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")
-        || task.name.equals("processVanillaDebugAndroidTestManifest")
-        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
+    if (task.name.equals("connectedVanillaDebugAndroidTest")
+            || task.name.equals("createVanillaDebugCoverageReport")
+            || task.name.equals("testVanillaDebugUnitTest")
+            || task.name.equals("testVanillaReleaseUnitTest")
+            || task.name.equals("processVanillaDebugAndroidTestManifest")
+            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 

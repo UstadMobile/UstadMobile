@@ -12,6 +12,6 @@ interface ViewWithErrorNotifier : UstadView {
      *
      * @param errorMessage Error message to show
      */
-    fun showErrorNotification(errorMessage: String, action: Runnable, actionMessageId: Int)
+    fun showErrorNotification(errorMessage: String, action: Runnable?, actionMessageId: Int?)
 
 }
