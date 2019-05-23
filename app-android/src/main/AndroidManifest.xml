@@ -166,6 +166,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/register"
             android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.AddSaleProductToSaleCategoryActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
 
 
         <!--Services-->

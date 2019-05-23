@@ -76,6 +76,21 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
                     " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
                     " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 0";
 
+    private static final String ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY =
+            "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+                    " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+                    " SaleProductPicture.saleProductPictureUid as pictureUid, " +
+                    PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
+                    " FROM SaleProduct " +
+                    "  LEFT JOIN SaleProductPicture on " +
+                    " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                    " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 0 " +
+                    "  AND SaleProduct.saleProductUid NOT IN (Select SaleProduct.saleProductUid FROM SaleProductParentJoin " +
+                    "  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+                    "  WHERE SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
+                    "  AND SaleProductParentJoin.saleProductParentJoinActive = 1 AND SaleProduct.saleProductActive = 1) " +
+                    " AND SaleProduct.saleProductUid != :saleProductCategoryUid ";
+
     private static final String ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY =
             "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
                     " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
@@ -85,6 +100,21 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
                     "  LEFT JOIN SaleProductPicture on " +
                     " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
                     " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 1";
+
+    private static final String ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY =
+            "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+                    " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+                    " SaleProductPicture.saleProductPictureUid as pictureUid, " +
+                    PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
+                    " FROM SaleProduct " +
+                    "  LEFT JOIN SaleProductPicture on " +
+                    " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                    " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 1 " +
+                    "  AND SaleProduct.saleProductUid NOT IN (Select SaleProduct.saleProductUid FROM SaleProductParentJoin " +
+                    "  LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+                    "  WHERE SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
+                    "  AND SaleProductParentJoin.saleProductParentJoinActive = 1 AND SaleProduct.saleProductActive = 1) " +
+                    " AND SaleProduct.saleProductUid != :saleProductCategoryUid ";
 
     @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
     public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveSNWILive();
@@ -112,6 +142,11 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
     public abstract UmProvider<SaleNameWithImage> findAllActiveProductsSNWIProvider();
 
+    //Products not existing already in Category
+    @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY)
+    public abstract UmProvider<SaleNameWithImage> findAllActiveProductsNotInCategorySNWIProvider(
+            long saleProductCategoryUid);
+
     //CATEGORY:
     @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
     public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveCategoriesSNWILive();
@@ -124,6 +159,12 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
 
     @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
     public abstract UmProvider<SaleNameWithImage> findAllActiveCategoriesSNWIProvider();
+
+    //Categories not existing already in Category
+    @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY)
+    public abstract UmProvider<SaleNameWithImage> findAllActiveCategoriesNotInCategorySNWIProvider(
+            long saleProductCategoryUid
+    );
 
 
     //LOOK UP

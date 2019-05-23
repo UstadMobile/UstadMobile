@@ -18,6 +18,9 @@ import com.ustadmobile.lib.db.entities.SaleProduct;
 
 import com.ustadmobile.core.db.dao.SaleProductDao;
 
+import static com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.ARG_ADD_TO_CATEGORY_TYPE_CATEGORY;
+import static com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.ARG_ADD_TO_CATEGORY_TYPE_ITEM;
+import static com.ustadmobile.core.view.AddSaleProductToSaleCategoryView.ARG_SALE_PRODUCT_CATEGORY_TO_ASSIGN_TO_UID;
 import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_SALEPRODUCT_UID;
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_ASSIGN_TO_CATEGORY_UID;
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_NEW_CATEGORY;
@@ -131,19 +134,18 @@ public class SaleProductCategoryListPresenter extends UstadBaseController<SalePr
 
     public void handleClickAddItem(){
         Hashtable<String, String> args = new Hashtable<>();
-        args.put(ARG_NEW_TITLE, "true");
-        args.put(ARG_ASSIGN_TO_CATEGORY_UID,
+        args.put(ARG_SALE_PRODUCT_CATEGORY_TO_ASSIGN_TO_UID,
                 String.valueOf(currentSaleProductCategory.getSaleProductUid()));
-        impl.go(SaleProductDetailView.VIEW_NAME, args, context);
-
+        args.put(ARG_ADD_TO_CATEGORY_TYPE_ITEM, "true");
         impl.go(AddSaleProductToSaleCategoryView.VIEW_NAME, args, context);
     }
 
     public void handleClickAddSubCategory(){
+
         Hashtable<String, String> args = new Hashtable<>();
-        args.put(ARG_NEW_CATEGORY, "true");
-        args.put(ARG_ASSIGN_TO_CATEGORY_UID,
+        args.put(ARG_SALE_PRODUCT_CATEGORY_TO_ASSIGN_TO_UID,
                 String.valueOf(currentSaleProductCategory.getSaleProductUid()));
-        impl.go(SaleProductDetailView.VIEW_NAME, args, context);
+        args.put(ARG_ADD_TO_CATEGORY_TYPE_CATEGORY, "true");
+        impl.go(AddSaleProductToSaleCategoryView.VIEW_NAME, args, context);
     }
 }

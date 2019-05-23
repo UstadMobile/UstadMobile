@@ -68,6 +68,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView;
 import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.ChangePasswordView;
@@ -97,6 +98,7 @@ import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
+import com.ustadmobile.port.android.view.AddSaleProductToSaleCategoryActivity;
 import com.ustadmobile.port.android.view.BasePoint2Activity;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.ChangePasswordActivity;
@@ -205,6 +207,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SelectLanguageDialogView.VIEW_NAME, SelectLanguageDialogFragment.class);
         viewNameToAndroidImplMap.put(SaleProductDetailView.VIEW_NAME, SaleProductDetailActivity.class);
         viewNameToAndroidImplMap.put(SaleProductCategoryListView.VIEW_NAME, SaleProductCategoryListActivity.class);
+        viewNameToAndroidImplMap.put(AddSaleProductToSaleCategoryView.VIEW_NAME, AddSaleProductToSaleCategoryActivity.class);
 
     }
 
