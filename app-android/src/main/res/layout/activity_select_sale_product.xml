@@ -9,22 +9,28 @@
 
 
     <android.support.constraint.ConstraintLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
 
-        android:paddingBottom="@dimen/bottom_navigation_height"
-    >
+        android:paddingBottom="@dimen/bottom_navigation_height">
 
         <android.support.design.widget.AppBarLayout
-            android:id="@+id/activity_select_sale_product_appbar" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:elevation="4dp"
+            android:id="@+id/activity_select_sale_product_appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <android.support.v7.widget.Toolbar android:id="@+id/activity_select_sale_product_toolbar"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
-                app:layout_scrollFlags="scroll|enterAlways" app:title="@string/add_item"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/activity_select_sale_product_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/primary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:title="@string/add_item"
                 tools:layout_editor_absoluteY="0dp" />
         </android.support.design.widget.AppBarLayout>
 
@@ -152,43 +158,41 @@
             app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_category_rv" />
 
         <com.github.clans.fab.FloatingActionMenu
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:id="@+id/activity_select_sale_product_fab_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
 
             >
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/activity_select_sale_product_fab_subcategory"
-                fab:fab_colorNormal="@color/fab"
-                fab:fab_colorPressed="@color/fab_pressed"
-                fab:fab_colorRipple="@color/fab_ripple"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:fab_size="mini"
-                app:fab_label="@string/subcategory"
                 android:layout_gravity="bottom|right"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:src="@drawable/ic_sub_category_white_24dp"
-                />
+                app:fab_label="@string/subcategory"
+                app:fab_size="mini"
+                fab:fab_colorNormal="@color/fab"
+                fab:fab_colorPressed="@color/fab_pressed"
+                fab:fab_colorRipple="@color/fab_ripple" />
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/activity_select_sale_product_fab_item"
-                fab:fab_colorNormal="@color/fab"
-                fab:fab_colorPressed="@color/fab_pressed"
-                fab:fab_colorRipple="@color/fab_ripple"
                 android:layout_width="wrap_content"
-                app:fab_size="mini"
                 android:layout_height="wrap_content"
-                app:fab_label="@string/item"
                 android:layout_gravity="bottom|right"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:src="@drawable/ic_hanger_white_24dp"
-                 />
+                app:fab_label="@string/item"
+                app:fab_size="mini"
+                fab:fab_colorNormal="@color/fab"
+                fab:fab_colorPressed="@color/fab_pressed"
+                fab:fab_colorRipple="@color/fab_ripple" />
         </com.github.clans.fab.FloatingActionMenu>
 
     </android.support.constraint.ConstraintLayout>

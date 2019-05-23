@@ -33,6 +33,7 @@ public class SelectSaleProductWithDescRecyclerAdapter extends
     Context theContext;
     Activity theActivity;
     SaleProductCategoryListPresenter mPresenter;
+    private boolean listCategory;
 
     @NonNull
     @Override
@@ -66,10 +67,9 @@ public class SelectSaleProductWithDescRecyclerAdapter extends
     public void onBindViewHolder(@NonNull SelectSaleProductViewHolder holder, int position) {
 
         SaleNameWithImage entity = getItem(position);
-        ImageView imageView = holder.itemView.findViewById(R.id.item_sale_product_blob_image);
+        ImageView imageView = holder.itemView.findViewById(R.id.item_sale_item_image);
         TextView name = holder.itemView.findViewById(R.id.item_sale_product_title);
         TextView desc = holder.itemView.findViewById(R.id.item_sale_product_desc);
-
 
         long pictureUid = entity.getPictureUid();
         String imagePath = "";
@@ -87,28 +87,29 @@ public class SelectSaleProductWithDescRecyclerAdapter extends
         desc.setText(entity.getDescription());
 
         holder.itemView.setOnClickListener(v -> {
-            if(entity.getType() == PRODUCT_GROUP_TYPE_PRODUCT) {
-                mPresenter.handleClickProduct(entity.getProductUid());
-            }
+            mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
         });
 
     }
 
-    protected class SelectSaleProductViewHolder extends RecyclerView.ViewHolder {
-        protected SelectSaleProductViewHolder(View itemView) {
+    class SelectSaleProductViewHolder extends RecyclerView.ViewHolder {
+        SelectSaleProductViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    protected SelectSaleProductWithDescRecyclerAdapter(
+    SelectSaleProductWithDescRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SaleNameWithImage> diffCallback,
             SaleProductCategoryListPresenter thePresenter,
             Activity activity,
+            boolean isCategory,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theActivity = activity;
         theContext = context;
+        listCategory = isCategory;
+
     }
 
 

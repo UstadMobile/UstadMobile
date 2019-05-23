@@ -14,7 +14,7 @@
         <android.support.design.widget.AppBarLayout
             android:id="@+id/activity_sale_product_detail_appbar" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
 
             <android.support.v7.widget.Toolbar android:id="@+id/activity_sale_product_detail_toolbar"
@@ -86,7 +86,7 @@
                     android:layout_marginEnd="8dp"
                     android:ems="10"
                     android:hint="@string/title_english"
-                    android:inputType="textPersonName"
+                    android:inputType="textCapWords"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageView4"
                     app:layout_constraintTop_toBottomOf="@+id/view8" />
@@ -163,7 +163,7 @@
                     app:srcCompat="@drawable/ic_tag_text_outline_black_24dp" />
 
                 <TextView
-                    android:id="@+id/textView8"
+                    android:id="@+id/activity_sale_product_detail_category_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
@@ -175,15 +175,16 @@
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/activity_sale_product_detail_categories_rv"
-                    android:layout_width="0dp"c
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="40dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
                     android:orientation="vertical"
+                    android:paddingBottom="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView8" />
+                    app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_category_title" />
 
             </android.support.constraint.ConstraintLayout>
         </ScrollView>

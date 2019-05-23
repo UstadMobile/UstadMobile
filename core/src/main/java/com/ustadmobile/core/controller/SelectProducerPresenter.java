@@ -30,9 +30,9 @@ public class SelectProducerPresenter extends UstadBaseController<SelectProducerV
     private long saleItemUid = 0;
 
     private Hashtable<Long, Integer> idToOrderInteger;
-    public static final int SORT_ORDER_NAME_ASC=1;
-    public static final int SORT_ORDER_NAME_DESC=2;
-    public static final int SORT_ORDER_MOST_USED=3;
+    private static final int SORT_ORDER_NAME_ASC=1;
+    private static final int SORT_ORDER_NAME_DESC=2;
+    private static final int SORT_ORDER_MOST_USED=3;
 
     public SelectProducerPresenter(Object context, Hashtable arguments, SelectProducerView view) {
         super(context, arguments, view);

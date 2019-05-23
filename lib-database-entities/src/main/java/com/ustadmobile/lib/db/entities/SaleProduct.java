@@ -62,6 +62,21 @@ public class SaleProduct {
 
     }
 
+    public SaleProduct(String name, String decs, boolean category){
+        this.saleProductName = name;
+        this.saleProductDesc = decs;
+        this.saleProductActive = true;
+        this.saleProductCategory = category;
+
+    }
+
+    public SaleProduct(String name, String decs, boolean category, boolean isActive){
+        this.saleProductName = name;
+        this.saleProductDesc = decs;
+        this.saleProductActive = isActive;
+        this.saleProductCategory = category;
+
+    }
     public long getSaleProductUid() {
         return saleProductUid;
     }

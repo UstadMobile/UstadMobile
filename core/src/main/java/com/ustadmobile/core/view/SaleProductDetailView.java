@@ -18,6 +18,7 @@ public interface SaleProductDetailView extends UstadView {
     String ARG_NEW_TITLE = "ArgNewTitle";
     String ARG_NEW_CATEGORY = "ArgNewCategory";
     String ARG_SALE_PRODUCT_UID = "ArgSaleProductUid";
+    String ARG_ASSIGN_TO_CATEGORY_UID = "ArgAssignToCategoryUid";
 
 
     /**
@@ -34,6 +35,8 @@ public interface SaleProductDetailView extends UstadView {
     void setListProvider(UmProvider<SaleProductSelected> listProvider);
 
     void updateToolbarTitle(String titleName);
+
+    void updateCategoryTitle(String titleName);
 
     void updateImageOnView(String imagePath);
 

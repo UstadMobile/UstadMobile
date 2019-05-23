@@ -9,10 +9,14 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleProductDetailPresenter;
@@ -33,6 +37,7 @@ public class SaleProductDetailActivity extends UstadBaseActivity implements Sale
     private Menu menu;
 
     EditText titleEng, descEng, titleDari, descDari, titlePashto, descPastho;
+    TextView categoryTitle;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -72,6 +77,9 @@ public class SaleProductDetailActivity extends UstadBaseActivity implements Sale
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Don't show me the keyboard
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
         //Setting layout:
         setContentView(R.layout.activity_sale_product_detail);
 
@@ -95,12 +103,87 @@ public class SaleProductDetailActivity extends UstadBaseActivity implements Sale
         descDari = findViewById(R.id.activity_sale_product_detail_desc_dari);
         descPastho = findViewById(R.id.activity_sale_product_detail_desc_pashto);
 
+        categoryTitle = findViewById(R.id.activity_sale_product_detail_category_title);
+
         //Call the Presenter
         mPresenter = new SaleProductDetailPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        //Listeners
+        titleEng.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateTitleEng(s.toString());
+            }
+        });
+        titleDari.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateTitleDari(s.toString());
+            }
+        });
+        titlePashto.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateTitlePashto(s.toString());
+            }
+        });
+
+        descEng.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateDescEng(s.toString());
+            }
+        });
+        descDari.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateDescDari(s.toString());
+            }
+        });
+        descPastho.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mPresenter.updateDescPashto(s.toString());
+            }
+        });
 
     }
 
@@ -148,6 +231,11 @@ public class SaleProductDetailActivity extends UstadBaseActivity implements Sale
     }
 
     @Override
+    public void updateCategoryTitle(String titleName) {
+        runOnUiThread(() -> categoryTitle.setText(titleName));
+    }
+
+    @Override
     public void updateImageOnView(String imagePath) {
         //TODO
     }
@@ -179,6 +267,14 @@ public class SaleProductDetailActivity extends UstadBaseActivity implements Sale
                 descPastho.setText(saleProduct.getSaleProductDescPashto());
             }
 
+            if(saleProduct.isSaleProductCategory()){
+                updateCategoryTitle(getText(R.string.parent_categories).toString());
+            }else{
+                updateCategoryTitle(getText(R.string.categories).toString());
+            }
+
+            if(!saleProduct.getSaleProductName().isEmpty())
+                updateToolbarTitle(saleProduct.getSaleProductName());
 
         }
     }

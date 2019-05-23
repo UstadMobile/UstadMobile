@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleProductDetailPresenter;
@@ -21,14 +22,13 @@ public class SaleProductCategorySelectorRecyclerAdapter extends
         PagedListAdapter<SaleProductSelected,
                 SaleProductCategorySelectorRecyclerAdapter.SaleProductDetailViewHolder> {
 
-    Context theContext;
+    private Context theContext;
     Activity theActivity;
     SaleProductDetailPresenter mPresenter;
 
     @NonNull
     @Override
     public SaleProductDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
 
         View list = LayoutInflater.from(theContext).inflate(
                 R.layout.item_category_selector, parent, false);
@@ -41,20 +41,20 @@ public class SaleProductCategorySelectorRecyclerAdapter extends
 
         SaleProductSelected saleProductCategory = getItem(position);
         CheckBox checkBox = holder.itemView.findViewById(R.id.item_category_selector_checkbox);
+        checkBox.setText(saleProductCategory.getSaleProductName());
         checkBox.setChecked(saleProductCategory.isSelected());
 
-
-
-
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
+                mPresenter.handleCheckboxChanged(isChecked, saleProductCategory.getSaleProductUid()));
     }
 
-    protected class SaleProductDetailViewHolder extends RecyclerView.ViewHolder {
-        protected SaleProductDetailViewHolder(View itemView) {
+    class SaleProductDetailViewHolder extends RecyclerView.ViewHolder {
+        SaleProductDetailViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    protected SaleProductCategorySelectorRecyclerAdapter(
+    SaleProductCategorySelectorRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SaleProductSelected> diffCallback,
             SaleProductDetailPresenter thePresenter,
             Context context) {

@@ -97,7 +97,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
 
         //Call the Presenter
         mPresenter = new SelectSaleProductPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this, false);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
 
@@ -125,7 +125,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     @Override
     public void setRecentProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, false,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
@@ -145,7 +145,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     @Override
     public void setCategoryProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,true,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
@@ -165,7 +165,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     @Override
     public void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, true,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

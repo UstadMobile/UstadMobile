@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,24 +17,23 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.SelectSaleProductPresenter;
+import com.ustadmobile.core.controller.SaleProductCategoryListPresenter;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 
 import java.io.File;
 
-import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYPE_PRODUCT;
-
-public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameWithImage,
-                SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
+public class SelectSaleCategoryRecyclerAdapter extends
+        PagedListAdapter<SaleNameWithImage,
+                SelectSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder> {
 
     private static final int IMAGE_WITH = 26;
     private Context theContext;
     private Activity theActivity;
-    private Fragment theFragment;
-    SelectSaleProductPresenter mPresenter;
+    SaleProductCategoryListPresenter mPresenter;
 
     private boolean listCategory;
+    private boolean showContextMenu;
 
     @NonNull
     @Override
@@ -73,6 +71,7 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
         TextView name = holder.itemView.findViewById(R.id.item_sale_product_blob_title);
         ImageView dots = holder.itemView.findViewById(R.id.item_sale_product_blob_dots);
 
+        assert entity != null;
         long pictureUid = entity.getPictureUid();
         String imagePath = "";
         if (pictureUid != 0) {
@@ -88,52 +87,35 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
         name.setText(entity.getName());
 
         //Options to Edit/Delete every schedule in the list
-        dots.setOnClickListener((View v) -> {
-            if(theActivity != null){
-                //creating a popup menu
-                PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
-                popup.setOnMenuItemClickListener(item -> {
-                    int i = item.getItemId();
-                    if (i == R.id.edit) {
-                        mPresenter.handleEditSaleProduct(entity.getProductUid());
-                        return true;
-                    } else if (i == R.id.delete) {
-                        mPresenter.handleDelteSaleProduct(entity.getProductUid());
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+        if(showContextMenu) {
+            dots.setOnClickListener((View v) -> {
+                if (theActivity != null) {
+                    //creating a popup menu
+                    PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+                    popup.setOnMenuItemClickListener(item -> {
+                        int i = item.getItemId();
+                        if (i == R.id.edit) {
+                            mPresenter.handleClickEditCategory(entity.getProductUid());
+                            return true;
+                        } else if (i == R.id.delete) {
+                            mPresenter.handleDeleteCategory(entity.getProductUid());
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
 
-                //inflating menu from xml resource
-                popup.inflate(R.menu.menu_edit_delete);
-                popup.getMenu().findItem(R.id.edit).setVisible(true);
-                //displaying the popup
-                popup.show();
-            }else if(theFragment != null){
-                //creating a popup menu
-                PopupMenu popup = new PopupMenu(theFragment.getContext(), v);
-                popup.setOnMenuItemClickListener(item -> {
-                    int i = item.getItemId();
-                    if (i == R.id.edit) {
-                        mPresenter.handleEditSaleProduct(entity.getProductUid());
-                        return true;
-                    } else if (i == R.id.delete) {
-                        mPresenter.handleDelteSaleProduct(entity.getProductUid());
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+                    //inflating menu from xml resource
+                    popup.inflate(R.menu.menu_edit_delete);
+                    popup.getMenu().findItem(R.id.edit).setVisible(true);
+                    //displaying the popup
+                    popup.show();
+                }
 
-                //inflating menu from xml resource
-                popup.inflate(R.menu.menu_edit_delete);
-                popup.getMenu().findItem(R.id.edit).setVisible(true);
-                //displaying the popup
-                popup.show();
-            }
-
-        });
+            });
+        }else{
+            dots.setVisibility(View.GONE);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
@@ -147,31 +129,19 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
         }
     }
 
-    SelectSaleProductRecyclerAdapter(
+    SelectSaleCategoryRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SaleNameWithImage> diffCallback,
-            SelectSaleProductPresenter thePresenter,
+            SaleProductCategoryListPresenter thePresenter,
             Activity activity,
+            Boolean showContext,
             Boolean isCategory,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theActivity = activity;
         listCategory = isCategory;
+        showContextMenu = showContext;
         theContext = context;
     }
-
-    SelectSaleProductRecyclerAdapter(
-            @NonNull DiffUtil.ItemCallback<SaleNameWithImage> diffCallback,
-            SelectSaleProductPresenter thePresenter,
-            Fragment fragment,
-            Boolean isCategory,
-            Context context) {
-        super(diffCallback);
-        mPresenter = thePresenter;
-        theFragment = fragment;
-        listCategory = isCategory;
-        theContext = context;
-    }
-
 
 }

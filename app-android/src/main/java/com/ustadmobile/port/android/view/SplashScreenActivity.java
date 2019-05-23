@@ -42,6 +42,7 @@ import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao;
+import com.ustadmobile.core.db.dao.SaleProductParentJoinDao;
 import com.ustadmobile.core.db.dao.SaleProductPictureDao;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmCallback;
@@ -55,6 +56,7 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.entities.SaleProductGroup;
 import com.ustadmobile.lib.db.entities.SaleProductGroupJoin;
+import com.ustadmobile.lib.db.entities.SaleProductParentJoin;
 import com.ustadmobile.lib.db.entities.SaleProductPicture;
 
 import java.io.IOException;
@@ -124,6 +126,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
         LocationDao locationDao = repo.getLocationDao();
         SaleItemDao saleItemDao = repo.getSaleItemDao();
         SaleProductDao saleProductDao = repo.getSaleProductDao();
+        SaleProductParentJoinDao productParentJoinDao = repo.getSaleProductParentJoinDao();
         PersonDao personDao = repo.getPersonDao();
         SaleProductGroupDao productGroupDao = repo.getSaleProductGroupDao();
         SaleProductGroupJoinDao productGroupJoinDao = repo.getProductGroupJoinDao();
@@ -214,52 +217,195 @@ public class SplashScreenActivity extends UstadBaseActivity{
                             "goldozi/goldozi_product_placeholder_accessories.png", repo);
 
 
-                    //Create categories
-                    SaleProductGroup bedLinenGroup = new SaleProductGroup("Bed Linen");
-                    bedLinenGroup.setSaleProductGroupUid(productGroupDao.insert(bedLinenGroup));
-                    SaleProductGroupJoin bedLinen1 =
-                            new SaleProductGroupJoin(pinkBedLinen.getSaleProductUid(),
-                                    bedLinenGroup.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(bedLinen1);
+                    SaleProduct  brownBag = new SaleProduct("Brown Bag", "Dummy data");
+                    brownBag.setSaleProductUid(saleProductDao.insert(brownBag));
+                    addPicToProduct(brownBag,
+                            "goldozi/goldozi_product_placeholder_bag.jpg", repo);
 
-                    SaleProductGroup tableLinenGroup = new SaleProductGroup("Table Linen");
-                    tableLinenGroup.setSaleProductGroupUid(productGroupDao.insert(tableLinenGroup));
-                    SaleProductGroupJoin tableLinen1 =
-                            new SaleProductGroupJoin(redTableLinen.getSaleProductUid(),
-                                    tableLinenGroup.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(tableLinen1);
 
-                    SaleProductGroup toyGroup = new SaleProductGroup("Toys");
-                    toyGroup.setSaleProductGroupUid(productGroupDao.insert(toyGroup));
-                    SaleProductGroupJoin toy1 =
-                            new SaleProductGroupJoin(zariToy.getSaleProductUid(),
-                                    toyGroup.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(toy1);
+                    SaleProduct blueClutch = new SaleProduct("Blue Clutch", "Dummy data");
+                    blueClutch.setSaleProductUid(saleProductDao.insert(blueClutch));
+                    addPicToProduct(blueClutch,
+                            "goldozi/goldozi_product_placeholder_blue_clutch.png", repo);
 
-                    //Create collections
-                    SaleProductGroup womenEidCollection = new SaleProductGroup("Women");
-                    womenEidCollection.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
-                    womenEidCollection.setSaleProductGroupUid(productGroupDao.insert(womenEidCollection));
-                    SaleProductGroupJoin womenCollection1 =
-                            new SaleProductGroupJoin(womenSuit.getSaleProductUid(),
-                                    womenEidCollection.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(womenCollection1);
+                    SaleProduct bowKeychain = new SaleProduct("Bow Keychain", "Dummy data");
+                    bowKeychain.setSaleProductUid(saleProductDao.insert(bowKeychain));
+                    addPicToProduct(bowKeychain,
+                            "goldozi/goldozi_product_placeholder_bow_keychain.jpeg", repo);
 
-                    SaleProductGroup menCollection = new SaleProductGroup("Men");
-                    menCollection.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
-                    menCollection.setSaleProductGroupUid(productGroupDao.insert(menCollection));
-                    SaleProductGroupJoin menCollection1 =
-                            new SaleProductGroupJoin(mensBelt.getSaleProductUid(),
-                                    menCollection.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(menCollection1);
+                    SaleProduct keychain = new SaleProduct("Keychain", "Dummy data");
+                    keychain.setSaleProductUid(saleProductDao.insert(keychain));
+                    addPicToProduct(keychain,
+                            "goldozi/goldozi_product_placeholder_keychain.jpg", repo);
 
-                    SaleProductGroup clutches = new SaleProductGroup("Accessories");
-                    clutches.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
-                    clutches.setSaleProductGroupUid(productGroupDao.insert(clutches));
-                    SaleProductGroupJoin accessoriesJoin =
-                            new SaleProductGroupJoin(beigeClutch.getSaleProductUid(),
-                                    clutches.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(accessoriesJoin);
+                    SaleProduct keychains = new SaleProduct("Keychains", "Dummy data");
+                    keychains.setSaleProductUid(saleProductDao.insert(keychains));
+                    addPicToProduct(keychains,
+                            "goldozi/goldozi_product_placeholder_keychains.jpg", repo);
+
+                    SaleProduct lightBlueClutch = new SaleProduct("Light Blue Clutch", "Dummy data");
+                    lightBlueClutch.setSaleProductUid(saleProductDao.insert(lightBlueClutch));
+                    addPicToProduct(lightBlueClutch,
+                            "goldozi/goldozi_product_placeholder_light_blue_clutch.png", repo);
+
+                    SaleProduct metallicClutch = new SaleProduct("Metallic Clutch", "Dummy data");
+                    metallicClutch.setSaleProductUid(saleProductDao.insert(metallicClutch));
+                    addPicToProduct(metallicClutch,
+                            "goldozi/goldozi_product_placeholder_metallic_clutch.png", repo);
+
+                    SaleProduct rubyClutch = new SaleProduct("Ruby Clutch", "Dummy data");
+                    rubyClutch.setSaleProductUid(saleProductDao.insert(rubyClutch));
+                    addPicToProduct(rubyClutch,
+                            "goldozi/goldozi_product_placeholder_ruby_clutch.png", repo);
+
+                    SaleProduct rubyPurse = new SaleProduct("Ruby purse", "Dummy data");
+                    rubyPurse.setSaleProductUid(saleProductDao.insert(rubyPurse));
+                    addPicToProduct(rubyPurse,
+                            "goldozi/goldozi_product_placeholder_ruby_purse.png", repo);
+
+                    SaleProduct rubyScarf = new SaleProduct("Ruby Scarf", "Dummy data");
+                    rubyScarf.setSaleProductUid(saleProductDao.insert(rubyScarf));
+                    addPicToProduct(rubyScarf,
+                            "goldozi/goldozi_product_placeholder_ruby_scarf.jpg", repo);
+
+                    SaleProduct laceholderRubyScarf = new SaleProduct("Laceholder Ruby Scarf", "Dummy data");
+                    laceholderRubyScarf.setSaleProductUid(saleProductDao.insert(laceholderRubyScarf));
+                    addPicToProduct(laceholderRubyScarf,
+                            "goldozi/goldozi_product_placeholder_scarves.jpg", repo);
+
+                    SaleProduct turquoiseClutch = new SaleProduct("Turquoise Clutch", "Dummy data");
+                    turquoiseClutch.setSaleProductUid(saleProductDao.insert(turquoiseClutch));
+                    addPicToProduct(turquoiseClutch,
+                            "goldozi/goldozi_product_placeholder_turquoise_clutch.png", repo);
+
+                    SaleProduct turquoisePurse = new SaleProduct("Turquoise Purse", "Dummy data");
+                    turquoisePurse.setSaleProductUid(saleProductDao.insert(turquoisePurse));
+                    addPicToProduct(turquoisePurse,
+                            "goldozi/goldozi_product_placeholder_turquoise_purse .png", repo);
+
+                    SaleProduct yellowClutch = new SaleProduct("Yellow Clutch", "Dummy data");
+                    yellowClutch.setSaleProductUid(saleProductDao.insert(yellowClutch));
+                    addPicToProduct(yellowClutch,
+                            "goldozi/goldozi_product_placeholder_yellow_clutch.png", repo);
+
+                    SaleProduct yellowPurse = new SaleProduct("Yellow Purse", "Dummy data");
+                    yellowPurse.setSaleProductUid(saleProductDao.insert(yellowPurse));
+                    addPicToProduct(yellowPurse,
+                            "goldozi/goldozi_product_placeholder_yellow_purse.png", repo);
+
+
+
+                    //Create categories (NEW)
+
+                    SaleProduct bedLinenCategry = new SaleProduct("Bed Linen", "Dummy data", true);
+                    bedLinenCategry.setSaleProductUid(saleProductDao.insert(bedLinenCategry));
+                    addPicToProduct(bedLinenCategry,
+                            "goldozi/goldozi_product_placeholder_bed_linen.png", repo);
+
+                    SaleProduct toysCategory = new SaleProduct("Toys", "Dummy data", true);
+                    toysCategory.setSaleProductUid(saleProductDao.insert(toysCategory));
+                    addPicToProduct(toysCategory,
+                            "goldozi/goldozi_product_placeholder_toys.png", repo);
+
+                    SaleProduct accessoriesCategory = new SaleProduct("Accessories", "Dummy data", true);
+                    accessoriesCategory.setSaleProductUid(saleProductDao.insert(accessoriesCategory));
+                    addPicToProduct(accessoriesCategory,
+                            "goldozi/goldozi_product_placeholder_accessories.png", repo);
+
+
+                    //Create joins to categories (new)
+                    SaleProductParentJoin bedLinenJoin =
+                            new SaleProductParentJoin(pinkBedLinen.getSaleProductUid(),
+                                    bedLinenCategry.getSaleProductUid(), true);
+                    bedLinenJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(bedLinenJoin));
+
+                    SaleProductParentJoin accessoriesJoin =
+                            new SaleProductParentJoin(beigeClutch.getSaleProductUid(),
+                                    accessoriesCategory.getSaleProductUid(), true);
+                    accessoriesJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(accessoriesJoin));
+
+                    SaleProductParentJoin toysJoin =
+                            new SaleProductParentJoin(zariToy.getSaleProductUid(),
+                                    toysCategory.getSaleProductUid(), true);
+                    toysJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(toysJoin));
+
+                    //two level categories
+                    SaleProduct categoryclutches = new SaleProduct("Clutches", "All clutches", true);
+                    categoryclutches.setSaleProductUid(saleProductDao.insert(categoryclutches));
+                    addPicToProduct(categoryclutches, "goldozi/goldozi_product_placeholder_ruby_clutch.png", repo);
+
+                    SaleProduct pursesCategory = new SaleProduct("Purses", "All purses", true);
+                    pursesCategory.setSaleProductUid(saleProductDao.insert(pursesCategory));
+                    addPicToProduct(pursesCategory, "goldozi/goldozi_product_placeholder_ruby_purse.png", repo);
+
+                    SaleProduct scarvesCategory = new SaleProduct("Scarves", "All scarves", true);
+                    scarvesCategory.setSaleProductUid(saleProductDao.insert(scarvesCategory));
+                    addPicToProduct(scarvesCategory, "goldozi/goldozi_product_placeholder_ruby_scarf.jpg", repo);
+
+                    SaleProductParentJoin clutchAccessoriesJoin =
+                            new SaleProductParentJoin(categoryclutches.getSaleProductUid(),
+                                    accessoriesCategory.getSaleProductUid(), true);
+                    clutchAccessoriesJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(clutchAccessoriesJoin));
+
+                    SaleProductParentJoin pursesAccessoriesJoin =
+                            new SaleProductParentJoin(pursesCategory.getSaleProductUid(),
+                                    accessoriesCategory.getSaleProductUid(), true);
+                    pursesAccessoriesJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(pursesAccessoriesJoin));
+
+                    SaleProductParentJoin scarfAccessoriesJoin =
+                            new SaleProductParentJoin(scarvesCategory.getSaleProductUid(),
+                                    accessoriesCategory.getSaleProductUid(), true);
+                    scarfAccessoriesJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(scarfAccessoriesJoin));
+
+                    //Create categories (OLD)
+//
+//                    SaleProductGroup bedLinenGroup = new SaleProductGroup("Bed Linen");
+//                    bedLinenGroup.setSaleProductGroupUid(productGroupDao.insert(bedLinenGroup));
+//                    SaleProductGroupJoin bedLinen1 =
+//                            new SaleProductGroupJoin(pinkBedLinen.getSaleProductUid(),
+//                                    bedLinenGroup.getSaleProductGroupUid());
+//                    productGroupJoinDao.insert(bedLinen1);
+//
+//                    SaleProductGroup tableLinenGroup = new SaleProductGroup("Table Linen");
+//                    tableLinenGroup.setSaleProductGroupUid(productGroupDao.insert(tableLinenGroup));
+//                    SaleProductGroupJoin tableLinen1 =
+//                            new SaleProductGroupJoin(redTableLinen.getSaleProductUid(),
+//                                    tableLinenGroup.getSaleProductGroupUid());
+//                    productGroupJoinDao.insert(tableLinen1);
+//
+//                    SaleProductGroup toyGroup = new SaleProductGroup("Toys");
+//                    toyGroup.setSaleProductGroupUid(productGroupDao.insert(toyGroup));
+//                    SaleProductGroupJoin toy1 =
+//                            new SaleProductGroupJoin(zariToy.getSaleProductUid(),
+//                                    toyGroup.getSaleProductGroupUid());
+//                    productGroupJoinDao.insert(toy1);
+//
+//                    //Create collections
+//                    SaleProductGroup womenEidCollection = new SaleProductGroup("Women");
+//                    womenEidCollection.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
+//                    womenEidCollection.setSaleProductGroupUid(productGroupDao.insert(womenEidCollection));
+//                    SaleProductGroupJoin womenCollection1 =
+//                            new SaleProductGroupJoin(womenSuit.getSaleProductUid(),
+//                                    womenEidCollection.getSaleProductGroupUid());
+//                    productGroupJoinDao.insert(womenCollection1);
+//
+//                    SaleProductGroup menCollection = new SaleProductGroup("Men");
+//                    menCollection.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
+//                    menCollection.setSaleProductGroupUid(productGroupDao.insert(menCollection));
+//                    SaleProductGroupJoin menCollection1 =
+//                            new SaleProductGroupJoin(mensBelt.getSaleProductUid(),
+//                                    menCollection.getSaleProductGroupUid());
+//                    productGroupJoinDao.insert(menCollection1);
+//
+//                    SaleProductGroup clutches = new SaleProductGroup("Accessories");
+//                    clutches.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
+//                    clutches.setSaleProductGroupUid(productGroupDao.insert(clutches));
+//                    SaleProductGroupJoin accessoriesJoinOld =
+//                            new SaleProductGroupJoin(beigeClutch.getSaleProductUid(),
+//                                    clutches.getSaleProductGroupUid());
+//                    productGroupJoinDao.insert(accessoriesJoinOld);
+
+
                 }
 
                 String pinkHatSaleTitle = "20x Pink Hat";
@@ -285,9 +431,6 @@ public class SplashScreenActivity extends UstadBaseActivity{
                                     20, 500, pinkHatSale.getSaleUid(),
                                     UMCalendarUtil.getDateInMilliPlusDays(-1));
                             saleItemDao.insert(thisSaleItem);
-
-
-
                         }
                     }
 

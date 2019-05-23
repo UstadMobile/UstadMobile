@@ -12,14 +12,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleProductCategoryListPresenter;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SaleProductCategoryListView;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Objects;
@@ -29,6 +33,9 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
     private Toolbar toolbar;
     private SaleProductCategoryListPresenter mPresenter;
     private RecyclerView mRecyclerView, cRecyclerView;
+
+    private FloatingActionButton itemActionButton, subCategoryActionButton;
+    private FloatingActionMenu floatingActionMenu;
 
     private Menu menu;
 
@@ -40,7 +47,7 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search, menu);
+        inflater.inflate(R.menu.menu_search_edit, menu);
 
         menu.findItem(R.id.action_search).setVisible(true);
         return true;
@@ -62,6 +69,9 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
         } else if (i == R.id.action_search) {
             //TODO: Handle search
             return true;
+        }else if(i == R.id.action_edit){
+            mPresenter.handleClickEditThisCategory();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -78,6 +88,10 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        floatingActionMenu = findViewById(R.id.activity_sale_product_category_list_fab_menu);
+        itemActionButton = findViewById(R.id.activity_sale_product_category_list_fab_item);
+        subCategoryActionButton = findViewById(R.id.activity_sale_product_category_list_fab_subcategory);
+
         //RecyclerView
         mRecyclerView = findViewById(R.id.activity_sale_product_category_list_items_recyclerview);
         RecyclerView.LayoutManager mRecyclerLayoutManager =
@@ -86,14 +100,25 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
 
         //categories RecyclerView
         cRecyclerView = findViewById(R.id.activity_sale_product_category_list_categories_recyclerview);
-        cRecyclerView.setLayoutManager(mRecyclerLayoutManager);
+        LinearLayoutManager cRecyclerLayoutManager
+                = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        cRecyclerView.setLayoutManager(cRecyclerLayoutManager);
 
         //Call the Presenter
         mPresenter = new SaleProductCategoryListPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        //Listeners
+        itemActionButton.setOnClickListener(v -> {
+            floatingActionMenu.close(true);
+            mPresenter.handleClickAddItem();
+        });
 
+        subCategoryActionButton.setOnClickListener(v -> {
+            floatingActionMenu.close(true);
+            mPresenter.handleClickAddSubCategory();
+        });
     }
 
     /**
@@ -118,7 +143,7 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
     public void setListProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductWithDescRecyclerAdapter recyclerAdapter =
                 new SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter,
-                        this, getApplicationContext());
+                        this, false, getApplicationContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
@@ -136,9 +161,10 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
 
     @Override
     public void setCategoriesListProvider(UmProvider<SaleNameWithImage> listProvider) {
-        SelectSaleProductWithDescRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter,
-                        this, getApplicationContext());
+
+        SelectSaleCategoryRecyclerAdapter recyclerAdapter =
+                new SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, false,
+                        true, getApplicationContext());
 
         // get the provider, set , observe, etc.
         // A warning is expected
@@ -165,5 +191,22 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
                 Toast.LENGTH_SHORT
         ).show());
 
+    }
+
+    @Override
+    public void initFromSaleCategory(SaleProduct saleProductCategory) {
+        if(saleProductCategory != null){
+            runOnUiThread(() -> toolbar.setTitle(saleProductCategory.getSaleProductName()));
+        }
+    }
+
+    @Override
+    public void updateSortPresets(String[] presets) {
+        //TODO:
+    }
+
+    @Override
+    public void hideFAB(boolean hide) {
+        floatingActionMenu.setVisibility(hide?View.GONE:View.VISIBLE);
     }
 }

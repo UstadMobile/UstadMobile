@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 
 
 /**
@@ -36,9 +37,14 @@ public interface SaleProductCategoryListView extends UstadView {
      */
     void setCategoriesListProvider(UmProvider<SaleNameWithImage> listProvider);
 
-
     void setMessageOnView(int messageCode);
 
+    //eg: set toolbar
+    void initFromSaleCategory(SaleProduct saleProductCategory);
+
+    void updateSortPresets(String[] presets);
+
+    void hideFAB(boolean hide);
 
 }
 

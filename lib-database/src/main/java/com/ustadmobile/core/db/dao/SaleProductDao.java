@@ -56,7 +56,6 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     public abstract UmProvider<SaleProduct> findAllCateogoriesProvider();
 
 
-
     public static final String ALL_ACTIVE_NAME_WITH_IMAGE_QUERY =
             "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
             " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
@@ -65,7 +64,27 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
             " FROM SaleProduct " +
             "  LEFT JOIN SaleProductPicture on " +
             " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
-            " WHERE saleProductActive = 1";
+            " WHERE saleProductActive = 1 ";
+
+    private static final String ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY =
+            "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+                    " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+                    " SaleProductPicture.saleProductPictureUid as pictureUid, " +
+                    PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
+                    " FROM SaleProduct " +
+                    "  LEFT JOIN SaleProductPicture on " +
+                    " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                    " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 0";
+
+    private static final String ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY =
+            "SELECT SaleProduct.saleProductName as name, SaleProduct.saleProductDesc as description, " +
+                    " 0 as productGroupUid, SaleProduct.saleProductUid as productUid," +
+                    " SaleProductPicture.saleProductPictureUid as pictureUid, " +
+                    PRODUCT_GROUP_TYPE_PRODUCT + " as type " + //kinda irrelevant in new way TODO: check this
+                    " FROM SaleProduct " +
+                    "  LEFT JOIN SaleProductPicture on " +
+                    " SaleProductPicture.saleProductPictureSaleProductUid = SaleProduct.saleProductUid " +
+                    " WHERE saleProductActive = 1 AND SaleProduct.saleProductCategory = 1";
 
     @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
     public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveSNWILive();
@@ -78,6 +97,33 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
 
     @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
     public abstract UmProvider<SaleNameWithImage> findAllActiveSNWIProvider();
+
+
+    //ITEMS(PRODUCTS):
+    @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
+    public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveProductsSNWILive();
+
+    @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
+    public abstract List<SaleNameWithImage> findAllActiveProductsSNWIList();
+
+    @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
+    public abstract void findAllActiveProductsSNWIAsync(UmCallback<List<SaleNameWithImage>> allActiveCallback);
+
+    @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
+    public abstract UmProvider<SaleNameWithImage> findAllActiveProductsSNWIProvider();
+
+    //CATEGORY:
+    @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
+    public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveCategoriesSNWILive();
+
+    @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
+    public abstract List<SaleNameWithImage> findAllActiveCategoriesSNWIList();
+
+    @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
+    public abstract void findAllActiveCategoriesSNWIAsync(UmCallback<List<SaleNameWithImage>> allActiveCallback);
+
+    @UmQuery(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
+    public abstract UmProvider<SaleNameWithImage> findAllActiveCategoriesSNWIProvider();
 
 
     //LOOK UP
