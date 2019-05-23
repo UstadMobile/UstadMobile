@@ -10,11 +10,13 @@ powered by open standards:
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
 
 ### Prerequisites
-After acquiring a copy of this app, the first thing to do is to install node. Make sure you install v8 or above (Everything depends on it). After that make sure to install all NPM packages used in the project since node_modules directoey is git ignored. 
+After acquiring a copy of this app, the first thing to do is to install [Node](https://nodejs.org/en/download/) v8 or above (Everything depends on it). After Node installation, install angular CLI. Finally, install all dependencies used in the project since node_modules directory is git ignored. 
 
-### Installing
-Install all Node packages used in the app
-
+### Installing Angular CLI
+```
+npm install -g @angular/cli
+```
+### Installing all dependencies
 ```
 npm install
 ```
@@ -22,7 +24,7 @@ npm install
 ## Development
 We have used [Jar2Npm Plugin](https://github.com/svok/kotlin-jar2npm-plugin) to create Node package from kotlin multiplatform generated Jar file. To create node package follow the following procedures.
 
-* Generate Jar from Kotlin Multiplatform source
+* Generate Jar from Kotlin Multi-platform source
 ```
 ./gradlew core:jsJar
 ```
@@ -34,12 +36,16 @@ We have used [Jar2Npm Plugin](https://github.com/svok/kotlin-jar2npm-plugin) to 
 
 After that your IDE should see that:
 ```
-import {ContentEntryDetailView} from 'core';
+import {com} from 'core';
 ```
-
+* Running an app locally
+```
+ng serve
+```
+This will create an app, to run it use http://localhost:4200/
 
 ## Deployment
-To create deployable app, you need to generate JS bundles from angular source. To achieve that run the following command on your terminal.
+To create production app, you need to generate JS bundles from angular source. To achieve that run the following command on your terminal.
 
 ```
 npm build --prod
