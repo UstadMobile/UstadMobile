@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.Language
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {

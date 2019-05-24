@@ -34,6 +34,7 @@ import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
 import com.ustadmobile.core.view.UstadView
 import kotlinx.atomicfu.atomic
+import kotlin.js.JsName
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -55,6 +56,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      *
      * @param savedState savedState if any
      */
+    @JsName("onCreate")
     open fun onCreate(savedState: Map<String, String?>?) {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {

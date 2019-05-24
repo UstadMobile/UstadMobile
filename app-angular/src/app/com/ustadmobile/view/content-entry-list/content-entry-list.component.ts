@@ -32,7 +32,9 @@ export class ContentEntryListComponent implements com_core.ustadmobile.core.view
 
   ngOnInit() {
     this.presenter = new com_core.ustadmobile.core.controller.ContentEntryListFragmentPresenter(this.context, this.args, this);
-    this.presenter.onCreate({});
+    this.presenter.onDestroy();
+    console.log("called destroy fn");
+    this.presenter.onCreate(null);
   }
 
   navigate(entry) {
