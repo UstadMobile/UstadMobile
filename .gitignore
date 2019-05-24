@@ -214,3 +214,5 @@ app-gwt/*
 
 lib-content-editor/
 
+build/
+build/

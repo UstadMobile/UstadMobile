@@ -82,7 +82,6 @@ tasks {
 }
 
 dependencies {
-  implementation(project(":hello-ustad"))
   implementation(project(":core"))
   implementation(project(":lib-database"))
 }

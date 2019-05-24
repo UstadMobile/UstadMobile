@@ -29,7 +29,7 @@ include ':app-android', ':lib-database-annotations', ':lib-database2', ':lib-dat
         ':lib-database-android',
         ':lib-database-runtime-jdbc',
         ':lib-room-annotations',
-        ':lib-content-scrapers', ':hello-ustad'
+        ':lib-content-scrapers'
 include ':lib-database-jdbc'
 include ':app-rest-server'
 include ':lib-database-retrofitrepository'
