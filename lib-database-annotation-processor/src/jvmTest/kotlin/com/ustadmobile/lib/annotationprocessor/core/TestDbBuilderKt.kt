@@ -15,7 +15,7 @@ import java.net.URLClassLoader
 
 class TestDbBuilderKt {
 
-    @Test
+    //@Test
     fun givenDbShouldOpen() {
         /*
         To make this run in Android Studio:
@@ -35,6 +35,20 @@ class TestDbBuilderKt {
         val exList = listOf(ExampleEntity2(0, "bob",42))
         exampleDao2.insertList(exList)
         Assert.assertTrue(true)
+    }
+
+
+    @Test
+    fun givenEntryInserted_whenQueried_shouldBeEqual() {
+        val exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
+        val entityToInsert = ExampleEntity2(0, "Bob", 50)
+        entityToInsert.uid = exampleDb.exampleDao2().insertAndReturnId(entityToInsert)
+
+        val entityFromQuery = exampleDb.exampleDao2().findByUid(entityToInsert.uid)
+
+        Assert.assertNotEquals(0, entityToInsert.uid)
+        Assert.assertEquals("Entity retrieved from database is the same as entity inserted",
+                entityToInsert, entityFromQuery)
     }
 
 }

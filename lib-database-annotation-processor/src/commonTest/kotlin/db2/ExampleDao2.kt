@@ -9,6 +9,9 @@ import androidx.room.OnConflictStrategy
 abstract class ExampleDao2 {
 
     @Insert
+    abstract fun insertAndReturnId(entity: ExampleEntity2): Long
+
+    @Insert
     abstract suspend fun insertAsync(entity: ExampleEntity2)
 
     @Insert
@@ -21,7 +24,7 @@ abstract class ExampleDao2 {
     abstract fun insertOtherList(entityList: List<ExampleEntity2>)
 
     @Insert
-    abstract fun insertAndReturn(entityList: List<ExampleEntity2>): List<Long>
+    abstract fun insertAndReturnList(entityList: List<ExampleEntity2>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entityList: List<ExampleEntity2>)

@@ -730,22 +730,25 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
 
 
-            var entityName = ""
+            var entityVarName = ""
             if(isListOrArray(returnType)) {
                 codeBlock.beginControlFlow("while(_resultSet.next())")
+                        .add("val _entity = %T()\n", entityType)
+                entityVarName = "_entity"
             }else {
                 codeBlock.beginControlFlow("if(_resultSet.next())")
+                        .add("$resultVarName = %T()\n", entityType)
+                entityVarName = resultVarName
             }
 
-            codeBlock.add("val _entity = %T()\n", entityType)
             colNames.fold(codeBlock, {builder, colName ->
                 val getterName = "get${getPreparedStatementSetterGetterTypeName(settableProps[".$colName"]!!.asType().asTypeName()) }"
                 //todo: lookup colname to find embedded properties
-                builder.add("_entity.$colName = _resultSet.$getterName(%S)\n", colName)
+                builder.add("$entityVarName.$colName = _resultSet.$getterName(%S)\n", colName)
             })
 
             if(isListOrArray(returnType)) {
-                codeBlock.add("_result.add(_entity)\n")
+                codeBlock.add("$resultVarName.add(_entity)\n")
             }
 
             codeBlock.endControlFlow()
