@@ -416,6 +416,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 daoImpl.addFunction(generateInsertFun(daoTypeElement, daoMethod, daoImpl))
             }else if(daoMethod.getAnnotation(Query::class.java) != null) {
                 daoImpl.addFunction(generateQueryFun(daoTypeElement, daoMethod, daoImpl))
+            }else if(daoMethod.getAnnotation(Update::class.java) != null) {
+                daoImpl.addFunction(generateUpdateFun(daoTypeElement, daoMethod, daoImpl))
             }
         }
 
@@ -513,7 +515,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val dropFunSpec = FunSpec.builder("clearAllTables")
                 .addModifiers(KModifier.OVERRIDE)
                 .addCode("var _con = null as %T?\n", Connection::class)
-                .addCode("var _stmt = null as %T\n", Statement::class)
+                .addCode("var _stmt = null as %T?\n", Statement::class)
                 .beginControlFlow("try")
                 .addCode("_con = openConnection()\n")
                 .addCode("_stmt = _con!!.createStatement()\n")
@@ -681,6 +683,75 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         return funSpec.build()
     }
+
+    fun generateUpdateFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder) : FunSpec {
+        val updateFun = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+
+        val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
+                daoMethod) as ExecutableType
+
+        val entityType = entityTypeFromFirstParam(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+
+        val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
+
+        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved)
+
+        val codeBlock = CodeBlock.builder()
+
+        val pkEl = entityTypeEl.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
+        val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
+        val sqlSetPart = nonPkFields.map { "${it.simpleName} = ?" }.joinToString()
+        val sqlStmt  = "UPDATE ${entityTypeEl.simpleName} SET $sqlSetPart WHERE ${pkEl.simpleName} = ?"
+
+
+        if(resolvedReturnType != UNIT)
+            codeBlock.add("var _result = ${defaultVal(resolvedReturnType)}\n")
+
+        codeBlock.add("var _con = null as %T?\n", Connection::class)
+                .add("var _stmt = null as %T?\n", Statement::class)
+                .beginControlFlow("try")
+                .add("_con = _db.openConnection()!!\n")
+                .add("_stmt = _con.prepareStatement(%S)!!\n", sqlStmt)
+
+        var entityVarName = daoMethod.parameters[0].simpleName.toString()
+        if(isListOrArray(entityType.asTypeName())) {
+            codeBlock.add("_con.autoCommit = false\n")
+                    .beginControlFlow("for(_entity in ${daoMethod.parameters[0].simpleName})")
+            entityVarName = "_entity"
+        }
+
+        var fieldIndex = 1
+        val fieldSetFn = { it : Element ->
+            codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(it.asType().asTypeName())}(${fieldIndex++}, $entityVarName.${it.simpleName})\n")
+            Unit
+        }
+        nonPkFields.forEach(fieldSetFn)
+        fieldSetFn(pkEl)
+
+        if(resolvedReturnType != UNIT)
+            codeBlock.add("result += ")
+
+        codeBlock.add("_stmt.executeUpdate()\n")
+
+        if(isListOrArray(entityType.asTypeName())) {
+            codeBlock.add("_con.commit()\n")
+                    .endControlFlow()
+        }
+
+        codeBlock.nextControlFlow("finally")
+                .add("_stmt?.close()\n")
+                .add("_con?.close()\n")
+                .endControlFlow()
+
+        if(resolvedReturnType != UNIT)
+            codeBlock.add("return _result\n")
+
+        updateFun.addCode(codeBlock.build())
+        return updateFun.build()
+    }
+
 
     fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String,
                                enclosing: TypeElement, method: ExecutableElement): CodeBlock {

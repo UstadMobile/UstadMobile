@@ -6,6 +6,7 @@ import db2.ExampleDatabase2
 import db2.ExampleEntity2
 import db2.ExampleLinkEntity
 import org.junit.Assert
+import org.junit.Before
 import org.junit.BeforeClass
 
 import org.junit.Test
@@ -15,6 +16,14 @@ import java.net.URL
 import java.net.URLClassLoader
 
 class TestDbBuilderKt {
+
+    lateinit var exampleDb2: ExampleDatabase2
+
+    @Before
+    fun openAndClearDb() {
+        exampleDb2 = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
+        exampleDb2.clearAllTables()
+    }
 
     //@Test
     fun givenDbShouldOpen() {
@@ -28,8 +37,6 @@ class TestDbBuilderKt {
         addMethod.invoke(ClassLoader.getSystemClassLoader(),
                 File("/home/mike/src/UstadMobile/lib-database-annotation-processor/build/classes/kotlin/jvm/test").toURI().toURL())
         */
-
-        var exampleDb2 = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         Assert.assertNotNull(exampleDb2)
         val exampleDao2 = exampleDb2.exampleDao2()
         Assert.assertNotNull(exampleDao2)
@@ -41,11 +48,10 @@ class TestDbBuilderKt {
 
     @Test
     fun givenEntryInserted_whenQueried_shouldBeEqual() {
-        val exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         val entityToInsert = ExampleEntity2(0, "Bob", 50)
-        entityToInsert.uid = exampleDb.exampleDao2().insertAndReturnId(entityToInsert)
+        entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
 
-        val entityFromQuery = exampleDb.exampleDao2().findByUid(entityToInsert.uid)
+        val entityFromQuery = exampleDb2.exampleDao2().findByUid(entityToInsert.uid)
 
         Assert.assertNotEquals(0, entityToInsert.uid)
         Assert.assertEquals("Entity retrieved from database is the same as entity inserted",
@@ -55,28 +61,42 @@ class TestDbBuilderKt {
 
     @Test
     fun givenEntryInserted_whenSingleValueQueried_shouldBeEqual() {
-        val exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         val entityToInsert = ExampleEntity2(0, "Bob" + System.currentTimeMillis(),
                 50)
-        entityToInsert.uid = exampleDb.exampleDao2().insertAndReturnId(entityToInsert)
+        entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
 
 
         Assert.assertEquals("Select single column method returns expected value",
-                entityToInsert.name, exampleDb.exampleDao2().findNameByUid(entityToInsert.uid))
+                entityToInsert.name, exampleDb2.exampleDao2().findNameByUid(entityToInsert.uid))
     }
 
     @Test
     fun givenEntitiesInserted_whenQueryWithEmbeddedValueRuns_shouldReturnBoth() {
-        var exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         val entityToInsert = ExampleEntity2(0, "Linked", 50)
-        entityToInsert.uid = exampleDb.exampleDao2().insertAndReturnId(entityToInsert)
+        entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
 
         val linkedEntity = ExampleLinkEntity((Math.random() * 1000).toLong(), entityToInsert.uid)
-        exampleDb.exampleLinkedEntityDao().insert(linkedEntity)
+        exampleDb2.exampleLinkedEntityDao().insert(linkedEntity)
 
-        val entityWithEmbedded = exampleDb.exampleDao2().findByUidWithLinkEntity(entityToInsert.uid)
+        val entityWithEmbedded = exampleDb2.exampleDao2().findByUidWithLinkEntity(entityToInsert.uid)
         Assert.assertEquals("Embedded entity is loaded into query result",
                 linkedEntity.eeUid, entityWithEmbedded!!.link!!.eeUid)
+    }
+
+    @Test
+    fun givenEntityInserted_whenUpdateSingleItemNoReturnTypeCalled_thenValueShouldBeUpdated() {
+        val entityToInsert = ExampleEntity2(name = "UpdateMe", someNumber =  50)
+        entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
+
+        val nameBeforeInsert = exampleDb2.exampleDao2().findNameByUid(entityToInsert.uid)
+
+        entityToInsert.name = "Update${System.currentTimeMillis()}"
+        exampleDb2.exampleDao2().updateSingleItem(entityToInsert)
+
+        Assert.assertEquals("Name before insert is first given name", "UpdateMe",
+                nameBeforeInsert)
+        Assert.assertEquals("Name after insert is updated name", entityToInsert.name,
+                exampleDb2.exampleDao2().findNameByUid(entityToInsert.uid))
     }
 
 }
