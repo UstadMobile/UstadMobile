@@ -39,8 +39,12 @@ fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType,
     val methodResolved = processingEnv.typeUtils.asMemberOf(enclosing, method) as ExecutableType
     val firstParamType = methodResolved.parameterTypes[0]
     if(isList(firstParamType, processingEnv)) {
-        val listDt = firstParamType as DeclaredType
-        return listDt.typeArguments[0]
+        val firstType = (firstParamType as DeclaredType).typeArguments[0]
+        return if(firstType is WildcardType) {
+            firstType.extendsBound
+        }else {
+            firstType
+        }
     }else if(firstParamType.kind == TypeKind.ARRAY) {
         return (firstParamType as ArrayType).componentType
     }else {
@@ -290,12 +294,12 @@ fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
                            processingEnv: ProcessingEnvironment): EntityFieldMap {
 
     ancestorsToList(entityTypeEl, processingEnv).forEach {
-        val listParted = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD }.partition { it.getAnnotation(Embedded::class.java) == null }
+        val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD }.partition { it.getAnnotation(Embedded::class.java) == null }
         listParted.first.forEach { fieldMap["$prefix.${it.simpleName}"] = it}
         listParted.second.forEach {
-            embeddedVarsList.add(Pair(prefix, it))
+            embeddedVarsList.add(Pair("$prefix.${it.simpleName}", it))
             mapEntityFields(processingEnv.typeUtils.asElement(it.asType()) as TypeElement,
-                    "$prefix.${it.simpleName}", fieldMap, embeddedVarsList, processingEnv)
+                    "$prefix.${it.simpleName}!!", fieldMap, embeddedVarsList, processingEnv)
         }
     }
 
@@ -656,12 +660,10 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val querySql = daoMethod.getAnnotation(Query::class.java).value
 
-        //val paramTypes = daoMethod.parameters.map { it.simpleName.toString() to it.asType() }
         val paramTypesResolved = daoMethodResolved.parameterTypes
 
 
         //TODO: This could be replaced with a bit of mapIndexed + filters
-
         val queryVarsMap = mutableMapOf<String, TypeName>()
         for(i in 0 until daoMethod.parameters.size) {
             if (!isContinuationParam(paramTypesResolved[i].asTypeName())) {
@@ -670,7 +672,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         }
 
 
-        funSpec.addCode(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql))
+        funSpec.addCode(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
+                daoTypeElement, daoMethod))
 
         if(returnTypeResolved != UNIT){
             funSpec.addCode("return _result\n")
@@ -679,7 +682,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         return funSpec.build()
     }
 
-    fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String): CodeBlock {
+    fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String,
+                               enclosing: TypeElement, method: ExecutableElement): CodeBlock {
         // The result, with any wrapper (e.g. LiveData or DataSource.Factory) removed
         val resultType = resolveQueryResultType(returnType)
 
@@ -728,7 +732,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         codeBlock.add("_resultSet = _stmt.executeQuery()\n")
 
         var execStmtSql = querySql
-        namedParams.forEach { execStmtSql = execStmtSql.replace(it, "null") }
+        namedParams.forEach { execStmtSql = execStmtSql.replace(":$it", "null") }
 
         var resultSet = null as ResultSet?
         var execStmt = null as Statement?
@@ -755,11 +759,20 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             if(QUERY_SINGULAR_TYPES.contains(entityType)) {
                 codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
             }else {
-                colNames.fold(codeBlock, {builder, colName ->
-                    val getterName = "get${getPreparedStatementSetterGetterTypeName(entityFieldMap!!.fieldMap[".$colName"]!!.asType().asTypeName()) }"
-                    //todo: lookup colname to find embedded properties
-                    builder.add("$entityVarName.$colName = _resultSet.$getterName(%S)\n", colName)
-                })
+                // Map of the last prop name (e.g. name) to the full property name as it will
+                // be generated (e.g. embedded!!.name)
+                val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()
+
+                entityFieldMap.embeddedVarsList.forEach {
+                    codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
+                }
+
+                colNames.forEach {colName ->
+                    val fullPropName = colNameLastToFullMap[colName]
+                    val propType = entityFieldMap.fieldMap[fullPropName]
+                    val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
+                    codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
+                }
             }
 
             if(isListOrArray(returnType)) {
@@ -769,7 +782,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             codeBlock.endControlFlow()
 
         }catch(e: SQLException) {
-            messager!!.printMessage(Diagnostic.Kind.ERROR, "Exception running query SQL")
+            messager!!.printMessage(Diagnostic.Kind.ERROR, "${makeLogPrefix(enclosing, method)} " +
+                    "Exception running query SQL '$execStmtSql' : ${e.message}")
         }
 
         codeBlock.nextControlFlow("finally")
@@ -780,6 +794,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         return codeBlock.build()
     }
 
+    fun makeLogPrefix(enclosing: TypeElement, method: ExecutableElement) = "DoorDb: ${enclosing.qualifiedName}. ${method.simpleName} "
 
     companion object {
 

@@ -64,4 +64,8 @@ class TestDbBuilderKt {
                 entityToInsert.name, exampleDb.exampleDao2().findNameByUid(entityToInsert.uid))
     }
 
+    fun givenEntitiesInserted_whenQueryWithEmbeddedValueRuns_shouldReturnBoth() {
+
+    }
+
 }
