@@ -51,4 +51,17 @@ class TestDbBuilderKt {
                 entityToInsert, entityFromQuery)
     }
 
+
+    @Test
+    fun givenEntryInserted_whenSingleValueQueried_shouldBeEqual() {
+        val exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
+        val entityToInsert = ExampleEntity2(0, "Bob" + System.currentTimeMillis(),
+                50)
+        entityToInsert.uid = exampleDb.exampleDao2().insertAndReturnId(entityToInsert)
+
+
+        Assert.assertEquals("Select single column method returns expected value",
+                entityToInsert.name, exampleDb.exampleDao2().findNameByUid(entityToInsert.uid))
+    }
+
 }

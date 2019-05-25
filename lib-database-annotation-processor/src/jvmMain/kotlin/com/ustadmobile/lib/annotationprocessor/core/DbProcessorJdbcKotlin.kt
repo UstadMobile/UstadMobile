@@ -26,6 +26,9 @@ import java.sql.*
 import javax.tools.Diagnostic
 import kotlin.coroutines.Continuation
 
+val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
+        String::class.asTypeName())
+
 
 fun isList(type: TypeMirror, processingEnv: ProcessingEnvironment): Boolean =
         type.kind == TypeKind.DECLARED && (processingEnv.typeUtils.asElement(type) as TypeElement).qualifiedName.toString() == "java.util.List"
@@ -55,6 +58,7 @@ fun resolveEntityFromResultType(type: TypeName) =
         }else {
             type
         }
+
 
 
 fun pkgNameOfElement(element: Element, processingEnv: ProcessingEnvironment) =
@@ -683,8 +687,12 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             null
         }
 
-        val (settableProps, embeddedVarsList) = mapEntityFields(entityTypeEl = entityTypeElement as TypeElement,
-                processingEnv = processingEnv)
+        val entityFieldMap = if(entityTypeElement != null) {
+            mapEntityFields(entityTypeEl = entityTypeElement as TypeElement, processingEnv = processingEnv)
+        }else {
+            null
+        }
+
 
         val codeBlock = CodeBlock.builder()
 
@@ -728,8 +736,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 colNames.add(metaData.getColumnName(i))
             }
 
-
-
             var entityVarName = ""
             if(isListOrArray(returnType)) {
                 codeBlock.beginControlFlow("while(_resultSet.next())")
@@ -741,11 +747,15 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 entityVarName = resultVarName
             }
 
-            colNames.fold(codeBlock, {builder, colName ->
-                val getterName = "get${getPreparedStatementSetterGetterTypeName(settableProps[".$colName"]!!.asType().asTypeName()) }"
-                //todo: lookup colname to find embedded properties
-                builder.add("$entityVarName.$colName = _resultSet.$getterName(%S)\n", colName)
-            })
+            if(QUERY_SINGULAR_TYPES.contains(entityType)) {
+                codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
+            }else {
+                colNames.fold(codeBlock, {builder, colName ->
+                    val getterName = "get${getPreparedStatementSetterGetterTypeName(entityFieldMap!!.fieldMap[".$colName"]!!.asType().asTypeName()) }"
+                    //todo: lookup colname to find embedded properties
+                    builder.add("$entityVarName.$colName = _resultSet.$getterName(%S)\n", colName)
+                })
+            }
 
             if(isListOrArray(returnType)) {
                 codeBlock.add("$resultVarName.add(_entity)\n")
