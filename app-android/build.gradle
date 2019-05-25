@@ -21,16 +21,23 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'kotlin-android-extensions'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
 
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
+}
+
+kotlin {
+
+    targets {
+        fromPreset(presets.android, 'android')
+    }
 }
 
 /*
@@ -161,12 +168,12 @@ android {
  * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
  */
 gradle.taskGraph.useFilter { task ->
-    if(task.name.equals("connectedVanillaDebugAndroidTest")
-        || task.name.equals("createVanillaDebugCoverageReport")
-        || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")
-        || task.name.equals("processVanillaDebugAndroidTestManifest")
-        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
+    if (task.name.equals("connectedVanillaDebugAndroidTest")
+            || task.name.equals("createVanillaDebugCoverageReport")
+            || task.name.equals("testVanillaDebugUnitTest")
+            || task.name.equals("testVanillaReleaseUnitTest")
+            || task.name.equals("processVanillaDebugAndroidTestManifest")
+            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 
@@ -259,8 +266,8 @@ configurations.all {
 }
 
 dependencies {
-    api project(':core')
-    api project(':sharedse')
+    implementation project(':core')
+    implementation project(':sharedse')
     implementation project(':lib-door-runtime')
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
@@ -270,6 +277,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     androidTestImplementation project(":core-tests")
 

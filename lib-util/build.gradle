@@ -19,6 +19,8 @@ apply plugin: "maven-publish"
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
+        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
+        // the project to avoid it being seen as an extra jvm variant
         //fromPreset(presets.jvm, 'commonJvm') //comment this out for code completion
         fromPreset(presets.js, 'js') {
             compilations.main.kotlinOptions {
