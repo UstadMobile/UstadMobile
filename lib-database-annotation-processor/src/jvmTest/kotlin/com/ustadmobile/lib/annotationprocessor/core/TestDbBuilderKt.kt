@@ -4,6 +4,7 @@ import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabase
 import db2.ExampleDatabase2
 import db2.ExampleEntity2
+import db2.ExampleLinkEntity
 import org.junit.Assert
 import org.junit.BeforeClass
 
@@ -64,8 +65,18 @@ class TestDbBuilderKt {
                 entityToInsert.name, exampleDb.exampleDao2().findNameByUid(entityToInsert.uid))
     }
 
+    @Test
     fun givenEntitiesInserted_whenQueryWithEmbeddedValueRuns_shouldReturnBoth() {
+        var exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
+        val entityToInsert = ExampleEntity2(0, "Linked", 50)
+        entityToInsert.uid = exampleDb.exampleDao2().insertAndReturnId(entityToInsert)
 
+        val linkedEntity = ExampleLinkEntity((Math.random() * 1000).toLong(), entityToInsert.uid)
+        exampleDb.exampleLinkedEntityDao().insert(linkedEntity)
+
+        val entityWithEmbedded = exampleDb.exampleDao2().findByUidWithLinkEntity(entityToInsert.uid)
+        Assert.assertEquals("Embedded entity is loaded into query result",
+                linkedEntity.eeUid, entityWithEmbedded!!.link!!.eeUid)
     }
 
 }

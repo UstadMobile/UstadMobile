@@ -8,4 +8,6 @@ abstract class ExampleDatabase2 : DoorDatabase(){
 
     abstract fun exampleDao2(): ExampleDao2
 
+    abstract fun exampleLinkedEntityDao(): ExampleLinkEntityDao
+
 }
