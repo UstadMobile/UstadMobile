@@ -402,4 +402,7 @@
     <string name="add_subcategory">Add subcategory</string>
     <string name="item_deleted">Item deleted from catalog</string>
     <string name="category_deleted">Category deleted from catalog</string>
+
+    <string name="fingerprint_authentication">Fingerprint authentication</string>
+    <string name="fingerprint_instructions">Place your fingerprint on the fingerprint sensor to verify your identity</string>
 </resources>

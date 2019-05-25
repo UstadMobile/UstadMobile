@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <!-- Required for saving files to external SD -->
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -41,9 +42,19 @@
     <!-- Select gallery images for profile picture -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!-- For fingerprint login-->
+    <uses-permission
+        android:name="android.permission.USE_BIOMETRIC" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
+    <uses-feature android:name="android.hardware.biometrics"
+        android:required="false"/>
+
+    <uses-feature android:name="android.hardware.fingerprint"
+        android:required="false"/>
 
     <application android:supportsRtl="true"
         android:usesCleartextTraffic="true">

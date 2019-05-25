@@ -42,7 +42,7 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
         }
     }
 
-    public void handleClickLogin(String username, String password, String serverUrl) {
+    public void handleClickLogin(String username, String password, String serverUrl, boolean saveToFingerprint) {
         view.setInProgress(true);
         view.setErrorMessage("");
         UmAppDatabase loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
@@ -52,11 +52,15 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
             @Override
             public void onSuccess(UmAccount result) {
                 if(result != null) {
-                    result.setEndpointUrl(serverUrl);
-                    view.runOnUiThread(() -> view.setInProgress(false));
-                    UmAccountManager.setActiveAccount(result, getContext());
-                    view.forceSync();
-                    systemImpl.go(mNextDest, getContext());
+                    if(saveToFingerprint){
+                        UmAccountManager.setFingerprintPersonId(result.getPersonUid(), context,
+                                systemImpl);
+                        UmAccountManager.setFingerprintUsername(result.getUsername(), context,
+                                systemImpl);
+                        UmAccountManager.setFringerprintAuth(result.getAuth(), context,
+                                systemImpl);
+                    }
+                    loginOK(result, serverUrl);
 
                 }else {
                     view.runOnUiThread(() -> {
@@ -80,4 +84,27 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
     }
 
 
+    private void loginOK(UmAccount result, String serverUrl){
+        UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
+        if(serverUrl != null && !serverUrl.isEmpty()){
+            result.setEndpointUrl(serverUrl);
+        }
+        view.runOnUiThread(() -> view.setInProgress(false));
+        UmAccountManager.setActiveAccount(result, getContext());
+        view.forceSync();
+        systemImpl.go(mNextDest, getContext());
+    }
+
+    public void fingerprintLogin(String serverUrl, String auth){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UmAccount result = new UmAccount(
+                Long.parseLong(UmAccountManager.getFingerprintPersonId(context, impl)),
+                UmAccountManager.getFingerprintUsername(context, impl),
+                auth, serverUrl);
+        loginOK(result, serverUrl);
+    }
+
+    public void handleClickFingerPrint() {
+
+    }
 }

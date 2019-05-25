@@ -70,14 +70,12 @@
         android:id="@+id/activity_login_button_login"
         android:layout_width="186dp"
         android:layout_height="45dp"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:backgroundTint="@color/accent"
         android:text="@string/login"
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_forgot_password" />
 
@@ -107,5 +105,25 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_password" />
+
+    <ImageView
+        android:id="@+id/activity_login2_fingerprint_imageview"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="@+id/activity_login_button_login"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"
+        app:srcCompat="@drawable/ic_fingerprint_black_24dp" />
+
+    <CheckBox
+        android:id="@+id/activity_login2_assign_fingerprint_checbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="32dp"
+        android:text="Assign to fingerprint"
+        app:layout_constraintStart_toEndOf="@+id/activity_login2_fingerprint_imageview"
+        app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login" />
 
 </android.support.constraint.ConstraintLayout>

@@ -15,6 +15,13 @@ public class UmAccountManager {
 
     private static final String PREFKEY_ENDPOINT_URL = "umaccount.endpointurl";
 
+    private static final String PREFKEY_FINGERPRINT_USERNAME = "umaccount.fingerprintusername";
+
+    private static final String PREFKEY_FINGERPRINT_PERSON_ID = "umaccount.fingerprintpersonid";
+
+    private static final String PREFKEY_FINGERPRIT_ACCESS_TOKEN = "umaccount.fingerprintaccesstoken";
+
+
     public static synchronized UmAccount getActiveAccount(Object context, UstadMobileSystemImpl impl) {
         if(activeAccount == null) {
             long personUid = Long.parseLong(impl.getAppPref(PREFKEY_PERSON_ID, "0", context));
@@ -40,6 +47,34 @@ public class UmAccountManager {
 
     public static UmAccount getActiveAccount(Object context) {
         return getActiveAccount(context, UstadMobileSystemImpl.getInstance());
+    }
+
+    public static synchronized void setFingerprintUsername(String username, Object context,
+                                                           UstadMobileSystemImpl impl){
+        impl.setAppPref(PREFKEY_FINGERPRINT_USERNAME, username, context);
+    }
+    public static synchronized String getFingerprintUsername(Object context,
+                                                             UstadMobileSystemImpl impl){
+        return impl.getAppPref(PREFKEY_FINGERPRINT_USERNAME, context);
+    }
+
+    public static synchronized void setFingerprintPersonId(Long personId, Object context,
+                                                           UstadMobileSystemImpl impl){
+        impl.setAppPref(PREFKEY_FINGERPRINT_PERSON_ID, String.valueOf(personId), context);
+    }
+    public static synchronized String getFingerprintPersonId(Object context,
+                                                             UstadMobileSystemImpl impl){
+        return impl.getAppPref(PREFKEY_FINGERPRINT_PERSON_ID, context);
+    }
+
+    public static synchronized String getFingerprintAuth(Object context,
+                                                       UstadMobileSystemImpl impl){
+        return impl.getAppPref(PREFKEY_FINGERPRIT_ACCESS_TOKEN, context);
+    }
+
+    public static synchronized void setFringerprintAuth(String auth, Object context,
+                                                        UstadMobileSystemImpl impl){
+        impl.setAppPref(PREFKEY_FINGERPRIT_ACCESS_TOKEN, auth, context);
     }
 
     public static synchronized void setActiveAccount(UmAccount account, Object context,
