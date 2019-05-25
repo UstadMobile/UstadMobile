@@ -1,6 +1,9 @@
 package com.ustadmobile.door
 
 import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.SQLException
+import java.util.ArrayList
 import javax.naming.InitialContext
 import javax.sql.DataSource
 
@@ -14,6 +17,24 @@ actual abstract class DoorDatabase {
         private set
 
     var context: Any? = null
+
+    val tableNames: List<String> by lazy {
+        var con = null as Connection?
+        var tableNamesList = mutableListOf<String>()
+        var tableResult = null as ResultSet?
+        try {
+            con = openConnection()
+            val metadata = con.metaData
+            tableResult = metadata.getTables(null, null, "%", arrayOf("TABLE"))
+            while(tableResult.next()) {
+                tableNamesList.add(tableResult.getString("TABLE_NAME"))
+            }
+        }finally {
+            con?.close()
+        }
+
+        tableNamesList.toList()
+    }
 
     actual constructor()
 
@@ -46,5 +67,9 @@ actual abstract class DoorDatabase {
     abstract fun createAllTables()
 
     actual abstract fun clearAllTables()
+
+    companion object {
+        const val DBINFO_TABLENAME = "_door_info"
+    }
 
 }

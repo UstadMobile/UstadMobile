@@ -464,6 +464,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
     fun generateCreateTablesFun(dbTypeElement: TypeElement): FunSpec {
         val createTablesFunSpec = FunSpec.builder("createAllTables")
                 .addModifiers(KModifier.OVERRIDE)
+        val initDbVersion = dbTypeElement.getAnnotation(Database::class.java).version
         val codeBlock = CodeBlock.builder()
         codeBlock.add("var _con = null as %T?\n", Connection::class)
                 .add("var _stmt = null as %T?\n", Statement::class)
@@ -476,6 +477,10 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             codeBlock.beginControlFlow("$dbProductType -> ")
                     .add("// - create for this $dbProductType \n")
 
+            codeBlock.add("_stmt.executeUpdate(\"CREATE·TABLE·IF·NOT·EXISTS·${DoorDatabase.DBINFO_TABLENAME}" +
+                    "·(dbVersion·int·primary·key,·dbHash·varchar(255))\")\n")
+            codeBlock.add("_stmt.executeUpdate(\"INSERT·INTO·${DoorDatabase.DBINFO_TABLENAME}·" +
+                    "VALUES·($initDbVersion,·'')\")\n")
             val dbEntityTypes = entityTypesOnDb(dbTypeElement, processingEnv)
             for(entityType in dbEntityTypes) {
                 codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(entityType,
