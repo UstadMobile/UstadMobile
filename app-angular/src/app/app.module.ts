@@ -10,6 +10,7 @@ import { UmWordLimitPipe } from './com/ustadmobile/util/pipes/um-word-limit.pipe
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import {NgProgressInterceptor, NgProgressModule } from 'ngx-progressbar';
+import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,6 +30,7 @@ import {NgProgressInterceptor, NgProgressModule } from 'ngx-progressbar';
     NgProgressModule
   ],
   providers: [
+    UmDbMockService,
     { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]

@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { Router, ActivatedRoute } from '@angular/router';
 import { com } from 'core';
+import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 
 @Component({
   selector: 'app-root',
@@ -11,16 +12,15 @@ import { com } from 'core';
 })
 export class AppComponent implements OnInit{
   
-  private parentUid = "E130B099-5C18-E0899-6817-009BCAC1111E6";
   private readonly umContext: UmContextWrapper;
 
-  constructor(private router: Router, private route: ActivatedRoute){
+  constructor(private router: Router, private route: ActivatedRoute, private umDb: UmDbMockService){
     this.umContext = new UmContextWrapper(this.router);
     this.umContext.setActiveRoute(this.route);
   }
 
   ngOnInit(): void {
-    const args = { queryParams: { parentUid: this.parentUid} };
+    const args = { queryParams: { parentUid: this.umDb.ROOT_UID} };
     com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go('contentEntryList',args, this.umContext,0);
   }
 

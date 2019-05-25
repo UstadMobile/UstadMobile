@@ -171,6 +171,13 @@
   dependencies:
     tslib "^1.9.0"
 
+"@angular/http@^7.2.15":
+  version "7.2.15"
+  resolved "https://registry.yarnpkg.com/@angular/http/-/http-7.2.15.tgz#a32bea9e67e99eef88150085aeebbe7aeecd39eb"
+  integrity sha512-TR7PEdmLWNIre3Zn8lvyb4lSrvPUJhKLystLnp4hBMcWsJqq5iK8S3bnlR4viZ9HMlf7bW7+Hm4SI6aB3tdUtw==
+  dependencies:
+    tslib "^1.9.0"
+
 "@angular/language-service@~7.2.0":
   version "7.2.15"
   resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-7.2.15.tgz#b2ba33e472dc5e530047c408ff7a35deba4427b8"
@@ -4447,6 +4454,11 @@ ngx-materialize@^6.1.3:
     materialize-css "^0.100.2"
     tslib "^1.9.0"
 
+ngx-progressbar@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/ngx-progressbar/-/ngx-progressbar-2.1.1.tgz#cecd88435ac660be445caeaded19b85f4a1e47be"
+  integrity sha512-RyfW1Dhp9G+QZRhp0SsVZJOxvfXHq335aea9rAwVOORSzch6NFBuE+XYx3etlEh2avOYfigyWUX8vAlEXrHXKQ==
+
 nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
@@ -6677,6 +6689,13 @@ trim-right@^1.0.1:
   integrity sha512-m6s2OdQe5wgpFMC+pAJ+q9djG82O2jcHPOI6RNg1yy9rCYR+WD6Nbpl32fDpfC56nirdRy+opFa/Vk7HYhqaew==
   dependencies:
     glob "^7.1.2"
+
+ts-mockito@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/ts-mockito/-/ts-mockito-2.3.1.tgz#4c3467a2ddeb207966000a740a0826c970125ed1"
+  integrity sha512-chcKw0sTApwJxTyKhzbWxI4BTUJ6RStZKUVh2/mfwYqFS09PYy5pvdXZwG35QSkqT5pkdXZlYKBX196RRvEZdQ==
+  dependencies:
+    lodash "^4.17.5"
 
 ts-node@~7.0.0:
   version "7.0.1"

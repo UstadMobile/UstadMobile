@@ -1,8 +1,10 @@
+import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
 import {Component,OnInit} from '@angular/core';
-import {dataSample} from '../../util/UmDataSample';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { com as com_core} from 'core';
+import { com as core } from 'core';
+import { com as db } from 'lib-database';
+import { mock, anything, when, spy } from 'ts-mockito';
 import { UmContextWrapper } from '../../util/UmContextWrapper';
 
 @Component({
@@ -10,53 +12,51 @@ import { UmContextWrapper } from '../../util/UmContextWrapper';
   templateUrl: './content-entry-list.component.html',
   styleUrls: ['./content-entry-list.component.css']
 })
-export class ContentEntryListComponent implements com_core.ustadmobile.core.view.ContentEntryListFragmentView ,OnInit {
+export class ContentEntryListComponent implements core.ustadmobile.core.view.ContentEntryListFragmentView ,OnInit {
   
-  entries = [];
+  entries : ContentEntry[] = [];
   env = environment;
   currentEntryUid = "";
-  private readonly args: Params = null;
+  private args: Params = null; 
   private readonly context: UmContextWrapper;
-  private presenter: com_core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
+  private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 
-  constructor(private router: Router, private route: ActivatedRoute) {
-    this.args = this.route.snapshot.queryParamMap;
-    this.context = new UmContextWrapper(router);
+  constructor(private router: Router, private route: ActivatedRoute, private umDb: UmDbMockService) {
+    this.context = new UmContextWrapper(this.router);
     this.context.setActiveRoute(route);
-    this.route.queryParams.subscribe(args => {
-      this.currentEntryUid = args["parentUid"];
-      this.entries = dataSample[this.currentEntryUid];
+    this.route.queryParams.subscribe((urlParams) => {
+      this.args = urlParams;
+     this.entries = this.umDb.getDataRepo(this.args["parentUid"]);
     });
   }
 
   ngOnInit() {
-    this.presenter = new com_core.ustadmobile.core.controller.ContentEntryListFragmentPresenter(this.context, this.args, this);
+    this.presenter = new core.ustadmobile.core.controller.ContentEntryListFragmentPresenter(this.context, this.args, this);
+    //this.presenter.onCreate(new Map<String, String>())
   }
+
+  /* setUpPresenterDbMocks(){
+    const umDbMock = spy(db.ustadmobile.core.db.UmAppDatabase);
+    let managerMock : any = mock(core.ustadmobile.core.impl.UmAccountManager.Companion);
+    when(managerMock.getRepositoryForActiveAccount(anything())).thenReturn(umDbMock);
+    console.log("mock",managerMock);
+  } */
 
   ngOnDestroy(){
     this.presenter.onDestroy();
   }
 
-  navigate(entry) {
-    const contentEntry = new com_core.ustadmobile.lib.db.entities.ContentEntry();
-    contentEntry.setContentEntryUid(entry.entry_uid);
-    contentEntry.setTitle(entry.entry_name);
-    contentEntry.setThumbnailUrl(entry.entry_image);
-    contentEntry.setDescription(entry.entry_description);
-    contentEntry.setPublisher("CK12");
-    contentEntry.setAuthor("borrachera");
-    contentEntry.setPrimaryLanguageUid(345);
-    contentEntry.setSourceUrl("khan-id://x7d37671e");
-    contentEntry.setLeaf(true);
-    const rootEntry = entry.entry_root === true;
-    const basePath = rootEntry ? 'contentEntryList/' :'contentEntryDetail';
+  navigate(entry : ContentEntry) {
+    const contentEntry = entry as core.ustadmobile.lib.db.entities.ContentEntry;
+    const basePath = entry.leaf === true  ? 'contentEntryList/' :'contentEntryDetail';
 
     const args: any = {
       relativeTo: this.route,
-      queryParams: rootEntry ? {parentUid: entry.entry_uid}: {entryUid: entry.entry_uid},
+      queryParams: entry.leaf ? {parentUid: entry.contentEntryUid}: {entryUid: entry.contentEntryUid},
       queryParamsHandling: 'merge',
     };
-   // this.router.navigate([basePath], args);
+    //core.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go(basePath,args, this.context,0);
+
     this.presenter.handleContentEntryClicked(contentEntry);
   }
 }
