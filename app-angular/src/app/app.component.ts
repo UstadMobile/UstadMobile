@@ -1,6 +1,8 @@
+import { UmContextWrapper } from './com/ustadmobile/util/UmContextWrapper';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { com } from 'core';
 
 @Component({
   selector: 'app-root',
@@ -8,13 +10,18 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit{
-
-  rootEntryUid = "E130B099-5C18-E0899-6817-009BCAC1111E6";
   
-  constructor(private router: Router){}
+  private parentUid = "E130B099-5C18-E0899-6817-009BCAC1111E6";
+
+  private umContext: UmContextWrapper;
+  
+  constructor(private router: Router, private route: ActivatedRoute){
+    this.umContext = new UmContextWrapper(this.router);
+    this.umContext.setActiveRoute(this.route);
+  }
   ngOnInit(): void {
-    const args = { queryParams: { rootEntryUid: this.rootEntryUid} }
-    this.router.navigate(['/home/contentEntryList/'], args);
+    const args = { queryParams: { parentUid: this.parentUid} }
+    com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go('contentEntryList',args, this.umContext,0);
   }
 
   ngOnDestroy(): void {}

@@ -7,8 +7,10 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
 import kotlinx.io.InputStream
+import kotlinx.serialization.json.JSON
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
+import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 
 /**
@@ -55,6 +57,7 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The value of the manifest preference key if found, null otherwise
      */
+    @JsName("getManifestPreference")
     abstract fun getManifestPreference(key: String, context: Any): String?
 
 
@@ -65,6 +68,8 @@ abstract class UstadMobileSystemCommon {
      * @param zip if true, the app setup file should be delivered within a zip.
      * @param callback callback to call when complete or if any error occurs.
      */
+
+    @JsName("getAppSetupFile")
     abstract fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>)
 
 
@@ -79,6 +84,7 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The value of the key if found, if not, the default value provided
      */
+    @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
 
@@ -131,6 +137,7 @@ abstract class UstadMobileSystemCommon {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
+    @JsName("go")
     abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int)
 
     /**
@@ -153,6 +160,7 @@ abstract class UstadMobileSystemCommon {
      * @param key preference key as a string
      * @return value of that preference
      */
+    @JsName("getAppPref")
     abstract fun getAppPref(key: String, context: Any): String?
 
     /**
@@ -172,6 +180,7 @@ abstract class UstadMobileSystemCommon {
      *
      * @return System locale
      */
+    @JsName("getSystemLocale")
     abstract fun getSystemLocale(context: Any): String
 
 
@@ -293,6 +302,7 @@ abstract class UstadMobileSystemCommon {
      * @param context Platform specific context
      * @param callback Storage dir list callback
      */
+    @JsName("getStorageDirs")
     abstract fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
 
     /**
@@ -378,10 +388,6 @@ abstract class UstadMobileSystemCommon {
     protected fun getContentDirName(context: Any): String? {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
-
-
-
-
 
 
     companion object {

@@ -1,8 +1,7 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.util.UmContextWrapper
-import com.ustadmobile.core.util.localStorage
 import kotlinx.io.InputStream
+import kotlin.browser.localStorage
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -11,10 +10,10 @@ import kotlinx.io.InputStream
  *
  * @author mike, kileha3
  */
-
 actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private lateinit var appStrings : HashMap<Int, String>
+
 
     /**
      * Load all strings to be used in the app
@@ -33,14 +32,9 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
-        val mContext: UmContextWrapper = context as UmContextWrapper
-        val navigateTo = "/home/$viewName"
-        val navArgs: Any = mapOf(
-            "relativeTo" to mContext.getActiveRoute(),
-            "queryParams" to args,
-            "queryParamsHandling" to "merge"
-        )
-        mContext.getRouter().navigate(navigateTo, navArgs)
+        val umContext: dynamic = context
+        val navigateTo = arrayOf("/home/$viewName/")
+        umContext.router.navigate(navigateTo, args)
     }
 
     /**
@@ -84,8 +78,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String? {
-        val storage = localStorage()
-        return storage.getItem(key)
+        return localStorage.getItem(key)
     }
 
     /**
@@ -105,11 +98,10 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param value value to be set
      */
     actual fun setAppPref(key: String, value: String?, context: Any) {
-        val storage = localStorage()
         if(value == null){
-            storage.removeItem(key)
+            localStorage.removeItem(key)
         }else{
-            storage.setItem(key, value)
+            localStorage.setItem(key, value)
         }
     }
 
