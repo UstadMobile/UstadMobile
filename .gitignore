@@ -216,3 +216,4 @@ lib-content-editor/
 
 build/
 build/
+.vscode/

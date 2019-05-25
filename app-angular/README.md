@@ -31,7 +31,11 @@ We have used [Jar2Npm Plugin](https://github.com/svok/kotlin-jar2npm-plugin) to 
 
 * Create Node package
 ```
-./gradlew :app-angular:jar2npm
+./gradlew app-angular:jar2npm
+```
+* Simplified
+```
+ ./gradlew app-angular:clean core:clean core:jsJar app-angular:jar2npm
 ```
 
 After that your IDE should see that:
