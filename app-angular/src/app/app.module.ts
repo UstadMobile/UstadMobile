@@ -8,7 +8,8 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
 import { UmWordLimitPipe } from './com/ustadmobile/util/pipes/um-word-limit.pipe';
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
-
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import {NgProgressInterceptor, NgProgressModule } from 'ngx-progressbar';
 @NgModule({
   declarations: [
     AppComponent,
@@ -24,9 +25,12 @@ import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entr
     MzCardModule,
     MzButtonModule,
     MzNavbarModule,
-    MzChipModule
+    MzChipModule,
+    NgProgressModule
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

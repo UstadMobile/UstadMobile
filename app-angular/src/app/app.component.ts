@@ -12,15 +12,15 @@ import { com } from 'core';
 export class AppComponent implements OnInit{
   
   private parentUid = "E130B099-5C18-E0899-6817-009BCAC1111E6";
+  private readonly umContext: UmContextWrapper;
 
-  private umContext: UmContextWrapper;
-  
   constructor(private router: Router, private route: ActivatedRoute){
     this.umContext = new UmContextWrapper(this.router);
     this.umContext.setActiveRoute(this.route);
   }
+
   ngOnInit(): void {
-    const args = { queryParams: { parentUid: this.parentUid} }
+    const args = { queryParams: { parentUid: this.parentUid} };
     com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go('contentEntryList',args, this.umContext,0);
   }
 
