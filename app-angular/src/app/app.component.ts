@@ -1,26 +1,31 @@
-import { UmContextWrapper } from './com/ustadmobile/util/UmContextWrapper';
+import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { Router, ActivatedRoute } from '@angular/router';
 import { com } from 'core';
+import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
+import { UmContextWrapper } from './com/ustadmobile/util/UmContextWrapper';
+import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit{
+export class AppComponent extends UmBaseComponent{
   
-  private parentUid = "E130B099-5C18-E0899-6817-009BCAC1111E6";
   private readonly umContext: UmContextWrapper;
 
-  constructor(private router: Router, private route: ActivatedRoute){
-    this.umContext = new UmContextWrapper(this.router);
+  constructor(localeService: UmBaseService, private router: Router, private route: ActivatedRoute, private umDb: UmDbMockService){
+    super(localeService);
+    this.umContext = new UmContextWrapper(router);
     this.umContext.setActiveRoute(this.route);
+    localeService.setContext(this.umContext)
   }
 
   ngOnInit(): void {
-    const args = { queryParams: { parentUid: this.parentUid} };
+    super.ngOnInit();
+    const args = { queryParams: { parentUid: this.umDb.ROOT_UID} };
     com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go('contentEntryList',args, this.umContext,0);
   }
 

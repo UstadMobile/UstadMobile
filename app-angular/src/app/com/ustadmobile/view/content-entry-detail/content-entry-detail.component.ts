@@ -1,5 +1,5 @@
+import { UmDbMockService } from './../../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../../util/UmContextWrapper';
-import { dataSample } from './../../util/UmDataSample';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
@@ -32,11 +32,11 @@ export class ContentEntryDetailComponent implements OnInit {
     {name: "Language 7", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
   ]
 
-  constructor(private router: Router, private route: ActivatedRoute) {
+  constructor(private router: Router, private route: ActivatedRoute, private dataService: UmDbMockService) {
     this.context = new UmContextWrapper(router);
     this.route.params.subscribe(val => {
       this.contentEntryUid = val.entryUid;
-      const entry = dataSample["E130B099-5C18-E0899-6817-009BCAC1111E6"][0];
+      const entry = this.dataService[dataService.ROOT_UID][0];
       this.entryTitle = entry.entry_name;
       this.entryDescription = entry.entry_description;
       this.entryThumbnail = entry.entry_image;

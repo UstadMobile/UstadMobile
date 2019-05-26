@@ -12,14 +12,15 @@ import kotlin.browser.localStorage
  */
 actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
-    private lateinit var appStrings : HashMap<Int, String>
-
+    @JsName("appStrings")
+    private var appStrings : Map<Int, String?> = emptyMap<Int, String>()
 
     /**
      * Load all strings to be used in the app
      */
-    fun preLoadAppStrings(){
-
+    @JsName("setLocaleStrings")
+    fun setLocaleStrings(values : HashMap<Int, String?>){
+        appStrings = values
     }
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -40,8 +41,10 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * Get a string for use in the UI
      */
+    @JsName("getString")
     actual fun getString(messageCode: Int, context: Any): String {
-        return appStrings.getValue(messageCode)
+        console.log("AppStrings", appStrings)
+        return appStrings[messageCode].toString()
     }
 
     /**
@@ -77,6 +80,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference key as a string
      * @return value of that preference
      */
+
     actual override fun getAppPref(key: String, context: Any): String? {
         return localStorage.getItem(key)
     }
