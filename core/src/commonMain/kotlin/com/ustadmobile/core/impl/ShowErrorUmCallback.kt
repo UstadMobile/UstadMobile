@@ -1,7 +1,6 @@
 package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.view.ViewWithErrorNotifier
-import kotlinx.coroutines.Runnable
 
 /**
  * Utility callback that will automatically call the showErrorNotification on a view if the
@@ -13,6 +12,6 @@ abstract class ShowErrorUmCallback<T>(private val view: ViewWithErrorNotifier, p
 
     override fun onFailure(exception: Throwable?) {
         view.showErrorNotification(UstadMobileSystemImpl.instance.getString(
-                errorMessage, view.context), Runnable { }, 0)
+                errorMessage, view.viewContext), { }, 0)
     }
 }

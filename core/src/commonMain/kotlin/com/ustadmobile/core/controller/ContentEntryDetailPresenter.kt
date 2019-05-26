@@ -240,7 +240,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     fun handleClickTranslatedEntry(uid: Long) {
         val args = HashMap<String, String>()
         args[ARG_CONTENT_ENTRY_UID] = uid.toString()
-        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
+        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext!!)
     }
 
     fun handleUpNavigation() {

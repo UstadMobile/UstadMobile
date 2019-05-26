@@ -78,10 +78,10 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
         if (lastEntryListArgs !=
                 null) {
             impl.go(ContentEntryDetailView.VIEW_NAME,
-                    UMFileUtil.parseURLQueryString(lastEntryListArgs), view.context,
+                    UMFileUtil.parseURLQueryString(lastEntryListArgs), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
-            impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
+            impl.go(DummyView.VIEW_NAME, mapOf(), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
 

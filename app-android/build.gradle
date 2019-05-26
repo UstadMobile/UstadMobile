@@ -21,10 +21,10 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-multiplatform'
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'kotlin-android-extensions'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
 
@@ -168,12 +168,12 @@ android {
  * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
  */
 gradle.taskGraph.useFilter { task ->
-    if(task.name.equals("connectedVanillaDebugAndroidTest")
-        || task.name.equals("createVanillaDebugCoverageReport")
-        || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")
-        || task.name.equals("processVanillaDebugAndroidTestManifest")
-        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
+    if (task.name.equals("connectedVanillaDebugAndroidTest")
+            || task.name.equals("createVanillaDebugCoverageReport")
+            || task.name.equals("testVanillaDebugUnitTest")
+            || task.name.equals("testVanillaReleaseUnitTest")
+            || task.name.equals("processVanillaDebugAndroidTestManifest")
+            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 
@@ -202,7 +202,7 @@ task generateCoreStringToAndroidResMap {
                 inputLastModified = file.lastModified()
         }
 
-        File outputFile = project.file("src/main/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        File outputFile = project.file("src/main/kotlin/com/ustadmobile/port/android/generated/MessageIDMap.kt")
         return outputFile.lastModified() < inputLastModified;
     }
 
@@ -212,13 +212,13 @@ task generateCoreStringToAndroidResMap {
         String genSrcHeader, genSrcFooter
         String genSrcBody = ""
 
-        genSrcHeader = "package com.ustadmobile.port.android.generated;\n"
-        genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID;\n"
-        genSrcHeader += "import com.toughra.ustadmobile.R;\n"
-        genSrcHeader += "import java.util.HashMap;\n"
-        genSrcHeader += "public class MessageIDMap {\n"
-        genSrcHeader += "\tpublic static final HashMap<Integer, Integer> ID_MAP = new HashMap<>();\n"
-        genSrcHeader += "\tstatic{\n"
+        genSrcHeader = "package com.ustadmobile.port.android.generated\n"
+        genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID\n"
+        genSrcHeader += "import com.toughra.ustadmobile.R\n"
+        genSrcHeader += "import java.util.HashMap\n"
+        genSrcHeader += "object MessageIDMap {\n"
+        genSrcHeader += "\tval ID_MAP = HashMap<Int, Int>()\n"
+        genSrcHeader += "\tinit {\n"
 
         System.out.println("Looking in: core/locale/main")
         rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
@@ -235,23 +235,23 @@ task generateCoreStringToAndroidResMap {
         Iterator<String> nameIterator = messageIds.keySet().iterator();
         while (nameIterator.hasNext()) {
             String strName = nameIterator.next()
-            genSrcBody += "\t\tID_MAP.put(MessageID." + strName + ", R.string." + strName + ");\n"
+            genSrcBody += "\tID_MAP[MessageID." + strName + "] = R.string." + strName + "\n"
         }
 
         genSrcFooter = "\t}\n"
         genSrcFooter += "}\n"
 
-        File oldMessageIdFile = project.file("src/main/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        File oldMessageIdFile = project.file("src/main/kotlin/com/ustadmobile/port/android/generated/MessageIDMap.kt")
         if (oldMessageIdFile.exists()) {
             oldMessageIdFile.delete()
         }
 
-        File outDir = project.file("src/main/java/com/ustadmobile/port/android/generated")
+        File outDir = project.file("src/main/kotlin/com/ustadmobile/port/android/generated")
         if (!outDir.isDirectory()) {
             outDir.mkdirs()
         }
 
-        File outFile = new File(outDir, "MessageIDMap.java")
+        File outFile = new File(outDir, "MessageIDMap.kt")
         outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
     }
 }
@@ -266,8 +266,8 @@ configurations.all {
 }
 
 dependencies {
-    api project(':core')
-    api project(':sharedse')
+    implementation project(':core')
+    implementation project(':sharedse')
     implementation project(':lib-door-runtime')
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")

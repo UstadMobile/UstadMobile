@@ -123,7 +123,7 @@ abstract class DownloadJobDao {
     @Query("SELECT ContentEntry.title FROM DownloadJob " +
             "LEFT JOIN ContentEntry ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE DownloadJob.djUid = :downloadJobId")
-    abstract suspend fun getEntryTitleByJobUidAsync(downloadJobId: Long): String?
+    abstract suspend fun getEntryTitleByJobUidAsync(downloadJobId: Int): String?
 
     @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :downloadJobId")
     abstract fun updateStatus(downloadJobId: Int, djStatus: Int)

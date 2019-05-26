@@ -342,10 +342,10 @@ abstract class UstadMobileSystemCommon {
      * converted to a boolean using Boolean.parseBoolean
      *
      * @param key The preference key to lookup
-     * @param context System context object
+     * @param context System viewContext object
      * @return The boolean value of the given preference key if found, otherwise false
      */
-    private fun getAppConfigBoolean(key: String, context: Any): Boolean {
+    fun getAppConfigBoolean(key: String, context: Any): Boolean {
         return getAppConfigBoolean(key, false, context)
     }
 
