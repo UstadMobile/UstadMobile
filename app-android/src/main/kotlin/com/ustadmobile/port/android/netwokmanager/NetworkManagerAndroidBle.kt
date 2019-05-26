@@ -25,10 +25,10 @@ import android.os.Handler
 import android.os.Looper.getMainLooper
 import android.os.ParcelUuid
 import android.os.SystemClock
-import android.support.annotation.RequiresApi
-import android.support.annotation.VisibleForTesting
-import android.support.v4.app.ActivityCompat
-import android.support.v4.net.ConnectivityManagerCompat
+import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
+import androidx.core.app.ActivityCompat
+import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl

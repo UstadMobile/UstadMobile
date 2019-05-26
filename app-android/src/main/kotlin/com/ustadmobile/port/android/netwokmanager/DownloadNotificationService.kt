@@ -7,10 +7,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationCompat.GROUP_ALERT_SUMMARY
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.content.ContextCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -297,7 +297,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
         if (isVersionLollipopOrAbove) {
             builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         }
 
         val notificationHolder = NotificationHolder(notificationId, contentTitle,
