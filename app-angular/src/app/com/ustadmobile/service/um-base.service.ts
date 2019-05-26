@@ -30,7 +30,6 @@ export class UmBaseService {
 
   private loadLocaleString(localeUrl: string){
     this.http.get<kotlin.collections.HashMap<Number, String>>(localeUrl).subscribe(response => {
-      this.systemImpl.setLocaleStrings(response);
-      console.log("string", this.systemImpl.getString(80, this.umContext)) 
+      this.systemImpl.setLocaleStrings(response); 
     })}
 }
