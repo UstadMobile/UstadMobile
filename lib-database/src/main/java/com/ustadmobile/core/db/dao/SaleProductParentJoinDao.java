@@ -41,27 +41,26 @@ public abstract class SaleProductParentJoinDao implements SyncableDao<SaleProduc
     public abstract UmProvider<SaleProductSelected> findAllSelectedCategoriesForSaleProductProvider(
             long saleProductUid);
 
-    @UmQuery("SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.saleProductPictureUid as pictureUid, " +
-            " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
-            " FROM SaleProductParentJoin " +
-            " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
-            " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
-            " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
-            " WHERE SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-            " AND child.saleProductCategory = 0 AND child.saleProductActive = 1 " +
-            " AND SaleProductParentJoin.saleProductParentJoinActive = 1 ")
+    public static final String QUERY_SELECT_ALL_SALE_PRODUCT =
+            "SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.saleProductPictureUid as pictureUid, " +
+                    " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
+                    " FROM SaleProductParentJoin " +
+                    " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+                    " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+                    " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
+                    " WHERE SaleProductParentJoin.saleProductParentJoinActive = 1 AND child.saleProductActive = 1 ";
+
+    @UmQuery(QUERY_SELECT_ALL_SALE_PRODUCT +
+            " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
+            " AND child.saleProductCategory = 0 ")
     public abstract UmProvider<SaleNameWithImage> findAllItemsInACategory(long saleProductCategoryUid);
 
-    @UmQuery("SELECT child.saleProductName as name, child.saleProductDesc as description, productPicture.saleProductPictureUid as pictureUid, " +
-            " '' as type, child.saleProductUid as productUid, parent.saleProductUid as productGroupUid  " +
-            " FROM SaleProductParentJoin " +
-            " LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
-            " LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
-            " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
-            " WHERE SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
-            " AND child.saleProductCategory = 1 AND child.saleProductActive = 1" +
-            " AND SaleProductParentJoin.saleProductParentJoinActive = 1 ")
+    @UmQuery(QUERY_SELECT_ALL_SALE_PRODUCT +
+            " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
+            " AND child.saleProductCategory = 1 ")
     public abstract UmProvider<SaleNameWithImage> findAllCategoriesInACategory(long saleProductCategoryUid);
+
+
 
 
     @UmQuery("SELECT * FROM SaleProductParentJoin WHERE " +

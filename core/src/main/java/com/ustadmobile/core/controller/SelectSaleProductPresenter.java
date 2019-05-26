@@ -18,7 +18,12 @@ import java.util.Hashtable;
 
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
+import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_MORE_CATEGORY;
+import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_MORE_RECENT;
+import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_PASS_PRODUCER_UID;
+import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_PASS_SALE_ITEM_UID;
 import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_SALEPRODUCT_UID;
+import static com.ustadmobile.core.view.SaleProductCategoryListView.ARG_SELECT_PRODUCT;
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_NEW_CATEGORY;
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_NEW_TITLE;
 import static com.ustadmobile.core.view.SaleProductDetailView.ARG_SALE_PRODUCT_UID;
@@ -107,11 +112,19 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
                 impl.go(SaleProductDetailView.VIEW_NAME, args, context);
             }
         }else {
-            args.put(ARG_SALE_ITEM_PRODUCT_UID, String.valueOf(productUid));
-            args.put(ARG_PRODUCER_UID, String.valueOf(producerUid));
-            args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
-
-            impl.go(SaleItemDetailView.VIEW_NAME, args, context);
+            //Need to select the product.
+            if(isCategory) {
+                args.put(ARG_SALEPRODUCT_UID, String.valueOf(productUid));
+                args.put(ARG_PASS_PRODUCER_UID, String.valueOf(producerUid));
+                args.put(ARG_PASS_SALE_ITEM_UID, String.valueOf(saleItemUid));
+                args.put(ARG_SELECT_PRODUCT, "true");
+                impl.go(SaleProductCategoryListView.VIEW_NAME, args, context);
+            }else {
+                args.put(ARG_SALE_ITEM_PRODUCT_UID, String.valueOf(productUid));
+                args.put(ARG_PRODUCER_UID, String.valueOf(producerUid));
+                args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
+                impl.go(SaleItemDetailView.VIEW_NAME, args, context);
+            }
             view.finish();
         }
     }
@@ -147,5 +160,44 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
                 exception.printStackTrace();
             }
         });
+    }
+
+    public void handleClickRecentMore() {
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_MORE_RECENT, "true");
+        if(catalogMode){
+                impl.go(SaleProductCategoryListView.VIEW_NAME, args, context);
+
+        }else {
+            //Need to select the product.
+
+            //Pass it on
+            args.put(ARG_PASS_PRODUCER_UID, String.valueOf(producerUid));
+            args.put(ARG_PASS_SALE_ITEM_UID, String.valueOf(saleItemUid));
+            args.put(ARG_SELECT_PRODUCT, "true");
+
+            impl.go(SaleProductCategoryListView.VIEW_NAME, args, context);
+        }
+    }
+
+    public void handleClickCategoryMore() {
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_MORE_CATEGORY, "true");
+        if(catalogMode){
+            impl.go(SaleProductCategoryListView.VIEW_NAME, args, context);
+
+        }else {
+            //Need to select the product.
+
+            //Pass it on
+            args.put(ARG_PASS_PRODUCER_UID, String.valueOf(producerUid));
+            args.put(ARG_PASS_SALE_ITEM_UID, String.valueOf(saleItemUid));
+            args.put(ARG_SELECT_PRODUCT, "true");
+
+            impl.go(SaleProductCategoryListView.VIEW_NAME, args, context);
+        }
+    }
+
+    public void handleClickCollectionMore() {
     }
 }

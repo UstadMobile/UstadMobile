@@ -16,6 +16,11 @@ public interface SaleProductCategoryListView extends UstadView {
 
     //Any argument keys:
     String ARG_SALEPRODUCT_UID = "ArgSaleProductUid";
+    String ARG_SELECT_PRODUCT = "ArgSelectProductMode";
+    String ARG_PASS_PRODUCER_UID = "ArgPassProducerUid";
+    String ARG_PASS_SALE_ITEM_UID = "ArgPassSaleItemUid";
+    String ARG_MORE_RECENT = "ArgMoreRecent";
+    String ARG_MORE_CATEGORY = "ArgMoreCategory";
 
     /**
      * Method to finish the screen / view.
@@ -45,6 +50,8 @@ public interface SaleProductCategoryListView extends UstadView {
     void updateSortPresets(String[] presets);
 
     void hideFAB(boolean hide);
+
+    void hideEditMenu(boolean hide);
 
 }
 

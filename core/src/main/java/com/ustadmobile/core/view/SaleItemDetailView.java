@@ -16,6 +16,7 @@ public interface SaleItemDetailView extends UstadView {
     String ARG_SALE_ITEM_UID = "ArgSaleItemUid";
     String ARG_SALE_ITEM_PRODUCT_UID = "ArgSaleItemProducerUid";
 
+
     /**
      * Method to finish the screen / view.
      */

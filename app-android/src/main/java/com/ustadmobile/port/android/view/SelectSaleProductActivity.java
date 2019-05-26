@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionMenu;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectSaleProductPresenter;
 import com.ustadmobile.core.db.UmProvider;
@@ -33,6 +34,7 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     private RecyclerView categoryRV;
     private RecyclerView collectionRV;
 
+    private FloatingActionMenu fam;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -102,8 +104,8 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this, false);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-
-
+        fam = findViewById(R.id.activity_select_sale_product_fab_menu);
+        fam.setVisibility(View.GONE);
     }
 
     /**
@@ -127,7 +129,8 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     @Override
     public void setRecentProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, false,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                        false,false,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
@@ -147,7 +150,8 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     @Override
     public void setCategoryProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,true,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                        true,false,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.
@@ -167,7 +171,8 @@ public class SelectSaleProductActivity extends UstadBaseActivity implements Sele
     @Override
     public void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, true,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                        true,false,
                         getApplicationContext());
 
         // get the provider, set , observe, etc.

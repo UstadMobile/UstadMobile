@@ -128,7 +128,6 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     @UmQuery(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
     public abstract UmProvider<SaleNameWithImage> findAllActiveSNWIProvider();
 
-
     //ITEMS(PRODUCTS):
     @UmQuery(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
     public abstract UmLiveData<List<SaleNameWithImage>> findAllActiveProductsSNWILive();
@@ -208,4 +207,5 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
 
     @UmUpdate
     public abstract void updateAsync(SaleProduct entity, UmCallback<Integer> updateCallback);
+
 }

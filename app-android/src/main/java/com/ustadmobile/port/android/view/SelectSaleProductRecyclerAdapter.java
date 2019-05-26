@@ -36,6 +36,7 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
     SelectSaleProductPresenter mPresenter;
 
     private boolean listCategory;
+    private boolean isCatalog;
 
     @NonNull
     @Override
@@ -87,53 +88,59 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
 
         name.setText(entity.getName());
 
-        //Options to Edit/Delete every schedule in the list
-        dots.setOnClickListener((View v) -> {
-            if(theActivity != null){
-                //creating a popup menu
-                PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
-                popup.setOnMenuItemClickListener(item -> {
-                    int i = item.getItemId();
-                    if (i == R.id.edit) {
-                        mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
-                        return true;
-                    } else if (i == R.id.delete) {
-                        mPresenter.handleDelteSaleProduct(entity.getProductUid(), listCategory);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+        if(isCatalog){
+            dots.setVisibility(View.VISIBLE);
+            //Options to Edit/Delete every schedule in the list
+            dots.setOnClickListener((View v) -> {
+                if(theActivity != null){
+                    //creating a popup menu
+                    PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+                    popup.setOnMenuItemClickListener(item -> {
+                        int i = item.getItemId();
+                        if (i == R.id.edit) {
+                            mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
+                            return true;
+                        } else if (i == R.id.delete) {
+                            mPresenter.handleDelteSaleProduct(entity.getProductUid(), listCategory);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
 
-                //inflating menu from xml resource
-                popup.inflate(R.menu.menu_edit_delete);
-                popup.getMenu().findItem(R.id.edit).setVisible(true);
-                //displaying the popup
-                popup.show();
-            }else if(theFragment != null){
-                //creating a popup menu
-                PopupMenu popup = new PopupMenu(theFragment.getContext(), v);
-                popup.setOnMenuItemClickListener(item -> {
-                    int i = item.getItemId();
-                    if (i == R.id.edit) {
-                        mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
-                        return true;
-                    } else if (i == R.id.delete) {
-                        mPresenter.handleDelteSaleProduct(entity.getProductUid(), listCategory);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+                    //inflating menu from xml resource
+                    popup.inflate(R.menu.menu_edit_delete);
+                    popup.getMenu().findItem(R.id.edit).setVisible(true);
+                    //displaying the popup
+                    popup.show();
+                }else if(theFragment != null){
+                    //creating a popup menu
+                    PopupMenu popup = new PopupMenu(theFragment.getContext(), v);
+                    popup.setOnMenuItemClickListener(item -> {
+                        int i = item.getItemId();
+                        if (i == R.id.edit) {
+                            mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
+                            return true;
+                        } else if (i == R.id.delete) {
+                            mPresenter.handleDelteSaleProduct(entity.getProductUid(), listCategory);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
 
-                //inflating menu from xml resource
-                popup.inflate(R.menu.menu_edit_delete);
-                popup.getMenu().findItem(R.id.edit).setVisible(true);
-                //displaying the popup
-                popup.show();
-            }
+                    //inflating menu from xml resource
+                    popup.inflate(R.menu.menu_edit_delete);
+                    popup.getMenu().findItem(R.id.edit).setVisible(true);
+                    //displaying the popup
+                    popup.show();
+                }
 
-        });
+            });
+        }else{
+            dots.setVisibility(View.GONE);
+        }
+
 
         holder.itemView.setOnClickListener(v -> {
             mPresenter.handleClickProduct(entity.getProductUid(), listCategory);
@@ -152,11 +159,13 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
             SelectSaleProductPresenter thePresenter,
             Activity activity,
             Boolean isCategory,
+            Boolean catalog,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theActivity = activity;
         listCategory = isCategory;
+        isCatalog = catalog;
         theContext = context;
     }
 
@@ -165,11 +174,13 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
             SelectSaleProductPresenter thePresenter,
             Fragment fragment,
             Boolean isCategory,
+            Boolean catalog,
             Context context) {
         super(diffCallback);
         mPresenter = thePresenter;
         theFragment = fragment;
         listCategory = isCategory;
+        isCategory = catalog;
         theContext = context;
     }
 

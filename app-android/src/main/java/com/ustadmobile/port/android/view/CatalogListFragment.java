@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionMenu;
@@ -32,6 +33,7 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
     private RecyclerView categoryRV;
     private RecyclerView collectionRV;
     private FloatingActionMenu floatingActionMenu;
+    private TextView recentMore, categoryMore, collectionMore;
 
     public static CatalogListFragment newInstance(){
         CatalogListFragment fragment = new CatalogListFragment();
@@ -78,6 +80,9 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
         collectionRV.setLayoutManager(layoutManager3);
 
         //Set other views
+        recentMore= rootContainer.findViewById(R.id.activity_select_sale_product_recent_more);
+        categoryMore = rootContainer.findViewById(R.id.activity_select_sale_product_category_more);
+        collectionMore = rootContainer.findViewById(R.id.activity_select_sale_product_collections_more);
 
         //Call the Presenter
         mPresenter = new SelectSaleProductPresenter(getContext(),
@@ -97,6 +102,18 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
                     floatingActionMenu.close(true);
                     mPresenter.handleClickAddItem();
                 });
+
+        recentMore.setOnClickListener(v -> {
+            mPresenter.handleClickRecentMore();
+        });
+
+        categoryMore.setOnClickListener(v -> {
+            mPresenter.handleClickCategoryMore();
+        });
+
+        collectionMore.setOnClickListener(v -> {
+            mPresenter.handleClickCollectionMore();
+        });
 
         return rootContainer;
     }
@@ -136,7 +153,8 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
     @Override
     public void setRecentProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, false,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                        false,true,
                         getContext());
 
         // get the provider, set , observe, etc.
@@ -156,7 +174,8 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
     @Override
     public void setCategoryProvider(UmProvider<SaleNameWithImage> listProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, true,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                        true,true,
                         getContext());
 
         // get the provider, set , observe, etc.
@@ -176,7 +195,8 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
     @Override
     public void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =
-                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this, true,
+                new SelectSaleProductRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
+                        true,true,
                         getContext());
 
         // get the provider, set , observe, etc.

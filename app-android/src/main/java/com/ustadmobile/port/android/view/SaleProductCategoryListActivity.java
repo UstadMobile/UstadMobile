@@ -38,6 +38,7 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
     private FloatingActionMenu floatingActionMenu;
 
     private Menu menu;
+    private boolean hideEdit = false;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -50,6 +51,8 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
         inflater.inflate(R.menu.menu_search_edit, menu);
 
         menu.findItem(R.id.action_search).setVisible(true);
+
+        menu.findItem(R.id.action_edit).setVisible(!hideEdit);
         return true;
     }
     /**
@@ -207,6 +210,13 @@ public class SaleProductCategoryListActivity extends UstadBaseActivity implement
 
     @Override
     public void hideFAB(boolean hide) {
-        floatingActionMenu.setVisibility(hide?View.GONE:View.VISIBLE);
+        runOnUiThread(() -> floatingActionMenu.setVisibility(hide?View.GONE:View.VISIBLE));
+    }
+
+    @Override
+    public void hideEditMenu(boolean hide) {
+        hideEdit = hide;
+        //runOnUiThread(() -> menu.findItem(R.id.action_edit).setVisible(!hide));
+
     }
 }
