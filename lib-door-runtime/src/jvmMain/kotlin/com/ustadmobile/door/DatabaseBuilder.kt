@@ -18,7 +18,9 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         val dbImplClass = Class.forName("${dbClass.java.canonicalName}_JdbcKt") as Class<T>
         val doorDb = dbImplClass.getConstructor(DataSource::class.java).newInstance(dataSource)
 
-        doorDb.createAllTables()
+        if(!doorDb.tableNames.any {it.toLowerCase() == DoorDatabase.DBINFO_TABLENAME}) {
+            doorDb.createAllTables()
+        }
 
         return doorDb
     }
