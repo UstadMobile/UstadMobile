@@ -8,14 +8,14 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
-import android.support.v4.app.Fragment
-import android.support.v4.view.GestureDetectorCompat
 import android.view.*
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.RelativeLayout
+import androidx.core.view.GestureDetectorCompat
+import androidx.fragment.app.Fragment
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMFileUtil

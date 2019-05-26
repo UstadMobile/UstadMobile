@@ -1,17 +1,18 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.ViewPager
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
@@ -124,7 +125,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_epub_content_showtoc) {
-            mDrawerLayout!!.openDrawer(Gravity.END)
+            mDrawerLayout!!.openDrawer(GravityCompat.END)
             return true
         } else if (item.itemId == android.R.id.home) {
             finish()

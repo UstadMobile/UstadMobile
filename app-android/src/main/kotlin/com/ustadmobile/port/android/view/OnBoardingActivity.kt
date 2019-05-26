@@ -2,14 +2,14 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.view.PagerAdapter
-import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.rd.PageIndicatorView
 import com.rd.animation.type.AnimationType
 import com.toughra.ustadmobile.R

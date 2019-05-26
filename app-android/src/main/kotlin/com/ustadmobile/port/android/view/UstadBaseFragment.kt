@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import java.util.*
 
 /**

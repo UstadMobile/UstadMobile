@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.support.design.widget.TextInputEditText
-import android.support.v4.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
@@ -10,6 +8,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.Register2Presenter
 import com.ustadmobile.core.generated.locale.MessageID
