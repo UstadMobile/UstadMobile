@@ -4,8 +4,8 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.os.Build
-import android.support.annotation.RequiresApi
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.NetworkNode

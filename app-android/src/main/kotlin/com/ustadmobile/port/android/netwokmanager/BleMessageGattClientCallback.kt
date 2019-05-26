@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.netwokmanager
 
 import android.bluetooth.*
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener
