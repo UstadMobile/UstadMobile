@@ -12,15 +12,14 @@ import kotlin.browser.localStorage
  */
 actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
-    @JsName("appStrings")
-    private var appStrings : Map<Int, String?> = emptyMap<Int, String>()
+    private var stringMap : Any = Any()
 
     /**
      * Load all strings to be used in the app
      */
     @JsName("setLocaleStrings")
-    fun setLocaleStrings(values : HashMap<Int, String?>){
-        appStrings = values
+    fun setLocaleStrings(values : Any){
+        stringMap = values
     }
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -43,8 +42,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     @JsName("getString")
     actual fun getString(messageCode: Int, context: Any): String {
-        console.log("AppStrings", appStrings)
-        return appStrings[messageCode].toString()
+        val stringMap : dynamic = stringMap
+        return stringMap[messageCode] as String
     }
 
     /**

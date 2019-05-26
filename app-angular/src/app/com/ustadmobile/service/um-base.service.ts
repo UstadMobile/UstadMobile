@@ -29,7 +29,8 @@ export class UmBaseService {
 
 
   private loadLocaleString(localeUrl: string){
-    this.http.get<kotlin.collections.HashMap<Number, String>>(localeUrl).subscribe(response => {
-      this.systemImpl.setLocaleStrings(response); 
+    this.http.get<kotlin.collections.HashMap<Number, String>>(localeUrl)
+    .subscribe(response => {
+      this.systemImpl.setLocaleStrings(response);
     })}
 }

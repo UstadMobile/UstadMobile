@@ -6,25 +6,25 @@ import { com as core } from 'core';
 import { com as db } from 'lib-database';
 import { mock, anything, when, spy } from 'ts-mockito';
 import { UmContextWrapper } from '../../util/UmContextWrapper';
+import { UmBaseComponent } from '../um-base-component';
+import { UmBaseService } from '../../service/um-base.service';
 
 @Component({
   selector: 'app-content-entry-list',
   templateUrl: './content-entry-list.component.html',
   styleUrls: ['./content-entry-list.component.css']
 })
-export class ContentEntryListComponent implements core.ustadmobile.core.view.ContentEntryListFragmentView ,OnInit {
+export class ContentEntryListComponent extends UmBaseComponent implements core.ustadmobile.core.view.ContentEntryListFragmentView {
   
   entries : ContentEntry[] = [];
   env = environment;
   currentEntryUid = "";
   private args: Params = null; 
-  private readonly context: UmContextWrapper;
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 
-  constructor(private router: Router, private route: ActivatedRoute, private umDb: UmDbMockService) {
-    this.context = new UmContextWrapper(this.router);
-    this.context.setActiveRoute(route);
-    this.route.queryParams.subscribe((urlParams) => {
+  constructor(localeService: UmBaseService, router: Router, route: ActivatedRoute, private umDb: UmDbMockService) {
+    super(localeService, router, route);
+    route.queryParams.subscribe((urlParams) => {
       this.args = urlParams;
      this.entries = this.umDb.getDataRepo(this.args["parentUid"]);
     });

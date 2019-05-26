@@ -5,16 +5,19 @@ import { com } from 'core';
 import { Router, ActivatedRoute } from '@angular/router';
 export abstract class UmBaseComponent implements OnInit{
   public systemImpl: any;
-  public readonly umContext: UmContextWrapper;
-  public C
-  constructor(private localeService: UmBaseService, private router: Router, private route: ActivatedRoute, ){
+  public readonly context: UmContextWrapper;
+  constructor(public localeService: UmBaseService, public router: Router, public route: ActivatedRoute, ){
     this.systemImpl = com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.localeService.setImpl(this.systemImpl);
-    this.umContext = new UmContextWrapper(router);
-    this.umContext.setActiveRoute(this.route);
-    localeService.setContext(this.umContext)
+    this.context = new UmContextWrapper(router);
+    this.context.setActiveRoute(this.route);
+    localeService.setContext(this.context)
   }
   ngOnInit(): void {
-    this.localeService.setCurrentLocale("en");
+    this.localeService.setCurrentLocale("fa");
+  }
+
+  public getString(messageId: number){
+    return this.systemImpl.getString(messageId, this.context)
   }
 }

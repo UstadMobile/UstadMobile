@@ -21,7 +21,7 @@ export class AppComponent extends UmBaseComponent{
   ngOnInit(): void {
     super.ngOnInit();
     const args = { queryParams: { parentUid: this.umDb.ROOT_UID} };
-    this.systemImpl.go('contentEntryList',args, this.umContext,0);
+    this.systemImpl.go('contentEntryList',args, this.context,0);
   }
 
   ngOnDestroy(): void {}
