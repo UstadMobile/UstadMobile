@@ -42,6 +42,7 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -83,6 +84,8 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setCheckLogout(false);
+
         setContentView(R.layout.activity_login2);
         setSupportActionBar(findViewById(R.id.um_toolbar));
 
@@ -125,20 +128,20 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
                 assignToFingerprintCB.setVisibility(View.GONE);
                 sendToast("Your device doesn't support fingerprint authentication");
             }else{
-                fingerprintIV.setVisibility(View.VISIBLE);
-                assignToFingerprintCB.setVisibility(View.VISIBLE);
+                if (!fingerprintManager.hasEnrolledFingerprints()) {
+                    sendToast("No fingerprint configured. " +
+                            "Please register at least one fingerprint in your device's Settings");
+                }else {
+                    fingerprintIV.setVisibility(View.VISIBLE);
+                    assignToFingerprintCB.setVisibility(View.VISIBLE);
+                    //Check that the user has registered at least one fingerprint//
+                }
             }
             //Check whether the user has granted your app the USE_FINGERPRINT permission//
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
                 // If your app doesn't have this permission, then display the following text//
                 sendToast("Please enable the fingerprint permission");
-            }
-
-            //Check that the user has registered at least one fingerprint//
-            if (!fingerprintManager.hasEnrolledFingerprints()) {
-                sendToast("No fingerprint configured. " +
-                        "Please register at least one fingerprint in your device's Settings");
             }
 
             //Check that the lock screen is secured//
@@ -315,5 +318,11 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
                         }
                     }
                 });
+    }
+
+    @Override
+    public void updateLastActive() {
+        AtomicLong systemTime = new AtomicLong(System.currentTimeMillis());
+        updateLastActive(systemTime);
     }
 }

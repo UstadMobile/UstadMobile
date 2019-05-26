@@ -180,7 +180,7 @@ public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameW
         mPresenter = thePresenter;
         theFragment = fragment;
         listCategory = isCategory;
-        isCategory = catalog;
+        isCatalog = catalog;
         theContext = context;
     }
 

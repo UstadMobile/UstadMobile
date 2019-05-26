@@ -378,32 +378,29 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     beltMenJoin.setSaleProductParentJoinUid(productParentJoinDao.insert(beltMenJoin));
 
 
-                    //Create collections
-                    SaleProductGroup womenEidCollection = new SaleProductGroup("Women");
-                    womenEidCollection.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
-                    womenEidCollection.setSaleProductGroupUid(productGroupDao.insert(womenEidCollection));
-                    SaleProductGroupJoin womenCollection1 =
-                            new SaleProductGroupJoin(womenCategory.getSaleProductUid(),
-                                    womenEidCollection.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(womenCollection1);
+                    //Create collection (new)
+                    SaleProduct collectionCategory = new SaleProduct("Collection",
+                            "All collections", true);
+                    collectionCategory.setSaleProductUid(saleProductDao.insert(collectionCategory));
+                    addPicToProduct(collectionCategory, "", repo);
 
-                    SaleProductGroup menCollection = new SaleProductGroup("Men");
-                    menCollection.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
-                    menCollection.setSaleProductGroupUid(productGroupDao.insert(menCollection));
-                    SaleProductGroupJoin menCollection1 =
-                            new SaleProductGroupJoin(menCategory.getSaleProductUid(),
-                                    menCollection.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(menCollection1);
+                    SaleProductParentJoin womenCategoryCollectionJoin =
+                            new SaleProductParentJoin(womenCategory.getSaleProductUid(),
+                                    collectionCategory.getSaleProductUid(), true);
+                    womenCategoryCollectionJoin.setSaleProductParentJoinUid(
+                            productParentJoinDao.insert(womenCategoryCollectionJoin));
 
-                    SaleProductGroup clutches = new SaleProductGroup("Accessories");
-                    clutches.setSaleProductGroupType(SaleProductGroup.PRODUCT_GROUP_TYPE_COLLECTION);
-                    clutches.setSaleProductGroupUid(productGroupDao.insert(clutches));
-                    SaleProductGroupJoin accessoriesJoinOld =
-                            new SaleProductGroupJoin(accessoriesCategory.getSaleProductUid(),
-                                    clutches.getSaleProductGroupUid());
-                    productGroupJoinDao.insert(accessoriesJoinOld);
+                    SaleProductParentJoin menCategoryCollectionJoin =
+                            new SaleProductParentJoin(menCategory.getSaleProductUid(),
+                                    collectionCategory.getSaleProductUid(), true);
+                    menCategoryCollectionJoin.setSaleProductParentJoinUid(
+                            productParentJoinDao.insert(menCategoryCollectionJoin));
 
-
+                    SaleProductParentJoin accessoriesCategoryCollectionJoin =
+                            new SaleProductParentJoin(accessoriesCategory.getSaleProductUid(),
+                                    collectionCategory.getSaleProductUid(), true);
+                    accessoriesCategoryCollectionJoin.setSaleProductParentJoinUid(
+                            productParentJoinDao.insert(accessoriesCategoryCollectionJoin));
                 }
 
                 String pinkHatSaleTitle = "20x Pink Hat";

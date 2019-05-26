@@ -8,38 +8,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_select_sale_product_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_select_sale_product_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/add_item"
+            tools:layout_editor_absoluteY="0dp" />
+    </android.support.design.widget.AppBarLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/activity_select_sale_product_appbar">
 
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
             android:paddingBottom="@dimen/bottom_navigation_height">
-
-            <android.support.design.widget.AppBarLayout
-                android:id="@+id/activity_select_sale_product_appbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:elevation="4dp"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <android.support.v7.widget.Toolbar
-                    android:id="@+id/activity_select_sale_product_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/primary"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_scrollFlags="scroll|enterAlways"
-                    app:title="@string/add_item"
-                    tools:layout_editor_absoluteY="0dp" />
-            </android.support.design.widget.AppBarLayout>
-
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/activity_select_sale_product_collection_rv"
@@ -122,12 +120,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="@string/most_recent"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/activity_select_sale_product_recent_more"
@@ -135,16 +133,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
+                android:background="?android:attr/selectableItemBackground"
                 android:text="@string/more_caps"
                 android:textColor="@color/primary"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_select_sale_product_appbar" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/activity_select_sale_product_category_more"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:background="?android:attr/selectableItemBackground"
                 android:layout_marginEnd="8dp"
                 android:text="@string/more_caps"
                 android:textColor="@color/primary"
@@ -158,6 +158,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/more_caps"
+                android:background="?android:attr/selectableItemBackground"
                 android:textColor="@color/primary"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"

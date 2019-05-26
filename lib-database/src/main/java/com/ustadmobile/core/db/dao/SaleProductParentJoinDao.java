@@ -61,6 +61,13 @@ public abstract class SaleProductParentJoinDao implements SyncableDao<SaleProduc
     public abstract UmProvider<SaleNameWithImage> findAllCategoriesInACategory(long saleProductCategoryUid);
 
 
+    @UmQuery(QUERY_SELECT_ALL_SALE_PRODUCT +
+            " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
+            "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
+            "   WHERE SaleProduct.saleProductName = 'Collection' " +
+            "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
+            " AND child.saleProductCategory = 1 ")
+    public abstract UmProvider<SaleNameWithImage> findAllCategoriesInCollection();
 
 
     @UmQuery("SELECT * FROM SaleProductParentJoin WHERE " +

@@ -24,15 +24,19 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.core.view.ViewWithErrorNotifier;
+import com.ustadmobile.port.android.impl.LastActive;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
@@ -40,8 +44,10 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -54,6 +60,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private UstadBaseController baseController;
 
     protected Toolbar umToolbar;
+
+    private boolean checkLogout = true;
 
     /**
      * Currently running instance of NetworkManagerBle
@@ -179,10 +187,50 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onResume() {
         super.onResume();
+
+        checkTimeout();
+
         if (localeChanged) {
             if (UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
                 new Handler().postDelayed(this::recreate, 200);
             }
+        }
+    }
+
+    @Override
+    public void onStart() {
+        isStarted = true;
+        checkTimeout();
+        super.onStart();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        AtomicLong systemTime = new AtomicLong(System.currentTimeMillis());
+        updateLastActive(systemTime);
+        return super.onTouchEvent(event);
+    }
+
+    public void updateLastActive(AtomicLong time){
+        LastActive.getInstance().setLastActive(time);
+    }
+
+    private void checkTimeout(){
+        AtomicLong lastInputEventTime = LastActive.getInstance().getLastActive();
+        long timeoutExceeded = System.currentTimeMillis() - lastInputEventTime.longValue();
+        long logoutTimeout = 300000; //TODO: Get and set from app pref
+        if(timeoutExceeded > logoutTimeout){
+            handleLogout();
+
+        }
+    }
+    public void handleLogout(){
+        if(checkLogout) {
+            finishAffinity();
+            UmAccountManager.setActiveAccount(null, getContext());
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            Hashtable<String, String> args = new Hashtable<>();
+            impl.go(Login2View.VIEW_NAME, args, getContext());
         }
     }
 
@@ -242,12 +290,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onStart() {
-        isStarted = true;
-        super.onStart();
     }
 
     public void onStop() {
@@ -435,5 +477,13 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
      */
     public NetworkManagerBle getNetworkManagerBle() {
         return networkManagerBle;
+    }
+
+    public boolean isCheckLogout() {
+        return checkLogout;
+    }
+
+    public void setCheckLogout(boolean checkLogout) {
+        this.checkLogout = checkLogout;
     }
 }

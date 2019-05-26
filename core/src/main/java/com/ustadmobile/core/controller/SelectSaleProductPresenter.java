@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupDao;
+import com.ustadmobile.core.db.dao.SaleProductParentJoinDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -13,6 +14,7 @@ import com.ustadmobile.core.view.SaleProductCategoryListView;
 import com.ustadmobile.core.view.SaleProductDetailView;
 import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.lib.db.entities.SaleNameWithImage;
+import com.ustadmobile.lib.db.entities.SaleProduct;
 
 import java.util.Hashtable;
 
@@ -44,6 +46,7 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
     SaleProductDao saleProductDao;
     SaleProductGroupDao saleProductGroupDao;
+    SaleProductParentJoinDao productParentJoinDao;
     UstadMobileSystemImpl impl;
     private boolean catalogMode;
 
@@ -59,6 +62,7 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
         saleProductDao = repository.getSaleProductDao();
         saleProductGroupDao = repository.getSaleProductGroupDao();
+        productParentJoinDao = repository.getSaleProductParentJoinDao();
 
         if(getArguments().containsKey(ARG_PRODUCER_UID)){
             producerUid = Long.parseLong((String)getArguments().get(ARG_PRODUCER_UID));
@@ -93,8 +97,7 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
 
     }
     private void updateCollectionProvider(){
-        collectionProvider =
-                saleProductGroupDao.findAllTypedActiveSNWIProvider(PRODUCT_GROUP_TYPE_COLLECTION);
+        collectionProvider = productParentJoinDao.findAllCategoriesInCollection();
         view.setCollectionProvider(collectionProvider);
     }
 
@@ -199,5 +202,16 @@ public class SelectSaleProductPresenter extends UstadBaseController<SelectSalePr
     }
 
     public void handleClickCollectionMore() {
+        saleProductDao.findByNameAsync("Collection", new UmCallback<SaleProduct>() {
+            @Override
+            public void onSuccess(SaleProduct result) {
+                handleClickProduct(result.getSaleProductUid(), true);
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 }
