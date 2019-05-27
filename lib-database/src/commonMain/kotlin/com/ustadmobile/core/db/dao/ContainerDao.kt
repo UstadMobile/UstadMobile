@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
 
 @Dao
 @UmRepository
-abstract class ContainerDao : SyncableDao<Container, ContainerDao> {
+abstract class ContainerDao : BaseDao<Container> {
 
     @Insert
     abstract fun insert(containerList: List<Container>): Array<Long>

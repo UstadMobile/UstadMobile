@@ -8,4 +8,4 @@ import com.ustadmobile.lib.db.entities.PersonGroupMember
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @Dao
 @UmRepository
-abstract class PersonGroupMemberDao : SyncableDao<PersonGroupMember, PersonGroupMemberDao>
+abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember>

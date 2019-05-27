@@ -8,4 +8,4 @@ import com.ustadmobile.lib.db.entities.PersonLocationJoin
 @UmDao(inheritPermissionFrom = PersonDao::class, inheritPermissionForeignKey = "personLocationPersonUid", inheritPermissionJoinedPrimaryKey = "personUid")
 @Dao
 @UmRepository
-abstract class PersonLocationJoinDao : SyncableDao<PersonLocationJoin, PersonLocationJoinDao>
+abstract class PersonLocationJoinDao : BaseDao<PersonLocationJoin>

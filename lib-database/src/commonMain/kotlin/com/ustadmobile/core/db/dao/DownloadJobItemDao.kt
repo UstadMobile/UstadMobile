@@ -2,7 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 /**
@@ -118,10 +118,10 @@ abstract class DownloadJobItemDao {
     abstract fun findByUid(djiUid: Int): DownloadJobItem?
 
     @Query("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
-    abstract fun getLiveStatus(djiUid: Int): UmLiveData<Int>
+    abstract fun getLiveStatus(djiUid: Int): DoorLiveData<Int>
 
     @Query("SELECT * FROM DownloadJobItem")
-    abstract fun findAllLive(): UmLiveData<List<DownloadJobItem>>
+    abstract fun findAllLive(): DoorLiveData<List<DownloadJobItem>>
 
     @Query("SELECT * FROM DownloadJobItem")
     abstract fun findAll(): List<DownloadJobItem>
@@ -130,7 +130,7 @@ abstract class DownloadJobItemDao {
     abstract fun getTotalDownloadJobItems(djiDjUid: Int): Int
 
     @Query("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
-    abstract fun countDownloadJobItems(djiDjUid: Long): UmLiveData<Int>
+    abstract fun countDownloadJobItems(djiDjUid: Long): DoorLiveData<Int>
 
     @Query("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
     abstract fun getDestinationFiles(djiDsiUids: List<Long>): List<String>
@@ -145,7 +145,7 @@ abstract class DownloadJobItemDao {
             " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
             " AND DownloadJob.meteredNetworkAllowed) " +
             "LIMIT 1")
-    abstract fun findNextDownloadJobItems(): UmLiveData<List<DownloadJobItem>>
+    abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid " +
@@ -164,7 +164,7 @@ abstract class DownloadJobItemDao {
             "FROM DownloadJobItem " +
             "WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
-    abstract fun findByContentEntryUidLive(contentEntryUid: Long): UmLiveData<DownloadJobItem>
+    abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem>
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +

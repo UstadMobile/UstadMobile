@@ -12,7 +12,7 @@ import kotlinx.io.InputStream
         Role.PERMISSION_PERSON_PICTURE_UPDATE + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
-abstract class PersonPictureDao : SyncableDao<PersonPicture, PersonPictureDao> {
+abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @UmDbSetAttachment
     abstract fun setAttachment(uid: Long, pictureAttachment: InputStream)

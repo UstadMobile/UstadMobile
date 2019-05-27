@@ -1,10 +1,9 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION1
@@ -22,7 +21,7 @@ import com.ustadmobile.lib.db.entities.Role
         TABLE_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
-abstract class ClazzDao : SyncableDao<Clazz, ClazzDao> {
+abstract class ClazzDao : BaseDao<Clazz> {
 
     @Insert
     abstract override fun insert(entity: Clazz): Long

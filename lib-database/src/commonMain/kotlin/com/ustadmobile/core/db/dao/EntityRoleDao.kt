@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.EntityRole
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)", updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @Dao
 @UmRepository
-abstract class EntityRoleDao : SyncableDao<EntityRole, EntityRoleDao> {
+abstract class EntityRoleDao : BaseDao<EntityRole> {
 
     @Query("SELECT (SELECT admin FROM Person WHERE personUid = :accountPersonUid) " +
             "OR EXISTS(SELECT EntityRole.erUid FROM EntityRole " +

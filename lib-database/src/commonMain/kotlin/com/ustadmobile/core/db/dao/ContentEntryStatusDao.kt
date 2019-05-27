@@ -1,7 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 
@@ -26,7 +26,7 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun findAllInvalidated(): List<ContentEntryStatus>
 
     @Query("Select * FROM ContentEntryStatus where cesUid = :parentUid")
-    abstract fun findContentEntryStatusByUid(parentUid: Long): UmLiveData<ContentEntryStatus>
+    abstract fun findContentEntryStatusByUid(parentUid: Long): DoorLiveData<ContentEntryStatus>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertOrAbort(statusList: List<ContentEntryStatus>)

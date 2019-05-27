@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode
 
@@ -43,7 +43,7 @@ abstract class EntryStatusResponseDao {
     abstract fun findByContainerUid(erContainerUid: Long): EntryStatusResponse?
 
     @Query("SELECT * FROM EntryStatusResponse WHERE erContainerUid = :erContainerUid")
-    abstract fun getLiveEntryStatus(erContainerUid: Long): UmLiveData<List<EntryStatusResponse>>
+    abstract fun getLiveEntryStatus(erContainerUid: Long): DoorLiveData<List<EntryStatusResponse>>
 
     @Query("SELECT Container.containerUid, NetworkNode.nodeId FROM Container, NetworkNode " +
             " WHERE Container.containerUid IN (:erContainerUids) " +

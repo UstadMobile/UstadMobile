@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
 @UmRepository
-abstract class ContentEntryContentCategoryJoinDao : SyncableDao<ContentEntryContentCategoryJoin, ContentEntryContentCategoryJoinDao> {
+abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentCategoryJoin> {
 
     @Query("SELECT ContentEntryContentCategoryJoin.* FROM ContentEntryContentCategoryJoin " +
             "LEFT JOIN ContentEntry ON ContentEntryContentCategoryJoin.ceccjContentEntryUid = ContentEntry.contentEntryUid " +

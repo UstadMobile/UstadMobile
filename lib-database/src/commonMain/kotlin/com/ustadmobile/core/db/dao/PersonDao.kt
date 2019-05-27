@@ -20,7 +20,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
         + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
-abstract class PersonDao : SyncableDao<Person, PersonDao> {
+abstract class PersonDao : BaseDao<Person> {
 
     internal inner class PersonUidAndPasswordHash {
         var passwordHash: String = ""

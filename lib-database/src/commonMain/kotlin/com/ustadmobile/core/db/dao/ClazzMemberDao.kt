@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ClazzMember
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid", inheritPermissionJoinedPrimaryKey = "clazzUid")
 @Dao
 @UmRepository
-abstract class ClazzMemberDao : SyncableDao<ClazzMember, ClazzMemberDao> {
+abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     @Insert
     abstract override fun insert(entity: ClazzMember): Long

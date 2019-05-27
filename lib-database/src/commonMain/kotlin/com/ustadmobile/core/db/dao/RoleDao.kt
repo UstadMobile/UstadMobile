@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.Role
 
 @UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-abstract class RoleDao : SyncableDao<Role, RoleDao> {
+abstract class RoleDao : BaseDao<Role> {
     companion object {
 
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"

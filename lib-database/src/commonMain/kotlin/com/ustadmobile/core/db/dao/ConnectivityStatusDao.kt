@@ -4,14 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 
 @Dao
 abstract class ConnectivityStatusDao {
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
-    abstract fun statusLive(): UmLiveData<ConnectivityStatus>
+    abstract fun statusLive(): DoorLiveData<ConnectivityStatus>
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     abstract fun status(): ConnectivityStatus?

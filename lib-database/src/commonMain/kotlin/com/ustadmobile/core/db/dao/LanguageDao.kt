@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.Language
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
 @UmRepository
-abstract class LanguageDao : SyncableDao<Language, LanguageDao> {
+abstract class LanguageDao : BaseDao<Language> {
 
     @Query("SELECT * FROM Language")
     abstract fun publicLanguages(): List<Language>

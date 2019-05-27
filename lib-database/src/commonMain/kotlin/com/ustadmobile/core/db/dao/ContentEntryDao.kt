@@ -1,10 +1,10 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmQuery
 import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey
@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.*
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
 @UmRepository
-abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
+abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("SELECT * FROM ContentEntry")
     abstract fun allEntries(): List<ContentEntry>
@@ -29,7 +29,7 @@ abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
             "FROM DownloadJob \n" +
             "LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid\n" +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid \n ")
-    abstract fun downloadedRootItems(): UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>
+    abstract fun downloadedRootItems(): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 
     @Insert
     abstract fun insert(contentEntries: List<ContentEntry>): Array<Long>
@@ -43,7 +43,7 @@ abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
-    abstract fun getChildrenByParentUid(parentUid: Long): UmProvider<ContentEntry>
+    abstract fun getChildrenByParentUid(parentUid: Long): DataSource.Factory<Int, ContentEntry>
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -111,7 +111,7 @@ abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
             "AND " +
             "(:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin " +
             "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
-    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>
+    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 
 
 }

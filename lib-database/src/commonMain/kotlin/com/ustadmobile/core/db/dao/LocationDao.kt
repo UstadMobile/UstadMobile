@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Location
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @Dao
 @UmRepository
-abstract class LocationDao : SyncableDao<Location, LocationDao> {
+abstract class LocationDao : BaseDao<Location> {
 
 
     @Insert
