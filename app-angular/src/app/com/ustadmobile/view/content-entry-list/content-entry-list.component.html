@@ -1,6 +1,4 @@
 <div class="row white" (close)="ngOnDestroy()">
- 
-  <p>{{getString(80)}}</p>
     <ul *ngIf="entries" class="collection default-padding-top">
         <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="navigate(entry)">
           <div class="row">

@@ -3,8 +3,6 @@ package com.ustadmobile.core.generated.locale
 /** DO NOT EDIT. GENERATED CODE */
 object MessageID{
 
-    const val  NAME = "Ustad Mobile"
-
     const val cancel = 2020
 
     const val data_label = 2092
