@@ -1,13 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 @UmEntity
 @Entity
-class ScrapeRun {
+class ScrapeRun() {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
@@ -17,9 +17,7 @@ class ScrapeRun {
 
     var status: Int = 0
 
-    constructor()
-
-    constructor(scrapeType: String, status: Int) {
+    constructor(scrapeType: String, status: Int) : this() {
         this.scrapeType = scrapeType
         this.status = status
     }

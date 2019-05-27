@@ -13,8 +13,6 @@ class EntryStatusResponseWithNode : EntryStatusResponse {
     @Embedded
     var networkNode: NetworkNode? = null
 
-    constructor()
-
     constructor(networkNode: NetworkNode) {
         this.networkNode = networkNode
     }

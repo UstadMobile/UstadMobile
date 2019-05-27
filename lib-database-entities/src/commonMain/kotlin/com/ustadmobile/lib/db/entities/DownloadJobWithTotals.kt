@@ -5,7 +5,7 @@ package com.ustadmobile.lib.db.entities
  * all DownloadJobItem entities in the DownloadJob. This is used with DAO method SQL that uses
  * the SQL sum function.
  */
-class DownloadJobWithTotals : DownloadJob() {
+class DownloadJobWithTotals() : DownloadJob() {
 
     /**
      * Get the total number of DownloadJobItem entities that are part of this job

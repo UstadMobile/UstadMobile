@@ -1,15 +1,9 @@
 package com.ustadmobile.lib.db.entities
 
 import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
-
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TABLE_ID
 
 /**
@@ -21,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TABLE_ID
  */
 @UmEntity(tableId = TABLE_ID)
 @Entity
-open class ContentEntry {
+open class ContentEntry() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
@@ -107,9 +101,7 @@ open class ContentEntry {
     @UmSyncLastChangedBy
     var contentEntryLastChangedBy: Int = 0
 
-    constructor()
-
-    constructor(title: String, description: String, leaf: Boolean, publik: Boolean) {
+    constructor(title: String, description: String, leaf: Boolean, publik: Boolean) : this() {
         this.title = title
         this.description = description
         this.leaf = leaf

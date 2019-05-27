@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: "kotlin-android"
+apply plugin: 'kotlin-kapt'
 
 buildscript {
     repositories {
@@ -58,19 +59,22 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
-    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+    kapt "androidx.lifecycle:lifecycle-compiler:$version_androidx_lifecycle"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
     //Room persistence
     implementation "androidx.room:room-runtime:$version_android_room"
-    //kapt "androidx.room:room-compiler:$version_android_room"
+    kapt "androidx.room:room-compiler:$version_android_room"
+
+    implementation "androidx.room:room-ktx:$version_android_room"
+
 
     // Paging
-    implementation "android.arch.paging:runtime:$version_android_paging"
+    implementation "androidx.paging:paging-runtime:$version_androidx_paging"
 
-    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
-    implementation "com.android.support:support-core-utils:$version_android_support_lib"
+    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
 
     testImplementation "junit:junit:$version_junit"
     androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"

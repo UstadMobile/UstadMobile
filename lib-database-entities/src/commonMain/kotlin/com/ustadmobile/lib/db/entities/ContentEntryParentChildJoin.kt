@@ -1,8 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Index
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TABLE_ID
 
@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TAB
 //short code = cepcj
 @UmEntity(tableId = TABLE_ID, indices = arrayOf(UmIndex(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])))
 @Entity(indices = arrayOf(Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])))
-class ContentEntryParentChildJoin {
+class ContentEntryParentChildJoin() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
@@ -34,10 +34,8 @@ class ContentEntryParentChildJoin {
     @UmSyncLastChangedBy
     var cepcjLastChangedBy: Int = 0
 
-    constructor()
-
     constructor(parentEntry: ContentEntry, childEntry: ContentEntry,
-                childIndex: Int) {
+                childIndex: Int) : this() {
         this.cepcjParentContentEntryUid = parentEntry.contentEntryUid
         this.cepcjChildContentEntryUid = childEntry.contentEntryUid
         this.childIndex = childIndex

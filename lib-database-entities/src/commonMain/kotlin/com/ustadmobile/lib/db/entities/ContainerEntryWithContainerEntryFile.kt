@@ -12,6 +12,4 @@ class ContainerEntryWithContainerEntryFile : ContainerEntry {
     constructor(cePath: String, container: Container, entryFile: ContainerEntryFile) : super(cePath, container, entryFile) {
         this.containerEntryFile = entryFile
     }
-
-    constructor()
 }

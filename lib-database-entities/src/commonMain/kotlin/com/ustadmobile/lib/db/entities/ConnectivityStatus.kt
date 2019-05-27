@@ -1,13 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 @UmEntity
 @Entity
-class ConnectivityStatus {
+class ConnectivityStatus() {
 
     @UmPrimaryKey
     @PrimaryKey
@@ -19,8 +19,7 @@ class ConnectivityStatus {
 
     var connectedOrConnecting: Boolean = false
 
-    constructor()
-    constructor(connectivityState: Int, connectedOrConnecting: Boolean, wifiSsid: String?) {
+    constructor(connectivityState: Int, connectedOrConnecting: Boolean, wifiSsid: String?) : this() {
         this.connectivityState = connectivityState
         this.connectedOrConnecting = connectedOrConnecting
         this.wifiSsid = wifiSsid

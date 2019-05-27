@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import android.arch.persistence.room.Embedded
 import com.ustadmobile.lib.database.annotation.UmEmbedded
 
-open class ContentEntryWithContentEntryStatus : ContentEntry() {
+open class ContentEntryWithContentEntryStatus() : ContentEntry() {
 
     @UmEmbedded
     @Embedded

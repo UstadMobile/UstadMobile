@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-class DistinctCategorySchema {
+class DistinctCategorySchema() {
 
     var contentCategoryUid: Long = 0
 

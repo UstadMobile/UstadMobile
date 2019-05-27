@@ -1,16 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 48)
 @Entity
-class PersonLocationJoin {
+class PersonLocationJoin() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
@@ -29,9 +25,7 @@ class PersonLocationJoin {
     @UmSyncLastChangedBy
     var plLastChangedBy: Int = 0
 
-    constructor()
-
-    constructor(person: Person, location: Location) {
+    constructor(person: Person, location: Location) : this() {
         this.personLocationPersonUid = person.personUid
         this.personLocationLocationUid = location.locationUid
     }
