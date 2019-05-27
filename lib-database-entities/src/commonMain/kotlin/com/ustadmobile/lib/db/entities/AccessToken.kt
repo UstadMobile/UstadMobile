@@ -13,7 +13,7 @@ class AccessToken() {
     @UmPrimaryKey
     @PrimaryKey
     @NonNull
-    var token: String? = ""
+    var token: String = ""
 
     var accessTokenPersonUid: Long = 0
 
