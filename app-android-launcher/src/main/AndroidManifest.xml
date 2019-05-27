@@ -2,7 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.toughra.ustadmobile.launcher">
 
-    <application android:allowBackup="true"
+    <application
+        tools:replace="android:allowBackup"
+        android:allowBackup="false"
         android:icon="@drawable/ic_launcher_classbook_logo"
         android:roundIcon="@drawable/ic_launcher_classbook_logo"
         android:name="com.ustadmobile.port.android.App"

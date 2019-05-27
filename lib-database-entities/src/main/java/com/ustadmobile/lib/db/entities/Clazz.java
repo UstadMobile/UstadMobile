@@ -44,6 +44,10 @@ public class Clazz {
     //SEL
     private boolean selFeature;
 
+    private long clazzStartTime;
+
+    private long clazzEndTime;
+
     @UmSyncMasterChangeSeqNum
     private long clazzMasterChangeSeqNum;
 
@@ -183,5 +187,21 @@ public class Clazz {
 
     public void setClazzLocationUid(long clazzLocationUid) {
         this.clazzLocationUid = clazzLocationUid;
+    }
+
+    public long getClazzStartTime() {
+        return clazzStartTime;
+    }
+
+    public void setClazzStartTime(long clazzStartTime) {
+        this.clazzStartTime = clazzStartTime;
+    }
+
+    public long getClazzEndTime() {
+        return clazzEndTime;
+    }
+
+    public void setClazzEndTime(long clazzEndTime) {
+        this.clazzEndTime = clazzEndTime;
     }
 }

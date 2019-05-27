@@ -39,7 +39,8 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <application android:supportsRtl="true" >
+    <application android:allowBackup="false"
+        android:supportsRtl="true" >
         <activity
             android:theme="@style/ThemeOnboarding"
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"

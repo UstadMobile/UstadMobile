@@ -34,7 +34,7 @@ public class UmDbBuilder {
                 Class roomDbClass = Class.forName(dbClass.getName() + "_RoomDb");
 
                 RoomDatabase.Builder roomBuilder = Room.databaseBuilder((Context)context, roomDbClass,
-                        dbName);
+                        dbName).fallbackToDestructiveMigration();
                 for(DbCallback dbCallback : callbackList) {
                     roomBuilder.addCallback(new UmDbCallbackAdapter(dbCallback));
                 }

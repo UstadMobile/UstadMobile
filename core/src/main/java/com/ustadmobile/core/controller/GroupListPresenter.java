@@ -44,7 +44,7 @@ public class GroupListPresenter extends UstadBaseController<GroupListView> {
         super.onCreate(savedState);
 
         //Get provider 
-        umProvider = providerDao.findAllActiveGroups();
+        umProvider = providerDao.findAllActiveGroupsWithoutIndividualGroup();
         view.setListProvider(umProvider);
 
     }

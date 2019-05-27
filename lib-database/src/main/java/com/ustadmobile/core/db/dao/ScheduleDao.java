@@ -135,7 +135,8 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
         for(ClazzWithTimeZone clazz : clazzList) {
             //Skipp classes that have no time zone
             if(clazz.getTimeZone() == null) {
-                System.err.println("Warning: cannot create schedules for clazz" + clazz.getClazzName() + ", uid:" +
+                System.err.println("Warning: cannot create schedules for clazz" +
+                        clazz.getClazzName() + ", uid:" +
                         clazz.getClazzUid() + " as it has no timezone");
                 continue;
             }
@@ -175,6 +176,15 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         //Its a holiday. Skip
                         System.out.println("Skipping holiday");
 
+                    } else if(clazz.getClazzEndTime() != 0 &&
+                            startCalendar.getTimeInMillis() > clazz.getClazzEndTime()){
+                        //Date is ahead of clazz end date. Skipping.
+                        System.out.println("Skipping cause current date is after Class's end date.");
+
+                    } else if(clazz.getClazzStartTime() != 0 &&
+                            startCalendar.getTimeInMillis() < clazz.getClazzStartTime()){
+                        //Date is before Clazz's start date. Skipping
+                        System.out.println("Skipping cause current date is before Class's start date.");
                     } else {
 
                         //This will get the next schedule for that day. For the same day, it will
@@ -201,21 +211,27 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                             clazz.getClazzUid())) {
                         //Its a holiday. Skip it.
                         System.out.println("Skipping holiday");
+                    }else if(clazz.getClazzEndTime() != 0 &&
+                            startCalendar.getTimeInMillis() > clazz.getClazzEndTime()){
+                        //Date is ahead of clazz end date. Skipping.
+                        System.out.println("Skipping cause current date is after Class's end date.");
+
+                    } else if(clazz.getClazzStartTime() != 0 &&
+                            startCalendar.getTimeInMillis() < clazz.getClazzStartTime()){
+                        //Date is before Clazz's start date. Skipping
+                        System.out.println("Skipping cause current date is before Class's start date.");
                     }else{
 
+                        //Will be true if today is schedule day
+                        incToday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+                                == schedule.getScheduleDay();
 
-                    if(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == schedule.getScheduleDay()){
-                        incToday = true;
-                    }else{
-                        incToday = false;
-                    }
+                        //Get the day of next occurence.
+                        nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
+                                startCalendar, timeZone, schedule.getScheduleDay(), incToday);
 
-                    //Get the day of next occurence.
-                    nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
-                            startCalendar, timeZone, schedule.getScheduleDay(), incToday);
-
-                    //Set the day's timezone to Clazz
-                    nextScheduleOccurence.setTimeZone(TimeZone.getTimeZone(timeZone));
+                        //Set the day's timezone to Clazz
+                        nextScheduleOccurence.setTimeZone(TimeZone.getTimeZone(timeZone));
 
                         nextScheduleOccurence = UMCalendarUtil.copyCalendarAndAdvanceTo(
                                 startCalendar, clazz.getTimeZone(), schedule.getScheduleDay(), incToday);
@@ -232,8 +248,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         nextScheduleOccurence.set(Calendar.SECOND, 0);
                         nextScheduleOccurence.set(Calendar.MILLISECOND, 0);
                     }
-
-
                 }
 
                 if (nextScheduleOccurence != null && nextScheduleOccurence.before(endCalendar)) {
@@ -249,7 +263,6 @@ public abstract class ScheduleDao implements SyncableDao<Schedule, ScheduleDao> 
                         db.getClazzLogDao().replace(newLog);
                     }
                 }
-
             }
         }
     }

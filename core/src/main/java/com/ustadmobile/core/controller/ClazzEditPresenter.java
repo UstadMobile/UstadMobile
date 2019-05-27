@@ -447,7 +447,6 @@ public class ClazzEditPresenter
                     }
                 });
             }
-
         }
     }
 
@@ -529,5 +528,13 @@ public class ClazzEditPresenter
         args.put(CLAZZ_FEATURE_ACTIVITY_ENABLED, mUpdatedClazz.isActivityFeature()?"yes":"no");
         args.put(CLAZZ_FEATURE_SEL_ENABLED, mUpdatedClazz.isSelFeature()?"yes":"no");
         impl.go(SelectClazzFeaturesView.VIEW_NAME, args, getContext());
+    }
+
+    public void handleUpdateStartTime(long startTime) {
+        mUpdatedClazz.setClazzStartTime(startTime);
+    }
+
+    public void handleUpdateEndTime(long endTime) {
+        mUpdatedClazz.setClazzEndTime(endTime);
     }
 }

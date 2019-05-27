@@ -713,5 +713,8 @@ This is the one you should be editing. The one in /core/locale/main/values/strin
     <string name="send_feedback">Send feedback</string>
     <string name="feedback_thanks">Thank you for the feedback.</string>
 
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+
 
 </resources>

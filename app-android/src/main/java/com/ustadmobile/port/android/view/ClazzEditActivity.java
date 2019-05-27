@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.app.DatePickerDialog;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
@@ -31,12 +32,15 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ClazzEditPresenter;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ClazzEditView;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.CustomField;
 import com.ustadmobile.lib.db.entities.Schedule;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -65,6 +69,9 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
     TextView featuresTextView;
 
     LinearLayout customFieldsLL;
+
+    EditText fromET;
+    EditText toET;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -104,6 +111,9 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
         mPresenter = new ClazzEditPresenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
+
+        fromET = findViewById(R.id.activity_clazz_edit_start_date_edittext);
+        toET = findViewById(R.id.activity_clazz_edit_end_date_edittext);
 
         featuresTextView.setOnClickListener(v -> mPresenter.handleClickFeaturesSelection());
 
@@ -168,6 +178,65 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        //Date preparation
+        Calendar myCalendarEnd = Calendar.getInstance();
+        Calendar myCalendarStart = Calendar.getInstance();
+        Locale currentLocale = getResources().getConfiguration().locale;
+
+        //START DATE:
+        fromET.setFocusable(false);
+
+        DatePickerDialog.OnDateSetListener startDateListener = (view, year, month, dayOfMonth) -> {
+            myCalendarStart.set(Calendar.YEAR, year);
+            myCalendarStart.set(Calendar.MONTH, month);
+            myCalendarStart.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            long startDate = myCalendarStart.getTimeInMillis();
+            mPresenter.handleUpdateStartTime(startDate);
+
+            if(startDate == 0L){
+                fromET.setText("-");
+            }else {
+                fromET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(startDate,
+                        currentLocale));
+            }
+        };
+
+        //date listener - opens a new date picker.
+        DatePickerDialog startDatePicker = new DatePickerDialog(
+                this, startDateListener, myCalendarStart.get(Calendar.YEAR),
+                myCalendarStart.get(Calendar.MONTH), myCalendarStart.get(Calendar.DAY_OF_MONTH));
+
+        fromET.setOnClickListener(v -> startDatePicker.show());
+
+
+        //END DATE:
+
+        toET.setFocusable(false);
+
+        //Date pickers's on click listener - sets text
+        DatePickerDialog.OnDateSetListener endDateListener = (view, year, month, dayOfMonth) -> {
+            myCalendarEnd.set(Calendar.YEAR, year);
+            myCalendarEnd.set(Calendar.MONTH, month);
+            myCalendarEnd.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            long endDate = myCalendarEnd.getTimeInMillis();
+
+            mPresenter.handleUpdateEndTime(endDate);
+
+            if(endDate == 0L){
+                toET.setText("-");
+            }else {
+                toET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(endDate,
+                        currentLocale));
+            }
+        };
+
+        //date listener - opens a new date picker.
+        DatePickerDialog endDatePicker = new DatePickerDialog(
+                this, endDateListener, myCalendarEnd.get(Calendar.YEAR),
+                myCalendarEnd.get(Calendar.MONTH), myCalendarEnd.get(Calendar.DAY_OF_MONTH));
+
+        toET.setOnClickListener(v -> endDatePicker.show());
     }
 
     private void handleClickDone(){
@@ -284,6 +353,28 @@ public class ClazzEditActivity extends UstadBaseActivity implements ClazzEditVie
             Objects.requireNonNull(classDescTIP.getEditText()).setText(finalClazzDesc);
         });
 
+        long startTimeLong = 0;
+        long endTimeLong = 0;
+
+        startTimeLong = updatedClazz.getClazzStartTime();
+        endTimeLong = updatedClazz.getClazzEndTime();
+
+        long finalStartTimeLong = startTimeLong;
+        long finalEndTimeLong = endTimeLong;
+        runOnUiThread(() -> {
+            if(finalStartTimeLong ==0){
+                fromET.setText("-");
+            }else {
+                fromET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                        finalStartTimeLong));
+            }
+            if(finalEndTimeLong == 0) {
+                toET.setText("-");
+            }else{
+                toET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                        finalEndTimeLong));
+            }
+        });
 
     }
 

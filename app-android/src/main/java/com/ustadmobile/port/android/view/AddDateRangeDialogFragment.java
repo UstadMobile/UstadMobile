@@ -72,7 +72,8 @@ public class AddDateRangeDialogFragment extends UstadDialogFragment implements
         LayoutInflater inflater =
                 (LayoutInflater)Objects.requireNonNull(getContext()).getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
-        Calendar myCalendar = Calendar.getInstance();
+        Calendar myCalendarFrom = Calendar.getInstance();
+        Calendar myCalendarTo = Calendar.getInstance();
 
         assert inflater != null;
 
@@ -86,11 +87,11 @@ public class AddDateRangeDialogFragment extends UstadDialogFragment implements
         //TO:
         //Date pickers's on click listener - sets text
         DatePickerDialog.OnDateSetListener toDateListener = (view, year, month, dayOfMonth) -> {
-            myCalendar.set(Calendar.YEAR, year);
-            myCalendar.set(Calendar.MONTH, month);
-            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            myCalendarTo.set(Calendar.YEAR, year);
+            myCalendarTo.set(Calendar.MONTH, month);
+            myCalendarTo.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-            setToDate(myCalendar.getTimeInMillis());
+            setToDate(myCalendarTo.getTimeInMillis());
             mPresenter.handleDateRangeToTimeSelected(toDate);
 
             toET.setText(UMCalendarUtil.getPrettyDateSimpleWithoutYearFromLong(toDate,
@@ -102,8 +103,8 @@ public class AddDateRangeDialogFragment extends UstadDialogFragment implements
 
         //date listener - opens a new date picker.
         DatePickerDialog dateFieldPicker = new DatePickerDialog(
-                mAttachedContext, toDateListener, myCalendar.get(Calendar.YEAR),
-                myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+                mAttachedContext, toDateListener, myCalendarTo.get(Calendar.YEAR),
+                myCalendarTo.get(Calendar.MONTH), myCalendarTo.get(Calendar.DAY_OF_MONTH));
 
         dateFieldPicker = hideYearFromDatePicker(dateFieldPicker);
 
@@ -114,11 +115,11 @@ public class AddDateRangeDialogFragment extends UstadDialogFragment implements
         //FROM:
         //Date pickers's on click listener - sets text
         DatePickerDialog.OnDateSetListener fromDateListener = (view, year, month, dayOfMonth) -> {
-            myCalendar.set(Calendar.YEAR, year);
-            myCalendar.set(Calendar.MONTH, month);
-            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            myCalendarFrom.set(Calendar.YEAR, year);
+            myCalendarFrom.set(Calendar.MONTH, month);
+            myCalendarFrom.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-            setFromDate(myCalendar.getTimeInMillis());
+            setFromDate(myCalendarFrom.getTimeInMillis());
             mPresenter.handleDateRangeFromTimeSelected(fromDate);
 
             fromET.setText(UMCalendarUtil.getPrettyDateSimpleWithoutYearFromLong(fromDate,
@@ -131,8 +132,8 @@ public class AddDateRangeDialogFragment extends UstadDialogFragment implements
 
         //date listener - opens a new date picker.
         DatePickerDialog fromDateFieldPicker = new DatePickerDialog(
-                mAttachedContext, fromDateListener, myCalendar.get(Calendar.YEAR),
-                myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH));
+                mAttachedContext, fromDateListener, myCalendarFrom.get(Calendar.YEAR),
+                myCalendarFrom.get(Calendar.MONTH), myCalendarFrom.get(Calendar.DAY_OF_MONTH));
 
         fromDateFieldPicker = hideYearFromDatePicker(fromDateFieldPicker);
 
