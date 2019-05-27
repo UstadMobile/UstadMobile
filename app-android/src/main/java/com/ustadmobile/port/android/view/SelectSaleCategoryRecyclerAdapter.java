@@ -27,7 +27,7 @@ public class SelectSaleCategoryRecyclerAdapter extends
         PagedListAdapter<SaleNameWithImage,
                 SelectSaleCategoryRecyclerAdapter.SelectSaleProductViewHolder> {
 
-    private static final int IMAGE_WITH = 26;
+    private static final int IMAGE_WITH = 100;
     private Context theContext;
     private Activity theActivity;
     SaleProductCategoryListPresenter mPresenter;

@@ -217,7 +217,13 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private void checkTimeout(){
         AtomicLong lastInputEventTime = LastActive.getInstance().getLastActive();
-        long timeoutExceeded = System.currentTimeMillis() - lastInputEventTime.longValue();
+        long lt;
+        if(lastInputEventTime == null){
+            lt =0;
+        }else{
+            lt = lastInputEventTime.longValue();
+        }
+        long timeoutExceeded = System.currentTimeMillis() - lt;
         long logoutTimeout = 300000; //TODO: Get and set from app pref
         if(timeoutExceeded > logoutTimeout){
             handleLogout();

@@ -29,7 +29,7 @@ import static com.ustadmobile.lib.db.entities.SaleProductGroup.PRODUCT_GROUP_TYP
 public class SelectSaleProductRecyclerAdapter extends PagedListAdapter<SaleNameWithImage,
                 SelectSaleProductRecyclerAdapter.SelectSaleProductViewHolder> {
 
-    private static final int IMAGE_WITH = 26;
+    private static final int IMAGE_WITH = 100;
     private Context theContext;
     private Activity theActivity;
     private Fragment theFragment;
