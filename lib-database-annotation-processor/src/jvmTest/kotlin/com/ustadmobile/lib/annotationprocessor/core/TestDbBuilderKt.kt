@@ -84,6 +84,17 @@ class TestDbBuilderKt {
     }
 
     @Test
+    fun givenEntitiesInserted_whenFindAllCalled_shouldReturnBoth(){
+        val entities = listOf(ExampleEntity2(name = "e1", someNumber = 42),
+                ExampleEntity2(name = "e2", someNumber = 43))
+        exampleDb2.exampleDao2().insertList(entities)
+
+        val entitiesFromQuery = exampleDb2.exampleDao2().findAll()
+        Assert.assertEquals("Found correct number of entities inserted",2,
+                entitiesFromQuery.size)
+    }
+
+    @Test
     fun givenEntityInserted_whenUpdateSingleItemNoReturnTypeCalled_thenValueShouldBeUpdated() {
         val entityToInsert = ExampleEntity2(name = "UpdateMe", someNumber =  50)
         entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
@@ -97,6 +108,33 @@ class TestDbBuilderKt {
                 nameBeforeInsert)
         Assert.assertEquals("Name after insert is updated name", entityToInsert.name,
                 exampleDb2.exampleDao2().findNameByUid(entityToInsert.uid))
+    }
+
+    @Test
+    fun givenEntityInserted_whenUpdatedSingleItemReturnCountCalled_thenShouldUpdateAndReturn1() {
+        val entityToInsert = ExampleEntity2(name = "UpdateMe", someNumber =  50)
+        entityToInsert.uid = exampleDb2.exampleDao2().insertAndReturnId(entityToInsert)
+
+        entityToInsert.name = "Update${System.currentTimeMillis()}"
+
+        val updateCount = exampleDb2.exampleDao2().updateSingleItemAndReturnCount(entityToInsert)
+
+        Assert.assertEquals("Update count = 1", 1, updateCount)
+        Assert.assertEquals("Name after insert is updated name", entityToInsert.name,
+                exampleDb2.exampleDao2().findNameByUid(entityToInsert.uid))
+    }
+
+    @Test
+    fun givenEntitiesInserted_whenUpdateListNoReturnTypeCalled_thenBothItemsShouldBeUpdated() {
+        val entities = listOf(ExampleEntity2(name = "e1", someNumber = 42),
+                ExampleEntity2(name = "e2", someNumber = 43))
+        entities.forEach { it.uid = exampleDb2.exampleDao2().insertAndReturnId(it) }
+
+        entities.forEach { it.name += System.currentTimeMillis() }
+        exampleDb2.exampleDao2().updateList(entities)
+
+        entities.forEach { Assert.assertEquals("Entity was updated", it.name,
+                exampleDb2.exampleDao2().findNameByUid(it.uid)) }
     }
 
 }

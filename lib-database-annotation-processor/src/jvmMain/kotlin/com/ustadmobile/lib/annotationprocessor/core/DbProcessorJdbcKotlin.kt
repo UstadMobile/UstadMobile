@@ -191,8 +191,9 @@ fun overrideAndConvertToKotlinTypes(method: ExecutableElement, enclosing: Declar
 fun isContinuationParam(paramTypeName: TypeName) = paramTypeName is ParameterizedTypeName &&
         paramTypeName.rawType.canonicalName == "kotlin.coroutines.Continuation"
 
+//this might be a parameterized type name, not only a class name
 fun suspendedReturnTypeFromContinuationParam(continuationParam: TypeName) =
-        (((continuationParam as ParameterizedTypeName).typeArguments[0] as WildcardTypeName).inTypes[0] as ClassName).javaToKotlinType()
+        ((continuationParam as ParameterizedTypeName).typeArguments[0] as WildcardTypeName).inTypes[0].javaToKotlinType()
 
 /**
  * Figures out the return type of a method. This will also figure out the return type of a suspended method
@@ -691,6 +692,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                 daoMethod) as ExecutableType
 
+        //The parameter type - could be singular (e.g. Entity), could be list/array (e.g. List<Entity>)
+        val paramType = daoMethodResolved.parameterTypes[0].asTypeName().javaToKotlinType()
+
         val entityType = entityTypeFromFirstParam(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv)
 
@@ -716,7 +720,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .add("_stmt = _con.prepareStatement(%S)!!\n", sqlStmt)
 
         var entityVarName = daoMethod.parameters[0].simpleName.toString()
-        if(isListOrArray(entityType.asTypeName())) {
+        if(isListOrArray(paramType)) {
             codeBlock.add("_con.autoCommit = false\n")
                     .beginControlFlow("for(_entity in ${daoMethod.parameters[0].simpleName})")
             entityVarName = "_entity"
@@ -731,13 +735,13 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         fieldSetFn(pkEl)
 
         if(resolvedReturnType != UNIT)
-            codeBlock.add("result += ")
+            codeBlock.add("_result += ")
 
         codeBlock.add("_stmt.executeUpdate()\n")
 
-        if(isListOrArray(entityType.asTypeName())) {
-            codeBlock.add("_con.commit()\n")
-                    .endControlFlow()
+        if(isListOrArray(paramType)) {
+            codeBlock.endControlFlow()
+                .add("_con.commit()\n")
         }
 
         codeBlock.nextControlFlow("finally")

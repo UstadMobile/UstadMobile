@@ -40,7 +40,19 @@ abstract class ExampleDao2 {
             "WHERE ExampleEntity2.uid = :uid")
     abstract fun findByUidWithLinkEntity(uid: Long): ExampleEntity2WithExampleLinkEntity?
 
+    @Query("SELECT * FROM ExampleEntity2 ORDER BY uid")
+    abstract fun findAll(): List<ExampleEntity2WithExampleLinkEntity>
+
+    @Query("SELECT * FROM ExampleEntity2")
+    abstract suspend fun findAllAsync(): List<ExampleEntity2WithExampleLinkEntity>
+
     @Update
     abstract fun updateSingleItem(entity: ExampleEntity2)
+
+    @Update
+    abstract fun updateSingleItemAndReturnCount(entity: ExampleEntity2): Int
+
+    @Update
+    abstract fun updateList(updateEntityList: List<ExampleEntity2>)
 
 }
