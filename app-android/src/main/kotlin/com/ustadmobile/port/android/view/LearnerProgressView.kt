@@ -1,11 +1,11 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
-import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.toughra.ustadmobile.R
 import com.txusballesteros.widgets.FitChart
 import com.txusballesteros.widgets.FitChartValue

@@ -1,0 +1,15 @@
+.user-view{
+    background: url('../../../../../assets/images/top_header_bg.jpg')
+  }
+ 
+  .header-title-label {
+    font-size: 1.5em;
+    margin-top: 14px;
+    margin-left: 70px !important;
+    min-width: 600px !important;
+    text-decoration: none;
+    color: white;
+    background: transparent;
+    border: 0px solid transparent;
+    cursor: default
+  }

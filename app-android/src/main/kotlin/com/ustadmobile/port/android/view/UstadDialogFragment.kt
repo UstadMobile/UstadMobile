@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
+import androidx.fragment.app.DialogFragment
 import com.ustadmobile.core.view.DialogResultListener
 import com.ustadmobile.core.view.DismissableDialog
 import java.util.*
@@ -9,7 +10,7 @@ import java.util.*
  * Created by mike on 7/17/17.
  */
 
-open class UstadDialogFragment : android.support.v4.app.DialogFragment(), DismissableDialog {
+open class UstadDialogFragment : DialogFragment(), DismissableDialog {
 
     protected lateinit var mResultListener: DialogResultListener
 

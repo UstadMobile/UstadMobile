@@ -1,14 +1,11 @@
 package com.ustadmobile.port.android.db;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.db.UmObserver;
-import com.ustadmobile.core.impl.UmLifecycleOwner;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import java.util.HashMap;
 

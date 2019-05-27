@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.netwokmanager
 
 import android.app.Service
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleObserver
-import android.arch.lifecycle.OnLifecycleEvent
-import android.arch.lifecycle.ProcessLifecycleOwner
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.WorkManager
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
 

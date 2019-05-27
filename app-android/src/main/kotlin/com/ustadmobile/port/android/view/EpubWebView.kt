@@ -2,8 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.annotation.TargetApi
 import android.content.Context
-import android.support.v4.view.GestureDetectorCompat
-import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
@@ -11,6 +9,8 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.webkit.WebView
 import android.widget.OverScroller
+import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.ViewCompat
 
 /**
  * This modified WebView is designed to work with the Javascript and CSS that implement pagination

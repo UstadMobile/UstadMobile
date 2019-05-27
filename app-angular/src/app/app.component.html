@@ -1,0 +1,12 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<ng-progress
+    [positionUsing]="'marginLeft'"
+    [direction]="'leftToRightIncreased'"
+    [color]="'#ffffff'"
+    [trickleSpeed]="500"
+    [thick]="false"
+    [showSpinner]="false"
+    [ease]="'easeInSine'">
+  </ng-progress>
+
+<router-outlet (deactivate)="ngOnDestroy()"></router-outlet>

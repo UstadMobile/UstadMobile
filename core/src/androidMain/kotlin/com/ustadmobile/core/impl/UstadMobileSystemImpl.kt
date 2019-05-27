@@ -39,12 +39,12 @@ import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.FileProvider
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.fragment.app.DialogFragment
 import com.ustadmobile.core.BuildConfig
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
@@ -433,7 +433,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return The value of the key if found, if not, the default value provided
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
-        return ""
+        TODO("not implemented")
     }
 
 
@@ -536,6 +536,10 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         @JvmStatic
         actual val instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
+    }
+
+    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
 }

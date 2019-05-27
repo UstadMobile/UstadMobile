@@ -1,0 +1,52 @@
+<title>{{env.appName}}</title>
+<header>
+
+  <div class="navbar-fixed">
+    <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
+      <mz-navbar-item-container [align]="'left'">
+          <mz-navbar-item>
+            <i (click)="goBack()" class="material-icons large white-text go-back-icon">arrow_back</i>
+          </mz-navbar-item>
+          <p class="header-title-label">Entries Entries</p>
+</mz-navbar-item-container>
+    </mz-navbar>
+  </div>
+
+
+  <!-- side nav starts here-->
+
+  <mz-sidenav #sidenav [fixed]=true [id]="'sidenav-demo'" [collapseButtonId]="'btn-sidenav-demo'" [edge]="'right'">
+
+    <mz-sidenav-header>
+      <div class="user-view">
+        <img class="circle avatar" src="../../../../../assets/images/guest_user_icon.png">
+        <div class="white-text name">UstadMobile FZ</div>
+        <div class="white-text email">angular@ustadmobile.com</div>
+      </div>
+    </mz-sidenav-header>
+
+    <mz-sidenav-link [active]="true">
+      <a class="collapsible-header">Libraries
+        <i class="material-icons">library_books</i>
+      </a>
+    </mz-sidenav-link>
+
+    <mz-sidenav-link>
+      <a class="collapsible-header">Reports
+        <i class="material-icons">pie_chart</i>
+      </a>
+    </mz-sidenav-link>
+
+  </mz-sidenav>
+
+  <!-- side nav ends here-->
+
+</header>
+
+<!-- Content section starts here-->
+<main>
+  <div class="content-app-wrapper">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+<!-- Content section ends here-->

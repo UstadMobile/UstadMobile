@@ -288,6 +288,8 @@ dependencies {
     // Room (annotation processing takes place only on lib-database-android to improve build times)
     implementation "androidx.room:room-runtime:$version_android_room"
 
+    implementation "androidx.core:core-ktx:$version_android_core"
+
     // Paging
     implementation "android.arch.paging:runtime:$version_android_paging"
 

@@ -22,7 +22,14 @@ kotlin {
         //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
         // the project to avoid it being seen as an extra jvm variant
         //fromPreset(presets.jvm, 'commonJvm') //comment this out for code completion
-        fromPreset(presets.js, 'js')
+        fromPreset(presets.js, 'js') {
+            compilations.main.kotlinOptions {
+                metaInfo = true
+                sourceMap = true
+                moduleKind = "commonjs"
+                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
+            }
+        }
         fromPreset(presets.android, 'android')
     }
 

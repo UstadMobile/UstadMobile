@@ -415,7 +415,7 @@ object UMFileUtil {
         var key: String
         while (it.hasNext()) {
             key = it.next()
-            decodedParams[URLTextUtil.urlDecodeUTF8(key)!!] = URLTextUtil.urlDecodeUTF8(parsedParams[key])
+            decodedParams[UMURLEncoder.decodeUTF8(key)] = UMURLEncoder.decodeUTF8(parsedParams[key])
         }
 
         return decodedParams
@@ -445,8 +445,8 @@ object UMFileUtil {
             }
 
             key = keys.next()
-            sb.append(URLTextUtil.urlEncodeUTF8(key)).append('=')
-            sb.append(URLTextUtil.urlEncodeUTF8(ht[key] as String))
+            sb.append(UMURLEncoder.encodeUTF8(key)).append('=')
+            sb.append(UMURLEncoder.encodeUTF8(ht[key] as String))
         }
 
         return sb.toString()

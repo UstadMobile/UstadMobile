@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl
 
 import kotlinx.io.InputStream
+import kotlin.browser.localStorage
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -10,6 +11,16 @@ import kotlinx.io.InputStream
  * @author mike, kileha3
  */
 actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
+
+    private lateinit var appStrings : HashMap<Int, String>
+
+
+    /**
+     * Load all strings to be used in the app
+     */
+    fun preLoadAppStrings(){
+
+    }
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
      * Android this involves starting a new activity with the arguments being turned into an
@@ -21,14 +32,16 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
-
+        val umContext: dynamic = context
+        val navigateTo = arrayOf("/home/$viewName/")
+        umContext.router.navigate(navigateTo, args)
     }
 
     /**
      * Get a string for use in the UI
      */
     actual fun getString(messageCode: Int, context: Any): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return appStrings.getValue(messageCode)
     }
 
     /**
@@ -38,6 +51,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param callback Storage dir list callback
      */
     actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**
@@ -46,7 +60,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return System locale
      */
     actual override fun getSystemLocale(context: Any): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return "en_US.UTF-8"
     }
 
     /**
@@ -54,6 +68,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      */
     actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**
@@ -63,7 +78,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return value of that preference
      */
     actual override fun getAppPref(key: String, context: Any): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return localStorage.getItem(key)
     }
 
     /**
@@ -74,6 +89,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param callback callback to call when complete or if any error occurs.
      */
     actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**
@@ -82,6 +98,11 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param value value to be set
      */
     actual fun setAppPref(key: String, value: String?, context: Any) {
+        if(value == null){
+            localStorage.removeItem(key)
+        }else{
+            localStorage.setItem(key, value)
+        }
     }
 
     /**
@@ -135,6 +156,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?, callback: UmCallback<Any>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**
@@ -172,10 +194,14 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          *
          * @return A singleton instance
          */
-        actual val instance: UstadMobileSystemImpl
-            get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-
+        actual val instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
     }
+
+    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+
 
 
 }
