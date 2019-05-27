@@ -45,3 +45,7 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+/src/assets/locale/locale.en.json
+/src/assets/locale/locale.fa.json
+/src/assets/locale/locale.ps.json
+/src/assets/locale/messages.xlf

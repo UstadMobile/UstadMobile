@@ -354,13 +354,13 @@ generateDefaultLocaleXlf.dependsOn(prepareWebLocale)
  * Generate the rest of the all supported languages
  */
 task generateOtherLocaleXlf{
-    rootProject.fileTree(dir: translationFilePath,include: "*.xlf").each() { File file ->
+    rootProject.fileTree(dir: translationsOutPath,include: "*.xlf").each() { File file ->
        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
         xmlDoc.toString()
     }
 }
 generateOtherLocaleXlf.dependsOn(generateDefaultLocaleXlf)
-compileKotlinJs.dependsOn(generateOtherLocaleXlf)
+
 
 publishing {
     publications {

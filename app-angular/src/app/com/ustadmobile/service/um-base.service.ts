@@ -1,8 +1,9 @@
 import { UmContextWrapper } from './../util/UmContextWrapper';
-import { UmWordLimitPipe } from './../util/pipes/um-word-limit.pipe';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { kotlin } from 'kotlin';
+import { async } from '@angular/core/testing';
+import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -10,7 +11,9 @@ export class UmBaseService {
 
   private systemImpl: any;
 
-  private umContext: UmContextWrapper;
+  loadedLocale: boolean = false;
+
+  private context: UmContextWrapper;
 
   constructor(private http: HttpClient) {}
 
@@ -19,18 +22,22 @@ export class UmBaseService {
   }
 
   setContext(context: UmContextWrapper){
-    this.umContext = context;
+    this.context = context;
   }
 
-  setCurrentLocale(locale: string){
+  loadLocaleStrings(locale: string){
     const localeUrl = "assets/locale/locale."+locale+".json";
-    this.loadLocaleString(localeUrl);
+    const localeObservable = new Observable(observer => {
+      setTimeout(() => {
+        if(!this.loadedLocale){
+          this.loadedLocale = true;
+          this.http.get<kotlin.collections.HashMap<Number, String>>(localeUrl).subscribe(strings => {
+            this.systemImpl.setLocaleStrings(strings);
+            observer.next(true);
+          });
+        }
+      }, 300);
+    });
+    return localeObservable;
   }
-
-
-  private loadLocaleString(localeUrl: string){
-    this.http.get<kotlin.collections.HashMap<Number, String>>(localeUrl)
-    .subscribe(response => {
-      this.systemImpl.setLocaleStrings(response);
-    })}
 }

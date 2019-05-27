@@ -10,7 +10,7 @@ export abstract class UmBaseComponent implements OnInit{
   public systemImpl: any;
   public readonly context: UmContextWrapper;
   public readonly MessageID;
-  public appName: string;
+  public app_name: string = "...";
 
   constructor(public localeService: UmBaseService, public router: Router, public route: ActivatedRoute, ){
     this.systemImpl = com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
@@ -19,11 +19,16 @@ export abstract class UmBaseComponent implements OnInit{
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
     localeService.setContext(this.context)
-    this.appName = this.MessageID.NAME; 
-    console.log(com.ustadmobile.core.generated.locale.MessageID.cancel)
   }
+
   ngOnInit(): void {
-    this.localeService.setCurrentLocale("fa");
+    //load locale strings
+    const systemDefaultLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
+    this.localeService.loadLocaleStrings(systemDefaultLocale).subscribe((loaded) => {
+      if(loaded){
+        this.app_name = this.getString(this.MessageID.app_name);
+      }
+    });
   }
 
   public getString(messageId: number){

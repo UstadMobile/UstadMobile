@@ -1,11 +1,8 @@
 import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
-import {Component,OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { com as core } from 'core';
-import { com as db } from 'lib-database';
-import { mock, anything, when, spy } from 'ts-mockito';
-import { UmContextWrapper } from '../../util/UmContextWrapper';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 
@@ -48,13 +45,7 @@ export class ContentEntryListComponent extends UmBaseComponent implements core.u
 
   navigate(entry : ContentEntry) {
     const contentEntry = entry as core.ustadmobile.lib.db.entities.ContentEntry;
-    const basePath = entry.leaf === true  ? 'contentEntryList/' :'contentEntryDetail';
 
-    const args: any = {
-      relativeTo: this.route,
-      queryParams: entry.leaf ? {parentUid: entry.contentEntryUid}: {entryUid: entry.contentEntryUid},
-      queryParamsHandling: 'merge',
-    };
     //core.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go(basePath,args, this.context,0);
 
     this.presenter.handleContentEntryClicked(contentEntry);

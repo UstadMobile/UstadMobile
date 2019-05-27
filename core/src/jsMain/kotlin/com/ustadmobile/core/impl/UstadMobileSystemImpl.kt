@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl
 
 import kotlinx.io.InputStream
 import kotlin.browser.localStorage
+import kotlin.browser.window
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -12,6 +13,7 @@ import kotlin.browser.localStorage
  */
 actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
+    @JsName("stringMap")
     private var stringMap : Any = Any()
 
     /**
@@ -19,7 +21,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     @JsName("setLocaleStrings")
     fun setLocaleStrings(values : Any){
-        stringMap = values
+        this.stringMap = values
     }
     /**
      * The main method used to go to a new view. This is implemented at the platform level. On
@@ -42,8 +44,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     @JsName("getString")
     actual fun getString(messageCode: Int, context: Any): String {
-        val stringMap : dynamic = stringMap
-        return stringMap[messageCode] as String
+        val map : dynamic = this.stringMap
+        return map[messageCode] as String
     }
 
     /**
@@ -62,7 +64,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return System locale
      */
     actual override fun getSystemLocale(context: Any): String {
-        return "en_US.UTF-8"
+        return "${window.navigator.language}.UTF-8"
     }
 
     /**

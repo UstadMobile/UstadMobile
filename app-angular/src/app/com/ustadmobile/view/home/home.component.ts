@@ -13,6 +13,7 @@ import { UmDbMockService } from '../../core/db/um-db-mock.service';
 })
 export class HomeComponent extends UmBaseComponent {
 
+  section_title = "Title"
   constructor(private location: Location,localeService: UmBaseService, router: Router, route: ActivatedRoute, private umDb: UmDbMockService) {
     super(localeService, router, route);
   }
@@ -25,6 +26,8 @@ export class HomeComponent extends UmBaseComponent {
     console.log(this.location)
     this.location.back();
   }
+
+
 
   ngOnDestroy(): void {}
 
