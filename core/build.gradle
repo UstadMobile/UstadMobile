@@ -1,4 +1,9 @@
+import groovy.util.slurpersupport.GPathResult
+
+import javax.xml.parsers.DocumentBuilder
 import java.util.concurrent.atomic.AtomicInteger
+import groovy.xml.MarkupBuilder
+import groovy.util.*
 
 /**
  * Core module build script : see buildconfig.core.default.gradle for configuration
@@ -221,6 +226,8 @@ kotlin {
     }
 }
 
+def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
+Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
 if (rootProject.file("buildconfig.local.properties").exists()) {
@@ -269,6 +276,91 @@ task prepareLocale {
     }
     outFile << '}'
 }
+
+/**
+ * Generate locale json file whic maps code to actual string
+ */
+task prepareWebLocale{
+    File outFile = null
+    if(!file(translationsOutPath).exists()){
+        file(translationsOutPath).mkdirs()
+    }
+
+    Map<String, Integer> messageIds = new HashMap<>()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+    def localeCode = "en"
+    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+
+        Map<String, String> idToTranslationMap = new HashMap<>()
+
+        if(file.absolutePath.split("-").size() > 1){
+            localeCode = file.absolutePath.split("-")[1].split("/")[0]
+        }
+        File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
+        if(tempFile.exists()){
+            tempFile.delete()
+        }
+        outFile = tempFile
+
+        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        def counter = 0
+        def terminator = ","
+        def fileContent = "{\n\n"
+        def value = 0
+        xmlDoc.string.each() { str ->
+            String msgName = str.@name
+            String msgValue = str
+            if (!messageIds.containsKey(msgName)) {
+                if (str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                } else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+                messageIds.put(msgName, value as Integer)
+            }else{
+                value = messageIds.get(msgName)
+            }
+
+            if(counter == xmlDoc.string.size() -1){
+                terminator = ""
+            }
+
+            msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
+            fileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
+
+            idToTranslationMap.put(msgName,msgValue)
+            languageMapOfMaps.put(localeCode, idToTranslationMap)
+
+            counter++
+        }
+
+        fileContent <<=  '}'
+        fileContent <<= ""
+        outFile << fileContent
+    }
+
+}
+
+/**
+ * Generate default XLF file to be used for other translation
+ */
+task generateDefaultLocaleXlf(type: Exec){
+    def angularModulePath = "${rootDir.absolutePath}/app-angular"
+    commandLine 'npm', '--prefix', angularModulePath, 'run','um-translate'
+}
+generateDefaultLocaleXlf.dependsOn(prepareWebLocale)
+
+/**
+ * Generate the rest of the all supported languages
+ */
+task generateOtherLocaleXlf{
+    rootProject.fileTree(dir: translationFilePath,include: "*.xlf").each() { File file ->
+       def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        xmlDoc.toString()
+    }
+}
+generateOtherLocaleXlf.dependsOn(generateDefaultLocaleXlf)
+compileKotlinJs.dependsOn(generateOtherLocaleXlf)
 
 publishing {
     publications {
