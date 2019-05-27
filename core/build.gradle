@@ -238,7 +238,6 @@ task prepareLocale {
     outFile << 'package com.ustadmobile.core.generated.locale\n\n'
     outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
     outFile << 'object MessageID{\n\n'
-    outFile << '    const val  NAME = "' + project.ext.buildConfigProperties['appName'] + '"\n\n'
 
     Map<String, Integer> messageIds = new HashMap<>()
     AtomicInteger messageIdGenerator = new AtomicInteger(2000)
