@@ -1,36 +1,47 @@
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { com } from 'lib-database';
+import { com as db} from 'lib-database';
+import {UmAngularUtil} from "../../util/UmAngularUtil";
+
 @Injectable({
   providedIn: 'root'
 })
-export class UmDbMockService {
+export class UmDbMockService extends com.ustadmobile.core.db.UmAppDatabase{
   ROOT_UID = 1311236;
+  private initialized: boolean = false;
+  constructor() {
+    super()
+    if(!this.initialized){
+      this.initialized = true;
+      db.ustadmobile.core.db.UmAppDatabase.Companion.setInstance(this);
+      console.log("db", db.ustadmobile.core.db.UmAppDatabase.Companion) 
+    }
+   }
 
-  constructor() { }
-
-  getDataRepo(entryUid){
+   contentEntryDao = new ContentEntryDao(); 
+   
+  getData(entryUid){
     const data : ContentEntry [] =  dataSample[entryUid];
     return data;
   }
 
-
-  getContentEntryDao(){
-    return new ContentEntryDao();
-  }
-
 }
 
-/**DAO */
-class ContentEntryDao extends com.ustadmobile.core.db.dao.ContentEntryDao{
-  getChildrenByParentUidWithCategoryFilter(param1, param2, param3){
+ 
 
+/**DAO */
+class ContentEntryDao {
+  constructor() {}
+  getChildrenByParentUidWithCategoryFilter(param1, param2, param3) : any{
+    const entryList : ContentEntry [] =  dataSample[param1];
+    return UmAngularUtil.createObserver(entryList);
   }
 
   getContentByUuidAsync(entryUid){
-
+    
   }
 }
-
 /**Entities */
 
 export interface ContentEntry {

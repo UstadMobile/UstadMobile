@@ -1,3 +1,4 @@
+import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
 import { OnInit } from '@angular/core';
@@ -12,13 +13,14 @@ export abstract class UmBaseComponent implements OnInit{
   public readonly MessageID;
   public app_name: string = "...";
 
-  constructor(public localeService: UmBaseService, public router: Router, public route: ActivatedRoute, ){
+
+  protected constructor(public localeService: UmBaseService, public router: Router, public route: ActivatedRoute, public mockedUmDb: UmDbMockService){
     this.systemImpl = com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = com.ustadmobile.core.generated.locale.MessageID;
     this.localeService.setImpl(this.systemImpl);
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
-    localeService.setContext(this.context)
+    localeService.setContext(this.context);
   }
 
   ngOnInit(): void {

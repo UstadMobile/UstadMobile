@@ -11,13 +11,14 @@ import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
 })
 export class AppComponent extends UmBaseComponent{
   
-  constructor(localeService: UmBaseService, router: Router, route: ActivatedRoute, private umDb: UmDbMockService){
-    super(localeService, router, route);
+  constructor(localeService: UmBaseService, router: Router,
+              route: ActivatedRoute, private umDb: UmDbMockService){
+    super(localeService, router, route, umDb);
   }
 
   ngOnInit(): void {
     super.ngOnInit();
-    const args = { queryParams: { parentUid: this.umDb.ROOT_UID} };
+    const args = { queryParams: { parentUid: this.umDb.ROOT_UID, entryid: this.umDb.ROOT_UID} };
     this.systemImpl.go('contentEntryList',args, this.context,0);
   }
 
