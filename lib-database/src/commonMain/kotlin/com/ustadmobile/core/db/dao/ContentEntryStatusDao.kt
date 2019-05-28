@@ -8,9 +8,9 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 @Dao
 abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
 
-    fun refresh() {
+   /* fun refresh() {
         println("Update content entry status")
-    }
+    }*/
 
     @Query("DELETE FROM ContentEntryStatus")
     abstract suspend fun deleteAllAsync()
@@ -35,7 +35,7 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun deleteByFileUids(cesUid: Long)
 
     @Transaction
-    fun updateDownloadStatusByList(statusList: List<DownloadJobItemStatus>) {
+    open fun updateDownloadStatusByList(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateDownloadStatus(status.contentEntryUid, status.status)
         }

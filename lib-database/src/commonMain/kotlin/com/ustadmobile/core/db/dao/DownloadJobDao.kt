@@ -97,7 +97,7 @@ abstract class DownloadJobDao {
                                 jobStatusTo: Int)
 
     @Transaction
-    fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
+    open fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
                           completeJobItemStatus: Int) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
@@ -148,7 +148,7 @@ abstract class DownloadJobDao {
     abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
     @Transaction
-    fun cleanupUnused(downloadJobUid: Int) {
+    open fun cleanupUnused(downloadJobUid: Int) {
         deleteUnusedDownloadJobItems(downloadJobUid)
         deleteUnusedDownloadJob(downloadJobUid)
     }

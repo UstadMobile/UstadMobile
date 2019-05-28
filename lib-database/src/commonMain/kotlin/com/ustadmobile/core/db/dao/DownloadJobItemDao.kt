@@ -34,14 +34,14 @@ abstract class DownloadJobItemDao {
     abstract fun insert(jobRunItems: List<DownloadJobItem>)
 
     @Transaction
-    fun insertListAndSetIds(jobItems: List<DownloadJobItem>) {
+    open fun insertListAndSetIds(jobItems: List<DownloadJobItem>) {
         for (item in jobItems) {
-            item.djiUid = insert(item)
+            item.djiUid = insert(item).toInt()
         }
     }
 
     @Transaction
-    fun updateDownloadJobItemsProgress(statusList: List<DownloadJobItemStatus>) {
+    open fun updateDownloadJobItemsProgress(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateDownloadJobItemProgress(status.jobItemUid, status.bytesSoFar,
                     status.totalBytes)
@@ -85,7 +85,8 @@ abstract class DownloadJobItemDao {
                                                          downloadedSoFar: Long, downloadLength: Long,
                                                          currentSpeed: Long)
 
-    fun updateDownloadJobItemStatus(djiUid: Long, djiStatus: Int,
+    @Transaction
+    open fun updateDownloadJobItemStatus(djiUid: Long, djiStatus: Int,
                                     downloadedSoFar: Long, downloadLength: Long,
                                     currentSpeed: Long) {
         println("updateDownloadJobItemStatus $djiUid -> $djiStatus")
@@ -103,7 +104,8 @@ abstract class DownloadJobItemDao {
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     protected abstract fun updateItemStatusInt(djiUid: Int, status: Int)
 
-    fun updateStatus(djiUid: Int, status: Int) {
+    @Transaction
+    open fun updateStatus(djiUid: Int, status: Int) {
         println("DownloadJob #$djiUid updating status to $status")
         updateItemStatusInt(djiUid, status)
     }
@@ -200,7 +202,7 @@ abstract class DownloadJobItemDao {
     abstract fun insertDownloadJobItemParentChildJoin(dj: DownloadJobItemParentChildJoin)
 
     @Transaction
-    fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
+    open fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateStatus(status.jobItemUid, status.status)
         }

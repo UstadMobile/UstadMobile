@@ -67,8 +67,8 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-    @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun incrementPrimaryKey()
+  /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
+    protected abstract fun incrementPrimaryKey()*/
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,

@@ -3,12 +3,7 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges
-import com.ustadmobile.lib.database.annotation.UmSyncOutgoing
 import com.ustadmobile.lib.db.entities.*
-import kotlin.jvm.Synchronized
-import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, EntryStatusResponse::class,
     DownloadJobItemHistory::class, HttpCachedEntry::class, DownloadJob::class, DownloadJobItem::class,
@@ -107,32 +102,28 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
-
-
-
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
 
     // val deviceBits: Int
     //     get() = syncablePrimaryKeyDao.getDeviceBits()
 
-    @UmRepository
-    abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
+   //@UmRepository
+    //abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
 
-    @UmSyncOutgoing
-    abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
+   // @UmSyncOutgoing
+   // abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
 
 
     fun validateAuth(personUid: Long, auth: String): Boolean {
         return if (personUid == 0L) true else accessTokenDao.isValidToken(personUid, auth)//Anonymous or guest access
-
     }
 
-    fun invalidateDeviceBits() {
+   // fun invalidateDeviceBits() {
         //     syncablePrimaryKeyDao.invalidateDeviceBits()
-    }
+   // }
 
-    @UmSyncCountLocalPendingChanges
-    abstract fun countPendingLocalChanges(accountUid: Long, deviceId: Int): Int
+   // @UmSyncCountLocalPendingChanges
+   // abstract fun countPendingLocalChanges(accountUid: Long, deviceId: Int): Int
 
     companion object {
 

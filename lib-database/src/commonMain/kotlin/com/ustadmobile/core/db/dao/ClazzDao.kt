@@ -56,7 +56,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
 //    abstract override fun syncFindExistingEntities(primaryKeys: List<Long>,
 //                                                   accountPersonUid: Long): List<UmSyncExistingEntity>
 
-    @Query("SELECT COUNT(*) FROM Clazz " +
+   /* @Query("SELECT COUNT(*) FROM Clazz " +
             "WHERE " +
             "clazzLocalChangeSeqNum > (SELECT syncedToLocalChangeSeqNum FROM SyncStatus WHERE tableId = 6) " +
             "AND clazzLastChangedBy = (SELECT deviceBits FROM SyncDeviceBits LIMIT 1) " +
@@ -66,7 +66,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
             " OR (" + TABLE_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_INSERT + //can insert on table
 
             TABLE_LEVEL_PERMISSION_CONDITION2 + "))")
-    abstract fun countPendingLocalChanges(accountPersonUid: Long): Int
+    abstract fun countPendingLocalChanges(accountPersonUid: Long): Int */
 
     companion object {
 

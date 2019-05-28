@@ -1,9 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 
@@ -28,7 +25,8 @@ abstract class ConnectivityStatusDao {
     @Query("UPDATE ConnectivityStatus SET connectivityState = :connectivityState , wifiSsid = :wifiSsid")
     abstract fun updateStateSync(connectivityState: Int, wifiSsid: String)
 
-    suspend fun addConnectivityStatusRecord(state: Int, wifiSsid: String, connectedOrConnecting: Boolean) {
+    @Transaction
+    open suspend fun addConnectivityStatusRecord(state: Int, wifiSsid: String, connectedOrConnecting: Boolean) {
         val connectivityStatus = ConnectivityStatus()
         connectivityStatus.connectedOrConnecting = connectedOrConnecting
         connectivityStatus.connectivityState = state
