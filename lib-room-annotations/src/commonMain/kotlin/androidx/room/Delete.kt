@@ -1,7 +1,5 @@
 package androidx.room
 
-import android.arch.persistence.room.Entity
-
 /**
  * Marks a method in a [Dao] annotated class as a delete method.
  *
