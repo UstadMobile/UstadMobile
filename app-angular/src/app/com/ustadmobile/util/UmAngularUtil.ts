@@ -1,19 +1,21 @@
-import { ActivatedRoute, Params } from '@angular/router';
+import {com as core} from 'core';
+import {Observable} from 'rxjs';
+
 export class UmAngularUtil{
 
-    static paramsToMap(params: Params){
-        
-        params.forEach((value: string, key: string) => {
-            const param = {key: value};
-            
-        });
+    /**
+     * Convert query parameters to a kotlin map to be used on presenters
+     */
+    static queryParamsToMap(){
+       return core.ustadmobile.core.util.UMFileUtil
+         .parseURLQueryString(document.location.search);
     }
 
-    static mapToParams(map: Params){
-        const urlParams = {};
-        map.forEach((value: string, key: string) => {
-            const param = {key: value};
-            
+    static createObserver(dataToObserve) {
+      return new Observable(observer => {
+          setTimeout(() => {
+            observer.next(dataToObserve);
+          }, 300);
         });
-    }
+      }
 }
