@@ -16,6 +16,8 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("UPDATE ContainerEntryFile SET cefPath = :path WHERE cefUid = :cefUid")
     abstract fun updateFilePath(cefUid: Long, path: String)
 
+    @Query("SELECT * FROM ContainerEntryFile WHERE cefUid = :uid")
+    abstract fun findByUid(uid: Long): ContainerEntryFile?
 
     @Query("SELECT SUM(ContainerEntryFile.ceCompressedSize) FROM " +
             "ContainerEntry " +

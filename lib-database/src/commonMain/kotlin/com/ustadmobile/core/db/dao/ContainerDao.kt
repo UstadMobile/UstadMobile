@@ -31,6 +31,9 @@ abstract class ContainerDao : BaseDao<Container> {
     abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long?
 
 
+    @Query("SELECT * FROM Container WHERE containerUid = :uid")
+    abstract fun findByUid(uid: Long): Container?
+
     @Query("SELECT recent.* " +
             "FROM Container recent LEFT JOIN Container old " +
             "ON (recent.containerContentEntryUid = old.containerContentEntryUid " +
