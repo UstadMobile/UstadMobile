@@ -57,12 +57,11 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
 
         val systemImpl = UstadMobileSystemImpl.instance
         if (umAppDatabase === null) {
-            umAppDatabase = UmAppDatabase.getInstance(context).getRepository(serverUrl,
-                    "")
+            umAppDatabase = UmAppDatabase.getInstance(context)//.getRepository(serverUrl, "")
         }
 
         if (repo === null) {
-            repo = UmAccountManager.getRepositoryForActiveAccount(context)
+            repo = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
         }
 
         GlobalScope.launch {

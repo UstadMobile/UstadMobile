@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -28,7 +29,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val appDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+        val appDatabase = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = appDatabase.contentEntryDao
 
         if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {
