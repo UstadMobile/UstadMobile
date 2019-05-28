@@ -30,7 +30,7 @@ abstract class ClazzDao : BaseDao<Clazz> {
     abstract override suspend fun insertAsync(entity: Clazz): Long
 
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
-    abstract override fun findByUid(uid: Long): Clazz?
+    abstract fun findByUid(uid: Long): Clazz?
 
     @Query("SELECT Clazz.*, " +
             " (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid) AS numStudents" +

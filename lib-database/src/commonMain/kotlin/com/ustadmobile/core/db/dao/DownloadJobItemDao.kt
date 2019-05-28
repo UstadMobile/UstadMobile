@@ -63,7 +63,7 @@ abstract class DownloadJobItemDao {
      * @param jobRunItem DownloadJobItem to insert
      */
     @Insert
-    abstract fun insert(jobRunItem: DownloadJobItem): Int
+    abstract fun insert(jobRunItem: DownloadJobItem): Long
 
     @Query("DELETE FROM DownloadJobItem")
     abstract suspend fun deleteAllAsync()

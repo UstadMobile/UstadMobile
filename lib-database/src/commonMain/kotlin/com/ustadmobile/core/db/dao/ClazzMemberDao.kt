@@ -19,5 +19,5 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract override suspend fun insertAsync(entity: ClazzMember): Long
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
-    abstract override fun findByUid(uid: Long): ClazzMember?
+    abstract fun findByUid(uid: Long): ClazzMember?
 }

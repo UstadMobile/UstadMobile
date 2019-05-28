@@ -6,8 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmQuery
-import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 
@@ -19,11 +17,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT * FROM ContentEntry")
     abstract fun allEntries(): List<ContentEntry>
 
-    @UmQuery("SELECT * FROM ContentEntry WHERE publik")
+    @Query("SELECT * FROM ContentEntry WHERE publik")
     abstract fun publicContentEntries(): List<ContentEntry>
 
-
-    @UmQuery("SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, " +
+    @Query("SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, " +
             "(SELECT containerUid FROM Container " +
             "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY lastModified DESC LIMIT 1) as mostRecentContainer " +
             "FROM DownloadJob \n" +
@@ -86,7 +83,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Update
     abstract override fun update(entity: ContentEntry)
 
-    @UmQueryFindByPrimaryKey
+    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
     abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
 
     @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +

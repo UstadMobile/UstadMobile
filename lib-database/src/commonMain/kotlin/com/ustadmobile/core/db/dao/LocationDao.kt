@@ -27,7 +27,7 @@ abstract class LocationDao : BaseDao<Location> {
     abstract suspend fun updateAsync(entity: Location): Int
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
-    abstract override fun findByUid(uid: Long): Location?
+    abstract fun findByUid(uid: Long): Location?
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): Location?

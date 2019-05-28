@@ -1,10 +1,12 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 
 @UmDao
+@Dao
 abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     //TODO: split this to handle very large queries
