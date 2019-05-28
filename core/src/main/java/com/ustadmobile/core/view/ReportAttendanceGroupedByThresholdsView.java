@@ -27,4 +27,6 @@ public interface ReportAttendanceGroupedByThresholdsView extends UstadView {
      */
     void generateCSVReport();
 
+    void generateXLSXReport(String xlsxReportPath);
+
 }

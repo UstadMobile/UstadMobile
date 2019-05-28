@@ -90,6 +90,8 @@ public class ReportSELActivity extends UstadBaseActivity implements
         //FAB and its listener
         FloatingTextButton fab = findViewById(R.id.activity_report_sel_fab);
         fab.setOnClickListener(this::showPopup);
+
+        tableTextData = new ArrayList<>();
     }
 
     public void showPopup(View v) {
@@ -132,10 +134,6 @@ public class ReportSELActivity extends UstadBaseActivity implements
             return true;
 
         }
-//        } else if (i == R.id.menu_export_json) {
-//            mPresenter.dataToJSON();
-//            return true;
-//        }
         else {
             return false;
         }

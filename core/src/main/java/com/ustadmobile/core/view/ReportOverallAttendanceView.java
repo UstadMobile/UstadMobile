@@ -42,4 +42,6 @@ public interface ReportOverallAttendanceView extends UstadView {
      */
     void generateCSVReport();
 
+    void generateXLSXReport(String xlsxReportPath);
+
 }

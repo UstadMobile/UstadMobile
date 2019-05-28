@@ -90,7 +90,6 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
         PopupMenu popup = new PopupMenu(this, v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_export, popup.getMenu());
-
         popup.setOnMenuItemClickListener(this);
         popup.show();
     }
@@ -102,9 +101,50 @@ public class ReportOverallAttendanceActivity extends UstadBaseActivity
             mPresenter.dataToCSV();
             return true;
         }
+        if(i==R.id.menu_export_xls){
+            startXLSXReportGeneration();
+            return true;
+        }
         else {
             return false;
         }
+    }
+
+    @Override
+    public void generateXLSXReport(String xlsxReportPath) {
+        String applicationId = getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(this,
+                applicationId+".fileprovider",
+                new File(xlsxReportPath));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(shareIntent);
+        }
+    }
+
+    /**
+     * Starts the xlsx report process. Here it crates hte xlsx file.
+     */
+    private void startXLSXReportGeneration(){
+
+        File dir = getFilesDir();
+        String xlsxReportPath;
+
+        String title = "overall_attendance_activity_" + System.currentTimeMillis();
+
+        File output = new File(dir, title + ".xlsx");
+        xlsxReportPath = output.getAbsolutePath();
+
+        File testDir = new File(dir, title);
+        testDir.mkdir();
+        String workingDir = testDir.getAbsolutePath();
+
+        mPresenter.dataToXLSX(title, xlsxReportPath, workingDir, tableTextData);
+
     }
 
 

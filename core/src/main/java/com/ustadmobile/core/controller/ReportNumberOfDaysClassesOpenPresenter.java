@@ -5,11 +5,17 @@ import com.ustadmobile.core.db.dao.ClazzLogDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportNumberOfDaysClassesOpenView;
+import com.ustadmobile.core.xlsx.UmSheet;
+import com.ustadmobile.core.xlsx.UmXLSX;
+import com.ustadmobile.core.xlsx.ZipUtil;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
 import static com.ustadmobile.core.view.ReportEditView.ARG_FROM_DATE;
@@ -105,4 +111,46 @@ public class ReportNumberOfDaysClassesOpenPresenter
         view.generateCSVReport();
     }
 
+    public void dataToXLSX(String title, String xlsxReportPath, String theWorkingPath,
+                           List<String[]> tableTextData) {
+
+        try {
+            ZipUtil.createEmptyZipFile(xlsxReportPath);
+
+            UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, theWorkingPath);
+
+            UmSheet reportSheet = new UmSheet("Report");
+            reportSheet.addValueToSheet(0,0, "Date");
+            reportSheet.addValueToSheet(0,1, "Number of classes");
+
+
+            tableTextData.remove(0);
+            /*
+                Single Sheet
+                Date     | Classes
+                27/May/19| 42
+
+             */
+            //Loop over tableTextData
+            int r = 1;
+            for (String[] tableTextDatum : tableTextData) {
+                int c = 0;
+                String[] next = tableTextDatum;
+                for (int i = 0; i < next.length; i++) {
+                    String value = next[i];
+                    reportSheet.addValueToSheet(r, c, value);
+                    c++;
+                }
+                r++;
+            }
+            umXLSX.addSheet(reportSheet);
+
+            //Generate the xlsx report from the xlsx object.
+            umXLSX.createXLSX();
+            view.generateXLSXReport(xlsxReportPath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

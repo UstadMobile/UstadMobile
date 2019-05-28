@@ -102,12 +102,52 @@ public class ReportAtRiskStudentsActivity extends UstadBaseActivity
             mPresenter.dataToCSV();
             return true;
         }
+        if(i == R.id.menu_export_xls){
+            startXLSXReportGeneration();
+            return true;
+        }
 
         else {
             return false;
         }
     }
 
+    @Override
+    public void generateXLSXReport(String xlsxReportPath) {
+        String applicationId = getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(this,
+                applicationId+".fileprovider",
+                new File(xlsxReportPath));
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(shareIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(shareIntent);
+        }
+    }
+
+    /**
+     * Starts the xlsx report process. Here it crates hte xlsx file.
+     */
+    private void startXLSXReportGeneration(){
+
+        File dir = getFilesDir();
+        String xlsxReportPath;
+
+        String title = "report_at_risk_students_" + System.currentTimeMillis();
+
+        File output = new File(dir, title + ".xlsx");
+        xlsxReportPath = output.getAbsolutePath();
+
+        File testDir = new File(dir, title);
+        testDir.mkdir();
+        String workingDir = testDir.getAbsolutePath();
+
+        mPresenter.dataToXLSX(title, xlsxReportPath, workingDir);
+
+    }
 
     @Override
     public void generateCSVReport() {
@@ -156,6 +196,8 @@ public class ReportAtRiskStudentsActivity extends UstadBaseActivity
         }
     }
 
+
+
     public List<View> generateViewForDataSet(List<PersonWithEnrollment> classDataSet){
 
         List<View> classRiskStudentViews = new ArrayList<>();
@@ -180,6 +222,8 @@ public class ReportAtRiskStudentsActivity extends UstadBaseActivity
 
         return classRiskStudentViews;
     }
+
+
 
     @Override
     public void updateTables(LinkedHashMap<String, List<PersonWithEnrollment>> dataMaps) {
@@ -222,6 +266,11 @@ public class ReportAtRiskStudentsActivity extends UstadBaseActivity
             }
         }
 
+    }
+
+    @Override
+    public void setTableTextData(List<String[]> tableTextData) {
+        this.tableTextData = tableTextData;
     }
 
     public static final DiffUtil.ItemCallback<PersonWithEnrollment> DIFF_CALLBACK2 =

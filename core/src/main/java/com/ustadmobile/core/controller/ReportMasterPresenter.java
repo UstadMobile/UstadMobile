@@ -5,8 +5,12 @@ import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportMasterView;
+import com.ustadmobile.core.xlsx.UmSheet;
+import com.ustadmobile.core.xlsx.UmXLSX;
+import com.ustadmobile.core.xlsx.ZipUtil;
 import com.ustadmobile.lib.db.entities.ReportMasterItem;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -93,4 +97,50 @@ public class ReportMasterPresenter extends UstadBaseController<ReportMasterView>
 
     }
 
+    public void dataToXLSX(String title, String xlsxReportPath, String workingDir,
+                           List<String[]> tableTextData) {
+
+        try {
+            ZipUtil.createEmptyZipFile(xlsxReportPath);
+
+            UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, workingDir);
+
+            UmSheet reportSheet = new UmSheet("Report");
+            reportSheet.addValueToSheet(0,0, "Class ID");
+            reportSheet.addValueToSheet(0,1, "First name");
+            reportSheet.addValueToSheet(0,2, "Last name");
+            reportSheet.addValueToSheet(0,3, "Student ID");
+            reportSheet.addValueToSheet(0,4, "Number days present");
+            reportSheet.addValueToSheet(0,5, "Number absent");
+            reportSheet.addValueToSheet(0,6, "Number partial");
+            reportSheet.addValueToSheet(0,7, "Total class days");
+            reportSheet.addValueToSheet(0,8, "Date left");
+            reportSheet.addValueToSheet(0,9, "Active");
+            reportSheet.addValueToSheet(0,10, "Gender");
+            reportSheet.addValueToSheet(0,11, "Birthday");
+
+            //Remove already put headers
+            tableTextData.remove(0);
+
+            //Loop over tableTextData
+            int r = 1;
+            for (String[] tableTextDatum : tableTextData) {
+                int c = 0;
+                for (int i = 0; i < tableTextDatum.length; i++) {
+                    String value = tableTextDatum[i];
+                    reportSheet.addValueToSheet(r, c, value);
+                    c++;
+                }
+                r++;
+            }
+            umXLSX.addSheet(reportSheet);
+
+            //Generate the xlsx report from the xlsx object.
+            umXLSX.createXLSX();
+            view.generateXLSXReport(xlsxReportPath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

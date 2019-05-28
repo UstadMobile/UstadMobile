@@ -9,4 +9,6 @@ public interface ReportMasterView extends UstadView {
     void finish();
     void generateCSVReport();
     void updateTables(List<ReportMasterItem> items);
+
+    void generateXLSXReport(String xlsxReportPath);
 }

@@ -39,4 +39,6 @@ public interface ReportNumberOfDaysClassesOpenView extends UstadView {
      */
     void generateCSVReport();
 
+    void generateXLSXReport(String path);
+
 }

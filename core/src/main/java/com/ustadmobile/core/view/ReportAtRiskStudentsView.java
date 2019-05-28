@@ -30,6 +30,7 @@ public interface ReportAtRiskStudentsView extends UstadView {
      */
     void updateTables(LinkedHashMap<String, List<PersonWithEnrollment>> dataMaps);
 
+    void setTableTextData(List<String[]> tableTextData);
 
     /**
      * Sets report provider to view.
@@ -38,4 +39,5 @@ public interface ReportAtRiskStudentsView extends UstadView {
     void setReportProvider(UmProvider<PersonWithEnrollment> provider);
 
 
+    void generateXLSXReport(String xlsxReportPath);
 }

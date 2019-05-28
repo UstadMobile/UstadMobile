@@ -7,8 +7,12 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportOverallAttendanceView;
+import com.ustadmobile.core.xlsx.UmSheet;
+import com.ustadmobile.core.xlsx.UmXLSX;
+import com.ustadmobile.core.xlsx.ZipUtil;
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -222,4 +226,34 @@ public class ReportOverallAttendancePresenter
     }
 
 
+    public void dataToXLSX(String title, String xlsxReportPath, String workingDir,
+                           List<String[]> tableTextData) {
+
+        try {
+            ZipUtil.createEmptyZipFile(xlsxReportPath);
+
+            UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, workingDir);
+
+            UmSheet reportSheet = new UmSheet("Report");
+            //Loop over tableTextData
+            int r = 1;
+            for (String[] tableTextDatum : tableTextData) {
+                int c = 0;
+                for (int i = 0; i < tableTextDatum.length; i++) {
+                    String value = tableTextDatum[i];
+                    reportSheet.addValueToSheet(r, c, value);
+                    c++;
+                }
+                r++;
+            }
+            umXLSX.addSheet(reportSheet);
+
+            //Generate the xlsx report from the xlsx object.
+            umXLSX.createXLSX();
+            view.generateXLSXReport(xlsxReportPath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

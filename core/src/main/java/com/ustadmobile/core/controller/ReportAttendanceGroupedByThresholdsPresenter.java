@@ -7,12 +7,16 @@ import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.view.ReportAttendanceGroupedByThresholdsView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao.AttendanceResultGroupedByAgeAndThreshold;
+import com.ustadmobile.core.xlsx.UmSheet;
+import com.ustadmobile.core.xlsx.UmXLSX;
+import com.ustadmobile.core.xlsx.ZipUtil;
 import com.ustadmobile.lib.db.entities.Location;
 
 import static com.ustadmobile.core.view.ReportEditView.ARG_CLAZZ_LIST;
@@ -52,6 +56,38 @@ public class ReportAttendanceGroupedByThresholdsPresenter
 
     public Boolean getShowPercentages() {
         return showPercentages;
+    }
+
+    public void dataToXLSX(String title, String xlsxReportPath, String workingDir,
+                           List<String[]> tableTextData) {
+
+        try {
+            ZipUtil.createEmptyZipFile(xlsxReportPath);
+
+            UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, workingDir);
+
+            UmSheet reportSheet = new UmSheet("Report");
+
+            //Loop over tableTextData
+            int r = 1;
+            for (String[] tableTextDatum : tableTextData) {
+                int c = 0;
+                for (int i = 0; i < tableTextDatum.length; i++) {
+                    String value = tableTextDatum[i];
+                    reportSheet.addValueToSheet(r, c, value);
+                    c++;
+                }
+                r++;
+            }
+            umXLSX.addSheet(reportSheet);
+
+            //Generate the xlsx report from the xlsx object.
+            umXLSX.createXLSX();
+            view.generateXLSXReport(xlsxReportPath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static class ThresholdValues{

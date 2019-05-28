@@ -11,9 +11,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CallPersonRelatedDialogView;
 import com.ustadmobile.core.view.PersonDetailView;
 import com.ustadmobile.core.view.ReportAtRiskStudentsView;
+import com.ustadmobile.core.xlsx.UmSheet;
+import com.ustadmobile.core.xlsx.UmXLSX;
+import com.ustadmobile.core.xlsx.ZipUtil;
 import com.ustadmobile.lib.db.entities.Clazz;
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -32,7 +36,7 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
 
     private List<Long> clazzList, locationList;
     private boolean genderDisaggregated = true;
-    public static final float RISK_THRESHOLD = 0.4f;
+    private static final float RISK_THRESHOLD = 0.4f;
 
     private UmProvider<PersonWithEnrollment> atRiskStudentsUmProvider;
 
@@ -75,7 +79,58 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
     }
 
     public void dataToCSV(){
-        view.generateCSVReport();
+
+        ClazzDao clazzDao = repository.getClazzDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+
+        List<String[]> reportData = new ArrayList<>();
+        reportData.add(new String[]{"Class","Name", "Attendance"});
+
+        //1. Build a list of all classes for this report. This comes from both the location
+        // and the specified clazz list.
+        clazzDao.findAllClazzesByLocationAndUidList(locationList, clazzList,
+            new UmCallback<List<Clazz>>() {
+            @Override
+            public void onSuccess(List<Clazz> clazzList) {
+
+                //build a long list of classes.
+                List<Long> clazzUidList = new ArrayList<>();
+                for(Clazz everyClazz:clazzList){
+                    clazzUidList.add(everyClazz.getClazzUid());
+                }
+
+                List<String> clazzDone = new ArrayList<>();
+                //Run Live Data Query
+                clazzMemberDao.findAllStudentsAtRiskForClazzListAsync(clazzUidList,
+                        RISK_THRESHOLD, new UmCallback<List<PersonWithEnrollment>>() {
+                            @Override
+                            public void onSuccess(List<PersonWithEnrollment> result) {
+                                for(PersonWithEnrollment pwe:result){
+                                    if(!clazzDone.contains(pwe.getClazzName())){
+                                        clazzDone.add(pwe.getClazzName());
+                                        reportData.add(new String[]{pwe.getClazzName()});
+                                    }
+                                    String name = pwe.getFirstNames() + " " + pwe.getLastName();
+                                    String attendance = String.valueOf(pwe.getAttendancePercentage());
+                                    reportData.add(new String[]{"",name, attendance});
+                                }
+
+                                view.setTableTextData(reportData);
+                                view.generateCSVReport();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
     /**
@@ -120,14 +175,6 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
         view.setReportProvider(atRiskStudentsUmProvider);
     }
 
-    public boolean isGenderDisaggregated() {
-        return genderDisaggregated;
-    }
-
-    public void setGenderDisaggregated(boolean genderDisaggregated) {
-        this.genderDisaggregated = genderDisaggregated;
-    }
-
     @Override
     public void handleCommonPressed(Object arg) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -145,5 +192,90 @@ public class ReportAtRiskStudentsPresenter extends CommonHandlerPresenter<Report
         args.put(ARG_PERSON_UID, personWithEnrollment.getPersonUid());
         args.put(ARG_CLAZZ_UID, personWithEnrollment.getClazzUid());
         impl.go(CallPersonRelatedDialogView.VIEW_NAME, args, view.getContext());
+    }
+
+    public void dataToXLSX(String title, String xlsxReportPath, String workingDir) {
+
+        ClazzDao clazzDao = repository.getClazzDao();
+        ClazzMemberDao clazzMemberDao = repository.getClazzMemberDao();
+
+        List<String[]> tableTextData = new ArrayList<>();
+
+        try {
+            ZipUtil.createEmptyZipFile(xlsxReportPath);
+
+            UmXLSX umXLSX = new UmXLSX(title, xlsxReportPath, workingDir);
+
+            UmSheet reportSheet = new UmSheet("Report");
+
+            reportSheet.addValueToSheet(0,0, "Class");
+            reportSheet.addValueToSheet(0,1, "Name");
+            reportSheet.addValueToSheet(0,2, "Attendance");
+
+            //Loop over tableTextData
+            final int[] r = {1};
+
+            //1. Build a list of all classes for this report. This comes from both the location
+            // and the specified clazz list.
+            clazzDao.findAllClazzesByLocationAndUidList(locationList, clazzList,
+                new UmCallback<List<Clazz>>() {
+                @Override
+                public void onSuccess(List<Clazz> clazzList) {
+
+                    //build a long list of classes.
+                    List<Long> clazzUidList = new ArrayList<>();
+                    for(Clazz everyClazz:clazzList){
+                        clazzUidList.add(everyClazz.getClazzUid());
+                    }
+
+                    List<String> clazzDone = new ArrayList<>();
+                    //Run Live Data Query
+                    clazzMemberDao.findAllStudentsAtRiskForClazzListAsync(clazzUidList,
+                            RISK_THRESHOLD, new UmCallback<List<PersonWithEnrollment>>() {
+                                @Override
+                                public void onSuccess(List<PersonWithEnrollment> result) {
+                                    for(PersonWithEnrollment pwe:result){
+                                        if(!clazzDone.contains(pwe.getClazzName())){
+                                            clazzDone.add(pwe.getClazzName());
+                                            tableTextData.add(new String[]{pwe.getClazzName()});
+                                        }
+                                        String name = pwe.getFirstNames() + " " + pwe.getLastName();
+                                        String attendance = String.valueOf(pwe.getAttendancePercentage());
+                                        tableTextData.add(new String[]{"",name, attendance});
+                                    }
+
+                                    for (String[] tableTextDatum : tableTextData) {
+                                        int c = 0;
+                                        for (int i = 0; i < tableTextDatum.length; i++) {
+                                            String value = tableTextDatum[i];
+                                            reportSheet.addValueToSheet(r[0], c, value);
+                                            c++;
+                                        }
+                                        r[0]++;
+                                    }
+                                    umXLSX.addSheet(reportSheet);
+
+                                    //Generate the xlsx report from the xlsx object.
+                                    umXLSX.createXLSX();
+                                    view.generateXLSXReport(xlsxReportPath);
+
+                                }
+
+                                @Override
+                                public void onFailure(Throwable exception) {
+                                    exception.printStackTrace();
+                                }
+                            });
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
