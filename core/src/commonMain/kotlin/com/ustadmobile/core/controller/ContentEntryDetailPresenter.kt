@@ -17,7 +17,9 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
@@ -32,7 +34,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
-        OnDownloadJobItemChangeListener {
+        OnDownloadJobItemChangeListener, DoorLifecycleOwner {
 
     private var navigation: String? = null
 
@@ -51,9 +53,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var statusUmLiveData: DoorLiveData<ContentEntryStatus>? = null
 
-    private val statusUmObserver: UmObserver<ContentEntryStatus> =
-            object : UmObserver<ContentEntryStatus> {
-                override fun onChanged(t: ContentEntryStatus?) {
+    private val statusUmObserver: DoorObserver<ContentEntryStatus> =
+            object : DoorObserver<ContentEntryStatus> {
+                override fun onChanged(t: ContentEntryStatus) {
                     when (t) {
                         null -> onEntryStatusChanged(null)
                         else -> onEntryStatusChanged(t)
@@ -65,7 +67,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAppDatabase.getInstance(context)// UmAccountManager.getRepositoryForActiveAccount(context)
         val appdb = UmAppDatabase.getInstance(context)
         val contentRelatedEntryDao = repoAppDatabase.contentEntryRelatedEntryJoinDao
         val contentEntryDao = repoAppDatabase.contentEntryDao
@@ -257,7 +259,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     fun handleDownloadButtonClick(isDownloadComplete: Boolean, entryUuid: Long) {
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
                     context, object : UmCallback<Any> {
