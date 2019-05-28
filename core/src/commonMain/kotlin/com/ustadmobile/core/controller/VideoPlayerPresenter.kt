@@ -32,7 +32,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val db = UmAppDatabase.getInstance(context)
-        val dbRepo = UmAccountManager.getRepositoryForActiveAccount(context)
+        val dbRepo = UmAppDatabase.getInstance(context)//UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = dbRepo.contentEntryDao
         val containerEntryDao = db.containerEntryDao
 

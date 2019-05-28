@@ -23,7 +23,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAppDatabase.getInstance(context)//UmAccountManager.getRepositoryForActiveAccount(context)
         val contentEntryDao = repoAppDatabase.contentEntryDao
         val containerDao = repoAppDatabase.containerDao
 
@@ -70,7 +70,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
         val impl = UstadMobileSystemImpl.instance
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAppDatabase.getInstance(context)//UmAccountManager.getRepositoryForActiveAccount(context)
 
         ContentEntryUtil.goToContentEntryByViewDestination(
                 sourceUrl,

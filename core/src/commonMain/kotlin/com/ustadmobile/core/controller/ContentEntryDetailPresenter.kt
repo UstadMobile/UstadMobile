@@ -20,6 +20,7 @@ import com.ustadmobile.core.view.DummyView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
@@ -34,7 +35,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
-        OnDownloadJobItemChangeListener, DoorLifecycleOwner {
+        OnDownloadJobItemChangeListener {
 
     private var navigation: String? = null
 
@@ -53,17 +54,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var statusUmLiveData: DoorLiveData<ContentEntryStatus>? = null
 
-    private val statusUmObserver: DoorObserver<ContentEntryStatus> =
-            object : DoorObserver<ContentEntryStatus> {
-                override fun onChanged(t: ContentEntryStatus) {
-                    when (t) {
-                        null -> onEntryStatusChanged(null)
-                        else -> onEntryStatusChanged(t)
-                    }
-                }
-            }
-
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
+
+    var doorObserver = { it: ContentEntryStatus ->
+        when (it) {
+            null -> onEntryStatusChanged(null)
+            else -> onEntryStatusChanged(it)
+        }
+    }
+
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -127,7 +126,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
-        statusUmLiveData!!.observe(this, statusUmObserver)
+        statusUmLiveData!!.observe(this, doorObserver)
     }
 
     private fun getLicenseType(result: ContentEntry): String {
@@ -317,7 +316,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitor.stopMonitoringAvailability(this)
         }
 
-        statusUmLiveData?.removeObserver(statusUmObserver)
+        statusUmLiveData?.removeObserver(doorObserver)
 
 
         if (isListeningToDownloadStatus.getAndSet(false)) {
