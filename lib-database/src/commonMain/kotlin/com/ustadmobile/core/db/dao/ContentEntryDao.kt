@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
+import kotlin.js.JsName
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
@@ -108,6 +109,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "AND " +
             "(:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin " +
             "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
+    @JsName("getChildrenByParentUidWithCategoryFilter")
     abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 
 

@@ -4,6 +4,8 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.lib.db.entities.*
+import kotlin.jvm.Synchronized
+import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, EntryStatusResponse::class,
     DownloadJobItemHistory::class, HttpCachedEntry::class, DownloadJob::class, DownloadJobItem::class,

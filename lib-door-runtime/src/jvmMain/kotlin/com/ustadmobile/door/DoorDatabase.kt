@@ -1,9 +1,12 @@
 package com.ustadmobile.door
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.util.ArrayList
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.naming.InitialContext
 import javax.sql.DataSource
 
@@ -17,6 +20,10 @@ actual abstract class DoorDatabase {
         private set
 
     var context: Any? = null
+
+    data class ChangeListenerRequest(val tableNames: List<String>, val onChange: (List<String>) -> Unit)
+
+    val changeListeners = CopyOnWriteArrayList<ChangeListenerRequest>() as MutableList<ChangeListenerRequest>
 
     val tableNames: List<String> by lazy {
         var con = null as Connection?
@@ -67,6 +74,23 @@ actual abstract class DoorDatabase {
     abstract fun createAllTables()
 
     actual abstract fun clearAllTables()
+
+    fun addChangeListener(changeListenerRequest: ChangeListenerRequest) {
+        changeListeners.add(changeListenerRequest)
+    }
+
+    fun removeChangeListener(changeListenerRequest: ChangeListenerRequest) {
+        changeListeners.remove(changeListenerRequest)
+
+    }
+
+    fun handleTableChanged(changeTableNames: List<String>) {
+        GlobalScope.launch {
+            changeListeners.filter { it.tableNames.any { changeTableNames.contains(it) } }.forEach {
+                it.onChange.invoke(changeTableNames)
+            }
+        }
+    }
 
     companion object {
         const val DBINFO_TABLENAME = "_door_info"
