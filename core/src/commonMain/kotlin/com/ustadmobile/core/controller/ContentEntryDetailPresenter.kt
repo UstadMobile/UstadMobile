@@ -17,6 +17,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
@@ -48,7 +49,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private val isListeningToDownloadStatus = atomic(false)
 
-    private var statusUmLiveData: UmLiveData<ContentEntryStatus>? = null
+    private var statusUmLiveData: DoorLiveData<ContentEntryStatus>? = null
 
     private val statusUmObserver: UmObserver<ContentEntryStatus> =
             object : UmObserver<ContentEntryStatus> {

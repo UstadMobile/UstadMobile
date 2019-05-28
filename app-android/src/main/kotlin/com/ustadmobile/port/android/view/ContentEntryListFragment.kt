@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -155,15 +154,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         this.ustadBaseActivity = null
     }
 
-    override fun setContentEntryProvider(entryProvider: UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>) {
+    override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>) {
         if (recyclerAdapter != null)
             recyclerAdapter!!.removeListeners()
 
         recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
                 managerAndroidBle)
         recyclerAdapter!!.addListeners()
-        val factory = entryProvider.provider as DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data = LivePagedListBuilder(entryProvider, 20).build()
         data.observe(this, Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
 
         recyclerView!!.adapter = recyclerAdapter

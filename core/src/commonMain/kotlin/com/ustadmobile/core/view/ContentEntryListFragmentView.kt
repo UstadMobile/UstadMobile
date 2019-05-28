@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.db.UmProvider
+import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
@@ -9,7 +9,7 @@ import kotlin.js.JsName
 interface ContentEntryListFragmentView : UstadView {
 
     @JsName("setContentEntryProvider")
-    fun setContentEntryProvider(entryProvider: UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>)
+    fun setContentEntryProvider(entryProvider: DataSource.Factory<Int,ContentEntryWithStatusAndMostRecentContainerUid>)
 
     @JsName("setToolbarTitle")
     fun setToolbarTitle(title: String)
