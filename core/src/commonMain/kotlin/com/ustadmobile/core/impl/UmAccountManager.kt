@@ -71,9 +71,10 @@ object UmAccountManager {
 
     fun getRepositoryForActiveAccount(context: Any): UmAppDatabase {
         if (activeAccount == null)
-            return UmAppDatabase.getInstance(context).getRepository(
+            /*return UmAppDatabase.getInstance(context).getRepository(
                     UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                            "http://localhost", context), "")
+                            "http://localhost", context), "")*/
+            return UmAppDatabase.getInstance(context)
 
         val activeAccount = getActiveAccount(context)
         return UmAppDatabase.getInstance(context).getRepository(activeAccount!!.endpointUrl,

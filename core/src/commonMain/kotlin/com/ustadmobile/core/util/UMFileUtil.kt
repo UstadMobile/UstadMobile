@@ -31,6 +31,7 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import kotlin.js.JsName
 import kotlin.jvm.JvmStatic
 import kotlin.math.round
 
@@ -402,6 +403,7 @@ object UMFileUtil {
      * @param urlQuery
      * @return
      */
+    @JsName("parseURLQueryString")
     fun parseURLQueryString(urlQuery: String): Map<String, String?> {
         var retVal = urlQuery
         val queryPos = retVal.indexOf('?')
@@ -427,6 +429,7 @@ object UMFileUtil {
      * @param ht map of param keys to values (keys and values must be strings)
      * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
      */
+    @JsName("mapToQueryString")
     fun mapToQueryString(ht: Map<String, String?>): String {
         val sb = StringBuilder()
 

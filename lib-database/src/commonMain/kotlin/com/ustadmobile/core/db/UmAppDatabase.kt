@@ -7,6 +7,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges
 import com.ustadmobile.lib.database.annotation.UmSyncOutgoing
 import com.ustadmobile.lib.db.entities.*
+import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
@@ -149,6 +150,7 @@ abstract class UmAppDatabase : DoorDatabase() {
          * @param instance
          */
         @Synchronized
+        @JsName("setInstance")
         fun setInstance(instance: UmAppDatabase) {
             UmAppDatabase.instance = instance
         }
@@ -162,8 +164,9 @@ abstract class UmAppDatabase : DoorDatabase() {
          * @param dbName
          */
         @Synchronized
+        @JsName("setInstanceWithName")
         fun setInstance(instance: UmAppDatabase, dbName: String) {
-            namedInstances.put(dbName, instance)
+            namedInstances[dbName] = instance
         }
 
         @Synchronized
@@ -180,7 +183,7 @@ abstract class UmAppDatabase : DoorDatabase() {
 
         @Synchronized
         fun getInstance(context: Any, dbName: String): UmAppDatabase? {
-            var db = namedInstances.get(dbName)
+            var db = namedInstances[dbName]
 
             if (db == null) {
               /*  var builder = UmDbBuilder.builder(

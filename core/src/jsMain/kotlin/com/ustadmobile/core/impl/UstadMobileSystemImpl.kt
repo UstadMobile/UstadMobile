@@ -142,7 +142,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return The value of the key if found, if not, the default value provided
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return "https://localhost:8080/fakeEndpint"
     }
 
     /**

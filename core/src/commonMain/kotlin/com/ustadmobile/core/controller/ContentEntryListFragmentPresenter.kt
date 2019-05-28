@@ -13,7 +13,6 @@ import com.ustadmobile.lib.db.entities.Language
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlin.js.JsName
 
 class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
@@ -26,11 +25,12 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     private var parentUid: Long? = null
 
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val appDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-        contentEntryDao = appDatabase.contentEntryDao
+        val  appDatabase =  UmAccountManager.getRepositoryForActiveAccount(context)
 
+        contentEntryDao = appDatabase.contentEntryDao
         if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {
             showContentByParent()
         } else if (arguments.containsKey(ARG_DOWNLOADED_CONTENT)) {
