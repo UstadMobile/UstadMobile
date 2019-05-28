@@ -56,14 +56,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
-    var doorObserver = { it: ContentEntryStatus ->
-        when (it) {
-            null -> onEntryStatusChanged(null)
-            else -> onEntryStatusChanged(it)
-        }
-    }
-
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val repoAppDatabase = UmAppDatabase.getInstance(context)// UmAccountManager.getRepositoryForActiveAccount(context)
@@ -126,7 +118,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
-        statusUmLiveData!!.observe(this, doorObserver)
+        statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
     }
 
     private fun getLicenseType(result: ContentEntry): String {
@@ -315,9 +307,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitorStatus.value = false
             monitor.stopMonitoringAvailability(this)
         }
-
-        statusUmLiveData?.removeObserver(doorObserver)
-
 
         if (isListeningToDownloadStatus.getAndSet(false)) {
             statusProvider.removeDownloadChangeListener(this)
