@@ -74,26 +74,6 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     @UmQuery("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
     public abstract List<Sale> findAllSaleWithTitle(String saleTitle);
 
-
-    /*
-    String saleTitle;
-    String locationName;
-    long saleDueDate;
-    float saleAmount;
-    String saleCurrency;
-    long saleCreationDate;
-    int saleItemCount;
-     */
-//    public static final String ALL_SALE_LIST =
-//    " SELECT s.*, Location.title AS locationName, " +
-//    " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
-//            "SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
-//            "Sale.saleUid WHERE Sale.saleUid = s.saleUid) ,0) AS saleAmount, " +
-//    " 'Afs' AS saleCurrency,  " +
-//    " (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = s.saleUid) AS saleItemCount " +
-//    "FROM Sale s " +
-//    " LEFT JOIN Location ON Location.locationUid = s.saleLocationUid WHERE s.saleActive = 1";
-//
     public static final String ALL_SALE_LIST =
             " SELECT sl.*, " +
             " (SELECT SaleItem.saleItemQuantity " +
@@ -183,14 +163,18 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     public abstract UmProvider<SaleListDetail> findAllActiveSaleListDetailPaymentDueProvider();
 
 
-
-
     public static final String SORT_NAME_ASC = " ORDER BY sl.saleTitle ASC ";
     public static final String SORT_NAME_DEC = " ORDER BY sl.saleTitle DESC ";
     public static final String SORT_TOTAL_AMOUNT_DESC = " ORDER BY saleAmount DESC ";
     public static final String SORT_TOTAL_AMOUNT_ASC = " ORDER BY saleAmount ASC ";
     public static final String SORT_ORDER_DATE_DESC = " ORDER BY sl.saleCreationDate DESC ";
     public static final String SORT_ORDER_DATE_ASC = " ORDER BY sl.saleCreationDate ASC ";
+
+    private static final String SEARCH_BY_QUERY =
+            " OR locationName LIKE %search% " +
+            " OR saleAmount LIKE %search%  " +
+            " OR saleTitle LIKE %search% "
+            + " OR categoryName LIKE %search% ";
 
     @UmQuery(ALL_SALE_LIST +  SORT_NAME_ASC)
     public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortNameAscProvider();
@@ -230,6 +214,47 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
 
 
     public UmProvider<SaleListDetail> filterAndSortSale(int filter, int sort){
+
+        switch (filter){
+            case ALL_SELECTED:
+                switch (sort){
+                    case SORT_ORDER_NAME_ASC:
+                        return findAllSaleFilterAllSortNameAscProvider();
+                    case SORT_ORDER_NAME_DESC:
+                        return findAllSaleFilterAllSortNameDescProvider();
+                    case SORT_ORDER_AMOUNT_ASC:
+                        return findAllSaleFilterAllSortTotalAscProvider();
+                    case SORT_ORDER_AMOUNT_DESC:
+                        return findAllSaleFilterAllSortTotalDescProvider();
+                    case SORT_ORDER_DATE_CREATED_DESC:
+                        return findAllSaleFilterAllSortDateAscProvider();
+                    case SORT_ORDER_DATE_CREATED_ASC:
+                        return findAllSaleFilterAllSortDateDescProvider();
+                }
+                break;
+            case PREORDER_SELECTED:
+                switch (sort){
+                    case SORT_ORDER_NAME_ASC:
+                        return findAllSaleFilterPreOrderSortNameAscProvider();
+                    case SORT_ORDER_NAME_DESC:
+                        return findAllSaleFilterPreOrderSortNameDescProvider();
+                    case SORT_ORDER_AMOUNT_ASC:
+                        return findAllSaleFilterPreOrderSortTotalAscProvider();
+                    case SORT_ORDER_AMOUNT_DESC:
+                        return findAllSaleFilterPreOrderSortTotalDescProvider();
+                    case SORT_ORDER_DATE_CREATED_DESC:
+                        return findAllSaleFilterPreOrderSortDateAscProvider();
+                    case SORT_ORDER_DATE_CREATED_ASC:
+                        return findAllSaleFilterPreOrderSortDateDescProvider();
+                }
+                break;
+            case PAYMENT_SELECTED:
+                break;
+        }
+        return findAllActiveAsSaleListDetailProvider();
+    }
+
+    public UmProvider<SaleListDetail> filterAndSortSale(int filter, String search, int sort){
 
         switch (filter){
             case ALL_SELECTED:

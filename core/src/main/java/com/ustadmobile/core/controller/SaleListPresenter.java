@@ -43,6 +43,8 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
 
     private int filterSelected ;
 
+    private int currentSortOrder = 0;
+
     public SaleListPresenter(Object context, Hashtable arguments, SaleListView view) {
         super(context, arguments, view);
 
@@ -58,8 +60,8 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
         order=order+1;
 
         if(idToOrderInteger.containsKey(order)){
-            int sortCode = idToOrderInteger.get(order);
-            getAndSetProvider(sortCode);
+            currentSortOrder= idToOrderInteger.get(order);
+            getAndSetProvider(currentSortOrder);
         }
     }
 
@@ -108,11 +110,16 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
     }
 
 
-    public void getAndSetProvider(int sortCode){
+    private void getAndSetProvider(int sortCode){
 
         umProvider = saleDao.filterAndSortSale(filterSelected, sortCode);
         view.setListProvider(umProvider, false, false);
 
+    }
+
+    public void filterAndSetProvider(String search){
+        umProvider = saleDao.filterAndSortSale(filterSelected, search, currentSortOrder);
+        view.setListProvider(umProvider, false, false);
     }
 
     @Override
