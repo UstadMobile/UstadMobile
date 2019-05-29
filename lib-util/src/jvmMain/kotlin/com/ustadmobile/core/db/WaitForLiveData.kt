@@ -2,10 +2,10 @@ package com.ustadmobile.core.db
 
 import com.ustadmobile.door.DoorLiveData
 
-expect object WaitForLiveData {
+actual object WaitForLiveData {
 
-    interface WaitForChecker<T> {
-        fun done(value: T): Boolean
+    actual interface WaitForChecker<T> {
+        actual fun done(value: T): Boolean
     }
 
     /**
@@ -17,28 +17,25 @@ expect object WaitForLiveData {
      * @param checker interface to check for value
      * @param <T> The type of value returned by the live data
     </T> */
-    fun <T> observeUntil(liveData: DoorLiveData<T>, timeout: Long, checker: WaitForChecker<T>) //{
+    actual fun <T> observeUntil(liveData: DoorLiveData<T>, timeout: Long, checker: WaitForChecker<T>) {
 
+        /*val latch = CountDownLatch(1)
 
-       /* val latch = CountDownLatch(1)
-
-        val observer = object : UmObserver<T> {
-            override fun onChanged(t: T?) {
-                if(t != null){
-                    if (checker.done(t))
-                        latch.countDown()
-                }
+        val observer = { t:T ->
+            if (t != null) {
+                if (checker.done(t))
+                    latch.countDown()
             }
         }
         liveData.observeForever(observer)
         try {
-            latch.await(timeout, timeoutUnit)
+            latch.await(timeout, TimeUnit.MILLISECONDS)
         } catch (e: InterruptedException) {
             //should not happen
         }
 
-        liveData.removeObserver(observer) */
-   // }
+        liveData.removeObserver(observer)*/
+    }
 
 
 }

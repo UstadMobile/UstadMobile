@@ -2,10 +2,9 @@ package com.ustadmobile.core.db
 
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.lib.db.entities.*
-import kotlin.jvm.Synchronized
-import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, EntryStatusResponse::class,
     DownloadJobItemHistory::class, HttpCachedEntry::class, DownloadJob::class, DownloadJobItem::class,
@@ -156,16 +155,17 @@ abstract class UmAppDatabase : DoorDatabase() {
          */
         @Synchronized
         fun setInstance(instance: UmAppDatabase, dbName: String) {
-            namedInstances.put(dbName, instance)
+            namedInstances[dbName] = instance
         }
 
         @Synchronized
         fun getInstance(context: Any): UmAppDatabase {
             if (instance == null) {
-               /* var builder = UmDbBuilder
-                        .builder(UmAppDatabase::class, context)
-                builder = addMigrations(builder)
-                instance = addCallbacks(builder).build() */
+                var builder = DatabaseBuilder.databaseBuilder(
+                        context, UmAppDatabase::class, "UmAppDatabase")
+               // builder = addMigrations(builder)
+               //instance = addCallbacks(builder).build()
+                instance = builder.build()
             }
 
             return instance!!
@@ -173,14 +173,15 @@ abstract class UmAppDatabase : DoorDatabase() {
 
         @Synchronized
         fun getInstance(context: Any, dbName: String): UmAppDatabase? {
-            var db = namedInstances.get(dbName)
+            var db = namedInstances[dbName]
 
             if (db == null) {
-              /*  var builder = UmDbBuilder.builder(
-                        UmAppDatabase::class, context, dbName)
-                builder = addMigrations(builder)
-                db = addCallbacks(builder).build()
-                namedInstances.put(dbName, db) */
+                var builder = DatabaseBuilder.databaseBuilder(
+                        context, UmAppDatabase::class, dbName)
+                //builder = addMigrations(builder)
+                //db = addCallbacks(builder).build()
+                db = builder.build()
+                namedInstances[dbName] = db
             }
             return db
         }

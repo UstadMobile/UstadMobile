@@ -16,9 +16,9 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
 
         val umAppDb = UmAppDatabase.getInstance(applicationContext)
         try {
-            umAppDb.syncWith(
-                    UmAccountManager.getRepositoryForActiveAccount(applicationContext),
-                    activeAccount?.personUid ?: 0, 100, 100)
+           // umAppDb.syncWith(
+            //        UmAccountManager.getRepositoryForActiveAccount(applicationContext),
+          //          activeAccount?.personUid ?: 0, 100, 100)
             UMLog.l(UMLog.INFO, 100, "database syncWith repo ran")
         } catch (e: Exception) {
             UMLog.l(UMLog.WARN, 101, "Exception running syncWith :" + e.message)

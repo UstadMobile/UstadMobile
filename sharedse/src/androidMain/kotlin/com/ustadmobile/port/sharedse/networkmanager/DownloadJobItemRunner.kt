@@ -3,6 +3,8 @@ package com.ustadmobile.port.sharedse.networkmanager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmResultCallback
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
@@ -55,22 +57,22 @@ class DownloadJobItemRunner
 
     private val downloadJobItemManager: DownloadJobItemManager?
 
-    private var statusLiveData: UmLiveData<ConnectivityStatus>? = null
+    private var statusLiveData: DoorLiveData<ConnectivityStatus>? = null
 
-    private var statusObserver: UmObserver<ConnectivityStatus>? = null
+    private var statusObserver: DoorObserver<ConnectivityStatus>? = null
 
     //TODO: enable switching to local download when available after basic p2p cases complete
     //private UmObserver<EntryStatusResponse> entryStatusObserver;
 
     //private UmLiveData<EntryStatusResponse> entryStatusLiveData;
 
-    private var downloadJobItemObserver: UmObserver<Int>? = null
+    private var downloadJobItemObserver: DoorObserver<Int>? = null
 
-    private var downloadJobItemLiveData: UmLiveData<Int>? = null
+    private var downloadJobItemLiveData: DoorLiveData<Int>? = null
 
-    private var downloadSetConnectivityData: UmLiveData<Boolean>? = null
+    private var downloadSetConnectivityData: DoorLiveData<Boolean>? = null
 
-    private var downloadSetConnectivityObserver: UmObserver<Boolean>? = null
+    private var downloadSetConnectivityObserver: DoorObserver<Boolean>? = null
 
     @Volatile
     private var httpDownload: ResumableHttpDownload? = null
@@ -259,22 +261,12 @@ class DownloadJobItemRunner
         //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
         //                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
-        downloadSetConnectivityObserver = object : UmObserver<Boolean> {
-            override fun onChanged(t: Boolean?) {
-                handleDownloadSetMeteredConnectionAllowedChanged(t)
-            }
-        }
-        statusObserver = object : UmObserver<ConnectivityStatus> {
-            override fun onChanged(t: ConnectivityStatus?) {
-                handleConnectivityStatusChanged(t)
-            }
-        }
+        downloadSetConnectivityObserver = DoorObserver { t -> handleDownloadSetMeteredConnectionAllowedChanged(t) }
 
-        downloadJobItemObserver = object : UmObserver<Int> {
-            override fun onChanged(t: Int?) {
-                handleDownloadJobItemStatusChanged(t)
-            }
-        }
+        statusObserver = DoorObserver { t -> handleConnectivityStatusChanged(t) }
+
+        downloadJobItemObserver = DoorObserver<Int> { t -> handleDownloadJobItemStatusChanged(t) }
+
         //entryStatusObserver = this::handleContentEntryFileStatus;
         statusLiveData!!.observeForever(statusObserver!!)
         downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)

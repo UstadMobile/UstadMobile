@@ -14,7 +14,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter
@@ -56,7 +55,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
             val managerBle = context.networkManagerBle
             mPresenter = DownloadDialogPresenter(getContext() as Context, managerBle,
                     bundleToMap(arguments), this, UmAppDatabase.getInstance(context),
-                    UmAccountManager.getRepositoryForActiveAccount(context))
+                    UmAppDatabase.getInstance(context)) //UmAccountManager.getRepositoryForActiveAccount(context))
         }
 
         super.onAttach(context)

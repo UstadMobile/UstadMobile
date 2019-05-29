@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.util
 
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmObserver
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -28,9 +28,9 @@ class LiveDataWorkQueue<T>
 
     private val executor: ExecutorService
 
-    private var workSource: UmLiveData<List<T>>? = null
+    private var workSource: DoorLiveData<List<T>>? = null
 
-    private var workObserver: UmObserver<List<T>>? = null
+    private var workObserver: DoorObserver<List<T>>? = null
 
     var adapter: WorkQueueItemAdapter<T>? = null
 
@@ -80,13 +80,9 @@ class LiveDataWorkQueue<T>
      *
      * @param workSource UmLiveData that will provide items to be adapted and executed
      */
-    fun start(workSource: UmLiveData<List<T>>) {
+    fun start(workSource: DoorLiveData<List<T>>) {
         this.workSource = workSource
-        workObserver = object : UmObserver<List<T>> {
-            override fun onChanged(t: List<T>?) {
-                handleWorkSourceChanged(t)
-            }
-        }
+        workObserver = DoorObserver { t -> handleWorkSourceChanged(t) }
         workSource.observeForever(workObserver!!)
     }
 

@@ -9,9 +9,9 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.ACTION_START_FOREGROUND_SERVICE
 import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.GROUP_SUMMARY_ID
 import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.JOB_ID_TAG
@@ -41,9 +41,9 @@ class NetworkManagerBleAndroidService : Service() {
 
     private val mHttpDownloadServiceActive = AtomicBoolean(false)
 
-    private var activeDownloadJobData: UmLiveData<Boolean>? = null
+    private var activeDownloadJobData: DoorLiveData<Boolean>? = null
 
-    private var activeDownloadJobObserver: UmObserver<Boolean>? = null
+    private var activeDownloadJobObserver: DoorObserver<Boolean>? = null
 
     private var umAppDatabase: UmAppDatabase? = null
 
@@ -87,11 +87,7 @@ class NetworkManagerBleAndroidService : Service() {
         bindService(serviceIntent, mHttpdServiceConnection, Context.BIND_AUTO_CREATE)
 
         activeDownloadJobData = umAppDatabase!!.downloadJobDao.anyActiveDownloadJob()
-        activeDownloadJobObserver = object : UmObserver<Boolean> {
-            override fun onChanged(t: Boolean?) {
-                handleActiveJob(t!!)
-            }
-        }
+        activeDownloadJobObserver = DoorObserver<Boolean> { t -> handleActiveJob(t!!) }
         activeDownloadJobData!!.observeForever(activeDownloadJobObserver!!)
 
         mBadNodeExecutorService = Executors.newScheduledThreadPool(1)

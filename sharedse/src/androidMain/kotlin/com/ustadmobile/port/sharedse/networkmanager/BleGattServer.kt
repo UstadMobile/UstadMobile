@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_REQUEST
@@ -66,7 +67,7 @@ abstract class BleGattServer {
             ENTRY_STATUS_REQUEST -> {
                 val entryStatusResponse = ArrayList<Long>()
 
-                val containerDao = UmAccountManager.getRepositoryForActiveAccount(context!!)
+                val containerDao = UmAppDatabase.getInstance(context!!) //UmAccountManager.getRepositoryForActiveAccount(context!!)
                         .containerDao
                 for (containerUid in bleMessageBytesToLong(requestReceived.payload!!)) {
 

@@ -1,8 +1,8 @@
 package com.ustadmobile.core.impl
 
-class UmCallbackWithDefaultValue<T>(private val defaultVal: T, callback: UmCallback<*>) : UmCallback<T> {
+class UmCallbackWithDefaultValue<T>(private val defaultVal: T, callback: UmCallback<T>) : UmCallback<T> {
 
-    private val callback: UmCallback<T> = callback as UmCallback<T>
+    private val callback: UmCallback<T> = callback
 
     override fun onSuccess(result: T?) {
         if (result != null)

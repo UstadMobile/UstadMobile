@@ -91,6 +91,8 @@ kotlin {
                 implementation "org.json:json:$version_json"
 
 
+                implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+
                 implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
