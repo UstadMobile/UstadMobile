@@ -26,6 +26,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlinx-serialization'
+apply plugin: "kotlin-kapt"
 
 
 configurations.all {
@@ -259,9 +260,9 @@ assemble.dependsOn(generateCoreStringToAndroidResMap)
 
 configurations.all {
     resolutionStrategy {
-        force "android.arch.lifecycle:livedata-core:$version_android_lifecycle"
-        force "android.arch.lifecycle:runtime:$version_android_lifecycle"
-        force "android.arch.core:runtime:$version_android_lifecycle"
+        force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
+        force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
+        force "androidx.arch.core:core-runtime:$version_androidx_lifecycle"
     }
 }
 
@@ -282,16 +283,16 @@ dependencies {
     androidTestImplementation project(":core-tests")
 
     //ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
-    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+    kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
     implementation "androidx.room:room-runtime:$version_android_room"
 
-    implementation "androidx.core:core-ktx:$version_android_core"
+    implementation "androidx.core:core-ktx:$version_androidx_core"
 
     // Paging
-    implementation "android.arch.paging:runtime:$version_android_paging"
+    implementation "androidx.paging:paging-runtime:$version_androidx_paging"
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
