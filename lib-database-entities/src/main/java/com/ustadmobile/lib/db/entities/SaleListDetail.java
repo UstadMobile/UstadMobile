@@ -14,7 +14,7 @@ public class SaleListDetail extends Sale {
     float saleAmountDue;
     long earliestDueDate;
     boolean saleItemPreOrder;
-    String categoryName;
+    //String categoryName;
 
     public String getLocationName() {
         return locationName;
@@ -88,11 +88,11 @@ public class SaleListDetail extends Sale {
         this.saleItemPreOrder = saleItemPreOrder;
     }
 
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
+//    public String getCategoryName() {
+//        return categoryName;
+//    }
+//
+//    public void setCategoryName(String categoryName) {
+//        this.categoryName = categoryName;
+//    }
 }
