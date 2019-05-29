@@ -230,6 +230,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         }
     }
+
     public void handleLogout(){
         if(checkLogout) {
             finishAffinity();

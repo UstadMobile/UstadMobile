@@ -186,7 +186,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:src="@drawable/ic_sub_category_white_24dp"
-        app:fab_label="@string/subcategory"
+        app:fab_label="@string/category"
         app:fab_size="mini"
         fab:fab_colorNormal="@color/fab"
         fab:fab_colorPressed="@color/fab_pressed"
