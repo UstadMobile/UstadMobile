@@ -1,6 +1,7 @@
+import { UmAngularUtil } from './com/ustadmobile/util/UmAngularUtil';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
-import { Component } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnDestroy } from '@angular/core';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
 
@@ -18,9 +19,19 @@ export class AppComponent extends UmBaseComponent{
 
   ngOnInit(): void {
     super.ngOnInit();
-    const args = { queryParams: { parentUid: this.umDb.ROOT_UID, entryid: this.umDb.ROOT_UID} };
-    this.systemImpl.go('contentEntryList',args, this.context,0);
+    //check and redirect to a specific views based on URL path & params
+    var args , viewName = null
+    if(document.location.pathname === "/" && UmAngularUtil.queryParamsToMap().size  == 0){
+      args = UmAngularUtil.queryParamsToMap("?entryid=" + this.umDb.ROOT_UID)
+      viewName = 'ContentEntryList'
+    }else{
+      args = UmAngularUtil.queryParamsToMap();
+      viewName = document.location.pathname.split("/")[2]
+    }
+    this.systemImpl.go(viewName,args, this.context,0);
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    super.ngOnDestroy()
+  }
 }

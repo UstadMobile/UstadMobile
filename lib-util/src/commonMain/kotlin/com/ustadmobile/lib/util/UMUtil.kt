@@ -35,6 +35,7 @@ import kotlinx.serialization.stringFromUtf8Bytes
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
+import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
@@ -554,6 +555,12 @@ object UMUtil {
         sb.append(']')
 
         return sb.toString()
+    }
+
+    @JsName("jsListToKotlin")
+    @JvmStatic
+    fun jsListToKotlin(list: Array<Any>): Any{
+        return list.toList()
     }
 
 }

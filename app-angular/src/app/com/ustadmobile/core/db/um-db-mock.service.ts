@@ -1,13 +1,14 @@
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { com } from 'lib-database';
-import { com as db} from 'lib-database';
+import { com as util} from 'lib-util';
+import { com as db } from 'lib-database';
+import { com as kotlin } from 'kotlin';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
 
 @Injectable({
   providedIn: 'root'
 })
-export class UmDbMockService extends com.ustadmobile.core.db.UmAppDatabase{
+export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase{
   ROOT_UID = 1311236;
   private initialized: boolean = false;
   constructor() {
@@ -15,14 +16,13 @@ export class UmDbMockService extends com.ustadmobile.core.db.UmAppDatabase{
     if(!this.initialized){
       this.initialized = true;
       db.ustadmobile.core.db.UmAppDatabase.Companion.setInstance(this);
-      console.log("db", db.ustadmobile.core.db.UmAppDatabase.Companion) 
     }
    }
 
    contentEntryDao = new ContentEntryDao(); 
    
   getData(entryUid){
-    const data : ContentEntry [] =  dataSample[entryUid];
+    const data : ContentEntry [] =  entryList[entryUid];
     return data;
   }
 
@@ -34,15 +34,34 @@ export class UmDbMockService extends com.ustadmobile.core.db.UmAppDatabase{
 class ContentEntryDao {
   constructor() {}
   getChildrenByParentUidWithCategoryFilter(param1, param2, param3) : any{
-    const entryList : ContentEntry [] =  dataSample[param1];
-    return UmAngularUtil.createObserver(entryList);
+    return UmAngularUtil.createObserver(entryList[param1] as ContentEntry []);
   }
 
   getContentByUuidAsync(entryUid){
-    
+    const entry = entryList[entryUid][0] as ContentEntry;
+    entry.title = "Example Entry Title"
+    return entry;
+  }
+
+  findUniqueLanguagesInListAsync(entryUid,context){ 
+    return util.ustadmobile.lib.util.UMUtil.jsListToKotlin(languages[entryUid]);
+  }
+
+  findByUidAsync(entryUid){
+    return UmAngularUtil.findObjectByLabel(entryList,'contentEntryUid', entryUid) as ContentEntry;
+  }
+
+  findListOfCategoriesAsync(entryUid){
+    const schema: DistinctCategorySchema = {
+      contentCategoryUid:1,
+      categoryName: "Category",
+      contentCategorySchemaUid: 12,
+      schemaName: "Schema"};
+    return util.ustadmobile.lib.util.UMUtil.jsListToKotlin([schema]);
   }
 }
 /**Entities */
+
 
 export interface ContentEntry {
   contentEntryUid: number;
@@ -60,7 +79,29 @@ export interface ContentEntry {
   leaf: boolean; 
 }
 
-const dataSample = {
+export interface Language{
+  langUid: number;
+  namename: string;
+  iso_639_1_standard: string;
+  iso_639_2_standard: string;
+  iso_639_3_standard: string;
+  langLocalChangeSeqNum: number;
+  langMasterChangeSeqNum: number;
+  langLastChangedBy: number;
+}
+export interface DistinctCategorySchema {
+  contentCategoryUid:number
+  categoryName: String
+  contentCategorySchemaUid: number
+  schemaName: String
+}
+
+const languages = {
+  "1311236" : [{ "langUid": 1, "namename": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "namename": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "namename": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "namename": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "namename": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "namename": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
+  "41250" : [{ "langUid": 1, "namename": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "namename": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "namename": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "namename": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "namename": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "namename": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
+  "83098" : [{ "langUid": 1, "namename": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "namename": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "namename": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "namename": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "namename": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "namename": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }]
+}
+const entryList = {
   "1311236" :[{
     "contentEntryUid": 41250,
     "title": "magnis dis parturient",
@@ -74,7 +115,7 @@ const dataSample = {
     "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
     "lastModified": "62-963-5233",
-    "leaf": true
+    "leaf": false
   }, {
     "contentEntryUid": 83098,
     "title": "est phasellus sit amet erat",
@@ -88,7 +129,7 @@ const dataSample = {
     "sourceUrl": "https://tamu.edu/elementum/nullam/varius.png?interdum=sapien&mauris=in&non=sapien&ligula=iaculis&pellentesque=congue&ultrices=vivamus&phasellus=metus&id=arcu&sapien=adipiscing&in=molestie&sapien=hendrerit&iaculis=at&congue=vulputate&vivamus=vitae&metus=nisl&arcu=aenean&adipiscing=lectus&molestie=pellentesque&hendrerit=eget&at=nunc&vulputate=donec&vitae=quis&nisl=orci&aenean=eget&lectus=orci&pellentesque=vehicula&eget=condimentum&nunc=curabitur&donec=in&quis=libero&orci=ut&eget=massa&orci=volutpat&vehicula=convallis&condimentum=morbi&curabitur=odio&in=odio&libero=elementum&ut=eu&massa=interdum",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
     "lastModified": "01-794-7396",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 31228,
     "title": "tincidunt nulla mollis",
@@ -116,7 +157,7 @@ const dataSample = {
     "sourceUrl": "https://mlb.com/pede/venenatis/non/sodales.html?turpis=a&sed=ipsum&ante=integer&vivamus=a&tortor=nibh&duis=in&mattis=quis&egestas=justo&metus=maecenas&aenean=rhoncus&fermentum=aliquam&donec=lacus&ut=morbi&mauris=quis&eget=tortor&massa=id&tempor=nulla&convallis=ultrices&nulla=aliquet&neque=maecenas&libero=leo&convallis=odio&eget=condimentum&eleifend=id&luctus=luctus&ultricies=nec&eu=molestie&nibh=sed&quisque=justo&id=pellentesque&justo=viverra&sit=pede&amet=ac&sapien=diam&dignissim=cras&vestibulum=pellentesque&vestibulum=volutpat&ante=dui&ipsum=maecenas&primis=tristique&in=est&faucibus=et&orci=tempus&luctus=semper&et=est&ultrices=quam&posuere=pharetra&cubilia=magna&curae=ac&nulla=consequat&dapibus=metus&dolor=sapien&vel=ut&est=nunc&donec=vestibulum&odio=ante&justo=ipsum&sollicitudin=primis&ut=in&suscipit=faucibus&a=orci&feugiat=luctus&et=et&eros=ultrices&vestibulum=posuere&ac=cubilia&est=curae&lacinia=mauris&nisi=viverra&venenatis=diam&tristique=vitae&fusce=quam&congue=suspendisse&diam=potenti&id=nullam&ornare=porttitor&imperdiet=lacus&sapien=at&urna=turpis&pretium=donec&nisl=posuere&ut=metus",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
     "lastModified": "24-156-6015",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 38522,
     "title": "condimentum curabitur in libero ut",
@@ -145,7 +186,7 @@ const dataSample = {
     "sourceUrl": "http://addtoany.com/blandit/nam/nulla/integer.js?diam=mauris&neque=enim&vestibulum=leo&eget=rhoncus&vulputate=sed&ut=vestibulum&ultrices=sit&vel=amet&augue=cursus&vestibulum=id&ante=turpis&ipsum=integer&primis=aliquet&in=massa&faucibus=id&orci=lobortis&luctus=convallis&et=tortor&ultrices=risus&posuere=dapibus&cubilia=augue&curae=vel&donec=accumsan&pharetra=tellus&magna=nisi&vestibulum=eu&aliquet=orci&ultrices=mauris&erat=lacinia&tortor=sapien&sollicitudin=quis&mi=libero&sit=nullam&amet=sit&lobortis=amet&sapien=turpis&sapien=elementum&non=ligula&mi=vehicula&integer=consequat&ac=morbi&neque=a&duis=ipsum&bibendum=integer&morbi=a&non=nibh&quam=in&nec=quis&dui=justo&luctus=maecenas&rutrum=rhoncus&nulla=aliquam&tellus=lacus&in=morbi&sagittis=quis&dui=tortor&vel=id&nisl=nulla&duis=ultrices&ac=aliquet&nibh=maecenas&fusce=leo&lacus=odio&purus=condimentum&aliquet=id&at=luctus&feugiat=nec&non=molestie&pretium=sed&quis=justo&lectus=pellentesque&suspendisse=viverra&potenti=pede&in=ac&eleifend=diam&quam=cras&a=pellentesque&odio=volutpat&in=dui&hac=maecenas",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/cc0000/ffffff",
     "lastModified": "00-605-8113",
-    "leaf": true
+    "leaf": false
   }, {
     "contentEntryUid": 38321,
     "title": "in libero ut massa volutpat",
@@ -159,7 +200,7 @@ const dataSample = {
     "sourceUrl": "https://hc360.com/id/consequat/in.json?iaculis=hac&diam=habitasse&erat=platea&fermentum=dictumst&justo=etiam&nec=faucibus&condimentum=cursus&neque=urna&sapien=ut&placerat=tellus&ante=nulla&nulla=ut&justo=erat&aliquam=id&quis=mauris&turpis=vulputate&eget=elementum&elit=nullam&sodales=varius&scelerisque=nulla&mauris=facilisi&sit=cras&amet=non&eros=velit&suspendisse=nec&accumsan=nisi&tortor=vulputate&quis=nonummy&turpis=maecenas&sed=tincidunt&ante=lacus&vivamus=at&tortor=velit&duis=vivamus&mattis=vel&egestas=nulla&metus=eget&aenean=eros&fermentum=elementum&donec=pellentesque&ut=quisque&mauris=porta&eget=volutpat&massa=erat&tempor=quisque&convallis=erat&nulla=eros&neque=viverra&libero=eget&convallis=congue&eget=eget&eleifend=semper&luctus=rutrum&ultricies=nulla&eu=nunc&nibh=purus&quisque=phasellus&id=in&justo=felis&sit=donec&amet=semper&sapien=sapien&dignissim=a&vestibulum=libero&vestibulum=nam&ante=dui&ipsum=proin&primis=leo&in=odio&faucibus=porttitor&orci=id&luctus=consequat&et=in&ultrices=consequat&posuere=ut&cubilia=nulla&curae=sed&nulla=accumsan&dapibus=felis&dolor=ut",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
     "lastModified": "49-138-1993",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 84342,
     "title": "eget congue eget",
@@ -244,7 +285,7 @@ const dataSample = {
     "sourceUrl": "https://123-reg.co.uk/duis/faucibus/accumsan.png?eget=etiam&tincidunt=pretium&eget=iaculis&tempus=justo&vel=in&pede=hac&morbi=habitasse&porttitor=platea&lorem=dictumst&id=etiam&ligula=faucibus&suspendisse=cursus&ornare=urna&consequat=ut&lectus=tellus&in=nulla&est=ut&risus=erat&auctor=id&sed=mauris&tristique=vulputate&in=elementum&tempus=nullam&sit=varius&amet=nulla&sem=facilisi&fusce=cras&consequat=non&nulla=velit&nisl=nec&nunc=nisi&nisl=vulputate&duis=nonummy&bibendum=maecenas&felis=tincidunt",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/cc0000/ffffff",
     "lastModified": "65-365-5627",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 39313,
     "title": "luctus cum sociis natoque",
@@ -258,7 +299,7 @@ const dataSample = {
     "sourceUrl": "http://google.cn/blandit/mi/in/porttitor/pede/justo.xml?aliquam=scelerisque&sit=mauris&amet=sit&diam=amet&in=eros&magna=suspendisse&bibendum=accumsan&imperdiet=tortor&nullam=quis&orci=turpis&pede=sed&venenatis=ante&non=vivamus&sodales=tortor&sed=duis&tincidunt=mattis&eu=egestas&felis=metus&fusce=aenean&posuere=fermentum&felis=donec&sed=ut&lacus=mauris&morbi=eget&sem=massa&mauris=tempor&laoreet=convallis&ut=nulla&rhoncus=neque&aliquet=libero&pulvinar=convallis&sed=eget&nisl=eleifend&nunc=luctus&rhoncus=ultricies&dui=eu&vel=nibh&sem=quisque&sed=id&sagittis=justo&nam=sit&congue=amet&risus=sapien&semper=dignissim&porta=vestibulum",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
     "lastModified": "29-328-9775",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 56681,
     "title": "sit amet sem fusce",
@@ -272,7 +313,7 @@ const dataSample = {
     "sourceUrl": "http://nhs.uk/sit/amet/turpis/elementum.html?fringilla=dapibus&rhoncus=duis&mauris=at&enim=velit&leo=eu&rhoncus=est&sed=congue&vestibulum=elementum&sit=in&amet=hac&cursus=habitasse&id=platea&turpis=dictumst&integer=morbi&aliquet=vestibulum&massa=velit&id=id&lobortis=pretium&convallis=iaculis&tortor=diam&risus=erat&dapibus=fermentum&augue=justo&vel=nec&accumsan=condimentum&tellus=neque&nisi=sapien&eu=placerat&orci=ante&mauris=nulla&lacinia=justo&sapien=aliquam&quis=quis&libero=turpis&nullam=eget&sit=elit&amet=sodales&turpis=scelerisque&elementum=mauris&ligula=sit&vehicula=amet&consequat=eros&morbi=suspendisse&a=accumsan&ipsum=tortor&integer=quis&a=turpis&nibh=sed&in=ante&quis=vivamus&justo=tortor&maecenas=duis&rhoncus=mattis&aliquam=egestas&lacus=metus&morbi=aenean&quis=fermentum&tortor=donec&id=ut&nulla=mauris&ultrices=eget&aliquet=massa&maecenas=tempor&leo=convallis&odio=nulla&condimentum=neque&id=libero&luctus=convallis&nec=eget&molestie=eleifend&sed=luctus&justo=ultricies&pellentesque=eu&viverra=nibh&pede=quisque&ac=id",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
     "lastModified": "12-137-9799",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 92338,
     "title": "nullam varius nulla facilisi",
@@ -356,7 +397,7 @@ const dataSample = {
     "sourceUrl": "https://tumblr.com/a/ipsum/integer.jpg?tincidunt=dignissim&nulla=vestibulum&mollis=vestibulum&molestie=ante&lorem=ipsum&quisque=primis&ut=in&erat=faucibus&curabitur=orci&gravida=luctus&nisi=et&at=ultrices&nibh=posuere&in=cubilia&hac=curae&habitasse=nulla&platea=dapibus&dictumst=dolor&aliquam=vel&augue=est&quam=donec&sollicitudin=odio&vitae=justo&consectetuer=sollicitudin&eget=ut&rutrum=suscipit&at=a&lorem=feugiat&integer=et&tincidunt=eros&ante=vestibulum&vel=ac&ipsum=est&praesent=lacinia&blandit=nisi&lacinia=venenatis&erat=tristique&vestibulum=fusce&sed=congue&magna=diam&at=id&nunc=ornare&commodo=imperdiet&placerat=sapien&praesent=urna&blandit=pretium&nam=nisl&nulla=ut&integer=volutpat&pede=sapien&justo=arcu&lacinia=sed&eget=augue&tincidunt=aliquam&eget=erat&tempus=volutpat&vel=in&pede=congue&morbi=etiam&porttitor=justo&lorem=etiam&id=pretium&ligula=iaculis&suspendisse=justo",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
     "lastModified": "60-208-0014",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 92757,
     "title": "duis mattis egestas metus",
@@ -370,7 +411,7 @@ const dataSample = {
     "sourceUrl": "https://uol.com.br/felis/sed/interdum/venenatis/turpis/enim/blandit.js?nascetur=ipsum&ridiculus=dolor&mus=sit&vivamus=amet&vestibulum=consectetuer&sagittis=adipiscing&sapien=elit&cum=proin",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
     "lastModified": "43-067-5763",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 58757,
     "title": "amet eleifend pede libero",
@@ -412,7 +453,7 @@ const dataSample = {
     "sourceUrl": "http://newsvine.com/sit/amet.html?luctus=id&nec=ornare&molestie=imperdiet&sed=sapien&justo=urna&pellentesque=pretium&viverra=nisl&pede=ut&ac=volutpat&diam=sapien&cras=arcu&pellentesque=sed&volutpat=augue&dui=aliquam&maecenas=erat&tristique=volutpat&est=in&et=congue&tempus=etiam&semper=justo&est=etiam&quam=pretium&pharetra=iaculis&magna=justo&ac=in&consequat=hac&metus=habitasse&sapien=platea&ut=dictumst&nunc=etiam&vestibulum=faucibus&ante=cursus&ipsum=urna&primis=ut&in=tellus&faucibus=nulla&orci=ut&luctus=erat&et=id&ultrices=mauris&posuere=vulputate&cubilia=elementum&curae=nullam&mauris=varius&viverra=nulla&diam=facilisi&vitae=cras&quam=non&suspendisse=velit&potenti=nec&nullam=nisi&porttitor=vulputate&lacus=nonummy&at=maecenas&turpis=tincidunt",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
     "lastModified": "08-451-2758",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 66350,
     "title": "commodo placerat praesent blandit nam",
@@ -440,7 +481,7 @@ const dataSample = {
     "sourceUrl": "https://uiuc.edu/tempus/vel/pede/morbi/porttitor/lorem/id.png?mauris=luctus&laoreet=et&ut=ultrices&rhoncus=posuere&aliquet=cubilia&pulvinar=curae&sed=mauris&nisl=viverra&nunc=diam&rhoncus=vitae&dui=quam&vel=suspendisse&sem=potenti&sed=nullam&sagittis=porttitor&nam=lacus&congue=at&risus=turpis&semper=donec&porta=posuere&volutpat=metus&quam=vitae&pede=ipsum&lobortis=aliquam&ligula=non&sit=mauris&amet=morbi&eleifend=non&pede=lectus&libero=aliquam&quis=sit&orci=amet&nullam=diam&molestie=in&nibh=magna&in=bibendum&lectus=imperdiet&pellentesque=nullam&at=orci&nulla=pede&suspendisse=venenatis&potenti=non&cras=sodales&in=sed&purus=tincidunt&eu=eu&magna=felis&vulputate=fusce&luctus=posuere&cum=felis&sociis=sed&natoque=lacus&penatibus=morbi&et=sem&magnis=mauris&dis=laoreet&parturient=ut&montes=rhoncus&nascetur=aliquet&ridiculus=pulvinar&mus=sed&vivamus=nisl&vestibulum=nunc&sagittis=rhoncus&sapien=dui&cum=vel&sociis=sem&natoque=sed&penatibus=sagittis&et=nam&magnis=congue&dis=risus&parturient=semper&montes=porta&nascetur=volutpat&ridiculus=quam&mus=pede",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/cc0000/ffffff",
     "lastModified": "17-412-0047",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 30154,
     "title": "sit amet eleifend",
@@ -454,7 +495,7 @@ const dataSample = {
     "sourceUrl": "http://skype.com/curabitur/gravida.aspx?elit=id&proin=ornare&risus=imperdiet&praesent=sapien&lectus=urna&vestibulum=pretium&quam=nisl&sapien=ut&varius=volutpat&ut=sapien&blandit=arcu&non=sed&interdum=augue&in=aliquam&ante=erat&vestibulum=volutpat&ante=in&ipsum=congue&primis=etiam&in=justo&faucibus=etiam&orci=pretium&luctus=iaculis&et=justo&ultrices=in&posuere=hac&cubilia=habitasse&curae=platea&duis=dictumst&faucibus=etiam&accumsan=faucibus&odio=cursus&curabitur=urna&convallis=ut&duis=tellus&consequat=nulla&dui=ut&nec=erat&nisi=id&volutpat=mauris&eleifend=vulputate&donec=elementum&ut=nullam&dolor=varius&morbi=nulla&vel=facilisi&lectus=cras&in=non&quam=velit&fringilla=nec&rhoncus=nisi&mauris=vulputate&enim=nonummy&leo=maecenas&rhoncus=tincidunt&sed=lacus&vestibulum=at&sit=velit&amet=vivamus&cursus=vel&id=nulla&turpis=eget&integer=eros&aliquet=elementum&massa=pellentesque&id=quisque&lobortis=porta&convallis=volutpat&tortor=erat&risus=quisque&dapibus=erat&augue=eros&vel=viverra&accumsan=eget&tellus=congue&nisi=eget&eu=semper&orci=rutrum&mauris=nulla&lacinia=nunc&sapien=purus&quis=phasellus&libero=in&nullam=felis&sit=donec&amet=semper&turpis=sapien&elementum=a&ligula=libero&vehicula=nam&consequat=dui&morbi=proin&a=leo&ipsum=odio&integer=porttitor&a=id",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
     "lastModified": "11-122-5762",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 15438,
     "title": "lectus suspendisse potenti",
@@ -468,7 +509,7 @@ const dataSample = {
     "sourceUrl": "https://nasa.gov/risus/dapibus/augue.js?congue=faucibus&etiam=orci&justo=luctus&etiam=et&pretium=ultrices&iaculis=posuere&justo=cubilia&in=curae&hac=donec&habitasse=pharetra&platea=magna&dictumst=vestibulum&etiam=aliquet&faucibus=ultrices&cursus=erat&urna=tortor&ut=sollicitudin&tellus=mi&nulla=sit&ut=amet&erat=lobortis&id=sapien&mauris=sapien&vulputate=non&elementum=mi&nullam=integer&varius=ac&nulla=neque&facilisi=duis&cras=bibendum&non=morbi&velit=non&nec=quam&nisi=nec&vulputate=dui&nonummy=luctus&maecenas=rutrum&tincidunt=nulla&lacus=tellus&at=in&velit=sagittis&vivamus=dui&vel=vel&nulla=nisl&eget=duis&eros=ac&elementum=nibh&pellentesque=fusce&quisque=lacus&porta=purus&volutpat=aliquet&erat=at&quisque=feugiat&erat=non&eros=pretium&viverra=quis&eget=lectus&congue=suspendisse&eget=potenti&semper=in&rutrum=eleifend&nulla=quam&nunc=a&purus=odio&phasellus=in&in=hac&felis=habitasse&donec=platea&semper=dictumst&sapien=maecenas&a=ut&libero=massa&nam=quis&dui=augue",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/cc0000/ffffff",
     "lastModified": "21-829-3762",
-    "leaf": false
+    "leaf": true
   }, {
     "contentEntryUid": 88074,
     "title": "at nibh in hac habitasse",
@@ -496,7 +537,7 @@ const dataSample = {
     "sourceUrl": "http://elpais.com/in/faucibus/orci/luctus/et/ultrices/posuere.aspx?in=lacinia&magna=aenean&bibendum=sit&imperdiet=amet&nullam=justo&orci=morbi&pede=ut&venenatis=odio&non=cras&sodales=mi&sed=pede&tincidunt=malesuada&eu=in&felis=imperdiet&fusce=et&posuere=commodo&felis=vulputate&sed=justo&lacus=in&morbi=blandit&sem=ultrices&mauris=enim&laoreet=lorem&ut=ipsum&rhoncus=dolor&aliquet=sit&pulvinar=amet&sed=consectetuer&nisl=adipiscing&nunc=elit&rhoncus=proin&dui=interdum&vel=mauris&sem=non&sed=ligula&sagittis=pellentesque&nam=ultrices&congue=phasellus&risus=id&semper=sapien&porta=in&volutpat=sapien&quam=iaculis&pede=congue&lobortis=vivamus&ligula=metus&sit=arcu&amet=adipiscing&eleifend=molestie&pede=hendrerit&libero=at&quis=vulputate&orci=vitae&nullam=nisl&molestie=aenean&nibh=lectus&in=pellentesque&lectus=eget&pellentesque=nunc&at=donec&nulla=quis&suspendisse=orci&potenti=eget&cras=orci&in=vehicula&purus=condimentum&eu=curabitur&magna=in&vulputate=libero&luctus=ut&cum=massa&sociis=volutpat&natoque=convallis&penatibus=morbi",
     "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
     "lastModified": "05-281-4333",
-    "leaf": false
+    "leaf": true
   }]
 }
 

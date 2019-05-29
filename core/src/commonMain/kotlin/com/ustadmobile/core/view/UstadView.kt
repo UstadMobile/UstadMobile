@@ -31,6 +31,7 @@
 package com.ustadmobile.core.view
 
 import kotlinx.coroutines.Runnable
+import kotlin.js.JsName
 
 /**
  *
@@ -53,7 +54,8 @@ interface UstadView {
      *
      * @param r Runnable to run on system's UI thread
      */
-    fun runOnUiThread(r: Runnable?): Unit
+    @JsName("runOnUiThread")
+    fun runOnUiThread(r: Runnable?)
 
     companion object {
 

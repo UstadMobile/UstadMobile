@@ -7,14 +7,15 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 const routes: Routes = [
   {path: 'home', component: HomeComponent,
         children: [
-          {path: 'contentEntryList', component: ContentEntryListComponent},
-          {path: 'contentEntryDetail', component: ContentEntryDetailComponent},
-        ]
+          {path: 'ContentEntryList', component: ContentEntryListComponent},
+          {path: 'ContentEntryDetail', component: ContentEntryDetailComponent},
+        ],
+        runGuardsAndResolvers: "always"
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {onSameUrlNavigation: "reload"})],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}

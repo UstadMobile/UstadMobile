@@ -3,6 +3,7 @@ package com.ustadmobile.core.impl
 import kotlinx.io.InputStream
 import kotlin.browser.localStorage
 import kotlin.browser.window
+import kotlin.js.json
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -35,8 +36,15 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        val navigateTo = arrayOf("/home/$viewName/")
-        umContext.router.navigate(navigateTo, args)
+        umContext.router.navigate(arrayOf("/home/$viewName/"), mapToRouterParams(args))
+    }
+
+    private fun mapToRouterParams(args: Map<String, String?>): Any{
+        val params = json()
+        for ((key, value) in args) {
+            params[key] = value
+        }
+        return json("queryParams" to params, "queryParamsHandling" to "merge")
     }
 
     /**

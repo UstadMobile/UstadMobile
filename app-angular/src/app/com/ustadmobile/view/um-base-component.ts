@@ -1,17 +1,20 @@
 import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
-import { OnInit } from '@angular/core';
+import { OnInit, OnDestroy } from '@angular/core';
 import { com } from 'core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
-export abstract class UmBaseComponent implements OnInit{
+import { Observable, Subject } from 'rxjs';
+export abstract class UmBaseComponent implements OnInit, OnDestroy{
 
   public env = environment;
   public systemImpl: any;
   public readonly context: UmContextWrapper;
   public readonly MessageID;
-  public app_name: string = "...";
+  public app_name: String = "...";
+  public entry_title: String = "...";
+  public subject = new Subject<any> ();
 
 
   protected constructor(public localeService: UmBaseService, public router: Router, public route: ActivatedRoute, public mockedUmDb: UmDbMockService){
@@ -31,6 +34,13 @@ export abstract class UmBaseComponent implements OnInit{
         this.app_name = this.getString(this.MessageID.app_name);
       }
     });
+    this.subject.subscribe(data =>{
+      data.next("...")
+    })
+  }
+
+  ngOnDestroy(){
+    
   }
 
   public getString(messageId: number){

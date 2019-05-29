@@ -1,6 +1,6 @@
-<div class="row white" (close)="ngOnDestroy()">
+<div class="row white" (close)="ngOnDestroy()" infiniteScroll [infiniteScrollDistance]="2" [infiniteScrollThrottle]="50" (scrolled)="onFetchNextPage()" [scrollWindow]="false">
     <ul *ngIf="entries" class="collection default-padding-top">
-        <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="navigate(entry)">
+        <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="openEntry(entry)">
           <div class="row">
             <div class="col s2 l2">
                 <img src="{{entry.thumbnailUrl}}" alt="" class="responsive-img entry-image">

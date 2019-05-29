@@ -1,9 +1,9 @@
-import { Observable } from 'rxjs';
+import { Observable, PartialObserver, Subscription } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
 import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Router, ActivatedRoute, Params, NavigationEnd } from '@angular/router';
 import { com as core } from 'core';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
@@ -13,39 +13,66 @@ import { UmBaseService } from '../../service/um-base.service';
   templateUrl: './content-entry-list.component.html',
   styleUrls: ['./content-entry-list.component.css']
 })
-export class ContentEntryListComponent extends UmBaseComponent implements core.ustadmobile.core.view.ContentEntryListFragmentView {
+export class ContentEntryListComponent extends UmBaseComponent implements 
+core.ustadmobile.core.view.ContentEntryListFragmentView {
   
   entries : ContentEntry[] = [];
   env = environment;
   private readonly args;
+  private pageNumber: number = 1;
+  private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 
   constructor(localeService: UmBaseService, router: Router, route: ActivatedRoute, private umDb: UmDbMockService) {
     super(localeService, router, route, umDb);
     this.args = route.snapshot.queryParams;
+  
+    this.router.events.subscribe((e: any) => {
+      if (e instanceof NavigationEnd) {
+        this.entries = []
+          this.presenter = new core.ustadmobile.core.controller
+        .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
+        this.presenter.onCreate(null);
+      }
+    });
   }
 
   ngOnInit() {
-    this.presenter = new core.ustadmobile.core.controller
-      .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
-    this.presenter.onCreate(null);
+    console.log("On init called")
+    
   }
 
   setContentEntryProvider(provider : Observable<ContentEntry[]>){
-    provider.subscribe(entries =>{ 
-      this.entries = entries;
+    this.entryListObservable = provider;
+    this.entryListObservable.subscribe(entries =>{ 
+      this.entries.push(...entries);
     })
   }
 
-  ngOnDestroy(){
-    this.presenter.onDestroy();
+  openEntry(entry : ContentEntry) {
+    const contentEntry = entry as core.ustadmobile.lib.db.entities.ContentEntry;
+    this.presenter.handleContentEntryClicked(contentEntry);
   }
 
-  navigate(entry : ContentEntry) {
-    const contentEntry = entry as core.ustadmobile.lib.db.entities.ContentEntry;
+  setLanguageOptions(languages){
+    console.log("language", languages)
+  }
 
-    //core.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance.go(basePath,args, this.context,0);
+  setCategorySchemaSpinner(categories){
+    console.log("categories", categories);
+  }
 
-    this.presenter.handleContentEntryClicked(contentEntry);
+  setToolbarTitle(title: string){
+    this.subject.next(title)
+  }
+
+  onFetchNextPage(){
+    this.pageNumber = this.pageNumber + 1;
+    console.log("Feching page ", this.pageNumber)
+  }
+
+  ngOnDestroy(){
+    super.ngOnDestroy()
+    this.presenter.onDestroy();
   }
 }

@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.Language
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, String>?, private val fragmentViewContract: ContentEntryListFragmentView)
     : UstadBaseController<ContentEntryListFragmentView>(context, arguments!!, fragmentViewContract) {
@@ -107,9 +108,11 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     }
 
 
+    @JsName("handleContentEntryClicked")
     fun handleContentEntryClicked(entry: ContentEntry) {
         val impl = UstadMobileSystemImpl.instance
-        val args = HashMap<String, String>()
+        val args = hashMapOf<String, String?>()
+        args.putAll(arguments)
         val entryUid = entry.contentEntryUid
 
         GlobalScope.launch {
@@ -133,16 +136,19 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         }
     }
 
+    @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         this.filterByLang = langUid
         fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
+    @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         this.filterByCategory = contentCategoryUid
         fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, filterByLang, filterByCategory))
     }
 
+    @JsName("handleUpNavigation")
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
         impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
@@ -150,6 +156,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     }
 
+    @JsName("handleDownloadStatusButtonClicked")
     fun handleDownloadStatusButtonClicked(entry: ContentEntry) {
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()

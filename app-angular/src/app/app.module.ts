@@ -9,8 +9,9 @@ import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entr
 import { HTTP_INTERCEPTORS, HttpClientModule, HttpClient } from '@angular/common/http';
 import {NgProgressInterceptor, NgProgressModule } from 'ngx-progressbar';
 import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
-import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,7 +28,8 @@ import { UmBaseService } from './com/ustadmobile/service/um-base.service';
     MzNavbarModule,
     MzChipModule,
     NgProgressModule,
-    HttpClientModule
+    HttpClientModule,
+    InfiniteScrollModule
   ],
   providers: [
     UmDbMockService,
