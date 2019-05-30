@@ -1,7 +1,8 @@
 import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-list/content-entry-list.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { MzButtonModule , MzCardModule, MzSidenavModule, MzNavbarModule, MzChipModule} from 'ngx-materialize';
+import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,
+   MzNavbarModule, MzChipModule} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -31,6 +32,7 @@ import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.co
     MzChipModule,
     NgProgressModule,
     HttpClientModule,
+    MzSelectModule,
     InfiniteScrollModule
   ],
   providers: [

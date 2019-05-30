@@ -1,10 +1,12 @@
 import { Observable, PartialObserver, Subscription } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
+import { UmDbMockService, ContentEntry, Language } from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, Params, NavigationEnd } from '@angular/router';
 import { com as core } from 'core';
+import {com as db } from 'lib-database';
+import {com as util } from 'lib-util';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 
@@ -20,8 +22,10 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   env = environment;
   private readonly args;
   private pageNumber: number = 1;
+  languageLabel: string;
   private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
+  languages : db.ustadmobile.lib.db.entities.Language[]
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,  umDb: UmDbMockService) {
     super(umService, router, route, umDb);
@@ -37,10 +41,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     });
   }
 
-  ngOnInit() {
-    console.log("On init called")
-    
-  }
+  ngOnInit() {}
 
   setContentEntryProvider(provider : Observable<ContentEntry[]>){
     this.entryListObservable = provider;
@@ -55,7 +56,9 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   setLanguageOptions(languages){
-    console.log("language", languages)
+    const languageList = util.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(languages);
+    this.languages = languageList.splice(1,languageList.length);
+    this.languageLabel = this.getString(this.MessageID.language); 
   }
 
   setCategorySchemaSpinner(categories){
@@ -64,7 +67,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
 
   setToolbarTitle(title: string){
     this.umService.updateSectionTitle(title);
-    console.log("current title", title) 
   }
 
   onFetchNextPage(){

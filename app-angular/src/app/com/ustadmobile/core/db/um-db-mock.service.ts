@@ -1,8 +1,6 @@
-import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { com as util} from 'lib-util';
 import { com as db } from 'lib-database';
-import { com as kotlin } from 'kotlin';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
 
 @Injectable({
@@ -33,18 +31,16 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase{
 /**DAO */
 class ContentEntryDao {
   constructor() {}
-  getChildrenByParentUidWithCategoryFilter(param1, param2, param3) : any{
+  getChildrenByParentUidWithCategoryFilter(param1) : any{
     return UmAngularUtil.createObserver(entryList[param1] as ContentEntry []);
   }
 
   getContentByUuidAsync(entryUid){
-    const entry = UmAngularUtil.findObjectByLabel(entryList,'contentEntryUid', entryUid) as ContentEntry;
-    console.log("current Entry", entry)
-    return entry;
+    return UmAngularUtil.findObjectByLabel(entryList,'contentEntryUid', entryUid) as ContentEntry;
   }
 
-  findUniqueLanguagesInListAsync(entryUid,context){ 
-    return util.ustadmobile.lib.util.UMUtil.jsListToKotlin(languages[entryUid]);
+  findUniqueLanguagesInListAsync(entryUid){ 
+    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(languages[entryUid]);
   }
 
   findByUidAsync(entryUid){
@@ -52,13 +48,13 @@ class ContentEntryDao {
   }
 
 
-  findListOfCategoriesAsync(entryUid){
+  findListOfCategoriesAsync(){
     const schema: DistinctCategorySchema = {
       contentCategoryUid:1,
       categoryName: "Category",
       contentCategorySchemaUid: 12,
       schemaName: "Schema"};
-    return util.ustadmobile.lib.util.UMUtil.jsListToKotlin([schema]);
+    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schema]);
   }
 }
 /**Entities */
@@ -82,7 +78,7 @@ export interface ContentEntry {
 
 export interface Language{
   langUid: number;
-  namename: string;
+  name: string;
   iso_639_1_standard: string;
   iso_639_2_standard: string;
   iso_639_3_standard: string;
@@ -98,9 +94,9 @@ export interface DistinctCategorySchema {
 }
 
 const languages = {
-  "1311236" : [{ "langUid": 1, "namename": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "namename": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "namename": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "namename": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "namename": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "namename": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
-  "41250" : [{ "langUid": 1, "namename": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "namename": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "namename": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "namename": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "namename": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "namename": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
-  "83098" : [{ "langUid": 1, "namename": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "namename": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "namename": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "namename": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "namename": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "namename": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }]
+  "1311236" : [{ "langUid": 1, "name": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "name": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "name": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "name": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "name": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "name": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
+  "41250" : [{ "langUid": 1, "name": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "name": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "name": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "name": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "name": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "name": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
+  "83098" : [{ "langUid": 1, "name": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "name": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "name": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "name": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "name": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "name": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }]
 }
 const entryList = {
   "1311236" :[{

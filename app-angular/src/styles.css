@@ -51,6 +51,10 @@ main {
   padding-top: 16px !important;
 }
 
+.default-margin-top{
+  margin-top: 20px !important;
+}
+
 .top-nav-height {
   height: 90px !important;
 }

@@ -557,10 +557,16 @@ object UMUtil {
         return sb.toString()
     }
 
-    @JsName("jsListToKotlin")
+    @JsName("jsArrayToKotlinList")
     @JvmStatic
-    fun jsListToKotlin(list: Array<Any>): Any{
-        return list.toList()
+    fun jsArrayToKotlinList(array: Array<Any>): Any{
+        return array.toList()
+    }
+
+    @JsName("kotlinListToJsArray")
+    @JvmStatic
+    fun kotlinListToJsArray(list: ArrayList<Any>): Any{
+        return list.toTypedArray()
     }
 
 }
