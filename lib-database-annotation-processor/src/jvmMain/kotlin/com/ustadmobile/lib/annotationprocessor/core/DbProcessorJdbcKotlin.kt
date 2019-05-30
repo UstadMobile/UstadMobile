@@ -639,13 +639,19 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val returnType = daoMethodResolved.returnType
 
         if(returnType.kind != TypeKind.VOID) {
-            insertFun.addCode("return ")
+            insertFun.addCode("val _retVal = ")
         }
 
         val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved)
         val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
                 resolvedReturnType, processingEnv)
         insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())\n")
+        insertFun.addCode("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
+
+        if(returnType.kind != TypeKind.VOID) {
+            insertFun.addCode("return _retVal")
+        }
+
         return insertFun.build()
     }
 
@@ -748,6 +754,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .add("_stmt?.close()\n")
                 .add("_con?.close()\n")
                 .endControlFlow()
+                .add("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
 
         if(resolvedReturnType != UNIT)
             codeBlock.add("return _result\n")
