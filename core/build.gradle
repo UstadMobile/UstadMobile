@@ -122,11 +122,8 @@ kotlin {
                 implementation project(':lib-door-runtime')
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
+                compileOnly project(":lib-room-annotations")
                 implementation project(":lib-util")
-                //implementation project(':lib-database')
-                /*  compileOnly project(':lib-database-entities')
-                  implementation project(':lib-database-runtime')
-                  implementation project(":lib-util") */
             }
         }
         commonJvmMain {
