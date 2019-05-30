@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- activity_screen_slide.xml -->
 
-<androidx.core.widget.DrawerLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/container_drawer_layout"
@@ -46,7 +46,7 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.core.view.ViewPager
+        <androidx.viewpager.widget.ViewPager
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/container_epubrunner_pager"
             android:layout_below="@+id/appbar"
@@ -56,7 +56,7 @@
     </RelativeLayout>
 
 
-    <android.support.design.widget.NavigationView
+    <com.google.android.material.navigation.NavigationView
         android:elevation="@dimen/default_margin_dimension"
         android:id="@+id/activity_basepoint_navigationview"
         android:layout_height="match_parent"
@@ -146,7 +146,7 @@
             </ScrollView>
 
         </RelativeLayout>
-    </android.support.design.widget.NavigationView>
+    </com.google.android.material.navigation.NavigationView>
 
-</androidx.core.widget.DrawerLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
 
