@@ -64,7 +64,16 @@ import kotlin.reflect.KClass
  * @see androidx.room.RoomDatabase RoomDatabase
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
-@Retention(AnnotationRetention.BINARY)
+
+/*
+ This should be AnnotationRuntime.BINARY - however a Kotlin compiler bug will cause the compilation
+ to fail if this is the case. Using AnnotationRuntime.SOURCE does not affect our compilation, as
+ the annotation processor runs on the same module containing the DAO itself.
+
+ See:
+ https://youtrack.jetbrains.com/issue/KT-28927
+ */
+@Retention(AnnotationRetention.SOURCE)
 annotation class Database(
         /**
          * The list of entities included in the database. Each entity turns into a table in the

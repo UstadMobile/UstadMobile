@@ -5,8 +5,10 @@ import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.lib.db.entities.*
+import kotlin.jvm.Synchronized
+import kotlin.jvm.Volatile
 
-@Database(entities = [NetworkNode::class, EntryStatusResponse::class,
+@Database(entities = arrayOf(NetworkNode::class, EntryStatusResponse::class,
     DownloadJobItemHistory::class, HttpCachedEntry::class, DownloadJob::class, DownloadJobItem::class,
     DownloadJobItemParentChildJoin::class,
     Person::class, Clazz::class, ClazzMember::class,
@@ -20,7 +22,7 @@ import com.ustadmobile.lib.db.entities.*
     PersonLocationJoin::class, PersonPicture::class, ScrapeQueueItem::class, ScrapeRun::class,
     ContentEntryStatus::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class
-], version = 22)
+), version = 22)
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
