@@ -76,6 +76,11 @@ class TestSyncablePkAndroid {
                     latch.countDown()
                 }
             }
+
+            Assert.assertEquals("Success count = number of items added", numItemsToAdd.toLong(),
+                    successCount.get().toLong())
+            Assert.assertEquals("Number of items matches insert count", numItemsToAdd.toLong(),
+                    dao.countAll())
         }
 
 
@@ -84,11 +89,6 @@ class TestSyncablePkAndroid {
         } catch (e: InterruptedException) {
             //should not happen
         }
-
-        Assert.assertEquals("Success count = number of items added", numItemsToAdd.toLong(),
-                successCount.get().toLong())
-        Assert.assertEquals("Number of items matches insert count", numItemsToAdd.toLong(),
-                dao.countAll())
     }
 
 }
