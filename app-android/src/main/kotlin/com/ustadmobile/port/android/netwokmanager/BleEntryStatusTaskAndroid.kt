@@ -49,7 +49,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      * Get BleMessageGattClientCallback instance
      * @return Instance of a BleMessageGattClientCallback
      */
-    internal var gattClientCallback: BleMessageGattClientCallback? = null
+    var gattClientCallback: BleMessageGattClientCallback? = null
         private set
 
     private var bluetoothManager: BluetoothManager? = null
@@ -93,7 +93,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      * @param bluetoothManager BluetoothManager instance
      */
     @VisibleForTesting
-    internal fun setBluetoothManager(bluetoothManager: BluetoothManager) {
+    fun setBluetoothManager(bluetoothManager: BluetoothManager) {
         this.bluetoothManager = bluetoothManager
     }
 

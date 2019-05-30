@@ -1,56 +1,33 @@
 package com.ustadmobile.test.port.android.view
 
-import android.content.Context
 import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.InstrumentationRegistry
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.runner.AndroidJUnit4
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentCategoryDao
-import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentCategory
-import com.ustadmobile.lib.db.entities.ContentCategorySchema
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.ContentEntryListActivity
-
+import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import org.hamcrest.Matchers
+import org.hamcrest.core.AllOf.allOf
+import org.hamcrest.core.IsEqual.equalTo
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import org.hamcrest.core.AllOf.allOf
-import org.hamcrest.core.IsEqual.equalTo
 
 @RunWith(AndroidJUnit4::class)
 class ContentEntryListEspressoTest {
@@ -75,7 +52,7 @@ class ContentEntryListEspressoTest {
         val context = InstrumentationRegistry.getTargetContext()
         val db = UmAppDatabase.getInstance(context)
         db.clearAllTables()
-        val repo = db.getRepository("https://localhost", "")
+        val repo = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())// db.getRepository("https://localhost", "")
 
         val contentDao = repo.contentEntryDao
         val pcjdao = repo.contentEntryParentChildJoinDao

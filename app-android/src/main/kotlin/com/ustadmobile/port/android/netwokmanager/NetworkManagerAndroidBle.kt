@@ -924,7 +924,7 @@ class NetworkManagerAndroidBle
     }
 
     @VisibleForTesting
-    internal fun setBluetoothManager(manager: BluetoothManager) {
+    fun setBluetoothManager(manager: BluetoothManager) {
         this.bluetoothManager = manager
     }
 

@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,11 +20,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.MAXIMUM_MTU_SIZE;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,11 +53,11 @@ public class BleMessageGattClientCallbackTest {
     public void setUp(){
         mockedGattClient = mock(BluetoothGatt.class);
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
-        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte) 42,bleMessageLongToBytes(entryList));
+        messageToSend = new BleMessage(ENTRY_STATUS_REQUEST, (byte) 42, BleMessageUtil.INSTANCE.bleMessageLongToBytes(entryList));
 
         gattClientCallback = new BleMessageGattClientCallback(messageToSend);
 
-        BluetoothGattService service = new BluetoothGattService(USTADMOBILE_BLE_SERVICE_UUID,
+        BluetoothGattService service = new BluetoothGattService(NetworkManagerBle.Companion.getUSTADMOBILE_BLE_SERVICE_UUID(),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         mockedCharacteristic = mock(BluetoothGattCharacteristic.class);
         service.addCharacteristic(mockedCharacteristic);
@@ -65,7 +65,7 @@ public class BleMessageGattClientCallbackTest {
         BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         when(mockedGattClient.getServices()).thenReturn(Collections.singletonList(service));
         when(mockedGattClient.requestMtu(MAXIMUM_MTU_SIZE)).thenReturn(true);
-        when(mockedCharacteristic.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
+        when(mockedCharacteristic.getUuid()).thenReturn(NetworkManagerBle.Companion.getUSTADMOBILE_BLE_SERVICE_UUID());
         when(mockedGattClient.getDevice()).thenReturn(bluetoothDevice);
         when(mockedGattClient.getDevice().getAddress()).thenReturn("00:11:22:33:FF:EE");
 

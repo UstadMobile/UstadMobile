@@ -35,7 +35,7 @@ class H5PContentActivityEspressoTest {
     @Before
     fun setup() {
         db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
-        repo = db?.getRepository("http://localhost/dummy/", "")
+        repo =  UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext()) //db?.getRepository("http://localhost/dummy/", "")
         db?.clearAllTables()
 
         h5PTmpFile = File.createTempFile("H5pContentActivityEspressoTest", "h5p-true-false.h5p")
@@ -44,7 +44,7 @@ class H5PContentActivityEspressoTest {
         h5pContainer = Container()
         h5pContainer?.containerUid = repo!!.containerDao.insert(h5pContainer!!)
 
-        val containerManager = ContainerManager(h5pContainer!!, db, repo, containerTmpDir?.absolutePath!!)
+        val containerManager = ContainerManager(h5pContainer!!, db!!, repo!!, containerTmpDir?.absolutePath!!)
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/android/view/H5P-true-false.h5p",
                 h5PTmpFile!!)
         val zipFile = ZipFile(h5PTmpFile)

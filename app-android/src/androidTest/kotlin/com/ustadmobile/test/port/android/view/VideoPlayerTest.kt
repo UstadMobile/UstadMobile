@@ -47,7 +47,7 @@ class VideoPlayerTest {
             val context = InstrumentationRegistry.getTargetContext()
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
-            return db.getRepository("https://localhost", "")
+            return  UmAppDatabase.getInstance(context)//db.getRepository("https://localhost", "")
         }
 
     @Throws(IOException::class)

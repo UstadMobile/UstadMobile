@@ -1,14 +1,15 @@
+/*
 package com.ustadmobile.test.core;
-
-import com.ustadmobile.port.sharedse.impl.http.ClassResourcesResponder;
 
 import java.io.IOException;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
+*/
 /**
  * Created by mike on 8/3/17.
- */
+ *//*
+
 
 public class ResourcesHttpdTestServer {
 
@@ -45,3 +46,4 @@ public class ResourcesHttpdTestServer {
     }
 
 }
+*/

@@ -6,54 +6,37 @@ import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.InstrumentationRegistry
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao
-import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.view.WebChunkView
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
-import com.ustadmobile.lib.db.entities.ContentEntryStatus
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.WebChunkActivity
-
-import org.hamcrest.Matchers
-import org.hamcrest.core.AllOf
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import java.io.File
-import java.io.IOException
-
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources
 import org.hamcrest.Matchers.allOf
+import org.hamcrest.core.AllOf
 import org.hamcrest.core.IsEqual.equalTo
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.io.File
+import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class ContentEntryDetailEspressoTest {
@@ -76,7 +59,7 @@ class ContentEntryDetailEspressoTest {
             context = InstrumentationRegistry.getTargetContext()
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
-            return db.getRepository("https://localhost", "")
+            return  UmAppDatabase.getInstance(context)// db.getRepository("https://localhost", "")
         }
 
     @Throws(IOException::class)

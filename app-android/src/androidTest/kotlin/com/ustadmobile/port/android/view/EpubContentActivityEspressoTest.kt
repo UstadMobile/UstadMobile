@@ -1,17 +1,23 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
-import androidx.test.InstrumentationRegistry
-import androidx.test.espresso.contrib.DrawerActions
-import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.web.webdriver.Locator
-import androidx.core.content.ContextCompat
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
-
+import androidx.core.content.ContextCompat
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.DrawerActions
+import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
+import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
+import androidx.test.espresso.web.webdriver.DriverAtoms.getText
+import androidx.test.espresso.web.webdriver.Locator
+import androidx.test.platform.app.InstrumentationRegistry
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
@@ -22,41 +28,20 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.UmViewActions
-
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
-import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
-import androidx.test.espresso.web.sugar.Web.onWebView
-
+import org.hamcrest.CoreMatchers.*
+import org.hamcrest.core.AllOf.allOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
-
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 import java.util.zip.ZipFile
-
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withParent
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
-import androidx.test.espresso.web.webdriver.DriverAtoms.getText
-import org.hamcrest.CoreMatchers.containsString
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.instanceOf
-import org.hamcrest.CoreMatchers.not
-import org.hamcrest.core.AllOf.allOf
 
 class EpubContentActivityEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(EpubContentActivity::class.java, false, false)
 
     private var db: UmAppDatabase? = null
@@ -78,11 +63,11 @@ class EpubContentActivityEspressoTest {
     @Before
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
-        db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
-        repo = db!!.getRepository("http://localhost/dummy/", "")
+        db = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context)
+        repo = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context) //db!!.getRepository("http://localhost/dummy/", "")
         db!!.clearAllTables()
 
-        val context = InstrumentationRegistry.getTargetContext()
+        val context = InstrumentationRegistry.getInstrumentation().context
 
         val storageDir = ContextCompat.getExternalFilesDirs(context, null)[0]
         epubTmpFile = File(storageDir, "test.epub")
@@ -93,7 +78,7 @@ class EpubContentActivityEspressoTest {
         println(dirMade)
 
         epubContainer = Container()
-        epubContainer!!.containerUid = repo!!.containerDao.insert(epubContainer)
+        epubContainer!!.containerUid = repo!!.containerDao.insert(epubContainer!!)
 
         epubContainerManager = ContainerManager(epubContainer!!, db!!, repo!!,
                 containerTmpDir!!.absolutePath)
@@ -137,10 +122,10 @@ class EpubContentActivityEspressoTest {
         SystemClock.sleep(1000)
 
         onView(allOf<View>(instanceOf<View>(TextView::class.java), withParent(withId(R.id.um_toolbar))))
-                .check(matches(withText(opfDocument!!.getTitle())))
+                .check(matches(withText(opfDocument!!.title)))
         onView(withId(R.id.container_drawer_layout)).perform(DrawerActions.open(Gravity.END))
 
-        val firstNavTitle = navDocument!!.getToc().getChild(0).getTitle()
+        val firstNavTitle = navDocument!!.toc?.getChild(0)?.title
         onView(allOf<View>(withId(R.id.expandedListItem), withText(firstNavTitle)))
                 .check(matches(isDisplayed()))
     }
@@ -170,7 +155,7 @@ class EpubContentActivityEspressoTest {
         //Ensure that Espresso can see the progress bar - so it waits for this to be idle
         SystemClock.sleep(1000)
         onView(allOf<View>(instanceOf<View>(TextView::class.java), withParent(withId(R.id.um_toolbar))))
-                .check(matches(withText(opfDocument!!.getTitle())))
+                .check(matches(withText(opfDocument!!.title)))
 
         //When we single tap on the content, the toolbar should go away
         onView(allOf<View>(withId(R.id.fragment_container_page_webview), withTagValue(equalTo(0))))

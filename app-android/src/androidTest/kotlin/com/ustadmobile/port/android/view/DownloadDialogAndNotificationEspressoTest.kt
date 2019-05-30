@@ -22,10 +22,6 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.WaitForLiveData
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
 
@@ -53,6 +49,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
@@ -114,17 +111,18 @@ class DownloadDialogAndNotificationEspressoTest {
         connectedToUnmeteredConnection = wifiManager?.connectionInfo
                 ?.ssid?.toLowerCase()?.contains("androidwifi") ?: false
 
-        testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
+        // TODO for Lukundo
+       // testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
 
         val response = sendCommand("new", 0)
         serverActivePort = Integer.parseInt(response.getString("port"))
 
-        val testEndpoint = "http://" + BuildConfig.TEST_HOST +
-                ":" + serverActivePort + "/"
+       // val testEndpoint = "http://" + BuildConfig.TEST_HOST +
+        //        ":" + serverActivePort + "/"
 
-        val testAccount = UmAccount(0, "test", "",
-                testEndpoint)
-        UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext())
+      //  val testAccount = UmAccount(0, "test", "",
+      //          testEndpoint)
+      //  UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext())
 
         prepareContentEntriesAndFiles()
         SystemClock.sleep(MIN_SLEEP_TIME)
@@ -256,17 +254,17 @@ class DownloadDialogAndNotificationEspressoTest {
 
         startDownloading(connectedToUnmeteredConnection)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.getLastJobLive(),
-                MAX_THRESHOLD * 60000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                return value.getDjStatus() === JobStatus.COMPLETE
+        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+                MAX_THRESHOLD * 60000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
+            override fun done(value: DownloadJob): Boolean {
+                return value.djStatus == JobStatus.COMPLETE
             }
         })
 
         SystemClock.sleep(MIN_SLEEP_TIME)
 
         onView(allOf<View>(isDisplayed(),
-                isDescendantOfA(withTagValue(equalTo(entry1!!.contentEntryUid))),
+                isDescendantOfA(withTagValue(equalTo(entry1.contentEntryUid))),
                 withId(R.id.view_download_status_button_img)
         )).check(matches(withContentDescription(equalTo(DOWNLOADED_CONTENT_DESC))))
 
@@ -287,24 +285,24 @@ class DownloadDialogAndNotificationEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.getLastJobLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                return value.getDjStatus() === JobStatus.WAITING_FOR_CONNECTION
+        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
+            override fun done(value: DownloadJob): Boolean {
+                return value.djStatus == JobStatus.WAITING_FOR_CONNECTION
             }
         })
 
         assertEquals("Download task was paused and waiting for connectivity",
-                umAppDatabase!!.downloadJobDao.getLastJob().getDjStatus(),
+                umAppDatabase!!.downloadJobDao.lastJob()?.djStatus,
                 JobStatus.WAITING_FOR_CONNECTION)
 
 
         //reset for next test
         UmAndroidTestUtil.setAirplaneModeEnabled(false)
-        WaitForLiveData.observeUntil(umAppDatabase!!.connectivityStatusDao.getStatusLive(),
+        WaitForLiveData.observeUntil(umAppDatabase!!.connectivityStatusDao.statusLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
             override fun done(value: ConnectivityStatus): Boolean {
-                return value.getConnectivityState() !== ConnectivityStatus.STATE_DISCONNECTED
+                return value.connectivityState != ConnectivityStatus.STATE_DISCONNECTED
             }
         })
 
@@ -323,10 +321,10 @@ class DownloadDialogAndNotificationEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.getLastJobLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                return value.getDjStatus() === JobStatus.WAITING_FOR_CONNECTION
+        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
+            override fun done(value: DownloadJob): Boolean {
+                return value.djStatus == JobStatus.WAITING_FOR_CONNECTION
             }
         })
 
@@ -334,22 +332,22 @@ class DownloadDialogAndNotificationEspressoTest {
 
         SystemClock.sleep(MAX_SLEEP_TIME)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.connectivityStatusDao.getStatusLive(),
+        WaitForLiveData.observeUntil(umAppDatabase!!.connectivityStatusDao.statusLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
             override fun done(value: ConnectivityStatus): Boolean {
-                return value.getConnectivityState() !== ConnectivityStatus.STATE_DISCONNECTED
+                return value.connectivityState != ConnectivityStatus.STATE_DISCONNECTED
             }
         })
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.getLastJobLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                return value.getDjStatus() === JobStatus.COMPLETE
+        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
+            override fun done(value: DownloadJob): Boolean {
+                return value.djStatus == JobStatus.COMPLETE
             }
         })
 
         assertEquals("Download task was completed successfully",
-                umAppDatabase!!.downloadJobDao.getLastJob().getDjStatus(), JobStatus.COMPLETE)
+                umAppDatabase!!.downloadJobDao.lastJob()?.djStatus, JobStatus.COMPLETE)
         SystemClock.sleep(MIN_SLEEP_TIME)
     }
 

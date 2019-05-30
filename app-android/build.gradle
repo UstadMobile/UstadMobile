@@ -56,11 +56,11 @@ afterEvaluate {
     }
 }
 
-tasks.whenTaskAdded { task ->
+/*tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().endsWith("androidtest")) {
         task.dependsOn(":lib-http-testserver:startDaemon")
     }
-}
+}*/
 
 android {
     sourceSets {
@@ -353,7 +353,7 @@ dependencies {
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
     androidTestImplementation "junit:junit:$version_junit"
-    androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: 'version_androidx_support_lib'
+    androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_support_lib"
 
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
     androidTestImplementation "androidx.test:runner:$version_android_junit_runner"

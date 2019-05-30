@@ -36,7 +36,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.
  * @author kileha3
  */
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal class BleGattServerAndroid
+class BleGattServerAndroid
 /**
  * Constructor which will be used when creating new instance of BleGattServerAndroid
  * @param context Application context

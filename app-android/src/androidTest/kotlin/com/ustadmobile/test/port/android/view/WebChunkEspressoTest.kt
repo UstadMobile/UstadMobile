@@ -9,12 +9,8 @@ import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
-
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryStatusDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
@@ -24,21 +20,16 @@ import com.ustadmobile.port.android.view.WebChunkActivity
 import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
-
+import com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
-import java.util.HashMap
-
-import androidx.test.espresso.web.sugar.Web.onWebView
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER
-import com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory
+import java.util.*
 
 @RunWith(AndroidJUnit4::class)
 class WebChunkEspressoTest {
@@ -63,7 +54,7 @@ class WebChunkEspressoTest {
         context = InstrumentationRegistry.getTargetContext()
         db = UmAppDatabase.getInstance(context)
         db!!.clearAllTables()
-        return db!!.getRepository("https://localhost", "")
+        return  UmAppDatabase.getInstance(context) //db!!.getRepository("https://localhost", "")
     }
 
     @Throws(IOException::class)

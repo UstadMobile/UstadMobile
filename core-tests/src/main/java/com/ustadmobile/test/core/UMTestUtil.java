@@ -1,30 +1,21 @@
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.test.core.impl.PlatformTestUtil;
-
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by mike on 9/13/17.
  */
 
 public class UMTestUtil {
-
-    /**
+/*
+    *//**
      * Copy a given test resource into the first (shared) storage directory
      *
      * @return Complete path the resource was copied to
-     */
-    public static String copyResourceToStorageDir(String resourcePath) throws IOException{
+     *//*
+    public static String copyResourceToStorageDir(String resourcePath, ) throws IOException{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
 
         OutputStream fileOut = null;
@@ -35,8 +26,12 @@ public class UMTestUtil {
             entryIn = UMTestUtil.class.getResourceAsStream(resourcePath);
 
             Object context = PlatformTestUtil.getTargetContext();
-            UMStorageDir[] storageDirs = impl.getStorageDirs(UstadMobileSystemImpl.SHARED_RESOURCE,
-                    context);
+            impl.getStorageDirs(context, new UmResultCallback<List<UMStorageDir>>() {
+                @Override
+                public void onDone(@Nullable List<UMStorageDir> result) {
+
+                }
+            });
             String outDir = storageDirs[0].getDirURI();
             if(new File(outDir).isDirectory()) {
                 new File(outDir).mkdirs();
@@ -56,7 +51,7 @@ public class UMTestUtil {
         }
 
         return outPath;
-    }
+    }*/
 
     /**
      * Test util to determine if the contents of two streams are equal
