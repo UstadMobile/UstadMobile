@@ -142,7 +142,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private fun checkReady() {
         if (entryListPresenter == null && managerAndroidBle != null && rootContainer != null) {
-            entryListPresenter = ContentEntryListFragmentPresenter(getContext() as Context,
+            entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
                     UMAndroidUtil.bundleToMap(arguments), this)
             entryListPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
         }
