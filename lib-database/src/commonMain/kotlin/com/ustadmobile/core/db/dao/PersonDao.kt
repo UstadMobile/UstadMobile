@@ -112,6 +112,9 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String): Person?
 
+    @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
+    abstract fun findByUid(uid: Long): Person?
+
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long
 

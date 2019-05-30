@@ -42,11 +42,11 @@ class H5PContentActivityEspressoTest {
         containerTmpDir = UmFileUtilSe.makeTempDir("H5PContentActivityEspressoTest", "containerDir")
 
         h5pContainer = Container()
-        h5pContainer?.containerUid = repo!!.containerDao!!.insert(h5pContainer)
+        h5pContainer?.containerUid = repo!!.containerDao.insert(h5pContainer!!)
 
-        val containerManager = ContainerManager(h5pContainer, db, repo, containerTmpDir?.absolutePath)
+        val containerManager = ContainerManager(h5pContainer!!, db, repo, containerTmpDir?.absolutePath!!)
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/android/view/H5P-true-false.h5p",
-                h5PTmpFile)
+                h5PTmpFile!!)
         val zipFile = ZipFile(h5PTmpFile)
 
         containerManager.addEntriesFromZip(zipFile,

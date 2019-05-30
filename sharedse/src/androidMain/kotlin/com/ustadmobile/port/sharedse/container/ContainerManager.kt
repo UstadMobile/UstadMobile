@@ -300,11 +300,11 @@ class ContainerManager {
     companion object {
 
 
-        val OPTION_COPY = 1
+        const val OPTION_COPY = 1
 
-        val OPTION_MOVE = 2
+        const val OPTION_MOVE = 2
 
-        val OPTION_UPDATE_TOTALS = 4
+        const val OPTION_UPDATE_TOTALS = 4
     }
 
 }
