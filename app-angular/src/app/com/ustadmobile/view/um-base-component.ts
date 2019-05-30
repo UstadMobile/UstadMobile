@@ -13,30 +13,25 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   public readonly context: UmContextWrapper;
   public readonly MessageID;
   public app_name: String = "...";
-  public entry_title: String = "...";
-  public subject = new Subject<any> ();
 
 
-  protected constructor(public localeService: UmBaseService, public router: Router, public route: ActivatedRoute, public mockedUmDb: UmDbMockService){
+  protected constructor(public umService: UmBaseService, public router: Router, public route: ActivatedRoute, public mockedUmDb: UmDbMockService){
     this.systemImpl = com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance;
     this.MessageID = com.ustadmobile.core.generated.locale.MessageID;
-    this.localeService.setImpl(this.systemImpl);
+    this.umService.setImpl(this.systemImpl);
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
-    localeService.setContext(this.context);
+    umService.setContext(this.context);
   }
 
   ngOnInit(): void {
     //load locale strings
     const systemDefaultLocale = this.systemImpl.getSystemLocale(this.context).split("-")[0];
-    this.localeService.loadLocaleStrings(systemDefaultLocale).subscribe((loaded) => {
+    this.umService.loadLocaleStrings(systemDefaultLocale).subscribe((loaded) => {
       if(loaded){
         this.app_name = this.getString(this.MessageID.app_name);
       }
     });
-    this.subject.subscribe(data =>{
-      data.next("...")
-    })
   }
 
   ngOnDestroy(){

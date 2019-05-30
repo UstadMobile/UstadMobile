@@ -49,8 +49,8 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
 
    private presenter: core.ustadmobile.core.controller.ContentEntryDetailPresenter;
 
-   constructor(localeService: UmBaseService, router: Router, route: ActivatedRoute, private umDb: UmDbMockService) {
-    super(localeService, router, route, umDb);
+   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
+    super(umService, router, route, umDb);
     this.args = route.snapshot.queryParams;
     this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
@@ -61,18 +61,95 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
     });
   }
 
-  ngOnInit() {
-   
-  }
+  ngOnInit() {}
+
 
   navigateToLanguage(language){
     console.log("language", language)
   }
 
-
-  setContentEntryTitle(title: string){
+  
+  setContentEntryTitle(title: String){
 
   }
+
+  setContentEntryDesc(desc: String){
+
+  }
+
+  setContentEntryLicense(license: String){
+
+  }
+
+  setContentEntryAuthor(author: String){
+  
+  }
+
+  setDetailsButtonEnabled(enabled: Boolean){
+
+  }
+
+  setDownloadSize(fileSize: number){
+
+  }
+
+  loadEntryDetailsThumbnail(thumbnailUrl: String){
+
+  }
+
+  setAvailableTranslations(result: any, entryUuid: number){
+
+  }
+
+  updateDownloadProgress(progressValue: number){
+
+  }
+
+  setDownloadButtonVisible(visible: Boolean){
+
+  }
+
+  setButtonTextLabel(textLabel: String){
+
+  }
+
+  showFileOpenWithMimeTypeError(message: String, actionMessageId: number, mimeType: String){
+    
+  }
+
+  showFileOpenError(message: String){
+
+  }
+
+  updateLocalAvailabilityViews(icon: number, status: String){
+
+  }
+
+  setLocalAvailabilityStatusViewVisible(visible: Boolean){
+
+  }
+
+  setTranslationLabelVisible(visible: Boolean){
+
+  }
+
+  setFlexBoxVisible(visible: Boolean){
+
+  }
+
+  setDownloadProgressVisible(visible: Boolean){
+
+  }
+
+  setDownloadProgressLabel(progressLabel: String){
+
+  }
+
+  setDownloadButtonClickableListener(isDownloadComplete: Boolean){
+
+  }
+
+  showDownloadOptionsDialog(hashtable: any){}
 
   ngOnDestroy(): void {
     super.ngOnDestroy()

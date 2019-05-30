@@ -1,6 +1,4 @@
-import { Subscription } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
-import { environment } from 'src/environments/environment.prod';
+import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
@@ -14,17 +12,18 @@ import { UmDbMockService } from '../../core/db/um-db-mock.service';
 })
 export class HomeComponent extends UmBaseComponent {
 
-  entryTitleSubscription: Subscription
-  constructor(private location: Location,localeService: UmBaseService,
-              router: Router, route: ActivatedRoute, private umDb: UmDbMockService) {
-    super(localeService, router, route, umDb);
+  section_title: string;
+
+  constructor(private location: Location,umService: UmBaseService,
+              router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
+    super(umService, router, route, umDb);
     
   }
 
   ngOnInit() {
     super.ngOnInit()
-    this.entryTitleSubscription = this.subject.asObservable().subscribe(title => {
-      console.log("subscripton", title);
+    this.umService.getUmObservable().subscribe(title =>{
+      this.section_title = title;
     });
   }
 
@@ -32,11 +31,8 @@ export class HomeComponent extends UmBaseComponent {
     this.location.back();
   }
 
-
-
   ngOnDestroy(): void {
     super.ngOnDestroy()
-    //this.entryTitleSubscription.unsubscribe()
   }
 
 }

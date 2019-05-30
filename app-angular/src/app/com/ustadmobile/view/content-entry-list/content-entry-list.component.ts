@@ -23,8 +23,8 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
 
-  constructor(localeService: UmBaseService, router: Router, route: ActivatedRoute, private umDb: UmDbMockService) {
-    super(localeService, router, route, umDb);
+  constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,  umDb: UmDbMockService) {
+    super(umService, router, route, umDb);
     this.args = route.snapshot.queryParams;
   
     this.router.events.subscribe((e: any) => {
@@ -63,7 +63,8 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   setToolbarTitle(title: string){
-    this.subject.next(title)
+    this.umService.updateSectionTitle(title);
+    console.log("current title", title) 
   }
 
   onFetchNextPage(){

@@ -1,3 +1,4 @@
+import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
 import { NgModule } from '@angular/core';
@@ -11,7 +12,8 @@ const routes: Routes = [
           {path: 'ContentEntryDetail', component: ContentEntryDetailComponent},
         ],
         runGuardsAndResolvers: "always"
-  }
+  },
+  {path: "NotFound", component: NotFoundComponent}
 ];
 
 @NgModule({

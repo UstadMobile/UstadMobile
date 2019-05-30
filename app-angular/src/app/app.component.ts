@@ -20,15 +20,8 @@ export class AppComponent extends UmBaseComponent{
   ngOnInit(): void {
     super.ngOnInit();
     //check and redirect to a specific views based on URL path & params
-    var args , viewName = null
-    if(document.location.pathname === "/" && UmAngularUtil.queryParamsToMap().size  == 0){
-      args = UmAngularUtil.queryParamsToMap("?entryid=" + this.umDb.ROOT_UID)
-      viewName = 'ContentEntryList'
-    }else{
-      args = UmAngularUtil.queryParamsToMap();
-      viewName = document.location.pathname.split("/")[2]
-    }
-    this.systemImpl.go(viewName,args, this.context,0);
+    const initialRoute = UmAngularUtil.getInitialRoute(this.umDb.ROOT_UID);
+    this.systemImpl.go(initialRoute.view, initialRoute.args, this.context, 0);
   }
 
   ngOnDestroy(): void {

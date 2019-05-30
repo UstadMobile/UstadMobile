@@ -12,12 +12,28 @@ export class UmBaseService {
 
   loadedLocale: boolean = false;
 
+  private mObservable : Observable<any>;
+
   private context: UmContextWrapper;
 
-  constructor(private http: HttpClient) {}
+  private mObserver;
+
+  constructor(private http: HttpClient) {
+     this.mObservable = new Observable<any>(observer => {
+      this.mObserver = observer;
+    });
+  }
+
+  getUmObservable(){
+    return this.mObservable;
+  }
 
   setImpl(systemImpl: any){
     this.systemImpl = systemImpl;
+  }
+
+  updateSectionTitle(title: string){
+    this.mObserver.next(title)
   }
 
   setContext(context: UmContextWrapper){
