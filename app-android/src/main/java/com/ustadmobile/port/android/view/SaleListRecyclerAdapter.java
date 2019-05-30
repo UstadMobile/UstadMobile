@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.app.Activity;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.CommonHandlerPresenter;
 import com.ustadmobile.core.controller.SaleListPresenter;
 
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -29,7 +30,7 @@ public class SaleListRecyclerAdapter extends
     Context theContext;
     Activity theActivity;
     Fragment theFragment;
-    SaleListPresenter mPresenter;
+    CommonHandlerPresenter mPresenter;
     boolean paymentsDueTab = false;
     boolean preOrderTab = false;
 
@@ -70,7 +71,12 @@ public class SaleListRecyclerAdapter extends
 
         long earliestDueDate = entity.getEarliestDueDate();
         String dueDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(earliestDueDate, null);
-        String dueString = theFragment.getText(R.string.due) + " " + dueDatePretty;
+        String dueString;
+        if(theActivity != null){
+            dueString = theActivity.getText(R.string.due) + " " + dueDatePretty;
+        }else{
+            dueString = theFragment.getText(R.string.due) + " " + dueDatePretty;
+        }
 
         if(preOrderTab){
             saleDueDate.setVisibility(View.VISIBLE);
@@ -80,7 +86,13 @@ public class SaleListRecyclerAdapter extends
                 saleDueDate.setText(dueString);
 
             }else if(!entity.isSaleItemPreOrder()){
-                    dueString = theFragment.getText(R.string.not_delivered).toString();
+
+                    if(theActivity != null){
+                        dueString = theActivity.getText(R.string.not_delivered).toString();
+                    }else{
+                        dueString = theFragment.getText(R.string.not_delivered).toString();
+                    }
+
                     saleDueDate.setText(dueString);
             }else if (earliestDueDate != 0 &&
                     earliestDueDate > System.currentTimeMillis()){
@@ -108,22 +120,22 @@ public class SaleListRecyclerAdapter extends
 
 
         ConstraintLayout item = holder.itemView.findViewById(R.id.item_sale_cl);
-        item.setOnClickListener(v -> mPresenter.handleClickSale(entity.getSaleUid()));
+        item.setOnClickListener(v -> mPresenter.handleCommonPressed(entity.getSaleUid()));
 
 
 
     }
 
-    protected class SaleListViewHolder extends RecyclerView.ViewHolder {
-        protected SaleListViewHolder(View itemView) {
+    class SaleListViewHolder extends RecyclerView.ViewHolder {
+        SaleListViewHolder(View itemView) {
             super(itemView);
         }
     }
 
 
-    protected SaleListRecyclerAdapter(
+    SaleListRecyclerAdapter(
             @NonNull DiffUtil.ItemCallback<SaleListDetail> diffCallback,
-            SaleListPresenter thePresenter,
+            CommonHandlerPresenter thePresenter,
             boolean paymentsDue,
             boolean preOrder,
             Fragment fragment,
@@ -133,6 +145,21 @@ public class SaleListRecyclerAdapter extends
         theContext = context;
         paymentsDueTab = paymentsDue;
         theFragment = fragment;
+        preOrderTab = preOrder;
+    }
+
+    SaleListRecyclerAdapter(
+            @NonNull DiffUtil.ItemCallback<SaleListDetail> diffCallback,
+            CommonHandlerPresenter thePresenter,
+            boolean paymentsDue,
+            boolean preOrder,
+            Activity activity,
+            Context context) {
+        super(diffCallback);
+        mPresenter = thePresenter;
+        theContext = context;
+        paymentsDueTab = paymentsDue;
+        theActivity = activity;
         preOrderTab = preOrder;
     }
 

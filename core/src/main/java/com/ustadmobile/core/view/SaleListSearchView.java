@@ -1,0 +1,35 @@
+package com.ustadmobile.core.view;
+
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.db.entities.SaleListDetail;
+
+
+/**
+ * Core View. Screen is for SaleListSearch's View
+ */
+public interface SaleListSearchView extends UstadView {
+
+
+    // This defines the view name that is an argument value in the go() in impl.
+    String VIEW_NAME = "SaleListSearch";
+
+    //Any argument keys:
+
+    /**
+     * Method to finish the screen / view.
+     */
+    void finish();
+
+
+    /**
+     * Sets the given provider to the view's provider adapter.
+     *
+     * @param listProvider The provider to set to the view
+     */
+    void setListProvider(UmProvider<SaleListDetail> listProvider);
+
+    void updateLocationSpinner(String[] locations);
+
+
+}
+

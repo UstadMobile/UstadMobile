@@ -389,6 +389,9 @@ dependencies {
     //Chart library
     implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
 
+    //Range seekbar by Crystal
+    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
+
 }
 
 task sourceJar(type: Jar) {

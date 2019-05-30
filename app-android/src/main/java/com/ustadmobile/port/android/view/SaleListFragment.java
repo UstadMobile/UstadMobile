@@ -60,6 +60,10 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
         super.onCreate(savedInstanceState);
     }
 
+    public void goToSearch(){
+        mPresenter.handleClickSearch();
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

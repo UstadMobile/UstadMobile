@@ -192,6 +192,10 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
         categoryRV.setAdapter(recyclerAdapter);
     }
 
+    public void searchCatalog(String searchValue){
+
+    }
+
     @Override
     public void setCollectionProvider(UmProvider<SaleNameWithImage> collectionProvider) {
         SelectSaleProductRecyclerAdapter recyclerAdapter =

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
@@ -50,5 +51,8 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
 
     @UmQuery("SELECT * FROM Location")
     public abstract  UmLiveData<List<Location>> findAllActiveLocationsLive();
+
+    @UmQuery("SELECT * FROM Location WHERE locationActive = 1")
+    public abstract UmLiveData<List<Location>> findAllActiveLocationsProvider();
 
 }

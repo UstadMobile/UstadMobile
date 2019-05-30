@@ -408,4 +408,9 @@
     <string name="clear">Clear</string>
     <string name="delivery_signature">Delivery signature</string>
     <string name="record_signature">Record signature</string>
+    <string name="filter">Filter</string>
+    <string name="date_range">Date range</string>
+    <string name="value">Value</string>
+    <string name="from">From</string>
+    <string name="to">to</string>
 </resources>

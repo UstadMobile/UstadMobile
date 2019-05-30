@@ -295,6 +295,15 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
         return findAllActiveAsSaleListDetailProvider();
     }
 
+
+    public UmProvider<SaleListDetail> findAllSaleFilterAndSearchProvider(long locationUid,
+                                                     float apl, float aph, String searchQuery){
+
+        //TODO
+        return findAllSaleFilterAllSortNameAscProvider();
+
+    }
+
     //LOOK UP
 
     public static final String FIND_BY_UID_QUERY = "SELECT * FROM Sale WHERE saleUid = :saleUid";

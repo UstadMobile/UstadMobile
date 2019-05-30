@@ -26,6 +26,10 @@ public class Location {
 
     private long parentLocationUid;
 
+    private String timeZone;
+
+    private boolean locationActive;
+
     @UmSyncLocalChangeSeqNum
     private long locationLocalChangeSeqNum;
 
@@ -36,14 +40,19 @@ public class Location {
     private int locationLastChangedBy;
 
     public Location() {
-
+        this.locationActive = false;
     }
 
     public Location(String title, String description) {
         this.title = title;
         this.description = description;
+        this.locationActive = true;
     }
-
+    public Location(String title, String description, boolean active) {
+        this.title = title;
+        this.description = description;
+        this.locationActive = active;
+    }
 
     public String getLng() {
         return lng;
@@ -115,5 +124,21 @@ public class Location {
 
     public void setLocationLastChangedBy(int locationLastChangedBy) {
         this.locationLastChangedBy = locationLastChangedBy;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    public boolean isLocationActive() {
+        return locationActive;
+    }
+
+    public void setLocationActive(boolean locationActive) {
+        this.locationActive = locationActive;
     }
 }

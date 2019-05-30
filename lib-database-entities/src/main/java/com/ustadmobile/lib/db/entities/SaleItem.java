@@ -49,6 +49,9 @@ public class SaleItem {
     //Due date of the sale item. Will only be used if saleItemPreorder is true.
     private long saleItemDueDate;
 
+    //Stores the actual signature data
+    private String saleItemSignature;
+
     @UmSyncMasterChangeSeqNum
     private long saleItemMCSN;
 
@@ -214,5 +217,13 @@ public class SaleItem {
 
     public void setSaleItemLCB(int saleItemLCB) {
         this.saleItemLCB = saleItemLCB;
+    }
+
+    public String getSaleItemSignature() {
+        return saleItemSignature;
+    }
+
+    public void setSaleItemSignature(String saleItemSignature) {
+        this.saleItemSignature = saleItemSignature;
     }
 }

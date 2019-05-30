@@ -128,16 +128,6 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
         impl.go(Login2View.VIEW_NAME, args, context);
     }
 
-
-    /**
-     * Goes to Search activity.
-     */
-    public void handleClickSearchIcon(){
-
-        //Update: This method will not do anything the Search will figure out where it it
-        // has been clicked.
-    }
-
     /**
      * About menu clicked.
      */

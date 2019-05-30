@@ -1,10 +1,9 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -15,6 +14,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -22,15 +22,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.work.WorkManager;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
-import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-import com.squareup.picasso.Transformation;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePoint2Presenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -39,11 +38,8 @@ import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
-import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
-
-import androidx.work.WorkManager;
 
 import static com.ustadmobile.port.android.util.ColorUtil.getContextCompatColorFromColor;
 
@@ -85,6 +81,116 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_basepoint, menu);
         mOptionsMenu = menu;
+
+        //Search stuff
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        MenuItem searchItem = menu.findItem(R.id.menu_basepoint_search);
+
+        searchItem.setOnMenuItemClickListener(item -> {
+            switch (mPager.getCurrentItem()){
+                case VIEW_POSITION_POSITION_CATALOG:
+                    break;
+                case VIEW_POSITION_POSITION_INVENTORY:
+                    break;
+                case VIEW_POSITION_POSITION_SALES:
+                    saleListFragment.goToSearch();
+                    break;
+                case VIEW_POSITION_POSITION_COURSES:
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        });
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_basepoint_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setOnClickListener(v -> {
+
+            switch (mPager.getCurrentItem()){
+                case VIEW_POSITION_POSITION_CATALOG:
+                    break;
+                case VIEW_POSITION_POSITION_INVENTORY:
+                    break;
+                case VIEW_POSITION_POSITION_SALES:
+                    break;
+                case VIEW_POSITION_POSITION_COURSES:
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // filter recycler view when query submitted
+                switch (mPager.getCurrentItem()){
+                    case VIEW_POSITION_POSITION_CATALOG:
+                        catalogListFragment.searchCatalog(query);
+                        break;
+                    case VIEW_POSITION_POSITION_INVENTORY:
+                        break;
+                    case VIEW_POSITION_POSITION_SALES:
+                        break;
+                    case VIEW_POSITION_POSITION_COURSES:
+                        break;
+                    default:
+                        break;
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+
+                // filter recycler view when query submitted
+                switch (mPager.getCurrentItem()){
+                    case VIEW_POSITION_POSITION_CATALOG:
+                        catalogListFragment.searchCatalog(query);
+                        break;
+                    case VIEW_POSITION_POSITION_INVENTORY:
+                        break;
+                    case VIEW_POSITION_POSITION_SALES:
+                        break;
+                    case VIEW_POSITION_POSITION_COURSES:
+                        break;
+                    default:
+                        break;
+                }
+                return false;
+            }
+        });
+
+
+        searchView.setOnCloseListener(() -> {
+
+            // filter recycler view when query submitted
+            switch (mPager.getCurrentItem()){
+                case VIEW_POSITION_POSITION_CATALOG:
+                    catalogListFragment.searchCatalog("");
+                    break;
+                case VIEW_POSITION_POSITION_INVENTORY:
+                    break;
+                case VIEW_POSITION_POSITION_SALES:
+                    break;
+                case VIEW_POSITION_POSITION_COURSES:
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
+
+
+
         return true;
     }
 
@@ -109,23 +215,24 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         ab.setHomeAsUpIndicator(R.drawable.ic_account_circle_white_36dp);
         ab.setDisplayHomeAsUpEnabled(true);
 
-
-
         //Call the Presenter
         mPresenter = new BasePoint2Presenter(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
-
         //Get the bottom navigation component
         bottomNavigation = findViewById(R.id.activity_basepoint2_bottom_navigation);
 
         //Style it
-        bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(R.color.primary, getApplicationContext()));
-        bottomNavigation.setAccentColor(getContextCompatColorFromColor(R.color.text_primary, getApplicationContext()));
-        bottomNavigation.setInactiveColor(getContextCompatColorFromColor(R.color.bottom_navigation_unselected, getApplicationContext()));
+        bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(
+                R.color.primary, getApplicationContext()));
+        bottomNavigation.setAccentColor(getContextCompatColorFromColor(
+                R.color.text_primary, getApplicationContext()));
+        bottomNavigation.setInactiveColor(getContextCompatColorFromColor(
+                R.color.bottom_navigation_unselected, getApplicationContext()));
         bottomNavigation.setBehaviorTranslationEnabled(false);
-        bottomNavigation.setNotificationBackgroundColor(getContextCompatColorFromColor(R.color.text_primary, getApplicationContext()));
+        bottomNavigation.setNotificationBackgroundColor(getContextCompatColorFromColor(
+                R.color.text_primary, getApplicationContext()));
         bottomNavigation.setUseElevation(true, 2L);
 
         //Create the items to be added
@@ -146,8 +253,6 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         bottomNavigation.addItem(inventory_item);
         bottomNavigation.addItem(sales_item);
         bottomNavigation.addItem(courses_item);
-
-
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
@@ -199,7 +304,6 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
         if (output.exists()) {
             Uri profileImage = Uri.fromFile(output);
-
 
             int iconDimen = dpToPx(36);
             runOnUiThread(() -> Picasso.get()
@@ -288,6 +392,24 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         }
         if(i == R.id.menu_basepoint_sync){
             forceSync();
+        }
+
+        if( i == R.id.menu_basepoint_search){
+            switch (mPager.getCurrentItem()){
+                case VIEW_POSITION_POSITION_CATALOG:
+                    catalogListFragment.searchCatalog("");
+                    break;
+                case VIEW_POSITION_POSITION_INVENTORY:
+                    break;
+                case VIEW_POSITION_POSITION_SALES:
+                    saleListFragment.goToSearch();
+                    break;
+                case VIEW_POSITION_POSITION_COURSES:
+                    break;
+                default:
+                    break;
+            }
+
         }
         return super.onOptionsItemSelected(item);
     }

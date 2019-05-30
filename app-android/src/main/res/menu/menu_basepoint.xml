@@ -15,6 +15,7 @@
         android:visible="true"
         android:iconTint="@color/icons"
         app:showAsAction="always"
+        app:actionViewClass="android.support.v7.widget.SearchView"
         />
 
     <item android:id="@+id/menu_basepoint_sync"

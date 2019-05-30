@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import com.ustadmobile.core.view.SaleListSearchView;
 import com.ustadmobile.core.view.SaleListView;
 import com.ustadmobile.core.view.SaleDetailView;
 
@@ -32,7 +33,7 @@ import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
 /**
  * Presenter for SaleList view
  **/
-public class SaleListPresenter extends UstadBaseController<SaleListView> {
+public class SaleListPresenter extends CommonHandlerPresenter<SaleListView> {
 
     private UmProvider<SaleListDetail> umProvider;
     UmAppDatabase repository;
@@ -175,7 +176,7 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
         view.setListProvider(umProvider, true, false);
     }
 
-    public void handleClickSale(long saleUid){
+    void handleClickSale(long saleUid){
         UstadMobileSystemImpl impl =UstadMobileSystemImpl.getInstance();
         Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_SALE_UID, String.valueOf(saleUid));
@@ -190,5 +191,19 @@ public class SaleListPresenter extends UstadBaseController<SaleListView> {
         impl.go(SaleDetailView.VIEW_NAME, args, context);
     }
 
+    public void handleClickSearch(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        impl.go(SaleListSearchView.VIEW_NAME, args, context);
+    }
 
+    @Override
+    public void handleCommonPressed(Object arg) {
+        handleClickSale((Long) arg);
+    }
+
+    @Override
+    public void handleSecondaryPressed(Object arg) {
+
+    }
 }

@@ -391,18 +391,26 @@
     <string name="confirm_fingerprint">Confirm fingerprint to continue</string>
     <string name="use_password">Use password</string>
     <string name="touch_sensor">Touch sensor</string>
-
     <string name="sale_list_sort_by_name">name</string>
     <string name="sale_list_sort_by_total_asc">total (asc)</string>
     <string name="sale_list_sort_by_total_desc">total (desc)</string>
     <string name="sale_list_sort_by_date_desc">date (desc)</string>
     <string name="sale_list_sort_by_date_asc">date (asc)</string>
-
     <string name="category">Category</string>
     <string name="add_subcategory">Add subcategory</string>
     <string name="item_deleted">Item deleted from catalog</string>
     <string name="category_deleted">Category deleted from catalog</string>
-
     <string name="fingerprint_authentication">Fingerprint authentication</string>
     <string name="fingerprint_instructions">Place your fingerprint on the fingerprint sensor to verify your identity</string>
+
+    <!--Sprint 4-->
+    <string name="i_have_received_order">I have received order</string>
+    <string name="clear">Clear</string>
+    <string name="delivery_signature">Delivery signature</string>
+    <string name="record_signature">Record signature</string>
+    <string name="filter">Filter</string>
+    <string name="date_range">Date range</string>
+    <string name="value">Value</string>
+    <string name="from">From</string>
+    <string name="to">to</string>
 </resources>
