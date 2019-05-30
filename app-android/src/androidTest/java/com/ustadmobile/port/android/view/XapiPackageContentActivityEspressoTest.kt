@@ -6,6 +6,9 @@ import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.espresso.web.assertion.WebViewAssertions.webContent
+import androidx.test.espresso.web.matcher.DomMatchers.hasElementWithId
+import androidx.test.espresso.web.sugar.Web.onWebView
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -13,13 +16,14 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.w3c.dom.Document
 import java.io.File
 import java.io.IOException
 
 
 class XapiPackageContentActivityEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(XapiPackageContentActivity::class.java, false, false)
 
 
@@ -64,7 +68,7 @@ class XapiPackageContentActivityEspressoTest {
     fun givenValidXapiZip_whenCreated_thenShouldShowContents() {
         launchActivity()
         SystemClock.sleep(1000)
-       // onWebView().check<Document>(webContent(hasElementWithId("tetris")))
+        onWebView().check<Document>(webContent(hasElementWithId("tetris")))
     }
 
 
