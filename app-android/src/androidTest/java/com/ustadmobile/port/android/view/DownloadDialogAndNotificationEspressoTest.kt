@@ -7,7 +7,11 @@ import android.net.wifi.WifiManager
 import android.os.SystemClock
 import android.view.View
 import androidx.test.InstrumentationRegistry
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
@@ -15,46 +19,31 @@ import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-
-import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.WaitForLiveData
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
-
 import org.apache.commons.io.IOUtils
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.Matchers.allOf
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.After
-import org.junit.Assume
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
-
 import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.util.Arrays
-
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.Matchers.allOf
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import java.util.*
 
 
 /**
@@ -72,10 +61,10 @@ import org.junit.Assert.assertTrue
 @LargeTest
 class DownloadDialogAndNotificationEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = ActivityTestRule(DummyActivity::class.java, false, false)
 
-    @Rule
+    @get:Rule
     var mPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.CHANGE_NETWORK_STATE,
