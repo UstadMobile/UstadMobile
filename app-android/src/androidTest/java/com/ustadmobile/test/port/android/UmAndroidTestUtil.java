@@ -2,10 +2,10 @@ package com.ustadmobile.test.port.android;
 
 import android.os.Environment;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
 
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.test.port.android.view.VideoPlayerTest;

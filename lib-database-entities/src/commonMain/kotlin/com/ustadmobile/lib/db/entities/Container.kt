@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.ColumnInfo
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey

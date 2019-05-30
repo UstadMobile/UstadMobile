@@ -1,8 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
-import android.support.test.InstrumentationRegistry
-import android.support.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.InstrumentationRegistry
+import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container

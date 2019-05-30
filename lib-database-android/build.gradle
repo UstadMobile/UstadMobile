@@ -27,7 +27,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -77,8 +77,8 @@ dependencies {
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
 
     testImplementation "junit:junit:$version_junit"
-    androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
 }
 
 publishing {

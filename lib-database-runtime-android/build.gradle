@@ -22,7 +22,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -41,10 +41,10 @@ dependencies {
     implementation project(":lib-door-runtime")
     implementation "androidx.room:room-runtime:$version_android_room"
 
-    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
+    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
 }
 
 publishing {

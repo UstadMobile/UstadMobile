@@ -3,9 +3,9 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Intent;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.v4.content.ContextCompat;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.espresso.intent.rule.IntentsTestRule;
+import androidx.core.content.ContextCompat;
 
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.view.XapiPackageContentView;
@@ -19,9 +19,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-import static android.support.test.espresso.web.assertion.WebViewAssertions.webContent;
-import static android.support.test.espresso.web.matcher.DomMatchers.hasElementWithId;
-import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static androidx.test.espresso.web.assertion.WebViewAssertions.webContent;
+import static androidx.test.espresso.web.matcher.DomMatchers.hasElementWithId;
+import static androidx.test.espresso.web.sugar.Web.onWebView;
 
 
 public class XapiPackageContentActivityEspressoTest {

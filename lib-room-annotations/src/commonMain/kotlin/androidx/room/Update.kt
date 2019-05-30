@@ -1,6 +1,6 @@
 package androidx.room
 
-import android.arch.persistence.room.Entity
+import androidx.room.Entity
 
 /**
  * Marks a method in a [Dao] annotated class as an update method.

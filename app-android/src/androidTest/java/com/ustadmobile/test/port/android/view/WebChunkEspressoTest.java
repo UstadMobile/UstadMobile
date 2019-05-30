@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.rule.GrantPermissionRule;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.espresso.intent.rule.IntentsTestRule;
+import androidx.test.rule.GrantPermissionRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
@@ -35,7 +35,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 
-import static android.support.test.espresso.web.sugar.Web.onWebView;
+import static androidx.test.espresso.web.sugar.Web.onWebView;
 import static com.ustadmobile.core.impl.UstadMobileSystemImpl.ARG_REFERRER;
 import static com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory;
 

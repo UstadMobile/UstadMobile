@@ -1,8 +1,8 @@
 package com.ustadmobile.test.port.android;
 
-import android.support.test.espresso.UiController;
-import android.support.test.espresso.ViewAction;
-import android.support.test.espresso.action.MotionEvents;
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.action.MotionEvents;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Checkable;
@@ -11,7 +11,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static org.hamcrest.CoreMatchers.isA;
 
 public class UmViewActions {

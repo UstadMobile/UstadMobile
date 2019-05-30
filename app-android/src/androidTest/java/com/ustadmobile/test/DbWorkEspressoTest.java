@@ -1,24 +1,15 @@
 package com.ustadmobile.test;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.port.android.impl.DbInitialEntriesInserter;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import androidx.work.ListenableWorker;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-import androidx.work.WorkerParameters;
 
 public class DbWorkEspressoTest {
 

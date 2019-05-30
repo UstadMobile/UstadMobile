@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-import android.support.annotation.NonNull
+import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
