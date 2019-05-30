@@ -9,6 +9,7 @@ import android.webkit.WebViewClient
 import com.google.gson.Gson
 import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.container.ContainerManager
@@ -31,7 +32,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
     init {
         try {
             this.presenter = mPresenter
-            val repoAppDatabase = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
+            val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
             val appDatabase = UmAppDatabase.getInstance(context)
 
             containerManager = ContainerManager(pathToZip, appDatabase, repoAppDatabase)

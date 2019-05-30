@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
                                   private val monitor: LocalAvailabilityMonitor,
-                                  private val statusProvider: DownloadJobItemStatusProvider)
+                                  private val statusProvider: DownloadJobItemStatusProvider?)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
         OnDownloadJobItemChangeListener {
 
@@ -58,7 +58,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val repoAppDatabase = UmAppDatabase.getInstance(context)// UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         val appdb = UmAppDatabase.getInstance(context)
         val contentRelatedEntryDao = repoAppDatabase.contentEntryRelatedEntryJoinDao
         val contentEntryDao = repoAppDatabase.contentEntryDao
@@ -152,8 +152,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = true
-            statusProvider.addDownloadChangeListener(this)
-            statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
+            statusProvider?.addDownloadChangeListener(this)
+            statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid,
                     object : UmResultCallback<DownloadJobItemStatus?> {
                         override fun onDone(result: DownloadJobItemStatus?) {
                             onDownloadJobItemChange(result, result?.jobItemUid ?: 0)
@@ -163,7 +163,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             view.setDownloadProgressVisible(true)
         } else if (!isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = false
-            statusProvider.removeDownloadChangeListener(this)
+            statusProvider?.removeDownloadChangeListener(this)
             view.setDownloadButtonVisible(true)
             view.setDownloadProgressVisible(false)
         }
@@ -250,7 +250,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     fun handleDownloadButtonClick(isDownloadComplete: Boolean, entryUuid: Long) {
-        val repoAppDatabase = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
                     context, object : UmCallback<Any> {
@@ -309,7 +309,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         if (isListeningToDownloadStatus.getAndSet(false)) {
-            statusProvider.removeDownloadChangeListener(this)
+            statusProvider?.removeDownloadChangeListener(this)
         }
         super.onDestroy()
     }

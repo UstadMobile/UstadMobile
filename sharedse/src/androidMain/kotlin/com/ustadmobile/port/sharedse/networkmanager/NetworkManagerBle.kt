@@ -89,7 +89,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
     private val mJobItemAdapter = object : LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem> {
         override fun makeRunnable(item: DownloadJobItem): Runnable {
             return DownloadJobItemRunner(mContext!!, item, this@NetworkManagerBle,
-                    umAppDatabase!!, UmAppDatabase.getInstance(mContext!!), //UmAccountManager.getRepositoryForActiveAccount(mContext!!),
+                    umAppDatabase!!, UmAccountManager.getRepositoryForActiveAccount(mContext!!),
                     UmAccountManager.getActiveEndpoint(mContext!!)!!,
                     connectivityStatusRef.get())
         }

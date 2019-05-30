@@ -33,7 +33,7 @@ class NetworkManagerBleAndroidService : Service() {
 
     private val mBinder = this.LocalServiceBinder()
 
-    private val managerAndroidBleRef = AtomicReference<NetworkManagerAndroidBle>()
+    private val managerAndroidBleRef = AtomicReference<NetworkManagerAndroidBle?>()
 
     private val mHttpServiceBound = AtomicBoolean(false)
 
@@ -52,7 +52,7 @@ class NetworkManagerBleAndroidService : Service() {
     private val mHttpdServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             mHttpServiceBound.set(true)
-            httpdRef.set((service as EmbeddedHttpdService.LocalServiceBinder).httpd)
+            httpdRef.set((service as EmbeddedHttpdService.LocalServiceBinder).getHttpd())
             handleHttpdServiceBound()
         }
 
@@ -70,7 +70,7 @@ class NetworkManagerBleAndroidService : Service() {
     /**
      * @return Running instance of the NetworkManagerBle
      */
-    val networkManagerBle: NetworkManagerAndroidBle
+    val networkManagerBle: NetworkManagerAndroidBle?
         get() = managerAndroidBleRef.get()
 
 

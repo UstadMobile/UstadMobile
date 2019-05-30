@@ -61,7 +61,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
         }
 
         if (repo === null) {
-            repo = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
+            repo = UmAccountManager.getRepositoryForActiveAccount(context)
         }
 
         GlobalScope.launch {

@@ -64,7 +64,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         get() = managerAndroidBle!!.getLocallyAvailableContainerUids()
 
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow) {
             downloadButton!!.setBackgroundResource(
@@ -234,7 +234,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Runnable{ impl.go("DownloadDialog", args, this) },
+                Runnable { impl.go("DownloadDialog", args, this) },
                 impl.getString(MessageID.download_storage_permission_title, this),
                 impl.getString(MessageID.download_storage_permission_message, this))
     }
@@ -253,9 +253,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     override fun onDestroy() {
         entryDetailPresenter!!.onDestroy()
-        if (networkManagerBle != null) {
-            networkManagerBle.removeLocalAvailabilityListener(this)
-        }
+        networkManagerBle?.removeLocalAvailabilityListener(this)
         super.onDestroy()
     }
 

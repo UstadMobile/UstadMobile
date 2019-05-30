@@ -67,6 +67,7 @@ import java.util.zip.ZipOutputStream
  */
 actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
+    private var appConfig: Properties? = null
 
     private val deviceStorageIndex = 0
 
@@ -112,7 +113,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    fun handleActivityCreate(mContext: Activity, savedInstanceState: Bundle) {
+    fun handleActivityCreate(mContext: Activity, savedInstanceState: Bundle?) {
         init(mContext)
     }
 
@@ -433,7 +434,23 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @return The value of the key if found, if not, the default value provided
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
-        TODO("not implemented")
+        if (appConfig == null) {
+            val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
+                    "/com/ustadmobile/core/appconfig.properties", context)
+            appConfig = Properties()
+            var prefIn: InputStream? = null
+
+            try {
+                prefIn = getAssetSync(context, appPrefResource)
+                appConfig!!.load(prefIn)
+            } catch (e: IOException) {
+                UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
+            } finally {
+                UMIOUtils.closeInputStream(prefIn)
+            }
+        }
+
+        return appConfig!!.getProperty(key, defaultVal)
     }
 
 
@@ -539,7 +556,12 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        var path = path
+        if (path.startsWith("/")) {
+            path = path.substring(1)
+        }
+
+        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
     }
 
 }

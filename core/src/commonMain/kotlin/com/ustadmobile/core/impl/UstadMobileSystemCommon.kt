@@ -7,7 +7,6 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
 import kotlinx.io.InputStream
-import kotlinx.serialization.json.JSON
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
 import kotlin.js.JsName
@@ -30,7 +29,7 @@ abstract class UstadMobileSystemCommon {
     /**
      * The currently active locale
      */
-    private var locale: String? = null
+    private var locale: String = ""
 
     /**
      * Do any required startup operations: init will be called on creation
@@ -221,7 +220,7 @@ abstract class UstadMobileSystemCommon {
      * @return A new default options XmlPullParser
      */
 
-    open fun newPullParser(): KMPXmlParser{
+    open fun newPullParser(): KMPXmlParser {
         return KMPXmlParser()
     }
 
@@ -230,7 +229,7 @@ abstract class UstadMobileSystemCommon {
      *
      * @return New instance of an XML Serializer
      */
-    open fun newXMLSerializer(): KMPSerializerParser{
+    open fun newXMLSerializer(): KMPSerializerParser {
         return KMPSerializerParser()
     }
 
@@ -276,6 +275,7 @@ abstract class UstadMobileSystemCommon {
                          responseListener: UmHttpResponseCallback): UmHttpCall {
         throw Exception("Actual implementation will be replaced with KTOR")
     }
+
     /**
      * Directly send a synchronous request. THIS IS NOT FOR NORMAL USAGE. It is intended only to be
      * used by the cache so requests can be pumped through the system http library, if present on
@@ -392,10 +392,10 @@ abstract class UstadMobileSystemCommon {
 
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
-                "image/jpeg" to "jpg", "image/png"  to "png","image/gif" to "gif",
+                "image/jpeg" to "jpg", "image/png" to "png", "image/gif" to "gif",
                 "image/svg" to "svg", "application/epub+zip" to "epub")
 
-        private val MIME_TYPES_REVERSE = MIME_TYPES.entries.associateBy({ it.value }) {it.key}
+        private val MIME_TYPES_REVERSE = MIME_TYPES.entries.associateBy({ it.value }) { it.key }
 
         /**
          * Suggested name to create for content on Devices

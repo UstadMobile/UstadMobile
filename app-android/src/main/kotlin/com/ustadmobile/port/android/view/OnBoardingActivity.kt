@@ -91,7 +91,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 
     }
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow) {
             getStartedBtn!!.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)

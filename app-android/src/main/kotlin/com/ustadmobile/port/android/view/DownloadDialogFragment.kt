@@ -20,6 +20,8 @@ import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import java.io.File
 import java.util.*
+import com.ustadmobile.core.impl.UmAccountManager
+
 
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
@@ -55,7 +57,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
             val managerBle = context.networkManagerBle
             mPresenter = DownloadDialogPresenter(getContext() as Context, managerBle,
                     bundleToMap(arguments), this, UmAppDatabase.getInstance(context),
-                    UmAppDatabase.getInstance(context)) //UmAccountManager.getRepositoryForActiveAccount(context))
+                    UmAccountManager.getRepositoryForActiveAccount(context))
         }
 
         super.onAttach(context)

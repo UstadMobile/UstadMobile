@@ -9,6 +9,8 @@ import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import java.io.IOException
 
+
+
 class EmbeddedHttpdService : Service() {
 
     private var httpd: EmbeddedHTTPD? = null
@@ -17,9 +19,9 @@ class EmbeddedHttpdService : Service() {
 
     inner class LocalServiceBinder : Binder() {
 
-        val httpd: EmbeddedHTTPD?
-            get() = httpd
-
+        fun getHttpd(): EmbeddedHTTPD? {
+            return httpd
+        }
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {

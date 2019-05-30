@@ -25,7 +25,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBle,
+class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBle?,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               private var appDatabase: UmAppDatabase?, private val appDatabaseRepo: UmAppDatabase)
     : UstadBaseController<DownloadDialogView>(context, arguments, view), LifecycleOwner {
@@ -170,15 +170,15 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun createDownloadJobRecursive() {
         val newDownloadJob = DownloadJob(contentEntryUid, System.currentTimeMillis())
         newDownloadJob.djDestinationDir = destinationDir
-        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
-        currentJobId = jobItemManager!!.downloadJobUid
+        jobItemManager = networkManagerBle?.createNewDownloadJobItemManager(newDownloadJob)
+        currentJobId = jobItemManager?.downloadJobUid
         DownloadJobPreparer(jobItemManager!!, appDatabase!!, appDatabaseRepo).run()
     }
 
 
     fun handleClickPositive() {
         if (deleteFileOptions) {
-            Thread { networkManagerBle.cancelAndDeleteDownloadJob(currentJobId!!) }.start()
+            Thread { networkManagerBle?.cancelAndDeleteDownloadJob(currentJobId!!) }.start()
         } else {
             continueDownloading()
         }
@@ -192,7 +192,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     @JvmOverloads
     fun handleClickNegative(dismissAfter: Boolean = true) {
         if (downloadJobStatus.get() == 0) {
-            Thread { networkManagerBle.deleteUnusedDownloadJob(currentJobId!!) }.start()
+            Thread { networkManagerBle?.deleteUnusedDownloadJob(currentJobId!!) }.start()
         }
 
         //if the download has not been started

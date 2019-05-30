@@ -29,7 +29,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val appDatabase = UmAppDatabase.getInstance(context) //UmAccountManager.getRepositoryForActiveAccount(context)
+        val appDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         contentEntryDao = appDatabase.contentEntryDao
 
         if (arguments.containsKey(ARG_CONTENT_ENTRY_UID)) {

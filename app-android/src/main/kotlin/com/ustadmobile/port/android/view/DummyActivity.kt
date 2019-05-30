@@ -63,7 +63,7 @@ class DummyActivity : UstadBaseActivity(), DummyView {
                 database.downloadJobItemDao.deleteAllAsync()
                 database.contentEntryStatusDao.deleteAllAsync()
             }
-            networkManagerBle.clearHistories()
+            networkManagerBle?.clearHistories()
         } else if (itemId == R.id.action_send_feedback) {
             hearShake()
         }
@@ -71,7 +71,7 @@ class DummyActivity : UstadBaseActivity(), DummyView {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
         super.onBleNetworkServiceBound(networkManagerBle)
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,

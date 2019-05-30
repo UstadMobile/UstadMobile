@@ -1,6 +1,8 @@
 package com.ustadmobile.core.impl
 
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.core.db.UmAppDatabase
+import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
@@ -68,17 +70,21 @@ object UmAccountManager {
         setActiveAccount(account, context, UstadMobileSystemImpl.instance)
     }
 
-  /*  @JsName("getRepositoryForActiveAccount")
+    @JsName("getRepositoryForActiveAccount")
     fun getRepositoryForActiveAccount(context: Any): UmAppDatabase {
         if (activeAccount == null)
-            return UmAppDatabase.getInstance(context).getRepository(
+            /*return UmAppDatabase.getInstance(context).getRepository(
                     UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                            "http://localhost", context), "")
+                            "http://localhost", context), "")*/
+
+            return UmAppDatabase.getInstance(context)
 
         val activeAccount = getActiveAccount(context)
-        return UmAppDatabase.getInstance(context).getRepository(activeAccount!!.endpointUrl,
-                activeAccount.auth)
-    }*/
+      /*  return UmAppDatabase.getInstance(context).getRepository(activeAccount!!.endpointUrl,
+                activeAccount.auth)*/
+
+        return UmAppDatabase.getInstance(context)
+    }
 
     fun getActiveEndpoint(context: Any): String? {
         val activeAccount = getActiveAccount(context)

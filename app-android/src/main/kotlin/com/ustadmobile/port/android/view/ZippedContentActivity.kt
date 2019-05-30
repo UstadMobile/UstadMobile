@@ -35,7 +35,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
 
     private val httpdServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            httpdRef.set((service as EmbeddedHttpdService.LocalServiceBinder).httpd)
+            httpdRef.set((service as EmbeddedHttpdService.LocalServiceBinder).getHttpd())
             httpdBound.set(true)
             runWhenConnectedQueue.setReady(true)
         }

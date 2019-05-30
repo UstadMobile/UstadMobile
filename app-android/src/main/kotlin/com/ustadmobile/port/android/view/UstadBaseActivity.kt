@@ -63,7 +63,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     /**
      * @return Active NetworkManagerBle
      */
-    lateinit var networkManagerBle: NetworkManagerBle
+     var networkManagerBle: NetworkManagerBle? = null
 
     private var fragmentList: MutableList<WeakReference<Fragment>>? = null
 
@@ -146,7 +146,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onCreate(savedInstanceState: Bundle?) {
         //bind to the LRS forwarding service
-        instance.handleActivityCreate(this, savedInstanceState!!)
+        instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
         val intentFilter = IntentFilter()
         intentFilter.addAction(ACTION_LOCALE_CHANGE)
@@ -219,7 +219,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      *
      * @param networkManagerBle
      */
-    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {}
+    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {}
 
     protected fun onBleNetworkServiceUnbound() {
 

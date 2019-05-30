@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
@@ -24,7 +23,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        val repoAppDatabase = UmAppDatabase.getInstance(context)//UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         val contentEntryDao = repoAppDatabase.contentEntryDao
         val containerDao = repoAppDatabase.containerDao
 
@@ -71,7 +70,7 @@ class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebC
 
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
         val impl = UstadMobileSystemImpl.instance
-        val repoAppDatabase = UmAppDatabase.getInstance(context)//UmAccountManager.getRepositoryForActiveAccount(context)
+        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
 
         ContentEntryUtil.goToContentEntryByViewDestination(
                 sourceUrl,
