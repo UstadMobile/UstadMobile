@@ -4,11 +4,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
-abstract class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>,
+class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>,
                                        val fetchFn: () -> T?): DoorLiveData<T>() {
 
-    var value: T? = null
+
+    var value = AtomicReference<T?>()
 
     private val activeObservers = CopyOnWriteArrayList<DoorObserver<in T?>>()
 
@@ -42,7 +44,7 @@ abstract class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: Lis
     }
 
     override fun observeForever(observer: DoorObserver<in T?>) {
-        super.observeForever(observer)
+        addActiveObserver(observer)
     }
 
     override fun removeObserver(observer: DoorObserver<in T?>) {
@@ -54,9 +56,10 @@ abstract class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: Lis
         activeObservers.add(observer)
 
         if(activeObservers.size > 1 && lastUpdated.get() > lastChanged.get()) {
-            observer.onChanged(value)
+            observer.onChanged(value.get())
         }else {
             db.addChangeListener(dbChangeListenerRequest)
+            update()
         }
     }
 
@@ -68,9 +71,10 @@ abstract class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: Lis
 
     private fun update() {
         GlobalScope.launch {
-            val newVal = fetchFn()
+            val retVal = fetchFn()
+            this@DoorLiveDataJdbcImpl.value.set(retVal)
             lastUpdated.set(System.currentTimeMillis())
-            activeObservers.forEach { it.onChanged(newVal) }
+            activeObservers.forEach { it.onChanged(retVal) }
         }
     }
 

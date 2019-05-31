@@ -1,6 +1,7 @@
 package db2
 
 import androidx.room.*
+import com.ustadmobile.door.DoorLiveData
 
 @Dao
 abstract class ExampleDao2 {
@@ -41,7 +42,7 @@ abstract class ExampleDao2 {
     abstract fun findByUidWithLinkEntity(uid: Long): ExampleEntity2WithExampleLinkEntity?
 
     @Query("SELECT * FROM ExampleEntity2 ORDER BY uid")
-    abstract fun findAll(): List<ExampleEntity2WithExampleLinkEntity>
+    abstract fun findAll(): List<ExampleEntity2>
 
     @Query("SELECT * FROM ExampleEntity2")
     abstract suspend fun findAllAsync(): List<ExampleEntity2WithExampleLinkEntity>
@@ -54,5 +55,9 @@ abstract class ExampleDao2 {
 
     @Update
     abstract fun updateList(updateEntityList: List<ExampleEntity2>)
+
+    @Query("SELECT * FROM ExampleEntity2")
+    abstract fun findByMinUidLive(): DoorLiveData<List<ExampleEntity2>>
+
 
 }

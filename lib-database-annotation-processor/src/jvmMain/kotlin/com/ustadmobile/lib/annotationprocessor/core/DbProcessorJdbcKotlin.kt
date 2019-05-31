@@ -10,11 +10,12 @@ import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
 import javax.lang.model.type.*
-import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.EntityInsertionAdapter
 import javax.sql.DataSource
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.*
+import net.sf.jsqlparser.parser.CCJSqlParserUtil
+import net.sf.jsqlparser.statement.select.Select
+import net.sf.jsqlparser.util.TablesNamesFinder
 import org.jetbrains.annotations.Nullable
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeKind
@@ -22,6 +23,7 @@ import javax.lang.model.type.TypeMirror
 import kotlin.reflect.jvm.internal.impl.name.FqName
 import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
 import org.sqlite.SQLiteDataSource
+import java.lang.RuntimeException
 import java.sql.*
 import javax.tools.Diagnostic
 import kotlin.coroutines.Continuation
@@ -211,7 +213,8 @@ fun resolveReturnTypeIfSuspended(method: ExecutableType) : TypeName {
  * If the return type is LiveData, Factory, etc. then unwrap that into the result type.
  */
 fun resolveQueryResultType(returnTypeName: TypeName)  =
-        if(returnTypeName is ParameterizedTypeName && returnTypeName.rawType.canonicalName == "androidx.lifecycle.LiveData") {
+        if(returnTypeName is ParameterizedTypeName
+                && returnTypeName.rawType == DoorLiveData::class.asClassName()) {
             returnTypeName.typeArguments[0]
         }else {
             returnTypeName
@@ -346,6 +349,10 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
 
 fun isListOrArray(typeName: TypeName) = (typeName is ClassName && typeName.canonicalName =="kotlin.Array")
         || (typeName is ParameterizedTypeName && typeName.rawType == List::class.asClassName())
+
+fun isLiveData(typeName: TypeName) = (typeName is ParameterizedTypeName
+        && typeName.rawType == DoorLiveData::class.asClassName())
+
 
 
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
@@ -662,6 +669,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
         val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType().javaToKotlinType()
 
+        //The type of result with any wrapper (e.g. LiveData) removed e..g List<Entity>, Entity, String, etc.
         val resultType = resolveQueryResultType(returnTypeResolved)
 
         val funSpec = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
@@ -681,8 +689,36 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         }
 
 
-        funSpec.addCode(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
-                daoTypeElement, daoMethod))
+        if(isLiveData(returnTypeResolved)) {
+            val tablesToWatch = mutableListOf<String>()
+            try {
+                val select = CCJSqlParserUtil.parse(querySql) as Select
+                val tablesNamesFinder = TablesNamesFinder()
+                tablesToWatch.addAll(tablesNamesFinder.getTableList(select))
+            }catch(e: Exception) {
+                messager?.printMessage(Diagnostic.Kind.WARNING,
+                        "Could not parse SQL to determine livedata tables to watch")
+            }
+
+            val liveDataCodeBlock = CodeBlock.builder()
+                    .beginControlFlow("val _result = %T(_db, listOf(%L)) ",
+                            DoorLiveDataJdbcImpl::class.asClassName(),
+                            tablesToWatch.map {"\"$it\""}.joinToString())
+                    .add(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
+                            daoTypeElement, daoMethod, resultVarName = "_liveResult"))
+                    .add("_liveResult")
+
+            if(resultType is ParameterizedTypeName && resultType.rawType == List::class.asClassName())
+                liveDataCodeBlock.add(".toList()")
+
+            liveDataCodeBlock.add("\n")
+                    .endControlFlow()
+
+            funSpec.addCode(liveDataCodeBlock.build())
+        }else {
+            funSpec.addCode(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
+                    daoTypeElement, daoMethod))
+        }
 
         if(returnTypeResolved != UNIT){
             funSpec.addCode("return _result\n")
@@ -750,7 +786,10 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .add("_con.commit()\n")
         }
 
-        codeBlock.nextControlFlow("finally")
+        codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
+                .add("_e.printStackTrace()\n")
+                .add("throw %T(_e)\n", RuntimeException::class)
+                .nextControlFlow("finally")
                 .add("_stmt?.close()\n")
                 .add("_con?.close()\n")
                 .endControlFlow()
@@ -765,7 +804,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
 
     fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String,
-                               enclosing: TypeElement, method: ExecutableElement): CodeBlock {
+                               enclosing: TypeElement, method: ExecutableElement, resultVarName: String = "_result"): CodeBlock {
         // The result, with any wrapper (e.g. LiveData or DataSource.Factory) removed
         val resultType = resolveQueryResultType(returnType)
 
@@ -786,8 +825,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
 
         val codeBlock = CodeBlock.builder()
-
-        val resultVarName = "_result"
 
         val namedParams = getQueryNamedParameters(querySql)
 
@@ -828,7 +865,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             }
 
             var entityVarName = ""
-            if(isListOrArray(returnType)) {
+            if(isListOrArray(resultType)) {
                 codeBlock.beginControlFlow("while(_resultSet.next())")
                         .add("val _entity = %T()\n", entityType)
                 entityVarName = "_entity"
@@ -843,7 +880,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             }else {
                 // Map of the last prop name (e.g. name) to the full property name as it will
                 // be generated (e.g. embedded!!.name)
-                val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()
+                    val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()
 
                 entityFieldMap.embeddedVarsList.forEach {
                     codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
@@ -857,7 +894,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 }
             }
 
-            if(isListOrArray(returnType)) {
+            if(isListOrArray(resultType)) {
                 codeBlock.add("$resultVarName.add(_entity)\n")
             }
 
@@ -868,7 +905,10 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                     "Exception running query SQL '$execStmtSql' : ${e.message}")
         }
 
-        codeBlock.nextControlFlow("finally")
+        codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
+                .add("_e.printStackTrace()\n")
+                .add("throw %T(_e)\n", RuntimeException::class)
+                .nextControlFlow("finally")
                 .add("_stmt?.close()\n")
                 .add("_con?.close()\n")
                 .endControlFlow()
