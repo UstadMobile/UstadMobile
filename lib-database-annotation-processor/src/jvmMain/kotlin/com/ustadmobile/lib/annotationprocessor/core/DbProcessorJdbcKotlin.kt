@@ -430,6 +430,12 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 daoImpl.addFunction(generateQueryFun(daoTypeElement, daoMethod, daoImpl))
             }else if(daoMethod.getAnnotation(Update::class.java) != null) {
                 daoImpl.addFunction(generateUpdateFun(daoTypeElement, daoMethod, daoImpl))
+            }else if(daoMethod.getAnnotation(Delete::class.java) != null) {
+                daoImpl.addFunction(generateDeleteFun(daoTypeElement, daoMethod))
+            }else {
+                messager?.printMessage(Diagnostic.Kind.ERROR,
+                        "${makeLogPrefix(daoTypeElement, daoMethod)}: Abstract method on DAO not annotated with Query, Update, Delete, or Insert",
+                        daoMethod)
             }
         }
 
@@ -951,6 +957,73 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .endControlFlow()
 
         return codeBlock.build()
+    }
+
+    fun generateDeleteFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement): FunSpec {
+        val deleteFun = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+
+        val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
+                daoMethod) as ExecutableType
+
+        //The parameter type - could be singular (e.g. Entity), could be list/array (e.g. List<Entity>)
+        val paramType = daoMethodResolved.parameterTypes[0].asTypeName().javaToKotlinType()
+
+        val entityType = entityTypeFromFirstParam(daoMethod, daoTypeElement.asType() as DeclaredType,
+                processingEnv)
+
+        val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
+
+        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved)
+
+        val codeBlock = CodeBlock.builder()
+
+        val pkEl = entityTypeEl.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
+
+        val stmtSql = "DELETE FROM ${entityTypeEl.simpleName} WHERE ${pkEl.simpleName} = ?"
+
+        codeBlock.add("var _con = null as %T?\n", Connection::class)
+                .add("var _stmt = null as %T?\n", PreparedStatement::class)
+                .add("var _numChanges = 0\n")
+                .beginControlFlow("try")
+                .add("_con = _db.openConnection()\n")
+                .add("_stmt = _con.prepareStatement(%S)\n", stmtSql)
+
+
+
+        var entityVarName = daoMethod.parameters[0].simpleName.toString()
+        if(isListOrArray(paramType)) {
+            codeBlock.add("_con.autoCommit = false\n")
+                    .beginControlFlow("for(_entity in ${daoMethod.parameters[0].simpleName})")
+            entityVarName = "_entity"
+        }
+
+        codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(pkEl.asType().asTypeName())}(1, $entityVarName.${pkEl.simpleName})\n")
+        codeBlock.add("_numChanges += _stmt.executeUpdate()\n")
+
+        if(isListOrArray(paramType)) {
+            codeBlock.endControlFlow()
+                .add("_con.commit()\n")
+                .add("_con.autoCommit = true\n")
+        }
+
+        codeBlock.beginControlFlow("if(_numChanges > 0)")
+                .add("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
+                .endControlFlow()
+
+        codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
+                .add("_e.printStackTrace()\n")
+                .add("throw %T(_e)\n", RuntimeException::class)
+                .nextControlFlow("finally")
+                .add("_con?.close()\n")
+                .add("_stmt?.close()\n")
+                .endControlFlow()
+
+
+        if(resolvedReturnType != UNIT)
+            codeBlock.add("return _numChanges")
+
+        return deleteFun.addCode(codeBlock.build()).build()
     }
 
     fun makeLogPrefix(enclosing: TypeElement, method: ExecutableElement) = "DoorDb: ${enclosing.qualifiedName}. ${method.simpleName} "
