@@ -638,6 +638,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
 
+        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
+
         val upsertMode = daoMethod.getAnnotation(Insert::class.java).onConflict == OnConflictStrategy.REPLACE
         val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""}"
         if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
@@ -652,13 +654,15 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
                 fieldNames.add(subEl.simpleName.toString())
                 val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
+                val setterMethodName = getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())
                 if(pkAnnotation != null && pkAnnotation.autoGenerate) {
                     parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
-                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ 0L -> stmt.setObject(_fieldIndex++, null) else -> stmt.setLong(_fieldIndex++, entity.${subEl.simpleName})  }\n")
+                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ ${defaultVal(subEl.asType().asTypeName())} " +
+                            "-> stmt.setObject(_fieldIndex++, null) " +
+                            "else -> stmt.set$setterMethodName(_fieldIndex++, entity.${subEl.simpleName})  }\n")
                 }else {
                     parameterHolders.add("?")
-                    bindCodeBlock.add("stmt.set${getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())}" +
-                        "(_fieldIndex++, entity.${subEl.simpleName})\n")
+                    bindCodeBlock.add("stmt.set$setterMethodName(_fieldIndex++, entity.${subEl.simpleName})\n")
                 }
             }
 
@@ -700,18 +704,31 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val returnType = daoMethodResolved.returnType
 
-        if(returnType.kind != TypeKind.VOID) {
+        if(resolvedReturnType != UNIT) {
             insertFun.addCode("val _retVal = ")
         }
 
-        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved)
+
         val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
                 resolvedReturnType, processingEnv)
-        insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())\n")
+        insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())")
+
+        if(resolvedReturnType != UNIT) {
+            if(isListOrArray(resolvedReturnType)
+                    && resolvedReturnType is ParameterizedTypeName
+                    && resolvedReturnType.typeArguments[0] == INT) {
+                insertFun.addCode(".map { it.toInt() }")
+            }else if(resolvedReturnType == INT){
+                insertFun.addCode(".toInt()")
+            }
+        }
+
+        insertFun.addCode("\n")
+
         insertFun.addCode("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
 
-        if(returnType.kind != TypeKind.VOID) {
-            insertFun.addCode("return _retVal")
+        if(resolvedReturnType != UNIT) {
+            insertFun.addCode("return _retVal\n")
         }
 
         return insertFun.build()
