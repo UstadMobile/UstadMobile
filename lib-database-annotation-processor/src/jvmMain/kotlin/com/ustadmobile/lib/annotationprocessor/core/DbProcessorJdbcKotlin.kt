@@ -367,6 +367,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
     private var dbConnection: Connection? = null
 
+    private val allKnownEntities = mutableListOf<TypeElement>()
+
+
     override fun init(p0: ProcessingEnvironment?) {
         super.init(p0)
         messager = p0?.messager
@@ -391,6 +394,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {
             val stmt = dbConnection!!.createStatement()
             stmt.execute(makeCreateTableStatement(it, DoorDbType.SQLITE))
+            allKnownEntities.add(it)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -673,14 +677,15 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val resultType = resolveQueryResultType(returnTypeResolved)
 
         val funSpec = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
-                processingEnv, forceNullableReturn = !PRIMITIVE.contains(resultType) && !isListOrArray(resultType))
+                processingEnv,
+                forceNullableReturn = resultType != UNIT && !PRIMITIVE.contains(resultType) && !isListOrArray(resultType))
 
         val querySql = daoMethod.getAnnotation(Query::class.java).value
 
         val paramTypesResolved = daoMethodResolved.parameterTypes
 
 
-        //TODO: This could be replaced with a bit of mapIndexed + filters
+        //Perhaps this could be replaced with a bit of mapIndexed + filters
         val queryVarsMap = mutableMapOf<String, TypeName>()
         for(i in 0 until daoMethod.parameters.size) {
             if (!isContinuationParam(paramTypesResolved[i].asTypeName())) {
@@ -823,6 +828,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             null
         }
 
+        val isUpdateOrDelete = querySql.trim().startsWith("update", ignoreCase = true)
+                || querySql.trim().startsWith("delete", ignoreCase = true)
 
         val codeBlock = CodeBlock.builder()
 
@@ -848,7 +855,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                     "${it.key})\n")
         }
 
-        codeBlock.add("_resultSet = _stmt.executeQuery()\n")
 
         var execStmtSql = querySql
         namedParams.forEach { execStmtSql = execStmtSql.replace(":$it", "null") }
@@ -857,49 +863,80 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         var execStmt = null as Statement?
         try {
             execStmt = dbConnection?.createStatement()
-            resultSet = execStmt?.executeQuery(execStmtSql)
-            val metaData = resultSet!!.metaData
-            val colNames = mutableListOf<String>()
-            for(i in 1 .. metaData.columnCount) {
-                colNames.add(metaData.getColumnName(i))
-            }
 
-            var entityVarName = ""
-            if(isListOrArray(resultType)) {
-                codeBlock.beginControlFlow("while(_resultSet.next())")
-                        .add("val _entity = %T()\n", entityType)
-                entityVarName = "_entity"
-            }else {
-                codeBlock.beginControlFlow("if(_resultSet.next())")
-                        .add("$resultVarName = %T()\n", entityType)
-                entityVarName = resultVarName
-            }
+            if(isUpdateOrDelete) {
+                /*
+                 Run this query now so that we would get an exception if there is something wrong with it.
+                 */
+                execStmt?.executeUpdate(execStmtSql)
+                codeBlock.add("val _numUpdates = _stmt.executeUpdate()\n")
+                val stmtSplit = execStmtSql.trim().split(Regex("\\s+"), limit = 4)
+                val tableName = if(stmtSplit[0].equals("UPDATE", ignoreCase = true)) {
+                    stmtSplit[1] // in case it is an update statement, will be the second word (e.g. update tablename)
+                }else {
+                    stmtSplit[2] // in case it is a delete statement, will be the third word (e.g. delete from tablename)
+                }
 
-            if(QUERY_SINGULAR_TYPES.contains(entityType)) {
-                codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
+                /*
+                 * If the entity did not exist, then our attempt to run the query would have thrown
+                 * an SQLException . When calling handleTableChanged, we want to use the same case
+                 * as the entity, so we look it up from the list of known entities to find the correct
+                 * case to use.
+                 */
+                val entityModified = allKnownEntities.first {it.simpleName.toString().equals(tableName, ignoreCase = true)}
+
+                codeBlock.beginControlFlow("if(_numUpdates > 0)")
+                        .add("_db.handleTableChanged(listOf(%S))\n", entityModified.simpleName.toString())
+                        .endControlFlow()
+
+                if(resultType != UNIT) {
+                    codeBlock.add("$resultVarName = _numUpdates\n")
+                }
             }else {
-                // Map of the last prop name (e.g. name) to the full property name as it will
-                // be generated (e.g. embedded!!.name)
+                codeBlock.add("_resultSet = _stmt.executeQuery()\n")
+                resultSet = execStmt?.executeQuery(execStmtSql)
+                val metaData = resultSet!!.metaData
+                val colNames = mutableListOf<String>()
+                for(i in 1 .. metaData.columnCount) {
+                    colNames.add(metaData.getColumnName(i))
+                }
+
+                var entityVarName = ""
+                if(isListOrArray(resultType)) {
+                    codeBlock.beginControlFlow("while(_resultSet.next())")
+                            .add("val _entity = %T()\n", entityType)
+                    entityVarName = "_entity"
+                }else {
+                    codeBlock.beginControlFlow("if(_resultSet.next())")
+                            .add("$resultVarName = %T()\n", entityType)
+                    entityVarName = resultVarName
+                }
+
+                if(QUERY_SINGULAR_TYPES.contains(entityType)) {
+                    codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
+                }else {
+                    // Map of the last prop name (e.g. name) to the full property name as it will
+                    // be generated (e.g. embedded!!.name)
                     val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()
 
-                entityFieldMap.embeddedVarsList.forEach {
-                    codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
+                    entityFieldMap.embeddedVarsList.forEach {
+                        codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
+                    }
+
+                    colNames.forEach {colName ->
+                        val fullPropName = colNameLastToFullMap[colName]
+                        val propType = entityFieldMap.fieldMap[fullPropName]
+                        val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
+                        codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
+                    }
                 }
 
-                colNames.forEach {colName ->
-                    val fullPropName = colNameLastToFullMap[colName]
-                    val propType = entityFieldMap.fieldMap[fullPropName]
-                    val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
-                    codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
+                if(isListOrArray(resultType)) {
+                    codeBlock.add("$resultVarName.add(_entity)\n")
                 }
+
+                codeBlock.endControlFlow()
             }
-
-            if(isListOrArray(resultType)) {
-                codeBlock.add("$resultVarName.add(_entity)\n")
-            }
-
-            codeBlock.endControlFlow()
-
         }catch(e: SQLException) {
             messager!!.printMessage(Diagnostic.Kind.ERROR, "${makeLogPrefix(enclosing, method)} " +
                     "Exception running query SQL '$execStmtSql' : ${e.message}")
