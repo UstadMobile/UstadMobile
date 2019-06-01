@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.regex.Pattern
 import javax.naming.InitialContext
 import javax.sql.DataSource
 
@@ -79,6 +80,17 @@ actual abstract class DoorDatabase {
         }
     }
 
+    /**
+     * Postgres queries with array parameters (e.g. SELECT IN (?) need to be adjusted
+     */
+    fun adjustQueryWithSelectInParam(querySql: String): String {
+        return if(jdbcDbType == DoorDbType.POSTGRES) {
+            POSTGRES_SELECT_IN_PATTERN.matcher(querySql).replaceAll(POSTGRES_SELECT_IN_REPLACEMENT)
+        }else {
+            querySql
+        }
+    }
+
 
     fun openConnection() = dataSource.connection
 
@@ -105,6 +117,11 @@ actual abstract class DoorDatabase {
 
     companion object {
         const val DBINFO_TABLENAME = "_door_info"
+
+        const val POSTGRES_SELECT_IN_REPLACEMENT = "IN (SELECT UNNEST(?))"
+
+        val POSTGRES_SELECT_IN_PATTERN = Pattern.compile("IN(\\s*)\\((\\s*)\\?(\\s*)\\)",
+                Pattern.CASE_INSENSITIVE)
     }
 
 }

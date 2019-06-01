@@ -877,7 +877,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
             codeBlock.beginControlFlow("_stmt = if(_db!!.jdbcArraySupported)")
-                        .add("_con.prepareStatement(%S)!!\n", preparedStatementSql)
+                        .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
                     .nextControlFlow("else")
                     .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
                             PreparedStatement::class)
