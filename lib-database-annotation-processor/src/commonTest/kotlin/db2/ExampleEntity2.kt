@@ -1,8 +1,10 @@
 package db2
 
 import android.arch.persistence.room.ColumnInfo
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Entity
 open class ExampleEntity2(
         @PrimaryKey(autoGenerate = true)
         var uid: Long = 0L,

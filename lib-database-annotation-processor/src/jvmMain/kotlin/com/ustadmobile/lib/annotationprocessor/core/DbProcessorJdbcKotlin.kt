@@ -39,6 +39,10 @@ fun isList(type: TypeMirror, processingEnv: ProcessingEnvironment): Boolean =
 
 fun entityTypeFromFirstParam(method: ExecutableElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment) : TypeMirror {
     val methodResolved = processingEnv.typeUtils.asMemberOf(enclosing, method) as ExecutableType
+    if(methodResolved.parameterTypes.isEmpty()) {
+        return processingEnv.typeUtils.nullType
+    }
+
     val firstParamType = methodResolved.parameterTypes[0]
     if(isList(firstParamType, processingEnv)) {
         val firstType = (firstParamType as DeclaredType).typeArguments[0]
@@ -443,6 +447,17 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         dbConnection = dataSource.connection
         dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {
+            if(it.getAnnotation(Entity::class.java) == null) {
+                logMessage(Diagnostic.Kind.ERROR,
+                        "Class used as entity on database does not have @Entity annotation",
+                        it)
+            }
+
+            if(!it.enclosedElements.any { it.getAnnotation(PrimaryKey::class.java) != null }) {
+                logMessage(Diagnostic.Kind.ERROR,
+                        "Class used as entity does not have a field annotated @PrimaryKey")
+            }
+
             val stmt = dbConnection!!.createStatement()
             stmt.execute(makeCreateTableStatement(it, DoorDbType.SQLITE))
             allKnownEntities.add(it)
@@ -640,7 +655,19 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val entityType = entityTypeFromFirstParam(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv)
 
+        if(entityType == processingEnv.typeUtils.nullType) {
+            logMessage(Diagnostic.Kind.ERROR, "Insert function first parameter must be an entity object",
+                    daoTypeElement, daoMethod)
+            return insertFun.build()
+        }
+
         val entityTypeEl = processingEnv.typeUtils.asElement(entityType) as TypeElement
+
+        if(entityTypeEl.getAnnotation(Entity::class.java) == null) {
+            logMessage(Diagnostic.Kind.ERROR, "Insert method entity type must be annotated @Entity",
+                    daoTypeElement, daoMethod)
+            return insertFun.build()
+        }
 
         val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
 
@@ -754,6 +781,13 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                         && !isListOrArray(resultType) && !isDataSourceFactory(resultType))
 
         val querySql = daoMethod.getAnnotation(Query::class.java).value
+
+        if(!querySql.trim().startsWith("UPDATE", ignoreCase = true)
+                && !querySql.trim().startsWith("DELETE", ignoreCase = true)
+                && resultType == UNIT) {
+            logMessage(Diagnostic.Kind.ERROR, "Query method running SELECT must have a return type")
+            return funSpec.build()
+        }
 
         val paramTypesResolved = daoMethodResolved.parameterTypes
 
@@ -937,28 +971,34 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
 
         var paramIndex = 1
-        queryVars.forEach {
-            if(isListOrArray(it.value.javaToKotlinType())) {
+        val queryVarsNotSubstituted = mutableListOf<String>()
+        getQueryNamedParameters(querySql).forEach {
+            val paramType = queryVars[it]
+            if(paramType == null ) {
+                queryVarsNotSubstituted.add(it)
+            }else if(isListOrArray(paramType.javaToKotlinType())) {
                 //val con = null as Connection
-                val arrayTypeName = sqlArrayComponentTypeOf(it.value.javaToKotlinType())
+                val arrayTypeName = sqlArrayComponentTypeOf(paramType.javaToKotlinType())
                 codeBlock.add("_stmt.setArray(${paramIndex++}, ")
                         .beginControlFlow("if(_db!!.jdbcArraySupported) ")
-                        .add("_con!!.createArrayOf(%S, %L.toTypedArray())\n", arrayTypeName, it.key)
+                        .add("_con!!.createArrayOf(%S, %L.toTypedArray())\n", arrayTypeName, it)
                         .nextControlFlow("else")
                         .add("%T.createArrayOf(%S, %L.toTypedArray())\n", PreparedStatementArrayProxy::class,
-                                arrayTypeName, it.key)
+                                arrayTypeName, it)
                         .endControlFlow()
                         .add(")\n")
-
-
-                //con.createArrayOf(sqlArrayComponentTypeOf(it.value.javaToKotlinType()), listOf("blah").toTypedArray())
-
             }else {
-                codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(it.value)}(${paramIndex++}, " +
-                        "${it.key})\n")
+                codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramType.javaToKotlinType())}(${paramIndex++}, " +
+                        "${it})\n")
             }
         }
 
+        if(queryVarsNotSubstituted.isNotEmpty()) {
+            logMessage(Diagnostic.Kind.ERROR,
+                    "Parameters in query not found in method signature: ${queryVarsNotSubstituted.joinToString()}",
+                    enclosing, method)
+            return CodeBlock.builder().build()
+        }
 
         var execStmtSql = querySql
         namedParams.forEach { execStmtSql = execStmtSql.replace(":$it", "null") }
@@ -1037,11 +1077,22 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                         codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
                     }
 
+                    val missingPropNames = mutableListOf<String>()
                     colNames.forEach {colName ->
                         val fullPropName = colNameLastToFullMap[colName]
-                        val propType = entityFieldMap.fieldMap[fullPropName]
-                        val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
-                        codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
+                        if(!fullPropName.isNullOrBlank()) {
+                            val propType = entityFieldMap.fieldMap[fullPropName]
+                            val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
+                            codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
+                        }else {
+                            missingPropNames.add(colName)
+                        }
+                    }
+
+                    if(missingPropNames.isNotEmpty()) {
+                        logMessage(Diagnostic.Kind.ERROR, " Cannot map the following columns " +
+                                "from query to properties on return type of element $entityType : " +
+                                "$missingPropNames")
                     }
                 }
 
@@ -1137,7 +1188,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
     fun logMessage(kind: Diagnostic.Kind, message: String, enclosing: TypeElement? = null,
                    element: Element? = null, annotation: AnnotationMirror? = null) {
-        val messageStr = "DoorDb: ${enclosing?.qualifiedName}. ${element?.simpleName} $message "
+        val messageStr = "DoorDb: ${enclosing?.qualifiedName}#${element?.simpleName} $message "
         if(annotation != null && element != null) {
             messager?.printMessage(kind, messageStr, element, annotation)
         }else if(element != null) {

@@ -63,8 +63,8 @@ abstract class ExampleDao2 {
     @Query("UPDATE ExampleEntity2 SET name = :newName WHERE someNumber >= :num")
     abstract fun updateByParam(newName: String, num: Long) : Int
 
-    @Query("UPDATE exampleentity2 SET name = :newName WHERE someNumber >= :num")
-    abstract fun updateByParamNoReturn(newName: String, num: Long)
+    @Query("UPDATE exampleentity2 SET name = :newName WHERE someNumber >= :number")
+    abstract fun updateByParamNoReturn(newName: String, number: Long)
 
     @Delete
     abstract fun deleteSingle(entity: ExampleEntity2)
