@@ -22,6 +22,7 @@ include ':app-android', ':lib-database-annotations', ':lib-database2', ':lib-dat
         ':lib-database-entities',
         ':lib-util',
         ':lib-database-runtime',
+        ':lib-database-mpp',
         ':lib-http-testserver',
         ':lib-database-annotation-processor',
         ':lib-database',

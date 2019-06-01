@@ -4,4 +4,4 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class TestEntity(@PrimaryKey var uid: Int, var name: String)
+data class TestEntity(@PrimaryKey var uid: Int = 0, var name: String = "")

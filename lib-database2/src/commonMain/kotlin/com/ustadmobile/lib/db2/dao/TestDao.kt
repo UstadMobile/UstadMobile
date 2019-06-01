@@ -13,6 +13,6 @@ abstract class TestDao {
     abstract fun insert(entity: TestEntity)
 
     @Query("SELECT * FROM TestEntity WHERE uid = :pk")
-    abstract fun findByPk(pk: Int): TestEntity
+    abstract fun findByPk(pk: Int): TestEntity?
 
 }

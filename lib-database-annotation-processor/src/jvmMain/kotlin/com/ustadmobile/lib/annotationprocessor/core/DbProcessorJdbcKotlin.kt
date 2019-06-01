@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Embedded
 import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.OPTION_OUTPUT_DIR
@@ -433,7 +432,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment?): Boolean {
         val dbs = roundEnv!!.getElementsAnnotatedWith(Database::class.java)
         val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
-        val outputDir = if(outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
+        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
 
         val dataSource = SQLiteDataSource()
         val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
@@ -934,7 +933,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         }
 
         val entityFieldMap = if(entityTypeElement != null) {
-            mapEntityFields(entityTypeEl = entityTypeElement as TypeElement, processingEnv = processingEnv)
+            mapEntityFields(entityTypeEl = entityTypeElement, processingEnv = processingEnv)
         }else {
             null
         }
@@ -1092,7 +1091,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                     if(missingPropNames.isNotEmpty()) {
                         logMessage(Diagnostic.Kind.ERROR, " Cannot map the following columns " +
                                 "from query to properties on return type of element $entityType : " +
-                                "$missingPropNames")
+                                "$missingPropNames", enclosing, method)
                     }
                 }
 

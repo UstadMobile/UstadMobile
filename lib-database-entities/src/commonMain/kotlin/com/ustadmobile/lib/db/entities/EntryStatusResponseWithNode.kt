@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Embedded
-import com.ustadmobile.lib.database.annotation.UmEmbedded
 
 /**
  * Created by mike on 2/2/18.
@@ -9,7 +8,6 @@ import com.ustadmobile.lib.database.annotation.UmEmbedded
 
 class EntryStatusResponseWithNode : EntryStatusResponse {
 
-    @UmEmbedded
     @Embedded
     var networkNode: NetworkNode? = null
 

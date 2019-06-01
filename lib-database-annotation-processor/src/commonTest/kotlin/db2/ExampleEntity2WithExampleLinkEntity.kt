@@ -1,6 +1,6 @@
 package db2
 
-import android.arch.persistence.room.Embedded
+import androidx.room.Embedded
 
 class ExampleEntity2WithExampleLinkEntity(uid: Long, name: String, someNumber: Long): ExampleEntity2(uid, name, someNumber){
 
