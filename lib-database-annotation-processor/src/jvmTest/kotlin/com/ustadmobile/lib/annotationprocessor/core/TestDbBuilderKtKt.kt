@@ -10,6 +10,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 
 /*
@@ -51,6 +52,35 @@ class TestDbBuilderKtKt {
 
             liveData.removeObserver(observerFn)
         }
+    }
+
+    @Test
+    fun givenDataInserted_whenDeleted_shouldNotBePresentedAnymore() {
+        val entity = ExampleEntity2(name = "bob", someNumber = 100)
+        entity.uid = exampleDb2.exampleDao2().insertAndReturnId(entity)
+        val queryResultBeforeDelete = exampleDb2.exampleDao2().findByUid(entity.uid)
+
+        exampleDb2.exampleDao2().deleteSingle(entity)
+
+        assertNotNull(queryResultBeforeDelete, "Entity was in database before delete")
+        assertNull(exampleDb2.exampleDao2().findByUid(entity.uid),
+                "Entity not in database anymore after delete")
+    }
+
+    @Test
+    fun givenMultipleEntitiesInserted_whenDeleteCalled_dbShouldBeEmpty() {
+        val entityList = listOf(ExampleEntity2(name = "e1", someNumber = 42),
+                ExampleEntity2(name = "e2", someNumber = 43))
+        entityList.forEach { it.uid = exampleDb2.exampleDao2().insertAndReturnId(it) }
+        val numEntitiesBefore = exampleDb2.exampleDao2().countNumEntities()
+
+        exampleDb2.exampleDao2().deleteList(entityList)
+
+        assertEquals(entityList.size, numEntitiesBefore,
+                "Before delete, there were two entities in DB")
+
+        assertEquals(0, exampleDb2.exampleDao2().countNumEntities(),
+                "After delete, there are zero entities in DB")
     }
 
 }

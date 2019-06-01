@@ -908,13 +908,23 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 }
 
                 var entityVarName = ""
+                val entityInitializerBlock = if(QUERY_SINGULAR_TYPES.contains(entityType)) {
+                    CodeBlock.builder().add("${defaultVal(entityType)}").build()
+                }else {
+                    CodeBlock.builder().add("%T()", entityType).build()
+                }
+
                 if(isListOrArray(resultType)) {
                     codeBlock.beginControlFlow("while(_resultSet.next())")
-                            .add("val _entity = %T()\n", entityType)
+                            .add("val _entity = ")
+                            .add(entityInitializerBlock)
+                            .add("\n")
                     entityVarName = "_entity"
                 }else {
                     codeBlock.beginControlFlow("if(_resultSet.next())")
-                            .add("$resultVarName = %T()\n", entityType)
+                            .add("$resultVarName = ")
+                            .add(entityInitializerBlock)
+                            .add("\n")
                     entityVarName = resultVarName
                 }
 
@@ -944,8 +954,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 codeBlock.endControlFlow()
             }
         }catch(e: SQLException) {
-            messager!!.printMessage(Diagnostic.Kind.ERROR, "${makeLogPrefix(enclosing, method)} " +
-                    "Exception running query SQL '$execStmtSql' : ${e.message}")
+            logMessage(Diagnostic.Kind.ERROR, "Exception running query SQL '$execStmtSql' : ${e.message}",
+                    enclosing = enclosing, element = method,
+                    annotation = method.annotationMirrors.firstOrNull {it.annotationType.asTypeName() == Query::class.asTypeName()})
         }
 
         codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
@@ -1024,6 +1035,18 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             codeBlock.add("return _numChanges")
 
         return deleteFun.addCode(codeBlock.build()).build()
+    }
+
+    fun logMessage(kind: Diagnostic.Kind, message: String, enclosing: TypeElement? = null,
+                   element: Element? = null, annotation: AnnotationMirror? = null) {
+        val messageStr = "DoorDb: ${enclosing?.qualifiedName}. ${element?.simpleName} $message "
+        if(annotation != null && element != null) {
+            messager?.printMessage(kind, messageStr, element, annotation)
+        }else if(element != null) {
+            messager?.printMessage(kind, messageStr, element)
+        }else {
+            messager?.printMessage(kind, messageStr)
+        }
     }
 
     fun makeLogPrefix(enclosing: TypeElement, method: ExecutableElement) = "DoorDb: ${enclosing.qualifiedName}. ${method.simpleName} "

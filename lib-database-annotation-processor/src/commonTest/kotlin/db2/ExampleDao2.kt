@@ -68,4 +68,10 @@ abstract class ExampleDao2 {
     @Delete
     abstract fun deleteSingle(entity: ExampleEntity2)
 
+    @Delete
+    abstract fun deleteList(deleteList: List<ExampleEntity2>)
+
+    @Query("SELECT COUNT(*) FROM ExampleEntity2")
+    abstract fun countNumEntities(): Int
+
 }
