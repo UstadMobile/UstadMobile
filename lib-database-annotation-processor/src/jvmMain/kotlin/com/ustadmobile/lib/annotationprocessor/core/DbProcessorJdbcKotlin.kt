@@ -357,6 +357,10 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
 fun isListOrArray(typeName: TypeName) = (typeName is ClassName && typeName.canonicalName =="kotlin.Array")
         || (typeName is ParameterizedTypeName && typeName.rawType == List::class.asClassName())
 
+fun isDataSourceFactory(typeName: TypeName) = typeName is ParameterizedTypeName
+        && typeName.rawType == androidx.paging.DataSource.Factory::class.asTypeName()
+
+
 fun isLiveData(typeName: TypeName) = (typeName is ParameterizedTypeName
         && typeName.rawType == DoorLiveData::class.asClassName())
 
@@ -746,7 +750,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val funSpec = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv,
-                forceNullableReturn = resultType != UNIT && !PRIMITIVE.contains(resultType) && !isListOrArray(resultType))
+                forceNullableReturn = resultType != UNIT && !PRIMITIVE.contains(resultType)
+                        && !isListOrArray(resultType) && !isDataSourceFactory(resultType))
 
         val querySql = daoMethod.getAnnotation(Query::class.java).value
 
@@ -762,7 +767,11 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         }
 
 
-        if(isLiveData(returnTypeResolved)) {
+        if(isDataSourceFactory(returnTypeResolved)) {
+            funSpec.addCode("val _result = %T<%T, %T>()\n",
+                    DoorDataSourceJdbc.Factory::class, INT,
+                    (returnTypeResolved as ParameterizedTypeName).typeArguments[1])
+        }else if(isLiveData(returnTypeResolved)) {
             val tablesToWatch = mutableListOf<String>()
             try {
                 val select = CCJSqlParserUtil.parse(querySql) as Select

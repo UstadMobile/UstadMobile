@@ -1,5 +1,6 @@
 package db2
 
+import androidx.paging.DataSource
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 
@@ -76,5 +77,8 @@ abstract class ExampleDao2 {
 
     @Query("SELECT * FROM ExampleEntity2 WHERE uid IN (:uidList)")
     abstract fun queryUsingArray(uidList: List<Long>): List<ExampleEntity2>
+
+    @Query("SELECT * FROM ExampleEntity2")
+    abstract fun queryAllLive(): DataSource.Factory<Int, ExampleEntityPkInt>
 
 }
