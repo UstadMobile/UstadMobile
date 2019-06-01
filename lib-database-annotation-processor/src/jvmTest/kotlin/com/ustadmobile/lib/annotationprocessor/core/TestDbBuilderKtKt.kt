@@ -104,4 +104,13 @@ class TestDbBuilderKtKt {
         assertEquals(0, queryResults.size)
     }
 
+    @Test
+    fun givenEntityWithInheritedInterfaceMethod_whenMethodCalled_shouldInsert() {
+        val entity = ExampleEntity2(name = "WithInterface", someNumber =  43)
+        entity.uid = exampleDb2.examlpeDaoWithInterface().insertOne(entity)
+
+        assertEquals(entity, exampleDb2.exampleDao2().findByUid(entity.uid),
+                "Entity inserted using DAO implementing interface is found")
+    }
+
 }

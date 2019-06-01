@@ -376,6 +376,31 @@ fun sqlArrayComponentTypeOf(typeName: TypeName): String {
     return "UNKNOWN"
 }
 
+//Limitation: this does not currently support interface inheritence
+fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment) :List<Element> {
+    return ancestorsToList(typeElement, processingEnv).flatMap {
+        it.enclosedElements.filter {
+            it.kind ==  ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers //abstract methods in this class
+        } + it.interfaces.flatMap {
+            processingEnv.typeUtils.asElement(it).enclosedElements.filter { it.kind == ElementKind.METHOD } //methods from the interface
+        }
+    }.filter { !isMethodImplemented(it as ExecutableElement, typeElement, processingEnv) }
+}
+
+fun isMethodImplemented(method: ExecutableElement, enclosingClass: TypeElement, processingEnv: ProcessingEnvironment): Boolean {
+    val enclosingClassType = enclosingClass.asType() as DeclaredType
+    val methodResolved = processingEnv.typeUtils.asMemberOf(enclosingClassType,
+            method) as ExecutableType
+    return ancestorsToList(enclosingClass, processingEnv).any {
+        it.enclosedElements.any {
+            it is ExecutableElement
+                    && !(Modifier.ABSTRACT in it.modifiers)
+                    && it.simpleName == method.simpleName
+                    && processingEnv.typeUtils.isSubsignature(methodResolved,
+                        processingEnv.typeUtils.asMemberOf(enclosingClassType, it) as ExecutableType)
+        }
+    }
+}
 
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
 
@@ -441,9 +466,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .addProperty(PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
                 .superclass(daoTypeElement.asClassName())
 
-        for(daoSubEl in daoTypeElement.enclosedElements) {
+        methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach {daoSubEl ->
             if(daoSubEl.kind != ElementKind.METHOD)
-                continue
+                return@forEach
 
             val daoMethod = daoSubEl as ExecutableElement
             if(daoMethod.getAnnotation(Insert::class.java) != null) {
@@ -460,8 +485,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                         daoMethod)
             }
         }
-
-
 
         daoImplFile.addType(daoImpl.build())
         return daoImplFile.build()
