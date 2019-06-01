@@ -63,7 +63,6 @@ android {
     implementation project(':lib-database-runtime')
     implementation project(":lib-util")
 
-    testImplementation project(":core-tests")
     testImplementation project(":sharedse")
     testImplementation project(":app-javase")
     testImplementation project(":lib-database-jdbc")
@@ -149,8 +148,7 @@ kotlin {
             dependencies {
                     implementation "junit:junit:$version_junit"
 
-                /*     implementation project(":core-tests")
-                     implementation project(":sharedse")
+                /*   implementation project(":sharedse")
                      implementation project(":app-javase")
                      implementation project(":lib-database-jdbc")
                      implementation project(":lib-database-runtime-jdbc")

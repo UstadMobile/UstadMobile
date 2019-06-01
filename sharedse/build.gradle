@@ -52,7 +52,6 @@ android {
  */
 /*task copyTestResources(type: Copy) {
     from "${projectDir}/src/test/resources"
-    from "${projectDir}/../core-tests/src/main/resources"
     from "${projectDir}/../sharedse-tests/src/main/resources"
     into "${buildDir}/classes/test"
 }
@@ -143,7 +142,6 @@ kotlin {
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation project(":core-tests")
     testImplementation project (':lib-database-entities')
     testImplementation project(":app-javase")
     testImplementation project(":lib-database-runtime-jdbc")
