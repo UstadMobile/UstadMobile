@@ -83,4 +83,25 @@ class TestDbBuilderKtKt {
                 "After delete, there are zero entities in DB")
     }
 
+    @Test
+    fun givenEntitiesInserted_whenArrayQueryParameterRuns_shouldFindInsertedEntities() {
+        val entityList = listOf(ExampleEntity2(name = "e1", someNumber = 42),
+                ExampleEntity2(name = "e2", someNumber = 43))
+        entityList.forEach { it.uid = exampleDb2.exampleDao2().insertAndReturnId(it) }
+
+        val queryResults = exampleDb2.exampleDao2().queryUsingArray(entityList.map { it.uid})
+
+        assertEquals(entityList.size, queryResults.size)
+    }
+
+    @Test
+    fun givenEntitiesInserted_whenArrayQueryParameterRunsWithOtherVals_shouldNotFindEntities() {
+        val entityList = listOf(ExampleEntity2(name = "e1", someNumber = 42),
+                ExampleEntity2(name = "e2", someNumber = 43))
+        entityList.forEach { it.uid = exampleDb2.exampleDao2().insertAndReturnId(it) }
+
+        val queryResults = exampleDb2.exampleDao2().queryUsingArray(listOf(-1, -2))
+        assertEquals(0, queryResults.size)
+    }
+
 }

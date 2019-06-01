@@ -4,8 +4,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.sql.Connection
 import java.sql.ResultSet
-import java.sql.SQLException
-import java.util.ArrayList
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.naming.InitialContext
 import javax.sql.DataSource
@@ -20,6 +18,19 @@ actual abstract class DoorDatabase {
         private set
 
     var context: Any? = null
+
+    val jdbcArraySupported by lazy {
+        var connection = null as Connection?
+        var sqlArray = null as java.sql.Array?
+        try {
+            connection = openConnection()
+            sqlArray = connection?.createArrayOf("VARCHAR", arrayOf("hello"))
+        }finally {
+            connection?.close()
+        }
+
+        sqlArray != null
+    }
 
     data class ChangeListenerRequest(val tableNames: List<String>, val onChange: (List<String>) -> Unit)
 

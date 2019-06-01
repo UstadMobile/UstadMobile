@@ -236,7 +236,8 @@ fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeName, pro
 }
 
 private fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String? {
-    when(typeName.javaToKotlinType()) {
+    val kotlinType = typeName.javaToKotlinType()
+    when(kotlinType) {
         INT -> return "Int"
         BYTE -> return "Byte"
         LONG -> return "Long"
@@ -244,7 +245,13 @@ private fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String
         DOUBLE -> return "Double"
         BOOLEAN -> return "Boolean"
         String::class.asTypeName() -> return "String"
-        else -> return "UNKNOWN"
+        else -> {
+            if(isListOrArray(kotlinType)) {
+                return "Array"
+            }else {
+                return "UNKNOWN"
+            }
+        }
     }
 }
 
@@ -353,6 +360,21 @@ fun isListOrArray(typeName: TypeName) = (typeName is ClassName && typeName.canon
 fun isLiveData(typeName: TypeName) = (typeName is ParameterizedTypeName
         && typeName.rawType == DoorLiveData::class.asClassName())
 
+val SQL_COMPONENT_TYPE_MAP = mapOf(LONG to "BIGINT",
+        INT to "INTEGER",
+        SHORT to "SMALLINT",
+        BOOLEAN to "BOOLEAN",
+        FLOAT to "FLOAT",
+        DOUBLE to "DOUBLE",
+        String::class.asClassName() to "TEXT")
+
+fun sqlArrayComponentTypeOf(typeName: TypeName): String {
+    if(typeName is ParameterizedTypeName) {
+        return SQL_COMPONENT_TYPE_MAP.get(typeName.typeArguments[0])!!
+    }
+
+    return "UNKNOWN"
+}
 
 
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
@@ -852,13 +874,40 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 .add("var _resultSet = null as %T?\n", ResultSet::class)
                 .beginControlFlow("try")
                 .add("_con = _db.openConnection()\n")
-                .add("_stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
+
+        if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
+            codeBlock.beginControlFlow("_stmt = if(_db!!.jdbcArraySupported)")
+                        .add("_con.prepareStatement(%S)!!\n", preparedStatementSql)
+                    .nextControlFlow("else")
+                    .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
+                            PreparedStatement::class)
+                    .endControlFlow()
+        }else {
+            codeBlock.add("_stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
+        }
 
 
         var paramIndex = 1
         queryVars.forEach {
-            codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(it.value)}(${paramIndex++}, " +
-                    "${it.key})\n")
+            if(isListOrArray(it.value.javaToKotlinType())) {
+                //val con = null as Connection
+                val arrayTypeName = sqlArrayComponentTypeOf(it.value.javaToKotlinType())
+                codeBlock.add("_stmt.setArray(${paramIndex++}, ")
+                        .beginControlFlow("if(_db!!.jdbcArraySupported) ")
+                        .add("_con!!.createArrayOf(%S, %L.toTypedArray())\n", arrayTypeName, it.key)
+                        .nextControlFlow("else")
+                        .add("%T.createArrayOf(%S, %L.toTypedArray())\n", PreparedStatementArrayProxy::class,
+                                arrayTypeName, it.key)
+                        .endControlFlow()
+                        .add(")\n")
+
+
+                //con.createArrayOf(sqlArrayComponentTypeOf(it.value.javaToKotlinType()), listOf("blah").toTypedArray())
+
+            }else {
+                codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(it.value)}(${paramIndex++}, " +
+                        "${it.key})\n")
+            }
         }
 
 
