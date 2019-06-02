@@ -21,21 +21,28 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   
   entries : db.ustadmobile.lib.db.entities.ContentEntry[] = [];
   env = environment;
-  label_language: string = "";
+  label_language_options : string = "";
+  label_reading_level : string = "";
   label_license: string = "";
   private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.ustadmobile.lib.db.entities.Language[]
   categories: db.ustadmobile.lib.db.entities.DistinctCategorySchema[];
-  umForm : FormGroup;
+  categoryMap : any[][] = [];
+  umFormLanguage : FormGroup;
+  umFormCategories: FormGroup;
   private subscription: Subscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
      umDb: UmDbMockService, formBuilder: FormBuilder) {
     super(umService, router, route, umDb);
 
-    this.umForm = formBuilder.group({
+    this.umFormLanguage = formBuilder.group({
       'language': ['-1', Validators.required]
+    });
+
+    this.umFormCategories = formBuilder.group({
+      'category': ['-1', Validators.required]
     });
   
     this.router.events.subscribe((e: any) => {
@@ -50,20 +57,29 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
 
   ngOnInit() {
     super.ngOnInit();
+
+    //Listen for resources being ready
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.label_language = this.getString(this.MessageID.language); 
+        this.label_language_options = this.getString(this.MessageID.also_available_in); 
         this.label_license = this.getString(this.MessageID.entry_details_license); 
+        this.label_reading_level = this.getString(this.MessageID.label_reading_level); 
       }
     });
 
     //setup language spinner/select listener
-    this.umForm.valueChanges.subscribe((form: any) => {
+    this.umFormLanguage.valueChanges.subscribe((form: any) => {
         if(form.language > -1){
            this.presenter.handleClickFilterByLanguage(form.language);
          }
     });
+
     //setup category spinner/select listener
+    this.umFormCategories.valueChanges.subscribe((form: any) => {
+      if(form.category > -1){
+         this.presenter.handleClickFilterByCategory(form.category);
+       }
+  });
   }
 
   setContentEntryProvider(provider : Observable<ContentEntry[]>){
@@ -83,9 +99,12 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   setCategorySchemaSpinner(categories){
-    const categoryList = util.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(categories);
-    this.categories = categoryList;
-    console.log("cate", categoryList) 
+    const categoriesMap: any[] = util.ustadmobile.lib.util.UMUtil.kotlinCategoryMapToJsArray(categories);
+    var counter = 0;
+    categoriesMap.forEach(categoryList =>{  
+      this.categoryMap[counter] = categoryList.splice(2,3)
+      counter++;
+    }) 
   }
 
   setToolbarTitle(title: string){

@@ -38,10 +38,9 @@ class ContentEntryDao {
     if(language != 0){
       entries = entries.splice(0,entries.length - 2);
     }
-    if(language != 0 && category != 0){
+    if(category != 0){
       entries = entries.splice(0,entries.length - 3);
     }
-    
     return UmAngularUtil.createObserver(entries);
   }
 
