@@ -4,13 +4,16 @@
   
     <div class="row" *ngIf="languages">
       <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
+          <form>
           <mz-select-container>
               <select mz-select
+                [formControl]="umForm.controls['language']"
                 id="language-select"
                 [label]="[languageLabel]" >
-                <option *ngFor="let language of languages" >{{language.name}}</option>
+                <option *ngFor="let language of languages"  value="{{language.langUid}}">{{language.name}}</option>
               </select>
             </mz-select-container>
+            </form>
       </div>
   
       <!-- <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">

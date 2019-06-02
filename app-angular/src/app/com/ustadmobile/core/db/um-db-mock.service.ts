@@ -19,6 +19,8 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
 
   contentEntryDao = new ContentEntryDao();
 
+  contentEntryStatusDao = new ContentEntryStatusDao();
+
   getData(entryUid) {
     const data: ContentEntry[] = entryList[entryUid];
     return data;
@@ -48,14 +50,36 @@ class ContentEntryDao {
   }
 
 
-  findListOfCategoriesAsync() {
-    const schema: DistinctCategorySchema = {
-      contentCategoryUid: 1,
-      categoryName: "Category",
-      contentCategorySchemaUid: 12,
-      schemaName: "Schema"
-    };
-    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schema]);
+  findListOfCategoriesAsync(entryUid) {
+    const schemas: DistinctCategorySchema[] = [
+      {
+        contentCategoryUid: 1,
+        categoryName: "Category Name 1",
+        contentCategorySchemaUid: 12,
+        schemaName: "Schema"
+      },
+      {
+        contentCategoryUid: 2,
+        categoryName: "Category Name 2",
+        contentCategorySchemaUid: 12,
+        schemaName: "Schema"
+      },
+      {
+        contentCategoryUid: 3,
+        categoryName: "Category Name 3",
+        contentCategorySchemaUid: 12,
+        schemaName: "Schema"
+      }
+    ];
+    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schemas])
+  }
+}
+
+class ContentEntryStatusDao{
+  constructor() {}
+
+  findContentEntryStatusByUid(entryUid){
+    UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid) as ContentEntry;
   }
 }
 

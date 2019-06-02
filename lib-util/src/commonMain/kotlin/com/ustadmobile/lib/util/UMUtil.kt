@@ -559,7 +559,8 @@ object UMUtil {
 
     @JsName("jsArrayToKotlinList")
     @JvmStatic
-    fun jsArrayToKotlinList(array: Array<Any>): Any{
+    fun jsArrayToKotlinList(array: Any): Any{
+        val jsArray = array as Array<Any>
         return array.toList()
     }
 
@@ -569,10 +570,14 @@ object UMUtil {
         return list.toTypedArray()
     }
 
+    @JsName("kotlinCategoryMapToJsArray")
+    @JvmStatic
+    fun kotlinCategoryMapToJsArray(categoriesMap: HashMap<Long, List<Any>>){
+        val categoryList = ArrayList<Any>()
+        for ((_, value) in categoriesMap) {
+            categoryList.addAll(value)
+        }
+        categoryList.toTypedArray()
+    }
+
 }
-/**
- * Get the index of an item in an array. Filler method because this doesn't existing on J2ME.
- *
- * @param haystack Array to search in
- * @param needle Value to search for
- */

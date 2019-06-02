@@ -13,6 +13,7 @@ import { UmDbMockService } from './com/ustadmobile/core/db/um-db-mock.service';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,8 @@ import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.co
     NgProgressModule,
     HttpClientModule,
     MzSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
     InfiniteScrollModule
   ],
   providers: [

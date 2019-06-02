@@ -33,6 +33,8 @@ export class UmAngularUtil {
     return foundObj;
   }
 
+  
+
   static getInitialRoute(entryUid ? : number) {
     var args, view = null
     var routePath = document.location.pathname;
