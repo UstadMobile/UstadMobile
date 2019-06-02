@@ -117,6 +117,8 @@ object MessageID{
 
     const val options_uni_kandahar = 1028
 
+    const val library_reading_level = 2200
+
     const val nothing_selected = 2041
 
     const val confirm = 2019

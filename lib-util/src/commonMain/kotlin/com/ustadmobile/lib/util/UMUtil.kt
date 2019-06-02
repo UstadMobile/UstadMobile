@@ -572,12 +572,10 @@ object UMUtil {
 
     @JsName("kotlinCategoryMapToJsArray")
     @JvmStatic
-    fun kotlinCategoryMapToJsArray(categoriesMap: HashMap<Long, List<Any>>){
-        val categoryList = ArrayList<Any>()
-        for ((_, value) in categoriesMap) {
-            categoryList.addAll(value)
-        }
-        categoryList.toTypedArray()
+    fun kotlinCategoryMapToJsArray(categoriesMap: HashMap<Long, List<Any>>) : Array<Any>{
+        val categories = mutableListOf<Any>()
+        (ArrayList(categoriesMap.values)).forEach { list -> categories.add(list.toTypedArray()) }
+        return categories.toTypedArray()
     }
 
 }

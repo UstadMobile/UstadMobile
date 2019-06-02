@@ -2,29 +2,33 @@
 
 <div class="row white" (close)="ngOnDestroy()" >
   
-    <div class="row" *ngIf="languages">
-      <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
+      <div class="col s12 l3 m3 right default-content-padding-right default-margin-top" *ngIf="categoryMap.length > 0">
           <form>
-          <mz-select-container>
-              <select mz-select
-                [formControl]="umForm.controls['language']"
-                id="language-select"
-                [label]="[label_language]" >
-                <option *ngFor="let language of languages"  value="{{language.langUid}}">{{language.name}}</option>
-              </select>
-            </mz-select-container>
-            </form>
-      </div>
-  
-      <!-- <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
-          <mz-select-container>
-              <select mz-select
-                id="language-select"
-                [label]="[languageLabel]" >
-                <option *ngFor="let language of languages" >{{language.name}}</option>
-              </select>
-            </mz-select-container>
-      </div>  -->
+              <mz-select-container *ngFor="let map of categoryMap">
+                  <select mz-select
+                    [formControl]="umFormCategories.controls['category']"
+                    id="language-select"
+                    [label]="[label_reading_level]" >
+                    <option *ngFor="let category of map[0]"  value="{{category.contentCategoryUid}}">{{category.categoryName}}</option>
+                  </select>
+                </mz-select-container>
+          </form>
+      </div> 
+
+      <div class="row" *ngIf="languages">
+          <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
+              <form>
+              <mz-select-container>
+                  <select mz-select
+                    [formControl]="umFormLanguage.controls['language']"
+                    id="language-select"
+                    [label]="[label_language_options]" >
+                    <option *ngFor="let language of languages"  value="{{language.langUid}}">{{language.name}}</option>
+                  </select>
+                </mz-select-container>
+                </form>
+          </div>
+
     </div>
     <ul *ngIf="entries" class="collection default-padding-top">
           <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="openEntry(entry)">
