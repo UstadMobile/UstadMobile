@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
 import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
 import {Component, ElementRef} from '@angular/core';
@@ -22,12 +22,13 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   entries : db.ustadmobile.lib.db.entities.ContentEntry[] = [];
   env = environment;
   private pageNumber: number = 1;
-  languageLabel: string;
+  label_language: string = "";
   private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.ustadmobile.lib.db.entities.Language[]
   categories: db.ustadmobile.lib.db.entities.DistinctCategorySchema[];
   umForm : FormGroup;
+  private subscription: Subscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
      umDb: UmDbMockService, formBuilder: FormBuilder) {
@@ -48,6 +49,13 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   ngOnInit() {
+    super.ngOnInit();
+    this.subscription = this.umService.getUmObserver().subscribe(content =>{
+      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
+        this.label_language = this.getString(this.MessageID.language); 
+      }
+    });
+
     //setup language spinner/select listener
     this.umForm.valueChanges.subscribe((form: any) => {
          console.log("changed language", form.language);
@@ -69,7 +77,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   setLanguageOptions(languages){
     const languageList = util.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(languages);
     this.languages = languageList.splice(1,languageList.length);
-    this.languageLabel = this.getString(this.MessageID.language); 
   }
 
   setCategorySchemaSpinner(categories){
@@ -79,16 +86,13 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   }
 
   setToolbarTitle(title: string){
-    this.umService.updateSectionTitle(title);
-  }
-
-  onFetchNextPage(){
-    this.pageNumber = this.pageNumber + 1;
-    console.log("Feching page ", this.pageNumber)
+    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
+      UmAngularUtil.DISPATCH_TITLE, title))
   }
 
   ngOnDestroy(){
     super.ngOnDestroy()
     this.presenter.onDestroy();
+    this.subscription.unsubscribe();
   }
 }

@@ -1,3 +1,4 @@
+import { UmAngularUtil } from './../util/UmAngularUtil';
 import { UmDbMockService } from './../core/db/um-db-mock.service';
 import { UmContextWrapper } from './../util/UmContextWrapper';
 import { UmBaseService } from './../service/um-base.service';
@@ -30,6 +31,8 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.umService.loadLocaleStrings(systemDefaultLocale).subscribe((loaded) => {
       if(loaded){
         this.app_name = this.getString(this.MessageID.app_name);
+        this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
+          UmAngularUtil.DISPATCH_RESOURCE, loaded))
       }
     });
   }

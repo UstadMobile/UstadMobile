@@ -4,6 +4,8 @@ import { Location } from '@angular/common';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
+import { Subscription } from 'rxjs/internal/Subscription';
+import { UmAngularUtil } from '../../util/UmAngularUtil';
 
 @Component({
   selector: 'app-home',
@@ -12,19 +14,32 @@ import { UmDbMockService } from '../../core/db/um-db-mock.service';
 })
 export class HomeComponent extends UmBaseComponent {
 
-  section_title: string;
+  toolbar_title: string;
+
+  menu_libaries : string;
+
+  menu_reports: string;
+
+  subscription: Subscription;
 
   constructor(private location: Location,umService: UmBaseService,
               router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    
-  }
+   }
 
   ngOnInit() {
     super.ngOnInit()
-    this.umService.getUmObservable().subscribe(title =>{
-      this.section_title = title;
+    this.subscription = this.umService.getUmObserver().subscribe(content =>{
+      if(content[UmAngularUtil.DISPATCH_TITLE]){
+        this.toolbar_title = content[UmAngularUtil.DISPATCH_TITLE];
+      }
+
+      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
+        this.menu_libaries = this.getString(this.MessageID.libraries);
+        this.menu_reports = this.getString(this.MessageID.reports); 
+      }
     });
+   
   }
 
   goBack(){
@@ -32,7 +47,8 @@ export class HomeComponent extends UmBaseComponent {
   }
 
   ngOnDestroy(): void {
-    super.ngOnDestroy()
+    super.ngOnDestroy();
+    this.subscription.unsubscribe();
   }
 
 }

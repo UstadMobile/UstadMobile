@@ -25,6 +25,8 @@ object MessageID{
 
     const val password = 2045
 
+    const val entry_details_license = 2198
+
     const val share_via = 2104
 
     const val phone_memory = 2047
@@ -54,6 +56,8 @@ object MessageID{
     const val login_successful = 2137
 
     const val accept = 2156
+
+    const val entry_details_description = 2199
 
     const val get_app = 2195
 
@@ -504,5 +508,7 @@ object MessageID{
     const val account = 2099
 
     const val forgot_password = 2085
+
+    const val entry_details_author = 2197
 
 }

@@ -234,6 +234,9 @@
     <string name='connected_but_host_not_sharing'>اړیکه/اتصال رامنځ ته شو، خو هغه بله وسله چې له دې اپلکېشن څخه استفاده کوي هېڅ شی نه شریکوي.</string>
     <string name='field_required_prompt'>دا برخه لازمه ده </string>
     <string name="also_available_in">همدارنګه د لاسترسي وړ دی</string>
+    <string name="entry_details_author">Author</string>
+    <string name="entry_details_license">License</string>
+    <string name="entry_details_description">Description</string>
 
 
 

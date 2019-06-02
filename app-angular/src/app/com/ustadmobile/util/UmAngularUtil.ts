@@ -4,12 +4,26 @@ import {Observable} from 'rxjs';
 export class UmAngularUtil {
 
   /**
+   * Content dispatch keys - communication btn components
+   */
+  static DISPATCH_TITLE : string = "toolbar_title";
+
+  static DISPATCH_RESOURCE : string = "resouce_ready";
+
+
+  /**
    * Convert query parameters to a kotlin map to be used on presenters
    */
   static queryParamsToMap(queryParam ? : string, notFound? :boolean) {
     var paramString = queryParam || document.location.search + (notFound ? "":"&ref=null");
     return core.ustadmobile.core.util.UMFileUtil
       .parseURLQueryString(paramString);
+  }
+
+  static getContentToDispatch(key, value){
+    const content = {}
+    content[key] = value;
+    return content;
   }
 
   static createObserver(dataToObserve) {

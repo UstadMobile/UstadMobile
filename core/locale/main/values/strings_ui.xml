@@ -287,5 +287,8 @@
     <string name="download_entry_state_downloaded">Downloaded</string>
     <string name="get_app">Get app</string>
     <string name="no_app_found">"No app found to open file"</string>
+    <string name="entry_details_author">Author</string>
+    <string name="entry_details_license">License</string>
+    <string name="entry_details_description">Description</string>
 
 </resources>

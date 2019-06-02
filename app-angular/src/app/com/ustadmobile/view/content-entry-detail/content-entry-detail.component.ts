@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment.prod';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-content-entry-detail',
@@ -23,6 +24,12 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   entryDescription = "";
   entryThumbnail = "";
   args : Params = null;
+  label_author : string = "";
+  label_description : string = "";
+  label_license : string = "";
+  label_language_option : string = "";
+  private presenter: core.ustadmobile.core.controller.ContentEntryDetailPresenter;
+   private subscription: Subscription;
 
   entryLanguages = [
     {name: "Language 1", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
@@ -34,24 +41,13 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
     {name: "Language 7", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
   ]
 
-  /* constructor(private router: Router, private route: ActivatedRoute, private dataService: UmDbMockService) {
-    this.context = new UmContextWrapper(router);
-    this.route.params.subscribe(val => {
-      this.contentEntryUid = val.entryUid;
-      const entry = this.dataService[dataService.ROOT_UID][0];
-      this.entryTitle = entry.entry_name;
-      this.entryDescription = entry.entry_description;
-      this.entryThumbnail = entry.entry_image;
-      this.entryLicence = entry.entry_licence;
-    });
-    this.args = this.route.snapshot.queryParams;
-   } */
 
-   private presenter: core.ustadmobile.core.controller.ContentEntryDetailPresenter;
+   
 
    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
     this.args = route.snapshot.queryParams;
+    
     this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
         this.presenter = new core.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
@@ -61,7 +57,17 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    super.ngOnInit();
+    this.subscription = this.umService.getUmObserver().subscribe(content =>{
+      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
+        this.label_author = this.getString(this.MessageID.entry_details_author); 
+        this.label_description = this.getString(this.MessageID.entry_details_description); 
+        this.label_language_option = this.getString(this.MessageID.also_available_in); 
+        this.label_license = this.getString(this.MessageID.entry_details_license); 
+      }
+    });
+  }
 
 
   navigateToLanguage(language){
@@ -153,6 +159,7 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
 
   ngOnDestroy(): void {
     super.ngOnDestroy()
+    this.subscription.unsubscribe();
   }
 
 }

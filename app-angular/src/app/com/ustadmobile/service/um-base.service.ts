@@ -1,7 +1,7 @@
 import {UmContextWrapper} from './../util/UmContextWrapper';
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,41 +12,38 @@ export class UmBaseService {
 
   loadedLocale: boolean = false;
 
-  private mObservable : Observable<any>;
-
   private context: UmContextWrapper;
 
-  private mObserver;
+  private umObserver = new Subject < any > ();
 
-  constructor(private http: HttpClient) {
-     this.mObservable = new Observable<any>(observer => {
-      this.mObserver = observer;
-    });
+  constructor(private http: HttpClient) {}
+
+
+  dispatchUpdate(content: any) {
+    this.umObserver.next(content);
   }
 
-  getUmObservable(){
-    return this.mObservable;
+  getUmObserver(): Observable < any > {
+    return this.umObserver.asObservable();
   }
 
-  setImpl(systemImpl: any){
+
+
+  setImpl(systemImpl: any) {
     this.systemImpl = systemImpl;
   }
 
-  updateSectionTitle(title: string){
-    this.mObserver.next(title)
-  }
-
-  setContext(context: UmContextWrapper){
+  setContext(context: UmContextWrapper) {
     this.context = context;
   }
 
-  loadLocaleStrings(locale: string){
-    const localeUrl = "assets/locale/locale."+locale+".json";
+  loadLocaleStrings(locale: string) {
+    const localeUrl = "assets/locale/locale." + locale + ".json";
     return new Observable(observer => {
       setTimeout(() => {
         if (!this.loadedLocale) {
           this.loadedLocale = true;
-          this.http.get<Map<number, String>>(localeUrl).subscribe(strings => {
+          this.http.get < Map < number, String >> (localeUrl).subscribe(strings => {
             this.systemImpl.setLocaleStrings(strings);
             observer.next(true);
           });
