@@ -8,32 +8,33 @@
    <xsl:template match="/">
        <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
            <file source-language="en" datatype="plaintext" original="ng2.template">
-                <body/>
-                <xsl:for-each select="xliff:xliff/xliff:file/xliff:body/xliff:trans-unit">
-                    <trans-unit datatype="html">
-                        <xsl:attribute name="id">
-                            <xsl:value-of select="@id"/>
-                        </xsl:attribute>
-                       
-			                  <xsl:for-each select="*">
-                            <xsl:copy-of select="."/>
-                        </xsl:for-each>
+                <body>
+                  <xsl:for-each select="xliff:xliff/xliff:file/xliff:body/xliff:trans-unit">
+                      <trans-unit datatype="html">
+                          <xsl:attribute name="id">
+                              <xsl:value-of select="@id"/>
+                          </xsl:attribute>
 
-			                  <target>
-                            <xsl:variable name="targetid" select="@id"/>
-                            <xsl:choose>
-                              <xsl:when test="$stringsxml/resources/string[@name=$targetid]">
-                                <xsl:value-of select="$stringsxml/resources/string[@name=$targetid]"/>
-                              </xsl:when>
+                          <xsl:for-each select="*">
+                              <xsl:copy-of select="."/>
+                          </xsl:for-each>
 
-                              <xsl:otherwise>
-                                <xsl:value-of select="@id"/>
-                              </xsl:otherwise>
-                            </xsl:choose>
-                        </target>
+                          <target>
+                              <xsl:variable name="targetid" select="@id"/>
+                              <xsl:choose>
+                                <xsl:when test="$stringsxml/resources/string[@name=$targetid]">
+                                  <xsl:value-of select="$stringsxml/resources/string[@name=$targetid]"/>
+                                </xsl:when>
 
-		                </trans-unit>
-                </xsl:for-each>
+                                <xsl:otherwise>
+                                  <xsl:value-of select="@id"/>
+                                </xsl:otherwise>
+                              </xsl:choose>
+                          </target>
+
+                      </trans-unit>
+                  </xsl:for-each>
+                </body>
            </file>
        </xliff>
         
