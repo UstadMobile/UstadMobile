@@ -24,6 +24,7 @@ import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
 import org.sqlite.SQLiteDataSource
 import java.lang.RuntimeException
 import java.sql.*
+import javax.lang.model.util.SimpleTypeVisitor7
 import javax.tools.Diagnostic
 import kotlin.coroutines.Continuation
 
@@ -175,7 +176,7 @@ fun overrideAndConvertToKotlinTypes(method: ExecutableElement, enclosing: Declar
 
         if(isContinuationParam(resolvedTypeName)) {
             suspendedParamEl= method.parameters[i]
-            suspendedReturnType = suspendedReturnTypeFromContinuationParam(resolvedTypeName)
+            suspendedReturnType = resolveReturnTypeIfSuspended(resolvedExecutableType)
             funSpec.addModifiers(KModifier.SUSPEND)
         }else {
             funSpec.addParameter(method.parameters[i].simpleName.toString(), resolvedTypeName)
@@ -196,19 +197,23 @@ fun overrideAndConvertToKotlinTypes(method: ExecutableElement, enclosing: Declar
 fun isContinuationParam(paramTypeName: TypeName) = paramTypeName is ParameterizedTypeName &&
         paramTypeName.rawType.canonicalName == "kotlin.coroutines.Continuation"
 
-//this might be a parameterized type name, not only a class name
-fun suspendedReturnTypeFromContinuationParam(continuationParam: TypeName) =
-        ((continuationParam as ParameterizedTypeName).typeArguments[0] as WildcardTypeName).inTypes[0].javaToKotlinType()
-
 /**
  * Figures out the return type of a method. This will also figure out the return type of a suspended method
  */
 fun resolveReturnTypeIfSuspended(method: ExecutableType) : TypeName {
     val continuationParam = method.parameterTypes.firstOrNull { isContinuationParam(it.asTypeName()) }
     return if(continuationParam != null) {
-        suspendedReturnTypeFromContinuationParam(continuationParam.asTypeName())
+        //The continuation parameter is always the last parameter, and has one type argument
+        val contReturnType = (method.parameterTypes.last() as DeclaredType).typeArguments.first().extendsBoundOrSelf().asTypeName()
+
+        //Open classes can result in <out T> being generated instead of just <T>. Therefor we want to remove the wildcard
+        if(contReturnType is ParameterizedTypeName && contReturnType.typeArguments[0] is WildcardTypeName) {
+            contReturnType.rawType.parameterizedBy((contReturnType.typeArguments[0] as WildcardTypeName).outTypes[0]).javaToKotlinType()
+        }else {
+            contReturnType.javaToKotlinType()
+        }
     }else {
-        method.returnType.asTypeName()
+        method.returnType.asTypeName().javaToKotlinType()
     }
 }
 
@@ -408,6 +413,25 @@ fun isMethodImplemented(method: ExecutableElement, enclosingClass: TypeElement, 
         }
     }
 }
+
+// As per
+// https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/room/compiler/src/main/kotlin/androidx/room/ext/element_ext.kt
+// converts ? in Set< ? extends Foo> to Foo
+fun TypeMirror.extendsBound(): TypeMirror? {
+    return this.accept(object : SimpleTypeVisitor7<TypeMirror?, Void?>() {
+        override fun visitWildcard(type: WildcardType, ignored: Void?): TypeMirror? {
+            return type.extendsBound ?: type.superBound
+        }
+    }, null)
+}
+/**
+ * If the type mirror is in form of ? extends Foo, it returns Foo; otherwise, returns the TypeMirror
+ * itself.
+ */
+fun TypeMirror.extendsBoundOrSelf(): TypeMirror {
+    return extendsBound() ?: this
+}
+
 
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
 
@@ -769,7 +793,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 daoMethod)  as ExecutableType
 
         // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
-        val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType().javaToKotlinType()
+        val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
 
         //The type of result with any wrapper (e.g. LiveData) removed e..g List<Entity>, Entity, String, etc.
         val resultType = resolveQueryResultType(returnTypeResolved)
