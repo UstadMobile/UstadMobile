@@ -1,9 +1,9 @@
-import { Observable, PartialObserver, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { UmDbMockService, ContentEntry, Language } from './../../core/db/um-db-mock.service';
-import {Component} from '@angular/core';
+import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
+import {Component, ElementRef} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
-import { Router, ActivatedRoute, Params, NavigationEnd } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { com as core } from 'core';
 import {com as db } from 'lib-database';
 import {com as util } from 'lib-util';
@@ -20,7 +20,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   
   entries : ContentEntry[] = [];
   env = environment;
-  private readonly args;
   private pageNumber: number = 1;
   languageLabel: string;
   private entryListObservable: Observable<ContentEntry[]> = null
@@ -29,7 +28,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute,  umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    this.args = route.snapshot.queryParams;
   
     this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {

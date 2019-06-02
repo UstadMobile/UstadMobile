@@ -6,60 +6,61 @@ import {UmAngularUtil} from "../../util/UmAngularUtil";
 @Injectable({
   providedIn: 'root'
 })
-export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase{
+export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
   ROOT_UID = 1311236;
   private initialized: boolean = false;
   constructor() {
     super()
-    if(!this.initialized){
+    if (!this.initialized) {
       this.initialized = true;
       db.ustadmobile.core.db.UmAppDatabase.Companion.setInstance(this);
     }
-   }
+  }
 
-   contentEntryDao = new ContentEntryDao(); 
-   
-  getData(entryUid){
-    const data : ContentEntry [] =  entryList[entryUid];
+  contentEntryDao = new ContentEntryDao();
+
+  getData(entryUid) {
+    const data: ContentEntry[] = entryList[entryUid];
     return data;
   }
 
 }
 
- 
+
 
 /**DAO */
 class ContentEntryDao {
   constructor() {}
-  getChildrenByParentUidWithCategoryFilter(param1) : any{
-    return UmAngularUtil.createObserver(entryList[param1] as ContentEntry []);
+  getChildrenByParentUidWithCategoryFilter(param1): any {
+    return UmAngularUtil.createObserver(entryList[param1] as ContentEntry[]);
   }
 
-  getContentByUuidAsync(entryUid){
-    return UmAngularUtil.findObjectByLabel(entryList,'contentEntryUid', entryUid) as ContentEntry;
+  getContentByUuidAsync(entryUid) {
+    return UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid) as ContentEntry;
   }
 
-  findUniqueLanguagesInListAsync(entryUid){ 
+  findUniqueLanguagesInListAsync(entryUid) {
     return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(languages[entryUid]);
   }
 
-  findByUidAsync(entryUid){
-    return UmAngularUtil.findObjectByLabel(entryList,'contentEntryUid', entryUid) as ContentEntry;
+  findByUidAsync(entryUid) {
+    return UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid) as ContentEntry;
   }
 
 
-  findListOfCategoriesAsync(){
+  findListOfCategoriesAsync() {
     const schema: DistinctCategorySchema = {
-      contentCategoryUid:1,
+      contentCategoryUid: 1,
       categoryName: "Category",
       contentCategorySchemaUid: 12,
-      schemaName: "Schema"};
+      schemaName: "Schema"
+    };
     return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([schema]);
   }
 }
+
+
 /**Entities */
-
-
 export interface ContentEntry {
   contentEntryUid: number;
   title: string;
@@ -73,10 +74,10 @@ export interface ContentEntry {
   sourceUrl: string;
   thumbnailUrl: string;
   lastModified: string;
-  leaf: boolean; 
+  leaf: boolean;
 }
 
-export interface Language{
+export interface Language {
   langUid: number;
   name: string;
   iso_639_1_standard: string;
@@ -87,104 +88,268 @@ export interface Language{
   langLastChangedBy: number;
 }
 export interface DistinctCategorySchema {
-  contentCategoryUid:number
+  contentCategoryUid: number
   categoryName: String
   contentCategorySchemaUid: number
   schemaName: String
 }
 
 const languages = {
-  "1311236" : [{ "langUid": 1, "name": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "name": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "name": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "name": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "name": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "name": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
-  "41250" : [{ "langUid": 1, "name": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "name": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "name": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "name": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "name": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "name": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }],
-  "83098" : [{ "langUid": 1, "name": "pellentesque at", "iso_639_1_standard": "dui", "iso_639_2_standard": "quis", "iso_639_3_standard": "magna", "langLocalChangeSeqNum": 73801, "langMasterChangeSeqNum": 75240, "langLastChangedBy": 1624 }, { "langUid": 2, "name": "lobortis sapien", "iso_639_1_standard": "ut", "iso_639_2_standard": "natoque", "iso_639_3_standard": "cum", "langLocalChangeSeqNum": 75482, "langMasterChangeSeqNum": 11068, "langLastChangedBy": 62140 }, { "langUid": 3, "name": "iaculis congue", "iso_639_1_standard": "velit", "iso_639_2_standard": "pede", "iso_639_3_standard": "metus", "langLocalChangeSeqNum": 75370, "langMasterChangeSeqNum": 50569, "langLastChangedBy": 93444 }, { "langUid": 4, "name": "sit amet", "iso_639_1_standard": "amet", "iso_639_2_standard": "pellentesque", "iso_639_3_standard": "vulputate", "langLocalChangeSeqNum": 39410, "langMasterChangeSeqNum": 46112, "langLastChangedBy": 82190 }, { "langUid": 5, "name": "ut nunc", "iso_639_1_standard": "praesent", "iso_639_2_standard": "nisi", "iso_639_3_standard": "nam", "langLocalChangeSeqNum": 24164, "langMasterChangeSeqNum": 34629, "langLastChangedBy": 12748 }, { "langUid": 6, "name": "phasellus in", "iso_639_1_standard": "amet", "iso_639_2_standard": "curae", "iso_639_3_standard": "placerat", "langLocalChangeSeqNum": 7131, "langMasterChangeSeqNum": 6606, "langLastChangedBy": 97838 }]
+  "1311236": [{
+    "langUid": 1,
+    "name": "pellentesque at",
+    "iso_639_1_standard": "dui",
+    "iso_639_2_standard": "quis",
+    "iso_639_3_standard": "magna",
+    "langLocalChangeSeqNum": 73801,
+    "langMasterChangeSeqNum": 75240,
+    "langLastChangedBy": 1624
+  }, {
+    "langUid": 2,
+    "name": "lobortis sapien",
+    "iso_639_1_standard": "ut",
+    "iso_639_2_standard": "natoque",
+    "iso_639_3_standard": "cum",
+    "langLocalChangeSeqNum": 75482,
+    "langMasterChangeSeqNum": 11068,
+    "langLastChangedBy": 62140
+  }, {
+    "langUid": 3,
+    "name": "iaculis congue",
+    "iso_639_1_standard": "velit",
+    "iso_639_2_standard": "pede",
+    "iso_639_3_standard": "metus",
+    "langLocalChangeSeqNum": 75370,
+    "langMasterChangeSeqNum": 50569,
+    "langLastChangedBy": 93444
+  }, {
+    "langUid": 4,
+    "name": "sit amet",
+    "iso_639_1_standard": "amet",
+    "iso_639_2_standard": "pellentesque",
+    "iso_639_3_standard": "vulputate",
+    "langLocalChangeSeqNum": 39410,
+    "langMasterChangeSeqNum": 46112,
+    "langLastChangedBy": 82190
+  }, {
+    "langUid": 5,
+    "name": "ut nunc",
+    "iso_639_1_standard": "praesent",
+    "iso_639_2_standard": "nisi",
+    "iso_639_3_standard": "nam",
+    "langLocalChangeSeqNum": 24164,
+    "langMasterChangeSeqNum": 34629,
+    "langLastChangedBy": 12748
+  }, {
+    "langUid": 6,
+    "name": "phasellus in",
+    "iso_639_1_standard": "amet",
+    "iso_639_2_standard": "curae",
+    "iso_639_3_standard": "placerat",
+    "langLocalChangeSeqNum": 7131,
+    "langMasterChangeSeqNum": 6606,
+    "langLastChangedBy": 97838
+  }],
+  "41250": [{
+    "langUid": 1,
+    "name": "pellentesque at",
+    "iso_639_1_standard": "dui",
+    "iso_639_2_standard": "quis",
+    "iso_639_3_standard": "magna",
+    "langLocalChangeSeqNum": 73801,
+    "langMasterChangeSeqNum": 75240,
+    "langLastChangedBy": 1624
+  }, {
+    "langUid": 2,
+    "name": "lobortis sapien",
+    "iso_639_1_standard": "ut",
+    "iso_639_2_standard": "natoque",
+    "iso_639_3_standard": "cum",
+    "langLocalChangeSeqNum": 75482,
+    "langMasterChangeSeqNum": 11068,
+    "langLastChangedBy": 62140
+  }, {
+    "langUid": 3,
+    "name": "iaculis congue",
+    "iso_639_1_standard": "velit",
+    "iso_639_2_standard": "pede",
+    "iso_639_3_standard": "metus",
+    "langLocalChangeSeqNum": 75370,
+    "langMasterChangeSeqNum": 50569,
+    "langLastChangedBy": 93444
+  }, {
+    "langUid": 4,
+    "name": "sit amet",
+    "iso_639_1_standard": "amet",
+    "iso_639_2_standard": "pellentesque",
+    "iso_639_3_standard": "vulputate",
+    "langLocalChangeSeqNum": 39410,
+    "langMasterChangeSeqNum": 46112,
+    "langLastChangedBy": 82190
+  }, {
+    "langUid": 5,
+    "name": "ut nunc",
+    "iso_639_1_standard": "praesent",
+    "iso_639_2_standard": "nisi",
+    "iso_639_3_standard": "nam",
+    "langLocalChangeSeqNum": 24164,
+    "langMasterChangeSeqNum": 34629,
+    "langLastChangedBy": 12748
+  }, {
+    "langUid": 6,
+    "name": "phasellus in",
+    "iso_639_1_standard": "amet",
+    "iso_639_2_standard": "curae",
+    "iso_639_3_standard": "placerat",
+    "langLocalChangeSeqNum": 7131,
+    "langMasterChangeSeqNum": 6606,
+    "langLastChangedBy": 97838
+  }],
+  "83098": [{
+    "langUid": 1,
+    "name": "pellentesque at",
+    "iso_639_1_standard": "dui",
+    "iso_639_2_standard": "quis",
+    "iso_639_3_standard": "magna",
+    "langLocalChangeSeqNum": 73801,
+    "langMasterChangeSeqNum": 75240,
+    "langLastChangedBy": 1624
+  }, {
+    "langUid": 2,
+    "name": "lobortis sapien",
+    "iso_639_1_standard": "ut",
+    "iso_639_2_standard": "natoque",
+    "iso_639_3_standard": "cum",
+    "langLocalChangeSeqNum": 75482,
+    "langMasterChangeSeqNum": 11068,
+    "langLastChangedBy": 62140
+  }, {
+    "langUid": 3,
+    "name": "iaculis congue",
+    "iso_639_1_standard": "velit",
+    "iso_639_2_standard": "pede",
+    "iso_639_3_standard": "metus",
+    "langLocalChangeSeqNum": 75370,
+    "langMasterChangeSeqNum": 50569,
+    "langLastChangedBy": 93444
+  }, {
+    "langUid": 4,
+    "name": "sit amet",
+    "iso_639_1_standard": "amet",
+    "iso_639_2_standard": "pellentesque",
+    "iso_639_3_standard": "vulputate",
+    "langLocalChangeSeqNum": 39410,
+    "langMasterChangeSeqNum": 46112,
+    "langLastChangedBy": 82190
+  }, {
+    "langUid": 5,
+    "name": "ut nunc",
+    "iso_639_1_standard": "praesent",
+    "iso_639_2_standard": "nisi",
+    "iso_639_3_standard": "nam",
+    "langLocalChangeSeqNum": 24164,
+    "langMasterChangeSeqNum": 34629,
+    "langLastChangedBy": 12748
+  }, {
+    "langUid": 6,
+    "name": "phasellus in",
+    "iso_639_1_standard": "amet",
+    "iso_639_2_standard": "curae",
+    "iso_639_3_standard": "placerat",
+    "langLocalChangeSeqNum": 7131,
+    "langMasterChangeSeqNum": 6606,
+    "langLastChangedBy": 97838
+  }]
 }
 const entryList = {
-  "1311236" :[{
-    "contentEntryUid": 41250,
-    "title": "magnis dis parturient",
-    "description": "Suspendisse potenti. In eleifend quam a odio.",
-    "entryId": 7064822,
-    "author": "Moritz Lindgren",
-    "publisher": "Marlow Crumbleholme",
-    "licenseType": 81,
-    "licenseName": "vitae",
-    "licenseUrl": "https://ucoz.com/mattis/nibh/ligula/nec/sem.json",
-    "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
-    "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
-    "lastModified": "62-963-5233",
-    "leaf": false
-  },
-  { "contentEntryUid": 1311236,
-  "title": "magnis dis parturient",
-  "description": "Suspendisse potenti. In eleifend quam a odio.",
-  "entryId": 7064822,
-  "author": "Moritz Lindgren",
-  "publisher": "Marlow Crumbleholme",
-  "licenseType": 81,
-  "licenseName": "vitae",
-  "licenseUrl": "https://ucoz.com/mattis/nibh/ligula/nec/sem.json",
-  "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
-  "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
-  "lastModified": "62-963-5233",
-  "leaf": false
-},
-  {
-    "contentEntryUid": 83098,
-    "title": "est phasellus sit amet erat",
-    "description": "In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue.",
-    "entryId": 4850079,
-    "author": "Steffie Limb",
-    "publisher": "Eal Geffe",
-    "licenseType": 42,
-    "licenseName": "ipsum aliquam",
-    "licenseUrl": "https://dmoz.org/augue/quam/sollicitudin/vitae/consectetuer/eget.html",
-    "sourceUrl": "https://tamu.edu/elementum/nullam/varius.png?interdum=sapien&mauris=in&non=sapien&ligula=iaculis&pellentesque=congue&ultrices=vivamus&phasellus=metus&id=arcu&sapien=adipiscing&in=molestie&sapien=hendrerit&iaculis=at&congue=vulputate&vivamus=vitae&metus=nisl&arcu=aenean&adipiscing=lectus&molestie=pellentesque&hendrerit=eget&at=nunc&vulputate=donec&vitae=quis&nisl=orci&aenean=eget&lectus=orci&pellentesque=vehicula&eget=condimentum&nunc=curabitur&donec=in&quis=libero&orci=ut&eget=massa&orci=volutpat&vehicula=convallis&condimentum=morbi&curabitur=odio&in=odio&libero=elementum&ut=eu&massa=interdum",
-    "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
-    "lastModified": "01-794-7396",
-    "leaf": true
-  }, {
-    "contentEntryUid": 31228,
-    "title": "tincidunt nulla mollis",
-    "description": "Fusce consequat.",
-    "entryId": 7479491,
-    "author": "Barny Jerromes",
-    "publisher": "Camala Deary",
-    "licenseType": 62,
-    "licenseName": "in tempus",
-    "licenseUrl": "http://is.gd/imperdiet.js",
-    "sourceUrl": "http://cbsnews.com/odio/elementum/eu.jsp?magna=justo&bibendum=etiam&imperdiet=pretium&nullam=iaculis&orci=justo&pede=in&venenatis=hac&non=habitasse&sodales=platea&sed=dictumst&tincidunt=etiam&eu=faucibus&felis=cursus&fusce=urna&posuere=ut&felis=tellus&sed=nulla&lacus=ut&morbi=erat&sem=id&mauris=mauris&laoreet=vulputate&ut=elementum&rhoncus=nullam&aliquet=varius&pulvinar=nulla&sed=facilisi&nisl=cras&nunc=non&rhoncus=velit&dui=nec&vel=nisi&sem=vulputate&sed=nonummy&sagittis=maecenas",
-    "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
-    "lastModified": "23-043-9012",
-    "leaf": true
-  }, {
-    "contentEntryUid": 62506,
-    "title": "cubilia curae donec",
-    "description": "Integer ac neque. Duis bibendum.",
-    "entryId": 8323608,
-    "author": "Dion Pevie",
-    "publisher": "Brander O'Garmen",
-    "licenseType": 4,
-    "licenseName": "luctus tincidunt",
-    "licenseUrl": "https://ucla.edu/in/imperdiet/et.json",
-    "sourceUrl": "https://mlb.com/pede/venenatis/non/sodales.html?turpis=a&sed=ipsum&ante=integer&vivamus=a&tortor=nibh&duis=in&mattis=quis&egestas=justo&metus=maecenas&aenean=rhoncus&fermentum=aliquam&donec=lacus&ut=morbi&mauris=quis&eget=tortor&massa=id&tempor=nulla&convallis=ultrices&nulla=aliquet&neque=maecenas&libero=leo&convallis=odio&eget=condimentum&eleifend=id&luctus=luctus&ultricies=nec&eu=molestie&nibh=sed&quisque=justo&id=pellentesque&justo=viverra&sit=pede&amet=ac&sapien=diam&dignissim=cras&vestibulum=pellentesque&vestibulum=volutpat&ante=dui&ipsum=maecenas&primis=tristique&in=est&faucibus=et&orci=tempus&luctus=semper&et=est&ultrices=quam&posuere=pharetra&cubilia=magna&curae=ac&nulla=consequat&dapibus=metus&dolor=sapien&vel=ut&est=nunc&donec=vestibulum&odio=ante&justo=ipsum&sollicitudin=primis&ut=in&suscipit=faucibus&a=orci&feugiat=luctus&et=et&eros=ultrices&vestibulum=posuere&ac=cubilia&est=curae&lacinia=mauris&nisi=viverra&venenatis=diam&tristique=vitae&fusce=quam&congue=suspendisse&diam=potenti&id=nullam&ornare=porttitor&imperdiet=lacus&sapien=at&urna=turpis&pretium=donec&nisl=posuere&ut=metus",
-    "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
-    "lastModified": "24-156-6015",
-    "leaf": true
-  }, {
-    "contentEntryUid": 38522,
-    "title": "condimentum curabitur in libero ut",
-    "description": "Nulla neque libero, convallis eget, eleifend luctus, ultricies eu, nibh. Quisque id justo sit amet sapien dignissim vestibulum.",
-    "entryId": 7004919,
-    "author": "Hewie Guilleton",
-    "publisher": "Aubrie Cream",
-    "licenseType": 39,
-    "licenseName": "turpis donec",
-    "licenseUrl": "http://mlb.com/molestie/nibh/in/lectus/pellentesque.aspx",
-    "sourceUrl": "https://constantcontact.com/nunc/viverra/dapibus/nulla/suscipit/ligula.jsp?felis=eget&fusce=congue&posuere=eget&felis=semper&sed=rutrum&lacus=nulla&morbi=nunc&sem=purus&mauris=phasellus&laoreet=in&ut=felis&rhoncus=donec&aliquet=semper&pulvinar=sapien&sed=a&nisl=libero&nunc=nam&rhoncus=dui&dui=proin&vel=leo&sem=odio&sed=porttitor&sagittis=id&nam=consequat&congue=in&risus=consequat&semper=ut&porta=nulla&volutpat=sed&quam=accumsan&pede=felis&lobortis=ut&ligula=at&sit=dolor&amet=quis&eleifend=odio&pede=consequat&libero=varius",
-    "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
-    "lastModified": "70-351-1587",
-    "leaf": true
-  }],
+  "1311236": [{
+      "contentEntryUid": 41250,
+      "title": "magnis dis parturient",
+      "description": "Suspendisse potenti. In eleifend quam a odio.",
+      "entryId": 7064822,
+      "author": "Moritz Lindgren",
+      "publisher": "Marlow Crumbleholme",
+      "licenseType": 81,
+      "licenseName": "vitae",
+      "licenseUrl": "https://ucoz.com/mattis/nibh/ligula/nec/sem.json",
+      "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
+      "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
+      "lastModified": "62-963-5233",
+      "leaf": false
+    },
+    {
+      "contentEntryUid": 1311236,
+      "title": "magnis dis parturient",
+      "description": "Suspendisse potenti. In eleifend quam a odio.",
+      "entryId": 7064822,
+      "author": "Moritz Lindgren",
+      "publisher": "Marlow Crumbleholme",
+      "licenseType": 81,
+      "licenseName": "vitae",
+      "licenseUrl": "https://ucoz.com/mattis/nibh/ligula/nec/sem.json",
+      "sourceUrl": "https://deliciousdays.com/volutpat/erat.xml?quam=convallis&sollicitudin=eget&vitae=eleifend&consectetuer=luctus&eget=ultricies&rutrum=eu&at=nibh&lorem=quisque&integer=id&tincidunt=justo&ante=sit&vel=amet&ipsum=sapien&praesent=dignissim&blandit=vestibulum&lacinia=vestibulum&erat=ante&vestibulum=ipsum&sed=primis&magna=in&at=faucibus&nunc=orci&commodo=luctus&placerat=et&praesent=ultrices&blandit=posuere&nam=cubilia&nulla=curae&integer=nulla&pede=dapibus&justo=dolor&lacinia=vel&eget=est&tincidunt=donec&eget=odio&tempus=justo&vel=sollicitudin&pede=ut&morbi=suscipit&porttitor=a&lorem=feugiat&id=et&ligula=eros&suspendisse=vestibulum&ornare=ac&consequat=est&lectus=lacinia&in=nisi&est=venenatis&risus=tristique&auctor=fusce&sed=congue&tristique=diam&in=id&tempus=ornare&sit=imperdiet&amet=sapien&sem=urna&fusce=pretium&consequat=nisl&nulla=ut&nisl=volutpat&nunc=sapien&nisl=arcu&duis=sed",
+      "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
+      "lastModified": "62-963-5233",
+      "leaf": false
+    },
+    {
+      "contentEntryUid": 83098,
+      "title": "est phasellus sit amet erat",
+      "description": "In blandit ultrices enim. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue.",
+      "entryId": 4850079,
+      "author": "Steffie Limb",
+      "publisher": "Eal Geffe",
+      "licenseType": 42,
+      "licenseName": "ipsum aliquam",
+      "licenseUrl": "https://dmoz.org/augue/quam/sollicitudin/vitae/consectetuer/eget.html",
+      "sourceUrl": "https://tamu.edu/elementum/nullam/varius.png?interdum=sapien&mauris=in&non=sapien&ligula=iaculis&pellentesque=congue&ultrices=vivamus&phasellus=metus&id=arcu&sapien=adipiscing&in=molestie&sapien=hendrerit&iaculis=at&congue=vulputate&vivamus=vitae&metus=nisl&arcu=aenean&adipiscing=lectus&molestie=pellentesque&hendrerit=eget&at=nunc&vulputate=donec&vitae=quis&nisl=orci&aenean=eget&lectus=orci&pellentesque=vehicula&eget=condimentum&nunc=curabitur&donec=in&quis=libero&orci=ut&eget=massa&orci=volutpat&vehicula=convallis&condimentum=morbi&curabitur=odio&in=odio&libero=elementum&ut=eu&massa=interdum",
+      "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
+      "lastModified": "01-794-7396",
+      "leaf": true
+    }, {
+      "contentEntryUid": 31228,
+      "title": "tincidunt nulla mollis",
+      "description": "Fusce consequat.",
+      "entryId": 7479491,
+      "author": "Barny Jerromes",
+      "publisher": "Camala Deary",
+      "licenseType": 62,
+      "licenseName": "in tempus",
+      "licenseUrl": "http://is.gd/imperdiet.js",
+      "sourceUrl": "http://cbsnews.com/odio/elementum/eu.jsp?magna=justo&bibendum=etiam&imperdiet=pretium&nullam=iaculis&orci=justo&pede=in&venenatis=hac&non=habitasse&sodales=platea&sed=dictumst&tincidunt=etiam&eu=faucibus&felis=cursus&fusce=urna&posuere=ut&felis=tellus&sed=nulla&lacus=ut&morbi=erat&sem=id&mauris=mauris&laoreet=vulputate&ut=elementum&rhoncus=nullam&aliquet=varius&pulvinar=nulla&sed=facilisi&nisl=cras&nunc=non&rhoncus=velit&dui=nec&vel=nisi&sem=vulputate&sed=nonummy&sagittis=maecenas",
+      "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
+      "lastModified": "23-043-9012",
+      "leaf": true
+    }, {
+      "contentEntryUid": 62506,
+      "title": "cubilia curae donec",
+      "description": "Integer ac neque. Duis bibendum.",
+      "entryId": 8323608,
+      "author": "Dion Pevie",
+      "publisher": "Brander O'Garmen",
+      "licenseType": 4,
+      "licenseName": "luctus tincidunt",
+      "licenseUrl": "https://ucla.edu/in/imperdiet/et.json",
+      "sourceUrl": "https://mlb.com/pede/venenatis/non/sodales.html?turpis=a&sed=ipsum&ante=integer&vivamus=a&tortor=nibh&duis=in&mattis=quis&egestas=justo&metus=maecenas&aenean=rhoncus&fermentum=aliquam&donec=lacus&ut=morbi&mauris=quis&eget=tortor&massa=id&tempor=nulla&convallis=ultrices&nulla=aliquet&neque=maecenas&libero=leo&convallis=odio&eget=condimentum&eleifend=id&luctus=luctus&ultricies=nec&eu=molestie&nibh=sed&quisque=justo&id=pellentesque&justo=viverra&sit=pede&amet=ac&sapien=diam&dignissim=cras&vestibulum=pellentesque&vestibulum=volutpat&ante=dui&ipsum=maecenas&primis=tristique&in=est&faucibus=et&orci=tempus&luctus=semper&et=est&ultrices=quam&posuere=pharetra&cubilia=magna&curae=ac&nulla=consequat&dapibus=metus&dolor=sapien&vel=ut&est=nunc&donec=vestibulum&odio=ante&justo=ipsum&sollicitudin=primis&ut=in&suscipit=faucibus&a=orci&feugiat=luctus&et=et&eros=ultrices&vestibulum=posuere&ac=cubilia&est=curae&lacinia=mauris&nisi=viverra&venenatis=diam&tristique=vitae&fusce=quam&congue=suspendisse&diam=potenti&id=nullam&ornare=porttitor&imperdiet=lacus&sapien=at&urna=turpis&pretium=donec&nisl=posuere&ut=metus",
+      "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
+      "lastModified": "24-156-6015",
+      "leaf": true
+    }, {
+      "contentEntryUid": 38522,
+      "title": "condimentum curabitur in libero ut",
+      "description": "Nulla neque libero, convallis eget, eleifend luctus, ultricies eu, nibh. Quisque id justo sit amet sapien dignissim vestibulum.",
+      "entryId": 7004919,
+      "author": "Hewie Guilleton",
+      "publisher": "Aubrie Cream",
+      "licenseType": 39,
+      "licenseName": "turpis donec",
+      "licenseUrl": "http://mlb.com/molestie/nibh/in/lectus/pellentesque.aspx",
+      "sourceUrl": "https://constantcontact.com/nunc/viverra/dapibus/nulla/suscipit/ligula.jsp?felis=eget&fusce=congue&posuere=eget&felis=semper&sed=rutrum&lacus=nulla&morbi=nunc&sem=purus&mauris=phasellus&laoreet=in&ut=felis&rhoncus=donec&aliquet=semper&pulvinar=sapien&sed=a&nisl=libero&nunc=nam&rhoncus=dui&dui=proin&vel=leo&sem=odio&sed=porttitor&sagittis=id&nam=consequat&congue=in&risus=consequat&semper=ut&porta=nulla&volutpat=sed&quam=accumsan&pede=felis&lobortis=ut&ligula=at&sit=dolor&amet=quis&eleifend=odio&pede=consequat&libero=varius",
+      "thumbnailUrl": "http://dummyimage.com/200x200.png/dddddd/000000",
+      "lastModified": "70-351-1587",
+      "leaf": true
+    }
+  ],
   "41250": [{
     "contentEntryUid": 72932,
     "title": "nulla sed vel enim sit",
@@ -269,8 +434,8 @@ const entryList = {
     "thumbnailUrl": "http://dummyimage.com/200x200.png/5fa2dd/ffffff",
     "lastModified": "21-355-7776",
     "leaf": true
-  }]
-  ,"72932": [{
+  }],
+  "72932": [{
     "contentEntryUid": 52549,
     "title": "quam pede lobortis",
     "description": "In congue. Etiam justo. Etiam pretium iaculis justo.",
@@ -552,4 +717,3 @@ const entryList = {
     "leaf": true
   }]
 }
-

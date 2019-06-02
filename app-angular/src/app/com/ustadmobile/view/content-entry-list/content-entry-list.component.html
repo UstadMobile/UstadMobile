@@ -1,45 +1,46 @@
 
 
-<div class="row white" (close)="ngOnDestroy()" infiniteScroll [infiniteScrollDistance]="2" [infiniteScrollThrottle]="50" (scrolled)="onFetchNextPage()" [scrollWindow]="false">
+<div class="row white" (close)="ngOnDestroy()" >
   
-  <div class="row" *ngIf="languages">
-    <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
-        <mz-select-container>
-            <select mz-select
-              id="language-select"
-              [label]="[languageLabel]" >
-              <option *ngFor="let language of languages" >{{language.name}}</option>
-            </select>
-          </mz-select-container>
-    </div>
-
-    <!-- <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
-        <mz-select-container>
-            <select mz-select
-              id="language-select"
-              [label]="[languageLabel]" >
-              <option *ngFor="let language of languages" >{{language.name}}</option>
-            </select>
-          </mz-select-container>
-    </div>  -->
-  </div>
-  <ul *ngIf="entries" class="collection default-padding-top">
-        <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="openEntry(entry)">
-          <div class="row">
-            <div class="col s2 l2">
-                <img src="{{entry.thumbnailUrl}}" alt="" class="responsive-img entry-image">
-            </div>
-            <div class="col s10 l10"> 
-                <p class="entry-title {{env.colorTextPrimary}}">{{entry.title}}</p>
-                <p class="entry-description {{env.colorTextSecondary}}">{{entry.description}}</p>
-                <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.licenseName}}</p>
-            </div>
-          </div>
-        </li>
-      </ul>
-
-    <div class="center empty-state-view grey-text" *ngIf="!entries">
-        <i class="material-icons  large extra">library_books</i>
-        <p class="title-label empty grey-text">No libraries Found</p>
+    <div class="row" *ngIf="languages">
+      <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
+          <mz-select-container>
+              <select mz-select
+                id="language-select"
+                [label]="[languageLabel]" >
+                <option *ngFor="let language of languages" >{{language.name}}</option>
+              </select>
+            </mz-select-container>
       </div>
-  </div>
+  
+      <!-- <div class="col s12 l3 m3 right default-content-padding-right default-margin-top">
+          <mz-select-container>
+              <select mz-select
+                id="language-select"
+                [label]="[languageLabel]" >
+                <option *ngFor="let language of languages" >{{language.name}}</option>
+              </select>
+            </mz-select-container>
+      </div>  -->
+    </div>
+    <ul *ngIf="entries" class="collection default-padding-top">
+          <li class="open-content default-padding-top collection-item avatar" *ngFor="let entry of entries" (click)="openEntry(entry)">
+            <div class="row">
+              <div class="col s2 l2">
+                  <img src="{{entry.thumbnailUrl}}" alt="" class="responsive-img entry-image">
+              </div>
+              <div class="col s10 l10"> 
+                  <p class="entry-title {{env.colorTextPrimary}}">{{entry.title}}</p>
+                  <p class="entry-description {{env.colorTextSecondary}}">{{entry.description}}</p>
+                  <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.licenseName}}</p>
+              </div>
+            </div>
+          </li>
+        </ul>
+  
+      <div class="center empty-state-view grey-text" *ngIf="!entries">
+          <i class="material-icons  large extra">library_books</i>
+          <p class="title-label empty grey-text">No libraries Found</p>
+        </div>
+    </div>
+  
