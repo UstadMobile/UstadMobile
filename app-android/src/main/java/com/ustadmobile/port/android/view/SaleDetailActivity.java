@@ -8,6 +8,7 @@ import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -42,10 +43,16 @@ import com.ustadmobile.lib.db.entities.SaleItemListDetail;
 import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import org.xml.sax.InputSource;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Objects;
 
 public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailView {
@@ -88,6 +95,10 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private RecyclerView pRecyclerView;
     private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
     private View paymentHLineBeforeRV, anotherOneHLine;
+
+    //Signature
+    private TextView signatureTitleTV;
+    private ImageButton signatureIB;
 
 
     public static String getSaleVoiceNoteFilePath() {
@@ -367,6 +378,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         recordVoiceNotesIB = findViewById(R.id.activity_sale_detail_order_notes_record_voice_note_ib);
         playIB = findViewById(R.id.activity_sale_detail_order_notes_play_image_button);
         stopIB = findViewById(R.id.activity_sale_detail_order_notes_delete_ib);
+        signatureTitleTV = findViewById(R.id.activity_sale_detail_signature_title);
+        signatureIB = findViewById(R.id.activity_sale_detail_signature_button);
 
         c1 = findViewById(R.id.textView21);
         c2 = findViewById(R.id.activity_sale_detail_disc_currency4);
@@ -471,6 +484,8 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
             }
         });
+
+        signatureIB.setOnClickListener(v -> mPresenter.handleClickAddSignature());
     }
 
 
@@ -628,6 +643,24 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                     discountValue = String.valueOf(sale.getSaleDiscount());
                 }
                 discountET.setText(discountValue);
+                if(sale.getSaleSignature() != null && !sale.getSaleSignature().isEmpty()){
+                    try {
+                        String saleSignature= sale.getSaleSignature();
+                        XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
+                        XmlPullParser xpp = xppf.newPullParser();
+                        xpp.setInput(new StringReader(saleSignature));
+                        Drawable signature = Drawable.createFromXml(getResources(), xpp);
+                        String breakHere = "Ok";
+                        runOnUiThread(() -> signatureIB.setBackground(signature));
+
+
+                    } catch (XmlPullParserException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
             }
         });
 
@@ -682,6 +715,14 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         orderNotesET.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         recordVoiceNotesIB.setVisibility(show?View.VISIBLE:View.INVISIBLE);
 
+    }
+
+    @Override
+    public void showSignature(boolean show) {
+        runOnUiThread(() -> {
+            signatureIB.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+            signatureTitleTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        });
     }
 
     @Override

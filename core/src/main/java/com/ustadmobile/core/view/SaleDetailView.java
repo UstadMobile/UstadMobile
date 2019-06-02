@@ -56,7 +56,7 @@ public interface SaleDetailView extends UstadView {
     void showCalculations(boolean show);
     void showDelivered(boolean show);
     void showNotes(boolean show);
-
+    void showSignature(boolean show);
     void showPayments(boolean show);
 
     void updateSaleVoiceNoteOnView(String fileName);

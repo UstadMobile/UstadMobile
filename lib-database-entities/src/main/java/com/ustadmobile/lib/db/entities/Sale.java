@@ -42,6 +42,8 @@ public class Sale {
 
     private long saleDiscount;
 
+    private String saleSignature;
+
     @UmSyncMasterChangeSeqNum
     private long saleMCSN;
 
@@ -197,5 +199,13 @@ public class Sale {
 
     public void setSaleDiscount(long saleDiscount) {
         this.saleDiscount = saleDiscount;
+    }
+
+    public String getSaleSignature() {
+        return saleSignature;
+    }
+
+    public void setSaleSignature(String saleSignature) {
+        this.saleSignature = saleSignature;
     }
 }

@@ -21,6 +21,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -109,14 +110,15 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
-        searchView.setOnClickListener(v -> {
 
-            switch (mPager.getCurrentItem()){
+        searchView.setOnSearchClickListener(v -> {
+            switch (mPager.getCurrentItem()) {
                 case VIEW_POSITION_POSITION_CATALOG:
                     break;
                 case VIEW_POSITION_POSITION_INVENTORY:
                     break;
                 case VIEW_POSITION_POSITION_SALES:
+                    saleListFragment.goToSearch();
                     break;
                 case VIEW_POSITION_POSITION_COURSES:
                     break;
@@ -124,6 +126,22 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                     break;
             }
         });
+
+                searchView.setOnClickListener(v -> {
+
+                    switch (mPager.getCurrentItem()) {
+                        case VIEW_POSITION_POSITION_CATALOG:
+                            break;
+                        case VIEW_POSITION_POSITION_INVENTORY:
+                            break;
+                        case VIEW_POSITION_POSITION_SALES:
+                            break;
+                        case VIEW_POSITION_POSITION_COURSES:
+                            break;
+                        default:
+                            break;
+                    }
+                });
 
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

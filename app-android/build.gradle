@@ -392,6 +392,9 @@ dependencies {
     //Range seekbar by Crystal
     implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
 
+    //Singature pad by Gcacace
+    implementation "com.github.gcacace:signature-pad:$version_gcacace_signaturepad"
+
 }
 
 task sourceJar(type: Jar) {

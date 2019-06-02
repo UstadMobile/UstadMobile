@@ -81,6 +81,7 @@ import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Register2View;
+import com.ustadmobile.core.view.SaleDetailSignatureView;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SaleListSearchView;
@@ -114,6 +115,7 @@ import com.ustadmobile.port.android.view.Login2Activity;
 import com.ustadmobile.port.android.view.OnBoardingActivity;
 import com.ustadmobile.port.android.view.Register2Activity;
 import com.ustadmobile.port.android.view.SaleDetailActivity;
+import com.ustadmobile.port.android.view.SaleDetailSignatureActivity;
 import com.ustadmobile.port.android.view.SaleItemDetailActivity;
 import com.ustadmobile.port.android.view.SaleListSearchActivity;
 import com.ustadmobile.port.android.view.SalePaymentDetailActivity;
@@ -211,6 +213,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SaleProductCategoryListView.VIEW_NAME, SaleProductCategoryListActivity.class);
         viewNameToAndroidImplMap.put(AddSaleProductToSaleCategoryView.VIEW_NAME, AddSaleProductToSaleCategoryActivity.class);
         viewNameToAndroidImplMap.put(SaleListSearchView.VIEW_NAME, SaleListSearchActivity.class);
+        viewNameToAndroidImplMap.put(SaleDetailSignatureView.VIEW_NAME, SaleDetailSignatureActivity.class);
 
     }
 

@@ -20,6 +20,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.SaleDetailSignatureView;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SalePaymentDetailView;
@@ -95,6 +96,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             showSaveButton = true;
             view.runOnUiThread(() -> {
                 view.showCalculations(true);
+                view.showSignature(true);
                 view.showDelivered(true);
                 view.showNotes(true);
                 view.showPayments(true);
@@ -106,6 +108,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             updatedSale.setSalePreOrder(true); //ie: Not delivered unless ticked.
             updatedSale.setSaleDone(false);
             updatedSale.setSaleActive(false);
+            view.showSignature(false);
 
             saleDao.insertAsync(updatedSale, new UmCallback<Long>() {
                 @Override
@@ -499,5 +502,12 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         args.put(ARG_SALE_PAYMENT_UID, String.valueOf(salePaymentUid));
         //args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE, String.valueOf(totalAfterDiscount - totalPayment));
         impl.go(SalePaymentDetailView.VIEW_NAME, args, context);
+    }
+
+    public void handleClickAddSignature() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_SALE_UID, String.valueOf(currentSale.getSaleUid()));
+        impl.go(SaleDetailSignatureView.VIEW_NAME, args, context);
     }
 }
