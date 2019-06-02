@@ -1,4 +1,5 @@
 //Script copied from https://github.com/svok/kotlin-multiplatform-sample/blob/master/proj-angularfront/build.gradle.kts
+import com.github.eerohele.SaxonXsltTask
 import com.moowork.gradle.node.yarn.YarnTask
 
 plugins {
@@ -6,6 +7,7 @@ plugins {
   id("com.moowork.node") version "1.3.1"
   id("com.bmuschko.docker-remote-api") version "4.8.1"
   id("com.crowdproj.plugins.jar2npm") version "1.0.1"
+  id("com.github.eerohele.saxon-gradle") version "0.7.0"
 }
 
 node {
@@ -34,6 +36,28 @@ tasks {
     outputs.dir("dist")
 
     args = listOf("run", "build")
+  }
+
+  val generateXliffTask = task("generateXliff") {
+
+  }
+
+  rootProject.file("core/locale/main").listFiles().filter {it.isDirectory}.forEach {localeDir ->
+    var langCode = ""
+    if(localeDir.name.contains("-")) {
+      langCode = localeDir.name.substringAfter('-')
+    }else {
+      langCode = "en"
+    }
+
+    val xlateTask = task<SaxonXsltTask>("generateLocale_$langCode") {
+      stylesheet(project.file("locale-transform.xsl"))
+      input(file(project.file("src/assets/locale/messages.xlf")))
+      output(file(project.file("src/assets/locale/messages.$langCode.xlf")))
+      parameters(mapOf("strings_src" to "${localeDir.absolutePath}/strings_ui.xml"))
+    }
+
+    generateXliffTask.dependsOn(xlateTask)
   }
 
  register("webdriverUpdate", YarnTask::class) {
