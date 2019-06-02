@@ -20,8 +20,16 @@
                         </xsl:for-each>
 
 			                  <target>
-                            <xsl:variable name="targetid" select="replace(xliff:source/xliff:x/@equiv-text, '\{\{([a-zA-Z_]+)\}\}', '$1')"/>
-                            <xsl:value-of select="$stringsxml/resources/string[@name=$targetid]"/>
+                            <xsl:variable name="targetid" select="@id"/>
+                            <xsl:choose>
+                              <xsl:when test="$stringsxml/resources/string[@name=$targetid]">
+                                <xsl:value-of select="$stringsxml/resources/string[@name=$targetid]"/>
+                              </xsl:when>
+
+                              <xsl:otherwise>
+                                <xsl:value-of select="@id"/>
+                              </xsl:otherwise>
+                            </xsl:choose>
                         </target>
 
 		                </trans-unit>
