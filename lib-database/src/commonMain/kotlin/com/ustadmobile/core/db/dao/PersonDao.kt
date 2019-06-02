@@ -22,7 +22,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 @UmRepository
 abstract class PersonDao : BaseDao<Person> {
 
-    internal inner class PersonUidAndPasswordHash {
+    inner class PersonUidAndPasswordHash {
         var passwordHash: String = ""
 
         var personUid: Long = 0
@@ -91,7 +91,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.personUid, PersonAuth.passwordHash " +
             " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
             "WHERE Person.username = :username")
-    internal abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
+    abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
 
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)

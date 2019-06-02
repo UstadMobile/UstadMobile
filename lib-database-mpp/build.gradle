@@ -22,11 +22,16 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common:$version_kotlin")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation project(":lib-database")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-door-runtime")
+                implementation project(":lib-room-annotations")
             }
         }
 
         jvmMain {
             dependencies {
+                implementation project(":lib-database")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
                 implementation project(":lib-room-annotations")

@@ -349,6 +349,7 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
         INT -> codeBlock.add("0")
         LONG -> codeBlock.add("0L")
         BYTE -> codeBlock.add("0.toByte()")
+        BOOLEAN -> codeBlock.add("false")
         String::class.asTypeName() -> codeBlock.add("null as String?")
         else -> {
             if(kotlinType is ParameterizedTypeName && kotlinType.rawType == List::class.asClassName()) {
@@ -389,6 +390,8 @@ fun sqlArrayComponentTypeOf(typeName: TypeName): String {
 }
 
 //Limitation: this does not currently support interface inheritence
+data class MethodToImplement(val methodName: String, val paramTypes: List<TypeMirror>)
+
 fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType, processingEnv: ProcessingEnvironment) :List<Element> {
     return ancestorsToList(typeElement, processingEnv).flatMap {
         it.enclosedElements.filter {
@@ -396,7 +399,13 @@ fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType, proces
         } + it.interfaces.flatMap {
             processingEnv.typeUtils.asElement(it).enclosedElements.filter { it.kind == ElementKind.METHOD } //methods from the interface
         }
-    }.filter { !isMethodImplemented(it as ExecutableElement, typeElement, processingEnv) }
+    }.filter {
+        !isMethodImplemented(it as ExecutableElement, typeElement, processingEnv)
+    }.distinctBy {
+        val signatureParamTypes = (processingEnv.typeUtils.asMemberOf(enclosing, it) as ExecutableType)
+                .parameterTypes.filter { ! isContinuationParam(it.asTypeName()) }
+        MethodToImplement(it.simpleName.toString(), signatureParamTypes)
+    }
 }
 
 fun isMethodImplemented(method: ExecutableElement, enclosingClass: TypeElement, processingEnv: ProcessingEnvironment): Boolean {
@@ -432,6 +441,11 @@ fun TypeMirror.extendsBoundOrSelf(): TypeMirror {
     return extendsBound() ?: this
 }
 
+fun fieldsOnEntity(entityType: TypeElement) = entityType.enclosedElements.filter {
+    it.kind  == ElementKind.FIELD && it.simpleName.toString() != "Companion"
+            && !it.modifiers.contains(Modifier.STATIC)
+}
+
 
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
 
@@ -457,6 +471,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val dbs = roundEnv!!.getElementsAnnotatedWith(Database::class.java)
         val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
         val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
+        messager?.printMessage(Diagnostic.Kind.NOTE, "DbProcessorJdbcKotlin: output to ${File(outputDir).absolutePath}")
 
         val dataSource = SQLiteDataSource()
         val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
@@ -562,8 +577,18 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             dbImplType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",
                     daoImplClassName).delegate("lazy { %T(this) }", daoImplClassName).build())
 
-            dbImplType.addFunction(FunSpec.overriding(methodEl)
-                    .addStatement("return _${daoTypeEl.simpleName}").build())
+            if(subEl.simpleName.startsWith("get")) {
+                //must be overriden using a val
+                val propName = subEl.simpleName.substring(3, 4).toLowerCase() + subEl.simpleName.substring(4)
+                val getterFunSpec = FunSpec.getterBuilder().addStatement("return _${daoTypeEl.simpleName}").build()
+                dbImplType.addProperty(PropertySpec.builder(propName,
+                        methodEl.returnType.asTypeName(), KModifier.OVERRIDE)
+                        .getter(getterFunSpec).build())
+            }else {
+                dbImplType.addFunction(FunSpec.overriding(methodEl)
+                        .addStatement("return _${daoTypeEl.simpleName}").build())
+            }
+
         }
 
 
@@ -702,10 +727,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
             val bindCodeBlock = CodeBlock.builder().add("var _fieldIndex = 1\n")
 
-            for(subEl in entityTypeEl.enclosedElements) {
-                if(subEl.kind != ElementKind.FIELD)
-                    continue
-
+            fieldsOnEntity(entityTypeEl).forEach {subEl ->
                 fieldNames.add(subEl.simpleName.toString())
                 val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
                 val setterMethodName = getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())
@@ -886,7 +908,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         val codeBlock = CodeBlock.builder()
 
         val pkEl = entityTypeEl.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
-        val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
+        val nonPkFields = fieldsOnEntity(entityTypeEl).filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
         val sqlSetPart = nonPkFields.map { "${it.simpleName} = ?" }.joinToString()
         val sqlStmt  = "UPDATE ${entityTypeEl.simpleName} SET $sqlSetPart WHERE ${pkEl.simpleName} = ?"
 
