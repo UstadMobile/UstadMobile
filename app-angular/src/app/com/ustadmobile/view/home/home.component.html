@@ -3,11 +3,11 @@
   <div class="navbar-fixed">
     <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
       <mz-navbar-item-container [align]="'left'">
-          <mz-navbar-item>
-            <i (click)="goBack()" class="material-icons large white-text go-back-icon">arrow_back</i>
-          </mz-navbar-item>
-          <p  class="header-title-label">{{toolbar_title}}</p>
-</mz-navbar-item-container>
+        <mz-navbar-item>
+          <i (click)="goBack()" class="material-icons large white-text go-back-icon">arrow_back</i>
+        </mz-navbar-item>
+        <p class="header-title-label">{{toolbar_title}}</p>
+      </mz-navbar-item-container>
     </mz-navbar>
   </div>
 
@@ -25,13 +25,13 @@
     </mz-sidenav-header>
 
     <mz-sidenav-link [active]="true">
-      <a class="collapsible-header" i18n="@@libraries">{{menu_libaries}}
+      <a class="collapsible-header"><span i18n="@@libraries">Libraries</span>
         <i class="material-icons">library_books</i>
       </a>
     </mz-sidenav-link>
 
     <mz-sidenav-link>
-      <a class="collapsible-header" i18n="@@reports">{{menu_reports}}
+      <a class="collapsible-header"> <span i18n="@@reports">Reports</span>
         <i class="material-icons">pie_chart</i>
       </a>
     </mz-sidenav-link>

@@ -5,13 +5,13 @@
 
   <div class="col s7">
     <p class="entry-title">{{entryTitle}}</p>
-    <p class="entry-creator {{env.colorPrimaryText}}" i18n="@@entry_details_author">{{label_author}}</p>
-    <label i18n="@@entry_details_license">{{label_license}}</label>
+    <p class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author"> Author</span>: {{entryAuthor}}</p>
+    <label i18n="@@entry_details_license">License</label>
     <p class="entry-content">{{entryLicence}}</p> 
-    <label i18n="@@entry_details_description">{{label_description}}</label>
+    <label i18n="@@entry_details_description">Description</label>
     <p class="entry-content">{{entryDescription}}</p>
     <div class="divider default-margin-bottom"></div>
-    <label i18n="@@also_available_in">{{label_language_option}}</label>
+    <label i18n="@@also_available_in">Also available in: </label>
     <div class="row default-padding-top">
         
       <mz-chip class="open-content" *ngFor="let language of entryLanguages" (click)="navigateToLanguage(language)">
@@ -21,7 +21,7 @@
 
     <div class="row default-padding-top right default-margin-right">
           <div class="fixed-action-btn">
-              <button mz-button class="orange darken-2">
+              <button mz-button class="orange darken-2" i18n="@@open">
                   OPEN
                 </button>
             </div>

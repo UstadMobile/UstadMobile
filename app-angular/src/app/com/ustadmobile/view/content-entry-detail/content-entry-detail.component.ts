@@ -20,14 +20,11 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   env = environment;
   contentEntryUid = "";
   entryTitle = "";
+  entryAuthor = "";
   entryLicence = "";
   entryDescription = "";
   entryThumbnail = "";
   args : Params = null;
-  label_author : string = "";
-  label_description : string = "";
-  label_license : string = "";
-  label_language_option : string = "";
   private presenter: core.ustadmobile.core.controller.ContentEntryDetailPresenter;
    private subscription: Subscription;
 
@@ -60,12 +57,7 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   ngOnInit() {
     super.ngOnInit();
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
-      if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.label_author = this.getString(this.MessageID.entry_details_author); 
-        this.label_description = this.getString(this.MessageID.entry_details_description); 
-        this.label_language_option = this.getString(this.MessageID.also_available_in); 
-        this.label_license = this.getString(this.MessageID.entry_details_license); 
-      }
+      //do something
     });
   }
 

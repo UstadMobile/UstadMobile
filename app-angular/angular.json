@@ -64,10 +64,10 @@
                 }
               ]
             },
-            "production-swa": {
+            "production-en": {
               "optimization": true,
               "outputHashing": "all",
-              "outputPath": "dist/swa/",
+              "outputPath": "dist/en/",
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
@@ -88,10 +88,70 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "baseHref": "/swa/",
-              "i18nFile": "src/assets/locale/messages.swa.xlf",
+              "baseHref": "/en/",
+              "i18nFile": "src/assets/locale/messages.en.xlf",
               "i18nFormat": "xlf",
-              "i18nLocale": "swa",
+              "i18nLocale": "en",
+              "i18nMissingTranslation": "error"
+            },
+            "production-ps": {
+              "optimization": true,
+              "outputHashing": "all",
+              "outputPath": "dist/ps/",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "10mb",
+                  "maximumError": "15mb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "baseHref": "/ps/",
+              "i18nFile": "src/assets/locale/messages.ps.xlf",
+              "i18nFormat": "xlf",
+              "i18nLocale": "ps",
+              "i18nMissingTranslation": "error"
+            },
+            "production-fa": {
+              "optimization": true,
+              "outputHashing": "all",
+              "outputPath": "dist/fa/",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "10mb",
+                  "maximumError": "15mb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "baseHref": "/fa/",
+              "i18nFile": "src/assets/locale/messages.fa.xlf",
+              "i18nFormat": "xlf",
+              "i18nLocale": "fa",
               "i18nMissingTranslation": "error"
             }
           }
@@ -105,8 +165,14 @@
             "production": {
               "browserTarget": "sample:build:production"
             },
-            "swa": {
-              "browserTarget": "sample:build:production-swa"
+            "en": {
+              "browserTarget": "sample:build:production-en"
+            },
+            "fa": {
+              "browserTarget": "sample:build:production-fa"
+            },
+            "ps": {
+              "browserTarget": "sample:build:production-ps"
             }
           }
         },

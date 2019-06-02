@@ -23,7 +23,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   env = environment;
   label_language_options : string = "";
   label_reading_level : string = "";
-  label_license: string = "";
   private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.ustadmobile.lib.db.entities.Language[]
@@ -61,8 +60,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     //Listen for resources being ready
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.label_language_options = this.getString(this.MessageID.also_available_in); 
-        this.label_license = this.getString(this.MessageID.entry_details_license); 
+        this.label_language_options = this.getString(this.MessageID.also_available_in);
         this.label_reading_level = this.getString(this.MessageID.label_reading_level); 
       }
     });

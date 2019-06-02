@@ -35,8 +35,7 @@ export class HomeComponent extends UmBaseComponent {
       }
 
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
-        this.menu_libaries = this.getString(this.MessageID.libraries);
-        this.menu_reports = this.getString(this.MessageID.reports); 
+        //do something where all resources are ready
       }
     });
    
