@@ -33,8 +33,16 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
 /**DAO */
 class ContentEntryDao {
   constructor() {}
-  getChildrenByParentUidWithCategoryFilter(param1): any {
-    return UmAngularUtil.createObserver(entryList[param1] as ContentEntry[]);
+  getChildrenByParentUidWithCategoryFilter(entryUid, language, category): any {
+    var entries = entryList[entryUid] as ContentEntry[];
+    if(language != 0){
+      entries = entries.splice(0,entries.length - 2);
+    }
+    if(language != 0 && category != 0){
+      entries = entries.splice(0,entries.length - 3);
+    }
+    
+    return UmAngularUtil.createObserver(entries);
   }
 
   getContentByUuidAsync(entryUid) {

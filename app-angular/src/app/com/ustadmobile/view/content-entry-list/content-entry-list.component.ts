@@ -21,8 +21,8 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   
   entries : db.ustadmobile.lib.db.entities.ContentEntry[] = [];
   env = environment;
-  private pageNumber: number = 1;
   label_language: string = "";
+  label_license: string = "";
   private entryListObservable: Observable<ContentEntry[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.ustadmobile.lib.db.entities.Language[]
@@ -53,12 +53,15 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.label_language = this.getString(this.MessageID.language); 
+        this.label_license = this.getString(this.MessageID.entry_details_license); 
       }
     });
 
     //setup language spinner/select listener
     this.umForm.valueChanges.subscribe((form: any) => {
-         console.log("changed language", form.language);
+        if(form.language > -1){
+           this.presenter.handleClickFilterByLanguage(form.language);
+         }
     });
     //setup category spinner/select listener
   }
@@ -66,7 +69,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   setContentEntryProvider(provider : Observable<ContentEntry[]>){
     this.entryListObservable = provider;
     this.entryListObservable.subscribe(entries =>{ 
-      this.entries.push(...entries);
+      this.entries = entries;
     })
   }
 

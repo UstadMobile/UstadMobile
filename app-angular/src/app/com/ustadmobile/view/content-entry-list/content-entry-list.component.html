@@ -35,7 +35,10 @@
               <div class="col s10 l10"> 
                   <p class="entry-title {{env.colorTextPrimary}}">{{entry.title}}</p>
                   <p class="entry-description {{env.colorTextSecondary}}">{{entry.description}}</p>
-                  <p class="entry-licence {{env.colorTextSubSecondary}}">Licence: {{entry.licenseName}}</p>
+                  <p class="entry-licence {{env.colorTextSubSecondary}}">
+                    <span i18n="@@entry_details_license">{{label_license +": "}}</span>
+                    <span>{{entry.licenseName}}</span>
+                  </p>
               </div>
             </div>
           </li>
