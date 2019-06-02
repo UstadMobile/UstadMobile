@@ -26,7 +26,6 @@ import java.lang.RuntimeException
 import java.sql.*
 import javax.lang.model.util.SimpleTypeVisitor7
 import javax.tools.Diagnostic
-import kotlin.coroutines.Continuation
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName())
@@ -163,7 +162,8 @@ private fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTyp
 
 
 fun overrideAndConvertToKotlinTypes(method: ExecutableElement, enclosing: DeclaredType,
-                                    processingEnv: ProcessingEnvironment, forceNullableReturn: Boolean = false): FunSpec.Builder {
+                                    processingEnv: ProcessingEnvironment, forceNullableReturn: Boolean = false,
+                                    forceNullableParameterTypeArgs: Boolean = false): FunSpec.Builder {
 
     val funSpec = FunSpec.builder(method.simpleName.toString())
             .addModifiers(KModifier.OVERRIDE)
@@ -187,8 +187,13 @@ fun overrideAndConvertToKotlinTypes(method: ExecutableElement, enclosing: Declar
         funSpec.returns(suspendedReturnType.copy(nullable = forceNullableReturn
                 || suspendedParamEl?.getAnnotation(Nullable::class.java) != null))
     }else if(suspendedReturnType == null) {
-        funSpec.returns(resolvedExecutableType.returnType.asTypeName().javaToKotlinType()
-                .copy(nullable = forceNullableReturn || method.getAnnotation(Nullable::class.java) != null))
+        var returnType = resolvedExecutableType.returnType.asTypeName().javaToKotlinType()
+                .copy(nullable = forceNullableReturn || method.getAnnotation(Nullable::class.java) != null)
+        if(forceNullableParameterTypeArgs && returnType is ParameterizedTypeName) {
+            returnType = returnType.rawType.parameterizedBy(*returnType.typeArguments.map { it.copy(nullable = true)}.toTypedArray())
+        }
+
+        funSpec.returns(returnType)
     }
 
     return funSpec
@@ -445,6 +450,16 @@ fun fieldsOnEntity(entityType: TypeElement) = entityType.enclosedElements.filter
     it.kind  == ElementKind.FIELD && it.simpleName.toString() != "Companion"
             && !it.modifiers.contains(Modifier.STATIC)
 }
+
+/**
+ * Determine if the result type is nullable. Any single result entity object or String result can be
+ * null (e.g. no such object was found by the query). Primitives cannot be null as they will be 0/false.
+ * Lists and arrays (parameterized types) cannot be null: no results will provide an non-null empty
+ * list/array.
+ */
+fun isNullableResultType(typeName: TypeName) = typeName != UNIT
+        && !PRIMITIVE.contains(typeName)
+        && !(typeName is ParameterizedTypeName)
 
 
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
@@ -812,7 +827,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
     fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder) : FunSpec {
         val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
-                daoMethod)  as ExecutableType
+                daoMethod) as ExecutableType
 
         // The return type of the method - e.g. List<Entity>, LiveData<List<Entity>>, String, etc.
         val returnTypeResolved = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
@@ -822,8 +837,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         val funSpec = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv,
-                forceNullableReturn = resultType != UNIT && !PRIMITIVE.contains(resultType)
-                        && !isListOrArray(resultType) && !isDataSourceFactory(resultType))
+                forceNullableReturn = isNullableResultType(returnTypeResolved),
+                forceNullableParameterTypeArgs = isLiveData(returnTypeResolved)
+                        && isNullableResultType((returnTypeResolved as ParameterizedTypeName).typeArguments[0]))
 
         val querySql = daoMethod.getAnnotation(Query::class.java).value
 
@@ -862,8 +878,9 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             }
 
             val liveDataCodeBlock = CodeBlock.builder()
-                    .beginControlFlow("val _result = %T(_db, listOf(%L)) ",
+                    .beginControlFlow("val _result = %T<%T>(_db, listOf(%L)) ",
                             DoorLiveDataJdbcImpl::class.asClassName(),
+                            resultType.copy(nullable = isNullableResultType(resultType)),
                             tablesToWatch.map {"\"$it\""}.joinToString())
                     .add(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
                             daoTypeElement, daoMethod, resultVarName = "_liveResult"))

@@ -79,7 +79,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "LEFT JOIN ContentEntry ON ContentEntry.primaryLanguageUid = Language.langUid " +
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
-    abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): MutableList<Language>
+    abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
 
     @Update
     abstract override fun update(entity: ContentEntry)

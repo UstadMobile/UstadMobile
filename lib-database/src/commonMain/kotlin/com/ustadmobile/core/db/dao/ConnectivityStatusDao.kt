@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 abstract class ConnectivityStatusDao {
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
-    abstract fun statusLive(): DoorLiveData<ConnectivityStatus>
+    abstract fun statusLive(): DoorLiveData<ConnectivityStatus?>
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     abstract fun status(): ConnectivityStatus?

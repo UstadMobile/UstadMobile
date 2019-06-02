@@ -26,7 +26,7 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun findAllInvalidated(): List<ContentEntryStatus>
 
     @Query("Select * FROM ContentEntryStatus where cesUid = :parentUid")
-    abstract fun findContentEntryStatusByUid(parentUid: Long): DoorLiveData<ContentEntryStatus>
+    abstract fun findContentEntryStatusByUid(parentUid: Long): DoorLiveData<ContentEntryStatus?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertOrAbort(statusList: List<ContentEntryStatus>)

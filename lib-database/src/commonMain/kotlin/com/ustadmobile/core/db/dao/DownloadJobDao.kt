@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 abstract class DownloadJobDao {
 
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
-    abstract fun lastJobLive(): DoorLiveData<DownloadJob>
+    abstract fun lastJobLive(): DoorLiveData<DownloadJob?>
 
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
     abstract fun lastJob(): DownloadJob?
