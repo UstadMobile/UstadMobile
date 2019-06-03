@@ -26,7 +26,7 @@ default-content-padding-right default-content-padding-left">
       </div>
       <div class="col s12 l6">
         <mz-input-container>
-          <input mz-input [validate]="true" [dataError]="'Email is invalid'" [formControl]="umFormRegister.controls['email']" id="email"
+          <input mz-input [validate]="true" [dataError]="[label_wrong_email]" [formControl]="umFormRegister.controls['email']" id="email"
             label="{{label_email}}" type="email">
         </mz-input-container>
       </div>
@@ -35,14 +35,14 @@ default-content-padding-right default-content-padding-left">
     <div class="row default-padding-top">
       <div class="col s12 l6">
         <mz-input-container>
-          <input mz-input [validate]="true" [formControl]="umFormRegister.controls['password']" id="password"
+          <input mz-input [validate]="true" [dataError]="[label_password_mismatch]"  [formControl]="umFormRegister.controls['password']" id="password"
             label="{{label_password}}" type="password">
         </mz-input-container>
       </div>
 
       <div class="col s12 l6">
         <mz-input-container>
-          <input mz-input [validate]="true" [formControl]="umFormRegister.controls['confirm_password']"
+          <input mz-input [validate]="true" [dataError]="[label_password_mismatch]" [formControl]="umFormRegister.controls['confirm_password']"
             id="confirm_password" label="{{label_confirm_password}}" type="password">
         </mz-input-container>
       </div>

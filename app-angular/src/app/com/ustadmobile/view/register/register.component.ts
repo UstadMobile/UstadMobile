@@ -8,7 +8,6 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { com as core } from 'core';
 import { com as db } from 'lib-database';
-import { umValidatePassword } from '../../util/UmValidators';
 
 @Component({
   selector: 'app-register',
@@ -23,8 +22,10 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
   label_last_name: string = "";
   label_username: string = "";
   label_email: string = "";
+  label_wrong_email: string = "";
   label_password: string = "";
   label_confirm_password: string = "";
+  label_password_mismatch: string = "";
   formValidated : boolean = false;
   showProgress : boolean = false;
   serverUrl: string = "";
@@ -36,15 +37,17 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
     this.umFormRegister = formBuilder.group({
       'first_name': ['', Validators.required],
       'last_name': ['', Validators.required],
-      'password': ['', Validators.required, umValidatePassword, Validators.minLength(8)],
+      'password': ['', [Validators.required, Validators.minLength(8)]],
       'username': ['', Validators.required],
-      'email': ['', Validators.compose([Validators.required,Validators.pattern('[a-zA-Z0-9._-]+@[a-z]+\.+[a-z]+')])],
-      'confirm_password': ['', Validators.required, umValidatePassword, Validators.minLength(8)]
+      'email': ['', [Validators.required,Validators.pattern('[a-zA-Z0-9._-]+@[a-z]+\.+[a-z]+')]],
+      'confirm_password': ['', [Validators.required, Validators.minLength(8)]]
     });
 
     this.umFormRegister.valueChanges.subscribe(
-      (form: any) => {
-          this.formValidated = this.umFormRegister.status == "VALID";
+      (form: any) => { 
+          this.formValidated = this.umFormRegister.status == "VALID" 
+          && form.password == form.confirm_password;
+          console.log(this.umFormRegister.controls.password)
       }
   );
 
@@ -70,13 +73,15 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
         this.label_email = this.getString(this.MessageID.email);
         this.label_password = this.getString(this.MessageID.password);
         this.label_confirm_password = this.getString(this.MessageID.confirm_password);
+        this.label_wrong_email = this.getString(this.MessageID.register_incorrect_email);
+        this.label_password_mismatch = this.getString(this.MessageID.filed_password_no_match);
       }
     });
   }
 
   startRegistration(){
     const person = new db.ustadmobile.lib.db.entities.Person();
-    
+    console.log(person);
     this.presenter.handleClickRegister(person, this.umFormRegister.value.password,this.serverUrl);
   }
   setErrorMessageView(errorMessage: string){
