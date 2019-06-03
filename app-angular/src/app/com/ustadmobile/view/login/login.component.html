@@ -7,13 +7,13 @@ default-content-padding-right default-content-padding-left">
             <div class="input-field col s12">
                 <mz-input-container>
                   <input mz-input [validate]="true" [formControl]="umFormLogin.controls['username']" id="username"
-                    label="{{label_username}}" type="text">
+                  i18n-label="@@username" label="Username" type="text">
                 </mz-input-container>
               </div>
               <div class="input-field col s12">
                 <mz-input-container>
                   <input mz-input [validate]="true" [formControl]="umFormLogin.controls['password']" id="password"
-                    label="{{label_password}}" type="password">
+                  i18n-label="@@password" label="Password" type="password">
                 </mz-input-container>
               </div>
     

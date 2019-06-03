@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View)
     : UstadBaseController<Register2View>(context, arguments, view) {
@@ -52,12 +53,13 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
      * @param password Person password to be associated with the account.
      * @param serverUrl Server url where the account should be created
      */
+    @JsName("handleClickRegister")
     fun handleClickRegister(person: Person, password: String, serverUrl: String) {
         view.runOnUiThread(Runnable { view.setInProgress(true) })
 
         val systemImpl = UstadMobileSystemImpl.instance
         if (umAppDatabase === null) {
-            umAppDatabase = UmAppDatabase.instance.getRepository(serverUrl,
+            umAppDatabase = UmAppDatabase.getInstance(context).getRepository(serverUrl,
                     "")
         }
 

@@ -17,8 +17,6 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
 
   subscription: Subscription;
   umFormLogin : FormGroup;
-  label_username: string = "";
-  label_password: string = "";;
   formValidated : boolean = false;
   showProgress : boolean = false;
   serverUrl: string = "";
@@ -52,9 +50,7 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_TITLE,
-        this.getString(this.MessageID.login))); 
-        this.label_username = this.getString(this.MessageID.username);
-        this.label_password = this.getString(this.MessageID.password);
+        this.getString(this.MessageID.login)));
       }
     });
   }

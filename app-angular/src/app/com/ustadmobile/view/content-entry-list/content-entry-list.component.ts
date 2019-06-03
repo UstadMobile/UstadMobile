@@ -1,7 +1,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
 import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
-import {Component, ElementRef} from '@angular/core';
+import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { com as core } from 'core';

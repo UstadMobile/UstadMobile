@@ -5,14 +5,14 @@ default-content-padding-right default-content-padding-left">
       <div class="col s12 l6">
         <mz-input-container>
           <input mz-input [validate]="true" [formControl]="umFormRegister.controls['first_name']" id="first_name"
-            label="{{label_first_name}}" type="text">
+          i18n-label="@@first_name" label="First name" type="text">
         </mz-input-container>
       </div>
 
       <div class="col s12 l6">
         <mz-input-container>
           <input mz-input [validate]="true" [formControl]="umFormRegister.controls['last_name']" id="last_name"
-            label="{{label_last_name}}" type="text">
+          i18n-label="@@last_name" label="Last name" type="text">
         </mz-input-container>
       </div>
     </div>
@@ -21,13 +21,13 @@ default-content-padding-right default-content-padding-left">
       <div class="col s12 l6">
         <mz-input-container>
           <input mz-input [validate]="true" [formControl]="umFormRegister.controls['username']" id="username"
-            label="{{label_username}}" type="text">
+          i18n-label="@@username" label="Username" type="text">
         </mz-input-container>
       </div>
       <div class="col s12 l6">
         <mz-input-container>
           <input mz-input [validate]="true" [dataError]="[label_wrong_email]" [formControl]="umFormRegister.controls['email']" id="email"
-            label="{{label_email}}" type="email">
+          i18n-label="@@email" label="Email Address" type="email">
         </mz-input-container>
       </div>
     </div>
@@ -36,14 +36,14 @@ default-content-padding-right default-content-padding-left">
       <div class="col s12 l6">
         <mz-input-container>
           <input mz-input [validate]="true" [dataError]="[label_password_mismatch]"  [formControl]="umFormRegister.controls['password']" id="password"
-            label="{{label_password}}" type="password">
+          i18n-label="@@password" label="Password" type="password">
         </mz-input-container>
       </div>
 
       <div class="col s12 l6">
         <mz-input-container>
           <input mz-input [validate]="true" [dataError]="[label_password_mismatch]" [formControl]="umFormRegister.controls['confirm_password']"
-            id="confirm_password" label="{{label_confirm_password}}" type="password">
+            id="confirm_password" i18n-label="@@confirm_password" label="Confirm password" type="password">
         </mz-input-container>
       </div>
     </div>

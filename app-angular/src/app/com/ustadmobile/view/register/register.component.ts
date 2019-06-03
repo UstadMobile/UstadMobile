@@ -18,13 +18,7 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
 
   subscription: Subscription;
   umFormRegister : FormGroup;
-  label_first_name: string = "";
-  label_last_name: string = "";
-  label_username: string = "";
-  label_email: string = "";
   label_wrong_email: string = "";
-  label_password: string = "";
-  label_confirm_password: string = "";
   label_password_mismatch: string = "";
   formValidated : boolean = false;
   showProgress : boolean = false;
@@ -45,9 +39,7 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
 
     this.umFormRegister.valueChanges.subscribe(
       (form: any) => { 
-          this.formValidated = this.umFormRegister.status == "VALID" 
-          && form.password == form.confirm_password;
-          console.log(this.umFormRegister.controls.password)
+          this.formValidated = this.umFormRegister.valid && form.password == form.confirm_password;
       }
   );
 
@@ -66,13 +58,6 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(UmAngularUtil.DISPATCH_TITLE,
         this.getString(this.MessageID.create_new_account))); 
-
-        this.label_first_name = this.getString(this.MessageID.first_name);
-        this.label_last_name = this.getString(this.MessageID.last_name);
-        this.label_username = this.getString(this.MessageID.username);
-        this.label_email = this.getString(this.MessageID.email);
-        this.label_password = this.getString(this.MessageID.password);
-        this.label_confirm_password = this.getString(this.MessageID.confirm_password);
         this.label_wrong_email = this.getString(this.MessageID.register_incorrect_email);
         this.label_password_mismatch = this.getString(this.MessageID.filed_password_no_match);
       }
@@ -80,9 +65,12 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
   }
 
   startRegistration(){
-    const person = new db.ustadmobile.lib.db.entities.Person();
-    console.log(person);
-    this.presenter.handleClickRegister(person, this.umFormRegister.value.password,this.serverUrl);
+    this.formValidated = false;
+    const formValues = this.umFormRegister.value;
+    const person = new db.ustadmobile.lib.db.entities.Person(formValues.username, 
+      formValues.first_name, formValues.last_name);
+      person.emailAddr = formValues.email;
+    this.presenter.handleClickRegister("person", formValues.password,this.serverUrl);
   }
   setErrorMessageView(errorMessage: string){
     this.showError(errorMessage);
