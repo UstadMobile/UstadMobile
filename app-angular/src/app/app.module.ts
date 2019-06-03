@@ -15,6 +15,7 @@ import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
+import { LoginComponent } from './com/ustadmobile/view/login/login.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { RegisterComponent } from './com/ustadmobile/view/register/register.comp
     HomeComponent,
     ContentEntryDetailComponent,
     NotFoundComponent,
-    RegisterComponent
+    RegisterComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,

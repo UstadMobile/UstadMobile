@@ -1,3 +1,4 @@
+import { LoginComponent } from './com/ustadmobile/view/login/login.component';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -12,6 +13,7 @@ const routes: Routes = [
           {path: 'ContentEntryList', component: ContentEntryListComponent},
           {path: 'ContentEntryDetail', component: ContentEntryDetailComponent},
           {path: 'RegisterAccount', component: RegisterComponent},
+          {path: 'Login', component: LoginComponent},
         ],
         runGuardsAndResolvers: "always"
   },

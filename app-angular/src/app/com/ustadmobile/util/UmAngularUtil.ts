@@ -60,7 +60,7 @@ export class UmAngularUtil {
       view = 'ContentEntryList/'
     } else if(UmAngularUtil.queryParamsToMap().size > 0 && 
     (routePath.includes ("ContentEntryList")  || routePath.includes ("ContentEntryList") 
-    || routePath.includes("Register"))) {
+    || routePath.includes("Register") || routePath.includes("Login"))) {
       args = UmAngularUtil.queryParamsToMap();
       view =  route;
     }else{

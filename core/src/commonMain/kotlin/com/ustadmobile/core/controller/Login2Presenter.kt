@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.Login2View
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login2View)
     : UstadBaseController<Login2View>(context, arguments, view) {
@@ -34,6 +35,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
         }
     }
 
+    @JsName("handleClickLogin")
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
         view.setErrorMessage("")
