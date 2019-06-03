@@ -1,8 +1,8 @@
 import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-list/content-entry-list.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,
-   MzNavbarModule, MzChipModule} from 'ngx-materialize';
+import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,MzSpinnerModule,MzProgressModule,
+   MzNavbarModule, MzChipModule, MzToastModule, MzInputModule} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -14,6 +14,7 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { UmBaseService } from './com/ustadmobile/service/um-base.service';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ContentEntryListComponent,
     HomeComponent,
     ContentEntryDetailComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +36,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     NgProgressModule,
     HttpClientModule,
     MzSelectModule,
+    MzSpinnerModule,
     FormsModule,
+    MzToastModule,
+    MzInputModule,
+    MzProgressModule,
     ReactiveFormsModule,
     InfiniteScrollModule
   ],

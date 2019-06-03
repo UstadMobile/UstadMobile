@@ -37,11 +37,18 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     });
   }
 
-  ngOnDestroy(){
-    
+  runOnUiThread(runnable){
+    runnable.run();
   }
 
-  public getString(messageId: number){
+  showError(errorMessage){
+    this.umService.getToastService().show(errorMessage ? errorMessage : 
+      this.getString(this.MessageID.error), 4000, 'red', () => {});
+  }
+
+  getString(messageId: number){
     return this.systemImpl.getString(messageId, this.context)
   }
+
+  ngOnDestroy(){}
 }
