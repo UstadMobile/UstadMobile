@@ -2,6 +2,7 @@ import {UmContextWrapper} from './../util/UmContextWrapper';
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, Subject} from 'rxjs';
+import { MzToastService } from 'ngx-materialize';
 
 @Injectable({
   providedIn: 'root'
@@ -16,18 +17,20 @@ export class UmBaseService {
 
   private umObserver = new Subject < any > ();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toastService: MzToastService) {}
 
 
   dispatchUpdate(content: any) {
     this.umObserver.next(content);
   }
 
+  getToastService(){
+    return this.toastService;
+  }
+
   getUmObserver(): Observable < any > {
     return this.umObserver.asObservable();
   }
-
-
 
   setImpl(systemImpl: any) {
     this.systemImpl = systemImpl;

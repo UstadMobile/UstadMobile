@@ -36,6 +36,10 @@
     <string name='back'>شا</string>
     <string name='username'>کارن نوم</string>
     <string name='password'>تیرنویی/شفر</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="last_name">Last name</string>
+    <string name="first_name">First name</string>
+    <string name="create_new_account">Register Now</string>
     <string name='phone_memory'>د تیلیفون یاد</string>
     <string name='memory_card'>د یاد کارت</string>
     <string name='device'>وزله</string>

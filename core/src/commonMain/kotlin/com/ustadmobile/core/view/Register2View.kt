@@ -1,11 +1,16 @@
 package com.ustadmobile.core.view
 
+import kotlin.js.JsName
+
 interface Register2View : UstadView {
 
+    @JsName("setErrorMessageView")
     fun setErrorMessageView(errorMessageView: String)
 
+    @JsName("setServerUrl")
     fun setServerUrl(url: String)
 
+    @JsName("setInProgress")
     fun setInProgress(inProgress: Boolean)
 
     companion object {

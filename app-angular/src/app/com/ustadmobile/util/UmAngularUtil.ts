@@ -52,18 +52,22 @@ export class UmAngularUtil {
   static getInitialRoute(entryUid ? : number) {
     var args, view = null
     var routePath = document.location.pathname;
+    const pathSections = routePath.split("/");
+    const route =  pathSections[pathSections.length - 1] + "/";
+
     if (routePath == "/"  || UmAngularUtil.queryParamsToMap().size == 0) {
       args = UmAngularUtil.queryParamsToMap("?entryid=" + entryUid)
       view = 'ContentEntryList/'
     } else if(UmAngularUtil.queryParamsToMap().size > 0 && 
-    (routePath.includes ("ContentEntryList")  || routePath.includes ("ContentEntryList"))) {
+    (routePath.includes ("ContentEntryList")  || routePath.includes ("ContentEntryList") 
+    || routePath.includes("Register"))) {
       args = UmAngularUtil.queryParamsToMap();
-      const pathSections = routePath.split("/");
-      view =  pathSections[pathSections.length - 1] + "/";
+      view =  route;
     }else{
-      view = "/NotFound/";
+      view = "/NotFound/"
       args = UmAngularUtil.queryParamsToMap("", true)
     }
+    console.log("path", view)
     return {view: view, args: args};
   }
 }
