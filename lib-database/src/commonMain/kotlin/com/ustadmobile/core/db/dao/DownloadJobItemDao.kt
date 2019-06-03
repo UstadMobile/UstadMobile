@@ -166,7 +166,7 @@ abstract class DownloadJobItemDao {
             "FROM DownloadJobItem " +
             "WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
-    abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem>
+    abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +

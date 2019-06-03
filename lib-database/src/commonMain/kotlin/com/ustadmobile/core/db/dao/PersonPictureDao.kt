@@ -27,7 +27,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
 //    abstract fun setAttachmentFromTmpFile(uid: Long, tmpFilePath: String)
 
     @Query("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " + " picTimestamp DESC LIMIT 1")
-    abstract suspend fun findByPersonUidAsync(personUid: Long): PersonPicture
+    abstract suspend fun findByPersonUidAsync(personUid: Long): PersonPicture?
 
 
 //    @UmDbSetAttachment

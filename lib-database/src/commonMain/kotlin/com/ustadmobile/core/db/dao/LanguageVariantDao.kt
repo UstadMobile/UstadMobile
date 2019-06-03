@@ -16,7 +16,7 @@ abstract class LanguageVariantDao : BaseDao<LanguageVariant> {
     abstract fun publicLanguageVariants(): List<LanguageVariant>
 
     @Query("SELECT * FROM LanguageVariant WHERE countryCode = :countryCode LIMIT 1")
-    abstract fun findByCode(countryCode: String): LanguageVariant
+    abstract fun findByCode(countryCode: String): LanguageVariant?
 
     @Update
     abstract override fun update(entity: LanguageVariant)

@@ -22,7 +22,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 @UmRepository
 abstract class PersonDao : BaseDao<Person> {
 
-    inner class PersonUidAndPasswordHash {
+    class PersonUidAndPasswordHash {
         var passwordHash: String = ""
 
         var personUid: Long = 0

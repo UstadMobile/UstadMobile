@@ -740,8 +740,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             val fieldNames = mutableListOf<String>()
             val parameterHolders = mutableListOf<String>()
 
-            val bindCodeBlock = CodeBlock.builder().add("var _fieldIndex = 1\n")
-
+            val bindCodeBlock = CodeBlock.builder()
+            var fieldIndex = 1
             fieldsOnEntity(entityTypeEl).forEach {subEl ->
                 fieldNames.add(subEl.simpleName.toString())
                 val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
@@ -749,11 +749,11 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 if(pkAnnotation != null && pkAnnotation.autoGenerate) {
                     parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
                     bindCodeBlock.add("when(entity.${subEl.simpleName}){ ${defaultVal(subEl.asType().asTypeName())} " +
-                            "-> stmt.setObject(_fieldIndex++, null) " +
-                            "else -> stmt.set$setterMethodName(_fieldIndex++, entity.${subEl.simpleName})  }\n")
+                            "-> stmt.setObject(${fieldIndex}, null) " +
+                            "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})  }\n")
                 }else {
                     parameterHolders.add("?")
-                    bindCodeBlock.add("stmt.set$setterMethodName(_fieldIndex++, entity.${subEl.simpleName})\n")
+                    bindCodeBlock.add("stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})\n")
                 }
             }
 
@@ -819,8 +819,19 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         insertFun.addCode("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
 
         if(resolvedReturnType != UNIT) {
-            insertFun.addCode("return _retVal\n")
+            insertFun.addCode("return _retVal")
         }
+
+        if(resolvedReturnType is ParameterizedTypeName
+                && resolvedReturnType.rawType == ARRAY) {
+            insertFun.addCode(".toTypedArray()")
+        }else if(resolvedReturnType == LongArray::class.asClassName()) {
+            insertFun.addCode(".toLongArray()")
+        }else if(resolvedReturnType == IntArray::class.asClassName()) {
+            insertFun.addCode(".toIntArray()")
+        }
+
+        insertFun.addCode("\n")
 
         return insertFun.build()
     }
@@ -1116,21 +1127,29 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
                 if(isListOrArray(resultType)) {
                     codeBlock.beginControlFlow("while(_resultSet.next())")
-                            .add("val _entity = ")
-                            .add(entityInitializerBlock)
-                            .add("\n")
                     entityVarName = "_entity"
                 }else {
                     codeBlock.beginControlFlow("if(_resultSet.next())")
-                            .add("$resultVarName = ")
-                            .add(entityInitializerBlock)
-                            .add("\n")
                     entityVarName = resultVarName
                 }
 
                 if(QUERY_SINGULAR_TYPES.contains(entityType)) {
+                    if(isListOrArray(resultType)) {
+                        codeBlock.add("val ") //this will be added to the list,so needs declared
+                    }
                     codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
                 }else {
+                    if(isListOrArray(resultType)) {
+                        codeBlock.add("val _entity = ")
+                                .add(entityInitializerBlock)
+                                .add("\n")
+                    }else {
+                        codeBlock.add("$resultVarName = ")
+                                .add(entityInitializerBlock)
+                                .add("\n")
+                    }
+
+
                     // Map of the last prop name (e.g. name) to the full property name as it will
                     // be generated (e.g. embedded!!.name)
                     val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()

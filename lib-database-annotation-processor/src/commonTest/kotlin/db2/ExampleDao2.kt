@@ -25,6 +25,9 @@ abstract class ExampleDao2 {
     @Insert
     abstract fun insertAndReturnList(entityList: List<ExampleEntity2>): List<Long>
 
+    @Insert
+    abstract fun insertListAndReturnIdsArray(entityList: List<ExampleEntity2>): Array<Long>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entityList: List<ExampleEntity2>)
 

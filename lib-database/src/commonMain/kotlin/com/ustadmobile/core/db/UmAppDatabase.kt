@@ -9,7 +9,7 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = arrayOf(NetworkNode::class, EntryStatusResponse::class,
-    DownloadJobItemHistory::class, HttpCachedEntry::class, DownloadJob::class, DownloadJobItem::class,
+    DownloadJobItemHistory::class, DownloadJob::class, DownloadJobItem::class,
     DownloadJobItemParentChildJoin::class,
     Person::class, Clazz::class, ClazzMember::class,
     PersonCustomField::class, PersonCustomFieldValue::class,
@@ -40,8 +40,6 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val downloadJobItemParentChildJoinDao: DownloadJobItemParentChildJoinDao
 
     abstract val downloadJobItemHistoryDao: DownloadJobItemHistoryDao
-
-    abstract val httpCachedEntryDao: HttpCachedEntryDao
 
     abstract val personDao: PersonDao
 
