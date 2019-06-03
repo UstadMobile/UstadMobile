@@ -18,7 +18,7 @@ android {
 
 
     sourceSets {
-        main.java.srcDirs += ["../lib-database/src/commonMain/kotlin"]
+        main.java.srcDirs += ["build/generated/source/door"]
     }
 
     defaultConfig {
@@ -45,6 +45,19 @@ android {
     }
 
 }
+
+/**
+ * The Android Kotlin must not have the @JsName annotation that is present in the lib-database
+ * project.
+ */
+task copyLibDatabase(type: Copy) {
+    from "../lib-database/src/commonMain/kotlin"
+    into "build/generated/source/door"
+    include "**/*.kt"
+    filter {line -> line.trim().startsWith("@JsName") || (line.trim().startsWith("import")  && line.contains("kotlin.js.JsName")) ? "" : line }
+}
+
+assemble.dependsOn(copyLibDatabase)
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
