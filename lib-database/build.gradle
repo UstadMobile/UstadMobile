@@ -96,7 +96,7 @@ kotlin {
 
 kapt {
     arguments {
-        arg("door_jdbc_kt_out", rootProject.file("lib-database-mpp/src/jvmMain/kotlin").absolutePath)
+        arg("door_jdbc_kt_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
     }
 }
 

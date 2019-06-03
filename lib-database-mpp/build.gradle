@@ -30,6 +30,9 @@ kotlin {
         }
 
         jvmMain {
+            kotlin.srcDir("build/generated/source/door")
+
+
             dependencies {
                 implementation project(":lib-database")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
@@ -47,3 +50,5 @@ kotlin {
     }
 
 }
+
+assemble.dependsOn(":lib-database:build")
