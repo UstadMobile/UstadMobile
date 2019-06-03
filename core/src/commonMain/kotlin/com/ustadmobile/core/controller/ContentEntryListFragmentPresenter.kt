@@ -59,7 +59,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         }
 
         GlobalScope.launch {
-            val result = contentEntryDao!!.findUniqueLanguagesInListAsync(parentUid!!)
+            val result = contentEntryDao!!.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
             if (result.size > 1) {
                 val selectLang = Language()
                 selectLang.name = "Language"

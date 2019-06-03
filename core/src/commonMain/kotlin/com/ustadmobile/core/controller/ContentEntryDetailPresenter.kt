@@ -52,7 +52,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private val isListeningToDownloadStatus = atomic(false)
 
-    private var statusUmLiveData: DoorLiveData<ContentEntryStatus>? = null
+    private var statusUmLiveData: DoorLiveData<ContentEntryStatus?>? = null
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
