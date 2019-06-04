@@ -1,21 +1,15 @@
 package com.ustadmobile.port.sharedse.controller
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobItemManager
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
@@ -28,10 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBle?,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               private var appDatabase: UmAppDatabase?, private val appDatabaseRepo: UmAppDatabase)
-    : UstadBaseController<DownloadDialogView>(context, arguments, view), LifecycleOwner {
-    override fun getLifecycle(): Lifecycle {
-        return LifecycleRegistry(this)
-    }
+    : UstadBaseController<DownloadDialogView>(context, arguments, view) {
 
     private var deleteFileOptions = false
 
@@ -84,8 +75,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun startObservingJob() {
         view.runOnUiThread(Runnable {
             downloadDownloadJobLive = appDatabase!!.downloadJobDao.getJobLive(currentJobId!!)
-            downloadDownloadJobLive!!.observe(this@DownloadDialogPresenter,
-                    DoorObserver { t -> handleDownloadJobStatusChange(t) })
+            downloadDownloadJobLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
+                    this@DownloadDialogPresenter::handleDownloadJobStatusChange)
         })
     }
 
@@ -93,8 +84,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
         view.runOnUiThread(Runnable {
             allowedMeteredLive = appDatabase!!.downloadJobDao
                     .getLiveMeteredNetworkAllowed(currentJobId!!)
-            allowedMeteredLive!!.observe(this@DownloadDialogPresenter,
-                    DoorObserver<Boolean> { t -> handleDownloadJobMeteredStateChange(t) })
+            allowedMeteredLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
+                    this@DownloadDialogPresenter::handleDownloadJobMeteredStateChange)
         })
     }
 

@@ -65,7 +65,14 @@ kotlin {
 
     sourceSets {
         commonMain {
-
+            dependencies {
+                implementation project(":core")
+                implementation project(":lib-door-runtime")
+                compileOnly project(":lib-database")
+                compileOnly project(":lib-room-annotations")
+                compileOnly project(':lib-database-entities')
+                implementation project(":lib-util")
+            }
         }
 
         androidMain {
@@ -75,11 +82,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
-                implementation project(":core")
-                compileOnly project(":lib-database")
-                implementation project(":lib-door-runtime")
-                compileOnly project(':lib-database-entities')
-                implementation project(":lib-util")
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -87,7 +89,6 @@ kotlin {
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-                implementation "org.json:json:$version_json"
 
 
                 implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
@@ -95,14 +96,14 @@ kotlin {
                 implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
-
-                compileOnly "androidx.room:room-runtime:$version_android_room"
             }
         }
         jvmMain {
             dependencies {
 
             }
+
+            dependsOn androidMain
         }
 
 
@@ -110,54 +111,6 @@ kotlin {
 
 }
 
-
-/*dependencies {
-    //compile fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-    implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    implementation "net.sf.kxml:kxml2:$version_kxml";
-    implementation "com.google.code.gson:gson:$version_gson"
-    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-    implementation "org.json:json:$version_json"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-
-    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
-
-
-    implementation project(path: ":core", configuration: "jvmDefault")
-    testImplementation project (':lib-database-jdbc')
-    implementation project(":lib-database")
-    implementation project(":lib-database-runtime")
-    compileOnly project(path: ':lib-database-entities', configuration: 'jvmDefault')
-    implementation project(path: ":lib-util", configuration: "jvmDefault")
-
-    implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-
-
-
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation project (':lib-database-entities')
-    testImplementation project(":app-javase")
-    testImplementation project(":lib-database-runtime-jdbc")
-
-
-    //SQLite dependencies for running db-driven tests
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-    //MockWebServer
-    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-
-    testImplementation project(":app-javase")
-} */
 
 publishing {
     publications {

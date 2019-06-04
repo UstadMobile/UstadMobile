@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>,
-                                       val fetchFn: () -> T?): DoorLiveData<T>() {
+                                       val fetchFn: () -> T): DoorLiveData<T>() {
 
 
-    var value = AtomicReference<T?>()
+    var value = AtomicReference<T>()
 
-    private val activeObservers = CopyOnWriteArrayList<DoorObserver<in T?>>()
+    private val activeObservers = CopyOnWriteArrayList<DoorObserver<in T>>()
 
     private val lastUpdated = AtomicLong()
 
@@ -23,7 +23,7 @@ class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>
         update()
     }
 
-    inner class LifecycleObserver(val observer: DoorObserver<in T?>): DoorLifecycleObserver() {
+    inner class LifecycleObserver(val observer: DoorObserver<in T>): DoorLifecycleObserver() {
 
         override fun onStart(owner: DoorLifecycleOwner) {
             addActiveObserver(observer)
@@ -35,7 +35,7 @@ class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>
     }
 
 
-    override fun observe(lifecycleOwner: DoorLifecycleOwner, observer: DoorObserver<in T?>) {
+    override fun observe(lifecycleOwner: DoorLifecycleOwner, observer: DoorObserver<in T>) {
         if(lifecycleOwner.currentState >= DoorLifecycleObserver.STARTED) {
             addActiveObserver(observer)
         }
@@ -43,16 +43,16 @@ class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>
         //TODO: Start listening to it's lifecycle
     }
 
-    override fun observeForever(observer: DoorObserver<in T?>) {
+    override fun observeForever(observer: DoorObserver<in T>) {
         addActiveObserver(observer)
     }
 
-    override fun removeObserver(observer: DoorObserver<in T?>) {
+    override fun removeObserver(observer: DoorObserver<in T>) {
         removeActiveObserver(observer)
     }
 
 
-    private fun addActiveObserver(observer: DoorObserver<in T?>) {
+    private fun addActiveObserver(observer: DoorObserver<in T>) {
         activeObservers.add(observer)
 
         if(activeObservers.size > 1 && lastUpdated.get() > lastChanged.get()) {
@@ -63,7 +63,7 @@ class DoorLiveDataJdbcImpl<T>(val db: DoorDatabase, val tableNames: List<String>
         }
     }
 
-    private fun removeActiveObserver(observer: DoorObserver<in T?>) {
+    private fun removeActiveObserver(observer: DoorObserver<in T>) {
         if(activeObservers.remove(observer) && activeObservers.isEmpty()) {
             db.removeChangeListener(dbChangeListenerRequest)
         }

@@ -7,3 +7,9 @@ fun <T: Any?> DoorLiveData<T>.observe(lifecycleOwner: DoorLifecycleOwner, observ
         }
     })
 }
+
+class ObserverFnWrapper<T>(val observerFn: (T) -> Unit): DoorObserver<T> {
+    override fun onChanged(t: T) {
+        observerFn.invoke(t)
+    }
+}
