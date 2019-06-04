@@ -6,6 +6,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-list/content-entry-list.component';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
+import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent,
@@ -15,6 +16,7 @@ const routes: Routes = [
           {path: 'RegisterAccount', component: RegisterComponent},
           {path: 'Login', component: LoginComponent},
         ],
+        canActivate: [AuthGuard],
         runGuardsAndResolvers: "always"
   },
   {path: "NotFound", component: NotFoundComponent}

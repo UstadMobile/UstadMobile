@@ -16,6 +16,7 @@ import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.co
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
+import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { LoginComponent } from './com/ustadmobile/view/login/login.component';
   providers: [
     UmDbMockService,
     UmBaseService,
+    AuthGuard,
     { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]

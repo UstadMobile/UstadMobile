@@ -15,11 +15,8 @@ import { UmAngularUtil } from '../../util/UmAngularUtil';
 export class HomeComponent extends UmBaseComponent {
 
   toolbar_title: string;
-
   menu_libaries : string;
-
   menu_reports: string;
-
   subscription: Subscription;
 
   constructor(private location: Location,umService: UmBaseService,
@@ -42,12 +39,14 @@ export class HomeComponent extends UmBaseComponent {
   }
 
   goBack(){
-    this.location.back();
+    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
+      UmAngularUtil.DISPATCH_BACK_NAVIGATION, "back")); 
   }
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
     this.subscription.unsubscribe();
+    
   }
 
 }

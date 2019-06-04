@@ -24,6 +24,7 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
   showProgress : boolean = false;
   serverUrl: string = "";
   presenter: core.ustadmobile.core.controller.Register2Presenter;
+  private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
     umDb: UmDbMockService, formBuilder: FormBuilder) {
@@ -43,12 +44,11 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
       }
   );
 
-    this.router.events.subscribe((e: any) => {
-      if (e instanceof NavigationEnd) {
-        this.presenter = new core.ustadmobile.core.controller
+    this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+    .subscribe((event:NavigationEnd) => {
+      this.presenter = new core.ustadmobile.core.controller
         .Register2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
-      }
     });
   }
 
@@ -88,6 +88,9 @@ export class RegisterComponent extends UmBaseComponent implements core.ustadmobi
     super.ngOnDestroy()
     this.presenter.onDestroy();
     this.subscription.unsubscribe();
+    if (this.navigationSubscription) {  
+      this.navigationSubscription.unsubscribe();
+    }
   }
 
 

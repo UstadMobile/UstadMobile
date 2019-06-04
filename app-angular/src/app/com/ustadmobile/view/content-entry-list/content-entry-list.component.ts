@@ -31,6 +31,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   umFormLanguage : FormGroup;
   umFormCategories: FormGroup;
   private subscription: Subscription;
+  private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
      umDb: UmDbMockService, formBuilder: FormBuilder) {
@@ -44,14 +45,15 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
       'category': ['-1', Validators.required]
     });
   
-    this.router.events.subscribe((e: any) => {
-      if (e instanceof NavigationEnd) {
-        this.entries = [];
+    this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+    .subscribe((event:NavigationEnd) => {
+      this.entries = [];
         this.presenter = new core.ustadmobile.core.controller
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
-      }
     });
+
+    
   }
 
   ngOnInit() {
@@ -62,6 +64,11 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.label_language_options = this.getString(this.MessageID.also_available_in);
         this.label_reading_level = this.getString(this.MessageID.label_reading_level); 
+      }
+
+      console.log("up navigation clicked", content)
+      if(content[UmAngularUtil.DISPATCH_BACK_NAVIGATION]){
+        this.presenter.handleUpNavigation();
       }
     });
 
@@ -114,5 +121,8 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     super.ngOnDestroy()
     this.presenter.onDestroy();
     this.subscription.unsubscribe();
+    if (this.navigationSubscription) {  
+      this.navigationSubscription.unsubscribe();
+    }
   }
 }

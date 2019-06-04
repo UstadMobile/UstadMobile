@@ -21,6 +21,7 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
   showProgress : boolean = false;
   serverUrl: string = "";
   presenter: core.ustadmobile.core.controller.Login2Presenter;
+  private navigationSubscription;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
     umDb: UmDbMockService, formBuilder: FormBuilder) {
@@ -34,15 +35,16 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
       (form: any) => { 
           this.formValidated = this.umFormLogin.status == "VALID";
       }
-  );
+      );
 
-    this.router.events.subscribe((e: any) => {
-      if (e instanceof NavigationEnd) {
-        this.presenter = new core.ustadmobile.core.controller
+    this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+    .subscribe((event:NavigationEnd) => {
+      this.presenter = new core.ustadmobile.core.controller
         .Login2Presenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
-      }
     });
+
+    
   }
 
   ngOnInit() {
@@ -86,6 +88,9 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
     super.ngOnDestroy()
     this.presenter.onDestroy();
     this.subscription.unsubscribe();
+    if (this.navigationSubscription) {  
+      this.navigationSubscription.unsubscribe();
+    }
   }
 
 }
