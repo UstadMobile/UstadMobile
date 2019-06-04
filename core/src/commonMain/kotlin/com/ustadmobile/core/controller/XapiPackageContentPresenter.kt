@@ -29,8 +29,9 @@ import org.kmp.io.KMPXmlParser
  * https://github.com/RusticiSoftware/launch/blob/master/lms_lrs.md
  *
  */
-class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view: XapiPackageContentView)
-    : UstadBaseController<XapiPackageContentView>(context, args!!, view) {
+class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
+                                  private val containerMounter: suspend (Long) -> String)
+    : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
     private var mountedPath: String? = null
 
@@ -42,43 +43,58 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>?, view
 
     private var registrationUUID: String? = null
 
-    private inner class ZipMountedCallbackHandler : ShowErrorUmCallback<String>(view, MessageID.error_opening_file) {
-
-        override fun onSuccess(result: String?) {
-            mountedPath = result
-
-            GlobalScope.launch {
-
-                try {
-                    val client = HttpClient()
-                    var tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath!!, "tincan.xml"))
-
-                    val xpp = KMPXmlParser()
-                    xpp.setInput(StringReader(tincanContent))
-                    tinCanXml = TinCanXML.loadFromXML(xpp)
-                    launchHref = tinCanXml?.launchActivity?.launchUrl
-                    launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
-                    view.runOnUiThread(Runnable {
-                        view.setTitle(tinCanXml!!.launchActivity?.name!!)
-                        view.loadUrl(launchUrl!!)
-                    })
-                } catch (e: Exception) {
-                    UMLog.l(UMLog.ERROR, 75, null, e)
-                    view.runOnUiThread(Runnable {
-                        view.showErrorNotification(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file,
-                                view.viewContext!!), { }, 0)
-                    })
-                }
-
-            }
-        }
-    }
+//    private inner class ZipMountedCallbackHandler : ShowErrorUmCallback<String>(view, MessageID.error_opening_file) {
+//
+//        override fun onSuccess(result: String?) {
+//            mountedPath = result
+//
+//            GlobalScope.launch {
+//
+//                try {
+//                    val client = HttpClient()
+//                    var tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath!!, "tincan.xml"))
+//
+//                    val xpp = KMPXmlParser()
+//                    xpp.setInput(StringReader(tincanContent))
+//                    tinCanXml = TinCanXML.loadFromXML(xpp)
+//                    launchHref = tinCanXml?.launchActivity?.launchUrl
+//                    launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
+//                    view.runOnUiThread(Runnable {
+//                        view.setTitle(tinCanXml!!.launchActivity?.name!!)
+//                        view.loadUrl(launchUrl!!)
+//                    })
+//                } catch (e: Exception) {
+//                    UMLog.l(UMLog.ERROR, 75, null, e)
+//                    view.runOnUiThread(Runnable {
+//                        view.showErrorNotification(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file,
+//                                view.viewContext), { }, 0)
+//                    })
+//                }
+//
+//            }
+//        }
+//    }
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()
-        view.mountContainer(containerUid, ZipMountedCallbackHandler())
+        GlobalScope.launch {
+            mountedPath = containerMounter(containerUid)
+
+            val client = HttpClient()
+            val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath!!, "tincan.xml"))
+
+            val xpp = KMPXmlParser()
+            xpp.setInput(StringReader(tincanContent))
+            tinCanXml = TinCanXML.loadFromXML(xpp)
+            launchHref = tinCanXml?.launchActivity?.launchUrl
+            launchUrl = UMFileUtil.joinPaths(mountedPath!!, launchHref!!)
+            view.runOnUiThread(Runnable {
+                view.setTitle(tinCanXml!!.launchActivity?.name!!)
+                view.loadUrl(launchUrl!!)
+            })
+        }
     }
 
 }

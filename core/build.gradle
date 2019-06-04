@@ -39,19 +39,50 @@ android {
     }
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+/*
+ * This might be required to be able to run unit tests via the IDE.
+ */
+task dumpEnvProperties {
+    outputs.upToDateWhen {
+        project.file("build/local.env.properties").exists()
+    }
+
+    doFirst {
+        if(!project.file("build").exists())
+            project.file("build").mkdir()
+
+        def outWriter = new FileWriter(project.file("build/local.env.properties"))
+        System.getProperties().store(outWriter, "System properties for use with running unit tests in IDE")
+        outWriter.flush()
+        outWriter.close()
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "jvmTestClasses") {
+        task.dependsOn(dumpEnvProperties)
+    }
+}
 
 kotlin {
 
-    jvm {
-        compilations.main.kotlinOptions {
-            // Setup the Kotlin compiler options for the 'main' compilation:
-            jvmTarget = "$version_kotlin_jvmTarget"
-        }
-    }
-
 
     targets {
-        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.jvm, 'jvm') {
+            compilations.main.kotlinOptions {
+                // Setup the Kotlin compiler options for the 'main' compilation:
+                jvmTarget = "$version_kotlin_jvmTarget"
+            }
+
+            compilations.test.kotlinOptions {
+                // Setup the Kotlin compiler options for the 'main' compilation:
+                jvmTarget = "$version_kotlin_jvmTarget"
+            }
+        }
+
         fromPreset(presets.android, 'android')
         fromPreset(presets.js, 'js')
         //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
@@ -128,6 +159,7 @@ kotlin {
                 api project(":sharedse")
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
+                api project(":lib-database-mpp")
             }
         }
         androidMain {
