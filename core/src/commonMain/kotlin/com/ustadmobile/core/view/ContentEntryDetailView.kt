@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import kotlin.js.JsName
 
@@ -8,26 +9,17 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
     val allKnowAvailabilityStatus: Set<Long>
 
 
-    @JsName("setContentEntryTitle")
-    fun setContentEntryTitle(title: String)
-
-    @JsName("setContentEntryDesc")
-    fun setContentEntryDesc(desc: String)
+    @JsName("setContentEntry")
+    fun setContentEntry(contentEntry: ContentEntry)
 
     @JsName("setContentEntryLicense")
     fun setContentEntryLicense(license: String)
-
-    @JsName("setContentEntryAuthor")
-    fun setContentEntryAuthor(author: String)
 
     @JsName("setDetailsButtonEnabled")
     fun setDetailsButtonEnabled(enabled: Boolean)
 
     @JsName("setDownloadSize")
     fun setDownloadSize(fileSize: Long)
-
-    @JsName("loadEntryDetailsThumbnail")
-    fun loadEntryDetailsThumbnail(thumbnailUrl: String)
 
     @JsName("setAvailableTranslations")
     fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long)
@@ -69,7 +61,7 @@ interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
     fun setDownloadButtonClickableListener(isDownloadComplete: Boolean)
 
     @JsName("showDownloadOptionsDialog")
-    fun showDownloadOptionsDialog(hashtable: HashMap<String, String>)
+    fun showDownloadOptionsDialog(map: HashMap<String, String>)
 
     companion object {
 

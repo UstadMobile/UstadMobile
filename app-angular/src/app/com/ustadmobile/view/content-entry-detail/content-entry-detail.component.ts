@@ -1,13 +1,14 @@
 import { UmDbMockService } from './../../core/db/um-db-mock.service';
-import { UmContextWrapper } from './../../util/UmContextWrapper';
-import { ActivatedRoute, Router, Params, NavigationEnd } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
-import { com as core} from 'core';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { Component } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmAngularUtil } from '../../util/UmAngularUtil';
 import { Subscription } from 'rxjs';
+import { com as core } from 'core';
+import { com as db } from 'lib-database';
+import { com as util } from 'lib-util';
 
 @Component({
   selector: 'app-content-entry-detail',
@@ -24,28 +25,15 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   entryLicence = "";
   entryDescription = "";
   entryThumbnail = "";
-  args : Params = null;
   private presenter: core.ustadmobile.core.controller.ContentEntryDetailPresenter;
-   private subscription: Subscription;
-
-  entryLanguages = [
-    {name: "Language 1", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-    {name: "Language 2", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-    {name: "Language 3", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-    {name: "Language 4", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-    {name: "Language 5", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-    {name: "Language 6", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-    {name: "Language 7", uid: "E130B099-5C18-E0899-6817-009BCAC1111E6"},
-  ]
-
-
-   
+  private subscription: Subscription;
+  translations = []
 
    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    this.args = route.snapshot.queryParams;
-    
+    console.log("navigation", "onConstructor")
     this.router.events.subscribe((e: any) => {
+      console.log("navigation", e)
       if (e instanceof NavigationEnd) {
         this.presenter = new core.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
           UmAngularUtil.queryParamsToMap(), this);
@@ -55,101 +43,68 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   }
 
   ngOnInit() {
+
+    console.log("navigation", "onInit")
     super.ngOnInit();
-    this.subscription = this.umService.getUmObserver().subscribe(content =>{
+    this.subscription = this.umService.getUmObserver().subscribe(() =>{
       //do something
     });
   }
 
 
-  navigateToLanguage(language){
-    console.log("language", language)
+  openTranslation(translation){
+    this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
   }
 
+  setContentEntry(contentEntry){
+    this.contentEntryUid = contentEntry.title;
+    this.entryTitle = contentEntry.title;
+    this.entryAuthor = contentEntry.author;
+    this.entryDescription = contentEntry.description;
+    this.entryThumbnail = contentEntry.thumbnailUrl;
+  }
   
-  setContentEntryTitle(title: String){
-
+  setContentEntryLicense(license){
+    this.entryLicence = license;
   }
 
-  setContentEntryDesc(desc: String){
+  setDetailsButtonEnabled(){}
 
+  setDownloadSize(){}
+
+  setAvailableTranslations(result){
+    this.translations = util.ustadmobile.lib.util.UMUtil.kotlinListToJsArray(result);
   }
 
-  setContentEntryLicense(license: String){
+  updateDownloadProgress(){}
 
+  setDownloadButtonVisible(){}
+
+  setButtonTextLabel(){}
+
+  showFileOpenWithMimeTypeError(){}
+
+  showFileOpenError(message){
+    this.showError(message);
   }
 
-  setContentEntryAuthor(author: String){
-  
-  }
+  updateLocalAvailabilityViews(){}
 
-  setDetailsButtonEnabled(enabled: Boolean){
+  setLocalAvailabilityStatusViewVisible(){}
 
-  }
+  setTranslationLabelVisible(){}
 
-  setDownloadSize(fileSize: number){
+  setFlexBoxVisible(){}
 
-  }
+  setDownloadProgressVisible(){}
 
-  loadEntryDetailsThumbnail(thumbnailUrl: String){
+  setDownloadProgressLabel(){}
 
-  }
+  setDownloadButtonClickableListener(){}
 
-  setAvailableTranslations(result: any, entryUuid: number){
+  showDownloadOptionsDialog(){}
 
-  }
-
-  updateDownloadProgress(progressValue: number){
-
-  }
-
-  setDownloadButtonVisible(visible: Boolean){
-
-  }
-
-  setButtonTextLabel(textLabel: String){
-
-  }
-
-  showFileOpenWithMimeTypeError(message: String, actionMessageId: number, mimeType: String){
-    
-  }
-
-  showFileOpenError(message: String){
-
-  }
-
-  updateLocalAvailabilityViews(icon: number, status: String){
-
-  }
-
-  setLocalAvailabilityStatusViewVisible(visible: Boolean){
-
-  }
-
-  setTranslationLabelVisible(visible: Boolean){
-
-  }
-
-  setFlexBoxVisible(visible: Boolean){
-
-  }
-
-  setDownloadProgressVisible(visible: Boolean){
-
-  }
-
-  setDownloadProgressLabel(progressLabel: String){
-
-  }
-
-  setDownloadButtonClickableListener(isDownloadComplete: Boolean){
-
-  }
-
-  showDownloadOptionsDialog(hashtable: any){}
-
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     super.ngOnDestroy()
     this.subscription.unsubscribe();
   }

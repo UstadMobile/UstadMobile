@@ -29,6 +29,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
@@ -76,21 +77,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                 view.runOnUiThread(Runnable {
                     view.setContentEntryLicense(licenseType)
                     with(result) {
-                        val contentEntryAuthor = author
-                        if (contentEntryAuthor != null)
-                            view.setContentEntryAuthor(contentEntryAuthor)
-
-                        val contentEntryTitle = title
-                        if (contentEntryTitle != null)
-                            view.setContentEntryTitle(contentEntryTitle)
-
-                        val contentEntryDesc = description
-                        if (contentEntryDesc != null)
-                            view.setContentEntryDesc(contentEntryDesc)
-
-                        val contentThumbnailUrl = thumbnailUrl
-                        if (!contentThumbnailUrl.isNullOrEmpty())
-                            view.loadEntryDetailsThumbnail(contentThumbnailUrl)
+                        view.setContentEntry(this)
                     }
                 })
             }
@@ -231,12 +218,14 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
+    @JsName("handleClickTranslatedEntry")
     fun handleClickTranslatedEntry(uid: Long) {
         val args = HashMap<String, String>()
         args[ARG_CONTENT_ENTRY_UID] = uid.toString()
-        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext!!)
+        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
     }
 
+    @JsName("handleUpNavigation")
     fun handleUpNavigation() {
         val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryListFragmentView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs != null) {

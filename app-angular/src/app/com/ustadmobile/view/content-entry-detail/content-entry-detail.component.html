@@ -5,17 +5,17 @@
 
   <div class="col s7">
     <p class="entry-title">{{entryTitle}}</p>
-    <p class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author"> Author</span>: {{entryAuthor}}</p>
-    <label i18n="@@entry_details_license">License</label>
-    <p class="entry-content">{{entryLicence}}</p> 
-    <label i18n="@@entry_details_description">Description</label>
-    <p class="entry-content">{{entryDescription}}</p>
+    <p  *ngIf="entryAuthor" class="entry-creator {{env.colorPrimaryText}}"> <span i18n="@@entry_details_author"> Author</span>: {{entryAuthor}}</p>
+    <label *ngIf="entryLicence" i18n="@@entry_details_license">License</label>
+    <p *ngIf="entryLicence" class="entry-content">{{entryLicence}}</p> 
+    <label *ngIf="entryDescription" i18n="@@entry_details_description">Description</label>
+    <p *ngIf="entryDescription" class="entry-content">{{entryDescription}}</p>
     <div class="divider default-margin-bottom"></div>
-    <label i18n="@@also_available_in">Also available in: </label>
-    <div class="row default-padding-top">
+    <label *ngIf="translations.length > 0" i18n="@@also_available_in">Also available in: </label>
+    <div  *ngIf="translations.length > 0"  class="row default-padding-top">
         
-      <mz-chip class="open-content" *ngFor="let language of entryLanguages" (click)="navigateToLanguage(language)">
-      {{language.name}}
+      <mz-chip class="open-content" *ngFor="let translation of translations" (click)="openTranslation(translation)">
+      {{translation.languageName}}
       </mz-chip>
     </div>
 

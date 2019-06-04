@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
+import kotlin.js.JsName
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
@@ -17,9 +18,11 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
     @Query("SELECT ContentEntryRelatedEntryJoin.* FROM ContentEntryRelatedEntryJoin " +
             "LEFT JOIN ContentEntry ON ContentEntryRelatedEntryJoin.cerejRelatedEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.publik")
+    @JsName("publicContentEntryRelatedEntryJoins")
     abstract fun publicContentEntryRelatedEntryJoins(): List<ContentEntryRelatedEntryJoin>
 
     @Query("SELECT * FROM ContentEntryRelatedEntryJoin WHERE " + "cerejRelatedEntryUid = :contentEntryUid LIMIT 1")
+    @JsName("findPrimaryByTranslation")
     abstract fun findPrimaryByTranslation(contentEntryUid: Long): ContentEntryRelatedEntryJoin?
 
 
@@ -35,6 +38,7 @@ abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntr
             " OR ContentEntryRelatedEntryJoin.cerejContentEntryUid IN" +
             " (SELECT cerejContentEntryUid FROM ContentEntryRelatedEntryJoin WHERE cerejRelatedEntryUid = :contentEntryUid))" +
             " AND ContentEntryRelatedEntryJoin.relType = " + REL_TYPE_TRANSLATED_VERSION)
+    @JsName("findAllTranslationsForContentEntryAsync")
     abstract fun findAllTranslationsForContentEntryAsync(contentEntryUid: Long): List<ContentEntryRelatedEntryJoinWithLanguage>
 
     @Update

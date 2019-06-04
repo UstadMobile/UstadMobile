@@ -1,9 +1,4 @@
-import groovy.util.slurpersupport.GPathResult
-
-import javax.xml.parsers.DocumentBuilder
 import java.util.concurrent.atomic.AtomicInteger
-import groovy.xml.MarkupBuilder
-import groovy.util.*
 
 /**
  * Core module build script : see buildconfig.core.default.gradle for configuration

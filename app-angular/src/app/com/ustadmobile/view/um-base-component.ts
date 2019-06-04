@@ -14,6 +14,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
   public readonly context: UmContextWrapper;
   public readonly MessageID;
   public app_name: String = "...";
+  public viewContext: UmContextWrapper;
 
 
   protected constructor(public umService: UmBaseService, public router: Router, public route: ActivatedRoute, public mockedUmDb: UmDbMockService){
@@ -22,6 +23,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.umService.setImpl(this.systemImpl);
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
+    this.viewContext = this.context; 
     umService.setContext(this.context);
   }
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { com as util} from 'lib-util';
 import { com as db } from 'lib-database';
+import { com as door } from 'lib-door-runtime';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
 
 @Injectable({
@@ -18,8 +19,10 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
   }
 
   contentEntryDao = new ContentEntryDao();
-
   contentEntryStatusDao = new ContentEntryStatusDao();
+  contentEntryRelatedEntryJoinDao = new ContentEntryRelatedEntryJoinDao();
+  containerDao = new ContainerDao();
+  networkNodeDao = new NetworkNodeDao();
 
   getData(entryUid) {
     const data: ContentEntry[] = entryList[entryUid];
@@ -82,12 +85,34 @@ class ContentEntryDao {
   }
 }
 
+class ContainerDao{
+  findFilesByContentEntryUid(entryUid){
+    return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([]);
+  }
+}
+
+class NetworkNodeDao{
+
+}
 class ContentEntryStatusDao{
   constructor() {}
-
-  findContentEntryStatusByUid(entryUid){
-    UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid) as ContentEntry;
+  findContentEntryStatusByUid(entryUid) : door.ustadmobile.door.DoorLiveData {
+    return UmAngularUtil.createObserver(0) 
   }
+}
+
+class ContentEntryRelatedEntryJoinDao{
+  findAllTranslationsForContentEntryAsync(entryUid){
+    
+    var relatedEntries = [
+      {
+        cerejContentEntryUid: entryUid,
+        cerejRelatedEntryUid: 41250,
+        languageName: "Sample1"
+      }
+    ];
+  return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList(relatedEntries);
+}
 }
 
 

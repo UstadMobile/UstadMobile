@@ -46,8 +46,8 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   
     this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
-        this.entries = []
-          this.presenter = new core.ustadmobile.core.controller
+        this.entries = [];
+        this.presenter = new core.ustadmobile.core.controller
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.presenter.onCreate(null);
       }

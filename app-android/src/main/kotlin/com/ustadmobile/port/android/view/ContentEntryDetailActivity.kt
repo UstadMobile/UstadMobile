@@ -25,12 +25,14 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import java.util.*
 
 class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener, LocalAvailabilityMonitor, LocalAvailabilityListener {
+
 
     private var entryDetailPresenter: ContentEntryDetailPresenter? = null
 
@@ -58,7 +60,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     private var downloadProgress: DownloadProgressView? = null
 
-    internal var fileStatusIcon = HashMap<Int, Int>()
+    private var fileStatusIcon = HashMap<Int, Int>()
 
     override val allKnowAvailabilityStatus: Set<Long>
         get() = managerAndroidBle!!.getLocallyAvailableContainerUids()
@@ -128,22 +130,22 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     }
 
+    override fun setContentEntry(contentEntry: ContentEntry) {
+        entryDetailsTitle!!.text = contentEntry.title
+        supportActionBar!!.title = contentEntry.title
+        entryDetailsDesc!!.text = contentEntry.description
+        entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
 
-    override fun setContentEntryTitle(title: String) {
-        entryDetailsTitle!!.text = title
-        supportActionBar!!.title = title
+        if(contentEntry.thumbnailUrl != null){
+            Picasso.get()
+                    .load(contentEntry.thumbnailUrl)
+                    .into(findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
+        }
     }
 
-    override fun setContentEntryDesc(desc: String) {
-        entryDetailsDesc!!.text = desc
-    }
 
     override fun setContentEntryLicense(license: String) {
         entryDetailsLicense!!.text = license
-    }
-
-    override fun setContentEntryAuthor(author: String) {
-        entryDetailsAuthor!!.text = author
     }
 
     override fun setDetailsButtonEnabled(enabled: Boolean) {
@@ -152,13 +154,6 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     override fun setDownloadSize(fileSize: Long) {
         downloadSize!!.text = UMFileUtil.formatFileSize(fileSize)
-    }
-
-    override fun loadEntryDetailsThumbnail(thumbnailUrl: String) {
-
-        Picasso.get()
-                .load(thumbnailUrl)
-                .into(findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
     }
 
 
@@ -224,23 +219,23 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
     }
 
     override fun setDownloadButtonClickableListener(isDownloadComplete: Boolean) {
-        downloadButton!!.setOnClickListener { view ->
+        downloadButton!!.setOnClickListener { _ ->
             entryDetailPresenter!!.handleDownloadButtonClick(isDownloadComplete,
                     entryDetailPresenter!!.entryUuid)
         }
     }
 
-    override fun showDownloadOptionsDialog(args: HashMap<String, String>) {
+    override fun showDownloadOptionsDialog(map: HashMap<String, String>) {
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Runnable { impl.go("DownloadDialog", args, this) },
+                Runnable { impl.go("DownloadDialog", map, this) },
                 impl.getString(MessageID.download_storage_permission_title, this),
                 impl.getString(MessageID.download_storage_permission_message, this))
     }
 
-    override fun selectContentEntryOfLanguage(uid: Long) {
-        entryDetailPresenter!!.handleClickTranslatedEntry(uid)
+    override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
+        entryDetailPresenter!!.handleClickTranslatedEntry(contentEntryUid)
     }
 
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
