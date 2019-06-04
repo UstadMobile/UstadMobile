@@ -18,13 +18,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class DummyActivity : UstadBaseActivity(), DummyView {
+class HomeActivity : UstadBaseActivity(), HomeView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

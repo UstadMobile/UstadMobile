@@ -89,7 +89,7 @@
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.DummyActivity"
+            android:name="com.ustadmobile.port.android.view.HomeActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label=""
             android:theme="@style/Theme.UstadTheme" />

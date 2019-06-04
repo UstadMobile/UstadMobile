@@ -5,7 +5,7 @@
 //import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 //import com.ustadmobile.core.view.ContentEntryDetailView
 //import com.ustadmobile.core.view.ContentEntryListFragmentView
-//import com.ustadmobile.core.view.DummyView
+//import com.ustadmobile.core.view.HomeView
 //import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer
 //import com.ustadmobile.test.core.impl.PlatformTestUtil
 //
@@ -85,14 +85,14 @@
 //        args.remove(UstadMobileSystemImpl.ARG_REFERRER)
 //
 //        presenter.handleUpNavigation()
-//        verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go(DummyView.VIEW_NAME, mutableMapOf(),
+//        verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go(HomeView.VIEW_NAME, mutableMapOf(),
 //                PlatformTestUtil.targetContext, UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 //
 //    }
 //
 //    companion object {
 //
-//        private val REFERRER_FULL_PATH = "/DummyView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43"
+//        private val REFERRER_FULL_PATH = "/HomeView?/ContentEntryList?entryid=41/ContentEntryList?entryid=42/ContentEntryDetail?entryid=43"
 //        private val REFERRER_NO_PATH = ""
 //        private val flags = UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP
 //    }

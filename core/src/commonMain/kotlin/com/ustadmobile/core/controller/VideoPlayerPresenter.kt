@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.VideoPlayerView.Companion.ARG_CONTENT_ENTRY_ID
@@ -81,7 +81,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
-            impl.go(DummyView.VIEW_NAME, mapOf(), view.viewContext,
+            impl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
 

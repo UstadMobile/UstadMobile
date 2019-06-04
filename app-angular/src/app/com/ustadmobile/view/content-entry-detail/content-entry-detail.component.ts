@@ -38,6 +38,7 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
     .subscribe((event:NavigationEnd) => {
       this.presenter = new core.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,
         UmAngularUtil.queryParamsToMap(), this);
+      this.umService.setPresenterInstance(this.presenter);
       this.presenter.onCreate(null);
     });
   }
@@ -55,7 +56,6 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   }
 
   setContentEntry(contentEntry){
-    console.log(contentEntry)
     this.contentEntryUid = contentEntry.title;
     this.entryTitle = contentEntry.title;
     this.entryAuthor = contentEntry.author;

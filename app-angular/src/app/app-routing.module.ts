@@ -9,7 +9,7 @@ import { RegisterComponent } from './com/ustadmobile/view/register/register.comp
 import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 
 const routes: Routes = [
-  {path: 'home', component: HomeComponent,
+  {path: 'Home', component: HomeComponent,
         children: [
           {path: 'ContentEntryList', component: ContentEntryListComponent},
           {path: 'ContentEntryDetail', component: ContentEntryDetailComponent},

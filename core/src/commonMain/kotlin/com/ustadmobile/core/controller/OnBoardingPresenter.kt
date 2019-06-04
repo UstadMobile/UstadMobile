@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
 import kotlinx.coroutines.Runnable
@@ -23,6 +23,6 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: O
     fun handleGetStarted() {
         val args: Map<String,String?> = arguments;
         impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
-        impl.go(DummyView.VIEW_NAME, args, context)
+        impl.go(HomeView.VIEW_NAME, args, context)
     }
 }

@@ -8,8 +8,6 @@ export class UmAngularUtil {
    */
   static DISPATCH_TITLE : string = "toolbar_title";
 
-  static DISPATCH_BACK_NAVIGATION : string = "back_navigation";
-
   static DISPATCH_RESOURCE : string = "resouce_ready";
 
 

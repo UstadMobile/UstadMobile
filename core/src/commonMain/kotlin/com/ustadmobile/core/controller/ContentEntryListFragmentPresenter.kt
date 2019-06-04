@@ -1,13 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
@@ -152,7 +151,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     @JsName("handleUpNavigation")
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        impl.go(DummyView.VIEW_NAME, mapOf(), view.viewContext,
+        impl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 
     }

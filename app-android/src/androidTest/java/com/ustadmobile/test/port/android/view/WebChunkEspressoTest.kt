@@ -41,7 +41,7 @@ class WebChunkEspressoTest {
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
 
-    internal var path = "/DummyView?/ContentEntryList?entryid=40/ContentEntryList?entryid=41/ContentEntryDetail?entryid=10/ContentEntryDetail?entryid=11/webChunk?"
+    internal var path = "/HomeView?/ContentEntryList?entryid=40/ContentEntryList?entryid=41/ContentEntryDetail?entryid=10/ContentEntryDetail?entryid=11/webChunk?"
     private var tmpDir: File? = null
     private var repo: UmAppDatabase? = null
     private var db: UmAppDatabase? = null

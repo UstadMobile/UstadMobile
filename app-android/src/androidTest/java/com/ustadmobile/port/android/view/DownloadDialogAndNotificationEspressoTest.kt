@@ -62,7 +62,7 @@ import java.util.*
 class DownloadDialogAndNotificationEspressoTest {
 
     @get:Rule
-    var mActivityRule = ActivityTestRule(DummyActivity::class.java, false, false)
+    var mActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
 
     @get:Rule
     var mPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(

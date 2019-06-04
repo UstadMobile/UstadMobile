@@ -39,8 +39,7 @@ export class HomeComponent extends UmBaseComponent {
   }
 
   goBack(){
-    this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
-      UmAngularUtil.DISPATCH_BACK_NAVIGATION, "back")); 
+    this.umService.goBack();
   }
 
   ngOnDestroy(): void {

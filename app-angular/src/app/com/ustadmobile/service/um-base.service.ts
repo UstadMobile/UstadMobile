@@ -10,18 +10,24 @@ import { MzToastService } from 'ngx-materialize';
 export class UmBaseService {
 
   private systemImpl: any;
-
   loadedLocale: boolean = false;
-
   private context: UmContextWrapper;
-
   private umObserver = new Subject < any > ();
+  private presenter;
+
 
   constructor(private http: HttpClient, private toastService: MzToastService) {}
 
-
   dispatchUpdate(content: any) {
     this.umObserver.next(content);
+  }
+
+  setPresenterInstance(presenter){
+    this.presenter = presenter;
+  }
+
+  goBack(){
+    this.presenter.handleUpNavigation();
   }
 
   getToastService(){

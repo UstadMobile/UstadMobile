@@ -2,8 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.NetworkNodeDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -16,11 +14,8 @@ import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.core.view.DummyView
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
-import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
@@ -233,7 +228,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), context,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {
-            impl.go(DummyView.VIEW_NAME, mutableMapOf(), context,
+            impl.go(HomeView.VIEW_NAME, mutableMapOf(), context,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         }
     }

@@ -50,6 +50,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
       this.entries = [];
         this.presenter = new core.ustadmobile.core.controller
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
+        this.umService.setPresenterInstance(this.presenter);
         this.presenter.onCreate(null);
     });
 
@@ -64,11 +65,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.label_language_options = this.getString(this.MessageID.also_available_in);
         this.label_reading_level = this.getString(this.MessageID.label_reading_level); 
-      }
-
-      console.log("up navigation clicked", content)
-      if(content[UmAngularUtil.DISPATCH_BACK_NAVIGATION]){
-        this.presenter.handleUpNavigation();
       }
     });
 
@@ -114,7 +110,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
 
   setToolbarTitle(title: string){
     this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
-      UmAngularUtil.DISPATCH_TITLE, title))
+      UmAngularUtil.DISPATCH_TITLE, title));
   }
 
   ngOnDestroy(){

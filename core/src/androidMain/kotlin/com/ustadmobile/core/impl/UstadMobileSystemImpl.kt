@@ -85,7 +85,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
-            DummyView.VIEW_NAME to Class.forName("${PACKAGE_NAME}DummyActivity"),
+            HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
             OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
             Login2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Login2Activity"),
             EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
