@@ -44,59 +44,6 @@ android {
     }
 }
 
-/*jar {
-    //Exclude factory classes that are intended to be replaced by platform specific implementations
-    exclude("com/ustadmobile/core/impl/*Factory.class")
-    exclude("com/ustadmobile/core/db/impl/*Factory.class")
-    exclude("com/ustadmobile/core/db/entities/*.class")
-    exclude("com/ustadmobile/core/db/*_Factory.class")
-} */
-
-/*task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-
-} */
-
-
-/* dependencies {
-    implementation "org.json:json:$version_json"
-    implementation "net.sf.kxml:kxml2:$version_kxml"
-
-    implementation project(':lib-database')
-    compileOnly project(':lib-database-entities')
-    implementation project(':lib-database-runtime')
-    implementation project(":lib-util")
-
-    testImplementation project(":sharedse")
-    testImplementation project(":app-javase")
-    testImplementation project(":lib-database-jdbc")
-    testImplementation project(":lib-database-runtime-jdbc")
-    testImplementation project(":lib-database-entities")
-    testImplementation project(":app-rest-server")
-
-    testImplementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    testImplementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-    //Jersey dependencies
-    testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
-    testImplementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
-    testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
-
-    //JNDI and SQLite dependencies for test database
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-} */
 
 kotlin {
 
@@ -133,6 +80,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
@@ -143,33 +91,35 @@ kotlin {
 
         jvmMain {
             dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
                 implementation "com.soywiz:klock-jvm:$version_klock"
             }
             dependsOn commonJvmMain
         }
+
+        commonTest {
+            dependencies {
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+            }
+        }
+
         jvmTest {
             dependencies {
-                    implementation "junit:junit:$version_junit"
+                implementation "junit:junit:$version_junit"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
-                /*   implementation project(":sharedse")
-                     implementation project(":app-javase")
-                     implementation project(":lib-database-jdbc")
-                     implementation project(":lib-database-runtime-jdbc")
-                     implementation project(":lib-database-entities")
-                     implementation project(":app-rest-server")
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
-                     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-                     implementation "junit:junit:$version_junit"
-                     implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-
-                     //JNDI and SQLite dependencies for test database
-                     implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                     implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                     implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                     implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2" */
+                implementation project(":sharedse")
             }
         }
         androidMain {

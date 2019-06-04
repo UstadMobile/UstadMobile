@@ -3,8 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager
 import com.ustadmobile.core.db.*
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmResultCallback
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
@@ -19,6 +18,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -57,9 +57,9 @@ class DownloadJobItemRunner
 
     private val downloadJobItemManager: DownloadJobItemManager?
 
-    private var statusLiveData: DoorLiveData<ConnectivityStatus>? = null
+    private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
-    private var statusObserver: DoorObserver<ConnectivityStatus>? = null
+    private var statusObserver: DoorObserver<ConnectivityStatus?>? = null
 
     //TODO: enable switching to local download when available after basic p2p cases complete
     //private UmObserver<EntryStatusResponse> entryStatusObserver;
@@ -182,8 +182,8 @@ class DownloadJobItemRunner
      * @param newDownloadStatus changed download job item status
      */
 
-    private fun handleDownloadJobItemStatusChanged(newDownloadStatus: Int?) {
-        if (newDownloadStatus != null && newDownloadStatus == JobStatus.STOPPING) {
+    private fun handleDownloadJobItemStatusChanged(newDownloadStatus: Int) {
+        if (newDownloadStatus == JobStatus.STOPPING) {
             stopAsync(JobStatus.STOPPED)
         }
     }
@@ -261,14 +261,20 @@ class DownloadJobItemRunner
         //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
         //                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
-        downloadSetConnectivityObserver = DoorObserver { t -> handleDownloadSetMeteredConnectionAllowedChanged(t) }
+        //downloadSetConnectivityObserver = DoorObserver { t -> handleDownloadSetMeteredConnectionAllowedChanged(t) }
+        downloadSetConnectivityObserver = object : DoorObserver<Boolean> {
+            override fun onChanged(t: Boolean) {
+                handleDownloadSetMeteredConnectionAllowedChanged(t)
+            }
+        }
 
-        statusObserver = DoorObserver { t -> handleConnectivityStatusChanged(t) }
-
-        downloadJobItemObserver = DoorObserver<Int> { t -> handleDownloadJobItemStatusChanged(t) }
+        statusObserver = ObserverFnWrapper(this::handleConnectivityStatusChanged)
+        downloadJobItemObserver = ObserverFnWrapper(this::handleDownloadJobItemStatusChanged)
 
         //entryStatusObserver = this::handleContentEntryFileStatus;
         statusLiveData!!.observeForever(statusObserver!!)
+
+
         downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
         downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         //entryStatusLiveData.observeForever(entryStatusObserver);
@@ -455,20 +461,33 @@ class DownloadJobItemRunner
     private fun connectToCloudNetwork(): Boolean {
         UMLog.l(UMLog.DEBUG, 699, "Reconnecting cloud network")
         networkManager.restoreWifi()
-        WaitForLiveData.observeUntil(statusLiveData!!, (CONNECTION_TIMEOUT * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                if (connectivityStatus == null)
-                    return false
-
-                if (connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED) {
+        runBlocking {
+            waitForLiveData(statusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) {connectivityStatus ->
+                if (connectivityStatus == null) {
+                    false
+                }else if (connectivityStatus.connectivityState == ConnectivityStatus.STATE_UNMETERED) {
                     networkManager.lockWifi(downloadWiFiLock)
-                    return true
+                    true
+                }else {
+                    connectivityStatus.connectivityState == STATE_METERED && meteredConnectionAllowed.get() == 1
                 }
-
-                return connectivityStatus!!.connectivityState == STATE_METERED && meteredConnectionAllowed.get() == 1
             }
+        }
 
-        })
+//        WaitForLiveData.observeUntil(statusLiveData!!, (CONNECTION_TIMEOUT * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
+//            override fun done(value: ConnectivityStatus): Boolean {
+//                if (connectivityStatus == null)
+//                    return false
+//
+//                if (connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED) {
+//                    networkManager.lockWifi(downloadWiFiLock)
+//                    return true
+//                }
+//
+//                return connectivityStatus!!.connectivityState == STATE_METERED && meteredConnectionAllowed.get() == 1
+//            }
+//
+//        })
         return connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED || meteredConnectionAllowed.get() == 1 && connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_METERED
     }
 
@@ -532,12 +551,17 @@ class DownloadJobItemRunner
 
         //disconnect first
         if (connectivityStatus!!.connectivityState != ConnectivityStatus.STATE_DISCONNECTED && connectivityStatus!!.wifiSsid != null) {
-            WaitForLiveData.observeUntil(statusLiveData!!, 10 * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-                override fun done(value: ConnectivityStatus): Boolean {
-                    return connectivityStatus != null && connectivityStatus!!.connectivityState != ConnectivityStatus.STATE_UNMETERED
+            runBlocking {
+                waitForLiveData(statusLiveData!!, 10 * 1000.toLong()) {
+                    it != null && it.connectivityState != ConnectivityStatus.STATE_UNMETERED
                 }
-
-            })
+            }
+//            WaitForLiveData.observeUntil(statusLiveData!!, 10 * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
+//                override fun done(value: ConnectivityStatus): Boolean {
+//                    return connectivityStatus != null && connectivityStatus!!.connectivityState != ConnectivityStatus.STATE_UNMETERED
+//                }
+//
+//            })
             UMLog.l(UMLog.INFO, 699, "Disconnected existing wifi network")
         }
 
@@ -546,19 +570,28 @@ class DownloadJobItemRunner
         networkManager.connectToWiFi(wiFiDirectGroupBle.get().ssid,
                 wiFiDirectGroupBle.get().passphrase)
 
-        val statusRef = AtomicReference<ConnectivityStatus>()
-        WaitForLiveData.observeUntil(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                statusRef.set(value)
-                if (value == null)
-                    return false
-
-                return isExpectedWifiDirectGroup(value)
+        val statusRef = AtomicReference<ConnectivityStatus?>()
+        runBlocking {
+            waitForLiveData(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong()) {
+                statusRef.set(it)
+                it != null && isExpectedWifiDirectGroup(it)
             }
+        }
 
-        })
+
+//        WaitForLiveData.observeUntil(statusLiveData!!, (lWiFiConnectionTimeout * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
+//            override fun done(value: ConnectivityStatus): Boolean {
+//                statusRef.set(value)
+//                if (value == null)
+//                    return false
+//
+//                return isExpectedWifiDirectGroup(value)
+//            }
+//
+//        })
         waitingForLocalConnection.set(false)
-        return statusRef.get() != null && isExpectedWifiDirectGroup(statusRef.get())
+        val currentStatus = statusRef.get()
+        return currentStatus != null && isExpectedWifiDirectGroup(currentStatus)
     }
 
 

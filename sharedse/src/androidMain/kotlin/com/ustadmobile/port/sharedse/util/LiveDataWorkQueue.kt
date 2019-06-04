@@ -1,7 +1,6 @@
 package com.ustadmobile.port.sharedse.util
 
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.*
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -82,7 +81,7 @@ class LiveDataWorkQueue<T>
      */
     fun start(workSource: DoorLiveData<List<T>>) {
         this.workSource = workSource
-        workObserver = DoorObserver { t -> handleWorkSourceChanged(t) }
+        workObserver = ObserverFnWrapper(this::handleWorkSourceChanged)
         workSource.observeForever(workObserver!!)
     }
 

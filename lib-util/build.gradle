@@ -38,6 +38,7 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common:$version_kotlin")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
                 implementation project(":lib-door-runtime")
             }
@@ -47,6 +48,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
             }
         }
         commonJvmMain {
@@ -59,9 +61,15 @@ kotlin {
         }
 
         jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+            }
             dependsOn commonJvmMain
         }
         androidMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+            }
             dependsOn commonJvmMain
         }
 
