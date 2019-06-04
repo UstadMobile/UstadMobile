@@ -25,6 +25,9 @@ gen/
 .gradle/
 build/
 
+# Android Studio classes generated when running unit tests in the Ide
+classes/
+
 # Local configuration file (sdk path, etc)
 local.properties
 

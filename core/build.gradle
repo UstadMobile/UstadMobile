@@ -117,7 +117,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
 
             }
@@ -160,6 +159,22 @@ kotlin {
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
                 api project(":lib-database-mpp")
+
+                // 5/June/2019 - Unfortunately, Android Studio won't load these depnendencies
+                // of sharedse when running tests in the IDE, which is why we have them here too.
+
+                //Begin SharedSE Android and JVM dependencies
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+
+                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+                //end SharedSE Android and JVM dependencies
             }
         }
         androidMain {
@@ -170,6 +185,7 @@ kotlin {
                 implementation "com.soywiz:klock-android:$version_klock"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
             }
             dependsOn commonJvmMain

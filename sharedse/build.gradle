@@ -104,7 +104,7 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
 
 
-                //Begin Android and JVM dependencies
+                //Begin SharedSE Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
@@ -115,7 +115,7 @@ kotlin {
                 implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
                 implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
-                //end Android and JVM dependencies
+                //end SharedSE Android and JVM dependencies
             }
         }
 

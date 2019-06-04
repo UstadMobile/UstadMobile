@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.any
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UmCallbackUtil
@@ -16,6 +17,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import com.ustadmobile.test.core.util.checkJndiSetup
+import com.ustadmobile.test.core.util.extractTestResourceToFile
+import kotlinx.coroutines.Runnable
 
 import java.io.File
 import java.io.IOException
@@ -79,7 +82,7 @@ class TestXapiPackageContentPresenter {
 
         xapiTmpFile = File.createTempFile("testxapipackagecontentpresenter",
                 "xapiTmpFile")
-        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/XapiPackage-JsTetris_TCAPI.zip",
+        extractTestResourceToFile("/com/ustadmobile/core/contentformats/XapiPackage-JsTetris_TCAPI.zip",
                 xapiTmpFile)
 
         containerDirTmp = UmFileUtilSe.makeTempDir("testxapipackagecontentpresenter",
@@ -87,30 +90,18 @@ class TestXapiPackageContentPresenter {
         val containerManager = ContainerManager(xapiContainer, db, repo,
                 containerDirTmp!!.absolutePath)
         val xapiZipFile = ZipFile(xapiTmpFile)
-        containerManager.addEntriesFromZip(xapiZipFile, ContainerManager.OPTION_COPY)
+        containerManager.addEntriesFromZip(xapiZipFile, ContainerManager.OPTION_COPY or ContainerManager.OPTION_UPDATE_TOTALS)
         xapiZipFile.close()
 
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
 
-//        mockXapiPackageContentView = mock(XapiPackageContentView::class.java)
-//        doAnswer {
-//            Thread {
-//                lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-//                        httpd!!.mountContainer(it.getArgument(0)!!, null)!!)
-//                UmCallbackUtil.onSuccessIfNotNull<String>(it.getArgument<UmCallback<String>>(1),
-//                        lastMountedUrl!!)
-//                mountLatch.countDown()
-//            }.start()
-//            Any()
-//        }.`when`<XapiPackageContentView>(mockXapiPackageContentView)
-//                .mountContainer(eq(xapiContainer.containerUid), any<UmCallback<String>>())
-//
-//
-//        doAnswer { invocation ->
-//            Thread(invocation.getArgument<Any>(0) as Runnable).start()
-//            Any()
-//        }.`when`<XapiPackageContentView>(mockXapiPackageContentView).runOnUiThread(any())
+        mockXapiPackageContentView = mock(XapiPackageContentView::class.java)
+
+        doAnswer { invocation ->
+            Thread(invocation.getArgument<Any>(0) as Runnable).start()
+            Any()
+        }.`when`<XapiPackageContentView>(mockXapiPackageContentView).runOnUiThread(any())
 
     }
 
@@ -123,23 +114,28 @@ class TestXapiPackageContentPresenter {
     @Test
     @Throws(InterruptedException::class)
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
-//        val args = Hashtable<String,String>()
+        val args = Hashtable<String,String>()
         Assert.assertNotNull(xapiContainer)
-//        args.put(XapiPackageContentView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
-//
-//        val xapiPresenter = XapiPackageContentPresenter(
-//                context, args, mockXapiPackageContentView!!)
-//        xapiPresenter.onCreate(null)
-//
-//        mountLatch.await(15000, TimeUnit.MILLISECONDS)
-//
-//        verify<XapiPackageContentView>(mockXapiPackageContentView).mountContainer(
-//                eq(xapiContainer.containerUid), any<UmCallback<String>>())
-//
-//        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(5000)).loadUrl(
-//                UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html"))
-//
-//        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example")
+        args.put(XapiPackageContentView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+
+        val xapiPresenter = XapiPackageContentPresenter(
+                context, args, mockXapiPackageContentView!!) {
+            val mountedPath = httpd!!.mountContainer(it, null)
+            lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
+                mountedPath!!)
+            mountLatch.countDown()
+            lastMountedUrl!!
+        }
+
+
+        xapiPresenter.onCreate(null)
+
+        mountLatch.await(15000, TimeUnit.MILLISECONDS)
+
+        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(5000)).loadUrl(
+                UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html"))
+
+        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example")
     }
 
 }
