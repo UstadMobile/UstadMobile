@@ -90,6 +90,10 @@ kotlin {
             }
         }
 
+        /*
+         Normally we would add a sourceSet and then use dependsOn. Unfortunately this does not
+         work when running unit tests in the IDE.
+         */
         androidMain {
             kotlin.srcDir("src/commonJvmMain/kotlin")
 
