@@ -42,6 +42,14 @@ android {
 
 kotlin {
 
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+
+
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
@@ -114,7 +122,9 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-                implementation project(":sharedse")
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":lib-database-annotations")
             }
         }
         androidMain {
