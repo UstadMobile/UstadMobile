@@ -16,7 +16,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -32,14 +32,14 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation "androidx.room:room-runtime:2.1.0-beta01"
+    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+    implementation "androidx.room:room-runtime:$version_android_room"
     implementation project(":lib-door-runtime")
     kapt "androidx.room:room-compiler:2.1.0-beta01"
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {

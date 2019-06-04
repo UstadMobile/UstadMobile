@@ -1,8 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
-import android.support.test.InstrumentationRegistry
-import android.support.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.InstrumentationRegistry
+import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
@@ -35,18 +35,18 @@ class H5PContentActivityEspressoTest {
     @Before
     fun setup() {
         db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
-        repo = db?.getRepository("http://localhost/dummy/", "")
+        repo =  UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext()) //db?.getRepository("http://localhost/dummy/", "")
         db?.clearAllTables()
 
         h5PTmpFile = File.createTempFile("H5pContentActivityEspressoTest", "h5p-true-false.h5p")
         containerTmpDir = UmFileUtilSe.makeTempDir("H5PContentActivityEspressoTest", "containerDir")
 
         h5pContainer = Container()
-        h5pContainer?.containerUid = repo!!.containerDao!!.insert(h5pContainer)
+        h5pContainer?.containerUid = repo!!.containerDao.insert(h5pContainer!!)
 
-        val containerManager = ContainerManager(h5pContainer, db, repo, containerTmpDir?.absolutePath)
+        val containerManager = ContainerManager(h5pContainer!!, db!!, repo!!, containerTmpDir?.absolutePath!!)
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/android/view/H5P-true-false.h5p",
-                h5PTmpFile)
+                h5PTmpFile!!)
         val zipFile = ZipFile(h5PTmpFile)
 
         containerManager.addEntriesFromZip(zipFile,

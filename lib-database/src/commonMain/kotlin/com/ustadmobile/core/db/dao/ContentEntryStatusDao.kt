@@ -1,19 +1,19 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 
 @Dao
 abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
 
-    fun refresh() {
+   /* fun refresh() {
         println("Update content entry status")
-    }
+    }*/
 
     @Query("DELETE FROM ContentEntryStatus")
-    abstract fun deleteAllAsync()
+    abstract suspend fun deleteAllAsync()
 
     @Query("UPDATE ContentEntryStatus SET bytesDownloadSoFar = :bytesDownloadSoFar " + "WHERE cesUid = :contentEntryUid")
     abstract fun updateLeafBytesDownloaded(contentEntryUid: Long, bytesDownloadSoFar: Long)
@@ -26,7 +26,7 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun findAllInvalidated(): List<ContentEntryStatus>
 
     @Query("Select * FROM ContentEntryStatus where cesUid = :parentUid")
-    abstract fun findContentEntryStatusByUid(parentUid: Long): UmLiveData<ContentEntryStatus>
+    abstract fun findContentEntryStatusByUid(parentUid: Long): DoorLiveData<ContentEntryStatus?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertOrAbort(statusList: List<ContentEntryStatus>)
@@ -35,7 +35,7 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     abstract fun deleteByFileUids(cesUid: Long)
 
     @Transaction
-    fun updateDownloadStatusByList(statusList: List<DownloadJobItemStatus>) {
+    open fun updateDownloadStatusByList(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateDownloadStatus(status.contentEntryUid, status.status)
         }

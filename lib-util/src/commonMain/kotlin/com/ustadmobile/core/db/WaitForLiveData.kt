@@ -1,5 +1,7 @@
 package com.ustadmobile.core.db
 
+import com.ustadmobile.door.DoorLiveData
+
 expect object WaitForLiveData {
 
     interface WaitForChecker<T> {
@@ -15,7 +17,8 @@ expect object WaitForLiveData {
      * @param checker interface to check for value
      * @param <T> The type of value returned by the live data
     </T> */
-    fun <T> observeUntil(liveData: UmLiveData<T>, timeout: Long, checker: WaitForChecker<T>) //{
+    fun <T> observeUntil(liveData: DoorLiveData<T>, timeout: Long, checker: WaitForChecker<T>) //{
+
 
        /* val latch = CountDownLatch(1)
 

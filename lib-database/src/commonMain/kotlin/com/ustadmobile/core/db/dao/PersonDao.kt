@@ -20,9 +20,9 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
         + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
-abstract class PersonDao : SyncableDao<Person, PersonDao> {
+abstract class PersonDao : BaseDao<Person> {
 
-    internal inner class PersonUidAndPasswordHash {
+    class PersonUidAndPasswordHash {
         var passwordHash: String = ""
 
         var personUid: Long = 0
@@ -67,8 +67,8 @@ abstract class PersonDao : SyncableDao<Person, PersonDao> {
     @Insert
     abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
 
-    @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
-    protected abstract fun incrementPrimaryKey()
+  /*  @Query("UPDATE SyncablePrimaryKey SET sequenceNumber = sequenceNumber + 1 WHERE tableId = " + Person.TABLE_ID)
+    protected abstract fun incrementPrimaryKey()*/
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
@@ -91,7 +91,7 @@ abstract class PersonDao : SyncableDao<Person, PersonDao> {
     @Query("SELECT Person.personUid, PersonAuth.passwordHash " +
             " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
             "WHERE Person.username = :username")
-    internal abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
+    abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
 
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
@@ -111,6 +111,9 @@ abstract class PersonDao : SyncableDao<Person, PersonDao> {
 
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String): Person?
+
+    @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
+    abstract fun findByUid(uid: Long): Person?
 
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long

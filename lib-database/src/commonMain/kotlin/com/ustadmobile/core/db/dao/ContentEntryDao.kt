@@ -1,13 +1,11 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmQuery
-import com.ustadmobile.lib.database.annotation.UmQueryFindByPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -15,25 +13,25 @@ import kotlin.js.JsName
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
 @UmRepository
-abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
+abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("SELECT * FROM ContentEntry")
     @JsName("allEntries")
     abstract fun allEntries(): List<ContentEntry>
 
-    @UmQuery("SELECT * FROM ContentEntry WHERE publik")
+
+    @Query("SELECT * FROM ContentEntry WHERE publik")
     @JsName("publicContentEntries")
     abstract fun publicContentEntries(): List<ContentEntry>
 
-
-    @UmQuery("SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, " +
+    @Query("SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, " +
             "(SELECT containerUid FROM Container " +
             "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY lastModified DESC LIMIT 1) as mostRecentContainer " +
             "FROM DownloadJob \n" +
             "LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid\n" +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid \n ")
     @JsName("downloadedRootItems")
-    abstract fun downloadedRootItems(): UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>
+    abstract fun downloadedRootItems(): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 
     @Insert
     @JsName("insert")
@@ -51,7 +49,7 @@ abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")
     @JsName("getChildrenByParentUid")
-    abstract fun getChildrenByParentUid(parentUid: Long): UmProvider<ContentEntry>
+    abstract fun getChildrenByParentUid(parentUid: Long): DataSource.Factory<Int, ContentEntry>
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -95,12 +93,13 @@ abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid ORDER BY Language.name")
     @JsName("findUniqueLanguagesInListAsync")
-    abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): MutableList<Language>
+    abstract suspend fun findUniqueLanguagesInListAsync(parentUid: Long): List<Language>
 
     @Update
     abstract override fun update(entity: ContentEntry)
 
-    @UmQueryFindByPrimaryKey
+
+    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid = :entryUid")
     @JsName("findByUidAsync")
     abstract suspend fun findByUidAsync(entryUid: Long): ContentEntry?
 
@@ -128,7 +127,5 @@ abstract class ContentEntryDao : SyncableDao<ContentEntry, ContentEntryDao> {
             "(:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin " +
             "WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid))")
     @JsName("getChildrenByParentUidWithCategoryFilter")
-    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): UmProvider<ContentEntryWithStatusAndMostRecentContainerUid>
-
-
+    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long): DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>
 }

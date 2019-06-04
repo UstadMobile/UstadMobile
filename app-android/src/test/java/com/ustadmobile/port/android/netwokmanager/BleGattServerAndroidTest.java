@@ -11,6 +11,7 @@ import android.content.Context;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,6 @@ import java.util.List;
 
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.DEFAULT_MTU_SIZE;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.ENTRY_STATUS_REQUEST;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -82,8 +82,8 @@ public class BleGattServerAndroidTest {
                 any(BluetoothGattServerCallback.class))).thenReturn(mockedGattServer);
 
         List<Long> entryList = Arrays.asList(1056289670L,4590875612L,9076137860L,2912543894L);
-        bleMessage = new BleMessage(ENTRY_STATUS_REQUEST,(byte)42, BleMessageUtil.bleMessageLongToBytes(entryList));
-        when(mockedCharacteristics.getUuid()).thenReturn(USTADMOBILE_BLE_SERVICE_UUID);
+        bleMessage = new BleMessage(ENTRY_STATUS_REQUEST,(byte)42, BleMessageUtil.INSTANCE.bleMessageLongToBytes(entryList));
+        when(mockedCharacteristics.getUuid()).thenReturn(NetworkManagerBle.Companion.getUSTADMOBILE_BLE_SERVICE_UUID());
     }
 
     @Test

@@ -45,7 +45,7 @@ interface BaseDao<T> {
      * @param uid uid to find
      * @return the object represented by the primary key, or null if there is no such object
      */
-    fun findByUid(uid: Long): T?
+    //fun findByUid(uid: Long): T?
 
     @Update
     fun update(entity: T)

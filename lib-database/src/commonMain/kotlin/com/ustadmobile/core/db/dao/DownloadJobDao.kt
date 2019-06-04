@@ -2,7 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.DownloadJob
 
 /**
@@ -12,18 +12,18 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 abstract class DownloadJobDao {
 
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
-    abstract fun lastJobLive(): UmLiveData<DownloadJob?>
+    abstract fun lastJobLive(): DoorLiveData<DownloadJob?>
 
     @Query("SELECT * FROM DownloadJob ORDER BY timeCreated DESC LIMIT 1")
     abstract fun lastJob(): DownloadJob?
 
     @Query("SELECT * From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
-    abstract fun activeDownloadJobs(): UmLiveData<List<DownloadJob>>
+    abstract fun activeDownloadJobs(): DoorLiveData<List<DownloadJob>>
 
     @Query("SELECT count(*) > 0 From DownloadJob WHERE djStatus BETWEEN " + (JobStatus.PAUSED + 1) + " AND " +
             JobStatus.RUNNING_MAX + " ORDER BY timeCreated")
-    abstract fun anyActiveDownloadJob(): UmLiveData<Boolean>
+    abstract fun anyActiveDownloadJob(): DoorLiveData<Boolean>
 
     /**
      * IInsert a new DownloadJob
@@ -76,10 +76,10 @@ abstract class DownloadJobDao {
      */
 
     @Query("SELECT * FROM DownloadJob WHERE djUid = :djUid")
-    abstract fun getJobLive(djUid: Int): UmLiveData<DownloadJob?>
+    abstract fun getJobLive(djUid: Int): DoorLiveData<DownloadJob?>
 
     @Query("SELECT * FROM DownloadJob WHERE djStatus = :jobStatus")
-    abstract fun getJobsLive(jobStatus: Int): UmLiveData<List<DownloadJob>>
+    abstract fun getJobsLive(jobStatus: Int): DoorLiveData<List<DownloadJob>>
 
     @Query("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int?
@@ -97,7 +97,7 @@ abstract class DownloadJobDao {
                                 jobStatusTo: Int)
 
     @Transaction
-    fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
+    open fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
                           completeJobItemStatus: Int) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
@@ -123,7 +123,7 @@ abstract class DownloadJobDao {
     @Query("SELECT ContentEntry.title FROM DownloadJob " +
             "LEFT JOIN ContentEntry ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE DownloadJob.djUid = :downloadJobId")
-    abstract suspend fun getEntryTitleByJobUidAsync(downloadJobId: Long): String?
+    abstract suspend fun getEntryTitleByJobUidAsync(downloadJobId: Int): String?
 
     @Query("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :downloadJobId")
     abstract fun updateStatus(downloadJobId: Int, djStatus: Int)
@@ -145,10 +145,10 @@ abstract class DownloadJobDao {
     abstract fun setMeteredConnectionAllowedByJobUidSync(djUid: Int, meteredNetworkAllowed: Boolean)
 
     @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
-    abstract fun getLiveMeteredNetworkAllowed(djUid: Int): UmLiveData<Boolean>
+    abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
     @Transaction
-    fun cleanupUnused(downloadJobUid: Int) {
+    open fun cleanupUnused(downloadJobUid: Int) {
         deleteUnusedDownloadJobItems(downloadJobUid)
         deleteUnusedDownloadJob(downloadJobUid)
     }

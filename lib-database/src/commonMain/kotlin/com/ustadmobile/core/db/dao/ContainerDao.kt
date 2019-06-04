@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
 
 @Dao
 @UmRepository
-abstract class ContainerDao : SyncableDao<Container, ContainerDao> {
+abstract class ContainerDao : BaseDao<Container> {
 
     @Insert
     abstract fun insert(containerList: List<Container>): Array<Long>
@@ -30,6 +30,9 @@ abstract class ContainerDao : SyncableDao<Container, ContainerDao> {
             "ORDER BY Container.lastModified DESC LIMIT 1")
     abstract fun getFileSizeOfMostRecentContainerForContentEntry(contentEntryUid: Long): Long?
 
+
+    @Query("SELECT * FROM Container WHERE containerUid = :uid")
+    abstract fun findByUid(uid: Long): Container?
 
     @Query("SELECT recent.* " +
             "FROM Container recent LEFT JOIN Container old " +

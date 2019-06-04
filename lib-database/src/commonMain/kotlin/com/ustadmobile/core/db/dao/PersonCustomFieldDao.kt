@@ -17,5 +17,5 @@ abstract class PersonCustomFieldDao : BaseDao<PersonCustomField> {
     abstract override suspend fun insertAsync(entity: PersonCustomField): Long
 
     @Query("SELECT * FROM PersonCustomField WHERE personCustomFieldUid = :uid")
-    abstract override fun findByUid(uid: Long): PersonCustomField?
+    abstract fun findByUid(uid: Long): PersonCustomField?
 }

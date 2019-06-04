@@ -1,20 +1,14 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Index
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndex
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 51 ,indices = arrayOf(UmIndex(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
-open class Container {
+open class Container() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
@@ -48,9 +42,7 @@ open class Container {
      */
     var cntNumEntries: Int = 0
 
-    constructor()
-
-    constructor(contentEntry: ContentEntry) {
+    constructor(contentEntry: ContentEntry) : this() {
         this.containerContentEntryUid = contentEntry.contentEntryUid
     }
 }

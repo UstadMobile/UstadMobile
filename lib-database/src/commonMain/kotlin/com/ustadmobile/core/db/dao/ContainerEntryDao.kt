@@ -16,7 +16,7 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
 
     @Transaction
-    fun insertAndSetIds(containerEntryList: List<ContainerEntry>) {
+    open fun insertAndSetIds(containerEntryList: List<ContainerEntry>) {
         for (entry in containerEntryList) {
             entry.ceUid = insert(entry)
         }

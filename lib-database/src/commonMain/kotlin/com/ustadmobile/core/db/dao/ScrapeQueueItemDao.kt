@@ -2,12 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
 @Dao
 abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
-    fun getNextItemAndSetStatus(runId: Int, itemType: Int): ScrapeQueueItem? {
+    @Transaction
+    open fun getNextItemAndSetStatus(runId: Int, itemType: Int): ScrapeQueueItem? {
         val nextItem = findNextItem(STATUS_PENDING, runId, itemType)
         if (nextItem != null) {
             updateSetStatusById(nextItem.sqiUid, STATUS_RUNNING)

@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 
 import com.ustadmobile.lib.db.entities.NetworkNode;
+import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +16,6 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,7 +81,7 @@ public class BleEntryStatusTaskAndroidTest {
 
         assertNotNull("BleClientCallback should not be null ", statusTask.getGattClientCallback());
 
-        List<Long> receivedEntries = bleMessageBytesToLong(statusTask.getMessage().getPayload());
+        List<Long> receivedEntries = BleMessageUtil.INSTANCE.bleMessageBytesToLong(statusTask.getMessage().getPayload());
 
         assertEquals("Should have the same message", receivedEntries,entries);
     }

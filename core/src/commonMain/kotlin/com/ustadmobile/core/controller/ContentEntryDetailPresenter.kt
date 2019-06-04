@@ -17,6 +17,10 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
 import com.ustadmobile.core.view.DummyView
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
@@ -29,7 +33,7 @@ import kotlinx.coroutines.launch
 class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
                                   viewContract: ContentEntryDetailView,
                                   private val monitor: LocalAvailabilityMonitor,
-                                  private val statusProvider: DownloadJobItemStatusProvider)
+                                  private val statusProvider: DownloadJobItemStatusProvider?)
     : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
         OnDownloadJobItemChangeListener {
 
@@ -48,17 +52,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private val isListeningToDownloadStatus = atomic(false)
 
-    private var statusUmLiveData: UmLiveData<ContentEntryStatus>? = null
-
-    private val statusUmObserver: UmObserver<ContentEntryStatus> =
-            object : UmObserver<ContentEntryStatus> {
-                override fun onChanged(t: ContentEntryStatus?) {
-                    when (t) {
-                        null -> onEntryStatusChanged(null)
-                        else -> onEntryStatusChanged(t)
-                    }
-                }
-            }
+    private var statusUmLiveData: DoorLiveData<ContentEntryStatus?>? = null
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
@@ -124,7 +118,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
-        statusUmLiveData!!.observe(this, statusUmObserver)
+        statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
     }
 
     private fun getLicenseType(result: ContentEntry): String {
@@ -158,8 +152,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = true
-            statusProvider.addDownloadChangeListener(this)
-            statusProvider.findDownloadJobItemStatusByContentEntryUid(entryUuid,
+            statusProvider?.addDownloadChangeListener(this)
+            statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid,
                     object : UmResultCallback<DownloadJobItemStatus?> {
                         override fun onDone(result: DownloadJobItemStatus?) {
                             onDownloadJobItemChange(result, result?.jobItemUid ?: 0)
@@ -169,7 +163,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             view.setDownloadProgressVisible(true)
         } else if (!isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = false
-            statusProvider.removeDownloadChangeListener(this)
+            statusProvider?.removeDownloadChangeListener(this)
             view.setDownloadButtonVisible(true)
             view.setDownloadProgressVisible(false)
         }
@@ -240,7 +234,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     fun handleClickTranslatedEntry(uid: Long) {
         val args = HashMap<String, String>()
         args[ARG_CONTENT_ENTRY_UID] = uid.toString()
-        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
+        impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext!!)
     }
 
     fun handleUpNavigation() {
@@ -314,11 +308,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
             monitor.stopMonitoringAvailability(this)
         }
 
-        statusUmLiveData?.removeObserver(statusUmObserver)
-
-
         if (isListeningToDownloadStatus.getAndSet(false)) {
-            statusProvider.removeDownloadChangeListener(this)
+            statusProvider?.removeDownloadChangeListener(this)
         }
         super.onDestroy()
     }

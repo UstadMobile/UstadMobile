@@ -19,6 +19,8 @@ apply plugin: "maven-publish"
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
+        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
+        // the project to avoid it being seen as an extra jvm variant
         //fromPreset(presets.jvm, 'commonJvm') //comment this out for code completion
         fromPreset(presets.js, 'js') {
             compilations.main.kotlinOptions {
@@ -37,6 +39,7 @@ kotlin {
                 implementation kotlin("stdlib-common:$version_kotlin")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
+                implementation project(":lib-door-runtime")
             }
         }
         jsMain {
@@ -51,6 +54,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
             }
         }
 

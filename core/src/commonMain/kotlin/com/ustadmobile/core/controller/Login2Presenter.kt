@@ -39,8 +39,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
     fun handleClickLogin(username: String, password: String, serverUrl: String) {
         view.setInProgress(true)
         view.setErrorMessage("")
-        val loginRepoDb = UmAppDatabase.getInstance(context).getRepository(serverUrl,
-                "")
+        val loginRepoDb = UmAppDatabase.getInstance(context)//.getRepository(serverUrl, "")
         val systemImpl = UstadMobileSystemImpl.instance
         GlobalScope.launch {
             try {

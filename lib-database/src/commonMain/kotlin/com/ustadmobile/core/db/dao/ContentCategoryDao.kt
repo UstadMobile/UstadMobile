@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentCategory
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
 @UmRepository
-abstract class ContentCategoryDao : SyncableDao<ContentCategory, ContentCategoryDao> {
+abstract class ContentCategoryDao : BaseDao<ContentCategory> {
 
     @Query("SELECT ContentCategory.* FROM ContentCategory")
     abstract fun publicContentCategories(): List<ContentCategory>

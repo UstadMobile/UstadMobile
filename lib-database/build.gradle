@@ -15,7 +15,7 @@ apply plugin: "kotlin-multiplatform"
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
 apply plugin: "jacoco"
-
+apply plugin: "kotlin-kapt"
 
 android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
@@ -65,6 +65,20 @@ kotlin {
         }
         jvmMain {
             dependsOn commonJvmMain
+            dependencies {
+                /*
+                 This is required to make the annotation processor actually work... sigh.
+                 */
+                compileOnly project(":lib-database-annotation-processor")
+                compileOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                compileOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                compileOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                compileOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                compileOnly "com.squareup:kotlinpoet:1.2.0"
+
+                compileOnly "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+                compileOnly "org.apache.commons:commons-text:$version_apache_commons_text"
+            }
         }
         androidMain {
             dependsOn commonJvmMain
@@ -80,41 +94,17 @@ kotlin {
 
 }
 
-
-/*dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
-    compileOnly project(":lib-database-runtime-core-compileonly")
-    implementation project(':lib-database-runtime')
-    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
-    implementation project(":lib-util")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-
-    annotationProcessor project(':lib-database-annotation-processor')
-
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "javax.ws.rs:javax.ws.rs-api:2.1"
-    testRuntimeOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testRuntimeOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testRuntimeOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testRuntimeOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-    testImplementation project(":lib-database-jdbc")
-    testImplementation project(":lib-database-entities")
-    testImplementation project(":lib-database-runtime")
-    testImplementation project(':lib-database-runtime-jdbc')
-    testImplementation project(':app-rest-server')
-
-    //Jersey dependencies - used to run the test server
-    testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
-    testImplementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
-    testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
+kapt {
+    arguments {
+        arg("door_jdbc_kt_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
+    }
 }
- */
+
+
+dependencies {
+    kapt project(":lib-database-annotation-processor")
+}
+
 
 publishing {
     publications {

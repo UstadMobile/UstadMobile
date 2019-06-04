@@ -1,17 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Embedded
+import androidx.room.Embedded
 import com.ustadmobile.lib.database.annotation.UmEmbedded
 
-class ContainerEntryWithContainerEntryFile : ContainerEntry {
+class ContainerEntryWithContainerEntryFile(cePath: String = "", container: Container = Container(), entryFile: ContainerEntryFile = ContainerEntryFile()) : ContainerEntry(cePath, container, entryFile) {
 
     @UmEmbedded
     @Embedded
-    var containerEntryFile: ContainerEntryFile? = null
+    var containerEntryFile: ContainerEntryFile? = entryFile
 
-    constructor(cePath: String, container: Container, entryFile: ContainerEntryFile) : super(cePath, container, entryFile) {
-        this.containerEntryFile = entryFile
-    }
-
-    constructor()
 }

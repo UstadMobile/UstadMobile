@@ -77,7 +77,7 @@ abstract class NetworkNodeDao {
     abstract fun getEndpointUrlByGroupSsid(ssid: String): String?
 
     @Transaction
-    suspend fun updateNodeLastSeen(knownNodes: MutableMap<String, Long>) {
+    open suspend fun updateNodeLastSeen(knownNodes: MutableMap<String, Long>) {
         val nodeIterator = knownNodes.entries.iterator()
         while (nodeIterator.hasNext()) {
             val nodeUpdates = nodeIterator.next()

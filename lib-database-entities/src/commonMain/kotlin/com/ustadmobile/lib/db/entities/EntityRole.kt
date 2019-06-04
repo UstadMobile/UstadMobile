@@ -1,18 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 47)
 @Entity
-class EntityRole {
+class EntityRole() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
@@ -43,9 +38,7 @@ class EntityRole {
     @ColumnInfo(index = true)
     var erRoleUid: Long = 0
 
-    constructor()
-
-    constructor(erTableId: Int, erEntityUid: Long, erGroupUid: Long, erRoleUid: Long) {
+    constructor(erTableId: Int, erEntityUid: Long, erGroupUid: Long, erRoleUid: Long) : this() {
         this.erTableId = erTableId
         this.erEntityUid = erEntityUid
         this.erGroupUid = erGroupUid

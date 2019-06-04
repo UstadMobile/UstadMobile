@@ -39,3 +39,14 @@ Eg. in ClazzMember.kt:
 var clazzMemberPersonUid: Long
 ```
 
+### Primary Constructor 
+
+primary constructor needs to be implemted on all entities 
+
+```
+class TestEntity(){
+
+}
+
+constructor() does not work 
+```

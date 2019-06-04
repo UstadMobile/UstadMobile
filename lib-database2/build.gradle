@@ -17,10 +17,12 @@ buildscript {
 }
 
 
-apply plugin: "kotlin-multiplatform"
-apply plugin: 'com.android.library'
-apply plugin: "maven-publish"
-apply plugin: "kotlin-kapt"
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id "org.jetbrains.kotlin.kapt"
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 
 android {
@@ -63,6 +65,20 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation project(":lib-door-runtime")
+
+                /*
+                 This is required to make the annotation processor actually work... sigh.
+                 */
+                compileOnly project(":lib-database-annotation-processor")
+                compileOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                compileOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                compileOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                compileOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                compileOnly "com.squareup:kotlinpoet:1.2.0"
+
+                compileOnly "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+                compileOnly "org.apache.commons:commons-text:$version_apache_commons_text"
             }
         }
 
@@ -88,6 +104,5 @@ sourceCompatibility = "8"
 targetCompatibility = "8"
 
 dependencies {
-    //kapt "androidx.room:room-compiler:2.1.0-beta01"
     kapt project(":lib-database-annotation-processor")
 }

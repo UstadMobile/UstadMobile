@@ -40,10 +40,7 @@ public class App extends UmBaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        Context appContext = getApplicationContext();
-        UmAppDatabase.getInstance(appContext).setAttachmentsDir(new File(appContext.getFilesDir(),
-                ATTACHMENTS_DIR).getAbsolutePath());
-        UstadMobileSystemImpl.getInstance().setMessageIdMap(MessageIDMap.ID_MAP);
+        UstadMobileSystemImpl.getInstance().setMessageIdMap(MessageIDMap.INSTANCE.getID_MAP());
     }
 
     @Override

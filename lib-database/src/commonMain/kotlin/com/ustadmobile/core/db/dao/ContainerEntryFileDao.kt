@@ -1,10 +1,12 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 
 @UmDao
+@Dao
 abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
     //TODO: split this to handle very large queries
@@ -14,6 +16,8 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("UPDATE ContainerEntryFile SET cefPath = :path WHERE cefUid = :cefUid")
     abstract fun updateFilePath(cefUid: Long, path: String)
 
+    @Query("SELECT * FROM ContainerEntryFile WHERE cefUid = :uid")
+    abstract fun findByUid(uid: Long): ContainerEntryFile?
 
     @Query("SELECT SUM(ContainerEntryFile.ceCompressedSize) FROM " +
             "ContainerEntry " +

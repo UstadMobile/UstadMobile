@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -59,7 +60,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
         }
 
         GlobalScope.launch {
-            val result = contentEntryDao!!.findUniqueLanguagesInListAsync(parentUid!!)
+            val result = contentEntryDao!!.findUniqueLanguagesInListAsync(parentUid!!).toMutableList()
             if (result.size > 1) {
                 val selectLang = Language()
                 selectLang.name = "Language"
@@ -124,10 +125,10 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                 }
                 if (result.leaf) {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.context)
+                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.viewContext)
                 }
             } catch (e: Exception) {
                 fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
@@ -151,7 +152,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
     @JsName("handleUpNavigation")
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        impl.go(DummyView.VIEW_NAME, mapOf(), view.context,
+        impl.go(DummyView.VIEW_NAME, mapOf(), view.viewContext,
                 UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
 
     }

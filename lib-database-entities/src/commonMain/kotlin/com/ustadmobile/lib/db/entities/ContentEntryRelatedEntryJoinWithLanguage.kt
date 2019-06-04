@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-class ContentEntryRelatedEntryJoinWithLanguage {
+class ContentEntryRelatedEntryJoinWithLanguage() {
 
     var cerejContentEntryUid: Long = 0
 

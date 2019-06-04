@@ -1,14 +1,9 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmIndexField
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 /**
  * This class mediates the relationship between a person and a clazz. A member can be a teacher,
@@ -16,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
  */
 @UmEntity(tableId = 11)
 @Entity
-class ClazzMember : SyncableEntity {
+class ClazzMember() : SyncableEntity {
 
     /**
      * The personUid field of the related Person entity
@@ -54,9 +49,7 @@ class ClazzMember : SyncableEntity {
     @UmSyncLastChangedBy
     var clazzMemberLastChangedBy: Int = 0
 
-    constructor()
-
-    constructor(clazzUid: Long, personUid: Long) {
+    constructor(clazzUid: Long, personUid: Long) : this() {
         this.clazzMemberClazzUid = clazzUid
         this.clazzMemberPersonUid = personUid
     }

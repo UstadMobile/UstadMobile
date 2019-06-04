@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Location
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @Dao
 @UmRepository
-abstract class LocationDao : SyncableDao<Location, LocationDao> {
+abstract class LocationDao : BaseDao<Location> {
 
 
     @Insert
@@ -27,7 +27,7 @@ abstract class LocationDao : SyncableDao<Location, LocationDao> {
     abstract suspend fun updateAsync(entity: Location): Int
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
-    abstract override fun findByUid(uid: Long): Location?
+    abstract fun findByUid(uid: Long): Location?
 
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): Location?

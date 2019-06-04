@@ -1,9 +1,9 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
-class XapiStatement {
+class XapiStatement() {
 
     @UmPrimaryKey
     @PrimaryKey

@@ -59,8 +59,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
 
         val systemImpl = UstadMobileSystemImpl.instance
         if (umAppDatabase === null) {
-            umAppDatabase = UmAppDatabase.getInstance(context).getRepository(serverUrl,
-                    "")
+            umAppDatabase = UmAppDatabase.getInstance(context)//.getRepository(serverUrl, "")
         }
 
         if (repo === null) {

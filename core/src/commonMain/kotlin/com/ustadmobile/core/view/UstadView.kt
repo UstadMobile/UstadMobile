@@ -44,9 +44,11 @@ interface UstadView {
      * Return the system specific context for this view (e.g. Activity on Android
      * etc)
      *
+     * Nullable so that this is compliant with fragment.getViewContext()
+     *
      * @return
      */
-    val context: Any
+    val viewContext: Any
 
     /**
      * Most UI platforms require that all UI changes are done in a particular thread. This method
@@ -56,7 +58,6 @@ interface UstadView {
      */
     @JsName("runOnUiThread")
     fun runOnUiThread(r: Runnable?)
-
     companion object {
 
 

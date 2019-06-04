@@ -2,30 +2,23 @@ package com.ustadmobile.core.db
 
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
+import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.database.annotation.UmSyncCountLocalPendingChanges
-import com.ustadmobile.lib.database.annotation.UmSyncOutgoing
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
-@Database(entities = [NetworkNode::class, EntryStatusResponse::class,
-    DownloadJobItemHistory::class, HttpCachedEntry::class, DownloadJob::class, DownloadJobItem::class,
-    DownloadJobItemParentChildJoin::class,
-    Person::class, Clazz::class, ClazzMember::class,
-    PersonCustomField::class, PersonCustomFieldValue::class,
-    ContentEntry::class, ContentEntryContentCategoryJoin::class,
-    ContentEntryParentChildJoin::class, ContentEntryRelatedEntryJoin::class,
-    ContentCategorySchema::class, ContentCategory::class, Language::class,
-    LanguageVariant::class, //SyncStatus::class, SyncablePrimaryKey::class, SyncDeviceBits::class,
-    AccessToken::class, PersonAuth::class, Role::class, EntityRole::class,
-    PersonGroup::class, PersonGroupMember::class, Location::class, LocationAncestorJoin::class,
-    PersonLocationJoin::class, PersonPicture::class, ScrapeQueueItem::class, ScrapeRun::class,
-    ContentEntryStatus::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class
-], version = 22)
+@Database(entities = [NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
+    DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
+    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
+    ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
+    ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
+    Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
+    EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
+    LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
+    ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
+    Container::class, ContainerEntry::class, ContainerEntryFile::class], version = 22)
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
@@ -43,8 +36,6 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val downloadJobItemParentChildJoinDao: DownloadJobItemParentChildJoinDao
 
     abstract val downloadJobItemHistoryDao: DownloadJobItemHistoryDao
-
-    abstract val httpCachedEntryDao: HttpCachedEntryDao
 
     abstract val personDao: PersonDao
 
@@ -108,32 +99,28 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
-
-
-
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
 
     // val deviceBits: Int
     //     get() = syncablePrimaryKeyDao.getDeviceBits()
 
-    @UmRepository
-    abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
+   //@UmRepository
+    //abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
 
-    @UmSyncOutgoing
-    abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
+   // @UmSyncOutgoing
+   // abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
 
 
     fun validateAuth(personUid: Long, auth: String): Boolean {
         return if (personUid == 0L) true else accessTokenDao.isValidToken(personUid, auth)//Anonymous or guest access
-
     }
 
-    fun invalidateDeviceBits() {
+   // fun invalidateDeviceBits() {
         //     syncablePrimaryKeyDao.invalidateDeviceBits()
-    }
+   // }
 
-    @UmSyncCountLocalPendingChanges
-    abstract fun countPendingLocalChanges(accountUid: Long, deviceId: Int): Int
+   // @UmSyncCountLocalPendingChanges
+   // abstract fun countPendingLocalChanges(accountUid: Long, deviceId: Int): Int
 
     companion object {
 
@@ -172,10 +159,11 @@ abstract class UmAppDatabase : DoorDatabase() {
         @Synchronized
         fun getInstance(context: Any): UmAppDatabase {
             if (instance == null) {
-               /* var builder = UmDbBuilder
-                        .builder(UmAppDatabase::class, context)
-                builder = addMigrations(builder)
-                instance = addCallbacks(builder).build() */
+                var builder = DatabaseBuilder.databaseBuilder(
+                        context, UmAppDatabase::class, "UmAppDatabase")
+               // builder = addMigrations(builder)
+               //instance = addCallbacks(builder).build()
+                instance = builder.build()
             }
 
             return instance!!
@@ -186,11 +174,12 @@ abstract class UmAppDatabase : DoorDatabase() {
             var db = namedInstances[dbName]
 
             if (db == null) {
-              /*  var builder = UmDbBuilder.builder(
-                        UmAppDatabase::class, context, dbName)
-                builder = addMigrations(builder)
-                db = addCallbacks(builder).build()
-                namedInstances.put(dbName, db) */
+                var builder = DatabaseBuilder.databaseBuilder(
+                        context, UmAppDatabase::class, dbName)
+                //builder = addMigrations(builder)
+                //db = addCallbacks(builder).build()
+                db = builder.build()
+                namedInstances[dbName] = db
             }
             return db
         }

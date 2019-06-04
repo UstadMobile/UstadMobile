@@ -2,7 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 
 /**
@@ -34,14 +34,14 @@ abstract class DownloadJobItemDao {
     abstract fun insert(jobRunItems: List<DownloadJobItem>)
 
     @Transaction
-    fun insertListAndSetIds(jobItems: List<DownloadJobItem>) {
+    open fun insertListAndSetIds(jobItems: List<DownloadJobItem>) {
         for (item in jobItems) {
-            item.djiUid = insert(item)
+            item.djiUid = insert(item).toInt()
         }
     }
 
     @Transaction
-    fun updateDownloadJobItemsProgress(statusList: List<DownloadJobItemStatus>) {
+    open fun updateDownloadJobItemsProgress(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateDownloadJobItemProgress(status.jobItemUid, status.bytesSoFar,
                     status.totalBytes)
@@ -63,7 +63,7 @@ abstract class DownloadJobItemDao {
      * @param jobRunItem DownloadJobItem to insert
      */
     @Insert
-    abstract fun insert(jobRunItem: DownloadJobItem): Int
+    abstract fun insert(jobRunItem: DownloadJobItem): Long
 
     @Query("DELETE FROM DownloadJobItem")
     abstract suspend fun deleteAllAsync()
@@ -85,7 +85,8 @@ abstract class DownloadJobItemDao {
                                                          downloadedSoFar: Long, downloadLength: Long,
                                                          currentSpeed: Long)
 
-    fun updateDownloadJobItemStatus(djiUid: Long, djiStatus: Int,
+    @Transaction
+    open fun updateDownloadJobItemStatus(djiUid: Long, djiStatus: Int,
                                     downloadedSoFar: Long, downloadLength: Long,
                                     currentSpeed: Long) {
         println("updateDownloadJobItemStatus $djiUid -> $djiStatus")
@@ -103,7 +104,8 @@ abstract class DownloadJobItemDao {
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     protected abstract fun updateItemStatusInt(djiUid: Int, status: Int)
 
-    fun updateStatus(djiUid: Int, status: Int) {
+    @Transaction
+    open fun updateStatus(djiUid: Int, status: Int) {
         println("DownloadJob #$djiUid updating status to $status")
         updateItemStatusInt(djiUid, status)
     }
@@ -118,10 +120,10 @@ abstract class DownloadJobItemDao {
     abstract fun findByUid(djiUid: Int): DownloadJobItem?
 
     @Query("SELECT djiStatus FROM DownloadJobItem WHERE djiUid = :djiUid")
-    abstract fun getLiveStatus(djiUid: Int): UmLiveData<Int>
+    abstract fun getLiveStatus(djiUid: Int): DoorLiveData<Int>
 
     @Query("SELECT * FROM DownloadJobItem")
-    abstract fun findAllLive(): UmLiveData<List<DownloadJobItem>>
+    abstract fun findAllLive(): DoorLiveData<List<DownloadJobItem>>
 
     @Query("SELECT * FROM DownloadJobItem")
     abstract fun findAll(): List<DownloadJobItem>
@@ -130,7 +132,7 @@ abstract class DownloadJobItemDao {
     abstract fun getTotalDownloadJobItems(djiDjUid: Int): Int
 
     @Query("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
-    abstract fun countDownloadJobItems(djiDjUid: Long): UmLiveData<Int>
+    abstract fun countDownloadJobItems(djiDjUid: Long): DoorLiveData<Int>
 
     @Query("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")
     abstract fun getDestinationFiles(djiDsiUids: List<Long>): List<String>
@@ -145,7 +147,7 @@ abstract class DownloadJobItemDao {
             " OR ((SELECT connectivityState FROM ConnectivityStatus) = " + ConnectivityStatus.STATE_METERED + ") " +
             " AND DownloadJob.meteredNetworkAllowed) " +
             "LIMIT 1")
-    abstract fun findNextDownloadJobItems(): UmLiveData<List<DownloadJobItem>>
+    abstract fun findNextDownloadJobItems(): DoorLiveData<List<DownloadJobItem>>
 
     @Query("SELECT DownloadJobItem.* FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiContentEntryUid = :contentEntryUid " +
@@ -164,7 +166,7 @@ abstract class DownloadJobItemDao {
             "FROM DownloadJobItem " +
             "WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
-    abstract fun findByContentEntryUidLive(contentEntryUid: Long): UmLiveData<DownloadJobItem>
+    abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
 
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +
@@ -200,7 +202,7 @@ abstract class DownloadJobItemDao {
     abstract fun insertDownloadJobItemParentChildJoin(dj: DownloadJobItemParentChildJoin)
 
     @Transaction
-    fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
+    open fun updateJobItemStatusList(statusList: List<DownloadJobItemStatus>) {
         for (status in statusList) {
             updateStatus(status.jobItemUid, status.status)
         }

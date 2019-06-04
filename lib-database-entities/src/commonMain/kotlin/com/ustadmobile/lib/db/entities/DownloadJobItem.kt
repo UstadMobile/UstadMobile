@@ -1,8 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndexField
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -15,7 +15,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  */
 @UmEntity
 @Entity
-open class DownloadJobItem {
+open class DownloadJobItem() {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
@@ -49,10 +49,7 @@ open class DownloadJobItem {
 
     var numAttempts: Int = 0
 
-
-    constructor()
-
-    constructor(src: DownloadJobItem) {
+    constructor(src: DownloadJobItem) : this() {
         djiUid = src.djiUid
         downloadLength = src.downloadLength
         downloadedSoFar = src.downloadedSoFar
@@ -65,14 +62,14 @@ open class DownloadJobItem {
         numAttempts = src.numAttempts
     }
 
-    constructor(djiDjUid: Int, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
+    constructor(djiDjUid: Int, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) : this() {
         this.djiDjUid = djiDjUid
         this.djiContentEntryUid = djiContentEntryUid
         this.djiContainerUid = djiContainerUid
         this.downloadLength = downloadLength
     }
 
-    constructor(downloadJob: DownloadJob, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) {
+    constructor(downloadJob: DownloadJob, djiContentEntryUid: Long, djiContainerUid: Long, downloadLength: Long) : this() {
         djiDjUid = downloadJob.djUid
         this.djiContentEntryUid = djiContentEntryUid
         this.djiContainerUid = djiContainerUid
