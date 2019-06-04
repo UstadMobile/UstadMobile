@@ -1,7 +1,9 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.SaleItemDao;
+import com.ustadmobile.core.db.dao.SaleItemReminderDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
@@ -11,6 +13,7 @@ import java.util.Hashtable;
 
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleItemReminder;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID;
@@ -91,22 +94,27 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
                 }
 
                 repository.getSaleProductDao().findByUidAsync(saleProductUid,
-                        new UmCallback<SaleProduct>() {
-                            @Override
-                            public void onSuccess(SaleProduct saleProduct) {
-                                String productName = "";
-                                if(saleProduct != null){
-                                    productName = saleProduct.getSaleProductName();
-                                }
-                                view.updateSaleItemOnView(updatedSaleItem,
-                                        productName);
+                    new UmCallback<SaleProduct>() {
+                        @Override
+                        public void onSuccess(SaleProduct saleProduct) {
+                            String productName = "";
+                            if(saleProduct != null){
+                                productName = saleProduct.getSaleProductName();
                             }
+                            view.updateSaleItemOnView(updatedSaleItem,
+                                    productName);
+                        }
 
-                            @Override
-                            public void onFailure(Throwable exception) {
-                                exception.printStackTrace();
-                            }
-                        });
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+
+                //Notification observer
+                SaleItemReminderDao reminderDao = repository.getSaleItemReminderDao();
+                UmProvider<SaleItemReminder> provider = reminderDao.findBySaleItemUid(saleItemUid);
+                view.setReminderProvider(provider);
             }
 
             @Override
@@ -203,4 +211,14 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
         updatedSaleItem.setSaleItemDueDate(date);
     }
 
+    public void handleClickAddReminder() {
+        //TODO: Open dialog and stuff
+
+        //Testing:
+        long saleItemUid = currentSaleItem.getSaleItemUid();
+        SaleItemReminder reminder = new SaleItemReminder((int) (Math.random()*12), saleItemUid, true);
+        SaleItemReminderDao reminderDao = repository.getSaleItemReminderDao();
+        reminderDao.insertAsync(reminder, null);
+
+    }
 }

@@ -7,8 +7,10 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
+import android.graphics.Picture;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PictureDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -34,6 +36,8 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleDetailPresenter;
 import com.ustadmobile.core.db.UmProvider;
@@ -43,16 +47,7 @@ import com.ustadmobile.lib.db.entities.SaleItemListDetail;
 import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import org.xml.sax.InputSource;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Objects;
 
 public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailView {
@@ -646,26 +641,44 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                 if(sale.getSaleSignature() != null && !sale.getSaleSignature().isEmpty()){
                     try {
                         String saleSignature= sale.getSaleSignature();
-                        XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
-                        XmlPullParser xpp = xppf.newPullParser();
-                        xpp.setInput(new StringReader(saleSignature));
-                        Drawable signature = Drawable.createFromXml(getResources(), xpp);
-                        String breakHere = "Ok";
-                        runOnUiThread(() -> signatureIB.setBackground(signature));
+                        SVG svg = SVG.getFromString(saleSignature);
+
+                        //TODO: Crop signature
+                        Picture signPic = svg.renderToPicture();
+
+                        int picW = signPic.getWidth();
+                        int picH = signPic.getHeight();
+                        Picture adjustedPic = signPic;
+                        if(picH>picW){
+                            adjustedPic = rotatePicture(0f , signPic);
+                        }
+                        PictureDrawable  pd = new PictureDrawable(adjustedPic);
+                        runOnUiThread(() -> signatureIB.setBackground(pd));
 
 
-                    } catch (XmlPullParserException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
+                    } catch (SVGParseException e) {
                         e.printStackTrace();
                     }
-
                 }
             }
         });
 
     }
 
+    public Picture rotatePicture(float degrees, Picture picture) {
+        int width = picture.getWidth();
+        int height = picture.getHeight();
+
+        Picture rotatedPicture = new Picture();
+        Canvas canvas = rotatedPicture.beginRecording(width, height);
+        canvas.save();
+        canvas.rotate(degrees, width, height);
+        picture.draw(canvas);
+        canvas.restore();
+        rotatedPicture.endRecording();
+
+        return rotatedPicture;
+    }
 
     @Override
     public void updatePaymentTotal(long paymentTotal) {

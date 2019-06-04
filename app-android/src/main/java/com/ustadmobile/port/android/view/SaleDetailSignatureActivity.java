@@ -58,6 +58,7 @@ public class SaleDetailSignatureActivity extends UstadBaseActivity implements Sa
 
         mSignaturePad = findViewById(R.id.activity_record_signature_signaturepad);
 
+
         //FAB and its listener
         FloatingTextButton accept = findViewById(R.id.activity_record_signature_fab_accept);
         accept.setOnClickListener(v -> mPresenter.handleClickAccept());

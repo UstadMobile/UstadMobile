@@ -414,4 +414,9 @@
     <string name="from">From</string>
     <string name="to">to</string>
     <string name="add_signature">Add signature</string>
+    <string name="add_reminder">Add reminder</string>
+    <string name="add_another_reminder">Add another reminder</string>
+    <string name="day_before">day before</string>
+    <string name="days_before">days before</string>
+
 </resources>

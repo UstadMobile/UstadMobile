@@ -2,8 +2,15 @@ package com.ustadmobile.port.android.view;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.paging.DataSource;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,9 +27,12 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleItemDetailPresenter;
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleItemReminder;
+import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.text.SimpleDateFormat;
@@ -47,6 +57,10 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     private View preOrderHline;
     private TextView orderDueDateTV;
     private EditText orderDueDateET;
+
+    private View reminderHline;
+    private TextView addReminderTV;
+    private RecyclerView remindersRV;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -107,6 +121,10 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         preOrderHline = findViewById(R.id.activity_sale_item_detail_preorder_hline);
         orderDueDateTV = findViewById(R.id.activity_sale_item_detail_preorder_due_date_tv);
         orderDueDateET = findViewById(R.id.activity_sale_item_detail_order_due_date_date_edittext);
+
+        reminderHline = findViewById(R.id.activity_sale_item_detil_notification_hline);
+        addReminderTV = findViewById(R.id.activity_sale_item_detail_add_reminder_tv);
+        remindersRV = findViewById(R.id.activity_sale_item_detail_reminder_rv);
 
         //Date
         Calendar myCalendar = Calendar.getInstance();
@@ -186,6 +204,8 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         });
 
         saleRB.setOnCheckedChangeListener((buttonView, isChecked) -> mPresenter.setSold(isChecked));
+
+        addReminderTV.setOnClickListener(v -> mPresenter.handleClickAddReminder());
     }
 
     @Override
@@ -219,6 +239,46 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
 
     }
 
+    /**
+     * The DIFF CALLBACK
+     */
+    public static final DiffUtil.ItemCallback<SaleItemReminder> DIFF_CALLBACK_REMINDER =
+            new DiffUtil.ItemCallback<SaleItemReminder>() {
+                @Override
+                public boolean areItemsTheSame(SaleItemReminder oldItem,
+                                               SaleItemReminder newItem) {
+                    return oldItem == newItem;
+                }
+
+                @Override
+                public boolean areContentsTheSame(SaleItemReminder oldItem,
+                                                  SaleItemReminder newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
+    @Override
+    public void setReminderProvider(UmProvider<SaleItemReminder> paymentProvider) {
+        SaleItemReminderRecyclerAdapter recyclerAdapter =
+                new SaleItemReminderRecyclerAdapter(DIFF_CALLBACK_REMINDER, mPresenter, this,
+                        getApplicationContext());
+
+        // get the provider, set , observe, etc.
+        // A warning is expected
+        DataSource.Factory<Integer, SaleItemReminder> factory =
+                (DataSource.Factory<Integer, SaleItemReminder>)
+                        paymentProvider.getProvider();
+        LiveData<PagedList<SaleItemReminder>> data =
+                new LivePagedListBuilder<>(factory, 20).build();
+
+        //Observe the data:
+        data.observe(this, recyclerAdapter::submitList);
+
+        //set the adapter
+        remindersRV.setAdapter(recyclerAdapter);
+
+    }
+
     @Override
     public void updateTotal(long total) {
         totalTV.setText(String.valueOf(total));
@@ -234,5 +294,9 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         preOrderHline.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         orderDueDateTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         orderDueDateET.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+
+        remindersRV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        reminderHline.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        addReminderTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
     }
 }

@@ -4,7 +4,6 @@ import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -46,7 +45,7 @@ public class SalePaymentRecyclerAdapter extends
 
         String prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                         entity.getSalePaymentPaidDate(), null);
-        TextView keyTV = holder.itemView.findViewById(R.id.item_key_value_key);
+        TextView keyTV = holder.itemView.findViewById(R.id.item_reminder_days_tv);
         TextView valueTV = holder.itemView.findViewById(R.id.item_key_value_value);
 
         String amountText = entity.getSalePaymentPaidAmount() + " " +
@@ -54,7 +53,7 @@ public class SalePaymentRecyclerAdapter extends
         keyTV.setText(prettyDate);
         valueTV.setText(amountText);
 
-        AppCompatImageView dots = holder.itemView.findViewById(R.id.item_key_value_context_dots);
+        AppCompatImageView dots = holder.itemView.findViewById(R.id.item_reminder_dots_iv);
 
         //Options to Edit/Delete every schedule in the list
         dots.setOnClickListener((View v) -> {

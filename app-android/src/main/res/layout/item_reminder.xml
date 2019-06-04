@@ -6,30 +6,21 @@
     android:background="?android:attr/selectableItemBackground"
     android:layout_height="wrap_content">
 
+
     <TextView
         android:id="@+id/item_reminder_days_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@color/text_primary"
-        app:layout_constraintEnd_toStartOf="@+id/item_key_value_value"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/item_key_value_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="@color/text_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/item_reminder_dots_iv"
+        app:layout_constraintStart_toEndOf="@+id/item_reminder_bell_iv"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
@@ -52,4 +43,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_more_vert_black_24dp" />
+
+    <ImageView
+        android:id="@+id/item_reminder_bell_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_notifications_none_black_24dp" />
 </android.support.constraint.ConstraintLayout>

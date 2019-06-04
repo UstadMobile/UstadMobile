@@ -6,7 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy;
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum;
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum;
 
-@UmEntity
+@UmEntity(tableId = 77)
 public class SaleProductParentJoin {
 
     @UmPrimaryKey(autoIncrement = true)

@@ -395,6 +395,9 @@ dependencies {
     //Singature pad by Gcacace
     implementation "com.github.gcacace:signature-pad:$version_gcacace_signaturepad"
 
+    //SVG
+    implementation "com.caverock:androidsvg-aar:$version_androidsvg"
+
 }
 
 task sourceJar(type: Jar) {

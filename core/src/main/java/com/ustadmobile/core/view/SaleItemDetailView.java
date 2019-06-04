@@ -1,6 +1,8 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleItemReminder;
 
 
 /**
@@ -29,6 +31,8 @@ public interface SaleItemDetailView extends UstadView {
     void updatePPP(long ppp);
 
     void showPreOrder(boolean show);
+
+    void setReminderProvider(UmProvider<SaleItemReminder> paymentProvider);
 
 }
 

@@ -38,6 +38,7 @@ import com.ustadmobile.core.db.dao.PersonPictureDao;
 import com.ustadmobile.core.db.dao.RoleDao;
 import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.db.dao.SaleItemDao;
+import com.ustadmobile.core.db.dao.SaleItemReminderDao;
 import com.ustadmobile.core.db.dao.SalePaymentDao;
 import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.db.dao.SaleProductGroupDao;
@@ -99,6 +100,7 @@ import com.ustadmobile.lib.db.entities.PersonPicture;
 import com.ustadmobile.lib.db.entities.Role;
 import com.ustadmobile.lib.db.entities.Sale;
 import com.ustadmobile.lib.db.entities.SaleItem;
+import com.ustadmobile.lib.db.entities.SaleItemReminder;
 import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.entities.SaleProductGroup;
@@ -119,7 +121,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 19, entities = {
+@UmDatabase(version = 21, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
@@ -138,7 +140,8 @@ import java.util.Random;
         //Goldozi :
         Sale.class, SaleItem.class, SalePayment.class, SaleProductGroup.class,
         SaleProductGroupJoin.class, SaleProductPicture.class, SaleProduct.class,
-        SaleVoiceNote.class, SaleProductParentJoin.class
+        SaleVoiceNote.class, SaleProductParentJoin.class,
+        SaleItemReminder.class
 })
 public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthenticator,
         UmDbWithAttachmentsDir {
@@ -745,6 +748,8 @@ public abstract class UmAppDatabase implements UmSyncableDatabase, UmDbWithAuthe
     public abstract SaleVoiceNoteDao getSaleVoiceNoteDao();
 
     public abstract SaleProductParentJoinDao getSaleProductParentJoinDao();
+
+    public abstract SaleItemReminderDao getSaleItemReminderDao();
 
     //end of Goldozi bit.
 
