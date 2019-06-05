@@ -74,11 +74,7 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
 
     override fun onHttpdConnected(httpd: com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD) {
         mPresenter = XapiPackageContentPresenter(this,
-                bundleToMap(intent.extras), this) {containerUid ->
-            val mountedUri = httpd.mountContainer(containerUid, null)
-            UMFileUtil.joinPaths(httpd.localHttpUrl,
-                    mountedUri!!)
-        }
+                bundleToMap(intent.extras), this, httpd.containerMounter)
 
         mPresenter.onCreate(null)
     }

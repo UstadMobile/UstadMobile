@@ -31,6 +31,13 @@ abstract class UstadMobileSystemCommon {
      */
     private var locale: String = ""
 
+    internal data class LastGoToDest(val viewName: String, val args: Map<String, String?>)
+
+    /**
+     * The last destination that was called via the go method. This is used for testing purposes.
+     */
+    internal var lastDestination: LastGoToDest? = null
+
     /**
      * Do any required startup operations: init will be called on creation
      *

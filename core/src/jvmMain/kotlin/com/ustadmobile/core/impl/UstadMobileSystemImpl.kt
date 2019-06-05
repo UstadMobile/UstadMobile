@@ -65,7 +65,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int){
-        TODO("not implemented")
+        lastDestination = LastGoToDest(viewName, args)
     }
 
     /**
@@ -279,7 +279,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
          * @return A singleton instance
          */
         @JvmStatic
-        actual val instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
+        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {

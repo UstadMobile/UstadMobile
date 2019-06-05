@@ -192,6 +192,6 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
          * @return A singleton instance
          */
         @JvmStatic
-        val instance: UstadMobileSystemImpl
+        var instance: UstadMobileSystemImpl
     }
 }

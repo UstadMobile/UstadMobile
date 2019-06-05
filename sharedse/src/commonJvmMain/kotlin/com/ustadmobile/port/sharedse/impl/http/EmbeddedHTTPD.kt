@@ -53,6 +53,11 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, context: Any, p
     val localHttpUrl: String
         get() = "http://127.0.0.1:$listeningPort/"
 
+    val containerMounter: suspend (Long) -> String = {containerUid ->
+        val contPath = mountContainer(containerUid, null)
+        UMFileUtil.joinPaths(localHttpUrl, contPath!!)
+    }
+
 
     interface ResponseListener {
 
