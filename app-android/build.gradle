@@ -41,18 +41,10 @@ kotlin {
     }
 }
 
-/*
-  TODO: Refactor to use another task to trigger these tasks
-
-  WARNING: API 'variant.getJavaCompiler()' is obsolete and has been replaced with 'variant.getJavaCompileProvider()'.
-  It will be removed at the end of 2019.
-  For more information, see https://d.android.com/r/tools/task-configuration-avoidance.
-  REASON: Called from: /home/mike/src/UstadMobile/app-android/build.gradle:37
- */
 afterEvaluate {
     android.libraryVariants.all { variant ->
-        variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
-        variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
+        variant.javaCompileProvider.get().dependsOn(copyMainXmlLocaleFilesFromCore)
+        variant.javaCompileProvider.get().dependsOn(generateCoreStringToAndroidResMap)
     }
 }
 
@@ -278,6 +270,14 @@ configurations.all {
 dependencies {
     implementation project(':core')
     implementation project(':sharedse')
+
+    /*
+     * This is a hack: Intellisense does not seem to recognize classes that are outside the common
+     * sourceset (e.g. android/jvm sourcesets) in Kotlin multiplatform project dependencies. Adding
+     * this will allow autocomplete etc. to work.
+     */
+    compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
+
     implementation project(':lib-door-runtime')
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")

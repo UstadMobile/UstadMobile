@@ -72,16 +72,6 @@ dependencies {
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
-task listConfigs {
-    println project.configurations
-    project.configurations.each() {
-        if(it.canBeConsumed) {
-            println "name: ${it.name}, can be consumed: ${it.canBeConsumed}, visible: ${it.visible}, description: ${it.description}, state: ${it.state}"
-        }
-    }
-}
-
-
 publishing {
     publications {
         maven(MavenPublication) {

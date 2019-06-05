@@ -9,7 +9,6 @@ buildscript {
     }
 
     dependencies {
-        // classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
@@ -20,7 +19,6 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
-//apply plugin: "de.fuerstenau.buildconfig"
 
 
 repositories {
@@ -45,17 +43,6 @@ android {
     }
 }
 
-
-/*
- * Added to overcome limitation on Android studio as per:
- *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
- */
-/*task copyTestResources(type: Copy) {
-    from "${projectDir}/src/test/resources"
-    from "${projectDir}/../sharedse-tests/src/main/resources"
-    into "${buildDir}/classes/test"
-}
-processTestResources.dependsOn copyTestResources */
 
 kotlin {
     targets {

@@ -62,7 +62,7 @@ task dumpEnvProperties {
 }
 
 tasks.whenTaskAdded { task ->
-    if (task.name == "jvmTestClasses") {
+    if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(dumpEnvProperties)
     }
 }
