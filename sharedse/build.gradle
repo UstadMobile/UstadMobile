@@ -62,18 +62,18 @@ kotlin {
         commonMain {
             dependencies {
                 implementation project(":core")
-                implementation project(":lib-door-runtime")
                 implementation project(":lib-util")
 
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
 
 
-                compileOnly project(":lib-database")
-                compileOnly project(":lib-room-annotations")
+                implementation project(':lib-door-runtime')
+                compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
+                compileOnly project(":lib-room-annotations")
             }
         }
 
@@ -88,7 +88,11 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation project(":lib-database-android")
+
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
 
 
                 //Begin SharedSE Android and JVM dependencies
@@ -113,7 +117,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
                 //Begin Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

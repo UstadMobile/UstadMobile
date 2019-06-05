@@ -518,7 +518,7 @@ class NetworkManagerAndroidBle
         }
 
         if (wifiP2pManager == null) {
-            wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
+            wifiP2pManager = mContext.getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager?
         }
         wifiP2PCapable.set(wifiP2pManager != null)
         wifiP2pGroupServiceManager = WifiP2PGroupServiceManager(this)

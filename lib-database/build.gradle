@@ -1,3 +1,8 @@
+/*
+ * Note: If the Android plugin is enabled, since Gradle 5.4, the annotation processor will not run
+ * with kapt (using project or files to locate the annotation processor).
+ */
+
 buildscript {
     repositories {
         mavenCentral()
@@ -12,26 +17,14 @@ buildscript {
 }
 
 apply plugin: "kotlin-multiplatform"
-apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
 apply plugin: "jacoco"
 apply plugin: "kotlin-kapt"
-
-android {
-    compileSdkVersion rootProject.ext.version_android_compile_sdk
-    buildToolsVersion rootProject.ext.version_android_buildtools
-
-    defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
-    }
-}
 
 kotlin {
 
     targets {
         fromPreset(presets.jvm, 'jvm')
-        fromPreset(presets.android, 'android')
         fromPreset(presets.js, 'js')  {
             compilations.main.kotlinOptions {
                 metaInfo = true
@@ -52,36 +45,16 @@ kotlin {
                 implementation project(":lib-database-entities")
                 implementation project(':lib-door-runtime')
                 implementation project(":lib-database-annotations")
-                //compileOnly project(":lib-database-runtime-core-compileonly")
                 compileOnly project(":lib-room-annotations")
 
             }
         }
-        commonJvmMain {
+
+        jvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
             }
-        }
-        jvmMain {
-            dependsOn commonJvmMain
-            dependencies {
-                /*
-                 This is required to make the annotation processor actually work... sigh.
-                 */
-                compileOnly project(":lib-database-annotation-processor")
-                compileOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                compileOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                compileOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                compileOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-                compileOnly "com.squareup:kotlinpoet:1.2.0"
-
-                compileOnly "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
-                compileOnly "org.apache.commons:commons-text:$version_apache_commons_text"
-            }
-        }
-        androidMain {
-            dependsOn commonJvmMain
         }
         jsMain {
             dependencies {
@@ -94,6 +67,13 @@ kotlin {
 
 }
 
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
+
+
 kapt {
     arguments {
         arg("door_jdbc_kt_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
@@ -102,9 +82,18 @@ kapt {
 
 
 dependencies {
-    kapt project(":lib-database-annotation-processor")
+    /**
+     * Since Gradle 5.4 using kapt project(":...") does not work.
+     */
+    kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
+            "../lib-door-runtime/build/libs/lib-door-runtime-jvm.jar")
+    kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    kapt "com.squareup:kotlinpoet:1.2.0"
+    kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+    kapt "org.apache.commons:commons-text:$version_apache_commons_text"
 }
 
+compileKotlinJvm.dependsOn(":lib-database-annotation-processor:build")
 
 publishing {
     publications {
