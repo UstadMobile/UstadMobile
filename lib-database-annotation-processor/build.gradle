@@ -13,64 +13,6 @@ task fatJar(type: Jar) {
     with jar
 }
 
-sourceSets {
-    main.java.srcDirs += ["src/jvmMain/kotlin"]
-    main.resources.srcDirs += ["src/jvmMain/resources"]
-}
-
-//kotlin {
-//    targets {
-//        fromPreset(presets.jvm, 'jvm')
-//    }
-//
-//    sourceSets {
-//        commonMain {
-//            dependencies {
-//                implementation project(":lib-database-annotations")
-//                implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-//                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
-//                implementation project(":lib-room-annotations")
-//                implementation project(":lib-door-runtime")
-//            }
-//        }
-//
-//        jvmMain {
-//            dependencies {
-//                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-//                implementation "org.jetbrains.kotlin:kotlin-reflect:$version_kotlin"
-//                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-//
-//                implementation project(":lib-util")
-//
-//
-//                implementation "com.squareup:kotlinpoet:1.2.0"
-//
-//                implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
-//                implementation "org.apache.commons:commons-text:$version_apache_commons_text"
-//
-//
-//                //SQLite dependencies
-//                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-//                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-//                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-//                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-//
-//            }
-//        }
-//
-//        jvmTest {
-//            dependencies {
-//                implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
-//                implementation "junit:junit:$version_junit"
-//            }
-//        }
-//    }
-//}
-
-task copyTestResources(type: Copy) {
-    from "${projectDir}/src/jvmTest/resources"
-    into "${buildDir}/classes/kotlin/test"
-}
 
 kapt {
     arguments {
@@ -103,8 +45,11 @@ dependencies {
     implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
 
+    //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")
-    kaptTest files("build/libs/")
+    kaptTest files("build/libs/lib-database-annotation-processor.jar")
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
+    testImplementation "junit:junit:$version_junit"
 }
 
 sourceCompatibility = "1.8"
