@@ -6,6 +6,4 @@ expect abstract class H5PContentPresenterBase(context: Any, arguments: Map<Strin
 
     suspend fun mountH5PDist(): String
 
-    suspend fun mountH5PContainer(containerUid: Long): String
-
 }

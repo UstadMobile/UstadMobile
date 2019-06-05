@@ -35,10 +35,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import kotlinx.io.InputStream
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileWriter
-import java.io.IOException
+import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -283,6 +280,22 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        var inStream = null as InputStream?
+        try {
+            inStream = this::class.java.getResourceAsStream(path)
+            if(inStream != null) {
+                return inStream.readBytes()
+            }
+
+            // we might be running in tests
+            val resDir = File(System.getProperty("user.dir"), "src/main/assets")
+            inStream = FileInputStream(File(resDir, path))
+            return inStream.readBytes()
+        }catch(e: IOException) {
+            e.printStackTrace()
+            throw IOException("Could not find resource: $path")
+        }finally {
+            inStream?.close()
+        }
     }
 }
