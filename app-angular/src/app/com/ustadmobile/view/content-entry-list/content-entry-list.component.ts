@@ -32,10 +32,15 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   umFormCategories: FormGroup;
   private subscription: Subscription;
   private navigationSubscription;
+  entry_thumbnail_class : string;
+  entry_summary_class: string;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
      umDb: UmDbMockService, formBuilder: FormBuilder) {
     super(umService, router, route, umDb);
+
+    this.entry_summary_class = this.umService.getSystemDirectionality() == "ltr" ? "right":"left entry-summary-left";
+    this.entry_thumbnail_class = this.umService.getSystemDirectionality() == "ltr" ? "left":"right";
 
     this.umFormLanguage = formBuilder.group({
       'language': ['-1', Validators.required]

@@ -13,3 +13,7 @@
     border: 0px solid transparent;
     cursor: default
   }
+
+  .icon-left-spacing{
+    padding-left: 30% !important;
+  }

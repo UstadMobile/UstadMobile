@@ -20,7 +20,11 @@ a.disabled {
     cursor: default;
  }
 
- .entry-image{
+ .entry-image-left{
      margin-left: -44% !important;
+ }
+
+ .entry-summary-left{
+    margin-right: 0% !important;
  }
 

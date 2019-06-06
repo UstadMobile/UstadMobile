@@ -14,9 +14,18 @@ export class UmBaseService {
   private context: UmContextWrapper;
   private umObserver = new Subject < any > ();
   private presenter;
+  private directionality: string;
 
 
   constructor(private http: HttpClient, private toastService: MzToastService) {}
+
+  setSystemDirectionality(directionality){
+    this.directionality = directionality;
+  }
+
+  getSystemDirectionality(){
+    return this.directionality;
+  }
 
   dispatchUpdate(content: any) {
     this.umObserver.next(content);
