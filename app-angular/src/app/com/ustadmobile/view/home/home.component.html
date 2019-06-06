@@ -1,13 +1,10 @@
 <header>
 
   <div class="navbar-fixed">
-    <mz-navbar navbarClass="top-nav-height z-depth-2 {{env.colorPrimary}}">
-      <mz-navbar-item-container [align]="['left']">
-        <mz-navbar-item>
-          <i (click)="goBack()" class="material-icons large white-text go-back-icon right">arrow_back</i>
-        </mz-navbar-item>
-        <p class="header-title-label">{{toolbar_title}}</p>
-      </mz-navbar-item-container>
+    <mz-navbar navbarClass="top-nav-height  z-depth-2 {{env.colorPrimary}}">
+        <p class="brand-logo {{toolbar_title_class}}">
+          <span (click)="goBack()" class="open-content"><i class="material-icons {{toolbar_icon_class}}">{{toolbar_arrow}}</i></span>
+          {{toolbar_title}}</p>
     </mz-navbar>
   </div>
 

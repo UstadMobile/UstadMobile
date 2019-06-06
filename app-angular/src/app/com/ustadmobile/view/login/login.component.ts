@@ -22,10 +22,14 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
   serverUrl: string = "";
   presenter: core.ustadmobile.core.controller.Login2Presenter;
   private navigationSubscription;
+  btn_class : string;
 
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
     umDb: UmDbMockService, formBuilder: FormBuilder) {
     super(umService, router, route, umDb);
+
+    this.btn_class = this.umService.getSystemDirectionality() == "ltr" ? "right-align":"left-align";
+
     this.umFormLogin = formBuilder.group({
       'username': ['', Validators.required],
       'password': ['', Validators.required]

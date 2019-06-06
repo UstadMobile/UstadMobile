@@ -30,10 +30,15 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
   private subscription: Subscription;
   translations = []
   private navigationSubscription;
+  entry_thumbnail_class : string;
+  entry_summary_class: string;
 
    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    
+    const directionality = this.umService.getSystemDirectionality();
+    this.entry_summary_class =  directionality == "ltr" ? "right":"left";
+    this.entry_thumbnail_class = directionality == "ltr" ? "left":"right thumbnail-wrapper-right";
+
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
       this.presenter = new core.ustadmobile.core.controller.ContentEntryDetailPresenter(this.context,

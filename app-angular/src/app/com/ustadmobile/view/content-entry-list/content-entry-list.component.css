@@ -25,6 +25,14 @@ a.disabled {
  }
 
  .entry-summary-left{
-    margin-right: 0% !important;
+    padding: 0 3% 0 3% !important;
+ }
+
+ .entry-ltr{
+     padding-left: 3% !important;
+ }
+
+ .entry-rtl{
+     padding-right: 3% !important;
  }
 

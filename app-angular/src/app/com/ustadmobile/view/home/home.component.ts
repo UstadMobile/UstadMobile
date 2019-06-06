@@ -19,13 +19,18 @@ export class HomeComponent extends UmBaseComponent {
   menu_reports: string;
   subscription: Subscription;
   icon_position_class : string;
-  toolbar_title_class : string;
+  toolbar_icon_class : string;
+  toolbar_arrow: string;
+  toolbar_title_class: string;
 
   constructor(private location: Location,umService: UmBaseService,
               router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    this.icon_position_class = this.umService.getSystemDirectionality() == "ltr" ? "left":"right icon-left-spacing";
-    this.toolbar_title_class = this.umService.getSystemDirectionality() == "ltr" ? "left":"right";
+    const directionality = this.umService.getSystemDirectionality();
+    this.icon_position_class =  directionality == "ltr" ? "left":"right icon-left-spacing";
+    this.toolbar_icon_class = directionality == "ltr" ? "left icon-right-spacing":"right icon-left-spacing";
+    this.toolbar_arrow = directionality == "ltr" ? "arrow_back":"arrow_forward";
+    this.toolbar_title_class = directionality == "ltr" ? "brand-logo-ltr":"brand-logo-rtl";
    }
 
   ngOnInit() {
