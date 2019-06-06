@@ -1,7 +1,7 @@
 package com.ustadmobile.port.android.generated
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
-import java.util.*
+import com.toughra.ustadmobile.R
+import java.util.HashMap
 object MessageIDMap {
 	val ID_MAP = HashMap<Int, Int>()
 	init {
@@ -9,8 +9,8 @@ object MessageIDMap {
 	ID_MAP[MessageID.data_label] = R.string.data_label
 	ID_MAP[MessageID.field_department] = R.string.field_department
 	ID_MAP[MessageID.delete_q] = R.string.delete_q
-	ID_MAP[MessageID.queued] = R.string.queued
 	ID_MAP[MessageID.options_uni_shaheed_rabani] = R.string.options_uni_shaheed_rabani
+	ID_MAP[MessageID.queued] = R.string.queued
 	ID_MAP[MessageID.about] = R.string.about
 	ID_MAP[MessageID.error_this_device_doesnt_support_bluetooth_sharing] = R.string.error_this_device_doesnt_support_bluetooth_sharing
 	ID_MAP[MessageID.options_gender_female] = R.string.options_gender_female
@@ -33,17 +33,17 @@ object MessageIDMap {
 	ID_MAP[MessageID.accept] = R.string.accept
 	ID_MAP[MessageID.get_app] = R.string.get_app
 	ID_MAP[MessageID.field_father_name] = R.string.field_father_name
+	ID_MAP[MessageID.size] = R.string.size
 	ID_MAP[MessageID.register_empty_fields] = R.string.register_empty_fields
 	ID_MAP[MessageID.cancel_download] = R.string.cancel_download
-	ID_MAP[MessageID.size] = R.string.size
 	ID_MAP[MessageID.regcode] = R.string.regcode
 	ID_MAP[MessageID.processing] = R.string.processing
 	ID_MAP[MessageID.download_entry_state_paused] = R.string.download_entry_state_paused
 	ID_MAP[MessageID.device_language] = R.string.device_language
 	ID_MAP[MessageID.options_relationship_single] = R.string.options_relationship_single
 	ID_MAP[MessageID.device] = R.string.device
-	ID_MAP[MessageID.register_incorrect_email] = R.string.register_incorrect_email
 	ID_MAP[MessageID.male] = R.string.male
+	ID_MAP[MessageID.register_incorrect_email] = R.string.register_incorrect_email
 	ID_MAP[MessageID.field_comments] = R.string.field_comments
 	ID_MAP[MessageID.options_uni_other] = R.string.options_uni_other
 	ID_MAP[MessageID.library_url] = R.string.library_url
@@ -84,9 +84,9 @@ object MessageIDMap {
 	ID_MAP[MessageID.download_storage_option_device] = R.string.download_storage_option_device
 	ID_MAP[MessageID.dir] = R.string.dir
 	ID_MAP[MessageID.cell_data_label] = R.string.cell_data_label
+	ID_MAP[MessageID.options_job_full] = R.string.options_job_full
 	ID_MAP[MessageID.see_also] = R.string.see_also
 	ID_MAP[MessageID.download_in_another_language] = R.string.download_in_another_language
-	ID_MAP[MessageID.options_job_full] = R.string.options_job_full
 	ID_MAP[MessageID.download_pause_all] = R.string.download_pause_all
 	ID_MAP[MessageID.my_resources] = R.string.my_resources
 	ID_MAP[MessageID.female] = R.string.female
@@ -189,8 +189,8 @@ object MessageIDMap {
 	ID_MAP[MessageID.field_faculty] = R.string.field_faculty
 	ID_MAP[MessageID.download_entry_state_downloading] = R.string.download_entry_state_downloading
 	ID_MAP[MessageID.welcome_dialog_box2] = R.string.welcome_dialog_box2
-	ID_MAP[MessageID.reset_counter_label] = R.string.reset_counter_label
 	ID_MAP[MessageID.welcome_dialog_box1] = R.string.welcome_dialog_box1
+	ID_MAP[MessageID.reset_counter_label] = R.string.reset_counter_label
 	ID_MAP[MessageID.welcome_dialog_box3] = R.string.welcome_dialog_box3
 	ID_MAP[MessageID.welcome_dialog_subheader] = R.string.welcome_dialog_subheader
 	ID_MAP[MessageID.download_calculating] = R.string.download_calculating
@@ -210,8 +210,8 @@ object MessageIDMap {
 	ID_MAP[MessageID.data_usage_label] = R.string.data_usage_label
 	ID_MAP[MessageID.wifi_data_label] = R.string.wifi_data_label
 	ID_MAP[MessageID.failed_message] = R.string.failed_message
-	ID_MAP[MessageID.share_offline_zip_checkbox_label] = R.string.share_offline_zip_checkbox_label
 	ID_MAP[MessageID.field_have_work_experience] = R.string.field_have_work_experience
+	ID_MAP[MessageID.share_offline_zip_checkbox_label] = R.string.share_offline_zip_checkbox_label
 	ID_MAP[MessageID.download] = R.string.download
 	ID_MAP[MessageID.onboarding_no_internet_headline] = R.string.onboarding_no_internet_headline
 	ID_MAP[MessageID.enter_phone_num] = R.string.enter_phone_num
@@ -223,14 +223,14 @@ object MessageIDMap {
 	ID_MAP[MessageID.connections] = R.string.connections
 	ID_MAP[MessageID.share_offline_dialog_message] = R.string.share_offline_dialog_message
 	ID_MAP[MessageID.settings] = R.string.settings
-	ID_MAP[MessageID.pause_download] = R.string.pause_download
 	ID_MAP[MessageID.field_type_job] = R.string.field_type_job
+	ID_MAP[MessageID.pause_download] = R.string.pause_download
 	ID_MAP[MessageID.my_libraries] = R.string.my_libraries
 	ID_MAP[MessageID.failed] = R.string.failed
 	ID_MAP[MessageID.also_available_in] = R.string.also_available_in
 	ID_MAP[MessageID.sent] = R.string.sent
-	ID_MAP[MessageID.preparing] = R.string.preparing
 	ID_MAP[MessageID.options_uni_kabul_education_uni] = R.string.options_uni_kabul_education_uni
+	ID_MAP[MessageID.preparing] = R.string.preparing
 	ID_MAP[MessageID.send] = R.string.send
 	ID_MAP[MessageID.kilobytes_per_second_abbreviated] = R.string.kilobytes_per_second_abbreviated
 	ID_MAP[MessageID.download_downloading_placeholder] = R.string.download_downloading_placeholder

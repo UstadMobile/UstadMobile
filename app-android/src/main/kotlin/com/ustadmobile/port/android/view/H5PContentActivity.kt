@@ -9,21 +9,15 @@ import android.webkit.WebViewClient
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.H5PContentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackUtil
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.H5PContentView
-import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import kotlinx.serialization.ImplicitReflectionSerializer
-import java.util.concurrent.atomic.AtomicReference
 
-class H5PContentActivity : ZippedContentActivity(), H5PContentView {
+class H5PContentActivity : ContainerContentActivity(), H5PContentView {
 
     private var mPresenter: H5PContentPresenter? = null
 
     private var mWebView: WebView? = null
-
-    private val mountedPath = AtomicReference<String>()
 
     @ImplicitReflectionSerializer
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,33 +37,21 @@ class H5PContentActivity : ZippedContentActivity(), H5PContentView {
 
         setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+    }
+
+    override fun onHttpdConnected(httpd: EmbeddedHTTPD) {
         mPresenter = H5PContentPresenter(this,
-                UMAndroidUtil.bundleToMap(intent.extras), this)
-        runWhenHttpdReady(Runnable { mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras)) })
+                UMAndroidUtil.bundleToMap(intent.extras), this, httpd.containerMounter)
+        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras))
     }
 
-    override fun mountH5PDist(callback: UmCallback<String>) {
-        callback.onSuccess(UMFileUtil.joinPaths(EmbeddedHttpdService.ANDROID_ASSETS_PATH,
-                "h5p/dist"))
-    }
-
-    override fun mountH5PContainer(containerUid: Long, callback: UmCallback<String>) {
-        mountContainer(containerUid, object : UmCallback<String> {
-            override fun onSuccess(result: String?) {
-                mountedPath.set(result)
-                UmCallbackUtil.onSuccessIfNotNull(callback, result)
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                UmCallbackUtil.onFailIfNotNull(callback, exception!!)
-            }
-        })
-    }
 
     override fun onDestroy() {
-        val mountedPath = this.mountedPath.get()
-        if (mountedPath != null)
-            unmountZipFromHttp(mountedPath)
+        //TODO: Handle unmount of the container
+        //val mountedPath = this.mountedPath.get()
+//        if (mountedPath != null)
+//            unmountZipFromHttp(mountedPath)
 
         super.onDestroy()
     }

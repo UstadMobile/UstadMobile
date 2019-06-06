@@ -14,26 +14,19 @@ pluginManagement {
     }
 }
 
-include ':app-android', ':lib-database-annotations', ':lib-database2', ':lib-database2-android', ':lib-door-runtime', ':app-angular',
+include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular',
         ':core',
         ':sharedse',
-        ':app-javase',
         ':app-android-launcher',
         ':lib-database-entities',
         ':lib-util',
-        ':lib-database-runtime',
         ':lib-database-mpp',
         ':lib-http-testserver',
         ':lib-database-annotation-processor',
         ':lib-database',
         ':lib-database-android',
-        ':lib-database-runtime-jdbc',
-        ':lib-room-annotations',
-        ':lib-content-scrapers'
-include ':lib-database-jdbc'
-include ':app-rest-server'
-include ':lib-database-retrofitrepository'
-include ':lib-database-runtime-core-compileonly'
-include ':lib-database-runtime-android'
+        ':lib-room-annotations'
+        //':lib-content-scrapers'
+//include ':app-rest-server'
 
 

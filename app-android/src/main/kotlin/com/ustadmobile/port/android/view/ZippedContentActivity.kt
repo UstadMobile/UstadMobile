@@ -28,7 +28,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
 
     private val httpdBound = AtomicBoolean(false)
 
-    private val runWhenConnectedQueue = RunnableQueue()
+    protected val runWhenHttpdReady = RunnableQueue()
 
     @Volatile
     private var mountedPath: String? = null
@@ -37,11 +37,11 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             httpdRef.set((service as EmbeddedHttpdService.LocalServiceBinder).getHttpd())
             httpdBound.set(true)
-            runWhenConnectedQueue.setReady(true)
+            runWhenHttpdReady.setReady(true)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            runWhenConnectedQueue.setReady(false)
+            runWhenHttpdReady.setReady(false)
             httpdBound.set(false)
         }
     }
@@ -100,11 +100,11 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
     }
 
     fun mountZip(zipUri: String, callback: UmCallback<String>) {
-        runWhenConnectedQueue.runWhenReady(Runnable { MountZipAsyncTask(callback, httpdRef.get()).doInBackground(zipUri) })
+        runWhenHttpdReady.runWhenReady(Runnable { MountZipAsyncTask(callback, httpdRef.get()).doInBackground(zipUri) })
     }
 
     fun mountContainer(containerUid: Long, callback: UmCallback<String>?) {
-        runWhenConnectedQueue.runWhenReady(Runnable { MountContainerAsyncTask(callback, httpdRef.get()).execute(containerUid) })
+        runWhenHttpdReady.runWhenReady(Runnable { MountContainerAsyncTask(callback, httpdRef.get()).execute(containerUid) })
     }
 
     fun unmountContainer(mountedUrl: String?) {
@@ -118,7 +118,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
     }
 
     protected fun runWhenHttpdReady(runnable: Runnable) {
-        runWhenConnectedQueue.runWhenReady(runnable)
+        runWhenHttpdReady.runWhenReady(runnable)
     }
 
 

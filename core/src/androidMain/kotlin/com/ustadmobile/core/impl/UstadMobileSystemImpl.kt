@@ -551,7 +551,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         @JvmStatic
-        actual val instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
+        actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
 

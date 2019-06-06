@@ -57,7 +57,11 @@ task copyLibDatabase(type: Copy) {
     filter {line -> line.trim().startsWith("@JsName") || (line.trim().startsWith("import")  && line.contains("kotlin.js.JsName")) ? "" : line }
 }
 
-assemble.dependsOn(copyLibDatabase)
+afterEvaluate {
+    android.libraryVariants.all { variant ->
+        variant.javaCompileProvider.get().dependsOn(copyLibDatabase)
+    }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -66,7 +70,6 @@ dependencies {
     implementation project(':lib-door-runtime')
     implementation project(":lib-database-annotations")
     implementation project(":lib-util")
-    implementation project(":lib-database-retrofitrepository")
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"

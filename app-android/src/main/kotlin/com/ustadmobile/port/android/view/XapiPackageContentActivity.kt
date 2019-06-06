@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.XapiPackageContentView
 import java.util.concurrent.atomic.AtomicReference
 
@@ -21,9 +22,9 @@ import java.util.concurrent.atomic.AtomicReference
  * Created by mike on 9/14/17.
  */
 
-class XapiPackageContentActivity : ZippedContentActivity(), XapiPackageContentView {
+class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageContentView {
 
-    private var mPresenter: XapiPackageContentPresenter? = null
+    private lateinit var mPresenter: XapiPackageContentPresenter
 
     private var mMountedPath: AtomicReference<String>? = null
 
@@ -66,11 +67,16 @@ class XapiPackageContentActivity : ZippedContentActivity(), XapiPackageContentVi
 
         mMountedPath = AtomicReference()
 
-        mPresenter = XapiPackageContentPresenter(this,
-                bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
         mProgressBar!!.isIndeterminate = true
         mProgressBar!!.visibility = View.VISIBLE
+    }
+
+    override fun onHttpdConnected(httpd: com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD) {
+        mPresenter = XapiPackageContentPresenter(this,
+                bundleToMap(intent.extras), this, httpd.containerMounter)
+
+        mPresenter.onCreate(null)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -94,9 +100,9 @@ class XapiPackageContentActivity : ZippedContentActivity(), XapiPackageContentVi
     }
 
     override fun onDestroy() {
-        val mountedPath = mMountedPath!!.get()
-        if (mountedPath != null)
-            super.unmountContainer(mountedPath)
+//        val mountedPath = mMountedPath!!.get()
+//        if (mountedPath != null)
+//            super.unmountContainer(mountedPath)
 
         super.onDestroy()
     }

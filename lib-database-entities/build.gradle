@@ -30,10 +30,17 @@ kotlin {
         }
     }
 
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+
     sourceSets {
         commonMain {
             dependencies {
-                compileOnly project(":lib-database-annotations")
+                implementation project(":lib-database-annotations")
                 compileOnly project(":lib-room-annotations")
                 implementation kotlin("stdlib-common:$version_kotlin")
             }

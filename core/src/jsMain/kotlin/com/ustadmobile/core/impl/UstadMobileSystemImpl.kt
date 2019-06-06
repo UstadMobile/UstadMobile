@@ -210,7 +210,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          *
          * @return A singleton instance
          */
-        actual val instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
+        actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {

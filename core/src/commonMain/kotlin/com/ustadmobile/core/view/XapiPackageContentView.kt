@@ -12,8 +12,6 @@ interface XapiPackageContentView : UstadView, ViewWithErrorNotifier {
 
     fun loadUrl(url: String)
 
-    fun mountContainer(containerUid: Long, callback: UmCallback<String>?)
-
     companion object {
 
         const val VIEW_NAME = "XapiPackage"

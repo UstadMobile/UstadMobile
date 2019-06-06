@@ -10,8 +10,7 @@ import com.ustadmobile.lib.database.annotation.*
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
 open class Container() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var containerUid: Long = 0
 
     @UmSyncLocalChangeSeqNum

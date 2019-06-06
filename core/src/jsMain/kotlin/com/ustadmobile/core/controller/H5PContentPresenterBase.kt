@@ -7,8 +7,4 @@ actual abstract class H5PContentPresenterBase actual constructor(context: Any, a
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual suspend fun mountH5PContainer(containerUid: Long): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 }
