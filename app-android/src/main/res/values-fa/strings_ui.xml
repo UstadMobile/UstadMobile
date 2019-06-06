@@ -37,6 +37,10 @@
     <string name='back'> بازگشت</string>
     <string name='username'>کاربر</string>
     <string name='password'>رمز ورودی</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="last_name">Last name</string>
+    <string name="first_name">First name</string>
+    <string name="create_new_account">Register Now</string>
     <string name='phone_memory'>حافظه تلفن </string>
     <string name='memory_card'>کارت حافظه</string>
     <string name='device'>دستگاه</string>
@@ -233,7 +237,7 @@
     <string name="entry_details_author">Author</string>
     <string name="entry_details_license">License</string>
     <string name="entry_details_description">Description</string>
-
+    <string name="library_reading_level">Reading Level</string>
 
 
 </resources>

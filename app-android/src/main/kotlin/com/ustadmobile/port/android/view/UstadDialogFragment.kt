@@ -16,7 +16,7 @@ open class UstadDialogFragment : DialogFragment(), DismissableDialog {
 
     private val runOnAttach = Vector<Runnable>()
 
-    fun runOnUiThread(r: Runnable) {
+    fun runOnUiThread(r: Runnable?) {
         if (activity != null) {
             activity!!.runOnUiThread(r)
         } else {

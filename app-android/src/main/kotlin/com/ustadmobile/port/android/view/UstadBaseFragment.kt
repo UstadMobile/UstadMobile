@@ -34,7 +34,7 @@ open class UstadBaseFragment : Fragment() {
 
     }
 
-    fun runOnUiThread(r: Runnable) {
+    fun runOnUiThread(r: Runnable?) {
         if (activity != null) {
             activity!!.runOnUiThread(r)
         } else {
