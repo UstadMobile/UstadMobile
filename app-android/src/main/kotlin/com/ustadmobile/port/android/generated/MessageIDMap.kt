@@ -16,6 +16,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.options_gender_female] = R.string.options_gender_female
 	ID_MAP[MessageID.download_delete_btn_label] = R.string.download_delete_btn_label
 	ID_MAP[MessageID.password] = R.string.password
+	ID_MAP[MessageID.entry_details_license] = R.string.entry_details_license
 	ID_MAP[MessageID.share_via] = R.string.share_via
 	ID_MAP[MessageID.phone_memory] = R.string.phone_memory
 	ID_MAP[MessageID.options_uni_i_dont_know] = R.string.options_uni_i_dont_know
@@ -31,6 +32,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.catalog_language] = R.string.catalog_language
 	ID_MAP[MessageID.login_successful] = R.string.login_successful
 	ID_MAP[MessageID.accept] = R.string.accept
+	ID_MAP[MessageID.entry_details_description] = R.string.entry_details_description
 	ID_MAP[MessageID.get_app] = R.string.get_app
 	ID_MAP[MessageID.field_father_name] = R.string.field_father_name
 	ID_MAP[MessageID.size] = R.string.size
@@ -60,6 +62,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.refresh] = R.string.refresh
 	ID_MAP[MessageID.data_usage] = R.string.data_usage
 	ID_MAP[MessageID.options_uni_kandahar] = R.string.options_uni_kandahar
+	ID_MAP[MessageID.library_reading_level] = R.string.library_reading_level
 	ID_MAP[MessageID.nothing_selected] = R.string.nothing_selected
 	ID_MAP[MessageID.confirm] = R.string.confirm
 	ID_MAP[MessageID.app_name] = R.string.app_name
@@ -76,6 +79,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.lang_en] = R.string.lang_en
 	ID_MAP[MessageID.reports] = R.string.reports
 	ID_MAP[MessageID.field_university] = R.string.field_university
+	ID_MAP[MessageID.create_new_account] = R.string.create_new_account
 	ID_MAP[MessageID.options_uni_khost] = R.string.options_uni_khost
 	ID_MAP[MessageID.registering] = R.string.registering
 	ID_MAP[MessageID.download_storage_permission_message] = R.string.download_storage_permission_message
@@ -113,10 +117,12 @@ object MessageIDMap {
 	ID_MAP[MessageID.back] = R.string.back
 	ID_MAP[MessageID.update] = R.string.update
 	ID_MAP[MessageID.library_title] = R.string.library_title
+	ID_MAP[MessageID.confirm_password] = R.string.confirm_password
 	ID_MAP[MessageID.device_name] = R.string.device_name
 	ID_MAP[MessageID.options_uni_kabul_uni] = R.string.options_uni_kabul_uni
 	ID_MAP[MessageID.field_english_proficiency] = R.string.field_english_proficiency
 	ID_MAP[MessageID.passed] = R.string.passed
+	ID_MAP[MessageID.first_name] = R.string.first_name
 	ID_MAP[MessageID.options_job_long] = R.string.options_job_long
 	ID_MAP[MessageID.connected_but_host_not_sharing] = R.string.connected_but_host_not_sharing
 	ID_MAP[MessageID.libraries] = R.string.libraries
@@ -192,6 +198,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.welcome_dialog_box1] = R.string.welcome_dialog_box1
 	ID_MAP[MessageID.reset_counter_label] = R.string.reset_counter_label
 	ID_MAP[MessageID.welcome_dialog_box3] = R.string.welcome_dialog_box3
+	ID_MAP[MessageID.last_name] = R.string.last_name
 	ID_MAP[MessageID.welcome_dialog_subheader] = R.string.welcome_dialog_subheader
 	ID_MAP[MessageID.download_calculating] = R.string.download_calculating
 	ID_MAP[MessageID.wrong_user_pass_combo] = R.string.wrong_user_pass_combo
@@ -256,5 +263,6 @@ object MessageIDMap {
 	ID_MAP[MessageID.attendance] = R.string.attendance
 	ID_MAP[MessageID.account] = R.string.account
 	ID_MAP[MessageID.forgot_password] = R.string.forgot_password
+	ID_MAP[MessageID.entry_details_author] = R.string.entry_details_author
 	}
 }
