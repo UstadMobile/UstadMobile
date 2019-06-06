@@ -24,16 +24,16 @@ npm install
 ## Development
 We have used [Jar2Npm Plugin](https://github.com/svok/kotlin-jar2npm-plugin) to create Node package from kotlin multiplatform generated Jar file. To create node package follow the following procedures.
 
-* Generate Jar from Kotlin Multi-platform source
+* **Generate Jar from Kotlin Multi-platform source**
 ```
 ./gradlew core:jsJar
 ```
 
-* Create Node package
+* **Create Node package**
 ```
 ./gradlew app-angular:jar2npm
 ```
-* Simplified
+* **Simplified**
 ```
  ./gradlew app-angular:clean core:clean core:jsJar app-angular:jar2npm
 ```
@@ -48,26 +48,31 @@ import {com as core} from 'core';
 import {com as db} from 'lib-database';
 ```
 
-* RTL Support
+* **RTL Support**
+
 MaterializeCss doesn't support RTL out of the box, so in case you want to add new component to the app then follow the following procedure:
-1. In the new component constructor call 
+
+star:
+
+- In the new component constructor call 
 ```
 this.umService.isLTRDirectionality();
 ```
-This will return true if the current directionality is LTR.
-2. Make use of Materialize quick floats, right/left to position the view base on the active directionality i.e.
+This will return true if the current directionality is LTR
+
+- Make use of Materialize quick floats, right/left to position the view base on the active directionality i.e.
 ```
 element1_class =  this.umService.isLTRDirectionality ? "right":"left";
 element2_class =  this.umService.isLTRDirectionality ? "left":"right";
 ```
-3. Use created varibale to add a class to the HTML containers (div), conatiner's will interchange position based on the current system directionality.
+- Use created varibale to add a class to the HTML containers (div), conatiner's will interchange position based on the current system directionality.
 ```
 <div class="row">
     <div class="col s12 l4 {{element1_class}}"></div>
     <div class="col s12 l8 {{element2_class}}"></div>
 </div>
 ```
-* Running an app locally
+* **Running an app locally**
 ```
 ng serve
 ```
