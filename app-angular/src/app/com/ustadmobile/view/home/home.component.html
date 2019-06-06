@@ -2,16 +2,36 @@
 
   <div class="navbar-fixed">
     <mz-navbar navbarClass="top-nav-height  z-depth-2 {{env.colorPrimary}}">
-        <p class="brand-logo {{toolbar_title_class}}">
-          <span (click)="goBack()" class="open-content"><i class="material-icons {{toolbar_icon_class}}">{{toolbar_arrow}}</i></span>
-          {{toolbar_title}}</p>
+      <p class="brand-logo {{toolbar_title_class}}">
+        <span (click)="goBack()" class="open-content"><i
+            class="material-icons {{toolbar_icon_class}}">{{toolbar_arrow}}</i></span>
+        {{toolbar_title}}</p>
+      <p class="hide-on-med-and-up open-content drawer-menu {{drawer_menu_class}}">
+        <a mz-button [flat]=true id="um-drawer" (click)="dropwdown.open()">
+          <i class="material-icons white-text">menu</i>
+        </a>
+      </p>
+
     </mz-navbar>
   </div>
 
 
   <!-- side nav starts here-->
 
-  <mz-sidenav #sidenav [fixed]=true [id]="'sidenav-demo'" [collapseButtonId]="'btn-sidenav-demo'" [edge]="'right'">
+  <mz-dropdown #dropwdown [id]="'dropdown-demo'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
+    [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
+    [stopPropagation]="true">
+    <mz-dropdown-item>
+      <a class="collapsible-header"><span i18n="@@libraries">Libraries</span>
+      </a></mz-dropdown-item>
+    <mz-dropdown-item>
+      <a class="collapsible-header"> <span i18n="@@reports">Reports</span>
+      </a>
+    </mz-dropdown-item>
+  </mz-dropdown>
+
+
+  <mz-sidenav #sidenav [fixed]=true [edge]="'left'">
 
     <mz-sidenav-header>
       <div class="user-view">

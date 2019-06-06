@@ -22,6 +22,7 @@ export class HomeComponent extends UmBaseComponent {
   toolbar_icon_class : string;
   toolbar_arrow: string;
   toolbar_title_class: string;
+  drawer_menu_class: string;
 
   constructor(private location: Location,umService: UmBaseService,
               router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
@@ -31,6 +32,7 @@ export class HomeComponent extends UmBaseComponent {
     this.toolbar_icon_class = directionality == "ltr" ? "left icon-right-spacing":"right icon-left-spacing";
     this.toolbar_arrow = directionality == "ltr" ? "arrow_back":"arrow_forward";
     this.toolbar_title_class = directionality == "ltr" ? "brand-logo-ltr":"brand-logo-rtl";
+    this.drawer_menu_class = directionality == "ltr" ? "right drawer-menu-ltr":"left drawer-menu-rtl";
    }
 
   ngOnInit() {
@@ -49,6 +51,10 @@ export class HomeComponent extends UmBaseComponent {
 
   goBack(){
     this.umService.goBack();
+  }
+
+  openDrawer(){
+    
   }
 
   ngOnDestroy(): void {

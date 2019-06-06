@@ -2,7 +2,7 @@ import { ContentEntryListComponent } from './com/ustadmobile/view/content-entry-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MzButtonModule ,MzSelectModule, MzCardModule, MzSidenavModule,MzSpinnerModule,MzProgressModule,
-   MzNavbarModule, MzChipModule, MzToastModule, MzInputModule} from 'ngx-materialize';
+   MzNavbarModule, MzChipModule, MzToastModule, MzInputModule, MzDropdownModule} from 'ngx-materialize';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './com/ustadmobile/view/home/home.component';
@@ -44,6 +44,7 @@ import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
     MzToastModule,
     MzInputModule,
     MzProgressModule,
+    MzDropdownModule,
     ReactiveFormsModule,
     InfiniteScrollModule
   ],

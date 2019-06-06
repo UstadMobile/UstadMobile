@@ -83,6 +83,9 @@ main {
 .collection-rtl{
  padding-right: 0 !important;
 }
+ul{
+  padding-inline-start: 0 !important;
+}
 
 
 
@@ -111,12 +114,12 @@ main {
   }
 
   .brand-logo-ltr{
-    top: 4% !important;
+    margin-top: 1% !important;
     left: 1% !important;
   }
 
   .brand-logo-rtl{
-    top: 4% !important;
+    margin-top: 1% !important;
     right: 0 !important;
   }
 
@@ -141,7 +144,7 @@ main {
 
   .content-data {
     min-height: 400px !important;
-  }
+  } 
 
   .empty-state-view {
     background: white;
@@ -152,8 +155,13 @@ main {
   }
 
   .brand-logo-ltr{
-    top: 4% !important;
+    margin-top: 1% !important;
     left: 1% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: -80% !important;  
   }
 
   .title-label.empty {
@@ -170,8 +178,13 @@ main {
 
 @media (min-width: 481px) and (max-width: 767px) {
   .brand-logo-ltr{
-    top: 4% !important;
-    left: 68% !important;
+    margin-top: 1% !important;
+    left: 90% !important;
+  }
+
+  .brand-logo-rtl{
+    margin-top: 1% !important;
+    right: -90% !important;  
   }
 }
 
@@ -195,13 +208,13 @@ main {
   }
 
   .brand-logo-ltr{
-    top: 6% !important;
-    left: 79% !important;
+    margin-top: 4% !important;
+    left: 85% !important;
   }
 
   .brand-logo-rtl{
-    top: 8% !important;
-    right: -80% !important;
+    margin-top: 4% !important;
+    right: -70% !important;
   }
   
 }
@@ -226,12 +239,12 @@ main {
   }
 
   .brand-logo-ltr{
-    top: 6% !important;
-    left: 100% !important;
+    margin-top: 4% !important;
+    left: 98% !important;
   }
 
   .brand-logo-rtl{
-    top: 8% !important;
+    margin-top: 4% !important;
     right: -90% !important;
   }
   
