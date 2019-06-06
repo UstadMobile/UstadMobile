@@ -138,7 +138,7 @@ android {
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
                 exclude "META-INF/ktor-http.kotlin_module"
-                exclude 'META-INF/KMPXmlPullParser.kotlin_module'
+                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
                 exclude 'META-INF/kotlinx-io.kotlin_module'
                 exclude 'META-INF/atomicfu.kotlin_module'
                 exclude 'META-INF/ktor-utils.kotlin_module'
@@ -276,7 +276,7 @@ dependencies {
      * sourceset (e.g. android/jvm sourcesets) in Kotlin multiplatform project dependencies. Adding
      * this will allow autocomplete etc. to work.
      */
-    compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
+    //compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
 
     implementation project(':lib-door-runtime')
     implementation project(':lib-database-android')
@@ -388,7 +388,7 @@ dependencies {
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
-    androidTestImplementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+    androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 }
 
 task sourceJar(type: Jar) {

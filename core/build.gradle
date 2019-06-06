@@ -104,7 +104,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-metadata:$version_klock"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-metadata:$version_kmp"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
@@ -122,7 +122,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-jvm:$version_kmp"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
 
@@ -187,12 +187,13 @@ kotlin {
         androidMain {
             dependencies {
                 implementation "com.github.aakira:napier-android:$version_napier"
-                implementation "com.android.support:appcompat-v7:$version_android_support_lib"
-                implementation "com.android.support:support-v4:$version_android_support_lib"
+                implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+                implementation "androidx.legacy:legacy-support-v4:$version_androidx_support_lib"
                 implementation "com.soywiz:klock-android:$version_klock"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation project(":lib-database-android")
 
             }
             dependsOn commonJvmMain
@@ -200,7 +201,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "com.ustadmobile.kmpxmlpullparser:KMPXmlPullParser-js:$version_kmp"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "com.soywiz:klock-js:$version_klock"
                 implementation "com.github.aakira:napier-js:$version_napier"
@@ -214,8 +215,15 @@ kotlin {
     }
 }
 
+
 def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
 Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
+
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
 if (rootProject.file("buildconfig.local.properties").exists()) {
@@ -366,15 +374,3 @@ publishing {
     }
 }
 
-
-/*
- * Added to overcome limitation on Android studio as per:
- *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
- */
-/*task copyTestResources(type: Copy) {
-   from "${projectDir}/src/test/resources"
-   from "${projectDir}/src/main/assets"
-   from "${projectDir}/../core-tests/src/main/resources"
-   into "${buildDir}/classes/test"
-}
-processTestResources.dependsOn copyTestResources */

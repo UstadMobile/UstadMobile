@@ -91,7 +91,7 @@ android {
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
                 exclude "META-INF/ktor-http.kotlin_module"
-                exclude 'META-INF/KMPXmlPullParser.kotlin_module'
+                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
                 exclude 'META-INF/kotlinx-io.kotlin_module'
                 exclude 'META-INF/atomicfu.kotlin_module'
                 exclude 'META-INF/ktor-utils.kotlin_module'
@@ -168,7 +168,6 @@ dependencies {
 
     api project(":app-android")
 
-    implementation project(":lib-database")
     implementation project(":lib-door-runtime")
 
     vanillamultidexApi 'androidx.multidex:multidex:2.0.0'

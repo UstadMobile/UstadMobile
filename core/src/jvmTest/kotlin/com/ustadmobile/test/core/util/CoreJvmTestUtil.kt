@@ -2,8 +2,6 @@ package com.ustadmobile.test.core.util
 
 import com.ustadmobile.core.util.UMIOUtils
 import java.io.*
-import java.net.URL
-import java.net.URLClassLoader
 import java.util.*
 
 fun checkJndiSetup() {
@@ -32,12 +30,6 @@ fun checkJndiSetup() {
                 e.printStackTrace()
             }
         }
-
-
-       /* val addMethod = URLClassLoader::class.java.getDeclaredMethod("addURL", URL::class.java)
-        addMethod.isAccessible = true
-        addMethod.invoke(ClassLoader.getSystemClassLoader(),
-                File(System.getProperty("user.dir"), "src/commonTest/resources").toURI().toURL())*/
     }
 }
 
