@@ -36,6 +36,13 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
 /**DAO */
 class ContentEntryDao {
   constructor() {}
+
+  findByUidWithContentEntryStatusAsync(entryUid){
+    const entry: any = UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid);
+    entry['contentEntryStatus'] = {downloadStatus:24};
+    return entry;
+  }
+
   getChildrenByParentUidWithCategoryFilter(entryUid, language, category): any {
     var entries = entryList[entryUid] as ContentEntry[];
     if(language != 0){
@@ -48,7 +55,7 @@ class ContentEntryDao {
   }
 
   getContentByUuidAsync(entryUid) {
-    return UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid) as ContentEntry;
+    return UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid);
   }
 
   findUniqueLanguagesInListAsync(entryUid) {
@@ -56,7 +63,7 @@ class ContentEntryDao {
   }
 
   findByUidAsync(entryUid) {
-    return UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid) as ContentEntry;
+    return UmAngularUtil.findObjectByLabel(entryList, 'contentEntryUid', entryUid);
   }
 
 
@@ -89,11 +96,23 @@ class ContainerDao{
   findFilesByContentEntryUid(entryUid){
     return util.ustadmobile.lib.util.UMUtil.jsArrayToKotlinList([]);
   }
+
+  getMostRecentDownloadedContainerForContentEntryAsync(entryUid){
+    const container = {
+      mimeType: "application/zip",
+      containerUid: 8989,
+      fileSize: 8989898
+    }
+
+    return container as db.ustadmobile.lib.db.entities.Container;
+  }
+
 }
 
 class NetworkNodeDao{
 
 }
+
 class ContentEntryStatusDao{
   constructor() {}
   findContentEntryStatusByUid(entryUid) : door.ustadmobile.door.DoorLiveData {

@@ -42,6 +42,31 @@ After that your IDE should see that:
 ```
 import {com} from 'core';
 ```
+In case you want to use two different import with com as top package, use alias i.e
+```
+import {com as core} from 'core';
+import {com as db} from 'lib-database';
+```
+
+* RTL Support
+MaterializeCss doesn't support RTL out of the box, so in case you want to add new component to the app then follow the following procedure:
+1. In the new component constructor call 
+```
+this.umService.isLTRDirectionality();
+```
+This will return true if the current directionality is LTR.
+2. Make use of Materialize quick floats, right/left to position the view base on the active directionality i.e.
+```
+element1_class =  this.umService.isLTRDirectionality ? "right":"left";
+element2_class =  this.umService.isLTRDirectionality ? "left":"right";
+```
+3. Use created varibale to add a class to the HTML containers (div), conatiner's will interchange position based on the current system directionality.
+```
+<div class="row">
+    <div class="col s12 l4 {{element1_class}}"></div>
+    <div class="col s12 l8 {{element2_class}}"></div>
+</div>
+```
 * Running an app locally
 ```
 ng serve

@@ -106,6 +106,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
             "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("findByUidWithContentEntryStatusAsync")
     abstract suspend fun findByUidWithContentEntryStatusAsync(contentEntryUid: Long): ContentEntryWithContentEntryStatus?
 
     @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +

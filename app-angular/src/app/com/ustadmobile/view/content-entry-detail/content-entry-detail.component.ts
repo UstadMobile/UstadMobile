@@ -35,9 +35,8 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
 
    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    const directionality = this.umService.getSystemDirectionality();
-    this.entry_summary_class =  directionality == "ltr" ? "right":"left";
-    this.entry_thumbnail_class = directionality == "ltr" ? "left":"right thumbnail-wrapper-right";
+    this.entry_summary_class =  this.umService.isLTRDirectionality ? "right":"left";
+    this.entry_thumbnail_class = this.umService.isLTRDirectionality? "left":"right thumbnail-wrapper-right";
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
@@ -55,13 +54,16 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
     });
   }
 
+  openEntry(){
+    this.presenter.handleDownloadButtonClick(true, this.contentEntryUid);
+  }
 
   openTranslation(translation){
     this.presenter.handleClickTranslatedEntry(translation.cerejRelatedEntryUid)
   }
 
   setContentEntry(contentEntry){
-    this.contentEntryUid = contentEntry.title;
+    this.contentEntryUid = contentEntry.contentEntryUid;
     this.entryTitle = contentEntry.title;
     this.entryAuthor = contentEntry.author;
     this.entryDescription = contentEntry.description;

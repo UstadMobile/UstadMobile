@@ -20,7 +20,7 @@ export class AppComponent extends UmBaseComponent{
               route: ActivatedRoute, private umDb: UmDbMockService){
     super(localeService, router, route, umDb);
     if(this.locale.startsWith('en')){
-      this.dir = "rtl";
+      this.dir = "ltr";
     }else{
       this.dir = "rtl";
     }

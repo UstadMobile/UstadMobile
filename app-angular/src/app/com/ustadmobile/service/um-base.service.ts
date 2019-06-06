@@ -23,8 +23,8 @@ export class UmBaseService {
     this.directionality = directionality;
   }
 
-  getSystemDirectionality(){
-    return this.directionality;
+  isLTRDirectionality() : boolean{
+    return this.directionality == "ltr";
   }
 
   dispatchUpdate(content: any) {

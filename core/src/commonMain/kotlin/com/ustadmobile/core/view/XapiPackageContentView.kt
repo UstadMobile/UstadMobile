@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.impl.UmCallback
+import kotlin.js.JsName
 
 /**
  * Created by mike on 9/13/17.
@@ -8,8 +8,10 @@ import com.ustadmobile.core.impl.UmCallback
 
 interface XapiPackageContentView : UstadView, ViewWithErrorNotifier {
 
+    @JsName("setTitle")
     fun setTitle(title: String)
 
+    @JsName("loadUrl")
     fun loadUrl(url: String)
 
     companion object {

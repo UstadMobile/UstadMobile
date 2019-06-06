@@ -40,11 +40,10 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 
      umDb: UmDbMockService, formBuilder: FormBuilder) {
     super(umService, router, route, umDb);
-    const directionality = this.umService.getSystemDirectionality();
-    this.entry_summary_class =  directionality == "ltr" ? "right":"left entry-summary-left";
-    this.entry_options_class =  directionality == "ltr" ? "right":"left";
-    this.entry_thumbnail_class = directionality == "ltr" ? "left entry-ltr":"right entry-rtl";
-    this.entry_collection_class = directionality == "ltr" ? "":"collection-rtl"; 
+    this.entry_summary_class =  this.umService.isLTRDirectionality ? "right":"left entry-summary-left";
+    this.entry_options_class =  this.umService.isLTRDirectionality ? "right":"left";
+    this.entry_thumbnail_class = this.umService.isLTRDirectionality ? "left entry-ltr":"right entry-rtl";
+    this.entry_collection_class = this.umService.isLTRDirectionality ? "":"collection-rtl"; 
 
     this.umFormLanguage = formBuilder.group({
       'language': ['-1', Validators.required]

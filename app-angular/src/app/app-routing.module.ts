@@ -1,3 +1,4 @@
+import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
 import { NotFoundComponent } from './com/ustadmobile/view/not-found/not-found.component';
 import { ContentEntryDetailComponent } from './com/ustadmobile/view/content-entry-detail/content-entry-detail.component';
@@ -15,6 +16,10 @@ const routes: Routes = [
           {path: 'ContentEntryDetail', component: ContentEntryDetailComponent},
           {path: 'RegisterAccount', component: RegisterComponent},
           {path: 'Login', component: LoginComponent},
+          {path: "XapiPackage", component: XapiContentComponent},
+          {path: "VideoPlayer", component: XapiContentComponent},
+          {path: "webChunk", component: XapiContentComponent},
+          {path: "Container", component: XapiContentComponent}
         ],
         canActivate: [AuthGuard],
         runGuardsAndResolvers: "always"

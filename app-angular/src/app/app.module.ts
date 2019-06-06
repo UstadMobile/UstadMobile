@@ -17,6 +17,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './com/ustadmobile/view/register/register.component';
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
 import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
+import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
     ContentEntryDetailComponent,
     NotFoundComponent,
     RegisterComponent,
-    LoginComponent
+    LoginComponent,
+    XapiContentComponent
   ],
   imports: [
     BrowserModule,

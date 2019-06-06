@@ -27,12 +27,11 @@ export class HomeComponent extends UmBaseComponent {
   constructor(private location: Location,umService: UmBaseService,
               router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    const directionality = this.umService.getSystemDirectionality();
-    this.icon_position_class =  directionality == "ltr" ? "left":"right icon-left-spacing";
-    this.toolbar_icon_class = directionality == "ltr" ? "left icon-right-spacing":"right icon-left-spacing";
-    this.toolbar_arrow = directionality == "ltr" ? "arrow_back":"arrow_forward";
-    this.toolbar_title_class = directionality == "ltr" ? "brand-logo-ltr":"brand-logo-rtl";
-    this.drawer_menu_class = directionality == "ltr" ? "right drawer-menu-ltr":"left drawer-menu-rtl";
+    this.icon_position_class =  this.umService.isLTRDirectionality ? "left":"right icon-left-spacing";
+    this.toolbar_icon_class = this.umService.isLTRDirectionality ? "left icon-right-spacing":"right icon-left-spacing";
+    this.toolbar_arrow = this.umService.isLTRDirectionality ? "arrow_back":"arrow_forward";
+    this.toolbar_title_class = this.umService.isLTRDirectionality ? "brand-logo-ltr":"brand-logo-rtl";
+    this.drawer_menu_class = this.umService.isLTRDirectionality ? "right drawer-menu-ltr":"left drawer-menu-rtl";
    }
 
   ngOnInit() {

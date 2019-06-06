@@ -233,6 +233,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
+    @JsName("handleDownloadButtonClick")
     fun handleDownloadButtonClick(isDownloadComplete: Boolean, entryUuid: Long) {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {

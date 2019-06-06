@@ -1,4 +1,5 @@
-import {com as core} from 'core';
+import { com as core} from 'core';
+import { com as db } from 'lib-database';
 import {Observable} from 'rxjs';
 
 export class UmAngularUtil {
@@ -6,9 +7,9 @@ export class UmAngularUtil {
   /**
    * Content dispatch keys - communication btn components
    */
-  static DISPATCH_TITLE : string = "toolbar_title";
+  static DISPATCH_TITLE = "toolbar_title";
 
-  static DISPATCH_RESOURCE : string = "resouce_ready";
+  static DISPATCH_RESOURCE = "resouce_ready";
 
 
   /**
@@ -44,7 +45,7 @@ export class UmAngularUtil {
         }
       })
     })
-    return foundObj;
+    return foundObj as db.ustadmobile.lib.db.entities.ContentEntry;
   }
 
   
@@ -60,7 +61,7 @@ export class UmAngularUtil {
       view = 'ContentEntryList/'
     } else if(UmAngularUtil.queryParamsToMap().size > 0 && 
     (routePath.includes ("ContentEntryList")  || routePath.includes ("ContentEntryList") 
-    || routePath.includes("Register") || routePath.includes("Login"))) {
+    || routePath.includes("Register") || routePath.includes("Login") || routePath.includes("XapiPackage"))) {
       args = UmAngularUtil.queryParamsToMap();
       view =  route;
     }else{
@@ -70,4 +71,6 @@ export class UmAngularUtil {
     console.log("path", view)
     return {view: view, args: args};
   }
+
+
 }

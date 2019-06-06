@@ -94,7 +94,7 @@ ul{
   ##Screen = B/w 768px to 1024px
 */
 
-@media (min-width: 768px){
+@media (min-width: 769px){
   header,
   main,
   footer {
@@ -136,10 +136,12 @@ ul{
 */
 
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  
+  
   header,
   main,
   footer {
-    padding-left: 300px;
+    padding-left: 0px;
   }
 
   .content-data {
@@ -156,7 +158,7 @@ ul{
 
   .brand-logo-ltr{
     margin-top: 1% !important;
-    left: 1% !important;
+    left: 33% !important;
   }
 
   .brand-logo-rtl{
@@ -168,7 +170,6 @@ ul{
     font-weight: 800;
     font-size: 2.2em;
   }
-  
 }
 
 /* 
