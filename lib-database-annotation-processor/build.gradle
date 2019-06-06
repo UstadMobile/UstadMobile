@@ -21,15 +21,15 @@ kapt {
 }
 
 dependencies {
-    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
-    implementation project(path: ":lib-room-annotations", configuration: "jvmDefault")
-    implementation project(path: ":lib-door-runtime", configuration: "jvmDefault")
+    implementation project(":lib-database-annotations")
+    implementation project(":lib-room-annotations")
+    implementation project(":lib-door-runtime")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$version_kotlin"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
 
-    implementation project(path: ":lib-util", configuration: "jvmDefault")
+    implementation project(":lib-util")
 
 
     implementation "com.squareup:kotlinpoet:1.2.0"
