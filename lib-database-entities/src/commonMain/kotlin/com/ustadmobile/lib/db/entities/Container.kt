@@ -6,8 +6,8 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 
-@UmEntity(tableId = 51 ,indices = arrayOf(UmIndex(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
-@Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])))
+@UmEntity(tableId = 51 ,indices = [UmIndex(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])])
+@Entity(indices = [Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "lastModified"])])
 open class Container() {
 
     @PrimaryKey(autoGenerate = true)

@@ -1,5 +1,4 @@
 <header>
-
   <div class="navbar-fixed">
     <mz-navbar navbarClass="top-nav-height  z-depth-2 {{env.colorPrimary}}">
       <p class="brand-logo {{toolbar_title_class}}">
@@ -21,17 +20,27 @@
   <mz-dropdown #dropwdown [id]="'dropdown-demo'" [align]="'left'" [belowOrigin]="true" [constrainWidth]="false"
     [dropdownButtonId]="'um-drawer'" [gutter]="true" [hover]="true" [inDuration]="300" [outDuration]="300"
     [stopPropagation]="true">
+
+    <li><a><span i18n="@@libraries">Libraries</span></a></li>
+    <li><a> <span i18n="@@reports">Reports</span></a></li>
+
+    <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
     <mz-dropdown-item>
-      <a class="collapsible-header"><span i18n="@@libraries">Libraries</span>
-      </a></mz-dropdown-item>
-    <mz-dropdown-item>
-      <a class="collapsible-header"> <span i18n="@@reports">Reports</span>
-      </a>
+        <form *ngIf="supportedLanguages" >
+            <p class="{{language_class}} grey-text text-lighten-2" i18n="@@language">Languages</p>
+                <mz-select-container [inline]=false *ngIf="supportedLanguages">
+                    <select mz-select
+                      [formControl]="umFormLanguage.controls['language']" 
+                      id="options-language">
+                      <option *ngFor="let language of supportedLanguages" value="{{language.code}}">{{language.name}}</option>
+                    </select>
+                  </mz-select-container>
+            </form>
     </mz-dropdown-item>
   </mz-dropdown>
 
 
-  <mz-sidenav #sidenav [fixed]=true [edge]="'left'">
+  <mz-sidenav #sidenav [fixed]=true [edge]="'left'" class="show-on-medium-and-up">
 
     <mz-sidenav-header>
       <div class="user-view">
@@ -52,7 +61,20 @@
         <i class="material-icons {{icon_position_class}}">pie_chart</i>
       </a>
     </mz-sidenav-link>
+    <mz-sidenav-subheader></mz-sidenav-subheader>
+    <mz-sidenav-divider></mz-sidenav-divider>
 
+    <form *ngIf="supportedLanguages" >
+    <span class="{{language_class}} {{env.colorPrimaryText}}" i18n="@@language">Languages</span>
+        <mz-select-container [inline]=true *ngIf="supportedLanguages">
+            <select mz-select
+              [formControl]="umFormLanguage.controls['language']" 
+              id="options-language">
+              <option *ngFor="let language of supportedLanguages" value="{{language.code}}">{{language.name}}</option>
+            </select>
+          </mz-select-container>
+    </form>
+   
   </mz-sidenav>
 
   <!-- side nav ends here-->

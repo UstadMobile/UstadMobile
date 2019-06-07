@@ -28,7 +28,7 @@ export class LoginComponent extends UmBaseComponent implements core.ustadmobile.
     umDb: UmDbMockService, formBuilder: FormBuilder) {
     super(umService, router, route, umDb);
 
-    this.btn_class = this.umService.isLTRDirectionality ? "right-align":"left-align";
+    this.btn_class = this.umService.isLTRDirectionality() ? "right-align":"left-align";
 
     this.umFormLogin = formBuilder.group({
       'username': ['', Validators.required],

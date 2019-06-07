@@ -37,6 +37,11 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
           UmAngularUtil.DISPATCH_RESOURCE, loaded))
       }
     });
+
+    this.umService.loadSupportedLanguages().subscribe((loaded) => {
+      this.umService.dispatchUpdate(UmAngularUtil.getContentToDispatch(
+        UmAngularUtil.DISPATCH_LANGUAGES, loaded))
+    })
   }
 
   runOnUiThread(runnable){

@@ -35,8 +35,8 @@ export class ContentEntryDetailComponent extends UmBaseComponent implements
 
    constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, umDb: UmDbMockService) {
     super(umService, router, route, umDb);
-    this.entry_summary_class =  this.umService.isLTRDirectionality ? "right":"left";
-    this.entry_thumbnail_class = this.umService.isLTRDirectionality? "left":"right thumbnail-wrapper-right";
+    this.entry_summary_class =  this.umService.isLTRDirectionality() ? "right":"left";
+    this.entry_thumbnail_class = this.umService.isLTRDirectionality()? "left":"right thumbnail-wrapper-right";
 
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {

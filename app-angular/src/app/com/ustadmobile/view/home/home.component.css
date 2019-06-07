@@ -27,3 +27,11 @@
   .drawer-menu-ltr{
     margin: 2% 1% 0 2% !important;
   }
+
+  .language-rtl{
+    margin: 4% !important;
+  }
+
+  .language-ltr{
+    margin : 4% !important;
+  }

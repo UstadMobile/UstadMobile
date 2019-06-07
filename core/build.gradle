@@ -274,35 +274,74 @@ task prepareLocale {
 }
 
 /**
- * Generate locale json file whic maps code to actual string
+ * Generate locale json files which maps code to actual string and list of supported language
  */
 task prepareWebLocale{
-    File outFile = null
+    File localeOutFile = null
+    File languagesOutFile = null
     if(!file(translationsOutPath).exists()){
         file(translationsOutPath).mkdirs()
     }
 
     Map<String, Integer> messageIds = new HashMap<>()
     AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+    def languageCounter = 0
+    File languageTmpFile = project.file("${rootDir.absolutePath}/app-angular/src/assets/languages.json")
     def localeCode = "en"
-    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+    def terminator = ","
+    def languageFileContent =  "{\n\n"
 
+    if(languageTmpFile.exists()){
+        languageTmpFile.delete()
+    }
+    languagesOutFile = languageTmpFile
+
+    ConfigurableFileTree files = rootProject.fileTree(dir: "core/locale/main")
+
+    files.each() { File file ->
+
+        System.out.println("Found file "+file.getAbsolutePath())
         Map<String, String> idToTranslationMap = new HashMap<>()
 
         if(file.absolutePath.split("-").size() > 1){
             localeCode = file.absolutePath.split("-")[1].split("/")[0]
         }
-        File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
-        if(tempFile.exists()){
-            tempFile.delete()
+
+        def languageName = ""
+
+        switch (localeCode){
+            case "en":
+                languageName = "English"
+                break
+            case "ps":
+                languageName = "Pashto"
+                break
+            case "fa":
+                languageName = "Farsi"
+                break
         }
-        outFile = tempFile
+
+        if(languageCounter == files.size() -1){
+            terminator = ""
+        }else{
+            terminator = ","
+        }
+
+        languageFileContent <<= '    "' + localeCode + '" : "'+languageName+'"'+"${terminator}\n\n"
+        languageCounter++
+
+
+        File localeTmpFile = project.file("${translationsOutPath}locale.${localeCode}.json")
+        if(localeTmpFile.exists()){
+            localeTmpFile.delete()
+        }
+
+        localeOutFile = localeTmpFile
 
         def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
-        def counter = 0
-        def terminator = ","
-        def fileContent = "{\n\n"
+        def localeFileContent = "{\n\n"
         def value = 0
+        def counter = 0
         xmlDoc.string.each() { str ->
             String msgName = str.@name
             String msgValue = str
@@ -319,10 +358,12 @@ task prepareWebLocale{
 
             if(counter == xmlDoc.string.size() -1){
                 terminator = ""
+            }else{
+                terminator = ","
             }
 
             msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
-            fileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
+            localeFileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
 
             idToTranslationMap.put(msgName,msgValue)
             languageMapOfMaps.put(localeCode, idToTranslationMap)
@@ -330,10 +371,14 @@ task prepareWebLocale{
             counter++
         }
 
-        fileContent <<=  '}'
-        fileContent <<= ""
-        outFile << fileContent
+        localeFileContent <<=  '}'
+        localeFileContent <<= ""
+        localeOutFile << localeFileContent
     }
+
+    languageFileContent <<=  '}'
+    languageFileContent <<= ""
+    languagesOutFile << languageFileContent
 
 }
 

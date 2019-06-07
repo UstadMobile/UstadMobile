@@ -11,6 +11,8 @@ export class UmAngularUtil {
 
   static DISPATCH_RESOURCE = "resouce_ready";
 
+  static DISPATCH_LANGUAGES = "languages_ready";
+
 
   /**
    * Convert query parameters to a kotlin map to be used on presenters
@@ -49,27 +51,36 @@ export class UmAngularUtil {
   }
 
   
+  private static getRoutePathParam(){
+    var routePath = document.location.pathname;
+    const pathSections = routePath.split("/");
+    return {completePath: routePath, path: pathSections[pathSections.length - 1] + "/" };
+  }
 
   static getInitialRoute(entryUid ? : number) {
     var args, view = null
-    var routePath = document.location.pathname;
-    const pathSections = routePath.split("/");
-    const route =  pathSections[pathSections.length - 1] + "/";
+    const route = this.getRoutePathParam();
 
-    if (routePath == "/"  || UmAngularUtil.queryParamsToMap().size == 0) {
+    if (route.completePath == "/"  || UmAngularUtil.queryParamsToMap().size == 0) {
       args = UmAngularUtil.queryParamsToMap("?entryid=" + entryUid)
       view = 'ContentEntryList/'
     } else if(UmAngularUtil.queryParamsToMap().size > 0 && 
-    (routePath.includes ("ContentEntryList")  || routePath.includes ("ContentEntryList") 
-    || routePath.includes("Register") || routePath.includes("Login") || routePath.includes("XapiPackage"))) {
+    (route.completePath.includes ("ContentEntryList")  || route.completePath.includes ("ContentEntryList") 
+    || route.completePath.includes("Register") || route.completePath.includes("Login") 
+    || route.completePath.includes("XapiPackage"))) {
       args = UmAngularUtil.queryParamsToMap();
-      view =  route;
+      view =  route.path;
     }else{
       view = "/NotFound/"
       args = UmAngularUtil.queryParamsToMap("", true)
     }
-    console.log("path", view)
     return {view: view, args: args};
+  }
+
+  static getDifferentLanguageRoute(languageCode){
+    var route = this.getRoutePathParam();
+    const args = UmAngularUtil.queryParamsToMap();
+    return {view: route.path, args: args};
   }
 
 
