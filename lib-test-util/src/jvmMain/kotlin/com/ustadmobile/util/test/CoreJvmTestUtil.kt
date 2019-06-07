@@ -1,10 +1,9 @@
-package com.ustadmobile.test.core.util
+package com.ustadmobile.util.test
 
-import com.ustadmobile.core.util.UMIOUtils
 import java.io.*
 import java.util.*
 
-fun checkJndiSetup() {
+actual fun checkJndiSetup() {
     if(System.getProperty("java.naming.factory.initial") == null) {
         val jndiProps = Properties()
         jndiProps.load(FileReader("src/commonTest/resources/jndi.properties"))
@@ -33,7 +32,8 @@ fun checkJndiSetup() {
     }
 }
 
-fun extractTestResourceToFile(testResPath: String, destFile: File) {
+fun extractTestResourceToFile(testResPath: String, destFile: File,
+                              resDirSearchPaths: List<String> = listOf("src/commonTest/resources", "src/jvmTest/resources")) {
     var inStream = null as InputStream?
     var outStream = null as OutputStream?
     try {
@@ -44,12 +44,22 @@ fun extractTestResourceToFile(testResPath: String, destFile: File) {
         }
 
         if(inStream == null) {
-            val resDir = File(System.getProperty("user.dir"), "src/commonTest/resources")
-            inStream = FileInputStream(File(resDir, testResPath))
+            for(searchPath in resDirSearchPaths) {
+                val resDir = File(System.getProperty("user.dir"), "src/commonTest/resources")
+                val resFile = File(resDir, testResPath)
+                if(resFile.exists()) {
+                    inStream = FileInputStream(resFile)
+                    break
+                }
+            }
+        }
+
+        if(inStream == null) {
+            throw FileNotFoundException("Could not find resource $testResPath in ${resDirSearchPaths.joinToString()}")
         }
 
         outStream = FileOutputStream(destFile)
-        UMIOUtils.readFully(inStream, outStream)
+        outStream.write(inStream.readBytes())
     }catch(e: Exception) {
         throw IOException("Could not extract test resource: $testResPath", e)
     }finally {

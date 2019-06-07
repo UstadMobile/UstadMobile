@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -9,12 +9,17 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.UMUtil
-import java.util.*
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.*
+import kotlinx.coroutines.NonCancellable.isActive
+import kotlin.jvm.Volatile
 
-class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: Int) {
+//import java.util.*
+//import java.util.concurrent.CountDownLatch
+//import java.util.concurrent.Executors
+//import java.util.concurrent.TimeUnit
+
+class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: Int,
+                             private val coroutineScope: CoroutineDispatcher) {
 
     private val jobItemUidToStatusMap = HashMap<Int, DownloadJobItemStatus>()
 
@@ -22,7 +27,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
 
     var onDownloadJobItemChangeListener: OnDownloadJobItemChangeListener? = null
 
-    private val executor = Executors.newSingleThreadScheduledExecutor()
+    //private val executor = Executors.newSingleThreadScheduledExecutor()
 
     @Volatile
     var rootItemStatus: DownloadJobItemStatus? = null
@@ -33,12 +38,24 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         private set
 
     init {
-        executor.scheduleWithFixedDelay({ this.doCommit() }, 1000, 1000, TimeUnit.MILLISECONDS)
-        try {
-            executor.schedule({ loadFromDb() }, 0, TimeUnit.SECONDS).get()
-        } catch (e: Exception) {
-            throw RuntimeException(e)
+
+        GlobalScope.launch {
+            withContext(coroutineScope){
+                //TODO: fix this to check a variable
+                loadFromDb()
+                while(true) {
+                    delay(1000)
+                    doCommit()
+                }
+            }
         }
+
+//        executor.scheduleWithFixedDelay({ this.doCommit() }, 1000, 1000, TimeUnit.MILLISECONDS)
+//        try {
+//            executor.schedule({ loadFromDb() }, 0, TimeUnit.SECONDS).get()
+//        } catch (e: Exception) {
+//            throw RuntimeException(e)
+//        }
 
     }
 
@@ -72,8 +89,9 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         }
     }
 
-    fun updateProgress(djiUid: Int, bytesSoFar: Long, totalBytes: Long) {
-        executor.execute {
+    suspend fun updateProgress(djiUid: Int, bytesSoFar: Long, totalBytes: Long) {
+        withContext(coroutineScope) {
+            //executor.execute {
             UMLog.l(UMLog.DEBUG, 420, "Updating ID #" +
                     djiUid + " bytesSoFar = " + bytesSoFar + " totalBytes=" + totalBytes)
             val djStatus = jobItemUidToStatusMap[djiUid]
@@ -93,9 +111,10 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         }
     }
 
-    fun updateStatus(djiUid: Int, status: Int, callback: UmResultCallback<Void?>?) {
-        executor.execute {
-            val updatedItems = LinkedList<DownloadJobItemStatus>()
+    suspend fun updateStatus(djiUid: Int, status: Int) {
+        //executor.execute {
+        withContext(coroutineScope) {
+            val updatedItems = mutableListOf<DownloadJobItemStatus>()
             val djStatus = jobItemUidToStatusMap[djiUid]
             if (djStatus != null) {
                 updateItemStatusInt(djStatus, status, updatedItems)
@@ -123,7 +142,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 }
             }
 
-            callback?.onDone(null)
+            //callback?.onDone(null)
         }
     }
 
@@ -153,7 +172,7 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                                 fn: (DownloadJobItemStatus) -> Boolean) {
         var parents = startParents
         while (parents != null && !parents.isEmpty()) {
-            val nextParents = LinkedList<DownloadJobItemStatus>()
+            val nextParents = mutableListOf<DownloadJobItemStatus>()
             for (parent in parents) {
                 val parentParents = parent.parents
                 if (fn.invoke(parent) && parentParents != null)
@@ -167,13 +186,15 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
         }
     }
 
-    fun insertDownloadJobItems(items: List<DownloadJobItem>, callback: UmResultCallback<Void?>?) {
-        executor.execute {
+    suspend fun insertDownloadJobItems(items: List<DownloadJobItem>/*, callback: UmResultCallback<Void?>?*/) {
+        //executor.execute {
+        withContext(coroutineScope){
             UMLog.l(UMLog.DEBUG, 420, "Adding download job items" + UMUtil.debugPrintList(items))
             db.downloadJobItemDao.insertListAndSetIds(items)
 
             for (item in items) {
-                val uidIntObj = Integer.valueOf(item.djiUid.toInt())
+                //val uidIntObj = Integer.valueOf(item.djiUid.toInt())
+                val uidIntObj = item.djiUid
 
                 val itemStatus = DownloadJobItemStatus(item)
                 jobItemUidToStatusMap[uidIntObj] = itemStatus
@@ -181,29 +202,30 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                     rootItemStatus = itemStatus
             }
 
-            callback?.onDone(null)
+            //callback?.onDone(null)
         }
     }
 
-    fun insertDownloadJobItemsSync(items: List<DownloadJobItem>) {
-        val latch = CountDownLatch(1)
-        insertDownloadJobItems(items, object : UmResultCallback<Void?> {
-            override fun onDone(result: Void?) {
-                latch.countDown()
-            }
-        })
+//    fun insertDownloadJobItemsSync(items: List<DownloadJobItem>) {
+//        val latch = CountDownLatch(1)
+//        insertDownloadJobItems(items, object : UmResultCallback<Void?> {
+//            override fun onDone(result: Void?) {
+//                latch.countDown()
+//            }
+//        })
+//
+//        try {
+//            latch.await(5, TimeUnit.SECONDS)
+//        } catch (e: InterruptedException) { /*should not happen */
+//        }
+//
+//    }
 
-        try {
-            latch.await(5, TimeUnit.SECONDS)
-        } catch (e: InterruptedException) { /*should not happen */
-        }
 
-    }
-
-
-    fun insertParentChildJoins(joins: List<DownloadJobItemParentChildJoin>,
-                               callback: UmResultCallback<Void>?) {
-        executor.execute {
+    suspend fun insertParentChildJoins(joins: List<DownloadJobItemParentChildJoin>/*,
+                               callback: UmResultCallback<Void>?*/) {
+        //executor.execute {
+        withContext(coroutineScope) {
             UMLog.l(UMLog.DEBUG, 420, "Adding parent-child joins" + UMUtil.debugPrintList(joins))
             for (join in joins) {
                 val childStatus = jobItemUidToStatusMap[join.djiChildDjiUid.toInt()]
@@ -223,19 +245,20 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 childStatus.addParent(parentStatus)
                 parentStatus.addChild(childStatus)
 
-                updateParentsProgress(childStatus.jobItemUid, Arrays.asList(parentStatus),
+                updateParentsProgress(childStatus.jobItemUid, /*Arrays.asList(parentStatus),*/ listOf(parentStatus),
                         childStatus.bytesSoFar, childStatus.totalBytes)
             }
 
             db.downloadJobItemParentChildJoinDao.insertList(joins)
 
-            callback?.onDone(null)
+            //callback?.onDone(null)
         }
     }
 
 
-    fun findStatusByContentEntryUid(contentEntryUid: Long, callback: UmResultCallback<DownloadJobItemStatus>) {
-        executor.execute {
+    suspend fun findStatusByContentEntryUid(contentEntryUid: Long) :DownloadJobItemStatus? {
+        //executor.execute {
+        return withContext(coroutineScope) {
             var statusFound = null as DownloadJobItemStatus?
             for (status in jobItemUidToStatusMap.values) {
                 if (status.contentEntryUid == contentEntryUid) {
@@ -244,23 +267,22 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
                 }
             }
 
-            callback.onDone(statusFound)
+            statusFound
         }
     }
 
-    fun commit(callback: UmResultCallback<Void>) {
-        executor.execute {
+    suspend fun commit() {
+        withContext(coroutineScope) {
             doCommit()
-            callback.onDone(null)
         }
     }
 
     private fun doCommit() {
-        db.downloadJobItemDao.updateDownloadJobItemsProgress(LinkedList(progressChangedItems))
+        db.downloadJobItemDao.updateDownloadJobItemsProgress(progressChangedItems.toList())
         progressChangedItems.clear()
     }
 
     fun close() {
-        executor.shutdownNow()
+        //executor.shutdownNow()
     }
 }

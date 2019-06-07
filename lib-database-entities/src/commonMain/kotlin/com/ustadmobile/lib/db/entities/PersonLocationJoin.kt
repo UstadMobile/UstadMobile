@@ -8,8 +8,7 @@ import com.ustadmobile.lib.database.annotation.*
 @Entity
 class PersonLocationJoin() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personLocationUid: Long = 0
 
     var personLocationPersonUid: Long = 0

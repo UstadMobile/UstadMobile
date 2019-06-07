@@ -16,6 +16,7 @@ import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
+import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -114,8 +115,9 @@ class DownloadJobItemRunner
             if (runnerStatus.get() == JobStatus.RUNNING) {
                 val bytesSoFar = completedEntriesBytesDownloaded.get() + (httpDownload?.downloadedSoFar
                         ?: 0)
-                downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
-                        bytesSoFar, downloadItem.downloadLength)
+                TODO("Fix this for coroutine")
+//                downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
+//                        bytesSoFar, downloadItem.downloadLength)
             }
         }
     }
@@ -439,8 +441,9 @@ class DownloadJobItemRunner
             }
             val totalDownloaded = completedEntriesBytesDownloaded.get() + if (httpDownload != null) httpDownload!!.downloadedSoFar else 0
 
-            downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
-                    totalDownloaded, totalDownloaded)
+            TODO("Fix this to use suspend fun")
+//            downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
+//                    totalDownloaded, totalDownloaded)
         }
 
         stop(if (downloaded) JobStatus.COMPLETE else JobStatus.FAILED)
@@ -604,12 +607,13 @@ class DownloadJobItemRunner
         val latch = CountDownLatch(1)
         UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                 " Setting status to: " + JobStatus.statusToString(itemStatus))
-        downloadJobItemManager!!.updateStatus(downloadItem.djiUid.toInt(), itemStatus,
-                object : UmResultCallback<Void?> {
-                    override fun onDone(result: Void?) {
-                        latch.countDown()
-                    }
-                })
+        TODO("Update this to using suspend fun")
+//        downloadJobItemManager!!.updateStatus(downloadItem.djiUid.toInt(), itemStatus,
+//                object : UmResultCallback<Void?> {
+//                    override fun onDone(result: Void?) {
+//                        latch.countDown()
+//                    }
+//                })
         try {
             latch.await(5, TimeUnit.SECONDS)
         } catch (e: InterruptedException) {/* should not happen */

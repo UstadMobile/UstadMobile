@@ -37,20 +37,21 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
             mNetworkServiceBound.set(true)
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
-            networkManagerBle!!.addDownloadChangeListener(this@DownloadNotificationService)
-            val activeDownloadManagers = networkManagerBle!!
-                    .activeDownloadJobItemManagers
-            for (manager in activeDownloadManagers) {
-                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
-                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
-                }
-            }
+            //TODO: this needs fixed to use the modified download manager
+//            networkManagerBle!!.addDownloadChangeListener(this@DownloadNotificationService)
+//            val activeDownloadManagers = networkManagerBle!!
+//                    .activeDownloadJobItemManagers
+//            for (manager in activeDownloadManagers) {
+//                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
+//                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
+//                }
+//            }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
             mNetworkServiceBound.set(false)
             if (networkManagerBle != null) {
-                networkManagerBle!!.removeDownloadChangeListener(this@DownloadNotificationService)
+//                networkManagerBle!!.removeDownloadChangeListener(this@DownloadNotificationService)
                 networkManagerBle = null
             }
         }
@@ -375,8 +376,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     private fun stopForegroundService() {
         if (!stopped.getAndSet(true)) {
             val networkManager = networkManagerBle
-            if (networkManager != null)
-                networkManagerBle!!.removeDownloadChangeListener(this)
+            //TODO: fix this once we update to use the new download manager
+//            if (networkManager != null)
+//                networkManagerBle!!.removeDownloadChangeListener(this)
 
             downloadJobIdToNotificationMap.clear()
             stopForeground(true)

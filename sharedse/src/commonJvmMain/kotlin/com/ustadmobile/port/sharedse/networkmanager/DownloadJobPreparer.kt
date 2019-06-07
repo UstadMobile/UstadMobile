@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
 import com.ustadmobile.lib.util.UMUtil
+import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -37,7 +38,8 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 jobItemManager.downloadJobUid, contentEntryUid,
                 rootEntryContainer?.containerUid ?: 0,
                 rootEntryContainer?.fileSize ?: 0)
-        jobItemManager.insertDownloadJobItemsSync(listOf(rootDownlaodJobItem))
+        TODO("Make this use coroutine suspended function")
+        //jobItemManager.insertDownloadJobItemsSync(listOf(rootDownlaodJobItem))
 
         val contentEntryUidToDjiUidMap = HashMap<Long, Int>()
         val parentUids = ArrayList<Long>()
@@ -64,7 +66,8 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 if (!contentEntryUidToDjiUidMap.containsKey(child.contentEntryUid)) {
                     val newItem = DownloadJobItem(downloadJobUid,
                             child.contentEntryUid, child.containerUid, child.fileSize)
-                    jobItemManager.insertDownloadJobItemsSync(listOf(newItem))
+                    TODO("Make this use suspend function")
+                    //jobItemManager.insertDownloadJobItemsSync(listOf(newItem))
                     numItemsCreated++
                     statusList.add(ContentEntryStatus(child.contentEntryUid,
                             child.fileSize > 0, child.fileSize))
@@ -81,10 +84,11 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 }
 
                 if (!createdJoinCepjUids.contains(child.cepcjUid)) {
-                    jobItemManager.insertParentChildJoins(listOf(DownloadJobItemParentChildJoin(
-                            contentEntryUidToDjiUidMap[child.parentEntryUid]!!,
-                            contentEntryUidToDjiUidMap[child.contentEntryUid]!!,
-                            child.cepcjUid)), null)
+                    TODO("Make this use suspend function")
+//                    jobItemManager.insertParentChildJoins(listOf(DownloadJobItemParentChildJoin(
+//                            contentEntryUidToDjiUidMap[child.parentEntryUid]!!,
+//                            contentEntryUidToDjiUidMap[child.contentEntryUid]!!,
+//                            child.cepcjUid)), null)
                     createdJoinCepjUids.add(child.cepcjUid)
                 }
             }
@@ -95,12 +99,13 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 " items. Time to prepare download job: " +
                 (System.currentTimeMillis() - startTime) + "ms")
         val latch = CountDownLatch(1)
-        jobItemManager.commit(object: UmResultCallback<Void>{
-            override fun onDone(result: Void?) {
-                latch.countDown()
-            }
-
-        })
+        TODO("Fix this to use coroutine suspend function")
+//        jobItemManager.commit(object: UmResultCallback<Void>{
+//            override fun onDone(result: Void?) {
+//                latch.countDown()
+//            }
+//
+//        })
         try {
             latch.await(5, TimeUnit.SECONDS)
         } catch (e: InterruptedException) {

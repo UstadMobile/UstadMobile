@@ -17,7 +17,7 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Compani
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.test.core.util.checkJndiSetup
+import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Assert
 import org.mockito.Mockito.spy
 

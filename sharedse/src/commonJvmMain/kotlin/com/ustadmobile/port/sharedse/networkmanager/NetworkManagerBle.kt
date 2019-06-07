@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
+import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.*
@@ -153,8 +154,8 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
 
     abstract val isVersionKitKatOrBelow: Boolean
 
-    val activeDownloadJobItemManagers: List<DownloadJobItemManager>
-        get() = jobItemManagerList!!.getActiveDownloadJobItemManagers()
+//    val activeDownloadJobItemManagers: List<DownloadJobItemManager>
+//        get() = jobItemManagerList!!.getActiveDownloadJobItemManagers()
 
     /**
      * Constructor to be used when creating new instance

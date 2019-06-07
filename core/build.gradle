@@ -143,6 +143,7 @@ kotlin {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
+                implementation project(":lib-test-util")
             }
         }
 
