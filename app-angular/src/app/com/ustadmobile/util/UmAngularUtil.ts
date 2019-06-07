@@ -2,6 +2,11 @@ import { com as core} from 'core';
 import { com as db } from 'lib-database';
 import {Observable} from 'rxjs';
 
+export const appRountes = [
+  "ContentEntryList", "ContentEntryDetail", "RegisterAccount",
+   "Login", "XapiPackage", "VideoPlayer", "webChunk", "Container"
+]
+
 export class UmAngularUtil {
 
   /**
@@ -69,26 +74,32 @@ export class UmAngularUtil {
   
   private static getRoutePathParam(){
     var routePath = document.location.pathname;
-    const pathSections = routePath.split("/");
-    return {completePath: routePath, path: pathSections[pathSections.length - 1] + "/" };
+    const mPaths = routePath.split("/");
+    return {completePath: routePath, path: mPaths[mPaths.length - 1], size:  mPaths.length};
+  }
+
+  private static hasPath(mPath){
+    var foundPath = false;
+    appRountes.forEach(path => {
+      if(mPath == path){
+        foundPath = true;
+      }
+    });
+    return foundPath;
   }
 
   static getInitialRoute(entryUid ? : number) {
     var args, view = null
-    const route = this.getRoutePathParam();
-
-    if (route.completePath == "/"  || UmAngularUtil.queryParamsToMap().size == 0) {
-      args = UmAngularUtil.queryParamsToMap("?entryid=" + entryUid)
-      view = 'ContentEntryList/'
-    } else if(UmAngularUtil.queryParamsToMap().size > 0 && 
-    (route.completePath.includes ("ContentEntryList")  || route.completePath.includes ("ContentEntryList") 
-    || route.completePath.includes("Register") || route.completePath.includes("Login") 
-    || route.completePath.includes("XapiPackage"))) {
+    const mPath = this.getRoutePathParam();
+    if(mPath.size >= 4){
+      //redirect as it is
+      view = this.hasPath(mPath.path) ? mPath.path : "NotFound/"
       args = UmAngularUtil.queryParamsToMap();
-      view =  route.path;
-    }else{
-      view = "/NotFound/"
-      args = UmAngularUtil.queryParamsToMap("", true)
+    }else if(mPath.size <= 3){
+      //redirect to default
+      view = this.hasPath(mPath.path) ? mPath.path + "/" : "ContentEntryList/"
+      args = !this.hasPath(mPath.path) ? UmAngularUtil.queryParamsToMap("?entryid=" + entryUid) 
+      : UmAngularUtil.queryParamsToMap("?")
     }
     return {view: view, args: args};
   }

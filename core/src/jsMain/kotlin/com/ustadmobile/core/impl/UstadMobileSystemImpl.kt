@@ -39,8 +39,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        val basePath = if(args.containsKey(ARG_CONTENT_ENTRY_UID) || args.containsKey(ARG_CONTAINER_UID)) "/${HomeView.VIEW_NAME}/" else "/"
-        umContext.router.navigate(arrayOf(basePath + viewName), mapToRouterParams(args))
+        umContext.router.navigate(arrayOf("/${HomeView.VIEW_NAME}/" + viewName), mapToRouterParams(args))
     }
 
     private fun mapToRouterParams(args: Map<String, String?>): Any{
