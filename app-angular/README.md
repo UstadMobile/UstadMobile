@@ -82,6 +82,6 @@ This will create an app, to run it use http://localhost:4200/
 To create production app, you need to generate JS bundles from angular source. To achieve that run the following command on your terminal.
 
 ```
-npm build --prod
+npm rum um-build
 ```
 

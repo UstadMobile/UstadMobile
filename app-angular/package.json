@@ -8,6 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "um-build":"for lang in en ps fa; do ng build --prod --base-href --output-path=dist/$lang --i18n-file src/assets/locale/messages.$lang.xlf --i18n-format xlf --i18n-locale $lang; done",
     "um-translate": "ng xi18n --output-path assets/locale"
   },
   "private": true,
