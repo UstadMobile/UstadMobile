@@ -2,10 +2,11 @@ import { com as core} from 'core';
 import { com as db } from 'lib-database';
 import {Observable} from 'rxjs';
 
-export const appRountes = [
-  "ContentEntryList", "ContentEntryDetail", "RegisterAccount",
-   "Login", "XapiPackage", "VideoPlayer", "webChunk", "Container"
-]
+export const appRountes = {
+  "list":"ContentEntryList", "details":"ContentEntryDetail", "register":"RegisterAccount",
+  "login":"Login", "xapi":"XapiPackage", "video":"VideoPlayer", "web":"webChunk", 
+  "container":"Container", "report":"Reports"
+}
 
 export class UmAngularUtil {
 
@@ -79,10 +80,11 @@ export class UmAngularUtil {
   }
 
   private static hasPath(mPath){
-    var foundPath = false;
-    appRountes.forEach(path => {
-      if(mPath == path){
+    var foundPath = false
+    Object.keys(appRountes).forEach(pathKey => {
+      if(mPath == appRountes[pathKey]){
         foundPath = true;
+        return;
       }
     });
     return foundPath;
@@ -99,7 +101,7 @@ export class UmAngularUtil {
       //redirect to default
       view = this.hasPath(mPath.path) ? mPath.path + "/" : "ContentEntryList/"
       args = !this.hasPath(mPath.path) ? UmAngularUtil.queryParamsToMap("?entryid=" + entryUid) 
-      : UmAngularUtil.queryParamsToMap("?")
+      : UmAngularUtil.queryParamsToMap(document.location.search.length > 0 ? document.location.search: "?")
     }
     return {view: view, args: args};
   }

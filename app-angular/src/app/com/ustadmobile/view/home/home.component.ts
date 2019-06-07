@@ -1,4 +1,3 @@
-import { Language } from './../../core/db/um-db-mock.service';
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -6,7 +5,7 @@ import { UmBaseComponent } from '../um-base-component';
 import { UmBaseService } from '../../service/um-base.service';
 import { UmDbMockService } from '../../core/db/um-db-mock.service';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { UmAngularUtil } from '../../util/UmAngularUtil';
+import { UmAngularUtil, appRountes } from '../../util/UmAngularUtil';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
@@ -26,6 +25,7 @@ export class HomeComponent extends UmBaseComponent {
   toolbar_title_class: string;
   drawer_menu_class: string;
   supportedLanguages = [];
+  routes = appRountes
   umFormLanguage : FormGroup;
 
   constructor(private location: Location,umService: UmBaseService,
@@ -68,8 +68,10 @@ export class HomeComponent extends UmBaseComponent {
     this.umService.goBack();
   }
 
-  openDrawer(){
-    
+  navigateTo(route){
+    const args = route != this.routes.list ?  UmAngularUtil.queryParamsToMap("?") 
+    : UmAngularUtil.queryParamsToMap("?entryid="+this.mockedUmDb.ROOT_UID);
+    this.systemImpl.go(route, args, this.context);
   }
 
   ngOnDestroy(): void {
