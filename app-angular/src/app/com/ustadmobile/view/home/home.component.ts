@@ -25,7 +25,6 @@ export class HomeComponent extends UmBaseComponent {
   toolbar_arrow: string;
   toolbar_title_class: string;
   drawer_menu_class: string;
-  language_class : string;
   supportedLanguages = [];
   umFormLanguage : FormGroup;
 
@@ -37,8 +36,7 @@ export class HomeComponent extends UmBaseComponent {
     this.toolbar_arrow = this.umService.isLTRDirectionality() ? "arrow_back":"arrow_forward";
     this.toolbar_title_class = this.umService.isLTRDirectionality() ? "brand-logo-ltr":"brand-logo-rtl";
     this.drawer_menu_class = this.umService.isLTRDirectionality() ? "right drawer-menu-ltr":"left drawer-menu-rtl";
-    this.language_class = this.umService.isLTRDirectionality() ? "language-ltr":"language-rtl";
-
+    
     this.umFormLanguage = formBuilder.group({
       'language': ['', Validators.required]
     });

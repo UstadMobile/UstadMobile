@@ -56,10 +56,13 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
     .subscribe((event:NavigationEnd) => {
       this.entries = [];
-        this.presenter = new core.ustadmobile.core.controller
+      //TODO: remove timeout
+        setTimeout(() => {
+          this.presenter = new core.ustadmobile.core.controller
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.umService.setPresenterInstance(this.presenter);
         this.presenter.onCreate(null);
+        }, 100);
     });
 
     
@@ -72,7 +75,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
       if(content[UmAngularUtil.DISPATCH_RESOURCE]){
         this.label_language_options = this.getString(this.MessageID.also_available_in);
-        this.label_reading_level = this.getString(this.MessageID.label_reading_level); 
+        this.label_reading_level = this.getString(this.MessageID.library_reading_level); 
       }
     });
 

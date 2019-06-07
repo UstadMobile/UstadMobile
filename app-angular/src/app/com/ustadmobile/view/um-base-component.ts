@@ -24,7 +24,7 @@ export abstract class UmBaseComponent implements OnInit, OnDestroy{
     this.context = new UmContextWrapper(router);
     this.context.setActiveRoute(this.route);
     this.viewContext = this.context; 
-    umService.setContext(this.context);
+    this.umService.setContext(this.context);
   }
 
   ngOnInit(): void {

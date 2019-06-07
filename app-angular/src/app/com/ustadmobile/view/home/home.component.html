@@ -27,7 +27,7 @@
     <mz-dropdown-divider class="default-margin-top"></mz-dropdown-divider>
     <mz-dropdown-item>
         <form *ngIf="supportedLanguages" >
-            <p class="{{language_class}} grey-text text-lighten-2" i18n="@@language">Languages</p>
+            <p class="language grey-text text-lighten-2" i18n="@@language">Languages</p>
                 <mz-select-container [inline]=false *ngIf="supportedLanguages">
                     <select mz-select
                       [formControl]="umFormLanguage.controls['language']" 
@@ -65,7 +65,7 @@
     <mz-sidenav-divider></mz-sidenav-divider>
 
     <form *ngIf="supportedLanguages" >
-    <span class="{{language_class}} {{env.colorPrimaryText}}" i18n="@@language">Languages</span>
+    <span class="language {{env.colorPrimaryText}}" i18n="@@language">Languages</span>
         <mz-select-container [inline]=true *ngIf="supportedLanguages">
             <select mz-select
               [formControl]="umFormLanguage.controls['language']" 
