@@ -60,6 +60,6 @@ import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-c
 })
 export class AppModule {
   constructor (private mockedDb: UmDbMockService){
-    this.mockedDb.loadEntries();
+    this.mockedDb.loadParentChildJoin();
   }
  }

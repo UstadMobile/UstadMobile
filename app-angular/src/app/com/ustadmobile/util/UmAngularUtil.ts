@@ -37,17 +37,33 @@ export class UmAngularUtil {
     });
   }
 
-  static findObjectByLabel = function (obj, label, value) {
-    var foundObj: any = null;
-    Object.keys(obj).forEach(key => {
-      (obj[key] as any[]).forEach(element => {
-        if (element[label] == value) {
-          foundObj = element;
-          return;
-        }
-      })
-    })
-    return foundObj as db.ustadmobile.lib.db.entities.ContentEntry;
+
+  static findEntry = function (entries,entryUid) {
+    var foundEntry: any = null;
+    entries.forEach(entry => {
+      if (entry.contentEntryUid as number == entryUid as number) {
+        foundEntry = entry;
+        return;
+      }
+    });
+    return foundEntry as db.ustadmobile.lib.db.entities.ContentEntry;
+  }
+
+  static findChildrenByParentUid(joins: any[], entries: any[], parentEntryUid) {
+    var foundEntryUids = [];
+    var foundEntries = [];
+
+    joins.forEach(join =>{
+      if(join.cepcjParentContentEntryUid == parentEntryUid){
+        foundEntryUids.push(join.cepcjChildContentEntryUid);
+      }
+    });
+
+    foundEntryUids.forEach(entryUid => {
+      foundEntries.push(this.findEntry(entries,entryUid));
+    });
+
+    return foundEntries;
   }
 
   

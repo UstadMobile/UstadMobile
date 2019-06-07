@@ -13,8 +13,11 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
   ROOT_UID = 1311236;
 
   private entriesLoaded = false;
+  private joinsLoaded = false;
   private initialized: boolean = false;
-  private entriesJson = {};
+  private entries = [];
+  private entryParentJoins = [];
+
 
   constructor(private http: HttpClient) {
     super()
@@ -31,18 +34,26 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
   networkNodeDao = new NetworkNodeDao();
 
   getData(entryUid) {
-    const data: ContentEntry[] = this.entriesJson[entryUid];
-    return data;
+    return this.entries[entryUid];
   }
 
-  loadEntries(){
+  loadEntries(joins){
     const languageUrl = "assets/entries.json";
     if(!this.entriesLoaded){
       this.entriesLoaded = true;
       this.http.get <any> (languageUrl).subscribe(entries => {
-        this.contentEntryDao = new ContentEntryDao(entries);
-        console.log("event", "entries loaded", this.contentEntryDao);
-        this.entriesJson = entries;
+        this.contentEntryDao = new ContentEntryDao(entries, joins);
+        this.entries = entries;
+      }); 
+    }
+  }
+
+  loadParentChildJoin(){
+    const joinUrl = "assets/entries_parent_join.json";
+    if(!this.joinsLoaded){
+      this.joinsLoaded = true; 
+      this.http.get <any> (joinUrl).subscribe(joins => {
+        this.loadEntries(joins);
       }); 
     }
   }
@@ -54,17 +65,17 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
 /**DAO */
 class ContentEntryDao {
 
-  
-  constructor(private entries) {}
+  constructor(private entries, private joins) {}
+
 
   findByUidWithContentEntryStatusAsync(entryUid){
-    const entry: any = UmAngularUtil.findObjectByLabel(this.entries, 'contentEntryUid', entryUid);
+    const entry: any = UmAngularUtil.findEntry(this.entries, entryUid);
     entry['contentEntryStatus'] = {downloadStatus:24};
     return entry;
   }
 
   getChildrenByParentUidWithCategoryFilter(entryUid, language, category): any {
-    var entries = this.entries[entryUid] as db.ustadmobile.lib.db.entities.ContentEntry[];
+    var entries = UmAngularUtil.findChildrenByParentUid(this.joins, this.entries, entryUid);
     if(language != 0){
       entries = entries.splice(0,entries.length - 2);
     }
@@ -75,7 +86,9 @@ class ContentEntryDao {
   }
 
   getContentByUuidAsync(entryUid) {
-    return UmAngularUtil.findObjectByLabel(this.entries, 'contentEntryUid', entryUid);
+    
+    const entry = UmAngularUtil.findEntry(this.entries, entryUid);
+    return entry;
   }
 
   findUniqueLanguagesInListAsync(entryUid) {
@@ -83,7 +96,7 @@ class ContentEntryDao {
   }
 
   findByUidAsync(entryUid) {
-    return UmAngularUtil.findObjectByLabel(this.entries, 'contentEntryUid', entryUid);
+    return UmAngularUtil.findEntry(this.entries, entryUid);
   }
 
 
@@ -154,23 +167,6 @@ class ContentEntryRelatedEntryJoinDao{
 }
 }
 
-
-/**Entities */
-export interface ContentEntry {
-  contentEntryUid: number;
-  title: string;
-  description: string;
-  entryId: number;
-  author: string;
-  publisher: string;
-  licenseType: number;
-  licenseName: string;
-  licenseUrl: string;
-  sourceUrl: string;
-  thumbnailUrl: string;
-  lastModified: string;
-  leaf: boolean;
-}
 
 export interface Language {
   langUid: number;

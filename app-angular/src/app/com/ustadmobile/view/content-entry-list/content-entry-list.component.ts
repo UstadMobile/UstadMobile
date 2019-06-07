@@ -1,6 +1,6 @@
 import { Observable, Subscription } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { UmDbMockService, ContentEntry } from './../../core/db/um-db-mock.service';
+import { UmDbMockService} from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -23,7 +23,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   env = environment;
   label_language_options : string = "";
   label_reading_level : string = "";
-  private entryListObservable: Observable<ContentEntry[]> = null
+  private entryListObservable: Observable<any[]> = null
   private presenter: core.ustadmobile.core.controller.ContentEntryListFragmentPresenter;
   languages : db.ustadmobile.lib.db.entities.Language[]
   categories: db.ustadmobile.lib.db.entities.DistinctCategorySchema[];
@@ -62,7 +62,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
         .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
         this.umService.setPresenterInstance(this.presenter);
         this.presenter.onCreate(null);
-        }, 100);
+        }, 500);
     });
 
     
@@ -94,7 +94,7 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   });
   }
 
-  setContentEntryProvider(provider : Observable<ContentEntry[]>){
+  setContentEntryProvider(provider : Observable<any[]>){
     this.entryListObservable = provider;
     this.entryListObservable.subscribe(entries =>{ 
       this.entries = entries;
