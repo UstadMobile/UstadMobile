@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Manages a list of DownloadJobItemManagers. Creates new items, closes downloadjobs that have finished etc.
  */
-class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider, OnDownloadJobItemChangeListener {
+class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider {
 
 
     private val managerMap = mutableMapOf<Int, DownloadJobItemManager>()
@@ -27,7 +27,7 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         //TODO: fix this
         val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
                 newSingleThreadContext("DownloadJob-${newDownloadJob.djUid}"))
-        manager.onDownloadJobItemChangeListener = this
+        manager.onDownloadJobItemChangeListener = this::onDownloadJobItemChange
         managerMap[newDownloadJob.djUid] = manager
 
         return manager
@@ -78,7 +78,7 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         }
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+    fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
         var listenersToNotify: List<OnDownloadJobItemChangeListener>
         synchronized(changeListeners) {
             listenersToNotify = changeListeners.toList()

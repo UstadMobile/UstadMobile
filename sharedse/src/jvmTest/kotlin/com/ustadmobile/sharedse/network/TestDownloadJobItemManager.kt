@@ -147,11 +147,9 @@ class TestDownloadJobItemManager {
             val manager = DownloadJobItemManager(db, downloadJob!!.djUid, newSingleThreadContext("DownloadManager"))
             val latch = CountDownLatch(1)
             val statusRef = AtomicReference<DownloadJobItemStatus?>()
-            manager.onDownloadJobItemChangeListener = object : OnDownloadJobItemChangeListener {
-                override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-                    statusRef.set(status)
-                    latch.countDown()
-                }
+            manager.onDownloadJobItemChangeListener = {status, djUid ->
+                statusRef.set(status)
+                latch.countDown()
             }
 
             setupRootAndSubleaf(manager)
@@ -195,14 +193,14 @@ class TestDownloadJobItemManager {
             setupRootAndSubleaf(manager)
             val parentStatusRef = AtomicReference<DownloadJobItemStatus>()
             val latch = CountDownLatch(1)
-            manager.onDownloadJobItemChangeListener = object : OnDownloadJobItemChangeListener {
-                override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-                    if (status != null && status.contentEntryUid == parentEntry.contentEntryUid) {
-                        parentStatusRef.set(status)
-                        latch.countDown()
-                    }
+
+            manager.onDownloadJobItemChangeListener = {status, djUid ->
+                if (status != null && status.contentEntryUid == parentEntry.contentEntryUid) {
+                    parentStatusRef.set(status)
+                    latch.countDown()
                 }
             }
+
 
             manager.updateProgress(subLeafDjItem.djiUid, 300,
                     subLeafDjItem.downloadLength)
