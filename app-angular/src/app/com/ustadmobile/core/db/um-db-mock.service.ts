@@ -3,7 +3,6 @@ import { com as util} from 'lib-util';
 import { com as db } from 'lib-database';
 import { com as door } from 'lib-door-runtime';
 import {UmAngularUtil} from "../../util/UmAngularUtil";
-import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +10,11 @@ import { HttpClient } from '@angular/common/http';
 export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
   
   ROOT_UID = 1311236;
-
-  private entriesLoaded = false;
-  private joinsLoaded = false;
   private initialized: boolean = false;
-  private entries = [];
-  private entryParentJoins = [];
+  entries = [];
+  entryParentJoins = [];
 
-
-  constructor(private http: HttpClient) {
+  constructor() {
     super()
     if (!this.initialized) {
       this.initialized = true;
@@ -36,34 +31,10 @@ export class UmDbMockService extends db.ustadmobile.core.db.UmAppDatabase {
   getData(entryUid) {
     return this.entries[entryUid];
   }
-
-  loadEntries(joins){
-    const languageUrl = "assets/entries.json";
-    if(!this.entriesLoaded){
-      this.entriesLoaded = true;
-      this.http.get <any> (languageUrl).subscribe(entries => {
-        this.contentEntryDao = new ContentEntryDao(entries, joins);
-        this.entries = entries;
-      }); 
-    }
-  }
-
-  loadParentChildJoin(){
-    const joinUrl = "assets/entries_parent_join.json";
-    if(!this.joinsLoaded){
-      this.joinsLoaded = true; 
-      this.http.get <any> (joinUrl).subscribe(joins => {
-        this.loadEntries(joins);
-      }); 
-    }
-  }
-
 }
 
-
-
 /**DAO */
-class ContentEntryDao {
+export class ContentEntryDao {
 
   constructor(private entries, private joins) {}
 
@@ -142,9 +113,7 @@ class ContainerDao{
 
 }
 
-class NetworkNodeDao{
-
-}
+class NetworkNodeDao{}
 
 class ContentEntryStatusDao{
   constructor() {}

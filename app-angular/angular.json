@@ -97,9 +97,12 @@
             "en": {
                "browserTarget": "sample:build:en"
             },
-            "fa": {
-              "browserTarget": "sample:build:fa"
-           }
+            "ps": {
+              "browserTarget": "sample:build:ps"
+           },
+           "fa": {
+            "browserTarget": "sample:build:fa"
+         }
           }
         },
         "extract-i18n": {

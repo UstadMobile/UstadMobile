@@ -112,5 +112,10 @@ export class UmAngularUtil {
     return {view: route.path, args: args};
   }
 
+  static showSplashScreen(){
+    const route = this.getRoutePathParam();
+    return window.location.search.length == 0 && !this.hasPath(route.path);
+  }
+
 
 }

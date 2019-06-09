@@ -19,7 +19,7 @@ export class XapiContentComponent extends UmBaseComponent {
 
   private presenter: core.ustadmobile.core.controller.XapiPackageContentPresenter;
   navigationSubscription: Subscription;
-  urlToLoad: string = "https://www.youtube.com/watch?v=YE7VzlLtp-4";
+  urlToLoad: string = "https://www.ustadmobile.com/files/s4s/2-coverletter/en/EPUB/main.html";
   
   
   constructor(umService: UmBaseService, router: Router, route: ActivatedRoute, 

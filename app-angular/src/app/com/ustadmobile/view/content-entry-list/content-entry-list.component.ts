@@ -1,6 +1,6 @@
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { UmAngularUtil } from './../../util/UmAngularUtil';
-import { UmDbMockService} from './../../core/db/um-db-mock.service';
+import { UmDbMockService, ContentEntryDao} from './../../core/db/um-db-mock.service';
 import {Component} from '@angular/core';
 import {environment} from 'src/environments/environment.prod';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -30,7 +30,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   categoryMap : any[][] = [];
   umFormLanguage : FormGroup;
   umFormCategories: FormGroup;
-  private subscription: Subscription;
   private navigationSubscription;
   entry_thumbnail_class : string;
   entry_summary_class: string;
@@ -52,24 +51,32 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
     this.umFormCategories = formBuilder.group({
       'category': ['-1', Validators.required]
     });
-  
-    this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
-    .subscribe((event:NavigationEnd) => {
-      this.entries = [];
-      //TODO: remove timeout
-        setTimeout(() => {
-          this.presenter = new core.ustadmobile.core.controller
-        .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
-        this.umService.setPresenterInstance(this.presenter);
-        this.presenter.onCreate(null);
-        }, 500);
-    });
 
-    
+    this.presenter = new core.ustadmobile.core.controller
+        .ContentEntryListFragmentPresenter(this.context, UmAngularUtil.queryParamsToMap(), this);
+    this.navigationSubscription = this.router.events.filter(event => event instanceof NavigationEnd)
+    .subscribe( _ => {
+      this.entries = [];
+      if(this.mockedUmDb.contentEntryDao){
+        this.onCreate()
+      }
+    }); 
+  }
+
+  private onCreate(){
+    this.presenter.onCreate(null);
   }
 
   ngOnInit() {
     super.ngOnInit();
+
+    combineLatest([
+      this.umService.loadEntries(),
+      this.umService.loadEntryJoins()
+    ]).subscribe(responses => {
+      this.mockedUmDb.contentEntryDao = new ContentEntryDao(responses[0], responses[1])
+      this.onCreate() 
+    })
 
     //Listen for resources being ready
     this.subscription = this.umService.getUmObserver().subscribe(content =>{
@@ -127,7 +134,6 @@ core.ustadmobile.core.view.ContentEntryListFragmentView {
   ngOnDestroy(){
     super.ngOnDestroy()
     this.presenter.onDestroy();
-    this.subscription.unsubscribe();
     if (this.navigationSubscription) {  
       this.navigationSubscription.unsubscribe();
     }

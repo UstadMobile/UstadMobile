@@ -18,6 +18,8 @@ import { RegisterComponent } from './com/ustadmobile/view/register/register.comp
 import { LoginComponent } from './com/ustadmobile/view/login/login.component';
 import { AuthGuard } from './com/ustadmobile/service/AuthGuard';
 import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-content.component';
+import { UmBaseComponent } from './com/ustadmobile/view/um-base-component';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -28,7 +30,7 @@ import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-c
     NotFoundComponent,
     RegisterComponent,
     LoginComponent,
-    XapiContentComponent
+    XapiContentComponent,
   ],
   imports: [
     BrowserModule,
@@ -58,8 +60,4 @@ import { XapiContentComponent } from './com/ustadmobile/view/xapi-content/xapi-c
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {
-  constructor (private mockedDb: UmDbMockService){
-    this.mockedDb.loadParentChildJoin();
-  }
- }
+export class AppModule{}

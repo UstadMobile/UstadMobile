@@ -12,6 +12,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
+import kotlin.js.JsName
 
 /**
  * Created by mike on 9/13/17.
@@ -26,7 +27,7 @@ import org.kmp.io.KMPXmlParser
  *
  */
 class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  private val containerMounter: suspend (Long) -> String)
+                                  @JsName("containerMounter") private val containerMounter: suspend (Long) -> String)
     : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
     private var mountedPath: String? = null

@@ -8,7 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "um-build":"for lang in en ps fa; do ng build --prod --base-href --output-path=dist/$lang --i18n-file src/assets/locale/messages.$lang.xlf --i18n-format xlf --i18n-locale $lang; done",
+    "build-locale:en": "ng build --prod --i18n-locale en --i18n-format xlf --i18n-file src/assets/locale/messages.en.xlf --output-path=dist/en --baseHref /en/",
+    "um-build": "for lang in en ps fa; do ng build --prod --base-href --output-path=dist/$lang --i18n-file src/assets/locale/messages.$lang.xlf --i18n-format xlf --i18n-locale $lang; done",
     "um-translate": "ng xi18n --output-path assets/locale"
   },
   "private": true,
@@ -26,9 +27,9 @@
     "ngx-infinite-scroll": "^6.0.0",
     "ngx-materialize": "^6.1.3",
     "ngx-progressbar": "^2.1.1",
-    "rxjs": "~6.3.3",
+    "rxjs": "^6.5.2",
     "rxjs-compat": "^6.5.2",
-    "tslib": "^1.9.0",
+    "tslib": "^1.9.3",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {

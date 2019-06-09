@@ -3,20 +3,17 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, Subject} from 'rxjs';
 import { MzToastService } from 'ngx-materialize';
+import { map, filter, scan } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UmBaseService {
 
-  private systemImpl: any;
-  loadedLocale: boolean = false;
-  loadedLanguages: boolean = false;
   private context: UmContextWrapper;
   private umObserver = new Subject < any > ();
-  private presenter;
   private directionality: string;
-  private supportedLanguages  = []
+  public supportedLanguages  = []
 
   constructor(private http: HttpClient, private toastService: MzToastService) {}
 
@@ -36,30 +33,11 @@ export class UmBaseService {
   }
 
   /**
-   * Get list of all supported languages
-   */
-  getSupportedLanguages(){
-    return this.supportedLanguages;
-  }
-
-  /**
    * Dispatch update to the other part of the app (other components)
    * @param content content to be passed to the observer
    */
   dispatchUpdate(content: any) {
     this.umObserver.next(content);
-  }
-
-  /**
-   * Set current presenter
-   * @param presenter current presenter
-   */
-  setPresenterInstance(presenter){
-    this.presenter = presenter;
-  }
-
-  goBack(){
-    this.presenter.handleUpNavigation();
   }
 
   getToastService(){
@@ -70,10 +48,6 @@ export class UmBaseService {
     return this.umObserver.asObservable();
   }
 
-  setImpl(systemImpl: any) {
-    this.systemImpl = systemImpl;
-  }
-
   setContext(context: UmContextWrapper) {
     this.context = context;
   }
@@ -82,37 +56,40 @@ export class UmBaseService {
    * Loading string map from json file
    * @param locale current system locale
    */
-  loadLocaleStrings(locale: string) {
+  loadStrings(locale: string){
     const localeUrl = "assets/locale/locale." + locale + ".json";
-    return new Observable(observer => {
-      setTimeout(() => {
-        if (!this.loadedLocale) {
-          this.loadedLocale = true;
-          this.http.get < Map < number, String >> (localeUrl).subscribe(strings => {
-            this.systemImpl.setLocaleStrings(strings);
-            observer.next(true);
-          });
-        }
-      }, 300);
-    });
+    return this.http.get<Map < number, String >>(localeUrl).pipe(map(strings => strings));
   }
 
   /**
    * Loading all supported languages from the language json file.
    */
-  loadSupportedLanguages(){
-    const languageUrl = "assets/languages.json";
-    return new Observable(observer => {
-      if(!this.loadedLanguages){
-        this.loadedLanguages = true;
-        this.http.get < Map < number, String >> (languageUrl).subscribe(languages => {
-          Object.keys(languages).forEach(key => {
-            const language = {code: key, name: languages[key]};
-            this.supportedLanguages.push(language);
-          });
-          observer.next("ready");
-        });      
-      }
-    });
+  loadLanguages(){
+    const languageUrl = "assets/languages.json"
+    const supportedLanguages = [];
+    return this.http.get<Map < number, String >>(languageUrl).pipe(map(languages => {
+      Object.keys(languages).forEach(key => {
+        const language = {code: key, name: languages[key]};
+        supportedLanguages.push(language);
+      });
+      return supportedLanguages;
+    }));
   }
+
+  /**
+   * Load entries
+   */
+  loadEntries(){
+    const entriesUrl = "assets/entries.json";
+    return this.http.get<any>(entriesUrl).pipe(map(entries => entries));
+  }
+
+  /**
+   * Load content entry parent child joins
+   */
+  loadEntryJoins(){
+    const joinUrl = "assets/entries_parent_join.json";
+    return this.http.get<any>(joinUrl).pipe(map(joins => joins));
+  }
+
 }
