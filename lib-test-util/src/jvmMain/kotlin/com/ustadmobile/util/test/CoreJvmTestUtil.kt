@@ -45,7 +45,7 @@ fun extractTestResourceToFile(testResPath: String, destFile: File,
 
         if(inStream == null) {
             for(searchPath in resDirSearchPaths) {
-                val resDir = File(System.getProperty("user.dir"), "src/commonTest/resources")
+                val resDir = File(System.getProperty("user.dir"), searchPath)
                 val resFile = File(resDir, testResPath)
                 if(resFile.exists()) {
                     inStream = FileInputStream(resFile)

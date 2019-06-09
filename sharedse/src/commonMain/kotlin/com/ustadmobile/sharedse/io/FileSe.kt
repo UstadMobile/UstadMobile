@@ -12,7 +12,9 @@ expect open class FileSe {
 
     fun length(): Long
 
-    fun renameTo(otherFiel: FileSe): Boolean
+    fun renameTo(otherFile: FileSe): Boolean
+
+    fun getAbsolutePath(): String
 
 }
 
