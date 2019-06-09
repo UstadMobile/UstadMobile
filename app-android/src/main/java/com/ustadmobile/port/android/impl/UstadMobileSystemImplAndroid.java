@@ -82,7 +82,6 @@ import com.ustadmobile.core.view.VideoPlayerView;
 import com.ustadmobile.core.view.WebChunkView;
 import com.ustadmobile.core.view.XapiPackageContentView;
 import com.ustadmobile.port.android.generated.MessageIDMap;
-import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
@@ -308,7 +307,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             Context appContext = ((Context) context).getApplicationContext();
 
             Picasso.Builder picassoBuilder = new Picasso.Builder(appContext);
-            picassoBuilder.addRequestHandler(new UmHttpCachePicassoRequestHandler(appContext));
             Picasso.setSingletonInstance(picassoBuilder.build());
             initRan = true;
         }

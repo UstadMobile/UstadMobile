@@ -48,7 +48,7 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_dummy_activity,menu);
+        getMenuInflater().inflate(R.menu.menu_dummy_activity, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -57,19 +57,19 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
-        if (itemId == R.id.action_open_about){
+        if (itemId == R.id.action_open_about) {
             UstadMobileSystemImpl.Companion.getInstance().go(AboutView.VIEW_NAME, getContext());
-        }else if(itemId == R.id.action_clear_history){
+        } else if (itemId == R.id.action_clear_history) {
             UmAppDatabase database = UmAppDatabase.getInstance(this);
             database.getNetworkNodeDao().deleteAll(null);
             database.getEntryStatusResponseDao().deleteAll(null);
             database.getDownloadJobItemHistoryDao().deleteAll(null);
-            database.getDownloadSetDao().deleteAll(null);
-            database.getDownloadSetItemDao().deleteAll(null);
             database.getDownloadJobDao().deleteAll(null);
             database.getDownloadJobItemDao().deleteAll(null);
             database.getContentEntryStatusDao().deleteAll(null);
             networkManagerBle.clearHistories();
+        } else if (itemId == R.id.action_send_feedback) {
+            hearShake();
         }
 
         return super.onOptionsItemSelected(item);
@@ -81,8 +81,8 @@ public class DummyActivity extends UstadBaseActivity implements DummyView {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
                 ((NetworkManagerAndroidBle) networkManagerBle)::checkP2PBleServices,
-                impl.getString(MessageID.location_permission_title,getContext()),
-                impl.getString(MessageID.location_permission_message,getContext()));
+                impl.getString(MessageID.location_permission_title, getContext()),
+                impl.getString(MessageID.location_permission_message, getContext()));
     }
 
     public static class LibraryPagerAdapter extends FragmentPagerAdapter {

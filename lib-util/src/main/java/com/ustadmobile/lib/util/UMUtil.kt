@@ -91,6 +91,7 @@ object UMUtil {
      * @param arr Array in which to search
      * @return the index of the given string in the array if found; -1 otherwise
      */
+    @JvmStatic
     fun getIndexInArrayIgnoreCase(str: String, arr: Array<String>): Int {
         for (i in arr.indices) {
             if (arr[i].equals(str, ignoreCase = true)) {
@@ -575,6 +576,27 @@ object UMUtil {
                 ':'.toString() + password)
     }
 
+
+    @JvmStatic
+    fun debugPrintList(list: List<Any?>?) : String {
+        if(list == null)
+            return "[null list]"
+
+        var isFirst = true
+        val sb = java.lang.StringBuilder()
+        sb.append('[')
+        for(obj in list) {
+            if(!isFirst)
+                sb.append(',')
+
+            sb.append(obj?.toString())
+            isFirst = false
+        }
+
+        sb.append(']')
+
+        return sb.toString()
+    }
 
 }
 /**

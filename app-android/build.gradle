@@ -31,13 +31,6 @@ configurations.all {
     exclude group: "org.json", module: "json"
 }
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
-if (project.file("buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
-}
-
-
 /*
   TODO: Refactor to use another task to trigger these tasks
 
@@ -50,7 +43,6 @@ afterEvaluate {
     android.libraryVariants.all { variant ->
         variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
-        variant.javaCompiler.dependsOn(checkBuildConfig)
     }
 }
 
@@ -104,14 +96,6 @@ android {
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
-        buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
-        buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
-        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
-        buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
-        buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
-
-
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
     }
 
@@ -186,11 +170,6 @@ gradle.taskGraph.useFilter { task ->
 
     return true;
 }
-
-task checkBuildConfig {
-    inputs.files("buildconfig.*.properties")
-}
-assemble.dependsOn(checkBuildConfig)
 
 task copyMainXmlLocaleFilesFromCore(type: Copy) {
     inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
@@ -280,10 +259,11 @@ configurations.all {
 dependencies {
     api project(':core')
     api project(':sharedse')
-    api project(":lib-core-fs")
     implementation project(':lib-database-runtime')
     implementation project(':lib-database')
     implementation project(':lib-database-android')
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
+    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
     implementation project(":lib-util")
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
@@ -307,6 +287,8 @@ dependencies {
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+    //Crash reporting
+    implementation "ch.acra:acra-http:$version_android_acra"
 
     androidTestImplementation project(":core-tests")
 
@@ -325,13 +307,16 @@ dependencies {
     implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
 
     //Image loading library
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
 
     //Page indicator
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+
+    // shake detector
+    implementation "com.squareup:seismic:$version_android_seismic"
 
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 

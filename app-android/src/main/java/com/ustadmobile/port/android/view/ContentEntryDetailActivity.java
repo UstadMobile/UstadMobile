@@ -72,7 +72,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     protected void onBleNetworkServiceBound(NetworkManagerBle networkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle);
-        if(networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow()){
+        if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow()) {
             downloadButton.setBackgroundResource(
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details);
         }
@@ -80,7 +80,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
         managerAndroidBle = (NetworkManagerAndroidBle) networkManagerBle;
         entryDetailPresenter = new ContentEntryDetailPresenter(getContext(),
                 bundleToMap(getIntent().getExtras()), this,
-                this);
+                this, networkManagerBle);
         entryDetailPresenter.onCreate(bundleToMap(new Bundle()));
         entryDetailPresenter.onStart();
         managerAndroidBle.addLocalAvailabilityListener(this);
@@ -170,7 +170,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     public void loadEntryDetailsThumbnail(String thumbnailUrl) {
 
-        Picasso.with(ContentEntryDetailActivity.this)
+        Picasso.get()
                 .load(thumbnailUrl)
                 .into((ImageView) findViewById(R.id.entry_detail_thumbnail));
     }
@@ -257,7 +257,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void showDownloadOptionsDialog(HashMap<String,String> args) {
+    public void showDownloadOptionsDialog(HashMap<String, String> args) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.Companion.getInstance();
         runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -289,9 +289,9 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     @Override
     public void onDestroy() {
         entryDetailPresenter.onDestroy();
-       if(networkManagerBle != null){
-           networkManagerBle.removeLocalAvailabilityListener(this);
-       }
+        if (networkManagerBle != null) {
+            networkManagerBle.removeLocalAvailabilityListener(this);
+        }
         super.onDestroy();
     }
 
@@ -301,7 +301,7 @@ public class ContentEntryDetailActivity extends UstadBaseActivity implements
     }
 
     @Override
-    public void setAvailableTranslations(List<? extends ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
+    public void setAvailableTranslations(List<ContentEntryRelatedEntryJoinWithLanguage> result, long entryUuid) {
         FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getApplicationContext());
         flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
         flexBox.setLayoutManager(flexboxLayoutManager);

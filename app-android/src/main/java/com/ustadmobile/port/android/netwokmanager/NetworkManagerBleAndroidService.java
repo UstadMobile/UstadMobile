@@ -10,13 +10,13 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 
-import java.sql.Time;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -112,6 +112,7 @@ public class NetworkManagerBleAndroidService extends Service {
     private void handleActiveJob(boolean anyActivityJob){
         if(!mHttpDownloadServiceActive.get() && anyActivityJob){
             Intent serviceIntent = new Intent(getApplicationContext(), DownloadNotificationService.class);
+            UstadMobileSystemImpl.l(UMLog.INFO, 699, "Starting foreground notification");
             serviceIntent.setAction(ACTION_START_FOREGROUND_SERVICE);
             serviceIntent.putExtra(JOB_ID_TAG,GROUP_SUMMARY_ID);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

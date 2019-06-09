@@ -247,9 +247,11 @@ object UMTinCanUtil {
      */
     fun makeActorFromActiveUser(context: Any): JSONObject? {
         val account = UmAccountManager.getActiveAccount(context)
-        return if (account != null) {
-            UMTinCanUtil.makeActorFromUserAccount(account.username,
-                    account.endpointUrl)
+        val accountUsername = account?.username
+        val accountEndpoint = account?.endpointUrl
+        return if (accountUsername != null && accountEndpoint != null) {
+            UMTinCanUtil.makeActorFromUserAccount(accountUsername,
+                    accountEndpoint)
         } else {
             UMTinCanUtil.makeActorFromUserAccount("anonymous",
                     UmAccountManager.getActiveEndpoint(context)!!)

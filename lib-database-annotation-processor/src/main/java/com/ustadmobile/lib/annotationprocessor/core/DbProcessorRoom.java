@@ -60,6 +60,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -513,7 +514,7 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                 bindCodeBlock.add("stmt.bindLong($L, value.get$L());\n",
                         fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
             }else if(fieldType.getKind().equals(TypeKind.BOOLEAN)) {
-                bindCodeBlock.add("stmt.bindLong($L, value.is$L() ? 1: 0);\n",
+                bindCodeBlock.add("stmt.bindLong($L, value.get$L() ? 1: 0);\n",
                         fieldCount + 1, DbProcessorUtils.capitalize(field.getSimpleName()));
             }else if(INSERT_BIND_DOUBLE.contains(fieldType.getKind())) {
                 bindCodeBlock.add("stmt.bindDouble($L, value.get$L());\n",
@@ -732,15 +733,16 @@ public class DbProcessorRoom extends AbstractDbProcessor implements QueryMethodG
                                               Element... excludedTypes) {
         List<Element> excludedTypeList = Arrays.asList(excludedTypes);
         List<? extends VariableElement> variableElementList = method.getParameters();
+        ExecutableType resolvedExecutable = (ExecutableType)processingEnv.getTypeUtils().asMemberOf(
+                (DeclaredType)clazz.asType(), method);
+        List<? extends TypeMirror> resolvedParamList = resolvedExecutable.getParameterTypes();
 
         for(int i = 0; i < variableElementList.size(); i++) {
-            TypeMirror variableType = variableElementList.get(i).asType();
+            TypeMirror variableType = resolvedParamList.get(i);
             if(excludedTypeList.contains(processingEnv.getTypeUtils().asElement(variableType)))
                 continue;
 
-            TypeMirror paramTypeMirror = DbProcessorUtils.resolveType(variableType, clazz,
-                    processingEnv);
-            methodBuilder.addParameter(TypeName.get(paramTypeMirror),
+            methodBuilder.addParameter(TypeName.get(variableType),
                     variableElementList.get(i).getSimpleName().toString());
         }
     }

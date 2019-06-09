@@ -62,10 +62,6 @@ public abstract class DownloadJobDao {
     @UmQuery("SELECT * From DownloadJob WHERE djUid = :djUid")
     public abstract DownloadJob findByUid(long djUid);
 
-    @UmQuery("SELECT * FROM DownloadJob WHERE djDsUid = :downloadSetUid")
-    public abstract List<DownloadJob> findBySetUid(long downloadSetUid);
-
-
     /**
      * Get a list of all DownloadJob items. Used for debugging purposes.
      *
@@ -86,6 +82,11 @@ public abstract class DownloadJobDao {
 
     @UmQuery("SELECT djUid FROM DownloadJob WHERE djDsUid = :djDsUid LIMIT 1")
     public abstract long getLatestDownloadJobUidForDownloadSet(long djDsUid);
+
+    @UmQuery("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " +
+            "ORDER BY timeStarted DESC LIMIT 1")
+    public abstract long getLatestDownloadJobUidForContentEntryUid(long contentEntryUid);
+
 
 
     @UmQuery("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
@@ -130,21 +131,47 @@ public abstract class DownloadJobDao {
 
 
     @UmQuery("SELECT ContentEntry.title FROM DownloadJob " +
-            "LEFT JOIN DownloadSet ON DownloadJob.djDsUid = DownloadSet.dsUid " +
-            "LEFT JOIN ContentEntry ON DownloadSet.dsRootContentEntryUid = ContentEntry.contentEntryUid " +
+            "LEFT JOIN ContentEntry ON DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE DownloadJob.djUid = :downloadJobId")
     public abstract void getEntryTitleByJobUid(long downloadJobId, UmCallback<String> callback);
 
-    @UmQuery("UPDATE DownloadJob " +
-            "SET djStatus = " + JobStatus.COMPLETE + " WHERE " +
-            "djUid = :downloadJobUid AND " +
-            "(SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid " +
-            "AND djiContentEntryFileUid != 0) = " +
-            "(SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobUid " +
-            "AND djiContentEntryFileUid != 0 " +
-            "AND djiStatus >= " + JobStatus.COMPLETE_MIN + ") ")
-    public abstract void updateJobStatusToCompleteIfAllItemsAreCompleted(long downloadJobUid);
+    @UmQuery("UPDATE DownloadJob SET djStatus = :djStatus WHERE djUid = :downloadJobId")
+    public abstract void updateStatus(int downloadJobId, byte djStatus);
+
+    @UmQuery("SELECT djUid FROM DownloadJob WHERE djRootContentEntryUid = :rootContentEntryUid")
+    public abstract long findDownloadJobUidByRootContentEntryUid(long rootContentEntryUid);
+
+    @UmQuery("UPDATE DownloadJob SET djDestinationDir = :destinationDir WHERE djUid = :djUid")
+    public abstract void updateDestinationDirectory(int djUid, String destinationDir, UmCallback<Integer> callback);
+
+    @UmQuery("SELECT djDestinationDir FROM DownloadJob WHERE djUid = :djUid")
+    public abstract String getDestinationDir(int djUid);
 
 
+    @UmQuery("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
+    public abstract void setMeteredConnectionAllowedByJobUid(int djUid, boolean meteredNetworkAllowed,
+                                                      UmCallback<Integer> callback);
+
+    @UmQuery("UPDATE DownloadJob SET meteredNetworkAllowed = :meteredNetworkAllowed WHERE djUid = :djUid")
+    public abstract void setMeteredConnectionAllowedByJobUidSync(int djUid, boolean meteredNetworkAllowed);
+
+    @UmQuery("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
+    public abstract UmLiveData<Boolean> getLiveMeteredNetworkAllowed(int djUid);
+
+    @UmTransaction
+    public void cleanupUnused(int downloadJobUid){
+        deleteUnusedDownloadJobItems(downloadJobUid);
+        deleteUnusedDownloadJob(downloadJobUid);
+    }
+
+    @UmQuery("DELETE FROM DownloadJobItem " +
+            "WHERE djiDjUid = :downloadJobUid " +
+            "AND (djiStatus = " + JobStatus.NOT_QUEUED +
+            " OR djiStatus = " + JobStatus.CANCELED + ")")
+    public abstract void deleteUnusedDownloadJobItems(int downloadJobUid);
+
+    @UmQuery("DELETE FROM DownloadJob WHERE djUid = :downloadJobUid AND djStatus = "
+            + JobStatus.NOT_QUEUED  + " OR djStatus = " + JobStatus.CANCELED)
+    public abstract void deleteUnusedDownloadJob(int downloadJobUid);
 
 }

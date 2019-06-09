@@ -19,6 +19,7 @@ object WaitForLiveData {
      * @param checker interface to check for value
      * @param <T> The type of value returned by the live data
     </T> */
+    @JvmStatic
     fun <T> observeUntil(liveData: UmLiveData<T>, timeout: Long,
                          timeoutUnit: TimeUnit, checker: WaitForChecker<T>) {
 

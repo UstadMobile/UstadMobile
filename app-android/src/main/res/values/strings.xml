@@ -3,4 +3,8 @@
     <string name="last_name">Last name</string>
     <string name="first_name">First name</string>
     <string name="create_new_account">Register Now</string>
+    <string name="send_feedback">Send Feedback</string>
+    <string name="shake_feedback">Shake the app anytime to send us feedback</string>
+    <string name="feedback_hint">Please tell us what went wrong or what you liked.</string>
+    <string name="feedback_thanks">Thank you for your feedback</string>
 </resources>

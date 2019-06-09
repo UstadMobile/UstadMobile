@@ -1,12 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: "jacoco"
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.default.properties")))
-if (project.file("../app-android/buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.local.properties")))
-}
-
 //See:
 // https://developer.android.com/studio/projects/android-library.html
 
@@ -113,7 +107,7 @@ android {
         release {
             testCoverageEnabled = false
             debuggable false
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -147,13 +141,11 @@ dependencies {
     implementation project(":lib-database")
     implementation project(":lib-database-runtime")
 
-    //Crash reporting
+    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
+    //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
     implementation "ch.acra:acra-dialog:$version_android_acra"
-
-
-    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
 
 
     api fileTree(dir: 'libs', include: ['*.jar'])

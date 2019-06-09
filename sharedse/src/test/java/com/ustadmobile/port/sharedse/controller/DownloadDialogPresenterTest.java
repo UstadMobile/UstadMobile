@@ -4,21 +4,23 @@ package com.ustadmobile.port.sharedse.controller;
 import com.ustadmobile.core.db.JobStatus;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.WaitForLiveData;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.DownloadJobItemManager;
 import com.ustadmobile.lib.database.jdbc.DriverConnectionPoolInitializer;
 import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin;
 import com.ustadmobile.lib.db.entities.DownloadJob;
-import com.ustadmobile.lib.db.entities.DownloadJobItem;
-import com.ustadmobile.lib.db.entities.DownloadSet;
-import com.ustadmobile.lib.db.entities.DownloadSetItem;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner;
+import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
 import com.ustadmobile.port.sharedse.view.DownloadDialogView;
 import com.ustadmobile.sharedse.SharedSeTestConfig;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.verification.VerificationMode;
@@ -26,7 +28,6 @@ import org.mockito.verification.VerificationMode;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -58,13 +59,13 @@ public class DownloadDialogPresenterTest {
 
     private UmAppDatabase umAppDatabase;
 
+    private UmAppDatabase umAppDatabaseRepo;
+
     private Object context;
 
     private ContentEntry rootEntry;
 
     private DownloadJob downloadJob;
-
-    private DownloadSet downloadSet;
 
     private Container container;
 
@@ -78,6 +79,7 @@ public class DownloadDialogPresenterTest {
 
     private DeleteJobTaskRunner mockedDeleteTaskRunner = null;
 
+    public static long TEST_ROOT_CONTENT_ENTRY_UID;
 
     @Before
     public void setUp() throws IOException {
@@ -93,7 +95,10 @@ public class DownloadDialogPresenterTest {
 
 
         umAppDatabase = UmAppDatabase.getInstance(context);
-        UmAppDatabase.getInstance(context).clearAllTables();
+        umAppDatabase.clearAllTables();
+
+        umAppDatabaseRepo = umAppDatabase.getRepository("http://localhost/dummy/",
+                "");
 
         EmbeddedHTTPD httpd = new EmbeddedHTTPD(0,context);
         httpd.start();
@@ -110,6 +115,8 @@ public class DownloadDialogPresenterTest {
         rootEntry = new ContentEntry("Lorem ipsum title",
                 "Lorem ipsum description",false,true);
         rootEntry.setContentEntryUid(umAppDatabase.getContentEntryDao().insert(rootEntry));
+        TEST_ROOT_CONTENT_ENTRY_UID = rootEntry.getContentEntryUid();
+
 
         container = new Container();
         container.setContainerContentEntryUid(rootEntry.getContentEntryUid());
@@ -131,19 +138,13 @@ public class DownloadDialogPresenterTest {
         cEntry2.setFileSize(500);
         cEntry2.setContainerUid(umAppDatabase.getContainerDao().insert(cEntry2));
 
-        Container cEntry3 = new Container();
-        cEntry3.setContainerContentEntryUid(entry3.getContentEntryUid());
-        cEntry3.setLastModified(System.currentTimeMillis());
-        cEntry3.setFileSize(500);
-        cEntry3.setContainerUid(umAppDatabase.getContainerDao().insert(cEntry3));
-
         Container cEntry4 = new Container();
         cEntry4.setContainerContentEntryUid(entry4.getContentEntryUid());
         cEntry4.setLastModified(System.currentTimeMillis());
         cEntry4.setFileSize(500);
         cEntry4.setContainerUid(umAppDatabase.getContainerDao().insert(cEntry4));
 
-        totalBytesToDownload = cEntry2.getFileSize() + cEntry3.getFileSize() + cEntry4.getFileSize();
+        totalBytesToDownload = cEntry2.getFileSize() + cEntry4.getFileSize();
 
         umAppDatabase.getContentEntryParentChildJoinDao().insertList(Arrays.asList(
                 new ContentEntryParentChildJoin(rootEntry, entry2, 0),
@@ -153,36 +154,26 @@ public class DownloadDialogPresenterTest {
 
     }
 
-    private void insertDownloadSetAndSetItems(boolean meteredNetworkAllowed, int status){
-        downloadSet = new DownloadSet();
-        downloadSet.setMeteredNetworkAllowed(meteredNetworkAllowed);
-        downloadSet.setDsUid(89);
-        umAppDatabase.getDownloadSetDao().insert(downloadSet);
-
-        DownloadSetItem downloadSetItem = new DownloadSetItem(downloadSet,rootEntry);
-        downloadSetItem.setDsiUid(umAppDatabase.getDownloadSetItemDao().insert(downloadSetItem));
-
-        downloadJob = new DownloadJob(downloadSet);
-        downloadJob.setDjUid(umAppDatabase.getDownloadJobDao().insert(downloadJob));
-
-
-        for(int i = 0 ; i < 5; i++){
-            DownloadJobItem downloadJobItem = new DownloadJobItem(downloadJob,downloadSetItem,container);
-            downloadJobItem.setDjiUid(i * 1000);
-            umAppDatabase.getDownloadJobItemDao().insert(downloadJobItem);
-        }
-
-        totalBytesToDownload = totalBytesToDownload + container.getFileSize();
-        umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
-                status,-1);
+    private void insertDownloadJobAndJobItems(boolean meteredNetworkAllowed, int status){
+        Assert.assertNotEquals(0, rootEntry.getContentEntryUid());
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 420, "DownloadDialogPresenterTest " +
+                "root entry uid = " + rootEntry.getContentEntryUid());
+        downloadJob = new DownloadJob(rootEntry.getContentEntryUid(),
+                System.currentTimeMillis());
+        downloadJob.setMeteredNetworkAllowed(meteredNetworkAllowed);
+        downloadJob.setDjStatus(status);
+        DownloadJobItemManager itemManager = mockedNetworkManager
+                .createNewDownloadJobItemManager(downloadJob);
+        new DownloadJobPreparer(itemManager, umAppDatabase, umAppDatabaseRepo).run();
+        System.out.println("job prepared");
     }
 
-    private void insertDownloadSetAndSetItems() {
-        insertDownloadSetAndSetItems(false, JobStatus.RUNNING);
+    private void insertDownloadJobAndJobItems() {
+        insertDownloadJobAndJobItems(false, JobStatus.RUNNING);
     }
 
     @Test
-    public void givenNoExistingDownloadSet_whenOnCreateCalled_shouldCreateDownloadSetAndSetItems() throws InterruptedException {
+    public void givenNoExistingDownloadJob_whenOnCreateCalled_shouldCreateDownloadJobAndJobItems() throws InterruptedException {
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
             viewReadyLatch.countDown();
@@ -192,27 +183,35 @@ public class DownloadDialogPresenterTest {
         HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
 
-        assertTrue(umAppDatabase.getDownloadSetDao()
-                .findDownloadSetUidByRootContentEntryUid(rootEntry.getContentEntryUid()) > 0);
+        long downloadJobUid = umAppDatabase.getDownloadJobDao()
+                .findDownloadJobUidByRootContentEntryUid(rootEntry.getContentEntryUid());
+        assertTrue("Download job was with root content entry uid was created dby presenter",
+                downloadJobUid > 0);
 
-        assertEquals("3 DownloadJobItem were created ",
-                3, umAppDatabase.getDownloadJobItemDao().findAll().size());
+        WaitForLiveData.observeUntil(
+                umAppDatabase.getDownloadJobItemDao().findByContentEntryUidLive(
+                        rootEntry.getContentEntryUid()), 5, TimeUnit.SECONDS,
+                (dji) -> dji != null && dji.getDownloadLength() ==  totalBytesToDownload);
+
+        assertEquals("4 DownloadJobItem were created ",
+                4, umAppDatabase.getDownloadJobItemDao().findAll().size());
 
         assertEquals("Total bytes to be downloaded was updated",
                 totalBytesToDownload,
-                umAppDatabase.getDownloadJobDao().findByUid(presenter.getCurrentJobId())
-                        .getTotalBytesToDownload());
+                umAppDatabase.getDownloadJobItemDao()
+                        .findByContentEntryUid2(rootEntry.getContentEntryUid()).getDownloadLength());
     }
 
 
     @Test
-    public void givenDownloadSetCreated_whenHandleClickCalled_shouldSetStatusToQueued() throws InterruptedException {
+    public void givenDownloadJobCreated_whenHandleClickCalled_shouldSetStatusToQueued() throws InterruptedException {
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
             viewReadyLatch.countDown();
@@ -222,7 +221,8 @@ public class DownloadDialogPresenterTest {
         HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
@@ -230,7 +230,7 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleClickPositive();
 
-        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobDao()
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
                         .getJobLive(presenter.getCurrentJobId()),MAX_LATCH_WAITING_TIME,TimeUnit.SECONDS,
                 downloadJob -> downloadJob != null && downloadJob.getDjStatus() == JobStatus.QUEUED);
 
@@ -242,22 +242,23 @@ public class DownloadDialogPresenterTest {
     @Test
     public void givenDownloadRunning_whenCreated_shouldShowStackedOptions() {
 
-        insertDownloadSetAndSetItems();
+        insertDownloadJobAndJobItems();
 
         HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
-        verify(mockedDialogView, timeout(2000)).setStackedOptions(any(),any());
+        verify(mockedDialogView, timeout(5000)).setStackedOptions(any(),any());
     }
 
 
     //TODO: Once this cooperates, the underlying method must return to being async
     @Test
     public void givenDownloadRunning_whenClickPause_shouldSetStatusToPaused() throws InterruptedException {
-        insertDownloadSetAndSetItems();
+        insertDownloadJobAndJobItems();
 
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
@@ -268,14 +269,15 @@ public class DownloadDialogPresenterTest {
         HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
         viewReadyLatch.await(MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS);
 
         presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE);
-        WaitForLiveData.INSTANCE.observeUntil(
+        WaitForLiveData.observeUntil(
                 umAppDatabase.getDownloadJobDao().getJobLive(downloadJob.getDjUid()),
                 MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 job -> job != null && job.getDjStatus() == JobStatus.PAUSED);
@@ -288,7 +290,7 @@ public class DownloadDialogPresenterTest {
     @Test
     public void givenDownloadRunning_whenClickCancel_shouldSetStatusToCancelling() throws InterruptedException {
 
-        insertDownloadSetAndSetItems();
+        insertDownloadJobAndJobItems();
 
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
@@ -299,7 +301,8 @@ public class DownloadDialogPresenterTest {
         HashMap<String,String> args =  new HashMap<>();
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
@@ -321,16 +324,17 @@ public class DownloadDialogPresenterTest {
     @Test
     public void givenExistingDownloadSet_whenDialogDismissedWithoutSelection_shouldCleanUpUnQueuedJob() throws InterruptedException {
 
-        insertDownloadSetAndSetItems(true, JobStatus.NOT_QUEUED);
+        insertDownloadJobAndJobItems(true, JobStatus.NOT_QUEUED);
 
         HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
 
-        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobItemDao()
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
                         .findAllLive(), MAX_LATCH_WAITING_TIME , TimeUnit.SECONDS,
                 allItems -> allItems.size() == 5);
 
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
@@ -339,7 +343,7 @@ public class DownloadDialogPresenterTest {
         presenter.handleClickNegative();
 
 
-        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadJobItemDao()
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobItemDao()
                 .findAllLive(), MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
                 allItems -> allItems.size() == 0);
 
@@ -351,7 +355,7 @@ public class DownloadDialogPresenterTest {
     @Test
     public void givenDownloadRunning_whenCompletedAndUserOptToDelete_shouldDeleteDownloadJobSetAndAssociatedFiles() throws InterruptedException {
 
-        insertDownloadSetAndSetItems();
+        insertDownloadJobAndJobItems();
 
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
@@ -365,7 +369,8 @@ public class DownloadDialogPresenterTest {
         umAppDatabase.getDownloadJobDao().updateJobAndItems(downloadJob.getDjUid(),
                 JobStatus.COMPLETE,JobStatus.RUNNING_MIN);
 
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
@@ -388,7 +393,7 @@ public class DownloadDialogPresenterTest {
     public void givenDownloadRunning_whenUserChangesWifiOnlyOption_shouldBeChangedInDb()
         throws InterruptedException{
 
-        insertDownloadSetAndSetItems(true,JobStatus.RUNNING);
+        insertDownloadJobAndJobItems(true,JobStatus.RUNNING);
 
         HashMap<String,String> args =  new HashMap<>();
 
@@ -399,7 +404,8 @@ public class DownloadDialogPresenterTest {
         }).when(mockedDialogView).setWifiOnlyOptionVisible(true);
 
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
@@ -407,19 +413,20 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleWiFiOnlyOption(true);
 
-        WaitForLiveData.INSTANCE.observeUntil(
-                umAppDatabase.getDownloadSetDao().getLiveMeteredNetworkAllowed(downloadSet.getDsUid()),
-                MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
-                allowed -> allowed != null && !allowed);
+        WaitForLiveData.observeUntil(
+                umAppDatabase.getDownloadJobDao().getLiveMeteredNetworkAllowed(
+                        (int)downloadJob.getDjUid()),
+                        MAX_LATCH_WAITING_TIME, TimeUnit.SECONDS,
+                        allowed -> allowed != null && !allowed);
 
         assertFalse("Job is allowed to run on un metered connection only",
-                umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
-                        .isMeteredNetworkAllowed());
+                umAppDatabase.getDownloadJobDao().findByUid((int)downloadJob.getDjUid())
+                        .getMeteredNetworkAllowed());
     }
 
     @Test
-    public void givenDownloadOptionsAreShown_whenStorageLocationChanged_shouldUpdateDestinationDirOnDownloadSet() throws InterruptedException {
-        insertDownloadSetAndSetItems();
+    public void givenDownloadOptionsAreShown_whenStorageLocationChanged_shouldUpdateDestinationDirOnDownloadJob() throws InterruptedException {
+        insertDownloadJobAndJobItems();
 
         CountDownLatch viewReadyLatch = new CountDownLatch(1);
         doAnswer((invocation) -> {
@@ -431,7 +438,8 @@ public class DownloadDialogPresenterTest {
 
         HashMap<String,String> args =  new HashMap<>();
         args.put(ARG_CONTENT_ENTRY_UID, String.valueOf(rootEntry.getContentEntryUid()));
-        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView);
+        presenter = new DownloadDialogPresenter(context,mockedNetworkManager,args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo);
         presenter.onCreate(new HashMap<>());
         presenter.onStart();
 
@@ -439,13 +447,14 @@ public class DownloadDialogPresenterTest {
 
         presenter.handleStorageOptionSelection(destDir);
 
-        WaitForLiveData.INSTANCE.observeUntil(umAppDatabase.getDownloadSetDao()
-                        .getLiveDownloadSet(downloadSet.getDsUid()), MAX_LATCH_WAITING_TIME,
-                TimeUnit.SECONDS, downloadSet -> downloadSet.getDestinationDir().equals(destDir));
+        WaitForLiveData.observeUntil(umAppDatabase.getDownloadJobDao()
+                        .getJobLive((int)downloadJob.getDjUid()), MAX_LATCH_WAITING_TIME,
+                TimeUnit.SECONDS, downloadJob -> downloadJob != null &&
+                        downloadJob.getDjDestinationDir() != null &&
+                        downloadJob.getDjDestinationDir().equals(destDir));
 
         assertEquals("DownloadSet destination directory changed successfully",
                 destDir,
-                umAppDatabase.getDownloadSetDao().findByUid(downloadSet.getDsUid())
-                .getDestinationDir());
+                umAppDatabase.getDownloadJobDao().findByUid((int)downloadJob.getDjUid()).getDjDestinationDir());
     }
 }

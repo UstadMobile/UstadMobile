@@ -5,7 +5,9 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -16,6 +18,7 @@ import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -23,6 +26,9 @@ import static org.mockito.Mockito.verify;
  */
 public class TestEmbeddedHTTPD {
 
+    private EmbeddedHTTPD httpd;
+
+    private Object context;
 
     static class EmbeddeHttpdResponder implements RouterNanoHTTPD.UriResponder {
 
@@ -52,13 +58,24 @@ public class TestEmbeddedHTTPD {
         }
     }
 
+    @Before
+    public void startServer() throws IOException {
+        context = PlatformTestUtil.getTargetContext();
+        httpd = new EmbeddedHTTPD(0, context);
+        httpd.start();
+    }
+
+    @After
+    public void stopServer() {
+        httpd.stop();
+        httpd = null;
+    }
+
     @Test
     public void givenResponseListenerAdded_whenRequestMade_shouldReceiveResponseStartAndFinishedEvent()
             throws IOException{
-        Object context = PlatformTestUtil.getTargetContext();
-        EmbeddedHTTPD httpd = new EmbeddedHTTPD(0, context);
+
         httpd.addRoute(".*", EmbeddeHttpdResponder.class);
-        httpd.start();
 
         EmbeddedHTTPD.ResponseListener responseListener = mock(EmbeddedHTTPD.ResponseListener.class);
         httpd.addResponseListener(responseListener);
@@ -75,7 +92,7 @@ public class TestEmbeddedHTTPD {
         Assert.assertEquals("Received expected request on response started",
                 "/dir/filename.txt", sessionArgumentCaptor.getValue().getUri());
 
-        verify(responseListener).responseFinished(sessionArgumentCaptor.capture(),
+        verify(responseListener, timeout(10000)).responseFinished(sessionArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
         Assert.assertEquals("Received expected request on response finished",
                 "/dir/filename.txt", sessionArgumentCaptor.getValue().getUri());
