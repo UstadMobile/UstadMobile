@@ -15,6 +15,7 @@ pluginManagement {
 }
 
 include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular',
+        ':lib-test-util',
         ':core',
         ':sharedse',
         ':app-android-launcher',

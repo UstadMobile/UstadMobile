@@ -7,12 +7,15 @@ import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import com.ustadmobile.sharedse.network.DownloadJobItemManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.newSingleThreadContext
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Manages a list of DownloadJobItemManagers. Creates new items, closes downloadjobs that have finished etc.
  */
-class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider, OnDownloadJobItemChangeListener {
+class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider {
 
 
     private val managerMap = mutableMapOf<Int, DownloadJobItemManager>()
@@ -21,9 +24,11 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
 
     fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
         newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
-        val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid)
-        manager.onDownloadJobItemChangeListener = this
-        managerMap[newDownloadJob.djUid.toInt()] = manager
+        //TODO: fix this
+        val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
+                newSingleThreadContext("DownloadJob-${newDownloadJob.djUid}"))
+        manager.onDownloadJobItemChangeListener = this::onDownloadJobItemChange
+        managerMap[newDownloadJob.djUid] = manager
 
         return manager
     }
@@ -47,16 +52,17 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         val checksLeft = AtomicInteger(managerListToCheck.size)
 
         for (manager in managerListToCheck) {
-            manager.findStatusByContentEntryUid(contentEntryUid, object : UmResultCallback<DownloadJobItemStatus> {
-                override fun onDone(result: DownloadJobItemStatus?) {
-                    if (result != null) {
-                        callback.onDone(result)
-                        checksLeft.set(-1)
-                    } else if (checksLeft.decrementAndGet() == 0) {
-                        callback.onDone(null)
-                    }
-                }
-            })
+//            TODO: reenable this
+//            manager.findStatusByContentEntryUid(contentEntryUid, object : UmResultCallback<DownloadJobItemStatus> {
+//                override fun onDone(result: DownloadJobItemStatus?) {
+//                    if (result != null) {
+//                        callback.onDone(result)
+//                        checksLeft.set(-1)
+//                    } else if (checksLeft.decrementAndGet() == 0) {
+//                        callback.onDone(null)
+//                    }
+//                }
+//            })
         }
     }
 
@@ -72,7 +78,7 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         }
     }
 
-    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+    fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
         var listenersToNotify: List<OnDownloadJobItemChangeListener>
         synchronized(changeListeners) {
             listenersToNotify = changeListeners.toList()
@@ -94,7 +100,8 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
         val downloadJobManager = managerMap[downloadJobUid]
         val rootItemStatus = downloadJobManager?.rootItemStatus
         if (downloadJobManager != null && rootItemStatus != null) {
-            downloadJobManager.updateStatus(rootItemStatus.jobItemUid, JobStatus.CANCELED, null)
+            //TODO: fix this
+            //downloadJobManager.updateStatus(rootItemStatus.jobItemUid, JobStatus.CANCELED, null)
         }
 
         if (downloadJobManager != null) {

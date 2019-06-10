@@ -16,8 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
 //shortcode = ctnCat
 class ContentCategory() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var contentCategoryUid: Long = 0
 
     var ctnCatContentCategorySchemaUid: Long = 0

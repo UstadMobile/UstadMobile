@@ -13,10 +13,11 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.port.sharedse.networkmanager.DownloadJobItemManager
+
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
@@ -30,7 +31,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private var contentEntryUid = 0L
 
-    private var downloadDownloadJobLive: DoorLiveData<DownloadJob?>? = null
+    private lateinit var downloadDownloadJobLive: DoorLiveData<DownloadJob?>
 
     private var allowedMeteredLive: DoorLiveData<Boolean>? = null
 

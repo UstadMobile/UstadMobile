@@ -13,8 +13,7 @@ import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 @Entity
 class Person() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personUid: Long = 0
 
     var username: String? = null

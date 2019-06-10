@@ -18,7 +18,17 @@ apply plugin: "maven-publish"
 
 kotlin {
     targets {
-        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.jvm, 'jvm') {
+            compilations.main.kotlinOptions {
+                // Setup the Kotlin compiler options for the 'main' compilation:
+                jvmTarget = "$version_kotlin_jvmTarget"
+            }
+
+            compilations.test.kotlinOptions {
+                // Setup the Kotlin compiler options for the 'main' compilation:
+                jvmTarget = "$version_kotlin_jvmTarget"
+            }
+        }
         //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
         // the project to avoid it being seen as an extra jvm variant
         //fromPreset(presets.jvm, 'commonJvm') //comment this out for code completion

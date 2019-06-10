@@ -18,8 +18,7 @@ class ClazzMember() : SyncableEntity {
      *
      * @param clazzMemberUid
      */
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var clazzMemberUid: Long = 0
 
     @UmIndexField

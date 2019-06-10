@@ -61,9 +61,10 @@ ext {
     version_kotlinx_serialization = "0.11.0"
     version_klock = "1.4.0"
     version_kmp = "0.0.2"
-    version_ktor = "1.2.0-rc2"
+    version_ktor = "1.2.1"
     version_coroutines = "1.2.1"
     version_atomicfu = "0.12.7"
+    version_krypto = "1.0.1"
 
     version_junit = "4.12"
     version_nanohttpd = "2.3.1"
@@ -143,11 +144,3 @@ if(project.file("buildconfig.local.properties").exists()) {
 ext.localProperties = new Properties()
 ext.localProperties.load(new FileInputStream(project.file("local.properties")))
 
-//Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
-// to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
-if(!ext.localProperties.containsKey("javac.9plus")) {
-    throw new GradleException("Due to a JDK8 bug ( https://bugs.openjdk.java.net/browse/JDK-8191074 ) " +
-            "with providing parameter names to the annotation processor, you must define a path to a " +
-            "JDK9+ javac for use with the database annotation processor in local.properties " +
-            "e.g. javac.9plus=/path/to/jvm9/bin/javac")
-}

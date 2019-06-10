@@ -13,8 +13,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.test.core.util.checkJndiSetup
-import com.ustadmobile.test.core.util.extractTestResourceToFile
+import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
 import org.mockito.Mockito
 import java.util.zip.ZipFile
 

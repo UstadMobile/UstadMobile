@@ -19,8 +19,7 @@ import com.ustadmobile.lib.database.annotation.*
 @Entity
 class PersonAuth() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personAuthUid: Long = 0
 
     var passwordHash: String? = null

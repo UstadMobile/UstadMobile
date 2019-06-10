@@ -8,8 +8,7 @@ import com.ustadmobile.lib.database.annotation.*
 @Entity
 class PersonGroup() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var groupUid: Long = 0
 
     @UmSyncMasterChangeSeqNum

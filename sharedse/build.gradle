@@ -67,6 +67,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
 
 
@@ -85,6 +86,7 @@ kotlin {
             kotlin.srcDir("src/commonJvmMain/kotlin")
 
             dependencies {
+                implementation project(":lib-database-android")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
@@ -92,7 +94,9 @@ kotlin {
                 implementation project(":lib-database-android")
 
                 implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+
 
 
                 //Begin SharedSE Android and JVM dependencies
@@ -118,6 +122,7 @@ kotlin {
 
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
 
                 //Begin Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
@@ -134,10 +139,70 @@ kotlin {
             }
         }
 
+        commonTest {
+            dependencies {
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-util")
+
+                implementation "com.github.aakira:napier:$version_napier"
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":lib-database-annotations")
+                api project(":lib-database-mpp")
+            }
+
+        }
+
 
     }
 
 }
+
+/*
+ * This might be required to be able to run unit tests via the IDE.
+ */
+task dumpEnvProperties {
+    outputs.upToDateWhen {
+        project.file("build/local.env.properties").exists()
+    }
+
+    doFirst {
+        println ("Dump sharedse local.env.properties")
+        if(!project.file("build").exists())
+            project.file("build").mkdir()
+
+        def outWriter = new FileWriter(project.file("build/local.env.properties"))
+        System.getProperties().store(outWriter, "System properties for use with running unit tests in IDE")
+        outWriter.flush()
+        outWriter.close()
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "compileTestKotlin") {
+        println ("Add task to jvmTest")
+        task.dependsOn(dumpEnvProperties)
+    }
+}
+jvmTest.dependsOn(dumpEnvProperties)
 
 
 publishing {
