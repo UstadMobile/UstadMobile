@@ -59,8 +59,8 @@ class ContainerEntryListResponder : RouterNanoHTTPD.UriResponder {
 
     companion object {
 
-        val PARAM_APPDB_INDEX = 0
+        const val PARAM_APPDB_INDEX = 0
 
-        val PARAM_CONTAINER_UID = "containerUid"
+        const val PARAM_CONTAINER_UID = "containerUid"
     }
 }
