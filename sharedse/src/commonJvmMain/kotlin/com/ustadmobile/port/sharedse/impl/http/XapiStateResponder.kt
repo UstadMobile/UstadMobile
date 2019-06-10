@@ -8,15 +8,12 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
 import com.ustadmobile.port.sharedse.contentformats.xapi.State
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StateEndpoint
-
+import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.IOException
-import java.lang.reflect.Type
-import java.util.HashMap
-
-import fi.iki.elonen.NanoHTTPD
-import fi.iki.elonen.router.RouterNanoHTTPD
+import java.util.*
 
 class XapiStateResponder : RouterNanoHTTPD.UriResponder {
     internal var contentMapToken = object : TypeToken<HashMap<String, Any>>() {
@@ -31,18 +28,18 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             val map = HashMap<String, String>()
             session.parseBody(map)
             val queryParams = session.parameters
-            val activityId = queryParams["activityId"].get(0)
-            val agentJson = queryParams["agent"].get(0)
+            val activityId = queryParams["activityId"]!![0]
+            val agentJson = queryParams["agent"]!![0]
             val stateId = if (queryParams.containsKey("stateId"))
-                queryParams["stateId"].get(0)
+                queryParams["stateId"]!![0]
             else
                 ""
             val registration = if (queryParams.containsKey("registration"))
-                queryParams["registration"].get(0)
+                queryParams["registration"]!![0]
             else
                 ""
             val since = if (queryParams.containsKey("since"))
-                queryParams["since"].get(0)
+                queryParams["since"]!![0]
             else
                 ""
 
@@ -74,7 +71,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             val map = HashMap<String, String>()
             session.parseBody(map)
             if (map.containsKey("content")) {
-                tmpFileName = map["content"]
+                tmpFileName = map["content"]!!
                 fin = FileInputStream(tmpFileName)
                 bout = ByteArrayOutputStream()
                 UMIOUtils.readFully(fin, bout)
@@ -84,11 +81,11 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
                 content = session.queryParameterString.toByteArray()
             }
             val queryParams = session.parameters
-            val activityId = queryParams["activityId"].get(0)
-            val agentJson = queryParams["agent"].get(0)
-            val stateId = queryParams["stateId"].get(0)
+            val activityId = queryParams["activityId"]?.get(0)
+            val agentJson = queryParams["agent"]?.get(0)
+            val stateId = queryParams["stateId"]?.get(0)
             val registration = if (queryParams.containsKey("registration"))
-                queryParams["registration"].get(0)
+                queryParams["registration"]!![0]
             else
                 ""
 
@@ -115,8 +112,8 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
         } catch (e: NullPointerException) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } finally {
-            UMIOUtils.closeQuietly(fin)
-            UMIOUtils.closeQuietly(bout)
+            UMIOUtils.closeInputStream(fin)
+            UMIOUtils.closeOutputStream(bout)
 
         }
 
@@ -131,11 +128,11 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             session.parseBody(map)
             val stateString = session.queryParameterString
             val queryParams = session.parameters
-            val activityId = queryParams["activityId"].get(0)
-            val agentJson = queryParams["agent"].get(0)
-            val stateId = queryParams["stateId"].get(0)
+            val activityId = queryParams["activityId"]?.get(0)
+            val agentJson = queryParams["agent"]?.get(0)
+            val stateId = queryParams["stateId"]?.get(0)
             val registration = if (queryParams.containsKey("registration"))
-                queryParams["registration"].get(0)
+                queryParams["registration"]!![0]
             else
                 ""
 
@@ -171,14 +168,14 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             val map = HashMap<String, String>()
             session.parseBody(map)
             val queryParams = session.parameters
-            val activityId = queryParams["activityId"].get(0)
-            val agentJson = queryParams["agent"].get(0)
+            val activityId = queryParams["activityId"]!![0]
+            val agentJson = queryParams["agent"]!![0]
             val stateId = if (queryParams.containsKey("stateId"))
-                queryParams["stateId"].get(0)
+                queryParams["stateId"]!![0]
             else
                 ""
             val registration = if (queryParams.containsKey("registration"))
-                queryParams["registration"].get(0)
+                queryParams["registration"]!![0]
             else
                 ""
 

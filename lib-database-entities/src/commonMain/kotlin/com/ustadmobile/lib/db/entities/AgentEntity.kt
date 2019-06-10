@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.AgentEntity.Companion.TABLE_ID
 
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.db.entities.AgentEntity.Companion.TABLE_ID
 class AgentEntity {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var agentUid: Long = 0
 
     var agentMbox: String? = null

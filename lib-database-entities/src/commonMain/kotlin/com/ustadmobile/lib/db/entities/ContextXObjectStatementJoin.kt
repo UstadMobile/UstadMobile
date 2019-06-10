@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.Companion.TABLE_ID
 
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.Companion.TAB
 class ContextXObjectStatementJoin {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var contextXObjectStatementJoinUid: Long = 0
 
     var contextActivityFlag: Int = 0

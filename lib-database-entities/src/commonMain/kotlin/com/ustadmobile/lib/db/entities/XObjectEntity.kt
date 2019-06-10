@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 class XObjectEntity {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
+    @PrimaryKey
     var xObjectUid: Long = 0
 
     var objectType: String? = null

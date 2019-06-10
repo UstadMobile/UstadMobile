@@ -10,19 +10,10 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementEndpoint
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementRequestException
-
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.lang.reflect.Type
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.HashMap
-
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import java.io.*
+import java.util.*
 
 class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
@@ -74,7 +65,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
             val map = HashMap<String, String>()
             session.parseBody(map)
             if (map.containsKey("content")) {
-                tmpFileName = map["content"]
+                tmpFileName = map["content"]!!
                 fin = FileInputStream(tmpFileName)
                 bout = ByteArrayOutputStream()
                 UMIOUtils.readFully(fin, bout)
@@ -86,7 +77,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
             val queryParams = session.parameters
             var statementId = ""
             if (queryParams != null && queryParams.containsKey("statementId")) {
-                statementId = queryParams["statementId"].get(0)
+                statementId = queryParams["statementId"]!![0]
             }
 
             if (content != null || statement != null) {
@@ -107,8 +98,8 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
         } catch (e: NanoHTTPD.ResponseException) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } finally {
-            UMIOUtils.closeQuietly(fin)
-            UMIOUtils.closeQuietly(bout)
+            UMIOUtils.closeInputStream(fin)
+            UMIOUtils.closeOutputStream(bout)
 
         }
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
@@ -133,7 +124,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
             val queryParams = session.parameters
             if (queryParams != null && queryParams.containsKey("method")) {
 
-                val method = queryParams["method"].get(0)
+                val method = queryParams["method"]!![0]
                 if (method.equals("put", ignoreCase = true)) {
                     return put(uriResource, urlParams, session)
                 } else if (method.equals("get", ignoreCase = true)) {
@@ -165,7 +156,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT, "application/octet", null)
             } else NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } finally {
-            UMIOUtils.closeQuietly(`is`)
+            UMIOUtils.closeInputStream(`is`)
         }
 
     }
