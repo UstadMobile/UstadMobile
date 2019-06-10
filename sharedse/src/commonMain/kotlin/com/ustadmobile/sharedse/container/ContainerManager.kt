@@ -85,8 +85,10 @@ class ContainerManager(private val container: Container,
     }
 
 
+
     @UseExperimental(ExperimentalUnsignedTypes::class)
-    suspend fun addEntries(entries: List<EntrySource>, addOptions: AddEntryOptions = AddEntryOptions()) {
+    suspend fun addEntries(addOptions: AddEntryOptions? = null, vararg entries: EntrySource) {
+        val addOpts = addOptions ?: AddEntryOptions()
         if(newFileDir == null)
             throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")
 
@@ -110,7 +112,7 @@ class ContainerManager(private val container: Container,
 
             //TODO: check for any paths that are being overwritten
 
-            if(addOptions.moveExistingFiles && currentFilePath != null) {
+            if(addOpts.moveExistingFiles && currentFilePath != null) {
                 if(!FileSe(currentFilePath).renameTo(destFile)) {
                     throw IOException("Could not rename input file : $currentFilePath")
                 }
@@ -141,7 +143,7 @@ class ContainerManager(private val container: Container,
 
         pathToEntryMap.putAll(newContainerEntries.map { it.cePath!! to it }.toMap())
 
-        if(!addOptions.dontUpdateTotals) {
+        if(!addOpts.dontUpdateTotals) {
             container.fileSize = pathToEntryMap.values.fold(0L, {count, next -> count + next.containerEntryFile!!.ceCompressedSize })
             container.cntNumEntries = pathToEntryMap.size
             dbRepo.containerDao.updateContainerSizeAndNumEntries(container.containerUid)

@@ -179,7 +179,8 @@ fun overrideAndConvertToKotlinTypes(method: ExecutableElement, enclosing: Declar
             suspendedReturnType = resolveReturnTypeIfSuspended(resolvedExecutableType)
             funSpec.addModifiers(KModifier.SUSPEND)
         }else {
-            funSpec.addParameter(method.parameters[i].simpleName.toString(), resolvedTypeName)
+            funSpec.addParameter(method.parameters[i].simpleName.toString(),
+                    resolvedTypeName.copy(nullable = (method.parameters[i].getAnnotation(Nullable::class.java) != null)))
         }
     }
 
