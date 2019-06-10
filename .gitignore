@@ -8,7 +8,7 @@
 # Android studio IML file
 *.iml
 
-.idea
+.idea/
 
 
 # Java class files
