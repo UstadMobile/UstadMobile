@@ -4,16 +4,20 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class TestXapiStatementResponder {
 
@@ -40,8 +44,10 @@ class TestXapiStatementResponder {
     fun testput() {
 
         val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements"
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8")
+
+        val tmpFile = File.createTempFile("testStatement", "statement")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val httpCon = URL(urlString).openConnection() as HttpURLConnection
         httpCon.doOutput = true
@@ -64,8 +70,10 @@ class TestXapiStatementResponder {
     fun testPost() {
 
         val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements"
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8")
+
+        val tmpFile = File.createTempFile("testStatement", "statement")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val httpCon = URL(urlString).openConnection() as HttpURLConnection
         httpCon.doOutput = true
@@ -89,8 +97,10 @@ class TestXapiStatementResponder {
     fun givenAValidStatement_whenPostRequestHasQueryParamsWithMethodisPut_thenShouldReturn204() {
 
         val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements?method=PUT"
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8")
+
+        val tmpFile = File.createTempFile("testStatement", "statement")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val httpCon = URL(urlString).openConnection() as HttpURLConnection
         httpCon.doOutput = true
@@ -115,8 +125,11 @@ class TestXapiStatementResponder {
 
         val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements?statementId=" +
                 URLEncoder.encode("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", StandardCharsets.UTF_8.toString())
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement"), "UTF-8")
+
+        val tmpFile = File.createTempFile("testStatement", "statement")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
+        println(content)
 
         val httpCon = URL(urlString).openConnection() as HttpURLConnection
         httpCon.doOutput = true

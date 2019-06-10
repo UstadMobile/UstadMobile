@@ -1,13 +1,14 @@
-package com.ustadmobile.core.contentformats.xapi
+package com.ustadmobile.sharedse.xapi
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.ustadmobile.core.contentformats.xapi.endpoints.StateEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
-import com.ustadmobile.test.core.impl.PlatformTestUtil
+import com.ustadmobile.port.sharedse.contentformats.xapi.State
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StateEndpoint
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
+import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -23,12 +24,14 @@ class TestStateEndpoint {
 
     }.type
 
+    val context = Any()
+
     @Before
     fun setup() {
-
-        val db = UmAppDatabase.getInstance(PlatformTestUtil.targetContext)
+        checkJndiSetup()
+        val db =  UmAppDatabase.Companion.getInstance(context)
         db.clearAllTables()
-        repo = db.getRepository("http://localhost/dummy/", "")
+        repo = db
 
         gson = Gson()
 
@@ -50,7 +53,7 @@ class TestStateEndpoint {
         val contentMap = gson.fromJson<HashMap<String, Any>>(content, contentMapToken)
 
         val state = State(stateId, agent, activityId, contentMap, "")
-        val endpoint = StateEndpoint(repo!!, gson)
+        val endpoint = StateEndpoint(repo!!, gson, null)
         endpoint.storeState(state)
 
         val agentEntity = XapiUtil.getAgent(repo!!.agentDao, repo!!.personDao, state.agent!!)
@@ -58,30 +61,30 @@ class TestStateEndpoint {
         val stateEntity = repo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity.agentUid, activityId, state.registration)
 
 
-        Assert.assertEquals("matches activity id", state.activityId, stateEntity.activityId)
+        Assert.assertEquals("matches activity id", state.activityId, stateEntity?.activityId)
         Assert.assertEquals("matches actor", state.agent!!.account!!.name, agentEntity.agentAccountName)
 
-        val contentEntityWebsite = repo!!.stateContentDao.findStateContentByKeyAndStateUid("website", stateEntity.stateUid)
+        val contentEntityWebsite = repo!!.stateContentDao.findStateContentByKeyAndStateUid("website", stateEntity!!.stateUid)
 
         Assert.assertEquals("matches value",
-                "{name=Parthenon, icon=Part}", contentEntityWebsite.stateContentValue)
+                "{name=Parthenon, icon=Part}", contentEntityWebsite?.stateContentValue)
 
         val contentEntityVisit = repo!!.stateContentDao.findStateContentByKeyAndStateUid("visited", stateEntity.stateUid)
 
         Assert.assertEquals("matches value",
-                "false", contentEntityVisit.stateContentValue)
+                "false", contentEntityVisit?.stateContentValue)
 
         val contentEntityVisitRange = repo!!.stateContentDao.findStateContentByKeyAndStateUid("visitrange", stateEntity.stateUid)
 
         Assert.assertEquals("matches value",
-                ".25", contentEntityVisitRange.stateContentValue)
+                ".25", contentEntityVisitRange?.stateContentValue)
 
 
     }
 
     companion object {
 
-        private val state = "/com/ustadmobile/core/contentformats/xapi/state"
+        private const val state = "/com/ustadmobile/core/contentformats/xapi/state"
     }
 
 }

@@ -6,16 +6,20 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.impl.http.XapiStateResponder
 import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 class TestXapiStateResponder {
@@ -48,8 +52,9 @@ class TestXapiStateResponder {
 
         var urlString = "http://localhost:" + httpd!!.listeningPort + "/xapi/activities/state"
 
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/state"), "UTF-8")
+        val tmpFile = File.createTempFile("testState", "state")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/state", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         urlString += "?activityId=" +
                 URLEncoder.encode("http://www.example.com/activities/1", StandardCharsets.UTF_8.toString()) +
@@ -70,8 +75,8 @@ class TestXapiStateResponder {
         val code = httpCon.responseCode
 
         Assert.assertEquals(204, code.toLong())
-        val agentEntity = appRepo!!.agentDao.getAgentByAnyId("","", "123", "http://www.example.com/users/", "")
-        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid,"http://www.example.com/activities/1", "")
+        val agentEntity = appRepo!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
+        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/activities/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
 
@@ -81,9 +86,9 @@ class TestXapiStateResponder {
 
         var urlString = "http://localhost:" + httpd!!.listeningPort + "/xpi/activities/state"
 
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/state"), "UTF-8")
-
+        val tmpFile = File.createTempFile("testState", "state")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/state", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         urlString += "?activityId=" +
                 URLEncoder.encode("http://www.example.com/activities/1", StandardCharsets.UTF_8.toString()) +
@@ -104,7 +109,7 @@ class TestXapiStateResponder {
         val code = httpCon.responseCode
 
         Assert.assertEquals(204, code.toLong())
-        val agentEntity = appRepo!!.agentDao.getAgentByAnyId("","", "123", "http://www.example.com/users/", "")
+        val agentEntity = appRepo!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
         val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/activities/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
@@ -114,9 +119,9 @@ class TestXapiStateResponder {
     fun testAll() {
         var urlString = "http://localhost:" + httpd!!.listeningPort + "/xapi/activities/state"
 
-        val content = UMIOUtils.readToString(
-                javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/state"), "UTF-8")
-
+        val tmpFile = File.createTempFile("testState", "state")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/state", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         urlString += "?activityId=" +
                 URLEncoder.encode("http://www.example.com/activities/1", StandardCharsets.UTF_8.toString()) +
@@ -137,7 +142,7 @@ class TestXapiStateResponder {
         val code = httpCon.responseCode
 
         Assert.assertEquals(204, code.toLong())
-        val agentEntity = appRepo!!.agentDao.getAgentByAnyId("","", "123", "http://www.example.com/users/", "")
+        val agentEntity = appRepo!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
         val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/states/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
 
