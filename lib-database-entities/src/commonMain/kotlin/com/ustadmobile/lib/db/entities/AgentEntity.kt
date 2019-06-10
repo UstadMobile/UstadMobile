@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.AgentEntity.Companion.TABLE_ID
 class AgentEntity {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var agentUid: Long = 0
 
     var agentMbox: String? = null

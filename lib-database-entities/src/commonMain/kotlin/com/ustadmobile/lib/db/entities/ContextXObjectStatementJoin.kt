@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ContextXObjectStatementJoin.Companion.TAB
 class ContextXObjectStatementJoin {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var contextXObjectStatementJoinUid: Long = 0
 
     var contextActivityFlag: Int = 0

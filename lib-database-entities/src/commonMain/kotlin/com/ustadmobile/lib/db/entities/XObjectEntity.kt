@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 class XObjectEntity {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var xObjectUid: Long = 0
 
     var objectType: String? = null

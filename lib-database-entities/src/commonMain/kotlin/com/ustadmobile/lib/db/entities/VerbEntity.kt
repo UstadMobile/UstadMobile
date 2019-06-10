@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.VerbEntity.Companion.TABLE_ID
 class VerbEntity {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var verbUid: Long = 0
 
     var urlId: String? = null
