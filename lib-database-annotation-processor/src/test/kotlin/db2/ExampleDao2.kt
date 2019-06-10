@@ -40,6 +40,8 @@ abstract class ExampleDao2 {
     @Query("SELECT * FROM ExampleEntity2 WHERE uid > :uid AND someNumber > :min")
     abstract suspend fun findLargeAsync(uid: Long, min: Long): List<ExampleEntity2>
 
+    @Query("SELECT * FROM ExampleEntity2 WHERE name = :name")
+    abstract fun findWithNullableParam(name: String?): List<ExampleEntity2>
 
     @Query("SELECT name FROM ExampleEntity2 WHERE uid = :uid")
     abstract fun findNameByUid(uid: Long): String?
