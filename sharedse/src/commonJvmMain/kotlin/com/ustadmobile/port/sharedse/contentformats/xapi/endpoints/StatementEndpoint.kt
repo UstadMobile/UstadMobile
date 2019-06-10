@@ -356,7 +356,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     fun hasExistingStatements(statements: List<Statement>): Boolean {
 
         val ids = statements.filter { it.id != null }.map { it.id }
-        val statementList = statementDao.findByStatementIdList(ids)
+        val statementList = statementDao.findByStatementIdList(ids as List<String>)
 
         for (statement in statementList) {
             throw StatementRequestException("Has Existing Statements", 409)

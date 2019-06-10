@@ -16,5 +16,5 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract fun findByStatementId(id: String): StatementEntity?
 
     @Query("SELECT * FROM StatementEntity WHERE statementId IN (:id)")
-    abstract fun findByStatementIdList(id: List<String?>): List<StatementEntity>
+    abstract fun findByStatementIdList(id: List<String>): List<StatementEntity>
 }

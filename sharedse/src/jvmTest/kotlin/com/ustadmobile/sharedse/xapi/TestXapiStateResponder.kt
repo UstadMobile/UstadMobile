@@ -71,7 +71,7 @@ class TestXapiStateResponder {
 
         Assert.assertEquals(204, code.toLong())
         val agentEntity = appRepo!!.agentDao.getAgentByAnyId("","", "123", "http://www.example.com/users/", "")
-        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity?.agentUid,"http://www.example.com/activities/1", "")
+        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid,"http://www.example.com/activities/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
 
@@ -105,7 +105,7 @@ class TestXapiStateResponder {
 
         Assert.assertEquals(204, code.toLong())
         val agentEntity = appRepo!!.agentDao.getAgentByAnyId("","", "123", "http://www.example.com/users/", "")
-        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity?.agentUid, "http://www.example.com/activities/1", "")
+        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/activities/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
 
@@ -138,7 +138,7 @@ class TestXapiStateResponder {
 
         Assert.assertEquals(204, code.toLong())
         val agentEntity = appRepo!!.agentDao.getAgentByAnyId("","", "123", "http://www.example.com/users/", "")
-        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity?.agentUid, "http://www.example.com/states/1", "")
+        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/states/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
 
         val getCon = URL(urlString).openConnection() as HttpURLConnection
@@ -157,7 +157,7 @@ class TestXapiStateResponder {
 
         Assert.assertEquals(204, deleteCode.toLong())
 
-        val deletedState = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity?.agentUid, "http://www.example.com/states/1", "")
+        val deletedState = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity.agentUid, "http://www.example.com/states/1", "")
         Assert.assertFalse("is set to inactive", deletedState!!.isIsactive)
 
     }
