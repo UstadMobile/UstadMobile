@@ -23,10 +23,10 @@ import java.nio.file.Paths
 
 class TestStatementEndpoint {
 
-    val contextWithObject = "/com/ustadmobile/core/contentformats/xapi/contextWitObject"
-    val fullstatement = "/com/ustadmobile/core/contentformats/xapi/fullstatement"
-    val simpleStatement = "/com/ustadmobile/core/contentformats/xapi/simpleStatment"
-    val subStatement = "/com/ustadmobile/core/contentformats/xapi/substatement"
+    val contextWithObject = "/com/ustadmobile/port/sharedse/xapi/contextWithObject"
+    val fullstatement = "/com/ustadmobile/port/sharedse/xapi/fullstatement"
+    val simpleStatement = "/com/ustadmobile/port/sharedse/xapi/simpleStatement"
+    val subStatement = "/com/ustadmobile/port/sharedse/xapi/substatement"
     private var repo: UmAppDatabase? = null
     private var gson: Gson? = null
     val context = Any()
@@ -96,8 +96,8 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to verb", entity.verbUid, verb!!.verbUid)
         Assert.assertEquals("joined to object", entity.xObjectUid, xobject!!.xObjectUid)
 
-        Assert.assertEquals("context statement joined with parent flag", contextJoin!!.contextActivityFlag.toLong(), ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong())
-        Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin!!.contextXObjectUid)
+        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
+        Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin.contextXObjectUid)
         Assert.assertEquals("context statement joined matches with statement", entity.statementUid, contextJoin.contextStatementUid)
 
 
@@ -110,6 +110,7 @@ class TestStatementEndpoint {
         val tmpFile = File.createTempFile("testStatement", "statement")
         extractTestResourceToFile(fullstatement, tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
+        println(content)
 
         val statement = gson!!.fromJson(content, Statement::class.java)
         val endpoint = StatementEndpoint(repo!!, gson!!)
@@ -119,8 +120,8 @@ class TestStatementEndpoint {
         val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
         val verb = repo!!.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/attended")
         val xobject = repo!!.xObjectDao.findByObjectId("http://www.example.com/meetings/occurances/34534")
-        val instructor = repo!!.agentDao.getAgentByAnyId("", "", "13936749", "", "")
-        val authority = repo!!.agentDao.getAgentByAnyId("", "", "anonymous", "", "")
+        val instructor = repo!!.agentDao.getAgentByAnyId("", "", "13936749", "http://www.example.com", "")
+        val authority = repo!!.agentDao.getAgentByAnyId("", "", "anonymous", "http://cloud.scorm.com/", "")
         val team = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
         val parent = repo!!.xObjectDao.findByObjectId("http://www.example.com/meetings/series/267")
         val contextJoin = repo!!.contextXObjectStatementJoinDao
@@ -136,15 +137,16 @@ class TestStatementEndpoint {
         Assert.assertEquals("context platform matched", "Example virtual meeting software", entity.contextPlatform)
         Assert.assertEquals("context statement matched", "6690e6c9-3ef0-4ed3-8b37-7f3964730bee", entity.contextStatementId)
 
-        Assert.assertEquals("joined to instructor", instructor?.agentUid, entity?.instructorUid)
+        Assert.assertEquals("joined to instructor", instructor!!.agentUid, entity?.instructorUid)
         Assert.assertEquals("13936749", instructor?.agentAccountName)
 
         Assert.assertEquals("joined to authority", authority?.agentUid, entity?.authorityUid)
         Assert.assertEquals("joined to team", team?.agentUid, entity?.teamUid)
 
-        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
-        Assert.assertEquals("context statement joined matches with objectuid", parent?.xObjectUid, contextJoin?.contextXObjectUid)
         Assert.assertEquals("context statement joined matches with statement", contextJoin?.contextStatementUid, entity?.statementUid)
+        Assert.assertEquals("context statement joined matches with objectuid", parent?.xObjectUid, contextJoin?.contextXObjectUid)
+        Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin?.contextActivityFlag?.toLong())
+
 
         Assert.assertTrue("result success matched", entity?.isResultSuccess?: false)
         Assert.assertTrue("result completion matched", entity?.isResultCompletion?: false)
@@ -178,7 +180,7 @@ class TestStatementEndpoint {
 
         Assert.assertEquals("joined to substatement verb", subVerb?.verbUid, entity?.substatementVerbUid)
         Assert.assertEquals("joined to substatement object", subobject?.xObjectUid, entity?.subStatementObjectUid)
-        Assert.assertEquals("with substatment, object should be null", 0, entity?.xObjectUid)
+        Assert.assertEquals("with substatment, object should be null", 0L, entity?.xObjectUid)
 
 
     }

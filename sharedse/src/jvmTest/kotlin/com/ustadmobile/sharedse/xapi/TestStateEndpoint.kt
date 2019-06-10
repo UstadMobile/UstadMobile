@@ -9,10 +9,14 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.State
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StateEndpoint
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 class TestStateEndpoint {
@@ -46,14 +50,16 @@ class TestStateEndpoint {
         val agentJson = "{\"objectType\": \"Agent\", \"name\": \"John Smith\", \"account\":{\"name\": \"123\", \"homePage\": \"http://www.example.com/users/\"}}"
         val stateId = "http://www.example.com/states/1"
 
-        val content = UMIOUtils.readStreamToString(javaClass.getResourceAsStream(state))
+        val tmpFile = File.createTempFile("testStateEndpoint", "stateEndpoint")
+        extractTestResourceToFile(state, tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val gson = Gson()
         val agent = gson.fromJson(agentJson, Actor::class.java)
         val contentMap = gson.fromJson<HashMap<String, Any>>(content, contentMapToken)
 
         val state = State(stateId, agent, activityId, contentMap, "")
-        val endpoint = StateEndpoint(repo!!, gson, null)
+        val endpoint = StateEndpoint(repo!!, gson, "application/json")
         endpoint.storeState(state)
 
         val agentEntity = XapiUtil.getAgent(repo!!.agentDao, repo!!.personDao, state.agent!!)
@@ -84,7 +90,7 @@ class TestStateEndpoint {
 
     companion object {
 
-        private const val state = "/com/ustadmobile/core/contentformats/xapi/state"
+        private const val state = "/com/ustadmobile/port/sharedse/xapi/state"
     }
 
 }

@@ -201,7 +201,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         }
 
         if (!isSubStatement) {
-            val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz").format(Date())
+            val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(Date())
             statement.stored = date
 
             if (statement.timestamp.isNullOrEmpty()) {
@@ -331,7 +331,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
             return
         }
         for (statement in statements) {
-            if (!statementId.equals(statement.id)) {
+            if (statementId != statement.id) {
                 throw StatementRequestException("Statement Id did not match with Parameter Statement ID", 409)
             }
         }

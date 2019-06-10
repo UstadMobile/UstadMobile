@@ -112,7 +112,7 @@ class StateEndpoint(db: UmAppDatabase, private val gson: Gson, private val conte
     }
 
     private fun isContentTypeJson() {
-        if (contentType?.isEmpty()!! || contentType != "application/json") {
+        if (contentType?.isEmpty() == true || contentType != "application/json") {
             throw StatementRequestException("Content Type missing or not set to application/json")
         }
     }

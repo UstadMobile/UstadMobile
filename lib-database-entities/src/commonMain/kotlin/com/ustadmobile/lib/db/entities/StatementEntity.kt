@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.StatementEntity.Companion.TABLE_ID
 class StatementEntity {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var statementUid: Long = 0
 
     var statementId: String? = null

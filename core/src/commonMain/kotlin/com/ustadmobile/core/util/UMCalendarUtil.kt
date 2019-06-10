@@ -2,7 +2,6 @@ package com.ustadmobile.core.util
 
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.ISO8601
 import com.soywiz.klock.parse
 
 /**
@@ -13,7 +12,7 @@ object UMCalendarUtil {
 
     private val httpDateFormat: DateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
     private val httpDateFormat2: DateFormat = DateFormat("EEE, dd-MMM-yyyy HH:mm:ss z")
-    private val iso8601DateFormat: DateFormat = ISO8601.DATE_CALENDAR_COMPLETE
+    private val iso8601DateFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
 
     private val listOfFormats = listOf(httpDateFormat, httpDateFormat2, iso8601DateFormat)
 
