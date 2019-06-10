@@ -3,6 +3,7 @@ package com.ustadmobile.sharedse.container
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.Base64Coder
@@ -10,8 +11,11 @@ import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileOutputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.security.getMessageDigestInstance
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlinx.io.InputStream
 import kotlinx.io.OutputStream
@@ -23,6 +27,8 @@ class ContainerManager(private val container: Container,
                               private val pathToEntryMap: MutableMap<String, ContainerEntryWithContainerEntryFile> = mutableMapOf()) {
 
     val newFileDir = if(newFilePath != null) { FileSe(newFilePath) } else { null }
+
+    val mutex = Mutex()
 
     data class AddEntryOptions(val moveExistingFiles: Boolean = false,
                                val dontUpdateTotals: Boolean = false)
@@ -92,61 +98,68 @@ class ContainerManager(private val container: Container,
         if(newFileDir == null)
             throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")
 
+        val entryMd5Sums = entries.map { Base64Coder.encodeToString(it.md5Sum) }
+        mutex.withLock {
 
-        val existingMd5Sums = entries.map { Base64Coder.encodeToString(it.md5Sum) }
-        val existingFiles = db.containerEntryFileDao.findEntriesByMd5Sums(existingMd5Sums)
-                .map { it.cefMd5!! to it }.toMap()
+            val existingFiles = db.containerEntryFileDao.findEntriesByMd5Sums(entryMd5Sums)
+                    .map { it.cefMd5!! to it }.toMap()
 
-        val newContainerEntries = mutableListOf<ContainerEntryWithContainerEntryFile>()
+            val newContainerEntries = mutableListOf<ContainerEntryWithContainerEntryFile>()
 
-        val entriesParted = entries.partition { Base64Coder.encodeToString(it.md5Sum) in existingFiles.keys }
+            val entriesParted = entries.partition { Base64Coder.encodeToString(it.md5Sum) in existingFiles.keys }
 
-        //for all entries that we already have
-        newContainerEntries.addAll(entriesParted.first.map { ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
-                existingFiles[Base64Coder.encodeToString(it.md5Sum)]!!) })
+            //delete any ContainerEntry that is being overwritten
+            val newEntryPaths = entries.map { it.pathInContainer }
+            db.containerEntryDao.deleteList(
+                    pathToEntryMap.filter { it.key in newEntryPaths }.map {it.value as ContainerEntry})
 
-        entriesParted.second.forEach {
-            val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16)}
-            val destFile = FileSe(newFileDir, md5HexStr)
-            val currentFilePath = it.filePath
+            //for all entries that we already have
+            newContainerEntries.addAll(entriesParted.first.map { ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
+                    existingFiles[Base64Coder.encodeToString(it.md5Sum)]!!) })
 
-            //TODO: check for any paths that are being overwritten
+            entriesParted.second.forEach {
+                val md5HexStr = it.md5Sum.joinToString(separator = "") { it.toUByte().toString(16)}
+                val destFile = FileSe(newFileDir, md5HexStr)
+                val currentFilePath = it.filePath
 
-            if(addOpts.moveExistingFiles && currentFilePath != null) {
-                if(!FileSe(currentFilePath).renameTo(destFile)) {
-                    throw IOException("Could not rename input file : $currentFilePath")
-                }
-            }else {
-                //copy it
-                GlobalScope.async {
-                    var destOutStream = null as OutputStream?
-                    try {
-                        destOutStream = FileOutputStreamSe(destFile)
-                        UMIOUtils.readFully(it.inputStream, destOutStream)
-                    }catch(e: IOException) {
-                        throw e
-                    }finally {
-                        destOutStream?.close()
+                //TODO: check for any paths that are being overwritten
+
+                if(addOpts.moveExistingFiles && currentFilePath != null) {
+                    if(!FileSe(currentFilePath).renameTo(destFile)) {
+                        throw IOException("Could not rename input file : $currentFilePath")
                     }
-                }.await()
+                }else {
+                    //copy it
+                    GlobalScope.async {
+                        var destOutStream = null as OutputStream?
+                        try {
+                            destOutStream = FileOutputStreamSe(destFile)
+                            UMIOUtils.readFully(it.inputStream, destOutStream)
+                        }catch(e: IOException) {
+                            throw e
+                        }finally {
+                            destOutStream?.close()
+                        }
+                    }.await()
+                }
+
+                val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
+                        destFile.length(), destFile.length(), 0)
+                containerEntryFile.cefPath = destFile.getAbsolutePath()
+                containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
+                newContainerEntries.add(ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
+                        containerEntryFile))
             }
 
-            val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
-                    destFile.length(), destFile.length(), 0)
-            containerEntryFile.cefPath = destFile.getAbsolutePath()
-            containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
-            newContainerEntries.add(ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
-                    containerEntryFile))
-        }
+            db.containerEntryDao.insertAndSetIds(newContainerEntries)
 
-        db.containerEntryDao.insertListAsync(newContainerEntries)
+            pathToEntryMap.putAll(newContainerEntries.map { it.cePath!! to it }.toMap())
 
-        pathToEntryMap.putAll(newContainerEntries.map { it.cePath!! to it }.toMap())
-
-        if(!addOpts.dontUpdateTotals) {
-            container.fileSize = pathToEntryMap.values.fold(0L, {count, next -> count + next.containerEntryFile!!.ceCompressedSize })
-            container.cntNumEntries = pathToEntryMap.size
-            dbRepo.containerDao.updateContainerSizeAndNumEntries(container.containerUid)
+            if(!addOpts.dontUpdateTotals) {
+                container.fileSize = pathToEntryMap.values.fold(0L, {count, next -> count + next.containerEntryFile!!.ceCompressedSize })
+                container.cntNumEntries = pathToEntryMap.size
+                dbRepo.containerDao.updateContainerSizeAndNumEntries(container.containerUid)
+            }
         }
     }
 
@@ -158,5 +171,30 @@ class ContainerManager(private val container: Container,
         return pathToEntryMap[pathInContainer]
     }
 
+    /**
+     * Make a copy of this container as a new container - e.g. when making a new version of this
+     * file, adding files, etc.
+     *
+     * @return ContainerManager wiht the same contents, linked to the same underlying files, with the
+     * last modified timestamp updated.
+     */
+    fun copyToNewContainer(): ContainerManager {
+        val newContainer = Container()
+        newContainer.fileSize = container.fileSize
+        newContainer.lastModified = getSystemTimeInMillis()
+        newContainer.cntNumEntries = pathToEntryMap.size
+        newContainer.containerContentEntryUid = container.containerContentEntryUid
+        newContainer.mimeType = container.mimeType
+        newContainer.mobileOptimized = container.mobileOptimized
+        newContainer.remarks = container.remarks
+        newContainer.containerUid = dbRepo.containerDao.insert(newContainer)
+
+        val newEntryMap = pathToEntryMap.map { it.key to
+                ContainerEntryWithContainerEntryFile(it.value.cePath!!, newContainer, it.value.containerEntryFile!!)}.toMap()
+
+        db.containerEntryDao.insertList(newEntryMap.values.map { it as ContainerEntry })
+        return ContainerManager(newContainer, db, dbRepo, newFileDir?.getAbsolutePath(),
+                newEntryMap.toMutableMap())
+    }
 
 }

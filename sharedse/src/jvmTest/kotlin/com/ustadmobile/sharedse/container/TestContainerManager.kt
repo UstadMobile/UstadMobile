@@ -10,7 +10,10 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class TestContainerManager  {
 
@@ -79,42 +82,105 @@ class TestContainerManager  {
 
     }
 
-//    @Test
-//    fun givenSameFileAddedToMultipleContainers_whenGetFileCalled_thenShouldReturnSameContainerEntryFile() {
-//        val container1 = Container()
-//        container1.containerUid = repo.containerDao.insert(container1)
-//        val manager1 = ContainerManager(container1, db, repo,
-//                containerTmpDir.getAbsolutePath())
-//        runBlocking {
-//
-//        }
-//
-//
-//        val filesToAdd1 = HashMap<File, String>()
-//
-//
-//
-//        manager1.addEntries(filesToAdd1, true)
-//
-//        val container2 = Container()
-//        container2.containerUid = dbRepo.containerDao.insert(container2)
-//        val manager2 = ContainerManager(container2, db, dbRepo,
-//                tmpDir.getAbsolutePath())
-//
-//        val filesToAdd2 = HashMap<File, String>()
-//        filesToAdd2[testFiles.get(0)] = "testfileothername.png"
-//        filesToAdd2[testFiles.get(1)] = "anotherimage.png"
-//        manager2.addEntries(filesToAdd2, true)
-//
-//        Assert.assertEquals("When two identical files are added, the same content entry file is used",
-//                manager1.getEntry("testfile1.png")!!.ceCefUid,
-//                manager2.getEntry("testfileothername.png")!!.ceCefUid)
-//
-//        Assert.assertNull("Manager2 does not return a container entry if given a name from manager1",
-//                manager2.getEntry("testfile1.png"))
-//
-//        Assert.assertEquals("Cotnainer2 num entries = 2", 2,
-//                dbRepo.containerDao.findByUid(container2.containerUid)!!.cntNumEntries.toLong())
-//    }
+    @Test
+    fun givenSameFileAddedToMultipleContainers_whenGetFileCalled_thenShouldReturnSameContainerEntryFile() {
+        runBlocking {
+            val container1 = Container()
+            container1.containerUid = repo.containerDao.insert(container1)
+            val manager1 = ContainerManager(container1, db, repo,
+                    containerTmpDir.getAbsolutePath())
+            manager1.addEntries(ContainerManager.FileEntrySource(testFiles[0], "testfile1.png"))
+
+            val container2 = Container()
+            container2.containerUid = repo.containerDao.insert(container2)
+            val manager2 = ContainerManager(container2, db, repo,
+                    containerTmpDir.getAbsolutePath())
+
+            val filesToAdd2 = HashMap<File, String>()
+            filesToAdd2[testFiles.get(0)] = "testfileothername.png"
+            filesToAdd2[testFiles.get(1)] = "anotherimage.png"
+            manager2.addEntries(
+                    ContainerManager.FileEntrySource(testFiles[0], "testfileothername.png"),
+                    ContainerManager.FileEntrySource(testFiles[1], "anotherimage.png"))
+
+            Assert.assertEquals("When two identical files are added, the same content entry file is used",
+                    manager1.getEntry("testfile1.png")!!.ceCefUid,
+                    manager2.getEntry("testfileothername.png")!!.ceCefUid)
+
+            Assert.assertNull("Manager2 does not return a container entry if given a name from manager1",
+                    manager2.getEntry("testfile1.png"))
+
+            Assert.assertEquals("Cotnainer2 num entries = 2", 2,
+                    repo.containerDao.findByUid(container2.containerUid)!!.cntNumEntries.toLong())
+        }
+    }
+
+    @Test
+    fun givenExistingContainer_whenCopyToNewContainerCalled_thenShouldHaveSameContents() {
+        runBlocking {
+            val container = Container()
+            container.containerUid = repo.containerDao.insert(container)
+            val manager = ContainerManager(container, db, repo, containerTmpDir.getAbsolutePath())
+
+            manager.addEntries(ContainerManager.FileEntrySource(testFiles[0], "testfileothername.png"),
+                    ContainerManager.FileEntrySource(testFiles[1], "anotherimage.png"))
+
+            val copy = manager.copyToNewContainer()
+            Assert.assertArrayEquals(UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                    manager.getEntry("testfileothername.png")!!)),
+                    UMIOUtils.readStreamToByteArray(copy.getInputStream(
+                            copy.getEntry("testfileothername.png")!!)))
+            Assert.assertArrayEquals(UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                    manager.getEntry("anotherimage.png")!!)),
+                    UMIOUtils.readStreamToByteArray(copy.getInputStream(
+                            copy.getEntry("anotherimage.png")!!)))
+        }
+
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun givenExistingContainer_whenFileAddedWithSamePath_thenFileShouldBeOverwritten() {
+        runBlocking {
+            val container = Container()
+            container.containerUid = repo.containerDao.insert(container)
+            val manager = ContainerManager(container, db, repo, containerTmpDir.getAbsolutePath())
+
+            val version1Content = "Version-1"
+            val version2Content = "Version-2"
+
+            val entryv1 = File.createTempFile("tmp", "testv1")
+            val foutV1 = FileOutputStream(entryv1)
+            UMIOUtils.readFully(ByteArrayInputStream(version1Content.toByteArray()), foutV1)
+            foutV1.close()
+
+            val entryV2 = File.createTempFile("tmp", "testv2")
+            val foutV2 = FileOutputStream(entryV2)
+            UMIOUtils.readFully(ByteArrayInputStream(version2Content.toByteArray()), foutV2)
+            foutV2.close()
+
+            manager.addEntries(ContainerManager.FileEntrySource(entryv1, "test.txt"))
+
+            val v1ContentFromContainer = UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                    manager.getEntry("test.txt")!!))
+
+            manager.addEntries(ContainerManager.FileEntrySource(entryV2, "test.txt"))
+            val v2ContentFRomContainer = UMIOUtils.readStreamToByteArray(manager.getInputStream(
+                    manager.getEntry("test.txt")!!))
+
+
+            Assert.assertArrayEquals("After adding first version, got version 1 content",
+                    version1Content.toByteArray(), v1ContentFromContainer)
+
+            Assert.assertArrayEquals("After adding second version, got version 2 content",
+                    version2Content.toByteArray(), v2ContentFRomContainer)
+            Assert.assertEquals("After adding an entry with the same name, there is still only one entry",
+                    1, db.containerEntryDao.findByContainer(container.containerUid).size)
+        }
+
+
+
+    }
+
 
 }
