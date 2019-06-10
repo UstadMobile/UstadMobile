@@ -68,7 +68,7 @@ class ContainerManager(private val container: Container,
             get() = FileInputStreamSe(file)
 
         override val filePath: String?
-            get() = file.absolutePath
+            get() = file.getAbsolutePath()
 
         override val md5Sum: ByteArray by lazy {
             val buffer = ByteArray(8*1024)
@@ -87,7 +87,7 @@ class ContainerManager(private val container: Container,
 
 
     @UseExperimental(ExperimentalUnsignedTypes::class)
-    suspend fun addEntries(addOptions: AddEntryOptions? = null, vararg entries: EntrySource) {
+    suspend fun addEntries(vararg entries: EntrySource, addOptions: AddEntryOptions? = null) {
         val addOpts = addOptions ?: AddEntryOptions()
         if(newFileDir == null)
             throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")

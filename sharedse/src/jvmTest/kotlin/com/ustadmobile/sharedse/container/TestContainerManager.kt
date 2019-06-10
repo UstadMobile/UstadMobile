@@ -67,7 +67,7 @@ class TestContainerManager  {
 
         val containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
         runBlocking {
-            containerManager.addEntries(null,
+            containerManager.addEntries(
                     ContainerManager.FileEntrySource(testFiles[0], "testfile1.png"))
 
             val containerInStream = containerManager.getInputStream(containerManager.getEntry("testfile1.png")!!)
