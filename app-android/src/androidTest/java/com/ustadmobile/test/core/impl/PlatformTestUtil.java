@@ -1,7 +1,7 @@
 package com.ustadmobile.test.core.impl;
 
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 
 

@@ -1,70 +1,99 @@
-apply plugin: 'java-library'
-apply plugin: "maven-publish"
-apply plugin: "jacoco"
+/*
+ * Note: If the Android plugin is enabled, since Gradle 5.4, the annotation processor will not run
+ * with kapt (using project or files to locate the annotation processor).
+ */
 
-
-compileJava {
-    /*
-     *  Annotation processor arguments:
-     *   umdb_room_out - Destination directory for the generated room version of database and DAO classes
-     */
-    options.compilerArgs += [
-            "-Aumdb_room_out=" + rootProject.file("lib-database-android/build/generated/source/umdbprocessor").getAbsolutePath(),
-            "-Aumdb_jdbc_out=" + rootProject.file("lib-database-jdbc/build/generated/source/umdbprocessor").getAbsolutePath(),
-            "-Aumdb_retrofit_out=" + rootProject.file("lib-database-retrofitrepository/build/generated/source/umdbprocessor").getAbsolutePath(),
-            "-Aumdb_jersey_res_out=" + rootProject.file("app-rest-server/build/generated/source/umdbprocessor").getAbsolutePath(),
-            "-parameters"
-    ]
-
-    //Due to a bug, the JDK8 annotation processor provides incorrect parameter names, thus we need
-    // to use JDK9+ to run the annotation processor https://bugs.openjdk.java.net/browse/JDK-8191074
-    if(JavaVersion.current() == JavaVersion.VERSION_1_8) {
-        options.fork = true
-        options.forkOptions.executable = rootProject.ext.localProperties["javac.9plus"]
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
     }
 }
 
+apply plugin: "kotlin-multiplatform"
+apply plugin: "maven-publish"
+apply plugin: "jacoco"
+apply plugin: "kotlin-kapt"
+
+kotlin {
+
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.js, 'js')  {
+            compilations.main.kotlinOptions {
+                metaInfo = true
+                sourceMap = true
+                moduleKind = "commonjs"
+                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
+            }
+        }
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation project(":lib-util")
+                implementation project(":lib-database-entities")
+                implementation project(':lib-door-runtime')
+                implementation project(":lib-database-annotations")
+                compileOnly project(":lib-room-annotations")
+
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+            }
+        }
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+            }
+        }
+
+    }
+
+}
+
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
+
+
+kapt {
+    arguments {
+        arg("door_jdbc_kt_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
+    }
+}
+
+
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
-    compileOnly project(":lib-database-runtime-core-compileonly")
-    implementation project(':lib-database-runtime')
-    implementation project(path: ":lib-database-annotations", configuration: "jvmDefault")
-    implementation project(":lib-util")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
-
-    annotationProcessor project(':lib-database-annotation-processor')
-
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "javax.ws.rs:javax.ws.rs-api:2.1"
-    testRuntimeOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testRuntimeOnly "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testRuntimeOnly "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testRuntimeOnly "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-    testImplementation project(":lib-database-jdbc")
-    testImplementation project(":lib-database-entities")
-    testImplementation project(":lib-database-runtime")
-    testImplementation project(':lib-database-runtime-jdbc')
-    testImplementation project(':app-rest-server')
-
-    //Jersey dependencies - used to run the test server
-    testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
-    testImplementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
-    testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
+    /**
+     * Since Gradle 5.4 using kapt project(":...") does not work.
+     */
+    kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
+            "../lib-door-runtime/build/libs/lib-door-runtime-jvm.jar")
+    kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    kapt "com.squareup:kotlinpoet:1.2.0"
+    kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
+    kapt "org.apache.commons:commons-text:$version_apache_commons_text"
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+compileKotlinJvm.dependsOn(":lib-database-annotation-processor:build")
 
 publishing {
     publications {
@@ -72,12 +101,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 

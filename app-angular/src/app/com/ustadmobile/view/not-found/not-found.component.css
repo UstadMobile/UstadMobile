@@ -1,0 +1,20 @@
+html, body , main{
+    height: 100%;
+  }
+
+.not-found{
+    width: 100% !important;
+    height: 100% !important;
+    margin-top: -30px !important;
+    padding-top: 17% !important;
+    padding-bottom: 20% !important;
+    color: white;
+}
+
+.error-404{
+    font-size: 10em;
+}
+
+.tag-line{
+    font-size: 1.8em;
+}

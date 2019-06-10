@@ -1,16 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 45)
 @Entity
-class Role {
+class Role() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey
@@ -30,10 +26,7 @@ class Role {
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
 
-
-    constructor()
-
-    constructor(roleName: String, rolePermissions: Long) {
+    constructor(roleName: String, rolePermissions: Long) : this() {
         this.roleName = roleName
         this.rolePermissions = rolePermissions
     }

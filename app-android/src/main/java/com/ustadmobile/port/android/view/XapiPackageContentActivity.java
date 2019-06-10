@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.XapiPackageContentView;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.ustadmobile.port.android.util.UMAndroidUtil.bundleToMap;
 
 /**
  * Created by mike on 9/14/17.

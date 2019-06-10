@@ -1,16 +1,12 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
-import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
-import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 43)
 @Entity
-class PersonGroup {
+class PersonGroup() {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey

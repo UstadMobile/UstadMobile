@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-class ContainerWithContentEntry : Container() {
+class ContainerWithContentEntry() : Container() {
 
     var entryId = ""
 

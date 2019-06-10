@@ -19,14 +19,28 @@ android {
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
-        fromPreset(presets.js, 'js')
         fromPreset(presets.android, 'android')
+        fromPreset(presets.js, 'js') {
+            compilations.main.kotlinOptions {
+                metaInfo = true
+                sourceMap = true
+                moduleKind = "commonjs"
+                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
+            }
+        }
+    }
+
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
     }
 
     sourceSets {
         commonMain {
             dependencies {
-                compileOnly project(":lib-database-annotations")
+                implementation project(":lib-database-annotations")
                 compileOnly project(":lib-room-annotations")
                 implementation kotlin("stdlib-common:$version_kotlin")
             }

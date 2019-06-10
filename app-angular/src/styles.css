@@ -1,0 +1,151 @@
+/* Ustadmobile global style */
+main {
+  margin-top: -10px;
+  background: #ffffff;
+  padding-bottom: 20px;
+  height: 100% !important;
+  min-height: 600px !important;
+}
+
+.content-app-wrapper {
+  margin-top: 33px;
+  background: white;
+}
+
+.open-content{
+  cursor: pointer
+}
+
+.go-back-icon{
+  margin-top: 34% !important;
+  margin-left: 20px !important;
+  cursor: pointer;
+}
+
+
+.default-margin-left {
+  margin-left: 4% !important;
+}
+
+.default-margin-right{
+  margin-right: 3% !important;
+}
+
+.default-margin-bottom{
+  margin-bottom: 4% !important;
+}
+
+.default-content-padding-bottom{
+  padding-bottom: 10% !important;
+}
+
+.default-content-padding-left{
+  padding-left: 2% !important;
+}
+
+.default-content-padding-right{
+  padding-right: 2% !important;
+}
+
+.default-padding-top{
+  padding-top: 16px !important;
+}
+
+.default-margin-top{
+  margin-top: 20px !important;
+}
+
+.top-nav-height {
+  height: 90px !important;
+}
+
+
+.header-title-label :hover{
+  background: transparent;
+}
+
+.title-label{
+  font-size: 1.2em;
+  font-weight: 500;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: black;
+}
+
+
+/*
+  #Device = laptop
+  #Screen = 1025px to higher resolution desktops
+*/
+@media (min-width: 1025px) {
+
+  header,
+  main,
+  footer {
+    padding-left: 300px;
+  }
+
+  .content-data {
+    min-height: 400px !important;
+  }
+
+  .empty-state-view {
+    background: white;
+    min-height: 520px !important;
+    padding-top: 20% !important;
+    padding-bottom: 100px;
+
+  }
+
+}
+
+/*
+  #Device = Desktop
+*/
+
+@media screen and (min-width: 1400px) {
+  main {
+    margin-top: -10px;
+    background: #ffffff;
+    padding-bottom: 20px;
+    min-height: 900px !important;
+  }
+
+  header,
+  main,
+  footer {
+    padding-left: 350px;
+  }
+
+  .content-data {
+    min-height: 700px !important;
+  }
+
+  .title-label.empty {
+    font-weight: 800;
+    font-size: 2.2em;
+  }
+}
+
+
+/*
+  #Device = Most of the Smartphones Mobiles (Portrait)
+  #Screen = B/w 320px to 479px
+*/
+
+@media (min-width: 320px) and (max-width: 1024px) {
+
+  header,
+  main,
+  footer {
+    padding-left: 0;
+  }
+
+  .empty-state-view {
+    min-height: 200px !important;
+    background: white;
+    padding-top: 100px;
+    padding-bottom: 50px;
+  }
+
+}

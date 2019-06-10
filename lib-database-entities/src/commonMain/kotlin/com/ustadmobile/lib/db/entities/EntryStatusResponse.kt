@@ -1,8 +1,8 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Index
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmIndex
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
@@ -12,7 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  */
 @UmEntity(indices = arrayOf(UmIndex(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])))
 @Entity(indices = arrayOf(Index(name = "containerUid_nodeId_unique", unique = true, value = ["erContainerUid", "erNodeId"])))
-open class EntryStatusResponse {
+open class EntryStatusResponse() {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
@@ -27,13 +27,10 @@ open class EntryStatusResponse {
     var available: Boolean = false
 
     constructor(erContainerUid: Long, responseTime: Long, erNodeId: Long,
-                available: Boolean) {
+                available: Boolean) : this() {
         this.erContainerUid = erContainerUid
         this.responseTime = responseTime
         this.erNodeId = erNodeId
         this.available = available
     }
-
-
-    constructor()
 }

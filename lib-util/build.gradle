@@ -1,32 +1,90 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.multiplatform'
+}
 
-//Kotlin plugin applied using subprojects DSL on the root project as advised by documentation
-apply plugin: 'java-library'
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+    }
+}
+
 apply plugin: "maven-publish"
 
-buildscript {
-    repositories {
-        mavenCentral()
+
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
+        // the project to avoid it being seen as an extra jvm variant
+        //fromPreset(presets.jvm, 'commonJvm') //comment this out for code completion
+        fromPreset(presets.js, 'js') {
+            compilations.main.kotlinOptions {
+                metaInfo = true
+                sourceMap = true
+                moduleKind = "commonjs"
+                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
+            }
+        }
+        fromPreset(presets.android, 'android')
     }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation kotlin("stdlib-common:$version_kotlin")
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
+                implementation project(":lib-door-runtime")
+            }
+        }
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+            }
+        }
+        commonJvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+            }
+            dependsOn commonJvmMain
+        }
+
+        androidMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+                implementation "androidx.room:room-runtime:$version_android_room"
+            }
+            dependsOn commonJvmMain
+        }
+
+
     }
 }
 
-dependencies {
-    implementation "net.sf.kxml:kxml2:$version_kxml"
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
-}
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
 }
 
 
@@ -36,12 +94,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 
@@ -49,27 +101,5 @@ publishing {
         maven {
             url rootProject.ext.buildConfigProperties['repo.dir']
         }
-    }
-}
-buildscript {
-    ext.kotlin_version = '1.3.21'
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-repositories {
-    mavenCentral()
-}
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 }

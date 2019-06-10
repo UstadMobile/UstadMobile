@@ -6,7 +6,7 @@ import kotlin.jvm.Transient
  * This is used as a memory efficient summary of the status of a download
  *
  */
-class DownloadJobItemStatus {
+class DownloadJobItemStatus() {
 
     var jobItemUid: Int = 0
 
@@ -20,17 +20,13 @@ class DownloadJobItemStatus {
 
     var totalBytes: Long = 0
 
-    var status: Byte = 0
+    var status: Int = 0
 
     @field:Transient
     var children: MutableList<DownloadJobItemStatus>? = null
         private set
 
-    constructor() {
-
-    }
-
-    constructor(item: DownloadJobItem) {
+    constructor(item: DownloadJobItem) : this() {
         jobItemUid = item.djiUid.toInt()
         contentEntryUid = item.djiContentEntryUid
         bytesSoFar = item.downloadedSoFar

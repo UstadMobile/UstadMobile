@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: "kotlin-multiplatform"
 apply plugin: "jacoco"
 
 //See:
@@ -10,6 +11,12 @@ def keystoreProperties = new Properties()
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+}
+
+kotlin {
+    targets {
+        fromPreset(presets.android, 'android')
+    }
 }
 
 
@@ -40,7 +47,7 @@ android {
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -83,6 +90,19 @@ android {
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/ktor-http.kotlin_module"
+                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
+                exclude 'META-INF/kotlinx-io.kotlin_module'
+                exclude 'META-INF/atomicfu.kotlin_module'
+                exclude 'META-INF/ktor-utils.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+                exclude 'META-INF/ktor-http-cio.kotlin_module'
+                exclude 'META-INF/ktor-*'
+
+
+
+
             }
         }
 
@@ -95,6 +115,16 @@ android {
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/ktor-http.kotlin_module"
+                exclude 'META-INF/KMPXmlPullParser.kotlin_module'
+                exclude 'META-INF/kotlinx-io.kotlin_module'
+                exclude 'META-INF/atomicfu.kotlin_module'
+                exclude 'META-INF/ktor-utils.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+                exclude 'META-INF/ktor-http-cio.kotlin_module'
+                exclude 'META-INF/ktor-*'
+
             }
         }
     }
@@ -138,10 +168,9 @@ dependencies {
 
     api project(":app-android")
 
-    implementation project(":lib-database")
-    implementation project(":lib-database-runtime")
+    implementation project(":lib-door-runtime")
 
-    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
+    vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
 
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
@@ -149,8 +178,8 @@ dependencies {
 
 
     api fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
-    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.0'
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"

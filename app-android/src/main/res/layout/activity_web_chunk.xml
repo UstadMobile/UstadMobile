@@ -6,7 +6,7 @@
     tools:context="com.ustadmobile.port.android.view.WebChunkActivity"
     android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/activity_webchunk_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

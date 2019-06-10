@@ -1,13 +1,13 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
 @UmEntity
 @Entity
-class ContainerEntryFile {
+class ContainerEntryFile() {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
@@ -23,9 +23,7 @@ class ContainerEntryFile {
 
     var compression: Int = 0
 
-    constructor()
-
-    constructor(md5: String, totalSize: Long, compressedSize: Long, compression: Int) {
+    constructor(md5: String, totalSize: Long, compressedSize: Long, compression: Int) : this() {
         this.cefMd5 = md5
         this.ceTotalSize = totalSize
         this.ceCompressedSize = compressedSize

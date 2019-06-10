@@ -47,7 +47,7 @@
             android:noHistory="true"/>
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -65,10 +65,6 @@
             android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label=""
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.BasePointActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
@@ -93,7 +89,7 @@
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.DummyActivity"
+            android:name="com.ustadmobile.port.android.view.HomeActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label=""
             android:theme="@style/Theme.UstadTheme" />

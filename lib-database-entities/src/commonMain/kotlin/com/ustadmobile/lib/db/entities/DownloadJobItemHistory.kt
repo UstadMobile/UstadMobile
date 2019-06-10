@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 
@@ -12,18 +12,18 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey
  */
 @UmEntity
 @Entity
-class DownloadJobItemHistory {
+class DownloadJobItemHistory() {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
+    var id: Int = 0
 
     var url: String? = null
 
     //Foreign key for the networknode this is connected to
     var networkNode: Long = 0
 
-    var downloadJobItemId: Long = 0
+    var downloadJobItemId: Int = 0
 
     var mode: Int = 0
 
@@ -35,9 +35,7 @@ class DownloadJobItemHistory {
 
     var endTime: Long = 0
 
-    constructor()
-
-    constructor(networkNode: Long, mode: Int, successful: Boolean, startTime: Long, endTime: Long) {
+    constructor(networkNode: Long, mode: Int, successful: Boolean, startTime: Long, endTime: Long) : this() {
         this.networkNode = networkNode
         this.mode = mode
         this.successful = successful
@@ -45,7 +43,7 @@ class DownloadJobItemHistory {
         this.endTime = endTime
     }
 
-    constructor(node: NetworkNode?, item: DownloadJobItem?, mode: Int, startTime: Long) {
+    constructor(node: NetworkNode?, item: DownloadJobItem?, mode: Int, startTime: Long) : this() {
         if (node != null)
             networkNode = node.nodeId
 

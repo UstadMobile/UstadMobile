@@ -6,137 +6,255 @@ import java.util.concurrent.atomic.AtomicInteger
 
 buildscript {
     repositories {
+        mavenCentral()
+        jcenter()
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
-        mavenCentral()
     }
     dependencies {
-        classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
-//Kotlin plugin applied using subprojects DSL on the root project as advised by documentation
-apply plugin: "java-library"
-apply plugin: "jacoco"
+
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
-apply plugin: "de.fuerstenau.buildconfig"
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-jar {
-    //Exclude factory classes that are intended to be replaced by platform specific implementations
-    exclude("com/ustadmobile/core/impl/*Factory.class")
-    exclude("com/ustadmobile/core/db/impl/*Factory.class")
-    exclude("com/ustadmobile/core/db/entities/*.class")
-    exclude("com/ustadmobile/core/db/*_Factory.class")
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation "org.json:json:$version_json"
-    implementation "net.sf.kxml:kxml2:$version_kxml"
-    implementation "com.google.code.gson:gson:$version_gson"
-
-    implementation project(':lib-database')
-    compileOnly project(':lib-database-entities')
-    compileOnly project(':core-compile-only')
-    implementation project(':lib-database-runtime')
-    implementation project(":lib-util")
-
-    testImplementation project(":core-tests")
-    testImplementation project(":sharedse")
-    testImplementation project(":app-javase")
-    testImplementation project(":lib-database-jdbc")
-    testImplementation project(":lib-database-runtime-jdbc")
-    testImplementation project(":lib-database-entities")
-    testImplementation project(":app-rest-server")
-
-    testImplementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    testImplementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-    //Jersey dependencies
-    testImplementation "org.glassfish.jersey.core:jersey-server:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-servlet:$version_jersey"
-    testImplementation "org.glassfish.jersey.core:jersey-client:$version_jersey"
-    testImplementation "org.glassfish.jersey.inject:jersey-hk2:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-json-jackson:$version_jersey"
-    testImplementation "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$version_jersey"
-    testImplementation "org.glassfish.jersey.media:jersey-media-multipart:$version_jersey"
-
-    //JNDI and SQLite dependencies for test database
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-    //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-}
 
 
-test {
-    testLogging {
-        exceptionFormat = 'full'
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+/*
+ * This might be required to be able to run unit tests via the IDE.
+ */
+task dumpEnvProperties {
+    outputs.upToDateWhen {
+        project.file("build/local.env.properties").exists()
+    }
+
+    doFirst {
+        if(!project.file("build").exists())
+            project.file("build").mkdir()
+
+        def outWriter = new FileWriter(project.file("build/local.env.properties"))
+        System.getProperties().store(outWriter, "System properties for use with running unit tests in IDE")
+        outWriter.flush()
+        outWriter.close()
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "compileTestKotlinJvm") {
+        task.dependsOn(dumpEnvProperties)
+    }
+}
+
+kotlin {
+
+
+    targets {
+        fromPreset(presets.jvm, 'jvm') {
+            compilations.main.kotlinOptions {
+                // Setup the Kotlin compiler options for the 'main' compilation:
+                jvmTarget = "$version_kotlin_jvmTarget"
+            }
+
+            compilations.test.kotlinOptions {
+                // Setup the Kotlin compiler options for the 'main' compilation:
+                jvmTarget = "$version_kotlin_jvmTarget"
+            }
+        }
+
+        fromPreset(presets.android, 'android')
+        fromPreset(presets.js, 'js') {
+            compilations.main.kotlinOptions {
+                metaInfo = true
+                sourceMap = true
+                moduleKind = "commonjs"
+                outputFile = "${rootProject.buildDir}/npm/${project.name}/${project.name}.js"
+            }
+        }
+        //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
+        // the project to avoid it being seen as an extra jvm variant
+        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
+    }
+
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "com.soywiz:klock-metadata:$version_klock"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
+                implementation project(':lib-door-runtime')
+                compileOnly project(':lib-database')
+                compileOnly project(':lib-database-entities')
+                compileOnly project(":lib-room-annotations")
+                implementation project(":lib-util")
+            }
+        }
+        commonJvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
+
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.soywiz:klock-jvm:$version_klock"
+            }
+            dependsOn commonJvmMain
+        }
+
+        commonTest {
+            dependencies {
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                /*
+                  For this to work in the IDE, these need to be API instead of implementation
+                 */
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":lib-database-annotations")
+                api project(":lib-database-mpp")
+
+                // 5/June/2019 - Unfortunately, Android Studio won't load these depnendencies
+                // of sharedse when running tests in the IDE, which is why we have them here too.
+
+                //Begin SharedSE Android and JVM dependencies
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+
+                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+                //end SharedSE Android and JVM dependencies
+            }
+        }
+        androidMain {
+            dependencies {
+                implementation "com.github.aakira:napier-android:$version_napier"
+                implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+                implementation "androidx.legacy:legacy-support-v4:$version_androidx_support_lib"
+                implementation "com.soywiz:klock-android:$version_klock"
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation project(":lib-database-android")
+
+            }
+            dependsOn commonJvmMain
+        }
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+                implementation "com.soywiz:klock-js:$version_klock"
+                implementation "com.github.aakira:napier-js:$version_napier"
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+
+
+            }
+        }
+
+    }
+}
+
+
+def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
+Map<String, Map<String,String>> languageMapOfMaps = new HashMap<>()
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
 }
 
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
-if(rootProject.file("buildconfig.local.properties").exists()) {
+if (rootProject.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
-buildConfig {
-    appName = "core"
-
-    sourceSets {
-        test {
-            packageName = "com.ustadmobile.core"
-            clsName = "CoreTestConfig"
-            buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
-            buildConfigField 'String', 'TESTDB_JDBCURL_DB1', rootProject.ext.buildConfigProperties['test.db.db1.url']
-        }
-    }
-}
 /*
  * Generate a class with constant integer flags for each string message ID. See localization docs
  * for further information.
  */
 task prepareLocale {
     inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
-    File outFile = project.file("src/main/java/com/ustadmobile/core/generated/locale/MessageID.kt")
+    File outFile = project.file("src/commonMain/kotlin/com/ustadmobile/core/generated/locale/MessageID.kt")
     outFile.text = ''
     outFile << 'package com.ustadmobile.core.generated.locale\n\n'
     outFile << '/** DO NOT EDIT. GENERATED CODE */\n'
     outFile << 'object MessageID{\n\n'
-    outFile << '    const val  NAME = "' + project.ext.buildConfigProperties['appName'] + '"\n\n'
 
     Map<String, Integer> messageIds = new HashMap<>()
     AtomicInteger messageIdGenerator = new AtomicInteger(2000)
 
-    rootProject.fileTree(dir : "core/locale/main/values", include: "*.xml").each() { File file ->
+    rootProject.fileTree(dir: "core/locale/main/values", include: "*.xml").each() { File file ->
         def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
         xmlDoc.string.each() { str ->
             String msgName = str.@name
 
-            if(!messageIds.containsKey(msgName)) {
+            if (!messageIds.containsKey(msgName)) {
                 Integer value;
-                if(str.attributes().get("value") != null) {
+                if (str.attributes().get("value") != null) {
                     value = new Integer(str.attributes().get("value"))
-                }else {
+                } else {
                     value = new Integer(messageIdGenerator.getAndIncrement())
                 }
 
@@ -147,26 +265,98 @@ task prepareLocale {
 
     Iterator<String> nameIterator = messageIds.keySet().iterator()
 
-    while(nameIterator.hasNext()) {
+    while (nameIterator.hasNext()) {
         String strName = nameIterator.next()
         Integer value = messageIds.get(strName)
-        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) +'\n\n'
+        outFile << '    const val ' + strName + ' = ' + String.valueOf(value) + '\n\n'
     }
     outFile << '}'
 }
-compileJava.dependsOn(prepareLocale)
 
-/*
- * Added to overcome limitation on Android studio as per:
- *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
+/**
+ * Generate locale json file whic maps code to actual string
  */
-task copyTestResources(type: Copy) {
-    from "${projectDir}/src/test/resources"
-    from "${projectDir}/src/main/assets"
-    from "${projectDir}/../core-tests/src/main/resources"
-    into "${buildDir}/classes/test"
+task prepareWebLocale{
+    File outFile = null
+    if(!file(translationsOutPath).exists()){
+        file(translationsOutPath).mkdirs()
+    }
+
+    Map<String, Integer> messageIds = new HashMap<>()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+    def localeCode = "en"
+    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+
+        println(file.getAbsolutePath())
+        Map<String, String> idToTranslationMap = new HashMap<>()
+
+        if(file.absolutePath.split("-").size() > 1){
+            localeCode = file.absolutePath.split("-")[1].split("\\\\")[0]
+        }
+        File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
+        if(tempFile.exists()){
+            tempFile.delete()
+        }
+        outFile = tempFile
+
+        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        def counter = 0
+        def terminator = ","
+        def fileContent = "{\n\n"
+        def value = 0
+        xmlDoc.string.each() { str ->
+            String msgName = str.@name
+            String msgValue = str
+            if (!messageIds.containsKey(msgName)) {
+                if (str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                } else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+                messageIds.put(msgName, value as Integer)
+            }else{
+                value = messageIds.get(msgName)
+            }
+
+            if(counter == xmlDoc.string.size() -1){
+                terminator = ""
+            }
+
+            msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
+            fileContent <<= '    "' + String.valueOf(value) + '" : "'+msgValue+'"'+"${terminator}\n\n"
+
+            idToTranslationMap.put(msgName,msgValue)
+            languageMapOfMaps.put(localeCode, idToTranslationMap)
+
+            counter++
+        }
+
+        fileContent <<=  '}'
+        fileContent <<= ""
+        outFile << fileContent
+    }
+
 }
-processTestResources.dependsOn copyTestResources
+
+/**
+ * Generate default XLF file to be used for other translation
+ */
+task generateDefaultLocaleXlf(type: Exec){
+    def angularModulePath = "${rootDir.absolutePath}/app-angular"
+    commandLine 'npm', '--prefix', angularModulePath, 'run','um-translate'
+}
+generateDefaultLocaleXlf.dependsOn(prepareWebLocale)
+
+/**
+ * Generate the rest of the all supported languages
+ */
+task generateOtherLocaleXlf{
+    rootProject.fileTree(dir: translationsOutPath,include: "*.xlf").each() { File file ->
+       def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        xmlDoc.toString()
+    }
+}
+generateOtherLocaleXlf.dependsOn(generateDefaultLocaleXlf)
 
 
 publishing {
@@ -175,12 +365,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 
@@ -190,13 +374,4 @@ publishing {
         }
     }
 }
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
+

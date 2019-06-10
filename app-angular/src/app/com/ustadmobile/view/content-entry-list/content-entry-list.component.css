@@ -1,0 +1,26 @@
+.entry-title{
+    font-size: 1.3em;
+    font-weight: 460;
+    margin-bottom: 10px !important;
+}
+
+.entry-description{
+    font-weight: 400;
+    font-size: 1em;
+}
+
+.entry-licence{
+    margin-top: 3% !important;
+    font-size: 0.9em;
+    font-weight: 300;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+ }
+
+ .entry-image{
+     margin-left: -44% !important;
+ }
+

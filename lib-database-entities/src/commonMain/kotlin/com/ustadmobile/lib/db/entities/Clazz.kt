@@ -1,9 +1,9 @@
 package com.ustadmobile.lib.db.entities
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.ustadmobile.lib.annotation.SyncablePrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
@@ -12,10 +12,10 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 
 @UmEntity(tableId = TABLE_ID)
 @Entity
-open class Clazz {
+open class Clazz() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @SyncablePrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var clazzUid: Long = 0
 
     var clazzName: String? = null
@@ -33,13 +33,11 @@ open class Clazz {
 
     var clazzLocationUid: Long = 0
 
-    constructor()
-
-    constructor(clazzName: String) {
+    constructor(clazzName: String) : this() {
         this.clazzName = clazzName
     }
 
-    constructor(clazzName: String, clazzLocationUid: Long) {
+    constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
     }

@@ -1,34 +1,30 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
 
 @UmEntity
 @Entity
-class DownloadJobItemParentChildJoin {
+class DownloadJobItemParentChildJoin() {
 
     @UmPrimaryKey(autoIncrement = true)
     @PrimaryKey(autoGenerate = true)
-    var djiPcjUid: Long = 0
+    var djiPcjUid: Int = 0
 
-    var djiParentDjiUid: Long = 0
+    var djiParentDjiUid: Int = 0
 
-    var djiChildDjiUid: Long = 0
+    var djiChildDjiUid: Int = 0
 
     var djiCepcjUid: Long = 0
 
-    constructor() {
-
-    }
-
-    constructor(parentItem: DownloadJobItem, cepcjUid: Long) {
+    constructor(parentItem: DownloadJobItem, cepcjUid: Long) : this() {
         this.djiParentDjiUid = parentItem.djiUid
         this.djiCepcjUid = cepcjUid
     }
 
-    constructor(djiParentDjiUid: Long, djiChildDjiUid: Long, djiCepcjUid: Long) {
+    constructor(djiParentDjiUid: Int, djiChildDjiUid: Int, djiCepcjUid: Long) : this() {
         this.djiParentDjiUid = djiParentDjiUid
         this.djiChildDjiUid = djiChildDjiUid
         this.djiCepcjUid = djiCepcjUid
