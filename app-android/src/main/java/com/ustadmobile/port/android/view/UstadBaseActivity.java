@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.ustadmobile.core.view.Login2View.ARG_LOGIN_USERNAME;
+
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
  * <p>
@@ -89,6 +91,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private String permissionDialogMessage;
 
     private String permission;
+
+    public static final String PREFKEY_LAST_ACTIVE = "prefke.lastactive";
 
 
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
@@ -213,9 +217,14 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     public void updateLastActive(AtomicLong time){
         LastActive.getInstance().setLastActive(time);
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setAppPref(PREFKEY_LAST_ACTIVE,
+                String.valueOf(time.longValue()), getContext());
     }
 
     private void checkTimeout(){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         AtomicLong lastInputEventTime = LastActive.getInstance().getLastActive();
         long lt;
         if(lastInputEventTime == null){
@@ -223,20 +232,35 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }else{
             lt = lastInputEventTime.longValue();
         }
+
+        String lastActiveString = impl.getAppPref(PREFKEY_LAST_ACTIVE, getContext());
+        if(lastActiveString != null && !lastActiveString.isEmpty()) {
+            lt = Long.parseLong(lastActiveString);
+        }else{
+            lt = 0;
+        }
+
         long timeoutExceeded = System.currentTimeMillis() - lt;
         long logoutTimeout = 300000; //TODO: Get and set from app pref
         if(timeoutExceeded > logoutTimeout){
+            //TODO: Fix check
             handleLogout();
-
         }
     }
 
-    public void handleLogout(){
+    private void handleLogout(){
         if(checkLogout) {
+            String currentUsername = null;
+            if(UmAccountManager.getActiveAccount(getContext())!= null){
+                currentUsername = UmAccountManager.getActiveAccount(getContext()).getUsername();
+            }
             finishAffinity();
             UmAccountManager.setActiveAccount(null, getContext());
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             Hashtable<String, String> args = new Hashtable<>();
+            if(currentUsername!=null) {
+                args.put(ARG_LOGIN_USERNAME, currentUsername);
+            }
             impl.go(Login2View.VIEW_NAME, args, getContext());
         }
     }
@@ -274,7 +298,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     }
 
     protected void setUMToolbar(int toolbarID) {
-        umToolbar = (Toolbar) findViewById(toolbarID);
+        umToolbar = findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
     }
@@ -286,11 +310,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
      */
     protected Toolbar getUMToolbar() {
         return umToolbar;
-    }
-
-
-    protected void setBaseController(UstadBaseController baseController) {
-        this.baseController = baseController;
     }
 
 

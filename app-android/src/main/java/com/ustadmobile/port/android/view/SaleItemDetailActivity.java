@@ -10,6 +10,7 @@ import android.arch.paging.PagedList;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -48,7 +49,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     private TextView totalTV;
     private RadioButton saleRB, preOrderRB;
     NumberPicker quantityNP, pppNP;
-    EditText pppNPET;
+    EditText pppNPET, quantityNPET;
     int quantityDefaultValue = 1;
     int pppDefaultValue =0;
     int minValue = 0;
@@ -114,9 +115,14 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         saleRB = findViewById(R.id.activity_sale_item_detail_radiobutton_sold);
         preOrderRB = findViewById(R.id.activity_sale_item_detail_radiobutton_preorder);
         quantityNP = findViewById(R.id.activity_sale_item_detail_quantity_numberpicker);
+        quantityNPET = quantityNP.findViewById(Resources.getSystem().getIdentifier
+                ("numberpicker_input", "id", "android"));
+        quantityNPET.setFocusable(false);
+
         pppNP = findViewById(R.id.activity_sale_payment_detail_amount_np);
         pppNPET = pppNP.findViewById(Resources.getSystem().getIdentifier("numberpicker_input",
                 "id", "android"));
+        pppNPET.setFocusable(false);
 
         preOrderHline = findViewById(R.id.activity_sale_item_detail_preorder_hline);
         orderDueDateTV = findViewById(R.id.activity_sale_item_detail_preorder_due_date_tv);
@@ -125,6 +131,9 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         reminderHline = findViewById(R.id.activity_sale_item_detil_notification_hline);
         addReminderTV = findViewById(R.id.activity_sale_item_detail_add_reminder_tv);
         remindersRV = findViewById(R.id.activity_sale_item_detail_reminder_rv);
+        RecyclerView.LayoutManager pRecyclerLayoutManager =
+                new LinearLayoutManager(getApplicationContext());
+        remindersRV.setLayoutManager(pRecyclerLayoutManager);
 
         //Date
         Calendar myCalendar = Calendar.getInstance();
@@ -275,7 +284,8 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         data.observe(this, recyclerAdapter::submitList);
 
         //set the adapter
-        remindersRV.setAdapter(recyclerAdapter);
+        runOnUiThread(() -> remindersRV.setAdapter(recyclerAdapter));
+
 
     }
 

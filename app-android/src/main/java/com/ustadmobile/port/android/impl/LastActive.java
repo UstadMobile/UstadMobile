@@ -2,8 +2,10 @@ package com.ustadmobile.port.android.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+//A singleton
 public class LastActive {
 
+    //Atomic is thread safe. Can read and write at the same time.
     private AtomicLong lastActive;
     private static final LastActive ourInstance = new LastActive();
 

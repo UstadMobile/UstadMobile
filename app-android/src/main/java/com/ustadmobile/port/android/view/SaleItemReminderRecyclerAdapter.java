@@ -5,10 +5,12 @@ import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleItemDetailPresenter;
@@ -38,6 +40,25 @@ public class SaleItemReminderRecyclerAdapter extends
 
         SaleItemReminder entity = getItem(position);
 
+        TextView title = holder.itemView.findViewById(R.id.item_reminder_days_tv);
+        AppCompatImageView deleteIV = holder.itemView.findViewById(R.id.item_reminder_dots_iv);
+
+        String dayBeforeString = "";
+        if(theActivity != null){
+            if(entity.getSaleItemReminderDays() > 2){
+                dayBeforeString = theActivity.getString(R.string.days_before);
+            }else{
+                dayBeforeString = theActivity.getString(R.string.day_before);
+            }
+        }
+        title.setText(entity.getSaleItemReminderDays() + " " + dayBeforeString);
+
+        deleteIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.handleDeleteReminder(entity.getSaleItemReminderUid());
+            }
+        });
 
     }
 

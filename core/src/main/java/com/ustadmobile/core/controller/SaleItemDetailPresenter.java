@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.lib.db.entities.SaleItem;
@@ -28,6 +29,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
 
     UmAppDatabase repository;
     private SaleItemDao saleItemDao;
+    private SaleItemReminderDao reminderDao;
 
     private SaleItem currentSaleItem, updatedSaleItem;
     private long productUid, producerUid;
@@ -38,7 +40,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
         saleItemDao = repository.getSaleItemDao();
-
+        reminderDao = repository.getSaleItemReminderDao();
     }
 
     @Override
@@ -112,8 +114,9 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
                     });
 
                 //Notification observer
-                SaleItemReminderDao reminderDao = repository.getSaleItemReminderDao();
                 UmProvider<SaleItemReminder> provider = reminderDao.findBySaleItemUid(saleItemUid);
+                //Testing:
+                List<SaleItemReminder> test = reminderDao.findBySaleItemUidList(saleItemUid);
                 view.setReminderProvider(provider);
             }
 
@@ -220,5 +223,9 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
         SaleItemReminderDao reminderDao = repository.getSaleItemReminderDao();
         reminderDao.insertAsync(reminder, null);
 
+    }
+
+    public void handleDeleteReminder(long saleItemReminderUid) {
+        reminderDao.invalidateReminder(saleItemReminderUid, null);
     }
 }

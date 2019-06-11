@@ -11,9 +11,13 @@ import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
 
+import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
+import static com.ustadmobile.core.db.dao.PersonAuthDao.encryptPassword;
+import static com.ustadmobile.core.view.Login2View.ARG_LOGIN_USERNAME;
+
 public class Login2Presenter extends UstadBaseController<Login2View> {
 
-    public static final String ARG_NEXT = "next";
+    static final String ARG_NEXT = "next";
 
     public static final String ARG_SERVER_URL = "apiUrl";
 
@@ -40,6 +44,13 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
             view.setServerUrl(UstadMobileSystemImpl.getInstance().getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", getContext()));
         }
+
+        if(getArguments().containsKey(ARG_LOGIN_USERNAME)){
+            String username = getArguments().get(ARG_LOGIN_USERNAME).toString();
+            if(username!=null && !username.isEmpty()){
+                view.updateUsername(username);
+            }
+        }
     }
 
     public void handleClickLogin(String username, String password, String serverUrl, boolean saveToFingerprint) {
@@ -48,6 +59,9 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
         UmAppDatabase loginRepoDb = UmAppDatabase.getInstance(getContext()).getRepository(serverUrl,
                 "");
         UstadMobileSystemImpl systemImpl = UstadMobileSystemImpl.getInstance();
+        //Update password hash to impl
+        String passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(password);
+
         loginRepoDb.getPersonDao().login(username, password, new UmCallback<UmAccount>() {
             @Override
             public void onSuccess(UmAccount result) {
@@ -60,6 +74,9 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
                         UmAccountManager.setFringerprintAuth(result.getAuth(), context,
                                 systemImpl);
                     }
+
+                    UmAccountManager.updateCredCache(username, result.getPersonUid(),
+                            passwordHash, context, systemImpl);
                     loginOK(result, serverUrl);
 
                 }else {
@@ -75,9 +92,16 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
             @Override
             public void onFailure(Throwable exception) {
                 view.runOnUiThread(() -> {
-                    view.setErrorMessage(systemImpl.getString(
-                            MessageID.login_network_error, getContext()));
-                    view.setInProgress(false);
+                    //Try local login:
+                    if(UmAccountManager.checkCredCache(username, passwordHash, context, systemImpl)){
+                        loginOKFromOtherSource(serverUrl,
+                                UmAccountManager.getCachedPersonUid(context, systemImpl),
+                                username, passwordHash);
+                    }else {
+                        view.setErrorMessage(systemImpl.getString(
+                                MessageID.login_network_error, getContext()));
+                        view.setInProgress(false);
+                    }
                 });
             }
         });
@@ -96,12 +120,18 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
         systemImpl.go(mNextDest, getContext());
     }
 
-    public void fingerprintLogin(String serverUrl, String auth){
+    public void loginOKFromOtherSource(String serverUrl, String auth){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UmAccount result = new UmAccount(
                 Long.parseLong(UmAccountManager.getFingerprintPersonId(context, impl)),
                 UmAccountManager.getFingerprintUsername(context, impl),
                 auth, serverUrl);
+        loginOK(result, serverUrl);
+    }
+
+    private void loginOKFromOtherSource(String serverUrl, Long personUid, String username,
+                                        String auth){
+        UmAccount result = new UmAccount(personUid, username,auth, serverUrl);
         loginOK(result, serverUrl);
     }
 

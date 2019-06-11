@@ -19,6 +19,12 @@ public class UmAccountManager {
 
     private static final String PREFKEY_FINGERPRINT_PERSON_ID = "umaccount.fingerprintpersonid";
 
+    private static final String PREFKEY_PASSWORD_HASH = "umaccount.passwordhash";
+
+    private static final String PREFKEY_PASSWORD_HASH_PERSONUID = "umaccount.passwordhashpersonuid";
+
+    private static final String PREFKEY_PASSWORD_HASH_USERNAME = "umaccount.passwordhashusername";
+
     private static final String PREFKEY_FINGERPRIT_ACCESS_TOKEN = "umaccount.fingerprintaccesstoken";
 
 
@@ -91,6 +97,31 @@ public class UmAccountManager {
             impl.setAppPref(PREFKEY_ACCESS_TOKEN, null, context);
             impl.setAppPref(PREFKEY_ENDPOINT_URL, null, context);
         }
+    }
+
+    public static void updateCredCache(String username, Long personUid, String passwordHash, Object context,
+                                       UstadMobileSystemImpl impl){
+        impl.setAppPref(PREFKEY_PASSWORD_HASH, passwordHash, context);
+        impl.setAppPref(PREFKEY_PASSWORD_HASH_PERSONUID, String.valueOf(personUid), context);
+        impl.setAppPref(PREFKEY_PASSWORD_HASH_USERNAME, username, context);
+    }
+
+    public static boolean checkCredCache(String username, String passwordHash, Object context,
+                                      UstadMobileSystemImpl impl){
+        if(username.equals(impl.getAppPref(PREFKEY_PASSWORD_HASH_USERNAME, context))){
+            if(passwordHash.equals(impl.getAppPref(PREFKEY_PASSWORD_HASH, context))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void updatePasswordHash(String password, Object context, UstadMobileSystemImpl impl){
+        impl.setAppPref(PREFKEY_PASSWORD_HASH, password,context);
+    }
+
+    public static Long getCachedPersonUid(Object context, UstadMobileSystemImpl impl){
+        return Long.parseLong(impl.getAppPref(PREFKEY_PASSWORD_HASH_PERSONUID, context));
     }
 
     public static void setActiveAccount(UmAccount account, Object context) {

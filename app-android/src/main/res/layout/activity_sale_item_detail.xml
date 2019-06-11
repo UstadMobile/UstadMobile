@@ -299,6 +299,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="44dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/add_reminder"
                 android:visibility="invisible"
@@ -309,18 +310,19 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/activity_sale_item_detail_reminder_rv"
                 android:layout_width="0dp"
-                android:visibility="invisible"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="44dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_item_detail_add_reminder_tv">
 
             </android.support.v7.widget.RecyclerView>
+
         </android.support.constraint.ConstraintLayout>
 
     </ScrollView>

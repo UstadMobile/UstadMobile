@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.Manifest;
-import android.accounts.AccountManager;
 import android.app.KeyguardManager;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -12,6 +11,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -89,16 +89,20 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
         setContentView(R.layout.activity_login2);
         setSupportActionBar(findViewById(R.id.um_toolbar));
 
+        mUsernameTextView = findViewById(R.id.activity_login_username);
+        mPasswordTextView = findViewById(R.id.activity_login_password);
+
         mPresenter = new Login2Presenter(this, UMAndroidUtil.bundleToHashtable(
                 getIntent().getExtras()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-        mUsernameTextView = findViewById(R.id.activity_login_username);
-        mPasswordTextView = findViewById(R.id.activity_login_password);
+
+
         mLoginButton = findViewById(R.id.activity_login_button_login);
         mErrorTextView = findViewById(R.id.activity_login_errormessage);
         mProgressBar = findViewById(R.id.progressBar);
         mProgressBar.setIndeterminate(true);
         mProgressBar.setScaleY(3f);
+
         assignToFingerprintCB = findViewById(R.id.activity_login2_assign_fingerprint_checbox);
         assignToFingerprintCB.setOnCheckedChangeListener((buttonView, isChecked) ->
                 assignToFingerprint = isChecked);
@@ -122,11 +126,13 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
             fingerprintManager =
                     (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
+            boolean fpok=false;
             if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
                 //Check whether the device has a fingerprint sensor//
                 fingerprintIV.setVisibility(View.GONE);
                 assignToFingerprintCB.setVisibility(View.GONE);
                 sendToast("Your device doesn't support fingerprint authentication");
+
             }else{
                 if (!fingerprintManager.hasEnrolledFingerprints()) {
                     sendToast("No fingerprint configured. " +
@@ -134,6 +140,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
                 }else {
                     fingerprintIV.setVisibility(View.VISIBLE);
                     assignToFingerprintCB.setVisibility(View.VISIBLE);
+                    fpok=true;
                     //Check that the user has registered at least one fingerprint//
                 }
             }
@@ -145,7 +152,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
             }
 
             //Check that the lock screen is secured//
-            if (!keyguardManager.isKeyguardSecure()) {
+            if (!keyguardManager.isKeyguardSecure() && fpok == true) {
                 sendToast("Please enable lock screen security in your device's Settings");
             } else {
                 try {
@@ -158,22 +165,27 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
                     //If the cipher is initialized successfully, then create a CryptoObject instance//
                     cryptoObject = new FingerprintManager.CryptoObject(cipher);
 
-                    FingerprintAuthenticationHelper helper = new FingerprintAuthenticationHelper(this, this);
+                    FingerprintAuthenticationHelper helper =
+                            new FingerprintAuthenticationHelper(this, this);
                     helper.startAuth(fingerprintManager, cryptoObject);
                 }
             }
         }
     }
 
-    //Create the generateKey method that we’ll use to gain access to the Android keystore and generate the encryption key//
-
+    /**
+     * Create the generateKey method that we’ll use to gain access to the Android
+     *  keystore and generate the encryption key
+     * @throws FingerprintException Exception fingerprint
+     */
     private void generateKey() throws FingerprintException {
         try {
-            // Obtain a reference to the Keystore using the standard Android keystore container identifier (“AndroidKeystore”)//
+            // Obtain a reference to the Keystore
             keyStore = KeyStore.getInstance("AndroidKeyStore");
 
             //Generate the key//
-            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,
+                    "AndroidKeyStore");
 
             //Initialize an empty KeyStore//
             keyStore.load(null);
@@ -181,17 +193,18 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
             //Initialize the KeyGenerator//
             keyGenerator.init(new
 
-                    //Specify the operation(s) this key can be used for//
-                    KeyGenParameterSpec.Builder(KEY_NAME,
-                    KeyProperties.PURPOSE_ENCRYPT |
-                            KeyProperties.PURPOSE_DECRYPT)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                //Specify the operation(s) this key can be used for//
+                KeyGenParameterSpec.Builder(KEY_NAME,
+                KeyProperties.PURPOSE_ENCRYPT |
+                        KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
 
-                    //Configure this key so that the user has to confirm their identity with a fingerprint each time they want to use it//
-                    .setUserAuthenticationRequired(true)
-                    .setEncryptionPaddings(
-                            KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                    .build());
+                //Configure this key so that the user has to confirm their identity with a fingerprint each time they want to use it//
+                .setUserAuthenticationRequired(true)
+                .setEncryptionPaddings(
+                        KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                .build()
+            );
 
             //Generate the key//
             keyGenerator.generateKey();
@@ -210,7 +223,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
     //Create a new method that we’ll use to initialize our cipher//
     public boolean initCipher() {
         try {
-            //Obtain a cipher instance and configure it with the properties required for fingerprint authentication//
+
             cipher = Cipher.getInstance(
                     KeyProperties.KEY_ALGORITHM_AES + "/"
                             + KeyProperties.BLOCK_MODE_CBC + "/"
@@ -235,13 +248,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
                 | UnrecoverableKeyException | IOException
                 | NoSuchAlgorithmException | InvalidKeyException e) {
             return false;
-            //throw new RuntimeException("Failed to init Cipher", e);
         }
-    }
-
-    @Override
-    public void authenticationFailed(String error) {
-
     }
 
     @Override
@@ -250,7 +257,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
         String fpUsername = UmAccountManager.getFingerprintUsername(getContext(), impl);
         String fpAuth = UmAccountManager.getFingerprintAuth(getContext(), impl);
         if(fpUsername!= null && !fpUsername.isEmpty()){
-            mPresenter.fingerprintLogin(mServerUrl, fpAuth);
+            mPresenter.loginOKFromOtherSource(mServerUrl, fpAuth);
         }else{
             sendToast("Login not registered with fingerprint.");
         }
@@ -258,7 +265,12 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
 
     @Override
     public void authenticationSuccess(FingerprintManager.AuthenticationResult result, UmAccount account) {
-        //Remove me
+        //Does nothing.
+    }
+
+    @Override
+    public void authenticationFailed(String error) {
+        //Does nothing.
     }
 
     private class FingerprintException extends Exception {
@@ -284,11 +296,6 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
     @Override
     public void setServerUrl(String serverUrl) {
         this.mServerUrl = serverUrl;
-    }
-
-    @Override
-    public void setUsername(String username) {
-        mUsernameTextView.setText(username);
     }
 
     @Override
@@ -324,5 +331,16 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
     public void updateLastActive() {
         AtomicLong systemTime = new AtomicLong(System.currentTimeMillis());
         updateLastActive(systemTime);
+    }
+
+    @Override
+    public void updateUsername(String username) {
+        mUsernameTextView.setText(username);
+        mUsernameTextView.setFocusable(false);
+        mPasswordTextView.setFocusable(true);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        //mPasswordTextView.setInputType(InputType.TYPE_CLASS_NUMBER);
     }
 }

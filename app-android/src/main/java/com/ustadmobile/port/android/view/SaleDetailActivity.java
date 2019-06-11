@@ -359,7 +359,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         pRecyclerView.setLayoutManager(pRecyclerLayoutManager);
 
 
-
         locationSpinner = findViewById(R.id.activity_sale_detail_location_spinner);
         discountET = findViewById(R.id.activity_sale_detail_discount);
         discountET.setText("0");
@@ -627,6 +626,17 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+    }
+
+    @Override
     public void updateSaleOnView(Sale sale) {
         runOnUiThread(() -> {
             if(sale != null){
@@ -653,6 +663,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                             adjustedPic = rotatePicture(0f , signPic);
                         }
                         PictureDrawable  pd = new PictureDrawable(adjustedPic);
+
                         runOnUiThread(() -> signatureIB.setBackground(pd));
 
 
@@ -664,6 +675,37 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         });
 
     }
+
+//    public static PictureDrawable crop(PictureDrawable image) {
+//        int minY = 0, maxY = 0, minX = Integer.MAX_VALUE, maxX = 0;
+//        boolean isBlank, minYIsDefined = false;
+//
+//        for (int y = 0; y < image.getHeight(); y++) {
+//            isBlank = true;
+//
+//            for (int x = 0; x < image.getWidth(); x++) {
+//                //Change condition to (raster.getSample(x, y, 3) != 0)
+//                //for better performance
+//                if (raster.getPixel(x, y, (int[]) null)[3] != 0) {
+//                    isBlank = false;
+//
+//                    if (x < minX) minX = x;
+//                    if (x > maxX) maxX = x;
+//                }
+//            }
+//
+//            if (!isBlank) {
+//                if (!minYIsDefined) {
+//                    minY = y;
+//                    minYIsDefined = true;
+//                } else {
+//                    if (y > maxY) maxY = y;
+//                }
+//            }
+//        }
+//
+//        return image.getSubimage(minX, minY, maxX - minX + 1, maxY - minY + 1);
+//    }
 
     public Picture rotatePicture(float degrees, Picture picture) {
         int width = picture.getWidth();

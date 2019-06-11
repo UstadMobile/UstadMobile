@@ -124,6 +124,7 @@ public class BasePoint2Presenter extends UstadBaseController<BasePoint2View> {
     public void handleLogOut(){
         UmAccountManager.setActiveAccount(null, context);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.getInstance());
         Hashtable args = new Hashtable();
         impl.go(Login2View.VIEW_NAME, args, context);
     }

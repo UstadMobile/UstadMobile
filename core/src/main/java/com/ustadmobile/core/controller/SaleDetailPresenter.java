@@ -276,24 +276,28 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
 
 
-    public void startObservingLocations(){
+    private void startObservingLocations(){
         locationLiveData = locationDao.findAllActiveLocationsLive();
         locationLiveData.observe(SaleDetailPresenter.this,
                 SaleDetailPresenter.this::handleLocationsChanged);
     }
 
-    public void handleSaleChanged(Sale sale){
+    private void handleSaleChanged(Sale sale){
         //set the og person value
         if(currentSale == null)
             currentSale = sale;
 
         if(updatedSale == null || !updatedSale.equals(sale)) {
             if(sale!=null) {
-                view.updateSaleOnView(updatedSale);
                 updatedSale = sale;
+                view.updateSaleOnView(updatedSale);
             }
         }
 
+    }
+
+    public void refreshSaleOnView(){
+        view.updateSaleOnView(updatedSale);
     }
 
     public void handleLocationsChanged(List<Location> changedLocations){

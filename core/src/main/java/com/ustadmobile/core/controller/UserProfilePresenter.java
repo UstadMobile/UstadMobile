@@ -105,6 +105,7 @@ public class UserProfilePresenter extends UstadBaseController<UserProfileView> {
 
     public void handleClickLogout(){
         UmAccountManager.setActiveAccount(null, context);
+        UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.getInstance());
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, String> args = new Hashtable<>();
         impl.go(Login2View.VIEW_NAME, args, context);
