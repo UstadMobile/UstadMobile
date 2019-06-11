@@ -147,6 +147,7 @@ kotlin {
                 implementation project(":lib-test-util")
 
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "com.soywiz:klock-metadata:$version_klock"
             }
         }
 
@@ -157,6 +158,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.soywiz:klock-jvm:$version_klock"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -167,6 +169,7 @@ kotlin {
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")
                 api project(":lib-database-mpp")
+
             }
 
         }
