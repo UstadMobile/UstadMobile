@@ -288,11 +288,10 @@ task prepareWebLocale{
     def localeCode = "en"
     rootProject.fileTree(dir: "core/locale/main").each() { File file ->
 
-        println(file.getAbsolutePath())
         Map<String, String> idToTranslationMap = new HashMap<>()
 
         if(file.absolutePath.split("-").size() > 1){
-            localeCode = file.absolutePath.split("-")[1].split("\\\\")[0]
+            localeCode = file.absolutePath.split("-")[1].split(File.separator)[0]
         }
         File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
         if(tempFile.exists()){
