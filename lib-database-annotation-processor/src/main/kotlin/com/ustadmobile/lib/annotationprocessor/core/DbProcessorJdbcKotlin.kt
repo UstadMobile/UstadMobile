@@ -758,19 +758,25 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 }
             }
 
+            val statementClause = if(upsertMode) {
+                "\${when(_db.jdbcDbType) { DoorDbType.SQLITE -> \"INSERT·OR·REPLACE\" else -> \"INSERT\"} }"
+            }else {
+                "INSERT"
+            }
+
             val upsertSuffix = if(upsertMode) {
                 val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
                 val nonPkFieldPairs = nonPkFields.map { "${it.simpleName}·=·excluded.${it.simpleName}" }
                 val pkField = entityTypeEl.enclosedElements.firstOrNull { it.getAnnotation(PrimaryKey::class.java) != null }
                 "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.simpleName})·" +
                         "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
-                        "else -> \"·ON CONFLICT REPLACE\" } } "
+                        "else -> \"·\" } } "
             } else {
                 ""
             }
 
             val sql = """
-                INSERT INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
+                $statementClause INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
                 VALUES (${parameterHolders.joinToString()})
                 $upsertSuffix
                 """.trimIndent()
