@@ -58,10 +58,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     protected lateinit var umToolbar: Toolbar
 
     /**
-     * Currently running instance of NetworkManagerBle
+     * Currently running instance of NetworkManagerBleCommon
      */
     /**
-     * @return Active NetworkManagerBle
+     * @return Active NetworkManagerBleCommon
      */
      var networkManagerBle: NetworkManagerBle? = null
 
@@ -435,7 +435,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
     /**
-     * Make sure NetworkManagerBle is not null when running a certain logic
+     * Make sure NetworkManagerBleCommon is not null when running a certain logic
      *
      * @param runnable Future task to be executed
      */

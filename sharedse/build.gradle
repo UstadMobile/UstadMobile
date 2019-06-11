@@ -6,19 +6,25 @@ buildscript {
         }
 
         mavenCentral()
+        maven {
+            url "https://kotlin.bintray.com/kotlinx"
+        }
     }
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+        classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$version_atomicfu"
     }
 }
 
 apply plugin: "kotlin-multiplatform"
+apply plugin: "kotlinx-atomicfu"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
+
 
 
 repositories {
@@ -68,6 +74,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
 
 
@@ -96,6 +103,7 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
 
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
 
 
 
@@ -123,6 +131,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
 
                 //Begin Android and JVM dependencies
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
@@ -157,6 +166,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

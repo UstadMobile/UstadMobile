@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
+import com.ustadmobile.sharedse.network.BleMessage
 import java.util.*
 
 /**

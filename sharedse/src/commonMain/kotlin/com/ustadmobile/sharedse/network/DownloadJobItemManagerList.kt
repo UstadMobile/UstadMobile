@@ -1,32 +1,30 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.sharedse.network.DownloadJobItemManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.newSingleThreadContext
-import java.util.concurrent.atomic.AtomicInteger
+import com.ustadmobile.lib.util.copyOnWriteListOf
+import kotlinx.coroutines.CoroutineDispatcher
 
 /**
  * Manages a list of DownloadJobItemManagers. Creates new items, closes downloadjobs that have finished etc.
  */
-class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : DownloadJobItemStatusProvider {
+class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
+                                 private val coroutineDispatchCreator: (String) -> CoroutineDispatcher) : DownloadJobItemStatusProvider {
 
 
     private val managerMap = mutableMapOf<Int, DownloadJobItemManager>()
 
-    private val changeListeners = mutableListOf<OnDownloadJobItemChangeListener>()
+    private val changeListeners = copyOnWriteListOf<OnDownloadJobItemChangeListener>()
 
     fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
         newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
         //TODO: fix this
         val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
-                newSingleThreadContext("DownloadJob-${newDownloadJob.djUid}"))
+                coroutineDispatchCreator("DownloadJob-${newDownloadJob.djUid}"))
         manager.onDownloadJobItemChangeListener = this::onDownloadJobItemChange
         managerMap[newDownloadJob.djUid] = manager
 
@@ -42,57 +40,31 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase) : Downl
     }
 
 
-    override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long, callback: UmResultCallback<DownloadJobItemStatus?>){
-        if (managerMap.isEmpty()) {
-            callback.onDone(null)
-            return
+    override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long)  : DownloadJobItemStatus?{
+        managerMap.values.forEach {
+            val status = it.findStatusByContentEntryUid(contentEntryUid)
+            if(status != null)
+                return status
         }
 
-        val managerListToCheck = managerMap.values.toList()
-        val checksLeft = AtomicInteger(managerListToCheck.size)
-
-        for (manager in managerListToCheck) {
-//            TODO: reenable this
-//            manager.findStatusByContentEntryUid(contentEntryUid, object : UmResultCallback<DownloadJobItemStatus> {
-//                override fun onDone(result: DownloadJobItemStatus?) {
-//                    if (result != null) {
-//                        callback.onDone(result)
-//                        checksLeft.set(-1)
-//                    } else if (checksLeft.decrementAndGet() == 0) {
-//                        callback.onDone(null)
-//                    }
-//                }
-//            })
-        }
+        return null
     }
 
     override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
-        synchronized(changeListeners) {
-            changeListeners.add(listener)
-        }
+        changeListeners.add(listener)
     }
 
     override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
-        synchronized(changeListeners) {
-            changeListeners.remove(listener)
-        }
+        changeListeners.remove(listener)
     }
 
     fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-        var listenersToNotify: List<OnDownloadJobItemChangeListener>
-        synchronized(changeListeners) {
-            listenersToNotify = changeListeners.toList()
-        }
+        changeListeners.forEach { it.onDownloadJobItemChange(status, downloadJobUid) }
 
-        for (listener in listenersToNotify) {
-            listener.onDownloadJobItemChange(status, downloadJobUid)
-        }
-
+        //if the root item has finished, it no longer needs tracking
         if (status != null && status.status >= JobStatus.COMPLETE_MIN &&
                 managerMap.get(downloadJobUid)?.rootContentEntryUid == status.contentEntryUid) {
-            synchronized(managerMap) {
-                managerMap.remove(downloadJobUid)
-            }
+            managerMap.remove(downloadJobUid)
         }
     }
 

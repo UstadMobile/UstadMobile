@@ -1,4 +1,6 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
+
+import kotlinx.coroutines.Runnable
 
 /**
  * Abstract class which used to implement platform specific job delete task

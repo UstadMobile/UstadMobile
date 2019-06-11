@@ -3,10 +3,13 @@ package com.ustadmobile.port.sharedse.networkmanager
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_REQUEST
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_RESPONSE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
+import com.ustadmobile.sharedse.network.BleMessage
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
+import com.ustadmobile.sharedse.network.WiFiDirectGroupBle
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -27,7 +30,7 @@ import java.util.concurrent.TimeUnit
  */
 abstract class BleGattServer {
 
-    private var networkManager: NetworkManagerBle? = null
+    private var networkManager: NetworkManagerBleCommon? = null
 
     private var context: Any? = null
 
@@ -36,10 +39,10 @@ abstract class BleGattServer {
     }
 
     /**
-     * Set NetworkManagerBle instance
-     * @param networkManager Instance of NetworkManagerBle
+     * Set NetworkManagerBleCommon instance
+     * @param networkManager Instance of NetworkManagerBleCommon
      */
-    fun setNetworkManager(networkManager: NetworkManagerBle) {
+    fun setNetworkManager(networkManager: NetworkManagerBleCommon) {
         this.networkManager = networkManager
     }
 
@@ -81,8 +84,10 @@ abstract class BleGattServer {
             }
 
             WIFI_GROUP_REQUEST -> {
-                val group = networkManager!!.awaitWifiDirectGroupReady(5000,
-                        TimeUnit.MILLISECONDS)
+//                val group = networkManager!!.awaitWifiDirectGroupReady(5000,
+//                        TimeUnit.MILLISECONDS)
+                //TODO: implement this
+                val group = WiFiDirectGroupBle(ssid = "fix", passphrase = "me")
                 return BleMessage(WIFI_GROUP_CREATION_RESPONSE, 42.toByte(),
                         networkManager!!.getWifiGroupInfoAsBytes(group))
             }

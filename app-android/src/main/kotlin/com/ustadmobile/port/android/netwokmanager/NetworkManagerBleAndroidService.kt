@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Wrapper class for NetworkManagerBle. A service is required as this encapsulates
+ * Wrapper class for NetworkManagerBleCommon. A service is required as this encapsulates
  * peer discovery processes and the http server that should continue running
  * regardless of which activity is active.
  *
@@ -68,7 +68,7 @@ class NetworkManagerBleAndroidService : Service() {
     }
 
     /**
-     * @return Running instance of the NetworkManagerBle
+     * @return Running instance of the NetworkManagerBleCommon
      */
     val networkManagerBle: NetworkManagerAndroidBle?
         get() = managerAndroidBleRef.get()

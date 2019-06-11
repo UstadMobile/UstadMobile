@@ -17,8 +17,7 @@ interface DownloadJobItemStatusProvider {
      * @param callback Callback that will receive the status. The callback value will be null if the
      * given contententry is not part of any active download job.
      */
-    fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long,
-                                                   callback: UmResultCallback<DownloadJobItemStatus?>)
+    suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long) : DownloadJobItemStatus?
 
     /**
      * Add a listener to receive events when downloadstatus changes.

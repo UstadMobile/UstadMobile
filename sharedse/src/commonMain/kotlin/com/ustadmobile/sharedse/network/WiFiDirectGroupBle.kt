@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
 /**
  * Class which defines WiFi Direct group in a cross platform way.

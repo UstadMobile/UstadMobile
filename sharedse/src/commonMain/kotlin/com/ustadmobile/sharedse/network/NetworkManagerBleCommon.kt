@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -11,18 +11,24 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
-import com.ustadmobile.sharedse.network.DownloadJobItemManager
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+//import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+//import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.*
-import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
+import kotlinx.io.ByteArrayInputStream
+import kotlinx.io.ByteArrayOutputStream
+
+//import java.io.*
+//import java.util.*
+//import java.util.concurrent.Executors
+//import java.util.concurrent.RejectedExecutionException
+//import java.util.concurrent.TimeUnit
+//import java.util.concurrent.atomic.AtomicInteger
+//import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -30,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference
  * @author kileha3
  */
 
-abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.OnQueueEmptyListener,
+abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWorkQueue.OnQueueEmptyListener*/
         /*DownloadJobItemManager.OnDownloadJobItemChangeListener,*/
         DownloadJobItemStatusProvider {
 
@@ -40,78 +46,72 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
 
     private var isStopMonitoring = false
 
-    private val entryStatusTaskExecutorService = Executors.newFixedThreadPool(5)
+    //private val entryStatusTaskExecutorService = Executors.newFixedThreadPool(5)
 
-    private val availabilityMonitoringRequests = HashMap<Any, List<Long>>()
+    private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
 
-    protected var knownBadNodeTrackList = HashMap<String, AtomicInteger>()
+    protected var knownBadNodeTrackList = mutableMapOf<String, AtomicInt>()
 
-    /**
-     * @return Active URLConnectionOpener
-     */
-    var localConnectionOpener: URLConnectionOpener? = null
-        protected set
+//    /**
+//     * @return Active URLConnectionOpener
+//     */
+//    var localConnectionOpener: URLConnectionOpener? = null
+//        protected set
 
     /**
      * Holds all created entry status tasks
      */
-    private val entryStatusTasks = Vector<BleEntryStatusTask>()
+    private val entryStatusTasks = mutableListOf<BleEntryStatusTask>()
 
-    /**
-     * Lis of all objects that will be listening for the Wifi direct group change
-     */
-    private val wiFiDirectGroupListeners = Vector<WiFiDirectGroupListenerBle>()
 
-    private var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>? = null
+    //private var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>? = null
 
-    private val entryStatusResponses = Hashtable<Long, MutableList<EntryStatusResponse>>()
+    private val entryStatusResponses = mutableMapOf<Long, MutableList<EntryStatusResponse>>()
 
-    private val locallyAvailableContainerUids = HashSet<Long>()
+    private val locallyAvailableContainerUids = mutableSetOf<Long>()
 
-    protected var connectivityStatusRef = AtomicReference<ConnectivityStatus>()
+    //protected var connectivityStatusRef = atomic(null as ConnectivityStatus?)
 
-    protected var wifiLockHolders: MutableList<Any> = Vector()
+    protected var wifiLockHolders = mutableListOf<Any>()
 
-    private val knownPeerNodes = HashMap<String, Long>()
+    private val knownPeerNodes = mutableMapOf<String, Long>()
 
-    private val scheduledExecutorService = Executors.newScheduledThreadPool(3)
+    //private val scheduledExecutorService = Executors.newScheduledThreadPool(3)
 
-    private var umAppDatabase: UmAppDatabase? = null
+    private lateinit var umAppDatabase: UmAppDatabase
 
-    private val localAvailabilityListeners = Vector<LocalAvailabilityListener>()
+    private val localAvailabilityListeners = mutableListOf<LocalAvailabilityListener>()
 
     //private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
 
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
-    @Deprecated("")
-    private val downloadJobItemChangeListeners = LinkedList<OnDownloadJobItemChangeListener>()
 
-    private val mJobItemAdapter = object : LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem> {
-        override fun makeRunnable(item: DownloadJobItem): Runnable {
-            return DownloadJobItemRunner(mContext!!, item, this@NetworkManagerBle,
-                    umAppDatabase!!, UmAccountManager.getRepositoryForActiveAccount(mContext!!),
-                    UmAccountManager.getActiveEndpoint(mContext!!)!!,
-                    connectivityStatusRef.get())
-        }
+//    private val mJobItemAdapter = object : LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem> {
+//        override fun makeRunnable(item: DownloadJobItem): Runnable {
+//            return DownloadJobItemRunner(mContext!!, item, this@NetworkManagerBleCommon,
+//                    umAppDatabase!!, UmAccountManager.getRepositoryForActiveAccount(mContext!!),
+//                    UmAccountManager.getActiveEndpoint(mContext!!)!!,
+//                    connectivityStatusRef.get())
+//        }
+//
+//        override fun getUid(item: DownloadJobItem): Long {
+//            return item.djiUid.hashCode().toLong() shl 32 or item.numAttempts.toLong()
+//        }
+//    }
 
-        override fun getUid(item: DownloadJobItem): Long {
-            return item.djiUid.hashCode().toLong() shl 32 or item.numAttempts.toLong()
-        }
-    }
-
-    private val nodeLastSeenTrackerTask = Runnable {
-        if (knownPeerNodes.size > 0) {
-            val nodeMap = HashMap(knownPeerNodes)
-            GlobalScope.launch {
-                umAppDatabase!!.networkNodeDao.updateNodeLastSeen(nodeMap)
-                UMLog.l(UMLog.DEBUG, 694, "Updating "
-                        + knownPeerNodes.size + " nodes from the Db")
-            }
-
-
-        }
-    }
+//    private val nodeLastSeenTrackerTask = Runnable {
+//        if (knownPeerNodes.size > 0) {
+//            val nodeMap = HashMap(knownPeerNodes)
+//            GlobalScope.launch {
+//                umAppDatabase!!.networkNodeDao.updateNodeLastSeen(nodeMap)
+//                UMLog.l(UMLog.DEBUG, 694, "Updating "
+//                        + knownPeerNodes.size + " nodes from the Db")
+//            }
+//
+//
+//        }
+//    }
 
     /**
      * Check if WiFi is enabled / disabled on the device
@@ -136,19 +136,21 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      * Get all unique entry UUID's to be monitored
      * @return Set of all unique UUID's
      */
-    private val allUidsToBeMonitored: SortedSet<Long>
-        get() {
-            val uidsToBeMonitoredSet = TreeSet<Long>()
-            for (uidList in availabilityMonitoringRequests.values) {
-                uidsToBeMonitoredSet.addAll(uidList)
-            }
-            return uidsToBeMonitoredSet
-        }
+    private val allUidsToBeMonitored: Set<Long>
+        get() = availabilityMonitoringRequests.flatMap { it.value }.toSet()
+
+//        {
+//            val uidsToBeMonitoredSet = TreeSet<Long>()
+//            for (uidList in availabilityMonitoringRequests.values) {
+//                uidsToBeMonitoredSet.addAll(uidList)
+//            }
+//            return uidsToBeMonitoredSet
+//        }
 
     /**
      * @return Active RouterNanoHTTPD
      */
-    abstract val httpd: EmbeddedHTTPD
+    //abstract val httpd: EmbeddedHTTPD
 
     abstract val isVersionLollipopOrAbove: Boolean
 
@@ -194,17 +196,17 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      */
     open fun onCreate() {
         umAppDatabase = UmAppDatabase.getInstance(mContext!!)
-        jobItemManagerList = DownloadJobItemManagerList(umAppDatabase!!)
-        downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)
-        downloadJobItemWorkQueue!!.adapter = mJobItemAdapter
-        downloadJobItemWorkQueue!!.start(umAppDatabase!!.downloadJobItemDao.findNextDownloadJobItems())
-        scheduledExecutorService.scheduleAtFixedRate(nodeLastSeenTrackerTask, 0, 10, TimeUnit.SECONDS)
+//        jobItemManagerList = DownloadJobItemManagerList(umAppDatabase!!)
+//        downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)
+//        downloadJobItemWorkQueue!!.adapter = mJobItemAdapter
+//        downloadJobItemWorkQueue!!.start(umAppDatabase!!.downloadJobItemDao.findNextDownloadJobItems())
+//        scheduledExecutorService.scheduleAtFixedRate(nodeLastSeenTrackerTask, 0, 10, TimeUnit.SECONDS)
     }
 
-    override fun onQueueEmpty() {
-        if (connectivityStatusRef.get() != null && connectivityStatusRef.get().connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
-            Thread(Runnable { this.restoreWifi() }).start()
-        }
+    /*override */fun onQueueEmpty() {
+//        if (connectivityStatusRef.get() != null && connectivityStatusRef.get().connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
+//            Thread(Runnable { this.restoreWifi() }).start()
+//        }
     }
 
     /**
@@ -225,37 +227,37 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
 
             if (!knownPeerNodes.containsKey(node.bluetoothMacAddress)) {
 
-                node.lastUpdateTimeStamp = System.currentTimeMillis()
+                node.lastUpdateTimeStamp = getSystemTimeInMillis()
 
-                GlobalScope.launch {
-                    val result = networkNodeDao.updateLastSeenAsync(node.bluetoothMacAddress!!,
-                            node.lastUpdateTimeStamp)
-                    knownPeerNodes[node.bluetoothMacAddress!!] = node.lastUpdateTimeStamp
-                    if (result == 0) {
-                        networkNodeDao.insertAsync(node)
-                        UMLog.l(UMLog.DEBUG, 694, "New node with address "
-                                + node.bluetoothMacAddress + " found, added to the Db")
-
-                        val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
-
-                        if (!isStopMonitoring) {
-                            if (entryUidsToMonitor.size > 0) {
-                                val entryStatusTask = makeEntryStatusTask(mContext, entryUidsToMonitor, node)
-                                entryStatusTasks.add(entryStatusTask)
-                                entryStatusTaskExecutorService.execute(entryStatusTask)
-                            }
-                        }
-                    }
-
-
-                }
+//                GlobalScope.launch {
+//                    val result = networkNodeDao.updateLastSeenAsync(node.bluetoothMacAddress!!,
+//                            node.lastUpdateTimeStamp)
+//                    knownPeerNodes[node.bluetoothMacAddress!!] = node.lastUpdateTimeStamp
+//                    if (result == 0) {
+//                        networkNodeDao.insertAsync(node)
+//                        UMLog.l(UMLog.DEBUG, 694, "New node with address "
+//                                + node.bluetoothMacAddress + " found, added to the Db")
+//
+//                        val entryUidsToMonitor = ArrayList(allUidsToBeMonitored)
+//
+//                        if (!isStopMonitoring) {
+//                            if (entryUidsToMonitor.size > 0) {
+//                                val entryStatusTask = makeEntryStatusTask(mContext, entryUidsToMonitor, node)
+//                                entryStatusTasks.add(entryStatusTask)
+//                                entryStatusTaskExecutorService.execute(entryStatusTask)
+//                            }
+//                        }
+//                    }
+//
+//
+//                }
             } else {
-                knownPeerNodes.put(node.bluetoothMacAddress!!, System.currentTimeMillis())
+                knownPeerNodes.put(node.bluetoothMacAddress!!, getSystemTimeInMillis())
             }
         }
     }
 
-    abstract fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle
+    //abstract fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle
 
     /**
      * Open bluetooth setting section from setting panel
@@ -286,7 +288,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
             val networkNodeDao = UmAppDatabase.getInstance(mContext!!).networkNodeDao
             val responseDao = UmAppDatabase.getInstance(mContext!!).entryStatusResponseDao
 
-            val lastUpdateTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1)
+            val lastUpdateTime = getSystemTimeInMillis() - (60 * 1000)
 
             val uniqueEntryUidsToMonitor = ArrayList(allUidsToBeMonitored)
             val knownNetworkNodes = getAllKnownNetworkNodeIds(networkNodeDao.findAllActiveNodes(lastUpdateTime, 1))
@@ -297,7 +299,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
 
             val entryWithoutRecentResponses = responseDao.findEntriesWithoutRecentResponse(
                     uniqueEntryUidsToMonitor, knownNetworkNodes,
-                    System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2))
+                    getSystemTimeInMillis() - (2 * 60 * 1000))
 
             //Group entryUUid by node where their status will be checked from
             val nodeToCheckEntryList = LinkedHashMap<Int, MutableList<Long>>()
@@ -320,14 +322,14 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
                 val networkNode = networkNodeDao.findNodeById(nodeId.toLong())
                 val entryStatusTask = makeEntryStatusTask(mContext,
                         nodeToCheckEntryList[nodeId]!!, networkNode)
-                entryStatusTasks.add(entryStatusTask)
-                entryStatusTaskExecutorService.execute(entryStatusTask)
+                entryStatusTasks.add(entryStatusTask!!)
+                //entryStatusTaskExecutorService.execute(entryStatusTask)
                 UMLog.l(UMLog.DEBUG, 694,
                         "Status check started for " + nodeToCheckEntryList[nodeId]!!.size
                                 + " entry(s) task from " + networkNode!!.bluetoothMacAddress)
             }
-        } catch (e: RejectedExecutionException) {
-            e.printStackTrace()
+        } catch (e: Exception) {
+            //e.printStackTrace()
         }
 
     }
@@ -512,35 +514,35 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      */
     fun handleNodeConnectionHistory(bluetoothAddress: String, success: Boolean) {
 
-        var record: AtomicInteger? = knownBadNodeTrackList[bluetoothAddress]
-
-        if (record == null || success) {
-            record = AtomicInteger(0)
-            knownBadNodeTrackList[bluetoothAddress] = record
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Connection succeeded bad node counter was set to " + record.get()
-                            + " for " + bluetoothAddress)
-        }
-
-        if (!success) {
-            record.set(record.incrementAndGet())
-            knownBadNodeTrackList[bluetoothAddress] = record
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Connection failed and bad node counter set to " + record.get()
-                            + " for " + bluetoothAddress)
-        }
-
-        if (knownBadNodeTrackList[bluetoothAddress]!!.get() > 5) {
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Bad node counter exceeded threshold (5), removing node with address "
-                            + bluetoothAddress + " from the list")
-            knownBadNodeTrackList.remove(bluetoothAddress)
-            knownPeerNodes.remove(bluetoothAddress)
-            umAppDatabase!!.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
-
-            UMLog.l(UMLog.DEBUG, 694, "Node with address "
-                    + bluetoothAddress + " removed from the list")
-        }
+//        var record: AtomicInteger? = knownBadNodeTrackList[bluetoothAddress]
+//
+//        if (record == null || success) {
+//            record = AtomicInteger(0)
+//            knownBadNodeTrackList[bluetoothAddress] = record
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Connection succeeded bad node counter was set to " + record.get()
+//                            + " for " + bluetoothAddress)
+//        }
+//
+//        if (!success) {
+//            record.set(record.incrementAndGet())
+//            knownBadNodeTrackList[bluetoothAddress] = record
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Connection failed and bad node counter set to " + record.get()
+//                            + " for " + bluetoothAddress)
+//        }
+//
+//        if (knownBadNodeTrackList[bluetoothAddress]!!.get() > 5) {
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Bad node counter exceeded threshold (5), removing node with address "
+//                            + bluetoothAddress + " from the list")
+//            knownBadNodeTrackList.remove(bluetoothAddress)
+//            knownPeerNodes.remove(bluetoothAddress)
+//            umAppDatabase!!.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
+//
+//            UMLog.l(UMLog.DEBUG, 694, "Node with address "
+//                    + bluetoothAddress + " removed from the list")
+//        }
     }
 
     /**
@@ -548,7 +550,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      * @param bluetoothAddress node bluetooth address
      * @return bad node
      */
-    fun getBadNodeTracker(bluetoothAddress: String): AtomicInteger? {
+    fun getBadNodeTracker(bluetoothAddress: String): AtomicInt? {
         return knownBadNodeTrackList[bluetoothAddress]
     }
 
@@ -566,8 +568,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      */
     open fun onDestroy() {
         //downloadJobItemWorkQueue.shutdown();
-        wiFiDirectGroupListeners.clear()
-        entryStatusTaskExecutorService.shutdown()
+        //entryStatusTaskExecutorService.shutdown()
     }
 
     /**
@@ -579,7 +580,8 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         var result = 0
         val ipAddressInArray = address.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         for (i in 3 downTo 0) {
-            val ip = Integer.parseInt(ipAddressInArray[3 - i])
+            //val ip = Integer.parseInt(ipAddressInArray[3 - i])
+            val ip = ipAddressInArray[3 - i].toInt()
             result = result or (ip shl i * 8)
         }
         return result
@@ -605,19 +607,19 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
     fun getWifiGroupInfoAsBytes(group: WiFiDirectGroupBle): ByteArray {
         val bos = ByteArrayOutputStream()
         var infoAsbytes = byteArrayOf()
-        val outputStream = DataOutputStream(bos)
-        try {
-            outputStream.writeUTF(group.ssid)
-            outputStream.writeUTF(group.passphrase)
-            outputStream.writeInt(convertIpAddressToInteger(group.ipAddress!!))
-            outputStream.writeChar((group.port + 'a'.toInt()).toChar().toInt())
-            infoAsbytes = bos.toByteArray()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            UMIOUtils.closeOutputStream(outputStream)
-            UMIOUtils.closeOutputStream(bos)
-        }
+//        val outputStream = DataOutputStream(bos)
+//        try {
+//            outputStream.writeUTF(group.ssid)
+//            outputStream.writeUTF(group.passphrase)
+//            outputStream.writeInt(convertIpAddressToInteger(group.ipAddress!!))
+//            outputStream.writeChar((group.port + 'a'.toInt()).toChar().toInt())
+//            infoAsbytes = bos.toByteArray()
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//        } finally {
+//            UMIOUtils.closeOutputStream(outputStream)
+//            UMIOUtils.closeOutputStream(bos)
+//        }
         return infoAsbytes
     }
 
@@ -629,17 +631,17 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
      */
     fun getWifiGroupInfoFromBytes(payload: ByteArray): WiFiDirectGroupBle {
         val inputStream = ByteArrayInputStream(payload)
-        val dataInputStream = DataInputStream(inputStream)
+        //val dataInputStream = DataInputStream(inputStream)
         var groupBle: WiFiDirectGroupBle? = null
         try {
-            groupBle = WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF())
-            groupBle.ipAddress = convertIpAddressToString(dataInputStream.readInt())
-            groupBle.port = dataInputStream.readChar() - 'a'
-        } catch (e: IOException) {
-            e.printStackTrace()
+//            groupBle = WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF())
+//            groupBle.ipAddress = convertIpAddressToString(dataInputStream.readInt())
+//            groupBle.port = dataInputStream.readChar() - 'a'
+        } catch (e: Exception) {
+//            e.printStackTrace()
         } finally {
-            UMIOUtils.closeInputStream(dataInputStream)
-            UMIOUtils.closeInputStream(inputStream)
+//            UMIOUtils.closeInputStream(dataInputStream)
+            inputStream.close()
         }
 
         UMLog.l(UMLog.INFO, 699,
@@ -660,7 +662,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
 
     fun createNewDownloadJobItemManager(rootContentEntryUid: Long): DownloadJobItemManager {
         return createNewDownloadJobItemManager(DownloadJob(rootContentEntryUid,
-                System.currentTimeMillis()))
+                getSystemTimeInMillis()))
     }
 
 
@@ -672,18 +674,16 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid)
     }
 
-    override fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long,
-                                                            callback: UmResultCallback<DownloadJobItemStatus?>) {
-        jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid, callback)
-    }
+    override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long)
+            = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)
 
-    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
-        jobItemManagerList!!.addDownloadChangeListener(listener)
-    }
+    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
+         = jobItemManagerList!!.addDownloadChangeListener(listener)
 
-    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener) {
-        jobItemManagerList!!.removeDownloadChangeListener(listener)
-    }
+
+    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
+        = jobItemManagerList!!.removeDownloadChangeListener(listener)
+
 
     companion object {
 
@@ -721,7 +721,7 @@ abstract class NetworkManagerBle : LocalAvailabilityMonitor, LiveDataWorkQueue.O
         /**
          * Bluetooth Low Energy service UUID for our app
          */
-        val USTADMOBILE_BLE_SERVICE_UUID = UUID.fromString("7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a")
+        val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
 
         const val WIFI_DIRECT_GROUP_SSID_PREFIX = "DIRECT-"
 

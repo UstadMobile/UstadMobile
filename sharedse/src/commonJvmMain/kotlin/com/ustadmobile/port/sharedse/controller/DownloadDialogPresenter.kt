@@ -13,14 +13,14 @@ import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.DownloadJob
 
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBle?,
+class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon?,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               private var appDatabase: UmAppDatabase?, private val appDatabaseRepo: UmAppDatabase)
     : UstadBaseController<DownloadDialogView>(context, arguments, view) {

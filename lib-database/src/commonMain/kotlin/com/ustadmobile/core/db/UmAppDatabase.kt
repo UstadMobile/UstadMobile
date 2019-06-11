@@ -156,21 +156,23 @@ abstract class UmAppDatabase : DoorDatabase() {
             namedInstances[dbName] = instance
         }
 
-        @Synchronized
-        fun getInstance(context: Any): UmAppDatabase {
-            if (instance == null) {
-                var builder = DatabaseBuilder.databaseBuilder(
-                        context, UmAppDatabase::class, "UmAppDatabase")
-               // builder = addMigrations(builder)
-               //instance = addCallbacks(builder).build()
-                instance = builder.build()
-            }
+//        @Synchronized
+//        fun getInstance(context: Any): UmAppDatabase {
+//            if (instance == null) {
+//                var builder = DatabaseBuilder.databaseBuilder(
+//                        context, UmAppDatabase::class, "UmAppDatabase")
+//               // builder = addMigrations(builder)
+//               //instance = addCallbacks(builder).build()
+//                instance = builder.build()
+//            }
+//
+//            return instance!!
+//        }
 
-            return instance!!
-        }
+        fun getInstance(context: Any) = lazy { Companion.getInstance(context, "UmAppDatabase") }.value
 
         @Synchronized
-        fun getInstance(context: Any, dbName: String): UmAppDatabase? {
+        fun getInstance(context: Any, dbName: String): UmAppDatabase {
             var db = namedInstances[dbName]
 
             if (db == null) {

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
 /**
  * Interface to listen for the response from the server device.

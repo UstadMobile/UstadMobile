@@ -10,15 +10,16 @@ actual fun checkJndiSetup() {
 
         jndiProps.setProperty("org.osjava.sj.root",
                 File(System.getProperty("user.dir"), "jndi-config").absolutePath)
-        jndiProps.stringPropertyNames().forEach {
-            System.setProperty(it, jndiProps.getProperty(it))
-        }
 
         //setup the env from the file that we had gradle make
         val envProps = Properties()
         envProps.load(FileReader("build/local.env.properties"))
         envProps.stringPropertyNames().filter { System.getProperty(it) == null }.forEach {
             System.setProperty(it, envProps.getProperty(it))
+        }
+
+        jndiProps.stringPropertyNames().forEach {
+            System.setProperty(it, jndiProps.getProperty(it))
         }
 
         val sqliteTmpDir = File(System.getProperty("user.dir"), "build/tmp")

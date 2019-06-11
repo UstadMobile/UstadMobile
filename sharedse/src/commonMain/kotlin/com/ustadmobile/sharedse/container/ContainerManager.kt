@@ -2,10 +2,7 @@ package com.ustadmobile.sharedse.container
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntry
-import com.ustadmobile.lib.db.entities.ContainerEntryFile
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileOutputStreamSe
@@ -195,6 +192,26 @@ class ContainerManager(private val container: Container,
         db.containerEntryDao.insertList(newEntryMap.values.map { it as ContainerEntry })
         return ContainerManager(newContainer, db, dbRepo, newFileDir?.getAbsolutePath(),
                 newEntryMap.toMutableMap())
+    }
+
+    suspend fun linkExistingItems(itemsToDownload: List<ContainerEntryWithMd5>) : List<ContainerEntryWithMd5> {
+        mutex.withLock {
+            val md5ToFilesToEntryToDownloadMap = itemsToDownload.map { it.cefMd5!! to it }.toMap()
+            val existingEntryFiles = db.containerEntryFileDao.findEntriesByMd5Sums(
+                    md5ToFilesToEntryToDownloadMap.keys.toList())
+            val md5ToExistingEntriesMap = existingEntryFiles.map { it.cefMd5 to it }.toMap()
+            val itemsToDownloadPartitioned = itemsToDownload.partition { it.cefMd5 in md5ToExistingEntriesMap.keys}
+
+            //these are the items that we already have here after searching by md5
+            val linksToInsert = itemsToDownloadPartitioned.first.map {
+                ContainerEntryWithContainerEntryFile(md5ToFilesToEntryToDownloadMap[it.cefMd5]!!.cePath!!,
+                        container, md5ToExistingEntriesMap[it.cefMd5]!!) }
+            db.containerEntryDao.insertAndSetIds(linksToInsert)
+            pathToEntryMap.putAll(linksToInsert.map {it.cePath!! to it}.toMap())
+
+            //return the items remaining (e.g. those that actually need downloaded)
+            return itemsToDownloadPartitioned.second
+        }
     }
 
 }
