@@ -1,44 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.ck12
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LogIndex
-import com.ustadmobile.lib.contentscrapers.LogResponse
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse
-import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse
-import com.ustadmobile.lib.contentscrapers.ck12.practice.PracticeResponse
-import com.ustadmobile.lib.contentscrapers.ck12.practice.QuestionResponse
-import com.ustadmobile.lib.contentscrapers.ck12.practice.ScriptEngineReader
-import com.ustadmobile.lib.contentscrapers.ck12.practice.TestResponse
-
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.IOUtils
-import org.apache.commons.lang.exception.ExceptionUtils
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
-import org.openqa.selenium.By
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.logging.LogEntries
-import org.openqa.selenium.logging.LogEntry
-import org.openqa.selenium.logging.LogType
-import org.openqa.selenium.support.ui.ExpectedConditions
-import org.openqa.selenium.support.ui.WebDriverWait
-
-import java.io.File
-import java.io.IOException
-import java.net.MalformedURLException
-import java.net.URL
-import java.util.ArrayList
-
-import javax.xml.parsers.ParserConfigurationException
-import javax.xml.transform.TransformerException
-
+import com.ustadmobile.lib.contentscrapers.*
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CHECK_NAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_INPUT_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONFIG_INPUT_LINK
@@ -82,7 +45,27 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIMER_NAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TROPHY_NAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import com.ustadmobile.lib.contentscrapers.ck12.plix.PlixResponse
+import com.ustadmobile.lib.contentscrapers.ck12.practice.*
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.IOUtils
+import org.apache.commons.lang.exception.ExceptionUtils
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.select.Elements
+import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
+import org.openqa.selenium.logging.LogType
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
+import java.io.File
+import java.io.IOException
+import java.net.MalformedURLException
+import java.net.URL
+import java.util.*
+import javax.xml.parsers.ParserConfigurationException
+import javax.xml.transform.TransformerException
 
 
 /**
@@ -739,15 +722,15 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
      * @param scrapUrl      base url to get images
      * @return the list of objects with the modified resources
      */
-    private fun downloadAllResourcesFromAnswer(answer: MutableList<Any>, questionAsset: File, scrapUrl: URL): List<T> {
+    private fun downloadAllResourcesFromAnswer(answer: MutableList<Any>, questionAsset: File, scrapUrl: URL): MutableList<Any> {
 
         for (i in answer.indices) {
 
             val `object` = answer[i]
             if (`object` is String) {
-                answer[i] = ContentScraperUtil.downloadAllResources(`object` as String, questionAsset, scrapUrl)
-            } else if (`object` is List<Any>) {
-                answer[i] = downloadAllResourcesFromAnswer(`object`, questionAsset, scrapUrl)
+                answer[i] = ContentScraperUtil.downloadAllResources(`object`, questionAsset, scrapUrl)
+            } else if (`object` is MutableList<*>) {
+                answer[i] = downloadAllResourcesFromAnswer(`object` as MutableList<Any>, questionAsset, scrapUrl)
             }
         }
 

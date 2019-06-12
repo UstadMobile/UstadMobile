@@ -3,35 +3,15 @@ package com.ustadmobile.lib.contentscrapers
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentCategoryDao
-import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
-import com.ustadmobile.core.db.dao.LanguageDao
-import com.ustadmobile.core.db.dao.LanguageVariantDao
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentCategory
-import com.ustadmobile.lib.db.entities.ContentCategorySchema
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.LanguageVariant
-
-import org.apache.commons.io.FileUtils
-import org.apache.commons.lang.exception.ExceptionUtils
-
-import java.io.File
-import java.io.IOException
-import java.util.ArrayList
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.stream.Collectors
-
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.JSON_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import com.ustadmobile.lib.db.entities.*
+import org.apache.commons.io.FileUtils
+import org.apache.commons.lang.exception.ExceptionUtils
+import java.io.File
+import java.io.IOException
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class ExportData {
 
@@ -127,10 +107,7 @@ class ExportData {
 
     private fun <T> split(list: List<T>, size: Int): Collection<List<T>> {
         val counter = AtomicInteger(0)
-
-        return list.stream().collect<Map<Int, List<T>>, Any>(Collectors.groupingBy { it -> counter.getAndIncrement() / size })
-                .values
-
+        return list.groupBy { counter.getAndIncrement() / size }.values
     }
 
     companion object {

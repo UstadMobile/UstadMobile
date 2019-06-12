@@ -212,8 +212,8 @@ object IndexEdraakK12Content {
 
             // found the last child
             val scrapeUrl = EdraakK12ContentScraper.generateUrl(
-                    (url!!.getProtocol() + "://" + url!!.getHost() + (if (url!!.getPort() > 0)
-                        (":" + url!!.getPort())
+                    (url!!.protocol + "://" + url!!.host + (if (url!!.port > 0)
+                        (":" + url!!.port)
                     else
                         "") + "/api/"), parentContent.id!!,
                     if (parentContent.program == 0) response!!.program else parentContent.program)

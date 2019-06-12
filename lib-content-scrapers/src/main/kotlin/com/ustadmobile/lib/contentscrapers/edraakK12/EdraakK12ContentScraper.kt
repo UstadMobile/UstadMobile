@@ -332,18 +332,18 @@ class EdraakK12ContentScraper : Runnable {
             val exerciseDirectory = File(destinationDir, exercise.id!!)
             exerciseDirectory.mkdirs()
 
-            exercise.full_description = ContentScraperUtil.downloadAllResources(exercise.full_description, exerciseDirectory, url)
-            exercise.explanation = ContentScraperUtil.downloadAllResources(exercise.explanation, exerciseDirectory, url)
-            exercise.description = ContentScraperUtil.downloadAllResources(exercise.description, exerciseDirectory, url)
+            exercise.full_description = ContentScraperUtil.downloadAllResources(exercise.full_description.toString(), exerciseDirectory, url)
+            exercise.explanation = ContentScraperUtil.downloadAllResources(exercise.explanation.toString(), exerciseDirectory, url)
+            exercise.description = ContentScraperUtil.downloadAllResources(exercise.description.toString(), exerciseDirectory, url)
 
             if (ComponentType.MULTICHOICE.type.equals(exercise.component_type!!, ignoreCase = true)) {
                 for (choice in exercise.choices!!) {
-                    choice.description = ContentScraperUtil.downloadAllResources(choice.description, exerciseDirectory, url)
+                    choice.description = ContentScraperUtil.downloadAllResources(choice.description.toString(), exerciseDirectory, url)
                 }
             }
 
             for (hint in exercise.hints!!) {
-                hint.description = ContentScraperUtil.downloadAllResources(hint.description, exerciseDirectory, url)
+                hint.description = ContentScraperUtil.downloadAllResources(hint.description.toString(), exerciseDirectory, url)
             }
 
         }

@@ -163,7 +163,7 @@ object ContentScraperUtil {
                     continue
                 }
 
-                content.parent().html(ContentScraperUtil.downloadAllResources(videoHtml, destinationDir, baseUrl))
+                content.parent().html(downloadAllResources(videoHtml, destinationDir, baseUrl))
                 continue
             } else if (url.contains("youtube")) {
                 // content.parent().html("We cannot download youtube content, please watch using the link below <p></p><a href=" + url + "\"><img src=\"video-thumbnail.jpg\"/></a>");
