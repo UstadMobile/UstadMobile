@@ -14,7 +14,7 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 //import com.ustadmobile.port.sharedse.networkmanager.*
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
-import com.ustadmobile.sharedse.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.sharedse.io.FileSe
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature

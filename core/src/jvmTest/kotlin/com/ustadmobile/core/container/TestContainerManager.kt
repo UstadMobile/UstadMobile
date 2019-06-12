@@ -1,7 +1,6 @@
-package com.ustadmobile.sharedse.container
+package com.ustadmobile.core.container
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.util.test.checkJndiSetup
@@ -15,7 +14,6 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 
 class TestContainerManager  {
@@ -49,7 +47,7 @@ class TestContainerManager  {
         testFiles = mutableListOf()
         testFileNames.forEach {
             val tmpFile = File.createTempFile("testContainerMgr", "testFile${fCount++}")
-            extractTestResourceToFile("/com/ustadmobile/port/sharedse/container/$it",
+            extractTestResourceToFile("/com/ustadmobile/core/container/$it",
                     tmpFile)
             testFiles.add(tmpFile)
         }

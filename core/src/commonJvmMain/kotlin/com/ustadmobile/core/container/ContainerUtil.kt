@@ -1,13 +1,11 @@
-package com.ustadmobile.sharedse.util
+package com.ustadmobile.core.container
 
-import com.ustadmobile.sharedse.container.ContainerManager
-import com.ustadmobile.sharedse.security.getMessageDigestInstance
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.InputStream
+import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile) : ContainerManager.EntrySource {
+class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile) : ContainerManagerCommon.EntrySource {
     override val length = zipEntry.size
 
     override val pathInContainer = zipEntry.name
@@ -21,7 +19,7 @@ class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile) : ContainerMa
         var bytesRead = 0
 
         val inStream = inputStream
-        val md5Digest = getMessageDigestInstance("MD5")
+        val md5Digest = MessageDigest.getInstance("MD5")
         while (inStream.read(buffer).also { bytesRead = it } != -1) {
             md5Digest.update(buffer, 0, bytesRead)
         }
@@ -35,7 +33,7 @@ actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: Conta
         var zipFile = null as ZipFile?
         try {
             zipFile = ZipFile(zipPath)
-            containerManager.addEntries( *zipFile.entries().toList().map { ZipEntrySource(it, zipFile) as ContainerManager.EntrySource }.toTypedArray())
+            containerManager.addEntries( *zipFile.entries().toList().map { ZipEntrySource(it, zipFile) as ContainerManagerCommon.EntrySource }.toTypedArray())
         }catch(e: Exception) {
             throw e
         }finally {
