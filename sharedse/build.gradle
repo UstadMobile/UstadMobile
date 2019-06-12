@@ -26,7 +26,6 @@ apply plugin: 'jacoco'
 apply plugin: "maven-publish"
 
 
-
 repositories {
     mavenCentral()
     maven {
@@ -189,10 +188,13 @@ kotlin {
 /*
  * This might be required to be able to run unit tests via the IDE.
  */
-task dumpEnvProperties {
+task copyResourcesForIdeTests(type: Copy) {
     outputs.upToDateWhen {
         project.file("build/local.env.properties").exists()
     }
+
+    from project.file("src/commonTest/resources")
+    into rootProject.file("build/classes/test/sharedse_jvmTest")
 
     doFirst {
         println ("Dump sharedse local.env.properties")
@@ -207,12 +209,12 @@ task dumpEnvProperties {
 }
 
 tasks.whenTaskAdded { task ->
-    if (task.name == "compileTestKotlin") {
+    if (task.name == "compileTestKotlinJvm") {
         println ("Add task to jvmTest")
         task.dependsOn(dumpEnvProperties)
     }
 }
-jvmTest.dependsOn(dumpEnvProperties)
+jvmTest.dependsOn(copyResourcesForIdeTests)
 
 
 publishing {
