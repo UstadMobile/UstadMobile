@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.google.common.collect.Lists
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageAlpha3Code
@@ -38,13 +37,9 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.Platform
-import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.logging.LogEntry
@@ -55,7 +50,6 @@ import org.openqa.selenium.remote.DesiredCapabilities
 import org.openqa.selenium.support.ui.ExpectedCondition
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
-import org.w3c.dom.Attr
 
 import java.io.File
 import java.io.FileInputStream
@@ -68,15 +62,12 @@ import java.net.URLConnection
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAccessor
-import java.util.ArrayList
 import java.util.HashMap
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
@@ -84,10 +75,8 @@ import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
-import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerException
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
@@ -1177,7 +1166,7 @@ object ContentScraperUtil {
         return driver
     }
 
-    fun downloadImagesFromJsonContent(images: Map<String, ItemData.Content.Image>, destDir: File, scrapeUrl: String, indexList: MutableList<LogIndex.IndexEntry>) {
+    fun downloadImagesFromJsonContent(images: MutableMap<String, ItemData.Content.Image?>, destDir: File, scrapeUrl: String, indexList: MutableList<LogIndex.IndexEntry>) {
         for (imageValue in images.keys) {
             var conn: HttpURLConnection? = null
             try {

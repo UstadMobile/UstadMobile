@@ -1,40 +1,9 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LogIndex
-import com.ustadmobile.lib.contentscrapers.LogResponse
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
-import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.db.entities.ContentEntry
-
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.IOUtils
-import org.apache.commons.lang.exception.ExceptionUtils
-import org.apache.commons.pool2.impl.GenericObjectPool
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.openqa.selenium.By
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.logging.LogEntry
-import org.openqa.selenium.support.ui.ExpectedConditions
-import org.openqa.selenium.support.ui.WebDriverWait
-
-import java.io.File
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
+import com.ustadmobile.lib.contentscrapers.*
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_JSON_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ATTEMPT_JSON_LINK
@@ -60,8 +29,24 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.Companion.RESPONSE_RECEIVED
-import com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPONSE_RECEIVED
+import com.ustadmobile.lib.db.entities.ContentEntry
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.IOUtils
+import org.apache.commons.lang.exception.ExceptionUtils
+import org.apache.commons.pool2.impl.GenericObjectPool
+import org.jsoup.Jsoup
+import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
+import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.*
+import java.util.regex.Pattern
 
 
 /**
@@ -110,14 +95,14 @@ import org.openqa.selenium.WebElement
  * Zip all files with the course as the name
  */
 class KhanContentScraper : Runnable {
-    private val containerDir: File
+    private lateinit var containerDir: File
 
-    private val factory: GenericObjectPool<ChromeDriver>?
-    private val sqiUid: Int
-    private val contentType: String
-    private val parentEntry: ContentEntry
-    private var destinationDirectory: File? = null
-    private val url: URL
+    private lateinit var factory: GenericObjectPool<ChromeDriver>
+    private var sqiUid: Int = 0
+    private lateinit var contentType: String
+    private lateinit var parentEntry: ContentEntry
+    private var destinationDirectory: File
+    private lateinit var url: URL
     private var driver: ChromeDriver? = null
 
     private val regexUrlPrefix = "https://(www.khanacademy.org|cdn.kastatic.org)/(.*)"
@@ -439,7 +424,7 @@ class KhanContentScraper : Runnable {
 
             val itemContent = gson.fromJson(itemResponse.itemData, ItemData::class.java)
 
-            var images: MutableMap<String, ItemData.Content.Image>? = itemContent.question!!.images!!
+            var images: MutableMap<String, ItemData.Content.Image?>? = itemContent.question!!.images
             if (images == null) {
                 images = HashMap()
             }
@@ -572,7 +557,7 @@ class KhanContentScraper : Runnable {
         var contentList: MutableList<SubjectListResponse.ComponentData.NavData.ContentModel>? = navData!!.contentModels
         if (contentList == null || contentList.isEmpty()) {
             contentList = ArrayList()
-            contentList.add(navData.contentModel)
+            contentList.add(navData.contentModel!!)
         }
 
         if (contentList.isEmpty()) {
@@ -590,7 +575,7 @@ class KhanContentScraper : Runnable {
                 nodeSlug = content.nodeSlug
                 val articleUrl = generateArtcleUrl(articleId)
                 val response = gson.fromJson(IOUtils.toString(URL(articleUrl), UTF_ENCODING), ArticleResponse::class.java)
-                val dateModified = ContentScraperUtil.parseServerDate(response.date_modified)
+                val dateModified = ContentScraperUtil.parseServerDate(response.date_modified!!)
 
                 var isUpdated: Boolean
                 val modifiedFile = File(destinationDirectory, destinationDirectory!!.name + ScraperConstants.LAST_MODIFIED_TXT)

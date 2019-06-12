@@ -12,7 +12,7 @@ class ItemData {
 
         var content: String? = null
 
-        var images: MutableMap<String, Image>? = null
+        var images: MutableMap<String, Image?>? = null
 
         var widgets: Map<String, Widget>? = null
 

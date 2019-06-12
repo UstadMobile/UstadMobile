@@ -3,7 +3,7 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 import com.ustadmobile.lib.contentscrapers.util.DownloadUrl
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat
 
-internal class SubjectListResponse {
+class SubjectListResponse {
 
     var componentProps: ComponentData? = null
 
