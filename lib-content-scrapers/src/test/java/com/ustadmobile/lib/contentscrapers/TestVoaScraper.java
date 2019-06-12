@@ -32,9 +32,9 @@ public class TestVoaScraper {
                 if (request.getPath().contains("json")) {
 
                     String fileName = request.getPath().substring(5);
-                    String body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
+                    String body = IOUtils.toString(getClass().getResourceAsStream(fileName), INSTANCE.getUTF_ENCODING());
                     MockResponse response = new MockResponse().setResponseCode(200);
-                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    response.setHeader("ETag", INSTANCE.getUTF_ENCODING().hashCode());
                     if (!request.getMethod().equalsIgnoreCase("HEAD"))
                         response.setBody(body);
 
@@ -42,18 +42,18 @@ public class TestVoaScraper {
 
                 } else if (request.getPath().contains("post")) {
 
-                    String data = IOUtils.toString(request.getBody().inputStream(), UTF_ENCODING);
+                    String data = IOUtils.toString(request.getBody().inputStream(), INSTANCE.getUTF_ENCODING());
                     String body;
                     if (data.contains("SelectedAnswerId")) {
                         String fileName = "/com/ustadmobile/lib/contentscrapers/voa/quizoneanswer.html";
-                        body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
+                        body = IOUtils.toString(getClass().getResourceAsStream(fileName), INSTANCE.getUTF_ENCODING());
                     } else {
                         String fileName = "/com/ustadmobile/lib/contentscrapers/voa/quizone.html";
-                        body = IOUtils.toString(getClass().getResourceAsStream(fileName), UTF_ENCODING);
+                        body = IOUtils.toString(getClass().getResourceAsStream(fileName), INSTANCE.getUTF_ENCODING());
                     }
 
                     MockResponse response = new MockResponse().setResponseCode(200);
-                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    response.setHeader("ETag", INSTANCE.getUTF_ENCODING().hashCode());
                     if (!request.getMethod().equalsIgnoreCase("HEAD"))
                         response.setBody(body);
 
@@ -69,7 +69,7 @@ public class TestVoaScraper {
                     source.readAll(buffer);
 
                     MockResponse response = new MockResponse().setResponseCode(200);
-                    response.setHeader("ETag", UTF_ENCODING.hashCode());
+                    response.setHeader("ETag", INSTANCE.getUTF_ENCODING().hashCode());
                     if (!request.getMethod().equalsIgnoreCase("HEAD"))
                         response.setBody(buffer);
 
@@ -136,7 +136,7 @@ public class TestVoaScraper {
 
         VoaScraper scraper = new VoaScraper(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/voa/testquiz.html").toString(),
                 tmpDir);
-        scraper.answerUrl = mockWebServer.url("/post/com/ustadmobile/lib/contentscrapers/voa/answer").toString();
+        scraper.setAnswerUrl(mockWebServer.url("/post/com/ustadmobile/lib/contentscrapers/voa/answer").toString());
         scraper.scrapeContent();
 
         long firstDownloadTime = new File(tmpDir, "testquiz.zip").lastModified();

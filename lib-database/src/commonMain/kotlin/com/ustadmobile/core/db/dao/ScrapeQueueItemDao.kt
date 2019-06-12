@@ -39,13 +39,13 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
     companion object {
 
-        val STATUS_PENDING = 1
+        const val STATUS_PENDING = 1
 
-        val STATUS_RUNNING = 2
+        const val STATUS_RUNNING = 2
 
-        val STATUS_DONE = 3
+        const val STATUS_DONE = 3
 
-        val STATUS_FAILED = 4
+        const val STATUS_FAILED = 4
     }
 
 }

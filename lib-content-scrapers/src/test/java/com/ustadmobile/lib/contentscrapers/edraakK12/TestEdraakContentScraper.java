@@ -135,18 +135,18 @@ public class TestEdraakContentScraper {
 
         File video = new File(courseDirectory, VIDEO_FILENAME_WEBM);
         if (ComponentType.ONLINE.getType().equalsIgnoreCase(gsonContent.target_component.component_type)) {
-            Assert.assertEquals("Has Video", true, ContentScraperUtil.fileHasContent(video));
+            Assert.assertEquals("Has Video", true, ContentScraperUtil.INSTANCE.fileHasContent(video));
         } else {
-            Assert.assertEquals("Should not have video", false, ContentScraperUtil.fileHasContent(video));
+            Assert.assertEquals("Should not have video", false, ContentScraperUtil.INSTANCE.fileHasContent(video));
         }
 
-        Assert.assertTrue("tincan file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, TINCAN_FILENAME)));
-        Assert.assertTrue("index html file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, INDEX_HTML)));
-        Assert.assertTrue("jquery file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, JQUERY_JS)));
-        Assert.assertTrue("material js file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, MATERIAL_JS)));
-        Assert.assertTrue("material css file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, MATERIAL_CSS)));
-        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, ARABIC_FONT_REGULAR)));
-        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.fileHasContent(new File(courseDirectory, ARABIC_FONT_BOLD)));
+        Assert.assertTrue("tincan file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getTINCAN_FILENAME())));
+        Assert.assertTrue("index html file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getINDEX_HTML())));
+        Assert.assertTrue("jquery file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getJQUERY_JS())));
+        Assert.assertTrue("material js file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getMATERIAL_JS())));
+        Assert.assertTrue("material css file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getMATERIAL_CSS())));
+        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getARABIC_FONT_REGULAR())));
+        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.INSTANCE.fileHasContent(new File(courseDirectory, INSTANCE.getARABIC_FONT_BOLD())));
 
 
     }
@@ -157,7 +157,7 @@ public class TestEdraakContentScraper {
         File tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile();
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_CONTENT_CONTENT_FILE, 41);
+        String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), MAIN_CONTENT_CONTENT_FILE, 41);
 
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
@@ -171,7 +171,7 @@ public class TestEdraakContentScraper {
         mockWebServer.setDispatcher(dispatcher);
 
 
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_TARGET_FILE, 41);
+        String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_TARGET_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
 
@@ -184,7 +184,7 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_CHILDREN_FILE, 41);
+        String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_CHILDREN_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
 
@@ -197,7 +197,7 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_VIDEO_FOUND, 41);
+        String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_VIDEO_FOUND, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
         scraper.scrapeContent();
 
@@ -220,7 +220,7 @@ public class TestEdraakContentScraper {
 
             mockWebServer.start();
 
-            String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MALFORMED_COMPONENT_ID, 41);
+            String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), MALFORMED_COMPONENT_ID, 41);
             EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
             scraper.scrapeContent();
 
@@ -237,16 +237,16 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
+        String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
 
         scraper.scrapeContent();
 
-        long firstDownloadTime = new File(tmpDir, VIDEO_FILENAME_WEBM).lastModified();
+        long firstDownloadTime = new File(tmpDir, INSTANCE.getVIDEO_FILENAME_WEBM()).lastModified();
         //now run scrapeContent again...
         scraper.scrapeContent();
 
-        long lastModified = new File(tmpDir, VIDEO_FILENAME_WEBM).lastModified();
+        long lastModified = new File(tmpDir, INSTANCE.getVIDEO_FILENAME_WEBM()).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 
@@ -259,16 +259,16 @@ public class TestEdraakContentScraper {
         MockWebServer mockWebServer = new MockWebServer();
         mockWebServer.setDispatcher(dispatcher);
 
-        String url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
+        String url = EdraakK12ContentScraper.Companion.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41);
         EdraakK12ContentScraper scraper = new EdraakK12ContentScraper(url, tmpDir);
 
         scraper.scrapeContent();
-        long firstDownloadTime = new File(tmpDir, QUESTIONS_JSON).lastModified();
+        long firstDownloadTime = new File(tmpDir, INSTANCE.getQUESTIONS_JSON()).lastModified();
         //now run scrapeContent again...
 
         scraper.scrapeContent();
 
-        long lastModified = new File(tmpDir, QUESTIONS_JSON).lastModified();
+        long lastModified = new File(tmpDir, INSTANCE.getQUESTIONS_JSON()).lastModified();
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime);
 

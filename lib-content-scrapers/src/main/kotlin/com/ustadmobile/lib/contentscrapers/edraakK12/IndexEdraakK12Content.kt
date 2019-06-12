@@ -1,0 +1,259 @@
+package com.ustadmobile.lib.contentscrapers.edraakK12
+
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
+import com.ustadmobile.core.db.dao.LanguageDao
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.db.dao.ScrapeRunDao
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.LanguageList
+import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeRun
+
+import org.apache.commons.io.IOUtils
+import org.apache.commons.lang.exception.ExceptionUtils
+
+import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
+import java.net.URL
+import java.util.concurrent.CountDownLatch
+
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.ALL_RIGHTS_RESERVED
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
+import kotlinx.io.charsets.Charset
+import org.apache.commons.lang.CharSet
+
+
+/**
+ * The Edraak Website uses json to generate their website to get all the courses and all the content within them.
+ * https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41
+ *
+ *
+ * Each section of the website is made out of categories and sections which follows the structure of the json
+ *
+ *
+ * The main json has a component type named MainContentTrack
+ * This has 6 children which are the main categories found in the website, they have a component type named Section
+ *
+ *
+ * Each Section has list of Subsections or Course Content
+ * SubSections are identified by the component type named SubSection
+ * SubSections has list of Course Content
+ * Course Content contains a Quiz(list of questions) or a Course that has video and list a questions.
+ * Courses and Quizzes are both identified with the component type named ImportedComponent
+ *
+ *
+ * The goal of the index class is to find all the importedComponent by going to the child of each component type
+ * until the component type found is ImportedComponent. Once it is found, EdraakK12ContentScraper
+ * will decide if its a quiz or course and scrap its content
+ */
+object IndexEdraakK12Content {
+
+    private val ROOT_URL = "https://programs.edraak.org/api/component/5a6087f46380a6049b33fc19/?states_program_id=41"
+
+    val EDRAAK = "Edraak"
+    private var url: URL? = null
+    private var destinationDirectory: File? = null
+    private var response: ContentResponse? = null
+    private var contentEntryDao: ContentEntryDao? = null
+    private var contentParentChildJoinDao: ContentEntryParentChildJoinDao? = null
+    private var arabicLang: Language? = null
+    private var queueDao: ScrapeQueueItemDao? = null
+    private var scrapeWorkQueue: WorkQueue? = null
+    private var runId: Int = 0
+    private var containerDirectory: File? = null
+
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        if (args.size < 2) {
+            System.err.println("Usage: <file destination><file container><optional log{trace, debug, info, warn, error, fatal}>")
+            System.exit(1)
+        }
+        UMLogUtil.setLevel(if (args.size == 3) args[2] else "")
+        UMLogUtil.logInfo(args[0])
+
+        try {
+            val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
+
+            runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_EDRAAK)
+            if (runId == 0) {
+                runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_EDRAAK,
+                        ScrapeQueueItemDao.STATUS_PENDING)).toInt()
+            }
+
+            scrapeFromRoot(File(args[0]), File(args[1]), runId)
+        } catch (e: Exception) {
+            UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
+            UMLogUtil.logError("Main method exception catch khan")
+        }
+
+    }
+
+    @Throws(IOException::class)
+    fun scrapeFromRoot(dest: File, containerDir: File, runId: Int) {
+        startScrape(ROOT_URL, dest, containerDir, runId)
+    }
+
+    @Throws(IOException::class)
+    fun startScrape(scrapeUrl: String, destinationDir: File, containerDir: File, runIdscrape: Int) {
+        try {
+            url = URL(scrapeUrl)
+        } catch (e: MalformedURLException) {
+            UMLogUtil.logError("url from main is Malformed = $scrapeUrl")
+            throw IllegalArgumentException("Malformed url$scrapeUrl", e)
+        }
+
+        destinationDir.mkdirs()
+        containerDir.mkdirs()
+        containerDirectory = containerDir
+        destinationDirectory = destinationDir
+        runId = runIdscrape
+
+        val db = UmAppDatabase.getInstance(Any())
+        val repository = db //db.getRepository("https://localhost", "");
+        contentEntryDao = repository.contentEntryDao
+        contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
+        val languageDao = repository.languageDao
+        queueDao = db.scrapeQueueItemDao
+
+        LanguageList().addAllLanguages()
+
+        arabicLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Arabic")
+        var connection: HttpURLConnection? = null
+        try {
+            connection = url!!.openConnection() as HttpURLConnection
+            connection!!.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01")
+            response = GsonBuilder().disableHtmlEscaping().create().fromJson<ContentResponse>(IOUtils.toString(connection!!.getInputStream(), UTF_ENCODING), ContentResponse::class.java!!)
+        } catch (e: IOException) {
+            throw IllegalArgumentException("JSON INVALID", e.cause)
+        } catch (e: JsonSyntaxException) {
+            throw IllegalArgumentException("JSON INVALID", e.cause)
+        } finally {
+            if (connection != null) {
+                connection!!.disconnect()
+            }
+        }
+
+        val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
+                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, arabicLang!!.langUid, null,
+                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+
+        var description = ("تعليم مجانيّ\n" +
+                "إلكترونيّ باللغة العربيّة!" +
+                "\n Free Online \n" +
+                "Education, In Arabic!")
+
+        description = String(description.toByteArray(), Charset.defaultCharset())
+
+        val edraakParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.edraak.org/k12/", "Edraak K12",
+                "https://www.edraak.org/k12/", EDRAAK, ALL_RIGHTS_RESERVED, arabicLang!!.langUid, null,
+                description, false, EMPTY_STRING, "https://www.edraak.org/static/images/logo-dark-ar.fa1399e8d134.png",
+                EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+
+
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, edraakParentEntry, 0)
+
+
+        val scraperSource = {
+
+            val item = queueDao!!.getNextItemAndSetStatus(runId,
+                    ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+            if (item == null) {
+                return null
+            }
+
+            val parent = contentEntryDao!!.findByEntryId(item!!.sqiContentEntryParentUid)
+
+            val scrapeContentUrl: URL
+            try {
+                scrapeContentUrl = URL(item!!.scrapeUrl!!)
+                return EdraakK12ContentScraper(scrapeContentUrl,
+                        File(item!!.destDir!!),
+                        containerDir,
+                        parent, item!!.sqiUid)
+            } catch (ignored: IOException) {
+                throw RuntimeException(("SEVERE: invalid URL to scrape: should not be in queue:" + item!!.scrapeUrl!!))
+            }
+        }
+
+        val scraperLatch = CountDownLatch(1)
+        scrapeWorkQueue = WorkQueue(scraperSource, 1)
+        scrapeWorkQueue!!.start()
+
+        findImportedComponent(response!!, edraakParentEntry)
+
+        scrapeWorkQueue!!.addEmptyWorkQueueListener({ scrapeQueu -> scraperLatch.countDown() })
+        try {
+            scraperLatch.await()
+        } catch (ignored: InterruptedException) {
+
+        }
+
+    }
+
+    @Throws(MalformedURLException::class)
+    private fun findImportedComponent(parentContent: ContentResponse, parentEntry: ContentEntry) {
+
+        if (ContentScraperUtil.isImportedComponent(parentContent.component_type!!)) {
+
+            // found the last child
+            val scrapeUrl = EdraakK12ContentScraper.generateUrl(
+                    (url!!.getProtocol() + "://" + url!!.getHost() + (if (url!!.getPort() > 0)
+                        (":" + url!!.getPort())
+                    else
+                        "") + "/api/"), parentContent.id!!,
+                    if (parentContent.program == 0) response!!.program else parentContent.program)
+
+            ContentScraperUtil.createQueueItem(queueDao!!, URL(scrapeUrl), parentEntry,
+                    File(destinationDirectory, parentContent.id!!), "",
+                    runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+            scrapeWorkQueue!!.checkQueue()
+
+        } else {
+
+            for (children in parentContent.children!!) {
+
+                val sourceUrl = children.id
+                val isLeaf = ContentScraperUtil.isImportedComponent(children.component_type!!)
+
+                val childEntry = ContentScraperUtil.createOrUpdateContentEntry(children.id!!, children.title,
+                        sourceUrl!!, EDRAAK, getLicenseType(children.license!!), arabicLang!!.langUid, null,
+                        EMPTY_STRING, isLeaf, EMPTY_STRING, EMPTY_STRING,
+                        EMPTY_STRING, EMPTY_STRING, contentEntryDao!!)
+
+
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, childEntry, children.child_index)
+
+                findImportedComponent(children, childEntry)
+
+            }
+
+        }
+    }
+
+    private fun getLicenseType(license: String): Int {
+        if (license.toLowerCase().contains("cc-by-nc-sa")) {
+            return ContentEntry.LICESNE_TYPE_CC_BY_NC_SA
+        } else if (license.toLowerCase().contains("all_rights_reserved")) {
+            return ALL_RIGHTS_RESERVED
+        } else {
+            UMLogUtil.logError("License type not matched for license: $license")
+            return ALL_RIGHTS_RESERVED
+        }
+    }
+
+}

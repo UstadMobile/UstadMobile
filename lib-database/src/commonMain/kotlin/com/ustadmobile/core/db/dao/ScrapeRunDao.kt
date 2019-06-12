@@ -12,10 +12,10 @@ abstract class ScrapeRunDao : BaseDao<ScrapeRun> {
 
     companion object {
 
-        val SCRAPE_TYPE_KHAN = "khan"
+        const val SCRAPE_TYPE_KHAN = "khan"
 
-        val SCRAPE_TYPE_VOA = "voa"
+        const val SCRAPE_TYPE_VOA = "voa"
 
-        val SCRAPE_TYPE_EDRAAK = "edraak"
+        const val SCRAPE_TYPE_EDRAAK = "edraak"
     }
 }

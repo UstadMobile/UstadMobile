@@ -31,7 +31,6 @@
 package com.ustadmobile.core.contentformats.epub.opf
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -409,7 +408,7 @@ class OpfDocument {
      *
      * @return map of manifest items
      */
-    fun getManifestItems(): Map<String, OpfItem> {
+    fun getManifestItems(): MutableMap<String, OpfItem> {
         return manifestItems
     }
 

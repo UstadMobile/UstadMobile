@@ -32,7 +32,6 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.IOException
 import kotlinx.io.InputStream
@@ -50,11 +49,11 @@ import kotlin.reflect.KClass
  */
 object UMIOUtils {
 
-    val HTTP_SIZE_NOT_GIVEN = -1
+    const val HTTP_SIZE_NOT_GIVEN = -1
 
-    val HTTP_SIZE_IO_EXCEPTION = -2
+    const val HTTP_SIZE_IO_EXCEPTION = -2
 
-    val DEFAULT_BUFFER_SIZE = 8 * 1024
+    const val DEFAULT_BUFFER_SIZE = 8 * 1024
 
     /**
      * Close the given input stream if not null
@@ -135,6 +134,8 @@ object UMIOUtils {
      * @return String from the given input stream in the given encoding
      * @throws IOException
      */
+    @JvmOverloads
+    @JvmStatic
     fun readToString(`in`: InputStream, encoding: String): String {
         val bout = ByteArrayOutputStream()
         readFully(`in`, bout, 1024)

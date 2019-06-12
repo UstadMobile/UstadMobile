@@ -38,7 +38,7 @@ subprojects {
     if(Arrays.asList("lib-database-runtime",
             "lib-database-runtime-jdbc", "lib-database-jdbc", "lib-database-retrofitrepository",
             "lib-core-fs", "app-rest-server",
-            "core-tests", "lib-content-scrapers").contains(name)) {
+            "core-tests").contains(name)) {
         apply plugin: "kotlin"
     }
 }
