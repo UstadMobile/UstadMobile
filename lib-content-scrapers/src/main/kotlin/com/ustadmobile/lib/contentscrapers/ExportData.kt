@@ -116,7 +116,7 @@ class ExportData {
             val file = File(destinationDirectory, fileName)
             pathList!!.add(fileName)
             try {
-                FileUtils.writeStringToFile(file, gson!!.toJson(iterator.next()), UTF_ENCODING)
+                FileUtils.writeStringToFile(file, gson.toJson(iterator.next()), UTF_ENCODING)
             } catch (e: IOException) {
                 UMLogUtil.logError("Error saving file $nameOfFile$count")
             }

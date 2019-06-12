@@ -306,7 +306,7 @@ class AsbScraper {
                 }
 
                 val options = ShrinkerUtil.EpubShrinkerOptions()
-                options.linkyHelper = {
+                options.linkHelper = {
                     IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING)
                 }
                 val tmpDir = ShrinkerUtil.shrinkEpub(ePubFile, options)

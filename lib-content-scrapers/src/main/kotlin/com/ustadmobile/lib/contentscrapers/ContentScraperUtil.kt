@@ -137,9 +137,9 @@ object ContentScraperUtil {
      * @param baseUrl        is needed for when the src is a path for the url
      * @returns the html with modified src pointing to its new location
      */
-    fun downloadAllResources(html: String?, destinationDir: File, baseUrl: URL): String? {
+    fun downloadAllResources(html: String, destinationDir: File, baseUrl: URL): String {
 
-        if (html == null || html.isEmpty()) {
+        if (html.isEmpty()) {
             // no string to parse
             return html
         }

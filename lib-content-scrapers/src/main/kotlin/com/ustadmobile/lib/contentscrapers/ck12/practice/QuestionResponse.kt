@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ck12.practice
 
 import com.google.gson.annotations.SerializedName
-import com.ustadmobile.lib.contentscrapers.ck12.practice.AnswerResponse
 
 class QuestionResponse {
 
@@ -39,7 +38,7 @@ class QuestionResponse {
 
         var responseObjects: List<QuestionObjects>? = null
 
-        var hints: List<String>? = null
+        var hints: MutableList<String>? = null
 
         var answer: AnswerResponse? = null
 

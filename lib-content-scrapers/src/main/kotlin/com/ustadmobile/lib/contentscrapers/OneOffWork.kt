@@ -3,7 +3,7 @@ package com.ustadmobile.lib.contentscrapers
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
-import com.ustadmobile.port.sharedse.util.Base64Coder
+import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 
 import java.io.File

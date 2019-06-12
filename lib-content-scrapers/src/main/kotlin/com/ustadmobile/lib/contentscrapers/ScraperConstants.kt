@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
-import java.util.Arrays
+import java.util.*
 
 object ScraperConstants {
 
@@ -239,7 +239,7 @@ object ScraperConstants {
         ONLINE("OnlineLesson")
     }
 
-    enum class HtmlName private constructor(val name: String) {
+    enum class HtmlName(val type: String) {
         DESC("description"),
         FULL_DESC("full_description"),
         EXPLAIN("explaination"),

@@ -658,7 +658,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
             questionAsset.mkdirs()
 
             questionResponse.response!!.stem!!.displayText = ContentScraperUtil.downloadAllResources(
-                    questionResponse.response!!.stem!!.displayText, questionAsset, scrapUrl)
+                    questionResponse.response!!.stem!!.displayText?: "", questionAsset, scrapUrl)
 
             val hintsList = questionResponse.response!!.hints
             for (j in hintsList!!.indices) {
@@ -666,10 +666,10 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
             }
             questionResponse.response!!.hints = hintsList
 
-            val answerResponse = extractAnswerFromEncryption(questionResponse.response!!.data)
+            val answerResponse = extractAnswerFromEncryption(questionResponse.response!!.data?: "")
 
             val answer = gson.fromJson(answerResponse, AnswerResponse::class.java)
-            answer.instance!!.solution = ContentScraperUtil.downloadAllResources(answer.instance!!.solution, questionAsset, scrapUrl)
+            answer.instance!!.solution = ContentScraperUtil.downloadAllResources(answer.instance!!.solution?: "", questionAsset, scrapUrl)
 
             answer.instance!!.answer = downloadAllResourcesFromAnswer(answer.instance!!.answer!!, questionAsset, scrapUrl)
 
@@ -681,12 +681,12 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
 
                     val question = questionOrderList[order]
 
-                    question.displayText = ContentScraperUtil.downloadAllResources(question.displayText, questionAsset, scrapUrl)
-                    question.optionKey = ContentScraperUtil.downloadAllResources(question.optionKey, questionAsset, scrapUrl)
+                    question.displayText = ContentScraperUtil.downloadAllResources(question.displayText?: "", questionAsset, scrapUrl)
+                    question.optionKey = ContentScraperUtil.downloadAllResources(question.optionKey?: "", questionAsset, scrapUrl)
 
                     val answerObject = answerObjectsList!![order]
-                    answerObject.displayText = ContentScraperUtil.downloadAllResources(answerObject.displayText, questionAsset, scrapUrl)
-                    answerObject.optionKey = ContentScraperUtil.downloadAllResources(answerObject.optionKey, questionAsset, scrapUrl)
+                    answerObject.displayText = ContentScraperUtil.downloadAllResources(answerObject.displayText?: "", questionAsset, scrapUrl)
+                    answerObject.optionKey = ContentScraperUtil.downloadAllResources(answerObject.optionKey?: "", questionAsset, scrapUrl)
 
                 }
             }
@@ -726,7 +726,7 @@ constructor(private val urlString: String, private val destinationDirectory: Fil
      * @param data return the result as json string
      * @return
      */
-    fun extractAnswerFromEncryption(data: String?): String {
+    fun extractAnswerFromEncryption(data: String): String {
         return scriptEngineReader.getResult(data)
     }
 
