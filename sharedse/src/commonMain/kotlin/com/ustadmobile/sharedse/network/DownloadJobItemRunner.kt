@@ -15,6 +15,8 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManagerCommon
+import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
@@ -23,6 +25,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.produce
 import kotlinx.io.IOException
+import kotlinx.io.InputStream
 //import retrofit2.Retrofit
 //import retrofit2.converter.gson.GsonConverterFactory
 //import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -126,6 +129,17 @@ class DownloadJobItemRunner
 //            }
 //        }
 //    }
+
+    class DownloadedEntrySource(override val pathInContainer: String,
+                                private val file: FileSe,
+                                override val md5Sum: ByteArray,
+                                override val filePath: String): ContainerManagerCommon.EntrySource {
+        override val length: Long
+            get() = file.length()
+
+        override val inputStream = FileInputStreamSe(file)
+
+    }
 
 
     init {
@@ -394,7 +408,7 @@ class DownloadJobItemRunner
                 appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
 
                 val containerEntryList = containerEntryListClient.get<List<ContainerEntryWithMd5>>(
-                        "$downloadEndpoint/$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
+                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
 
                 //val response = containerEntryListCall.execute()
                 //if (response.isSuccessful) {
@@ -414,16 +428,19 @@ class DownloadJobItemRunner
                             for(entry in producer) {
                                 val destFile = FileSe(FileSe(destinationDir!!),
                                         entry.ceCefUid.toString() + ".tmp")
-                                val resumableDownload = ResumableDownload2(downloadEndpoint +
-                                        CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid,
+                                val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
+                                println("Downloader $it downloading $downloadUrl")
+                                val resumableDownload = ResumableDownload2(downloadUrl,
                                         destFile.getAbsolutePath())
 //                            httpDownload!!.connectionOpener = connectionOpener
 //                            httpDownloadRef.set(httpDownload)
                                 if (resumableDownload.download()) {
                                     completedEntriesBytesDownloaded.addAndGet(destFile.length())
-                                    //TODO : Update download manager to add this here
-//                                    containerManager.addEntry(destFile, entry.cePath!!,
-//                                            ContainerManager.OPTION_COPY)
+                                    containerManager.addEntries(
+                                            ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
+                                                    dontUpdateTotals = true),
+                                            DownloadedEntrySource(entry.cePath!!, destFile,
+                                                    resumableDownload.md5Sum, destFile.getAbsolutePath()))
                                 }else {
                                     numFailures.incrementAndGet()
                                 }
@@ -461,30 +478,32 @@ class DownloadJobItemRunner
                         "Failed to download a file from " + endpointUrl, e)
             }
 
-            if (!downloaded) {
+
+            val numFails = numFailures.value
+            if (numFails > 0) {
                 //wait before retry
                 delay(3000)
             }
             attemptsRemaining--
-            recordHistoryFinished(history, downloaded)
+            recordHistoryFinished(history, numFails == 0)
         //} while (runnerStatus.get() == JobStatus.RUNNING && !downloaded && attemptsRemaining > 0)
 
         //httpdownloadref usage is finished
         //httpDownloadRef.set(null)
 
         //if (downloaded) {
-        val numFails = numFailures.value
+
         if(numFails == 0) {
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
 
             //val totalDownloaded = completedEntriesBytesDownloaded.get() + if (httpDownload != null) httpDownload!!.downloadedSoFar else 0
 
-            TODO("Fix this to use suspend fun")
-//            downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
-//                    totalDownloaded, totalDownloaded)
+
+            downloadJobItemManager!!.updateProgress(downloadItem.djiUid,
+                    0, 0)
         }
 
-        stop(if (downloaded) JobStatus.COMPLETE else JobStatus.FAILED)
+        stop(if (numFails == 0) JobStatus.COMPLETE else JobStatus.FAILED)
 
     }
 
@@ -654,10 +673,13 @@ class DownloadJobItemRunner
      * @param itemStatus new status to be set
      * @see JobStatus
      */
-    private fun updateItemStatus(itemStatus: Int) {
+    private suspend fun updateItemStatus(itemStatus: Int) {
+        downloadJobItemManager!!.updateStatus(downloadItem.djiUid, itemStatus)
+        UMLog.l(UMLog.INFO, 699,
+                "${mkLogPrefix()} Setting status to:  ${JobStatus.statusToString(itemStatus)}")
+
+
 //        val latch = CountDownLatch(1)
-//        UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-//                " Setting status to: " + JobStatus.statusToString(itemStatus))
 //        TODO("Update this to using suspend fun")
 ////        downloadJobItemManager!!.updateStatus(downloadItem.djiUid.toInt(), itemStatus,
 ////                object : UmResultCallback<Void?> {

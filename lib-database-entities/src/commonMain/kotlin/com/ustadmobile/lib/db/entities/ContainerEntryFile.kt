@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
@@ -13,6 +14,7 @@ class ContainerEntryFile() {
     @PrimaryKey(autoGenerate = true)
     var cefUid: Long = 0
 
+    @ColumnInfo(index = true)
     var cefMd5: String? = null
 
     var cefPath: String? = null

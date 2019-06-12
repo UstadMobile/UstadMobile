@@ -10,7 +10,8 @@ class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile) : ContainerMa
 
     override val pathInContainer = zipEntry.name
 
-    override val inputStream = zipFile.getInputStream(zipEntry)
+    override val inputStream
+        get() = zipFile.getInputStream(zipEntry)
 
     override val filePath = null
 
@@ -33,7 +34,8 @@ actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: Conta
         var zipFile = null as ZipFile?
         try {
             zipFile = ZipFile(zipPath)
-            containerManager.addEntries( *zipFile.entries().toList().map { ZipEntrySource(it, zipFile) as ContainerManagerCommon.EntrySource }.toTypedArray())
+            val entryList = zipFile.entries().toList().map { ZipEntrySource(it, zipFile) as ContainerManagerCommon.EntrySource }.toTypedArray()
+            containerManager.addEntries(*entryList)
         }catch(e: Exception) {
             throw e
         }finally {

@@ -3,13 +3,14 @@ package com.ustadmobile.sharedse.network
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.core.container.*
+import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.container.ContainerManager
-import com.ustadmobile.sharedse.util.addEntriesFromZipToContainer
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.newSingleThreadContext
@@ -209,7 +210,7 @@ class DownloadJobItemRunnerTest {
 
         peerTmpContentEntryFile = File.createTempFile("peerTmpContentEntryFile",
                 "" + System.currentTimeMillis() + ".zip")
-        UmFileUtilSe.extractResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile)
+        extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile)
         val peerZipFile = ZipFile(peerTmpContentEntryFile)
         peerContainerManager.addEntriesFromZip(peerZipFile, com.ustadmobile.port.sharedse.container.ContainerManager.OPTION_COPY)
         peerZipFile.close()
@@ -274,9 +275,66 @@ class DownloadJobItemRunnerTest {
 
     }
 
+    @Throws(IOException::class)
+    fun assertContainersHaveSameContent(containerUid1: Long, containerUid2: Long,
+                                        db1: UmAppDatabase, repo1: UmAppDatabase,
+                                        db2: UmAppDatabase, repo2: UmAppDatabase) {
+
+        val container1 = repo1.containerDao.findByUid(containerUid1)!!
+        val manager1 = ContainerManager(container1, db1, repo1)
+
+        val container2 = repo2.containerDao.findByUid(containerUid2)!!
+        val manager2 = ContainerManager(container2, db2, repo2)
+
+        Assert.assertEquals("Containers have same number of entries",
+                container1.cntNumEntries.toLong(),
+                db2.containerEntryDao.findByContainer(containerUid2).size.toLong())
+
+        for (entry in manager1.allEntries) {
+            val entry2 = manager2.getEntry(entry.cePath!!)
+            Assert.assertNotNull("Client container also contains " + entry.cePath!!,
+                    entry2)
+            Assert.assertArrayEquals(
+                    UMIOUtils.readStreamToByteArray(manager1.getInputStream(entry)),
+                    UMIOUtils.readStreamToByteArray(manager2.getInputStream(entry2!!)))
+        }
+    }
+
+
     @Test
     fun testSomething() {
         Assert.assertEquals(2, 2)
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun givenDownload_whenRun_shouldDownloadAndComplete() {
+        runBlocking {
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus)
+
+            val startTime = System.currentTimeMillis()
+            jobItemRunner.download()
+            val runTime = System.currentTimeMillis() - startTime
+            println("Download job completed in $runTime ms")
+
+            item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+
+            Assert.assertEquals("File download task completed successfully",
+                    JobStatus.COMPLETE.toLong(), item.djiStatus.toLong())
+
+            Assert.assertEquals("Correct number of ContentEntry items available in client db",
+                    container.cntNumEntries.toLong(),
+                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size.toLong())
+
+            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
+                    serverDb, serverRepo, clientDb, clientRepo)
+        }
+
+
     }
 
 }

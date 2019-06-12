@@ -15,7 +15,7 @@ expect class ContainerManager : ContainerManagerCommon {
                 pathToEntryMap: MutableMap<String, ContainerEntryWithContainerEntryFile> = mutableMapOf())
 
 
-    override suspend fun addEntries(vararg entries: EntrySource, addOptions: AddEntryOptions?)
+    override suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
 
     fun getInputStream(containerEntry: ContainerEntryWithContainerEntryFile): InputStream
 

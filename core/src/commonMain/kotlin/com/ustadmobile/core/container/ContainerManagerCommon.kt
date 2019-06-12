@@ -16,6 +16,9 @@ abstract class ContainerManagerCommon(protected val container: Container,
     data class AddEntryOptions(val moveExistingFiles: Boolean = false,
                                val dontUpdateTotals: Boolean = false)
 
+    val allEntries: List<ContainerEntryWithContainerEntryFile>
+        get() = pathToEntryMap.values.toList()
+
     interface EntrySource {
 
         /**
@@ -74,8 +77,8 @@ abstract class ContainerManagerCommon(protected val container: Container,
                 newEntryMap.toMutableMap())
     }
 
-    abstract suspend fun addEntries(vararg entries: EntrySource, addOptions: AddEntryOptions?)
+    abstract suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
 
-    suspend fun addEntries(vararg entries: EntrySource) = addEntries(*entries, addOptions = null)
+    suspend fun addEntries(vararg entries: EntrySource) = addEntries(null, *entries)
 
 }

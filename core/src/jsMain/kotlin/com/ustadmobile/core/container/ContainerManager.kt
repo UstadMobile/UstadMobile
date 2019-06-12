@@ -14,7 +14,7 @@ actual class ContainerManager actual constructor(container: Container,
 
     : ContainerManagerCommon(container, db, dbRepo, newFilePath, pathToEntryMap) {
 
-    actual override suspend fun addEntries(vararg entries: EntrySource, addOptions: AddEntryOptions?) {
+    actual override suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource) {
         TODO("not implemented on JS")
     }
 

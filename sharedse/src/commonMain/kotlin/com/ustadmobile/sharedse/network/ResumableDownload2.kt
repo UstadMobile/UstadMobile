@@ -1,10 +1,13 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.sharedse.io.FileOutputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.io.readText
 import com.ustadmobile.sharedse.io.writeText
+import com.ustadmobile.sharedse.security.MessageDigestSe
+import com.ustadmobile.sharedse.security.getMessageDigestInstance
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.*
@@ -30,7 +33,21 @@ import kotlinx.serialization.json.*
  * support validation (e.g. no etag and no last modified), the download attempt will start from the
  * beginning.
  */
-class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000) {
+class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000,
+                         private val calcMd5: Boolean = true) {
+
+    private var md5SumBytes: ByteArray? = null
+
+    val md5Sum: ByteArray
+        get() = if(md5SumBytes == null) {
+                throw IllegalStateException("Download not complete: cannot provide md5")
+            } else {
+                md5SumBytes!!
+            }
+
+
+
+
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
 
@@ -101,12 +118,16 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
                 outStream = FileOutputStreamSe(dlPartFile, appendOutput)
 
+                val messageDigestSe = getMessageDigestInstance("MD5")
+
                 val buf = ByteArray(8 * 1024)
                 var bytesRead = 0
                 while (inputStream.read(buf).also { bytesRead = it } != -1) {
                     outStream.write(buf, 0, bytesRead)
+                    messageDigestSe.update(buf, 0, bytesRead)
                 }
                 outStream.flush()
+                md5SumBytes = messageDigestSe.digest()
 
                 //now move the file to the destination
                 if (dlPartFile.renameTo(FileSe(destinationFile))) {
@@ -128,6 +149,8 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
         return false
     }
+
+
 
 
     companion object {

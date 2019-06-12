@@ -54,7 +54,7 @@ actual class ContainerManager actual constructor(container: Container,
 
 
     @UseExperimental(ExperimentalUnsignedTypes::class)
-    actual override suspend fun addEntries(vararg entries: ContainerManagerCommon.EntrySource, addOptions: ContainerManagerCommon.AddEntryOptions?) {
+    actual override suspend fun addEntries(addOptions: ContainerManagerCommon.AddEntryOptions?, vararg entries: ContainerManagerCommon.EntrySource) {
         val addOpts = addOptions ?: AddEntryOptions()
         if(newFileDir == null)
             throw RuntimeException("Cannot add files to container ${container.containerUid} with null newFileDir")
@@ -86,6 +86,7 @@ actual class ContainerManager actual constructor(container: Container,
                 //TODO: check for any paths that are being overwritten
 
                 if(addOpts.moveExistingFiles && currentFilePath != null) {
+                    println("Moving $currentFilePath to $destFile")
                     if(!File(currentFilePath).renameTo(destFile)) {
                         throw IOException("Could not rename input file : $currentFilePath")
                     }
@@ -93,12 +94,16 @@ actual class ContainerManager actual constructor(container: Container,
                     //copy it
                     GlobalScope.async {
                         var destOutStream = null as OutputStream?
+                        var inStream = null as InputStream?
                         try {
+                            inStream = it.inputStream
                             destOutStream = FileOutputStream(destFile)
-                            UMIOUtils.readFully(it.inputStream, destOutStream)
+                            inStream.copyTo(destOutStream)
                         }catch(e: IOException) {
                             throw e
                         }finally {
+                            destOutStream?.close()
+                            inStream?.close()
                             destOutStream?.close()
                         }
                     }.await()
