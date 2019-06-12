@@ -36,6 +36,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import java.util.function.Consumer
 
 class TestShrinkerUtils {
 
@@ -58,7 +59,7 @@ class TestShrinkerUtils {
 
     @Throws(IOException::class)
     fun initDb() {
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
 
         val `is` = javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/test.epub")
@@ -377,11 +378,7 @@ class TestShrinkerUtils {
 
         val options = ShrinkerUtil.EpubShrinkerOptions()
         options.linkHelper = {
-            try {
-                return IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING)
-            } catch (e: IOException) {
-                return null
-            }
+            IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ASB_CSS_HELPER), UTF_ENCODING)
         }
         ShrinkerUtil.shrinkEpub(epub, options)
 
@@ -404,7 +401,7 @@ class TestShrinkerUtils {
         val options = ShrinkerUtil.EpubShrinkerOptions()
         options.styleElementHelper = { styleElement ->
             val text = styleElement.text()
-            return if (text.startsWith("@font-face") || text.startsWith(".english")) {
+            if (text.startsWith("@font-face") || text.startsWith(".english")) {
                 ShrinkerUtil.STYLE_OUTSOURCE_TO_LINKED_CSS
             } else {
                 ShrinkerUtil.STYLE_DROP
@@ -423,11 +420,7 @@ class TestShrinkerUtils {
             document
         }
         options.linkHelper = {
-            try {
-                return IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING)
-            } catch (e: IOException) {
-                return null
-            }
+            IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.PRATHAM_CSS_HELPER), UTF_ENCODING)
         }
         val epubFolder = ShrinkerUtil.shrinkEpub(epub, options)
         ContentScraperUtil.zipDirectory(epubFolder, "fixed.epub", tmpDir)

@@ -1,19 +1,12 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContainerEntryDao
-import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
-
 import org.junit.Test
-
 import java.io.File
-import java.nio.file.Path
 import java.nio.file.Paths
 
 class TestCodec2Work {
@@ -22,9 +15,9 @@ class TestCodec2Work {
     private fun initDb() {
 
 
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
-        val repo = db.getRepository("https://localhost", "")
+        val repo = db//db.getRepository("https://localhost", "")
 
         val containerDoa = repo.containerDao
         val contentEntryDao = repo.contentEntryDao

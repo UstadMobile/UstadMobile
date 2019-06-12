@@ -1,35 +1,30 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
-
-import org.apache.commons.io.IOUtils
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import org.mockito.Mockito
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.net.URISyntaxException
-import java.nio.file.Files
-
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.BufferedSource
 import okio.Okio
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.apache.commons.io.IOUtils
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import org.mockito.Mockito
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.spy
+import java.io.File
+import java.io.IOException
+import java.net.URISyntaxException
+import java.net.URL
+import java.nio.file.Files
 
 class TestPrathamContentScraper {
 
@@ -77,7 +72,7 @@ class TestPrathamContentScraper {
 
     @Before
     fun clearDb() {
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
     }
 

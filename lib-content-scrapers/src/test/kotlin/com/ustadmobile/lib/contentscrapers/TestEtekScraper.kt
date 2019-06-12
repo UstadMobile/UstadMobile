@@ -1,29 +1,23 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.etekkatho.EtekkathoScraper
 import com.ustadmobile.lib.contentscrapers.etekkatho.IndexEtekkathoScraper
-
-import org.apache.commons.io.IOUtils
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.BufferedSource
 import okio.Okio
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.apache.commons.io.IOUtils
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
 
 class TestEtekScraper {
 
@@ -77,7 +71,7 @@ class TestEtekScraper {
 
     @Before
     fun clearDb() {
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
     }
 

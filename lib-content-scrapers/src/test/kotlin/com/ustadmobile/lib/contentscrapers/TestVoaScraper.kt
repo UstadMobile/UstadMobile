@@ -1,25 +1,19 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.voa.VoaScraper
-
-import org.apache.commons.io.IOUtils
-import org.junit.Assert
-import org.junit.Test
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.BufferedSource
 import okio.Okio
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.apache.commons.io.IOUtils
+import org.junit.Assert
+import org.junit.Test
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
 
 class TestVoaScraper {
 
@@ -31,9 +25,9 @@ class TestVoaScraper {
                 if (request.path.contains("json")) {
 
                     val fileName = request.path.substring(5)
-                    val body = IOUtils.toString(javaClass.getResourceAsStream(fileName), INSTANCE.getUTF_ENCODING())
+                    val body = IOUtils.toString(javaClass.getResourceAsStream(fileName),UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", INSTANCE.getUTF_ENCODING().hashCode())
+                    response.setHeader("ETag",UTF_ENCODING.hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.setBody(body)
 
@@ -41,18 +35,18 @@ class TestVoaScraper {
 
                 } else if (request.path.contains("post")) {
 
-                    val data = IOUtils.toString(request.body.inputStream(), INSTANCE.getUTF_ENCODING())
+                    val data = IOUtils.toString(request.body.inputStream(), UTF_ENCODING)
                     val body: String
                     if (data.contains("SelectedAnswerId")) {
                         val fileName = "/com/ustadmobile/lib/contentscrapers/voa/quizoneanswer.html"
-                        body = IOUtils.toString(javaClass.getResourceAsStream(fileName), INSTANCE.getUTF_ENCODING())
+                        body = IOUtils.toString(javaClass.getResourceAsStream(fileName), UTF_ENCODING)
                     } else {
                         val fileName = "/com/ustadmobile/lib/contentscrapers/voa/quizone.html"
-                        body = IOUtils.toString(javaClass.getResourceAsStream(fileName), INSTANCE.getUTF_ENCODING())
+                        body = IOUtils.toString(javaClass.getResourceAsStream(fileName), UTF_ENCODING)
                     }
 
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", INSTANCE.getUTF_ENCODING().hashCode())
+                    response.setHeader("ETag", UTF_ENCODING.hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.setBody(body)
 
@@ -68,7 +62,7 @@ class TestVoaScraper {
                     source.readAll(buffer)
 
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", INSTANCE.getUTF_ENCODING().hashCode())
+                    response.setHeader("ETag", UTF_ENCODING.hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
                         response.body = buffer
 

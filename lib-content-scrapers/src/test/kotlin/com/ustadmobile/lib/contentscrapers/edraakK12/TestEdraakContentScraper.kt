@@ -2,25 +2,6 @@ package com.ustadmobile.lib.contentscrapers.edraakK12
 
 import com.google.gson.GsonBuilder
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
-
-import org.apache.commons.io.IOUtils
-import org.junit.Assert
-import org.junit.Test
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
-import okio.Buffer
-import okio.BufferedSource
-import okio.Okio
-
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_BOLD
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ARABIC_FONT_REGULAR
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CONTENT_JSON
@@ -33,6 +14,19 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_WEBM
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
+import okio.Buffer
+import okio.Okio
+import org.apache.commons.io.IOUtils
+import org.junit.Assert
+import org.junit.Test
+import java.io.File
+import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.file.Files
 
 class TestEdraakContentScraper {
 
@@ -123,7 +117,7 @@ class TestEdraakContentScraper {
 
         val jsonFile = File(courseDirectory, CONTENT_JSON)
         Assert.assertTrue("Downloaded content info json exists", ContentScraperUtil.fileHasContent(jsonFile))
-        val jsonStr = String(Files.readAllBytes(jsonFile.toPath()), UTF_ENCODING)
+        val jsonStr = String(Files.readAllBytes(jsonFile.toPath()), Charset.defaultCharset())
         val gsonContent = GsonBuilder().disableHtmlEscaping().create().fromJson(jsonStr, ContentResponse::class.java)
         Assert.assertNotNull("Created Gson POJO Object", gsonContent)
 
@@ -131,7 +125,7 @@ class TestEdraakContentScraper {
 
         val questionSetList = scraper.getQuestionSet(gsonContent)
         Assert.assertNotNull("Has Questions Set", questionSetList)
-        Assert.assertTrue("Has more than 1 question", questionSetList.size > 0)
+        Assert.assertTrue("Has more than 1 question", questionSetList?.size ?: 0 > 0)
 
         val video = File(courseDirectory, VIDEO_FILENAME_WEBM)
         if (ComponentType.ONLINE.type.equals(gsonContent.target_component!!.component_type!!, ignoreCase = true)) {
@@ -140,13 +134,13 @@ class TestEdraakContentScraper {
             Assert.assertEquals("Should not have video", false, ContentScraperUtil.fileHasContent(video))
         }
 
-        Assert.assertTrue("tincan file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getTINCAN_FILENAME())))
-        Assert.assertTrue("index html file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getINDEX_HTML())))
-        Assert.assertTrue("jquery file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getJQUERY_JS())))
-        Assert.assertTrue("material js file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getMATERIAL_JS())))
-        Assert.assertTrue("material css file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getMATERIAL_CSS())))
-        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getARABIC_FONT_REGULAR())))
-        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INSTANCE.getARABIC_FONT_BOLD())))
+        Assert.assertTrue("tincan file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, TINCAN_FILENAME)))
+        Assert.assertTrue("index html file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, INDEX_HTML)))
+        Assert.assertTrue("jquery file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, JQUERY_JS)))
+        Assert.assertTrue("material js file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, MATERIAL_JS)))
+        Assert.assertTrue("material css file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, MATERIAL_CSS)))
+        Assert.assertTrue("arabic font regular file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, ARABIC_FONT_REGULAR)))
+        Assert.assertTrue("arabic font bold file exists", ContentScraperUtil.fileHasContent(File(courseDirectory, ARABIC_FONT_BOLD)))
 
 
     }
@@ -248,11 +242,11 @@ class TestEdraakContentScraper {
 
         scraper.scrapeContent()
 
-        val firstDownloadTime = File(tmpDir, INSTANCE.getVIDEO_FILENAME_WEBM()).lastModified()
+        val firstDownloadTime = File(tmpDir, VIDEO_FILENAME_WEBM).lastModified()
         //now run scrapeContent again...
         scraper.scrapeContent()
 
-        val lastModified = File(tmpDir, INSTANCE.getVIDEO_FILENAME_WEBM()).lastModified()
+        val lastModified = File(tmpDir, VIDEO_FILENAME_WEBM).lastModified()
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime)
 
@@ -270,12 +264,12 @@ class TestEdraakContentScraper {
         val scraper = EdraakK12ContentScraper(url, tmpDir)
 
         scraper.scrapeContent()
-        val firstDownloadTime = File(tmpDir, INSTANCE.getQUESTIONS_JSON()).lastModified()
+        val firstDownloadTime = File(tmpDir, QUESTIONS_JSON).lastModified()
         //now run scrapeContent again...
 
         scraper.scrapeContent()
 
-        val lastModified = File(tmpDir, INSTANCE.getQUESTIONS_JSON()).lastModified()
+        val lastModified = File(tmpDir, QUESTIONS_JSON).lastModified()
         //Assert that last modified dates are lower than firstDownloadCompleteTime
         Assert.assertEquals("last modified time = firstdownload time", lastModified, firstDownloadTime)
 

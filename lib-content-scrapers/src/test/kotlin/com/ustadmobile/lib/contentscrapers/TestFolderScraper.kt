@@ -1,17 +1,11 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.lib.contentscrapers.folder.IndexFolderScraper
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -29,7 +23,7 @@ class TestFolderScraper {
     @Before
     @Throws(IOException::class)
     fun setupFolder() {
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
 
         tmpDir = Files.createTempDirectory("testIndexFolderScraper").toFile()
@@ -62,8 +56,8 @@ class TestFolderScraper {
         scraper.findContent("3asafeer",
                 tmpDir!!, containerDir!!)
 
-        val db = UmAppDatabase.getInstance(null)
-        val repo = db.getRepository("https://localhost", "")
+        val db = UmAppDatabase.getInstance(Any())
+        val repo = db //db.getRepository("https://localhost", "")
 
         val contentEntryDao = repo.contentEntryDao
         val parentChildDaoJoin = repo.contentEntryParentChildJoinDao

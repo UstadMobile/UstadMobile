@@ -1,18 +1,13 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
-
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -31,9 +26,9 @@ class TestExportData {
 
     @Throws(IOException::class)
     fun initDb() {
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
-        val repo = db.getRepository("https://localhost", "")
+        val repo = db//db.getRepository("https://localhost", "")
 
         val contentDao = repo.contentEntryDao
         val pcjdao = repo.contentEntryParentChildJoinDao

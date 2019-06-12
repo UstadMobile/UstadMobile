@@ -1,16 +1,16 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.db.dao.ScrapeRunDao
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.db.entities.ScrapeRun
-
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
+import okio.Buffer
+import okio.Okio
 import org.apache.commons.io.IOUtils
 import org.apache.commons.pool2.impl.GenericObjectPool
 import org.junit.After
@@ -18,21 +18,9 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.openqa.selenium.chrome.ChromeDriver
-
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 import java.nio.file.Files
-
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
-import okio.Buffer
-import okio.BufferedSource
-import okio.Okio
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 
 class TestIndexKhanAcademy {
 
@@ -103,9 +91,9 @@ class TestIndexKhanAcademy {
     @Throws(IOException::class)
     fun givenServerOnline_whenKhanContentScraped_thenShouldConvertAndDownloadAllFiles() {
 
-        val db = UmAppDatabase.getInstance(null)
+        val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
-        val repo = db.getRepository("https://localhost", "")
+        val repo = db //db.getRepository("https://localhost", "")
         val runDao = db.scrapeRunDao
         val run = ScrapeRun()
         run.scrapeRunUid = 999

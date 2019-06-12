@@ -1,31 +1,18 @@
 package com.ustadmobile.lib.contentscrapers.phetsimulation
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryContentCategoryJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
-import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
-
-import org.junit.Assert
-import org.junit.Test
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-import java.util.ArrayList
-
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.BufferedSource
 import okio.Okio
+import org.junit.Assert
+import org.junit.Test
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
 
 class TestPhetContentScraper {
 
@@ -244,8 +231,8 @@ class TestPhetContentScraper {
     @Throws(IOException::class)
     fun givenServerOnline_whenUrlFound_findAllSimulations() {
 
-        val db = UmAppDatabase.getInstance(null)
-        val repo = db.getRepository("https://localhost", "")
+        val db = UmAppDatabase.getInstance(Any())
+        val repo = db //db.getRepository("https://localhost", "")
         db.clearAllTables()
 
         val index = IndexPhetContentScraper()
@@ -299,8 +286,8 @@ class TestPhetContentScraper {
     @Throws(IOException::class)
     fun givenDirectoryOfTranslationsIsCreated_findAllTranslationRelations() {
 
-        val db = UmAppDatabase.getInstance(null)
-        val repo = db.getRepository("https://localhost", "")
+        val db = UmAppDatabase.getInstance(Any())
+        val repo = db//db.getRepository("https://localhost", "")
         db.clearAllTables()
 
         val tmpDir = Files.createTempDirectory("testphetcontentscraper").toFile()

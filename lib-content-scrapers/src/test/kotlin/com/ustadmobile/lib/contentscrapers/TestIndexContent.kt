@@ -2,33 +2,21 @@ package com.ustadmobile.lib.contentscrapers
 
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.db.dao.ScrapeRunDao
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.edraakK12.IndexEdraakK12Content
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ScrapeRun
-
-import org.apache.commons.io.IOUtils
-import org.junit.Assert
-import org.junit.Test
-
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.BufferedSource
 import okio.Okio
-
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import org.apache.commons.io.IOUtils
+import org.junit.Assert
+import org.junit.Test
+import java.io.IOException
+import java.nio.file.Files
 
 class TestIndexContent {
 
@@ -98,8 +86,8 @@ class TestIndexContent {
     @Throws(IOException::class)
     fun givenServerOnline_whenUrlFound_FindImportedContent() {
 
-        val db = UmAppDatabase.getInstance(null)
-        val repo = db.getRepository("https://localhost", "")
+        val db = UmAppDatabase.getInstance(Any())
+        val repo = db//db.getRepository("https://localhost", "")
         val runDao = db.scrapeRunDao
         val run = ScrapeRun()
         run.scrapeRunUid = 943
