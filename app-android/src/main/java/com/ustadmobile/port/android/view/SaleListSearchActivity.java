@@ -30,6 +30,7 @@ import com.ustadmobile.core.view.SaleListSearchView;
 import com.ustadmobile.lib.db.entities.SaleListDetail;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 public class SaleListSearchActivity extends UstadBaseActivity implements SaleListSearchView {
@@ -46,8 +47,12 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
     private CrystalRangeSeekbar valueSeekbar;
     private String currentValue = "";
 
+    private long fromDate, toDate;
     EditText dateRangeET;
     TextView valueRangeTV;
+
+    private Spinner sortSpinner;
+    String[] sortSpinnerPresets;
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -142,6 +147,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         dateRangeET.setFocusable(false);
         valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar);
         valueRangeTV = findViewById(R.id.activity_sale_list_search_value_range_textview);
+        sortSpinner = findViewById(R.id.activity_sale_list_search_sort_spinner);
 
         //Call the Presenter
         mPresenter = new SaleListSearchPresenter(this,
@@ -158,20 +164,42 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        valueSeekbar.setMaxValue(100000);
+        valueSeekbar.setMinValue(0);
         valueSeekbar.setOnRangeSeekbarChangeListener((minValue, maxValue) -> {
             updateValueRangeOnView(minValue.intValue(), maxValue.intValue());
             if(minValue.floatValue() > 0)
-                apl = (minValue.intValue()/100f);
+                apl = (minValue.intValue());
             if(maxValue.floatValue() > 0)
-                aph = (maxValue.intValue()/100f);
+                aph = (maxValue.intValue());
             mPresenter.updateFilter(apl, aph, currentValue);
         });
 
         updateValueRangeOnView(0,100000);
+
+        dateRangeET.setOnClickListener(v -> mPresenter.goToSelectDateRange(fromDate, toDate));
+
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresenter.handleChangeSortOrder(id);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     private void updateValueRangeOnView(int from, int to){
-        String rangeText = getText(R.string.from) + " " + from + "% - " + to + "%";
+        fromDate = from;
+        toDate = to;
+        DecimalFormat formatter = new DecimalFormat("#,###");
+
+        String toS = formatter.format(to);
+        String fromS = formatter.format(from);
+        String rangeText = getText(R.string.from) + " " + fromS + " - " + toS ;
         valueRangeTV.setText(rangeText);
     }
 
@@ -217,5 +245,24 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
                 R.layout.item_simple_spinner, locations);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(adapter);
+    }
+
+    @Override
+    public void updateDateRangeText(String dateRangeText) {
+        dateRangeET.setText(dateRangeText);
+    }
+
+    /**
+     * Updates the sort spinner with string list given
+     *
+     * @param presets A String array String[] of the presets available.
+     */
+    @Override
+    public void updateSortSpinner(String[] presets) {
+        this.sortSpinnerPresets = presets;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getApplicationContext()),
+                R.layout.spinner_item, sortSpinnerPresets);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
     }
 }

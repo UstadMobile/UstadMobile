@@ -128,9 +128,6 @@ public class SplashScreenActivity extends UstadBaseActivity{
         SaleProductDao saleProductDao = repo.getSaleProductDao();
         SaleProductParentJoinDao productParentJoinDao = repo.getSaleProductParentJoinDao();
         PersonDao personDao = repo.getPersonDao();
-        SaleProductGroupDao productGroupDao = repo.getSaleProductGroupDao();
-        SaleProductGroupJoinDao productGroupJoinDao = repo.getProductGroupJoinDao();
-
 
         //Create a new location
         locationDao.findByTitleAsync("Test location", new UmCallback<List<Location>>() {
@@ -141,15 +138,52 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     newLocation = new Location();
                     newLocation.setTitle("Test location");
                     newLocation.setParentLocationUid(0);
+                    newLocation.setLocationActive(true);
                     newLocation.setDescription("Test location added from Dummy data");
                     newLocation.setLocationUid(locationDao.insert(newLocation));
 
+                    //Add more locations
+                    Location afg = new Location("Afghanistan",
+                            "Afghanistan whole region", true);
+                    long afgLocationUid = locationDao.insert(afg);
+
+                    Location centralAfg = new Location("Central Afghanistan", "Center region", true, afgLocationUid);
+                    long centralAfgLocationUid = locationDao.insert(centralAfg);
+                    Location easternAfg = new Location("Eastern Afghanistan", "Eastern region", true, afgLocationUid);
+                    locationDao.insert(new Location("Kabul Province",
+                            "Kabul area", true, centralAfgLocationUid));
+
+                    long easternAfgLocationUid = locationDao.insert(easternAfg);
+                    Location northernAfg= new Location("Northern Afghanistan", "Northern region", true, afgLocationUid);
+                    long northernAfgLocationUid = locationDao.insert(northernAfg);
+                    Location westernAfg = new Location("Western Afghanistan", "Western region", true, afgLocationUid);
+                    locationDao.insert(new Location("Kunduz Province",
+                            "Kunduz area", true, northernAfgLocationUid));
+
+                    long westernAfgLocationUid = locationDao.insert(westernAfg);
+                    Location southeastAfg = new Location("Southeast Afghanistan", "Southeast region", true, afgLocationUid);
+                    locationDao.insert(new Location("Herat Province",
+                            "Herat area", true, westernAfgLocationUid));
+                    long southeastAfgLocationUid = locationDao.insert(southeastAfg);
+                    locationDao.insert(new Location("Khost Province",
+                            "Khost area", true, southeastAfgLocationUid));
+                    locationDao.insert(new Location("Paktika Province",
+                            "Paktika area", true, southeastAfgLocationUid));
+
+                    Location southWestAfg = new Location("Southwest Afghanistan",
+                            "Southwest region", true, afgLocationUid);
+                    long southWestAfgLocationUid = locationDao.insert(southWestAfg);
+
                     //Also add some Producers (People)
 
-                    Person person1 = new Person("royarahimi", "Roya", "Rahimi");
-                    Person person2 = new Person("lailagulzar", "Laila", "Gulzar");
-                    Person person3 = new Person("meenahotaki", "Meena", "Hotaki");
-                    Person person4 = new Person("nargisyousafzi", "Nargis", "Yousafzi");
+                    Person person1 = new Person("royarahimi", "Roya",
+                            "Rahimi");
+                    Person person2 = new Person("lailagulzar", "Laila",
+                        "Gulzar");
+                    Person person3 = new Person("meenahotaki", "Meena",
+                            "Hotaki");
+                    Person person4 = new Person("nargisyousafzi","Nargis",
+                            "Yousafzi");
 
                     person1.setActive(true);
                     person2.setActive(true);

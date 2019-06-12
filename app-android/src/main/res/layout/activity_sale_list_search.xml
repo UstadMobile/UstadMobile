@@ -142,13 +142,14 @@
         android:id="@+id/activity_sale_list_search_sort_by_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="11dp"
+        android:layout_marginTop="13dp"
         android:text="@string/sort_by"
-        app:layout_constraintEnd_toStartOf="@+id/spinner2"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/activity_sale_list_search_sort_spinner"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline3" />
 
     <Spinner
-        android:id="@+id/spinner2"
+        android:id="@+id/activity_sale_list_search_sort_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

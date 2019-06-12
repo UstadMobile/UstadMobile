@@ -243,7 +243,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         long timeoutExceeded = System.currentTimeMillis() - lt;
         long logoutTimeout = 300000; //TODO: Get and set from app pref
         if(timeoutExceeded > logoutTimeout){
-            //TODO: Fix check
             handleLogout();
         }
     }

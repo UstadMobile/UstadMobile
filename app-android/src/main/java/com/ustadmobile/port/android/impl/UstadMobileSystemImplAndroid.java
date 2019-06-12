@@ -89,6 +89,7 @@ import com.ustadmobile.core.view.SalePaymentDetailView;
 import com.ustadmobile.core.view.SaleProductCategoryListView;
 import com.ustadmobile.core.view.SaleProductDetailView;
 import com.ustadmobile.core.view.ScormPackageView;
+import com.ustadmobile.core.view.SelectDateRangeDialogView;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.core.view.SelectProducerView;
 import com.ustadmobile.core.view.SelectSaleProductView;
@@ -122,6 +123,7 @@ import com.ustadmobile.port.android.view.SalePaymentDetailActivity;
 import com.ustadmobile.port.android.view.SaleProductCategoryListActivity;
 import com.ustadmobile.port.android.view.SaleProductDetailActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
+import com.ustadmobile.port.android.view.SelectDateRangeDialogFragment;
 import com.ustadmobile.port.android.view.SelectLanguageDialogFragment;
 import com.ustadmobile.port.android.view.SelectProducerActivity;
 import com.ustadmobile.port.android.view.SelectSaleProductActivity;
@@ -214,6 +216,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AddSaleProductToSaleCategoryView.VIEW_NAME, AddSaleProductToSaleCategoryActivity.class);
         viewNameToAndroidImplMap.put(SaleListSearchView.VIEW_NAME, SaleListSearchActivity.class);
         viewNameToAndroidImplMap.put(SaleDetailSignatureView.VIEW_NAME, SaleDetailSignatureActivity.class);
+        viewNameToAndroidImplMap.put(SelectDateRangeDialogView.VIEW_NAME, SelectDateRangeDialogFragment.class);
 
     }
 

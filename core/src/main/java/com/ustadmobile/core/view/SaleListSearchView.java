@@ -20,6 +20,10 @@ public interface SaleListSearchView extends UstadView {
      */
     void finish();
 
+    int SORT_MOST_RECENT = 1;
+    int SORT_LOWEST_PRICE = 2;
+    int SORT_HIGHEST_PRICE = 3;
+
 
     /**
      * Sets the given provider to the view's provider adapter.
@@ -30,6 +34,14 @@ public interface SaleListSearchView extends UstadView {
 
     void updateLocationSpinner(String[] locations);
 
+    void updateDateRangeText(String dateRangeText);
+
+    /**
+     * Sorts the sorting drop down (spinner) for sort options in the Class list view.
+     *
+     * @param presets A String array String[] of the presets available.
+     */
+    void updateSortSpinner(String[] presets);
 
 }
 

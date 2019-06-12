@@ -48,11 +48,20 @@ public class Location {
         this.description = description;
         this.locationActive = true;
     }
+
     public Location(String title, String description, boolean active) {
         this.title = title;
         this.description = description;
         this.locationActive = active;
     }
+
+    public Location(String title, String description, boolean active, Long parentUid) {
+        this.title = title;
+        this.description = description;
+        this.locationActive = active;
+        this.parentLocationUid = parentUid;
+    }
+
 
     public String getLng() {
         return lng;

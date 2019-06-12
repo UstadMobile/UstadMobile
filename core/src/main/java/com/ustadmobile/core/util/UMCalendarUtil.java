@@ -198,4 +198,17 @@ public class UMCalendarUtil {
         }
     }
 
+
+    public static String getPrettyDateSimpleFromLong(long thisDate, Locale locale){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(thisDate);
+        SimpleDateFormat format;
+        if(locale != null) {
+            format = new SimpleDateFormat("dd/MMM/YYYY", locale);
+        }else{
+            format = new SimpleDateFormat("dd/MMM/YYYY");
+        }
+        return format.format(calendar.getTime());
+    }
+
 }

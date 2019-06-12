@@ -418,5 +418,8 @@
     <string name="add_another_reminder">Add another reminder</string>
     <string name="day_before">day before</string>
     <string name="days_before">days before</string>
+    <string name="tocao">To</string>
+    <string name="lowest_price">Lowest price</string>
+    <string name="highest_price">Highest price</string>
 
 </resources>
