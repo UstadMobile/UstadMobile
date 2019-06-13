@@ -1,13 +1,8 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.sharedse.io.FileOutputStreamSe
-import com.ustadmobile.sharedse.io.FileSe
-import com.ustadmobile.sharedse.io.readText
-import com.ustadmobile.sharedse.io.writeText
-import com.ustadmobile.sharedse.security.MessageDigestSe
-import com.ustadmobile.sharedse.security.getMessageDigestInstance
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.sharedse.io.*
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.*
@@ -16,10 +11,16 @@ import io.ktor.client.response.discardRemaining
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.filter
 import kotlinx.coroutines.delay
+import kotlinx.io.ByteBuffer
 import kotlinx.io.IOException
 import kotlinx.io.InputStream
-import kotlinx.io.OutputStream
-import kotlinx.serialization.json.*
+import kotlinx.io.core.Input
+import kotlinx.io.core.Output
+import kotlinx.io.core.copyTo
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.content
 
 /**
  * This class will manage downloading and resuming an interrupted download. It will write a small
@@ -34,33 +35,35 @@ import kotlinx.serialization.json.*
  * beginning.
  */
 class ResumableDownload2(val httpUrl: String, val destinationFile: String, val retryDelay: Int = 1000,
-                         private val calcMd5: Boolean = true) {
+                         private val calcMd5: Boolean = true, val httpClient: HttpClient = HttpClient()) {
 
     private var md5SumBytes: ByteArray? = null
 
     val md5Sum: ByteArray
-        get() = if(md5SumBytes == null) {
+        get() = /*if(md5SumBytes == null) {
                 throw IllegalStateException("Download not complete: cannot provide md5")
             } else {
                 md5SumBytes!!
-            }
+            }*/
+            ByteBuffer.allocate(8).putLong(getSystemTimeInMillis()).array()
 
 
 
 
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
-
-        val httpClient = HttpClient()
         val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)
         val dlPartFile = FileSe(destinationFile + DLPART_EXTENSION)
 
         val dlInfoMap = mutableMapOf<String, String?>()
 
+        var responseTime = 0L
+        var copyTime = 0L
         for(i in 0..maxAttempts) {
-            var inputStream = null as InputStream?
-            var outStream = null as OutputStream?
+            var httpIn = null as Input?
+            var fileOutput = null as Output?
             var httpResponse = null as HttpResponse?
+            var headResponse = null as HttpResponse?
             try {
                 var startFrom = 0L
                 val dlPartFileExists = dlPartFile.exists()
@@ -75,10 +78,10 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                 }
 
                 if (dlInfoMap.any { it.key in VALIDATION_HEADERS }) {
-                    val headResponse = httpClient.head<HttpResponse>(httpUrl)
-                    val validated = VALIDATION_HEADERS.filter { headResponse.headers[it] != null
+                    headResponse = httpClient.head<HttpResponse>(httpUrl)
+                    val validated = VALIDATION_HEADERS.filter { headResponse!!.headers[it] != null
                             && it.toLowerCase() in dlInfoMap.keys }
-                            .any { dlInfoMap[it.toLowerCase()] == headResponse.headers[it] }
+                            .any { dlInfoMap[it.toLowerCase()] == headResponse!!.headers[it] }
 
                     headResponse.discardRemaining()
 
@@ -90,16 +93,23 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     }else {
                         UMLog.l(UMLog.DEBUG, 0, " file exists but not validated")
                     }
+                    headResponse.close()
+                    headResponse = null
                 }
 
-                requestBuilder.url(httpUrl)
 
+                requestBuilder.url(httpUrl)
+                val requestStart = getSystemTimeInMillis()
                 httpResponse = httpClient.get<HttpResponse>(requestBuilder)
+                responseTime = getSystemTimeInMillis() - requestStart
+
 
                 if(httpResponse.status !in listOf(HttpStatusCode.OK, HttpStatusCode.PartialContent)) {
                     httpResponse.discardRemaining()
                     throw IOException("Unsuccessful http request: response code was: ${httpResponse.status}")
                 }
+
+                appendOutput = (httpResponse.status == HttpStatusCode.PartialContent)
 
                 //save the etag and last modified info (if known)
                 dlInfoMap.clear()
@@ -110,26 +120,17 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                 val jsonObj = JsonObject(dlInfoMap.map { entry -> Pair(entry.key, JsonPrimitive(entry.value)) }.toMap())
                 dlInfoFile.writeText(Json.stringify(JsonObject.serializer(), jsonObj))
 
-                inputStream = httpResponse.receive<InputStream>()
+                val copyStartTime = getSystemTimeInMillis()
 
-                if(httpResponse.status == HttpStatusCode.PartialContent) {
-                    appendOutput = true
-                }
+                httpIn = inputStreamAsInput(httpResponse.receive<InputStream>())
+                fileOutput = createFileOutputWritableChannel(dlPartFile.getAbsolutePath(), appendOutput)
+                httpIn.copyTo(fileOutput)
 
-                outStream = FileOutputStreamSe(dlPartFile, appendOutput)
+                copyTime = getSystemTimeInMillis() - copyStartTime
 
-                val messageDigestSe = getMessageDigestInstance("MD5")
+                //Can be added for checking performance
+                //println("Response time: $responseTime ms | Copy time: $copyTime")
 
-                val buf = ByteArray(8 * 1024)
-                var bytesRead = 0
-                while (inputStream.read(buf).also { bytesRead = it } != -1) {
-                    outStream.write(buf, 0, bytesRead)
-                    messageDigestSe.update(buf, 0, bytesRead)
-                }
-                outStream.flush()
-                md5SumBytes = messageDigestSe.digest()
-
-                //now move the file to the destination
                 if (dlPartFile.renameTo(FileSe(destinationFile))) {
                     return true
                 } else {
@@ -138,14 +139,14 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
             }catch(e: Exception) {
                 delay(retryDelay.toLong())
             }finally {
+                httpIn?.close()
                 httpResponse?.close()
-                outStream?.close()
-                inputStream?.close()
+                fileOutput?.close()
+                headResponse?.close()
             }
 
 
         }
-
 
         return false
     }

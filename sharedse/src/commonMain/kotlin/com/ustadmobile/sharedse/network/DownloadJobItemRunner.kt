@@ -325,173 +325,120 @@ class DownloadJobItemRunner
                 " StartDownload: ContainerUid = " + downloadItem.djiContainerUid)
         var attemptsRemaining = 3
 
-        var downloaded = false
-//        val statusCheckTask = StatusCheckTask()
-//        statusCheckTimer.scheduleAtFixedRate(statusCheckTask,
-//                0, TimeUnit.SECONDS.toMillis(1))
-
         val container = appDbRepo.containerDao
                 .findByUid(downloadItem.djiContainerUid)
 
-        var containerManager = ContainerManager(container!!, appDb, appDbRepo, destinationDir!!)
+        val containerManager = ContainerManager(container!!, appDb, appDbRepo, destinationDir!!)
+
+        val currentTimeStamp = getSystemTimeInMillis()
+        val minLastSeen = currentTimeStamp - (60 * 1000)
+        val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
+
+        //TODO: if the content is available on the node we already connected to, take that one
+        currentNetworkNode = appDb.networkNodeDao
+                .findLocalActiveNodeByContainerUid(downloadItem.djiContainerUid,
+                        minLastSeen, BAD_PEER_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
+
+        val isFromCloud = currentNetworkNode == null
+        val history = DownloadJobItemHistory()
+        history.mode = if (isFromCloud) MODE_CLOUD else MODE_LOCAL
+        history.startTime = getSystemTimeInMillis()
+        history.downloadJobItemId = downloadItem.djiUid
+        history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
+        history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
+
+        val downloadEndpoint: String?
+        //var connectionOpener: URLConnectionOpener? = null
+        if (isFromCloud) {
+            if (connectivityStatus!!.wifiSsid != null && connectivityStatus!!.wifiSsid!!.toUpperCase().startsWith("DIRECT-")) {
+                //we are connected to a local peer, but need the normal wifi
+                //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
+                // set status to waiting for connection and stop
+                if (!connectToCloudNetwork()) {
+                    //connection has failed
+                    attemptsRemaining--
+                    recordHistoryFinished(history, false)
+                    //continue
+                }
+            }
+            downloadEndpoint = endpointUrl
+        } else {
+            if (currentNetworkNode!!.groupSsid == null || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
+
+                if (!connectToLocalNodeNetwork()) {
+                    //recording failure will push the node towards the bad threshold, after which
+                    // the download will be attempted from the cloud
+                    recordHistoryFinished(history, false)
+                    //continue
+                }
+            }
+
+            downloadEndpoint = currentNetworkNode!!.endpointUrl
+            //connectionOpener = networkManager.localConnectionOpener
+        }
+
+        val containerEntryListClient = HttpClient() {
+            install(JsonFeature)
+        }
 
 
+        history.url = downloadEndpoint
 
+        UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+                " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
+                " Attempts remaining= " + attemptsRemaining)
 
-        //do {
-            val currentTimeStamp = getSystemTimeInMillis()
-            val minLastSeen = currentTimeStamp - (60 * 1000)
-            val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
+        try {
+            appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
 
-            //TODO: if the content is available on the node we already connected to, take that one
-            currentNetworkNode = appDb.networkNodeDao
-                    .findLocalActiveNodeByContainerUid(downloadItem.djiContainerUid,
-                            minLastSeen, BAD_PEER_FAILURE_THRESHOLD, maxFailureFromTimeStamp)
+            val containerEntryList = containerEntryListClient.get<List<ContainerEntryWithMd5>>(
+                    "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
 
-            val isFromCloud = currentNetworkNode == null
-            val history = DownloadJobItemHistory()
-            history.mode = if (isFromCloud) MODE_CLOUD else MODE_LOCAL
+            val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
             history.startTime = getSystemTimeInMillis()
-            history.downloadJobItemId = downloadItem.djiUid
-            history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
-            history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
-
-            val downloadEndpoint: String?
-            //var connectionOpener: URLConnectionOpener? = null
-            if (isFromCloud) {
-                if (connectivityStatus!!.wifiSsid != null && connectivityStatus!!.wifiSsid!!.toUpperCase().startsWith("DIRECT-")) {
-                    //we are connected to a local peer, but need the normal wifi
-                    //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
-                    // set status to waiting for connection and stop
-                    if (!connectToCloudNetwork()) {
-                        //connection has failed
-                        attemptsRemaining--
-                        recordHistoryFinished(history, false)
-                        //continue
-                    }
-                }
-                downloadEndpoint = endpointUrl
-            } else {
-                if (currentNetworkNode!!.groupSsid == null || currentNetworkNode!!.groupSsid != connectivityStatus!!.wifiSsid) {
-
-                    if (!connectToLocalNodeNetwork()) {
-                        //recording failure will push the node towards the bad threshold, after which
-                        // the download will be attempted from the cloud
-                        recordHistoryFinished(history, false)
-                        //continue
-                    }
+            withContext(coroutineContext) {
+                val producer = produce<ContainerEntryWithMd5> {
+                    entriesToDownload.forEach { send(it) }
                 }
 
-                downloadEndpoint = currentNetworkNode!!.endpointUrl
-                //connectionOpener = networkManager.localConnectionOpener
-            }
-
-            val containerEntryListClient = HttpClient() {
-                install(JsonFeature)
-            }
-
-//
-//
-//
-//
-//            val containerEntryListCall = containerEntryListService
-//                    .findByContainerWithMd5(downloadEndpoint!! + CONTAINER_ENTRY_LIST_PATH,
-//                            downloadItem.djiContainerUid)
-
-            history.url = downloadEndpoint
-
-            UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                    " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
-                    " Attempts remaining= " + attemptsRemaining)
-
-            try {
-                appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
-
-                val containerEntryList = containerEntryListClient.get<List<ContainerEntryWithMd5>>(
-                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
-
-                //val response = containerEntryListCall.execute()
-                //if (response.isSuccessful) {
-                    //val containerEntryList = response.body()
-                val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
-                                //?: arrayListOf())//returns items we don't have yet
-//                    completedEntriesBytesDownloaded.set(appDb.containerEntryFileDao
-//                            .sumContainerFileEntrySizes(container!!.containerUid))
-                history.startTime = getSystemTimeInMillis()
-                withContext(coroutineContext) {
-                    val producer = produce<ContainerEntryWithMd5> {
-                        entriesToDownload.forEach { send(it) }
-                    }
-
-                    repeat(4) {
-                        launch {
-                            for(entry in producer) {
-                                val destFile = FileSe(FileSe(destinationDir!!),
-                                        entry.ceCefUid.toString() + ".tmp")
-                                val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
-                                println("Downloader $it downloading $downloadUrl")
-                                val resumableDownload = ResumableDownload2(downloadUrl,
-                                        destFile.getAbsolutePath())
+                repeat(4) {
+                    launch {
+                        val httpClient = HttpClient()
+                        for(entry in producer) {
+                            val destFile = FileSe(FileSe(destinationDir!!),
+                                    entry.ceCefUid.toString() + ".tmp")
+                            val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
+                            val resumableDownload = ResumableDownload2(downloadUrl,
+                                    destFile.getAbsolutePath(), httpClient = httpClient)
 //                            httpDownload!!.connectionOpener = connectionOpener
 //                            httpDownloadRef.set(httpDownload)
-                                if (resumableDownload.download()) {
-                                    completedEntriesBytesDownloaded.addAndGet(destFile.length())
-                                    containerManager.addEntries(
-                                            ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
-                                                    dontUpdateTotals = true),
-                                            DownloadedEntrySource(entry.cePath!!, destFile,
-                                                    resumableDownload.md5Sum, destFile.getAbsolutePath()))
-                                }else {
-                                    numFailures.incrementAndGet()
-                                }
+                            if (resumableDownload.download()) {
+                                completedEntriesBytesDownloaded.addAndGet(destFile.length())
+                                containerManager.addEntries(
+                                        ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
+                                                dontUpdateTotals = true),
+                                        DownloadedEntrySource(entry.cePath!!, destFile,
+                                                resumableDownload.md5Sum, destFile.getAbsolutePath()))
+                            }else {
+                                numFailures.incrementAndGet()
                             }
                         }
                     }
                 }
-
-//                    var downloadedCount = 0
-//                    UMLog.l(UMLog.INFO, 699, "Downloading " +
-//                            entriesToDownload.size + " ContainerEntryFiles from " + downloadEndpoint)
-//                    for (entry in entriesToDownload) {
-//                        val destFile = File(File(destinationDir!!),
-//                                entry.ceCefUid.toString() + ".tmp")
-//                        httpDownload = ResumableHttpDownload(downloadEndpoint +
-//                                CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid,
-//                                destFile.absolutePath)
-//                        httpDownload!!.connectionOpener = connectionOpener
-//                        httpDownloadRef.set(httpDownload)
-//                        if (httpDownload!!.download()) {
-//                            completedEntriesBytesDownloaded.addAndGet(destFile.length())
-//                            containerManager.addEntry(destFile, entry.cePath!!,
-//                                    ContainerManager.OPTION_COPY)
-//                            downloadedCount++
-//                        }
-//
-//                        if (!destFile.delete())
-//                            destFile.deleteOnExit()
-//                    }
-//
-//                    downloaded = downloadedCount == entriesToDownload.size
-//                //}
-            } catch (e: IOException) {
-                UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
-                        "Failed to download a file from " + endpointUrl, e)
             }
+        } catch (e: IOException) {
+            UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
+                    "Failed to download a file from " + endpointUrl, e)
+        }
 
 
-            val numFails = numFailures.value
-            if (numFails > 0) {
-                //wait before retry
-                delay(3000)
-            }
-            attemptsRemaining--
-            recordHistoryFinished(history, numFails == 0)
-        //} while (runnerStatus.get() == JobStatus.RUNNING && !downloaded && attemptsRemaining > 0)
-
-        //httpdownloadref usage is finished
-        //httpDownloadRef.set(null)
-
-        //if (downloaded) {
+        val numFails = numFailures.value
+        if (numFails > 0) {
+            //wait before retry
+            delay(3000)
+        }
+        attemptsRemaining--
+        recordHistoryFinished(history, numFails == 0)
 
         if(numFails == 0) {
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
@@ -504,7 +451,6 @@ class DownloadJobItemRunner
         }
 
         stop(if (numFails == 0) JobStatus.COMPLETE else JobStatus.FAILED)
-
     }
 
     private fun recordHistoryFinished(history: DownloadJobItemHistory, successful: Boolean) {
@@ -677,21 +623,6 @@ class DownloadJobItemRunner
         downloadJobItemManager!!.updateStatus(downloadItem.djiUid, itemStatus)
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} Setting status to:  ${JobStatus.statusToString(itemStatus)}")
-
-
-//        val latch = CountDownLatch(1)
-//        TODO("Update this to using suspend fun")
-////        downloadJobItemManager!!.updateStatus(downloadItem.djiUid.toInt(), itemStatus,
-////                object : UmResultCallback<Void?> {
-////                    override fun onDone(result: Void?) {
-////                        latch.countDown()
-////                    }
-////                })
-//        try {
-//            latch.await(5, TimeUnit.SECONDS)
-//        } catch (e: InterruptedException) {/* should not happen */
-//        }
-
     }
 
     private fun isExpectedWifiDirectGroup(status: ConnectivityStatus): Boolean {

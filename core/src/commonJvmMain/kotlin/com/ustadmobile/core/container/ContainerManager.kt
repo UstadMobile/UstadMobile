@@ -86,7 +86,6 @@ actual class ContainerManager actual constructor(container: Container,
                 //TODO: check for any paths that are being overwritten
 
                 if(addOpts.moveExistingFiles && currentFilePath != null) {
-                    println("Moving $currentFilePath to $destFile")
                     if(!File(currentFilePath).renameTo(destFile)) {
                         throw IOException("Could not rename input file : $currentFilePath")
                     }

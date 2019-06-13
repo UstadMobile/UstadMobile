@@ -41,6 +41,9 @@ class ResumableDownload2Test {
         mockServer.setDispatcher(mockDispatcher)
         mockServer.start()
 
+//        println("NanoHTTPD running on ${server.listeningPort}")
+//        Thread.sleep(5 * 60 * 1000)
+//        println("continuing")
     }
 
     @After
@@ -58,6 +61,7 @@ class ResumableDownload2Test {
     @Test
     fun `GIVEN serer running normally WHEN download runs SHOULD download successfully and file content should match`() {
         runBlocking {
+            val port = server.listeningPort
             val downloadDstFile = File.createTempFile("resumabledl2test", "tmp")
             tmpFilesToDelete.add(downloadDstFile)
             val downloader = ResumableDownload2(mockServer.url("/static/top_header_bg.jpg").toString(),
