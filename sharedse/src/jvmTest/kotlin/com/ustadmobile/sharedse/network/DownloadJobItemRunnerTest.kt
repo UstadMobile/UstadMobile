@@ -11,16 +11,22 @@ import com.ustadmobile.core.container.*
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.util.ReverseProxyDispatcher
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.io.IOException
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipFile
@@ -30,6 +36,10 @@ import javax.naming.InitialContext
 class DownloadJobItemRunnerTest {
 
     private lateinit var cloudServer: EmbeddedHTTPD
+
+    private lateinit var cloudMockWebServer: MockWebServer
+
+    private lateinit var cloudMockDispatcher: ReverseProxyDispatcher
 
     private lateinit var peerServer: EmbeddedHTTPD
 
@@ -92,6 +102,7 @@ class DownloadJobItemRunnerTest {
     private val MAX_THREAD_SLEEP_TIME = 2
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
+
 
 
     @Before
@@ -199,7 +210,11 @@ class DownloadJobItemRunnerTest {
                 serverDb)
         cloudServer.start()
 
-        cloudEndPoint = cloudServer.localURL
+        cloudMockWebServer = MockWebServer()
+        cloudMockDispatcher = ReverseProxyDispatcher(HttpUrl.parse(cloudServer.localURL)!!)
+        cloudMockWebServer.setDispatcher(cloudMockDispatcher)
+
+        cloudEndPoint = cloudMockWebServer.url("/").toString()
 
         val peerDb = UmAppDatabase.getInstance(context, "peerdb")
         peerDb.clearAllTables()
@@ -335,8 +350,54 @@ class DownloadJobItemRunnerTest {
             assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
                     serverDb, serverRepo, clientDb, clientRepo)
         }
-
-
     }
+
+
+    @Test
+    @Throws(IOException::class)
+    fun givenDownloadStarted_whenFailsOnce_shouldRetryAndComplete() {
+        runBlocking {
+            cloudMockDispatcher.numTimesToFail.set(1)
+
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus)
+
+            jobItemRunner.download()
+
+            item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+
+            Assert.assertEquals("File download task retried and completed successfully",
+                    JobStatus.COMPLETE.toLong(), item.djiStatus.toLong())
+
+            Assert.assertEquals("Number of attempts = 2", 2, item.numAttempts.toLong())
+            Assert.assertTrue("Number of file get requests > 2",
+                    cloudMockWebServer.requestCount > 2)
+
+            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
+                    serverDb, serverRepo, clientDb, clientRepo)
+        }
+    }
+
+    @Test
+    fun givenDownloadStarted_whenFailsExceedMaxAttempts_shouldStopAndSetStatusToFailed() {
+        runBlocking {
+            cloudMockDispatcher.numTimesToFail.set(10)
+
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus, retryDelay = 100L)
+
+            jobItemRunner.download()
+
+            item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+
+            Assert.assertEquals("File download task retried and completed with failure status",
+                    JobStatus.FAILED, item.djiStatus)
+        }
+    }
+
 
 }

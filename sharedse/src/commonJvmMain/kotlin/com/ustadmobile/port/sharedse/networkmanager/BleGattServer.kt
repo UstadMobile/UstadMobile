@@ -1,9 +1,11 @@
 package com.ustadmobile.port.sharedse.networkmanager
 
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes
+//import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
+//import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.BleMessage
+import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
+import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
