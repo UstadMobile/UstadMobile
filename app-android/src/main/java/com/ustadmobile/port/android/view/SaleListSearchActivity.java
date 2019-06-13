@@ -35,16 +35,14 @@ import java.util.Objects;
 
 public class SaleListSearchActivity extends UstadBaseActivity implements SaleListSearchView {
 
-    private Toolbar toolbar;
     private SaleListSearchPresenter mPresenter;
     private RecyclerView mRecyclerView;
     private SearchView searchView;
     private Spinner locationSpinner;
 
-    private float apl = 0.0f;
-    private float aph = 1.0f;
+    private int apl = 0;
+    private int aph = 0;
 
-    private CrystalRangeSeekbar valueSeekbar;
     private String currentValue = "";
 
     private long fromDate, toDate;
@@ -131,7 +129,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         setContentView(R.layout.activity_sale_list_search);
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_sale_list_search_toolbar);
+        Toolbar toolbar = findViewById(R.id.activity_sale_list_search_toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
@@ -145,7 +143,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         locationSpinner = findViewById(R.id.activity_sale_list_search_location_spinner);
         dateRangeET = findViewById(R.id.activity_sale_list_search_date_range_edittext);
         dateRangeET.setFocusable(false);
-        valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar);
+        CrystalRangeSeekbar valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar);
         valueRangeTV = findViewById(R.id.activity_sale_list_search_value_range_textview);
         sortSpinner = findViewById(R.id.activity_sale_list_search_sort_spinner);
 
@@ -168,10 +166,9 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         valueSeekbar.setMinValue(0);
         valueSeekbar.setOnRangeSeekbarChangeListener((minValue, maxValue) -> {
             updateValueRangeOnView(minValue.intValue(), maxValue.intValue());
-            if(minValue.floatValue() > 0)
-                apl = (minValue.intValue());
-            if(maxValue.floatValue() > 0)
-                aph = (maxValue.intValue());
+            apl = (minValue.intValue());
+            aph = (maxValue.intValue());
+
             mPresenter.updateFilter(apl, aph, currentValue);
         });
 

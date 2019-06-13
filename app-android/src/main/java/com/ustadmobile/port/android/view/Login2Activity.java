@@ -131,7 +131,7 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
                 //Check whether the device has a fingerprint sensor//
                 fingerprintIV.setVisibility(View.GONE);
                 assignToFingerprintCB.setVisibility(View.GONE);
-                sendToast("Your device doesn't support fingerprint authentication");
+                //("Your device doesn't support fingerprint authentication");
 
             }else{
                 if (!fingerprintManager.hasEnrolledFingerprints()) {
@@ -342,5 +342,10 @@ public class Login2Activity extends UstadBaseActivity implements Login2View,
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         //mPasswordTextView.setInputType(InputType.TYPE_CLASS_NUMBER);
+    }
+
+    @Override
+    public void setFinishAfficinityOnView() {
+        runOnUiThread(() -> finishAffinity());
     }
 }

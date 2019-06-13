@@ -63,6 +63,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     private TextView addReminderTV;
     private RecyclerView remindersRV;
 
+    private boolean preOrderSelected = false;
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
@@ -189,14 +190,10 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
 
         pppNPET.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -210,6 +207,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         preOrderRB.setOnCheckedChangeListener((buttonView, isChecked) -> {
             mPresenter.setPreOrder(isChecked);
             showPreOrder(isChecked);
+            preOrderSelected = isChecked;
         });
 
         saleRB.setOnCheckedChangeListener((buttonView, isChecked) -> mPresenter.setSold(isChecked));
@@ -236,7 +234,13 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
                 }
                 totalTV.setText(String.valueOf(total));
                 saleRB.setChecked(saleItem.isSaleItemSold());
-                preOrderRB.setChecked(saleItem.isSaleItemPreorder());
+
+                if(preOrderSelected){
+                    preOrderRB.setChecked(preOrderSelected);
+                }else {
+                    preOrderRB.setChecked(saleItem.isSaleItemPreorder());
+                }
+
 
                 long dueDate = saleItem.getSaleItemDueDate();
                 if(dueDate >0){
@@ -285,7 +289,6 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
 
         //set the adapter
         runOnUiThread(() -> remindersRV.setAdapter(recyclerAdapter));
-
 
     }
 

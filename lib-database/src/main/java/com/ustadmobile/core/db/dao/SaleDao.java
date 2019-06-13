@@ -170,12 +170,6 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     public static final String SORT_ORDER_DATE_DESC = " ORDER BY sl.saleCreationDate DESC ";
     public static final String SORT_ORDER_DATE_ASC = " ORDER BY sl.saleCreationDate ASC ";
 
-    private static final String SEARCH_BY_QUERY =
-            " OR locationName LIKE %search% " +
-            " OR saleAmount LIKE %search%  " +
-            " OR saleTitle LIKE %search% "
-            + " OR categoryName LIKE %search% ";
-
     @UmQuery(ALL_SALE_LIST +  SORT_NAME_ASC)
     public abstract UmProvider<SaleListDetail> findAllSaleFilterAllSortNameAscProvider();
 
@@ -295,12 +289,29 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
         return findAllActiveAsSaleListDetailProvider();
     }
 
+    //Filter queries
+    //ALL_SALE_LIST
+    private static final String SEARCH_BY_QUERY =
+            " AND " +
+            " sl.saleLocationUid = :locationuid " +
+            " AND saleAmount > :amountl AND saleAmount < :amounth " +
+            " OR (sl.saleCreationDate > :from AND sl.saleCreationDate < :to )" +
+            " AND sl.saleTitle LIKE :title ";
+    private static final String FILTER_SEARCH_BY_DATE = " ORDER BY saleCreationDate ASC " ;
+    private static final String FILTER_SEARCH_BY_PRICE_ASC = " ORDER BY saleAmount ASC ";
+    private static final String FILTER_SEARCH_BY_PRICE_DESC = " ORDER BY saleAmount DESC ";
+
+    @UmQuery(ALL_SALE_LIST +  SEARCH_BY_QUERY)
+    public abstract UmProvider<SaleListDetail> findAllSaleItemsWithSearchFilter(long locationuid,
+                                long amountl, long amounth, long from, long to, String title);
+
 
     public UmProvider<SaleListDetail> findAllSaleFilterAndSearchProvider(long locationUid,
-                                                     float apl, float aph, String searchQuery){
+                     long spl, long sph, long from, long to, String searchQuery, int sort){
 
         //TODO
-        return findAllSaleFilterAllSortNameAscProvider();
+
+        return findAllSaleItemsWithSearchFilter(locationUid, spl, sph, from, to, searchQuery);
 
     }
 

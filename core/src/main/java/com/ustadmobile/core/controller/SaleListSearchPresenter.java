@@ -48,6 +48,10 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
     private Hashtable<Long, Integer> idToOrderInteger;
 
     private long from,to;
+    private int amountFrom, amountTo;
+    private String stringQuery = "%%";
+
+    private int sort = SORT_MOST_RECENT;
 
     private long locationUidSelected;
 
@@ -140,7 +144,7 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
 
         //Get provider
         umProvider = saleDao.findAllSaleFilterAndSearchProvider(
-                0,0,1,"%");
+                0,0,1,from, to,"%", sort);
         setProvider();
     }
 
@@ -163,10 +167,10 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
         ;
     }
 
-    public void updateFilter(float apl,float aph, String value){
-        String stringQuery = "%" + value + "%";
-        umProvider = saleDao.findAllSaleFilterAndSearchProvider(locationUidSelected,apl,aph,
-                stringQuery);
+    public void updateFilter(int spl,int sph, String value){
+        stringQuery = "%" + value + "%";
+        amountFrom =spl;
+        amountTo = sph;
         setProvider();
     }
 
@@ -174,6 +178,8 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
      * Sets the people list provider set in the Presenter to the View.
      */
     private void setProvider(){
+        umProvider = saleDao.findAllSaleFilterAndSearchProvider(locationUidSelected,
+                amountFrom, amountTo, from, to, stringQuery, sort);
         view.setListProvider(umProvider);
     }
 
@@ -221,7 +227,8 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
 
         order=order+1;
         if(idToOrderInteger.containsKey(order)){
-            int sortCode = idToOrderInteger.get(order);
+            sort = idToOrderInteger.get(order);
+
             //TODO: Update provider
             setProvider();
         }

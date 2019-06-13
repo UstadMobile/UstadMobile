@@ -19,4 +19,6 @@ public interface Login2View extends UstadView{
 
     void updateUsername(String username);
 
+    void setFinishAfficinityOnView();
+
 }

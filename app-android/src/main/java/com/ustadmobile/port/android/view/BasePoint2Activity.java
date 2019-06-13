@@ -84,8 +84,6 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         mOptionsMenu = menu;
 
         //Search stuff
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         MenuItem searchItem = menu.findItem(R.id.menu_basepoint_search);
 
         searchItem.setOnMenuItemClickListener(item -> {
@@ -103,108 +101,6 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                     break;
             }
             return true;
-        });
-
-        SearchView searchView = (SearchView) menu.findItem(R.id.menu_basepoint_search)
-                .getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getComponentName()));
-        searchView.setMaxWidth(Integer.MAX_VALUE);
-
-        searchView.setOnSearchClickListener(v -> {
-            switch (mPager.getCurrentItem()) {
-                case VIEW_POSITION_POSITION_CATALOG:
-                    break;
-                case VIEW_POSITION_POSITION_INVENTORY:
-                    break;
-                case VIEW_POSITION_POSITION_SALES:
-                    saleListFragment.goToSearch();
-                    break;
-                case VIEW_POSITION_POSITION_COURSES:
-                    break;
-                default:
-                    break;
-            }
-        });
-
-                searchView.setOnClickListener(v -> {
-
-                    switch (mPager.getCurrentItem()) {
-                        case VIEW_POSITION_POSITION_CATALOG:
-                            break;
-                        case VIEW_POSITION_POSITION_INVENTORY:
-                            break;
-                        case VIEW_POSITION_POSITION_SALES:
-                            break;
-                        case VIEW_POSITION_POSITION_COURSES:
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-        // listening to search query text change
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // filter recycler view when query submitted
-                switch (mPager.getCurrentItem()){
-                    case VIEW_POSITION_POSITION_CATALOG:
-                        catalogListFragment.searchCatalog(query);
-                        break;
-                    case VIEW_POSITION_POSITION_INVENTORY:
-                        break;
-                    case VIEW_POSITION_POSITION_SALES:
-                        break;
-                    case VIEW_POSITION_POSITION_COURSES:
-                        break;
-                    default:
-                        break;
-                }
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String query) {
-                // filter recycler view when text is changed
-
-                // filter recycler view when query submitted
-                switch (mPager.getCurrentItem()){
-                    case VIEW_POSITION_POSITION_CATALOG:
-                        catalogListFragment.searchCatalog(query);
-                        break;
-                    case VIEW_POSITION_POSITION_INVENTORY:
-                        break;
-                    case VIEW_POSITION_POSITION_SALES:
-                        break;
-                    case VIEW_POSITION_POSITION_COURSES:
-                        break;
-                    default:
-                        break;
-                }
-                return false;
-            }
-        });
-
-
-        searchView.setOnCloseListener(() -> {
-
-            // filter recycler view when query submitted
-            switch (mPager.getCurrentItem()){
-                case VIEW_POSITION_POSITION_CATALOG:
-                    catalogListFragment.searchCatalog("");
-                    break;
-                case VIEW_POSITION_POSITION_INVENTORY:
-                    break;
-                case VIEW_POSITION_POSITION_SALES:
-                    break;
-                case VIEW_POSITION_POSITION_COURSES:
-                    break;
-                default:
-                    break;
-            }
-            return false;
         });
 
 

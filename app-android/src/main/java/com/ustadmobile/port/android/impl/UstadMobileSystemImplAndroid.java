@@ -68,6 +68,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.AddReminderDialogView;
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView;
 import com.ustadmobile.core.view.BasePoint2View;
 import com.ustadmobile.core.view.BasePointView;
@@ -101,6 +102,7 @@ import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
+import com.ustadmobile.port.android.view.AddReminderDialogFragment;
 import com.ustadmobile.port.android.view.AddSaleProductToSaleCategoryActivity;
 import com.ustadmobile.port.android.view.BasePoint2Activity;
 import com.ustadmobile.port.android.view.BasePointActivity;
@@ -217,6 +219,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SaleListSearchView.VIEW_NAME, SaleListSearchActivity.class);
         viewNameToAndroidImplMap.put(SaleDetailSignatureView.VIEW_NAME, SaleDetailSignatureActivity.class);
         viewNameToAndroidImplMap.put(SelectDateRangeDialogView.VIEW_NAME, SelectDateRangeDialogFragment.class);
+        viewNameToAndroidImplMap.put(AddReminderDialogView.VIEW_NAME, AddReminderDialogFragment.class);
+
 
     }
 
