@@ -1,12 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.ByteArrayOutputStream
-import kotlinx.io.ByteBuffer
-import kotlinx.io.IOException
 //import java.io.ByteArrayInputStream
 //import java.io.ByteArrayOutputStream
 //import java.io.IOException
@@ -14,7 +7,19 @@ import kotlinx.io.IOException
 //import java.util.*
 //import java.util.zip.GZIPInputStream
 //import java.util.zip.GZIPOutputStream
+import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.sharedse.io.ByteBufferSe
+import com.ustadmobile.sharedse.io.GzInputStreamConstants.GZIP_MAGIC
+import com.ustadmobile.sharedse.io.GzipInputStreamSe
+import com.ustadmobile.sharedse.io.GzipOutputStreamSe
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
+import kotlinx.io.ByteArrayInputStream
+import kotlinx.io.ByteArrayOutputStream
+import kotlinx.io.ByteBuffer
+import kotlinx.io.IOException
 import kotlin.math.ceil
+import kotlin.math.min
 
 /**
  * This class converts bytes
@@ -128,31 +133,33 @@ class BleMessage {
     }
 
     private fun constructFromPackets(packetsReceived: Array<ByteArray>) {
-//        messageId = packetsReceived[0][0]
-//        val messageBytes = depacketizePayload(packetsReceived)
-//        assignHeaderValuesFromFirstPacket(packetsReceived[0])
-//
-//        val receivedPayload = ByteArray(length)
-//        System.arraycopy(messageBytes, HEADER_SIZE, receivedPayload, 0, length)
-//
-//        val isCompressed = (receivedPayload.size > 0 &&
-//                receivedPayload[0] == GZIPInputStream.GZIP_MAGIC.toByte()
-//                && receivedPayload[1] == (GZIPInputStream.GZIP_MAGIC shr 8).toByte())
-//        this.payload = receivedPayload
-//        if (isCompressed) {
-//            this.payload = decompressPayload(receivedPayload)
-//        }
+        messageId = packetsReceived[0][0]
+        val messageBytes = depacketizePayload(packetsReceived)
+        assignHeaderValuesFromFirstPacket(packetsReceived[0])
+
+        val receivedPayload = ByteArray(length)
+        //System.arraycopy(messageBytes, HEADER_SIZE, receivedPayload, 0, length)
+        messageBytes.copyInto(receivedPayload, 0, HEADER_SIZE, HEADER_SIZE + length)
+
+        val isCompressed = (receivedPayload.isNotEmpty() &&
+                receivedPayload[0] == GZIP_MAGIC.toByte()
+                && receivedPayload[1] == (GZIP_MAGIC shr 8).toByte())
+        this.payload = receivedPayload
+        if (isCompressed) {
+            this.payload = decompressPayload(receivedPayload)
+        }
     }
 
     private fun assignHeaderValuesFromFirstPacket(packet: ByteArray) {
         messageId = packet[0]
         requestType = packet[1]
 
-        //mtu = ByteBuffer.wrap(byteArrayOf(packet[2], packet[3])).short.toInt()
-        //T
-//        mtu = ByteBuffer.allocate(2).put(byteArrayOf(packet[2], packet[3])).getInt()
-//        length = ByteBuffer.wrap(Arrays.copyOfRange(packet, payloadLengthStartIndex + 1,
-//                payLoadStartIndex + 1)).int
+
+        mtu = ByteBufferSe.wrap(byteArrayOf(packet[2], packet[3])).getShort().toInt()
+        // length = ByteBuffer.wrap(Array.copyOfRange(packet, payloadLengthStartIndex + 1,
+        //          payLoadStartIndex + 1)).int
+        length = ByteBufferSe.wrap(packet.copyOfRange(payloadLengthStartIndex + 1, payLoadStartIndex + 1)).getInt()
+
     }
 
 
@@ -179,20 +186,17 @@ class BleMessage {
      * @return Compressed payload in byte array, null if something goes wrong
      */
     private fun compressPayload(payload: ByteArray?): ByteArray? {
-//        try {
-//            ByteArrayOutputStream().use { bos ->
-//                GZIPOutputStream(bos).use { gos ->
-//                    gos.write(payload!!)
-//                    gos.flush()
-//                    gos.close()
-//                    return bos.toByteArray()
-//                }
-//            }
-//        } catch (e: IOException) {
-//            //Very unlikely as we are reading from memory into memory
-//            e.printStackTrace()
-//        }
-
+        try {
+            val bos = ByteArrayOutputStream()
+            val gzip = GzipOutputStreamSe(bos)
+            gzip.write(payload!!)
+            gzip.flush()
+            gzip.close()
+            return bos.toByteArray()
+        } catch (e: IOException) {
+            //Very unlikely as we are reading from memory into memory
+            UMLog.l(UMLog.DEBUG, 0, e.message)
+        }
         return null
     }
 
@@ -202,24 +206,23 @@ class BleMessage {
      * @return Decompressed payload in byte array.
      */
     private fun decompressPayload(receivedPayload: ByteArray): ByteArray {
-//        val BUFFER_SIZE = Math.min(32, receivedPayload.size)
-//        val `is` = ByteArrayInputStream(receivedPayload)
-//        val bout = ByteArrayOutputStream()
-//        try {
-//            val gis = GZIPInputStream(`is`, BUFFER_SIZE)
-//            val data = ByteArray(BUFFER_SIZE)
-//            var bytesRead: Int
-//            while (gis.read(data).also { bytesRead = it } != -1) {
-//                bout.write(data, 0, bytesRead)
-//            }
-//            bout.flush()
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        } finally {
-//            UMIOUtils.closeOutputStream(bout)
-//        }
-//        return bout.toByteArray()
-        return ByteArray(1)
+        val BUFFER_SIZE = min(32, receivedPayload.size)
+        val `is` = ByteArrayInputStream(receivedPayload)
+        val bout = ByteArrayOutputStream()
+        try {
+            val gis = GzipInputStreamSe(`is`, BUFFER_SIZE)
+            val data = ByteArray(BUFFER_SIZE)
+            var bytesRead: Int
+            while (gis.read(data).also { bytesRead = it } != -1) {
+                bout.write(data, 0, bytesRead)
+            }
+            bout.flush()
+        } catch (e: IOException) {
+            UMLog.l(UMLog.DEBUG, 0, e.message)
+        } finally {
+            UMIOUtils.closeOutputStream(bout)
+        }
+        return bout.toByteArray()
     }
 
 
@@ -233,7 +236,7 @@ class BleMessage {
      * @return Constructed payload packets in byte arrays
      */
     private fun packetizePayload(payload: ByteArray): Array<ByteArray> {
-        if (payload.size == 0) {
+        if (payload.isEmpty()) {
             throw IllegalArgumentException()
         } else {
             val numPackets = calculateNumPackets(payload.size, mtu)
@@ -259,6 +262,7 @@ class BleMessage {
                 val payloadPos = i * (mtu - 1)
 //                System.arraycopy(totalPayLoad, payloadPos, packets[i], 1,
 //                        Math.min(mtu - 1, totalPayLoad.size - payloadPos))
+                totalPayLoad.copyInto(packets[i], 1, payloadPos, payloadPos + min(mtu - 1, totalPayLoad.size - payloadPos))
             }
 
             return packets
@@ -272,9 +276,9 @@ class BleMessage {
      *
      * @return Constructed payload in byte array
      */
-    //TODO: Throw an exception if any packet has a different message id
+//TODO: Throw an exception if any packet has a different message id
     private fun depacketizePayload(packets: Array<ByteArray>): ByteArray {
-        if (packets.size == 0) {
+        if (packets.isEmpty()) {
             throw NullPointerException()
         } else {
             val outputStream = ByteArrayOutputStream()
@@ -326,11 +330,11 @@ class BleMessage {
 
     companion object {
 
-        private val payloadLengthStartIndex = 3
+        private const val payloadLengthStartIndex = 3
 
-        private val payLoadStartIndex = 7
+        private const val payLoadStartIndex = 7
 
-        val HEADER_SIZE = 1 + 2 + 4//Request type (byte - 1byte), mtu (short - 2 byts), length (int - 4bytes)
+        const val HEADER_SIZE = 1 + 2 + 4//Request type (byte - 1byte), mtu (short - 2 byts), length (int - 4bytes)
 
         private val messageIds = mutableMapOf<String, Byte>()
 
