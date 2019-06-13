@@ -1,8 +1,7 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
-import java.nio.ByteBuffer
-import java.util.ArrayList
-import java.util.Arrays
+import com.ustadmobile.sharedse.io.ByteBufferSe
+import kotlinx.io.ByteBuffer
 
 /**
  * Util class for {[BleMessage]}, it converts the entry UUID from Long to Bytes and vice versa.
@@ -33,7 +32,8 @@ object BleMessageUtil {
         var start = 0
         for (position in 0 until entryInBytes.size / BUFFER_SIZE) {
             val end = start + BUFFER_SIZE
-            val entry = ByteBuffer.wrap(Arrays.copyOfRange(entryInBytes, start, end)).long
+            //  long entry = ByteBuffer.wrap(Arrays.copyOfRange(entryInBytes, start, end)).getLong();
+            val entry = ByteBufferSe.wrap(entryInBytes.copyOfRange(start, end)).getLong()
             entries.add(entry)
             start += BUFFER_SIZE
         }

@@ -1,7 +1,8 @@
-package com.ustadmobile.port.sharedse.networkmanager
+package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.sharedse.network.BleMessage
-import java.util.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlin.jvm.Synchronized
+import kotlin.jvm.Volatile
 
 /**
  * BleMessageAssembler
@@ -9,34 +10,26 @@ import java.util.*
  */
 class BleMessageAssembler {
 
-    private val clientAddrToMessagesMap: MutableMap<String, Map<Byte, BleMessageInProgress>>
+    private val clientAddrToMessagesMap: MutableMap<String, Map<Byte, BleMessageInProgress>> = mutableMapOf()
 
     private class BleMessageInProgress {
 
-        val message: BleMessage
+        val message: BleMessage = BleMessage()
 
         @Volatile
         private var lastUpdated: Long = 0
 
-        init {
-            message = BleMessage()
-        }
-
         fun onPacketReceived(packet: ByteArray): Boolean {
-            lastUpdated = System.currentTimeMillis()
+            lastUpdated = getSystemTimeInMillis()
             return message.onPackageReceived(packet)
         }
-    }
-
-    init {
-        clientAddrToMessagesMap = mutableMapOf()
     }
 
     @Synchronized
     fun handleIncomingPacket(senderAddr: String, packet: ByteArray): BleMessage? {
         var clientMessageIdToMessageMap: MutableMap<Byte, BleMessageInProgress>? = clientAddrToMessagesMap[senderAddr] as MutableMap<Byte, BleMessageInProgress>?
         if (clientMessageIdToMessageMap == null) {
-            clientMessageIdToMessageMap = Hashtable()
+            clientMessageIdToMessageMap = mutableMapOf()
             clientAddrToMessagesMap[senderAddr] = clientMessageIdToMessageMap
         }
 
