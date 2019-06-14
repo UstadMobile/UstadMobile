@@ -97,7 +97,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
             public boolean onQueryTextSubmit(String query) {
                 currentValue = query;
                 // filter recycler view when query submitted
-                mPresenter.updateFilter(apl, aph, currentValue);
+                mPresenter.updateFilter(currentValue);
                 return false;
             }
 
@@ -105,14 +105,14 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
             public boolean onQueryTextChange(String query) {
                 currentValue = query;
                 // filter recycler view when text is changed
-                mPresenter.updateFilter(apl, aph, currentValue);
+                mPresenter.updateFilter(currentValue);
                 return false;
             }
         });
 
         searchView.setOnCloseListener(() -> {
             currentValue = "";
-            mPresenter.updateFilter(apl, aph, currentValue);
+            mPresenter.updateFilter(currentValue);
             return false;
         });
 

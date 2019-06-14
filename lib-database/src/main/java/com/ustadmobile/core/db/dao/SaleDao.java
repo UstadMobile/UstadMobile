@@ -15,7 +15,6 @@ import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 import java.util.List;
 
 
-
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition =
 RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
@@ -32,6 +31,10 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
     public static final int SORT_ORDER_DATE_CREATED_DESC=5;
     public static final int SORT_ORDER_DATE_CREATED_ASC=6;
 
+
+    public static final int SORT_MOST_RECENT = 1;
+    public static final int SORT_LOWEST_PRICE = 2;
+    public static final int SORT_HIGHEST_PRICE = 3;
 
     //INSERT
 
@@ -295,23 +298,46 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             " AND " +
             " sl.saleLocationUid = :locationuid " +
             " AND saleAmount > :amountl AND saleAmount < :amounth " +
-            " OR (sl.saleCreationDate > :from AND sl.saleCreationDate < :to )" +
-            " AND sl.saleTitle LIKE :title ";
-    private static final String FILTER_SEARCH_BY_DATE = " ORDER BY saleCreationDate ASC " ;
-    private static final String FILTER_SEARCH_BY_PRICE_ASC = " ORDER BY saleAmount ASC ";
-    private static final String FILTER_SEARCH_BY_PRICE_DESC = " ORDER BY saleAmount DESC ";
+            " AND saleTitleGen LIKE :title " +
+            " OR (sl.saleCreationDate > :from AND sl.saleCreationDate < :to )" ;
+    private static final String FILTER_ORDER_BY_DATE_ASC = " ORDER BY sl.saleCreationDate ASC " ;
+    private static final String FILTER_ORDER_BY_PRICE_ASC = " ORDER BY saleAmount ASC ";
+    private static final String FILTER_ORDER_BY_PRICE_DESC = " ORDER BY saleAmount DESC ";
 
-    @UmQuery(ALL_SALE_LIST +  SEARCH_BY_QUERY)
+    @UmQuery(ALL_SALE_LIST +  SEARCH_BY_QUERY )
     public abstract UmProvider<SaleListDetail> findAllSaleItemsWithSearchFilter(long locationuid,
                                 long amountl, long amounth, long from, long to, String title);
+
+    @UmQuery(ALL_SALE_LIST +  SEARCH_BY_QUERY + FILTER_ORDER_BY_DATE_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleItemsWithSearchFilterOrderDateAsc(long locationuid,
+                                    long amountl, long amounth, long from, long to, String title);
+
+    @UmQuery(ALL_SALE_LIST +  SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_ASC)
+    public abstract UmProvider<SaleListDetail> findAllSaleItemsWithSearchFilterOrderPriceAsc(long locationuid,
+                                    long amountl, long amounth, long from, long to, String title);
+
+    @UmQuery(ALL_SALE_LIST +  SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_DESC)
+    public abstract UmProvider<SaleListDetail> findAllSaleItemsWithSearchFilterOrderPriceDesc(long locationuid,
+                                    long amountl, long amounth, long from, long to, String title);
 
 
     public UmProvider<SaleListDetail> findAllSaleFilterAndSearchProvider(long locationUid,
                      long spl, long sph, long from, long to, String searchQuery, int sort){
 
-        //TODO
-
-        return findAllSaleItemsWithSearchFilter(locationUid, spl, sph, from, to, searchQuery);
+        switch (sort){
+            case SORT_MOST_RECENT:
+                return findAllSaleItemsWithSearchFilterOrderDateAsc(
+                        locationUid, spl, sph, from, to, searchQuery);
+            case SORT_LOWEST_PRICE:
+                return findAllSaleItemsWithSearchFilterOrderPriceAsc(
+                        locationUid, spl, sph, from, to, searchQuery);
+            case SORT_HIGHEST_PRICE:
+                return findAllSaleItemsWithSearchFilterOrderPriceDesc(
+                        locationUid, spl, sph, from, to, searchQuery);
+            default:
+                return findAllSaleItemsWithSearchFilter(locationUid,
+                        spl, sph, from, to, searchQuery);
+        }
 
     }
 

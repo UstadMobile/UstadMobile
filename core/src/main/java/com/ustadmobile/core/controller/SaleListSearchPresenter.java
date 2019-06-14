@@ -167,6 +167,11 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
         ;
     }
 
+    public void updateFilter(String value){
+        stringQuery = "%" + value + "%";
+        setProvider();
+    }
+
     public void updateFilter(int spl,int sph, String value){
         stringQuery = "%" + value + "%";
         amountFrom =spl;
