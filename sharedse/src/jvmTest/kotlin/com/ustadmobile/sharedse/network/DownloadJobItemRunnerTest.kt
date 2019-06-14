@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.container.*
 import com.ustadmobile.core.db.WaitForLiveData
 import com.ustadmobile.core.db.waitForLiveData
+import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -18,6 +19,8 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
@@ -99,7 +102,7 @@ class DownloadJobItemRunnerTest {
 
     private val MAX_LATCH_WAITING_TIME = 15000L
 
-    private val MAX_THREAD_SLEEP_TIME = 2
+    private val MAX_THREAD_SLEEP_TIME = 2000L
 
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
@@ -317,12 +320,6 @@ class DownloadJobItemRunnerTest {
         }
     }
 
-
-    @Test
-    fun testSomething() {
-        Assert.assertEquals(2, 2)
-    }
-
     @Test
     @Throws(IOException::class)
     fun givenDownload_whenRun_shouldDownloadAndComplete() {
@@ -402,17 +399,18 @@ class DownloadJobItemRunnerTest {
     @Test
     @Throws(InterruptedException::class)
     fun givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToWaiting() {
+        var item = clientDb.downloadJobItemDao.findByUid(
+                downloadJobItem.djiUid)!!
         runBlocking {
             //set speed to 512kbps (period unit by default is milliseconds)
             cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
             cloudMockDispatcher.throttlePeriod = 1000
 
-            var item = clientDb.downloadJobItemDao.findByUid(
-                    downloadJobItem.djiUid)!!
+
             val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
                     cloudEndPoint, connectivityStatus)
 
-            GlobalScope.launch {
+            launch {
                 jobItemRunner.download()
             }
 
@@ -430,12 +428,128 @@ class DownloadJobItemRunnerTest {
                 e.printStackTrace()
             }
 
-
-            item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
-
-            Assert.assertEquals("File download task stopped after network status " + "change and set status to waiting",
-                    JobStatus.WAITING_FOR_CONNECTION, item.djiStatus)
         }
+
+        item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+
+        Assert.assertEquals("File download task stopped after network status " + "change and set status to waiting",
+                JobStatus.WAITING_FOR_CONNECTION, item.djiStatus)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
+        runBlocking {
+            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
+            cloudMockDispatcher.throttlePeriod = 1000
+
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus)
+
+            launch {
+                jobItemRunner.download()
+            }
+
+            delay(1000)
+
+            clientDb.downloadJobItemDao.updateStatus(item.djiUid, JobStatus.STOPPING)
+
+            waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
+                    item.djiUid), MAX_LATCH_WAITING_TIME) {
+                status -> status == JobStatus.STOPPED
+            }
+
+            item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+
+            Assert.assertEquals("File download job was stopped and status was updated",
+                    JobStatus.STOPPED, item.djiStatus)
+        }
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus() {
+        var item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+        var statusAfterWaitingForDownload = -1
+        runBlocking {
+            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
+            cloudMockDispatcher.throttlePeriod = 1000
+
+
+            clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
+                    item.djiUid, true)
+
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus)
+
+            clientDb.connectivityStatusDao.updateState(ConnectivityStatus.STATE_METERED, "")
+
+            UMLog.l(UMLog.DEBUG, 699,
+                    " Running DownloadJobItemRunner for " + item.djiUid)
+
+            launch { jobItemRunner.download() }
+
+            waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
+                    item.djiUid), MAX_LATCH_WAITING_TIME) {
+                status -> status >= JobStatus.RUNNING_MIN
+            }
+
+            delay(MAX_THREAD_SLEEP_TIME)
+            statusAfterWaitingForDownload = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!.djiStatus
+
+            clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
+                    item.djiDjUid, false)
+
+            waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
+                    item.djiUid), MAX_LATCH_WAITING_TIME) {
+                status -> status == JobStatus.WAITING_FOR_CONNECTION
+            }
+        }
+
+        item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+        assertTrue("After starting download, download was in running state before changing metered connection option",
+                statusAfterWaitingForDownload >= JobStatus.RUNNING_MIN)
+        assertEquals("File download job is waiting for network after changing download" +
+                " set setting to use unmetered connection only",
+                JobStatus.WAITING_FOR_CONNECTION, item.djiStatus)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadStarted_whenConnectionGoesOff_shouldStopAndSetStatusToWaiting() {
+        var item = clientDb.downloadJobItemDao.findByUid(
+                downloadJobItem.djiUid)!!
+        var stateBeforeDisconnect = -1
+
+        runBlocking {
+            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
+            cloudMockDispatcher.throttlePeriod = 1000
+
+
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus)
+
+            launch { jobItemRunner.download() }
+
+            delay(MAX_THREAD_SLEEP_TIME)
+            stateBeforeDisconnect = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!.djiStatus
+
+            clientDb.connectivityStatusDao.updateState(ConnectivityStatus.STATE_DISCONNECTED, "")
+
+            waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
+                    item.djiUid), MAX_LATCH_WAITING_TIME) {
+                status -> status == JobStatus.WAITING_FOR_CONNECTION
+            }
+        }
+
+        item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+        assertEquals("Before disconnect, job was running", JobStatus.RUNNING,
+                stateBeforeDisconnect)
+        assertEquals("File download job is waiting for network after the network goes off",
+                JobStatus.WAITING_FOR_CONNECTION, item.djiStatus)
     }
 
 

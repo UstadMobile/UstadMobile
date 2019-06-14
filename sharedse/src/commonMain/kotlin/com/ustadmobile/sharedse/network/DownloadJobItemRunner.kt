@@ -156,7 +156,7 @@ class DownloadJobItemRunner
                     GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
                 }
 
-                STATE_DISCONNECTED -> GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION) }
+                STATE_DISCONNECTED -> GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
             }//TODO: check CONNECTING_LOCAL - if the status changed, but we are not the job that asked for that
         }
     }
@@ -176,7 +176,7 @@ class DownloadJobItemRunner
             if (meteredConnectionAllowed.value == 0 && connectivityStatus != null
                     && connectivityStatus!!.connectivityState == STATE_METERED) {
                 UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() + " : no longer allowed to run on metered network - stopping")
-                GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION) }
+                GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
             }
         }
     }
@@ -188,7 +188,7 @@ class DownloadJobItemRunner
 
     private fun handleDownloadJobItemStatusChanged(newDownloadStatus: Int) {
         if (newDownloadStatus == JobStatus.STOPPING) {
-            GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION) }
+            GlobalScope.launch { stop(JobStatus.STOPPED, cancel = true) }
         }
     }
 
