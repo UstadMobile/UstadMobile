@@ -23,21 +23,9 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.produce
-import kotlinx.io.IOException
-import kotlinx.io.InputStream
-//import retrofit2.Retrofit
-//import retrofit2.converter.gson.GsonConverterFactory
-//import retrofit2.converter.scalars.ScalarsConverterFactory
-//import java.io.File
-//import java.io.IOException
-//import java.util.*
-//import java.util.concurrent.CountDownLatch
-//import java.util.concurrent.TimeUnit
-//import java.util.concurrent.atomic.AtomicBoolean
-//import java.util.concurrent.atomic.AtomicInteger
-//import java.util.concurrent.atomic.AtomicLong
-//import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -83,10 +71,6 @@ class DownloadJobItemRunner
 
     private var downloadSetConnectivityObserver: DoorObserver<Boolean>? = null
 
-    private var httpDownload: ResumableDownload2? = null
-
-    //private val httpDownloadRef: AtomicReference<ResumableHttpDownload>
-
     private val completedEntriesBytesDownloaded = atomic(0L)
 
     //private val statusCheckTimer = Timer()
@@ -113,6 +97,8 @@ class DownloadJobItemRunner
     private var destinationDir: String? = null
 
     private val numFailures = atomic(0)
+
+    private var downloadContext: CoroutineContext? = null
 
     /**
      * Timer task to keep track of the download status
@@ -167,7 +153,7 @@ class DownloadJobItemRunner
         if (connectivityStatus != null) {
             when (newStatus!!.connectivityState) {
                 STATE_METERED -> if (meteredConnectionAllowed.value == 0) {
-                    GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION) }
+                    GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION, cancel = true) }
                 }
 
                 STATE_DISCONNECTED -> GlobalScope.launch { stop(JobStatus.WAITING_FOR_CONNECTION) }
@@ -239,10 +225,11 @@ class DownloadJobItemRunner
      *
      * @param newStatus new status to be set
      */
-    suspend fun stop(newStatus: Int) {
+    suspend fun stop(newStatus: Int, cancel: Boolean = false) {
         if(!runnerStatus.compareAndSet(JobStatus.STOPPED, JobStatus.STOPPED)) {
-            if (httpDownload != null) {
-                //httpDownload!!.stop()
+            if(cancel) {
+                println("===CANCELLING $downloadContext===")
+                downloadContext?.cancel()
             }
 
             statusLiveData!!.removeObserver(statusObserver!!)
@@ -260,6 +247,7 @@ class DownloadJobItemRunner
 
 
     suspend fun download() {
+        downloadContext = coroutineContext
         runnerStatus.value = JobStatus.RUNNING
         updateItemStatus(JobStatus.RUNNING)
         val downloadJobId = downloadItem.djiDjUid
@@ -409,7 +397,6 @@ class DownloadJobItemRunner
                                 val resumableDownload = ResumableDownload2(downloadUrl,
                                         destFile.getAbsolutePath(), httpClient = httpClient)
 //                            httpDownload!!.connectionOpener = connectionOpener
-//                            httpDownloadRef.set(httpDownload)
                                 if (resumableDownload.download()) {
                                     entriesDownloaded.incrementAndGet()
                                     completedEntriesBytesDownloaded.addAndGet(destFile.length())
@@ -482,33 +469,7 @@ class DownloadJobItemRunner
                 checkStatus.connectivityState == STATE_METERED && meteredConnectionAllowed.value == 1
             }
         }
-//        runBlocking {
-//            waitForLiveData(statusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) { connectivityStatus ->
-//                if (connectivityStatus == null) {
-//                    false
-//                }else if (connectivityStatus.connectivityState == ConnectivityStatus.STATE_UNMETERED) {
-//                    networkManager.lockWifi(downloadWiFiLock)
-//                    true
-//                }else {
-//                    connectivityStatus.connectivityState == STATE_METERED && meteredConnectionAllowed.get() == 1
-//                }
-//            }
-//        }
 
-//        WaitForLiveData.observeUntil(statusLiveData!!, (CONNECTION_TIMEOUT * 1000).toLong(), object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-//            override fun done(value: ConnectivityStatus): Boolean {
-//                if (connectivityStatus == null)
-//                    return false
-//
-//                if (connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED) {
-//                    networkManager.lockWifi(downloadWiFiLock)
-//                    return true
-//                }
-//
-//                return connectivityStatus!!.connectivityState == STATE_METERED && meteredConnectionAllowed.get() == 1
-//            }
-//
-//        })
         return connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED
                 || (meteredConnectionAllowed.value == 1 && connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_METERED)
     }

@@ -10,17 +10,16 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.filter
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.io.ByteBuffer
 import kotlinx.io.IOException
 import kotlinx.io.InputStream
-import kotlinx.io.core.Input
-import kotlinx.io.core.Output
-import kotlinx.io.core.copyTo
+import kotlinx.io.core.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.content
+import kotlin.coroutines.coroutineContext
 
 /**
  * This class will manage downloading and resuming an interrupted download. It will write a small
@@ -52,100 +51,128 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
-        val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)
-        val dlPartFile = FileSe(destinationFile + DLPART_EXTENSION)
+        try {
+            val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)
+            val dlPartFile = FileSe(destinationFile + DLPART_EXTENSION)
+            println("Start download: $httpUrl")
 
-        val dlInfoMap = mutableMapOf<String, String?>()
 
-        var responseTime = 0L
-        var copyTime = 0L
-        for(i in 0..maxAttempts) {
-            var httpIn = null as Input?
-            var fileOutput = null as Output?
-            var httpResponse = null as HttpResponse?
-            var headResponse = null as HttpResponse?
-            try {
-                var startFrom = 0L
-                val dlPartFileExists = dlPartFile.exists()
-                val dlPartFileSize = if (dlPartFileExists) dlPartFile.length() else 0L
-                var appendOutput = false
+            val dlInfoMap = mutableMapOf<String, String?>()
 
-                val requestBuilder = HttpRequestBuilder()
-                if (dlPartFile.exists() && dlInfoFile.exists()) {
-                    Json.parse(JsonObject.serializer(), dlInfoFile.readText()).forEach {
-                        dlInfoMap[it.key.toLowerCase()] = it.value.content
+            var responseTime = 0L
+            var copyTime = 0L
+            for(i in 0..maxAttempts) {
+                var httpIn = null as Input?
+                var fileOutput = null as Output?
+                var httpResponse = null as HttpResponse?
+                var headResponse = null as HttpResponse?
+                val buffer = IoBuffer.Pool.borrow()
+                try {
+                    var startFrom = 0L
+                    val dlPartFileExists = dlPartFile.exists()
+                    val dlPartFileSize = if (dlPartFileExists) dlPartFile.length() else 0L
+                    var appendOutput = false
+
+                    val requestBuilder = HttpRequestBuilder()
+                    if (dlPartFile.exists() && dlInfoFile.exists()) {
+                        Json.parse(JsonObject.serializer(), dlInfoFile.readText()).forEach {
+                            dlInfoMap[it.key.toLowerCase()] = it.value.content
+                        }
+                    }
+
+                    if (dlInfoMap.any { it.key in VALIDATION_HEADERS }) {
+                        headResponse = httpClient.head<HttpResponse>(httpUrl)
+                        val validated = VALIDATION_HEADERS.filter { headResponse!!.headers[it] != null
+                                && it.toLowerCase() in dlInfoMap.keys }
+                                .any { dlInfoMap[it.toLowerCase()] == headResponse!!.headers[it] }
+
+                        headResponse.discardRemaining()
+
+
+                        if(validated) {
+                            startFrom = dlPartFile.length()
+                            requestBuilder.header("Range", "bytes=$startFrom-")
+                            UMLog.l(UMLog.DEBUG, 0, " validated to start from $startFrom bytes")
+                        }else {
+                            UMLog.l(UMLog.DEBUG, 0, " file exists but not validated")
+                        }
+                        headResponse.close()
+                        headResponse = null
+                    }
+
+
+                    requestBuilder.url(httpUrl)
+                    val requestStart = getSystemTimeInMillis()
+                    httpResponse = httpClient.get<HttpResponse>(requestBuilder)
+                    responseTime = getSystemTimeInMillis() - requestStart
+
+
+                    if(httpResponse.status !in listOf(HttpStatusCode.OK, HttpStatusCode.PartialContent)) {
+                        httpResponse.discardRemaining()
+                        throw IOException("Unsuccessful http request: response code was: ${httpResponse.status}")
+                    }
+
+                    appendOutput = (httpResponse.status == HttpStatusCode.PartialContent)
+
+                    //save the etag and last modified info (if known)
+                    dlInfoMap.clear()
+                    httpResponse.headers.filter { key, value ->  key.toLowerCase() in VALIDATION_HEADERS}.forEach { key, values ->
+                        dlInfoMap[key.toLowerCase()] = values[0]
+                    }
+
+                    val jsonObj = JsonObject(dlInfoMap.map { entry -> Pair(entry.key, JsonPrimitive(entry.value)) }.toMap())
+                    dlInfoFile.writeText(Json.stringify(JsonObject.serializer(), jsonObj))
+
+                    val copyStartTime = getSystemTimeInMillis()
+
+                    httpIn = inputStreamAsInput(httpResponse.receive<InputStream>())
+                    fileOutput = createFileOutputWritableChannel(dlPartFile.getAbsolutePath(), appendOutput)
+
+
+                    //This copy procedure is as per the implementation of Input.copyTo,
+                    // with logic inserted to support cancellation
+                    do {
+                        buffer.resetForWrite()
+                        val rc = httpIn.readAvailable(buffer)
+                        if(!coroutineContext.isActive) {
+                            throw CancellationException("coroutine canceled - not reading anymore")
+                        }
+                        if (rc == -1) break
+                        //copied += rc
+                        fileOutput.writeFully(buffer)
+                    } while (true)
+
+
+                    copyTime = getSystemTimeInMillis() - copyStartTime
+
+                    //Can be added for checking performance
+                    //println("Response time: $responseTime ms | Copy time: $copyTime")
+
+                    if (dlPartFile.renameTo(FileSe(destinationFile))) {
+                        return true
+                    } else {
+                        return false
+                    }
+                }catch(e: Exception) {
+                    if(e is CancellationException)
+                        throw e
+
+                    delay(retryDelay.toLong())
+                }finally {
+                    withContext(NonCancellable) {
+                        println("Cleaning up resumabledownload of $httpUrl")
+                        httpIn?.close()
+                        httpResponse?.close()
+                        fileOutput?.close()
+                        headResponse?.close()
+                        buffer.release(IoBuffer.Pool)
                     }
                 }
-
-                if (dlInfoMap.any { it.key in VALIDATION_HEADERS }) {
-                    headResponse = httpClient.head<HttpResponse>(httpUrl)
-                    val validated = VALIDATION_HEADERS.filter { headResponse!!.headers[it] != null
-                            && it.toLowerCase() in dlInfoMap.keys }
-                            .any { dlInfoMap[it.toLowerCase()] == headResponse!!.headers[it] }
-
-                    headResponse.discardRemaining()
-
-
-                    if(validated) {
-                        startFrom = dlPartFile.length()
-                        requestBuilder.header("Range", "bytes=$startFrom-")
-                        UMLog.l(UMLog.DEBUG, 0, " validated to start from $startFrom bytes")
-                    }else {
-                        UMLog.l(UMLog.DEBUG, 0, " file exists but not validated")
-                    }
-                    headResponse.close()
-                    headResponse = null
-                }
-
-
-                requestBuilder.url(httpUrl)
-                val requestStart = getSystemTimeInMillis()
-                httpResponse = httpClient.get<HttpResponse>(requestBuilder)
-                responseTime = getSystemTimeInMillis() - requestStart
-
-
-                if(httpResponse.status !in listOf(HttpStatusCode.OK, HttpStatusCode.PartialContent)) {
-                    httpResponse.discardRemaining()
-                    throw IOException("Unsuccessful http request: response code was: ${httpResponse.status}")
-                }
-
-                appendOutput = (httpResponse.status == HttpStatusCode.PartialContent)
-
-                //save the etag and last modified info (if known)
-                dlInfoMap.clear()
-                httpResponse.headers.filter { key, value ->  key.toLowerCase() in VALIDATION_HEADERS}.forEach { key, values ->
-                    dlInfoMap[key.toLowerCase()] = values[0]
-                }
-
-                val jsonObj = JsonObject(dlInfoMap.map { entry -> Pair(entry.key, JsonPrimitive(entry.value)) }.toMap())
-                dlInfoFile.writeText(Json.stringify(JsonObject.serializer(), jsonObj))
-
-                val copyStartTime = getSystemTimeInMillis()
-
-                httpIn = inputStreamAsInput(httpResponse.receive<InputStream>())
-                fileOutput = createFileOutputWritableChannel(dlPartFile.getAbsolutePath(), appendOutput)
-                httpIn.copyTo(fileOutput)
-
-                copyTime = getSystemTimeInMillis() - copyStartTime
-
-                //Can be added for checking performance
-                //println("Response time: $responseTime ms | Copy time: $copyTime")
-
-                if (dlPartFile.renameTo(FileSe(destinationFile))) {
-                    return true
-                } else {
-                    return false
-                }
-            }catch(e: Exception) {
-                delay(retryDelay.toLong())
-            }finally {
-                httpIn?.close()
-                httpResponse?.close()
-                fileOutput?.close()
-                headResponse?.close()
             }
 
-
+        }catch (e: CancellationException) {
+            println("ResumableDownload2: cancellation exception on $httpUrl")
+            throw e
         }
 
         return false

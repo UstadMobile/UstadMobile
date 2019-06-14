@@ -10,6 +10,7 @@ import okio.BufferedSink
 import okio.Okio
 import java.io.ByteArrayInputStream
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 
@@ -17,6 +18,12 @@ class ReverseProxyDispatcher(private val serverUrl: HttpUrl) : Dispatcher() {
     private val client: OkHttpClient
 
     val numTimesToFail = AtomicInteger(0)
+
+    var throttleBytesPerPeriod = 0L
+
+    var throttlePeriod = 0L
+
+    var throttlePeriodUnit: TimeUnit = TimeUnit.MILLISECONDS
 
     init {
         client = OkHttpClient.Builder().build()
@@ -76,6 +83,10 @@ class ReverseProxyDispatcher(private val serverUrl: HttpUrl) : Dispatcher() {
 
             if(numTimesToFail.decrementAndGet() >= 0) {
                 mockResponse.setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY)
+            }
+
+            if(throttleBytesPerPeriod != 0L) {
+                mockResponse.throttleBody(throttleBytesPerPeriod, throttlePeriod, throttlePeriodUnit)
             }
 
             return mockResponse

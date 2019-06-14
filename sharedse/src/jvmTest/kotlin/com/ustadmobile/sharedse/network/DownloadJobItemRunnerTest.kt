@@ -8,6 +8,8 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.core.container.*
+import com.ustadmobile.core.db.WaitForLiveData
+import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -16,9 +18,7 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -97,7 +97,7 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var containerManager: ContainerManager
 
-    private val MAX_LATCH_WAITING_TIME = 15
+    private val MAX_LATCH_WAITING_TIME = 15000L
 
     private val MAX_THREAD_SLEEP_TIME = 2
 
@@ -396,6 +396,45 @@ class DownloadJobItemRunnerTest {
 
             Assert.assertEquals("File download task retried and completed with failure status",
                     JobStatus.FAILED, item.djiStatus)
+        }
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToWaiting() {
+        runBlocking {
+            //set speed to 512kbps (period unit by default is milliseconds)
+            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
+            cloudMockDispatcher.throttlePeriod = 1000
+
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner = DownloadJobItemRunner(context, item, mockedNetworkManager, clientDb, clientRepo,
+                    cloudEndPoint, connectivityStatus)
+
+            GlobalScope.launch {
+                jobItemRunner.download()
+            }
+
+            delay(1000) //wait for 1 second
+
+            clientDb.connectivityStatusDao.updateStateAsync(ConnectivityStatus.STATE_METERED)
+
+            try {
+                waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
+                        item.djiUid), MAX_LATCH_WAITING_TIME) {
+                    status -> status == JobStatus.WAITING_FOR_CONNECTION
+                }
+            }catch(e: Exception) {
+                println("Exception with live data cancel?")
+                e.printStackTrace()
+            }
+
+
+            item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+
+            Assert.assertEquals("File download task stopped after network status " + "change and set status to waiting",
+                    JobStatus.WAITING_FOR_CONNECTION, item.djiStatus)
         }
     }
 
