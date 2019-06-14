@@ -98,6 +98,8 @@ class DownloadJobItemRunner
 
     private val numFailures = atomic(0)
 
+    private val entriesDownloaded = atomic(0)
+
     private var downloadContext: CoroutineContext? = null
 
     /**
@@ -313,7 +315,7 @@ class DownloadJobItemRunner
         val currentTimeStamp = getSystemTimeInMillis()
         val minLastSeen = currentTimeStamp - (60 * 1000)
         val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
-        val entriesDownloaded = atomic(0)
+
         var numEntriesToDownload = -1
 
         for(attemptNum in attemptsRemaining downTo 0) {
@@ -379,6 +381,7 @@ class DownloadJobItemRunner
                 val containerEntryList = containerEntryListClient.get<List<ContainerEntryWithMd5>>(
                         "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
                 numEntriesToDownload = containerEntryList.size
+                entriesDownloaded.value = 0
 
                 val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
                 history.startTime = getSystemTimeInMillis()
