@@ -17,6 +17,5 @@ public interface AddReminderDialogView extends UstadView {
      */
     void finish();
 
-
 }
 

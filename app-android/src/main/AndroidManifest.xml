@@ -211,6 +211,9 @@
             android:enabled="true"
             android:exported="true"/>
 
+        <!--Receiver-->
+        <receiver android:name="com.ustadmobile.port.android.impl.ReminderReceiver"></receiver>
+
     </application>
 
 </manifest>

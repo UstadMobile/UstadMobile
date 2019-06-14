@@ -17,6 +17,9 @@ public interface SaleItemDetailView extends UstadView {
     //Any argument keys:
     String ARG_SALE_ITEM_UID = "ArgSaleItemUid";
     String ARG_SALE_ITEM_PRODUCT_UID = "ArgSaleItemProducerUid";
+    String ARG_SALE_DUE_DATE = "ArgSaleDueDate";
+
+    String ARG_SALE_ITEM_NAME = "ArgSaleItemName";
 
 
     /**
@@ -33,6 +36,8 @@ public interface SaleItemDetailView extends UstadView {
     void showPreOrder(boolean show);
 
     void setReminderProvider(UmProvider<SaleItemReminder> paymentProvider);
+
+    void setReminderNotification(int days, String message, long saleDueDate);
 
 }
 

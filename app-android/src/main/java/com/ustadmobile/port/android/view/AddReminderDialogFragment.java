@@ -55,7 +55,7 @@ public class AddReminderDialogFragment extends UstadDialogFragment implements
         rootView = inflater.inflate(R.layout.fragment_add_reminder, null);
 
         NumberPicker np = rootView.findViewById(R.id.fragment_add_reminder_days_np);
-        np.setMinValue(0);
+        np.setMinValue(1);
         np.setMaxValue(100);
 
         DialogInterface.OnClickListener positiveOCL =
@@ -81,9 +81,8 @@ public class AddReminderDialogFragment extends UstadDialogFragment implements
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getArguments()));
 
         return dialog;
+
     }
-
-
 
     //Required overrides
     @Override

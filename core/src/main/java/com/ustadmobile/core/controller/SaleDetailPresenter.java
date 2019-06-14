@@ -10,11 +10,9 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -25,7 +23,6 @@ import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.core.view.SalePaymentDetailView;
 import com.ustadmobile.core.view.SelectProducerView;
-import com.ustadmobile.core.view.SelectSaleProductView;
 
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.db.entities.Location;
@@ -37,9 +34,9 @@ import com.ustadmobile.lib.db.entities.SaleItemListDetail;
 import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.lib.db.entities.SaleVoiceNote;
 
-import jdk.nashorn.internal.runtime.UserAccessorProperty;
-
+import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_GEN_NAME;
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
+import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_NAME;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
 import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_DEFAULT_VALUE;
 import static com.ustadmobile.core.view.SalePaymentDetailView.ARG_SALE_PAYMENT_UID;
@@ -60,6 +57,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     private Sale currentSale;
     private Sale updatedSale;
     private LocationDao locationDao;
+    private String currentSaleName = "";
 
     private UmLiveData<List<Location>> locationLiveData;
 
@@ -92,6 +90,10 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         super.onCreate(savedState);
 
         if(getArguments().containsKey(ARG_SALE_UID)){
+            if(getArguments().containsKey(ARG_SALE_GEN_NAME)){
+                currentSaleName = getArguments().get(ARG_SALE_GEN_NAME).toString();
+            }
+
             initFromSale(Long.parseLong((String) getArguments().get(ARG_SALE_UID)));
             showSaveButton = true;
             view.runOnUiThread(() -> {
@@ -397,6 +399,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_SALE_ITEM_UID, String.valueOf(saleItemUid));
+        args.put(ARG_SALE_ITEM_NAME, String.valueOf(currentSaleName));
         impl.go(SaleItemDetailView.VIEW_NAME, args, context);
 
     }

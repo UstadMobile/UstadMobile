@@ -24,7 +24,7 @@ public abstract class CommonHandlerPresenter<V extends UstadView>
      * Primary action on item.
      * @param arg   The argument to be passed to the presenter for primary action pressed.
      */
-    public abstract void handleCommonPressed(Object arg);
+    public abstract void handleCommonPressed(Object arg, Object arg2);
 
     /**
      * Secondary action on item.

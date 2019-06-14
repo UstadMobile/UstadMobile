@@ -263,6 +263,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             impl.go(Login2View.VIEW_NAME, args, getContext());
         }
     }
+    public static final int ACTION_REMINDER_NOTIFICATION = 752;
+
 
     /**
      * Handles internal locale changes. When the user changes the locale using the system settings
@@ -382,7 +384,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             if (!fragmentReference.get().isVisible())
                 continue;
 
-            if (fragmentReference.get() instanceof UstadBaseFragment && ((UstadBaseFragment) fragmentReference.get()).canGoBack()) {
+            if (fragmentReference.get() instanceof UstadBaseFragment &&
+                    ((UstadBaseFragment) fragmentReference.get()).canGoBack()) {
                 ((UstadBaseFragment) fragmentReference.get()).goBack();
                 return;
             }

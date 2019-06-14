@@ -120,7 +120,16 @@ public class SaleListRecyclerAdapter extends
 
 
         ConstraintLayout item = holder.itemView.findViewById(R.id.item_sale_cl);
-        item.setOnClickListener(v -> mPresenter.handleCommonPressed(entity.getSaleUid()));
+        item.setOnClickListener(v -> {
+            String genTitle = entity.getSaleTitleGen();
+            String saleName;
+            if(genTitle != null && !genTitle.isEmpty()){
+                saleName = genTitle;
+            }else{
+                saleName = entity.getSaleTitle();
+            }
+            mPresenter.handleCommonPressed(entity.getSaleUid(), saleName);
+        });
 
 
 

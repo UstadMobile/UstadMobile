@@ -421,5 +421,7 @@
     <string name="tocao">To</string>
     <string name="lowest_price">Lowest price</string>
     <string name="highest_price">Highest price</string>
+    <string name="sale_reminder">Sale reminder</string>
+    <string name="sale_due_today">Due today is sale </string>
 
 </resources>

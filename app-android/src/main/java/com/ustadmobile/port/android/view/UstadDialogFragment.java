@@ -1,12 +1,19 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.port.android.impl.ReminderReceiver;
 
 import java.util.Iterator;
 import java.util.Vector;
+
+import static android.content.Context.ALARM_SERVICE;
+import static com.ustadmobile.port.android.view.UstadBaseActivity.ACTION_REMINDER_NOTIFICATION;
 
 /**
  * Created by mike on 7/17/17.
@@ -40,5 +47,6 @@ public class UstadDialogFragment extends android.support.v4.app.DialogFragment i
             runnables.remove();
         }
     }
+
 
 }

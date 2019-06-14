@@ -208,7 +208,7 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
     }
 
     @Override
-    public void handleCommonPressed(Object arg) {
+    public void handleCommonPressed(Object arg, Object arg2) {
         handleClickSale((Long)arg);
     }
 
@@ -217,7 +217,6 @@ public class SaleListSearchPresenter extends CommonHandlerPresenter<SaleListSear
 
     public void handleDateSelected(long fromDate, long toDate, String dateRangeText) {
         //Update Date range text.
-        //TODO: Update from, to dates and update query and provider
         from = fromDate;
         to = toDate;
 

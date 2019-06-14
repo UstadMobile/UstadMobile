@@ -28,6 +28,7 @@ import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_DATE_CREATED_ASC;
 import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_DATE_CREATED_DESC;
 import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_NAME_ASC;
 import static com.ustadmobile.core.db.dao.SaleDao.SORT_ORDER_NAME_DESC;
+import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_GEN_NAME;
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
 
 /**
@@ -176,10 +177,12 @@ public class SaleListPresenter extends CommonHandlerPresenter<SaleListView> {
         view.setListProvider(umProvider, true, false);
     }
 
-    void handleClickSale(long saleUid){
+    void handleClickSale(long saleUid, String saleName){
         UstadMobileSystemImpl impl =UstadMobileSystemImpl.getInstance();
         Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_SALE_UID, String.valueOf(saleUid));
+        if(saleName != null)
+        args.put(ARG_SALE_GEN_NAME, saleName);
         impl.go(SaleDetailView.VIEW_NAME, args, context);
 
     }
@@ -198,8 +201,8 @@ public class SaleListPresenter extends CommonHandlerPresenter<SaleListView> {
     }
 
     @Override
-    public void handleCommonPressed(Object arg) {
-        handleClickSale((Long) arg);
+    public void handleCommonPressed(Object arg, Object arg2) {
+        handleClickSale((Long) arg, (String) arg2);
     }
 
     @Override

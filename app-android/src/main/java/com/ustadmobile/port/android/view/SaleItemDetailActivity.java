@@ -1,12 +1,15 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
@@ -34,6 +37,7 @@ import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.lib.db.entities.SaleItem;
 import com.ustadmobile.lib.db.entities.SaleItemReminder;
 import com.ustadmobile.lib.db.entities.SalePayment;
+import com.ustadmobile.port.android.impl.ReminderReceiver;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.text.SimpleDateFormat;
@@ -311,5 +315,24 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         remindersRV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         reminderHline.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         addReminderTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+    }
+
+    public static final int REMINER_REQUEST_CODE =530;
+
+    @Override
+    public void setReminderNotification(int days, String message, long saleDueDate){
+        Intent intent = new Intent(this, ReminderReceiver.class);
+        intent.putExtra(ARG_SALE_ITEM_NAME, message);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REMINER_REQUEST_CODE, intent, 0);
+        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        long reminderMilli = getNextMidnightReminder(days, saleDueDate);
+        am.set(am.RTC_WAKEUP, reminderMilli, pendingIntent);
+    }
+
+    public static long getNextMidnightReminder(int days, long saleDueDate){
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(saleDueDate);
+        cal.add(Calendar.DATE, -days);
+        return cal.getTimeInMillis();
     }
 }
