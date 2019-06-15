@@ -52,8 +52,6 @@ abstract class NetworkManagerBleCommon(
 
     private var isStopMonitoring = false
 
-    //private val entryStatusTaskExecutorService = Executors.newFixedThreadPool(5)
-
     private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
 
     protected var knownBadNodeTrackList = mutableMapOf<String, AtomicInt>()
@@ -69,28 +67,23 @@ abstract class NetworkManagerBleCommon(
      */
     private val entryStatusTasks = mutableListOf<BleEntryStatusTask>()
 
-
     //private var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>? = null
 
     private val entryStatusResponses = mutableMapOf<Long, MutableList<EntryStatusResponse>>()
 
     private val locallyAvailableContainerUids = mutableSetOf<Long>()
 
-    protected var connectivityStatusRef = atomic(null as ConnectivityStatus?)
+    protected val connectivityStatusRef = atomic(null as ConnectivityStatus?)
 
     protected var wifiLockHolders = mutableListOf<Any>()
 
     private val knownPeerNodes = mutableMapOf<String, Long>()
-
-    //private val scheduledExecutorService = Executors.newScheduledThreadPool(3)
 
     private lateinit var umAppDatabase: UmAppDatabase
 
     private lateinit var umAppDatabaseRepo: UmAppDatabase
 
     private val localAvailabilityListeners = mutableListOf<LocalAvailabilityListener>()
-
-    //private Map<Integer, DownloadJobItemManager> downloadJobItemManagerMap = new HashMap<>();
 
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
@@ -154,11 +147,6 @@ abstract class NetworkManagerBleCommon(
 //            }
 //            return uidsToBeMonitoredSet
 //        }
-
-    /**
-     * @return Active RouterNanoHTTPD
-     */
-    //abstract val httpd: EmbeddedHTTPD
 
     abstract val isVersionLollipopOrAbove: Boolean
 
@@ -407,7 +395,7 @@ abstract class NetworkManagerBleCommon(
      * Cancel all download set and set items
      * @param downloadJobUid The download job uid that should be canceled and deleted
      */
-    fun cancelAndDeleteDownloadJob(downloadJobUid: Int) {
+    suspend fun cancelAndDeleteDownloadJob(downloadJobUid: Int) {
         umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobUid,
                 JobStatus.CANCELED, -1, JobStatus.CANCELED)
         val taskArgs = HashMap<String, String>()

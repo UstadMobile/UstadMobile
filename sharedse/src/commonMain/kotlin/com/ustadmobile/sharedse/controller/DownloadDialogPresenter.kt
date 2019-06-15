@@ -11,14 +11,17 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicInteger
+import kotlin.jvm.Volatile
 
 class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon?,
                               arguments: Map<String, String>, view: DownloadDialogView,
@@ -48,7 +51,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private var jobItemManager: DownloadJobItemManager? = null
 
-    private val downloadJobStatus = AtomicInteger(0)
+    private val downloadJobStatus = atomic(0)
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -76,7 +79,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun startObservingJob() {
         view.runOnUiThread(Runnable {
             downloadDownloadJobLive = appDatabase!!.downloadJobDao.getJobLive(currentJobId!!)
-            downloadDownloadJobLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
+            downloadDownloadJobLive.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobStatusChange)
         })
     }
@@ -97,7 +100,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun handleDownloadJobStatusChange(downloadJob: DownloadJob?) {
         if (downloadJob != null) {
             val downloadStatus = downloadJob.djStatus
-            downloadJobStatus.set(downloadStatus)
+            downloadJobStatus.value = downloadStatus
             view.setCalculatingViewVisible(false)
             view.setWifiOnlyOptionVisible(true)
             if (downloadStatus >= JobStatus.COMPLETE_MIN) {
@@ -133,16 +136,15 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             }
 
 
-            Thread {
+            GlobalScope.launch {
                 val totalDownloadJobItems = appDatabase!!.downloadJobItemDao
-                        .getTotalDownloadJobItems(currentJobId!!)
+                        .getTotalDownloadJobItemsAsync(currentJobId!!)
                 val rootStatus = jobItemManager!!.rootItemStatus
                 view.runOnUiThread(Runnable {
                     view.setStatusText(statusMessage!!, totalDownloadJobItems,
                             UMFileUtil.formatFileSize(rootStatus?.totalBytes ?: 0))
                 })
-            }.start()
-
+            }
         }
     }
 
@@ -160,17 +162,20 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private fun createDownloadJobRecursive() {
-        val newDownloadJob = DownloadJob(contentEntryUid, System.currentTimeMillis())
+        val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
         jobItemManager = networkManagerBle?.createNewDownloadJobItemManager(newDownloadJob)
         currentJobId = jobItemManager?.downloadJobUid
-        DownloadJobPreparer(jobItemManager!!, appDatabase!!, appDatabaseRepo).run()
+        GlobalScope.launch {
+            DownloadJobPreparer(jobItemManager!!, appDatabase!!, appDatabaseRepo).run()
+        }
     }
 
 
     fun handleClickPositive() {
         if (deleteFileOptions) {
-            Thread { networkManagerBle?.cancelAndDeleteDownloadJob(currentJobId!!) }.start()
+            TODO("Run this on coroutine")
+            //Thread { networkManagerBle?.cancelAndDeleteDownloadJob(currentJobId!!) }.start()
         } else {
             continueDownloading()
         }
@@ -181,10 +186,9 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
      * set dismissAfter to false to avoid a call to dismissDialog
      * @param dismissAfter flag to indicate if the dialog will be dismissed after the selection
      */
-    @JvmOverloads
     fun handleClickNegative(dismissAfter: Boolean = true) {
-        if (downloadJobStatus.get() == 0) {
-            Thread { networkManagerBle?.deleteUnusedDownloadJob(currentJobId!!) }.start()
+        if (downloadJobStatus.value == 0) {
+            //Thread { networkManagerBle?.deleteUnusedDownloadJob(currentJobId!!) }.start()
         }
 
         //if the download has not been started
@@ -194,7 +198,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     fun handleClickStackedButton(idClicked: Int) {
         when (idClicked) {
-            STACKED_BUTTON_PAUSE -> Thread {
+            STACKED_BUTTON_PAUSE -> GlobalScope.launch {
                 appDatabase!!.downloadJobDao.updateJobAndItems(currentJobId!!,
                         JobStatus.PAUSED, JobStatus.PAUSING)
             }.start()
@@ -209,7 +213,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
 
     private fun continueDownloading() {
-        Thread {
+        GlobalScope.launch {
             appDatabase!!.downloadJobDao.updateJobAndItems(currentJobId!!,
                     JobStatus.QUEUED, -1)
         }.start()
@@ -220,7 +224,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private fun cancelDownload() {
-        Thread {
+        GlobalScope.launch {
             appDatabase!!.downloadJobDao
                     .updateJobAndItems(currentJobId!!, JobStatus.CANCELED,
                             JobStatus.CANCELLING)

@@ -134,9 +134,8 @@ class DownloadJobItemRunnerTest {
 
         }
         mockedNetworkManager.setDatabase(clientDb)
-        mockedNetworkManager.setContext(context)
         mockedNetworkManager.setJobItemManagerList(DownloadJobItemManagerList(clientDb,
-                { newSingleThreadContext(it)} ))
+                newSingleThreadContext("DownloadJobItemRunnerTest") ))
 
         mockedNetworkManagerBleWorking.set(true)
 

@@ -45,7 +45,7 @@ targetCompatibility = '1.8'
 /*
  * This might be required to be able to run unit tests via the IDE.
  */
-task copyResourcesForIdeTests(type: Copy) {
+task copyTestResources(type: Copy) {
     outputs.upToDateWhen {
         project.file("build/local.env.properties").exists()
     }
@@ -66,7 +66,7 @@ task copyResourcesForIdeTests(type: Copy) {
 
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
-        task.dependsOn(copyResourcesForIdeTests)
+        task.dependsOn(copyTestResources)
     }
 }
 
