@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.util
 
-import kotlinx.coroutines.Runnable
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -19,8 +18,6 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
     var state: Int = 0
         private set
 
-    //private var delayedExecutor: DelayedExecutor? = null
-
     private val lock = ReentrantLock()
 
     private val stateChangeListeners = ArrayList<OnStateChangeListener>()
@@ -33,14 +30,14 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
         fun stopWaiting(newState: Int): Boolean
     }
 
-//    constructor(initialState: Int, delayedExecutor: (Runnable) -> Unit) {
+//    constructor(initialState: Int, delayedExecutor: (Runnable, Long) -> Unit) : this(){
 //        state = initialState
 //        targetState = initialState
 //        this.delayedExecutor = delayedExecutor
 //    }
 
     //Blank constructor required for mocking for tests
-    constructor(): this(0, {runnable, i ->  })
+    internal constructor(): this(0, {runnable, i ->  })
 
     fun setEnabled(enabled: Boolean) {
         try {

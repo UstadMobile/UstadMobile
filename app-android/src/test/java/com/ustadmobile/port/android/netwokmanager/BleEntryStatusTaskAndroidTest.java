@@ -9,6 +9,8 @@ import android.content.Context;
 
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
+import com.ustadmobile.sharedse.network.BleEntryStatusTaskAndroid;
+import com.ustadmobile.sharedse.network.NetworkManagerBle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +49,7 @@ public class BleEntryStatusTaskAndroidTest {
         Context context = mock(Context.class);
 
 
-        NetworkManagerAndroidBle managerBle = mock(NetworkManagerAndroidBle.class);
+        NetworkManagerBle managerBle = mock(NetworkManagerBle.class);
 
         NetworkNode networkNode = new NetworkNode();
         networkNode.setBluetoothMacAddress("00:11:22:33:FF:EE");

@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
  * Manages a list of DownloadJobItemManagers. Creates new items, closes downloadjobs that have finished etc.
  */
 class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
-                                 private val coroutineDispatchCreator: (String) -> CoroutineDispatcher) : DownloadJobItemStatusProvider {
+                                 private val coroutineDispatcher: CoroutineDispatcher) : DownloadJobItemStatusProvider {
 
 
     private val managerMap = mutableMapOf<Int, DownloadJobItemManager>()
@@ -22,9 +22,8 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
 
     fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
         newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
-        //TODO: fix this
         val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
-                coroutineDispatchCreator("DownloadJob-${newDownloadJob.djUid}"))
+                coroutineDispatcher)
         manager.onDownloadJobItemChangeListener = this::onDownloadJobItemChange
         managerMap[newDownloadJob.djUid] = manager
 

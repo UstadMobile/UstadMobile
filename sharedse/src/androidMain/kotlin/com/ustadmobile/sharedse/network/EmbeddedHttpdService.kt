@@ -1,11 +1,10 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import java.io.IOException
 

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
@@ -9,7 +9,6 @@ import androidx.annotation.VisibleForTesting
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.NetworkNode
-import com.ustadmobile.port.sharedse.networkmanager.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -56,7 +55,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
     private var mGattClient: BluetoothGatt? = null
 
-    private var managerBle: NetworkManagerAndroidBle? = null
+    private var managerBle: NetworkManagerBle? = null
 
     /**
      * Constructor to be used when creating platform specific instance of BleEntryStatusTask
@@ -64,12 +63,12 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    constructor(context: Context, managerAndroidBle: NetworkManagerAndroidBle,
+    constructor(context: Context, managerAndroidBle: NetworkManagerBle,
                 entryUidsToCheck: List<Long>, peerToCheck: NetworkNode) : super(context, managerAndroidBle, entryUidsToCheck, peerToCheck) {
         this.managerBle = managerAndroidBle
         this.context = context
         val messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck)
-        this.message = BleMessage(NetworkManagerBle.ENTRY_STATUS_REQUEST,
+        this.message = BleMessage(NetworkManagerBleCommon.ENTRY_STATUS_REQUEST,
                 BleMessage.getNextMessageIdForReceiver(peerToCheck.bluetoothMacAddress!!),
                 messagePayload)
     }
@@ -113,7 +112,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
             mGattClient = destinationPeer.connectGatt(
                     context as Context, managerBle?.isVersionKitKatOrBelow?: false, gattClientCallback)
 
-            if (managerBle?.isVersionLollipopOrAbove == true) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 mGattClient!!.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
             }
 

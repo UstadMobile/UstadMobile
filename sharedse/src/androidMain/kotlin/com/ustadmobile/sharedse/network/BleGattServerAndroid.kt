@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.bluetooth.*
 import android.content.Context
@@ -7,8 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.port.sharedse.networkmanager.BleGattServer
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageAssembler
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.USTADMOBILE_BLE_SERVICE_UUID
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
 
 
 /**
@@ -40,10 +39,10 @@ class BleGattServerAndroid
 /**
  * Constructor which will be used when creating new instance of BleGattServerAndroid
  * @param context Application context
- * @param networkManager Instance of a NetworkManagerAndroidBle for getting
+ * @param networkManager Instance of a NetworkManagerBle for getting
  * BluetoothManager instance.
  */
-(context: Context, networkManager: NetworkManagerAndroidBle) : BleGattServer(context) {
+(context: Context, networkManager: NetworkManagerBle) : BleGattServer(context) {
 
     /**
      * Get instance of a BluetoothGattServer
@@ -89,7 +88,7 @@ class BleGattServerAndroid
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite,
                     responseNeeded, offset, value)
 
-            if (USTADMOBILE_BLE_SERVICE_UUID == characteristic.uuid) {
+            if (USTADMOBILE_BLE_SERVICE_UUID == characteristic.uuid.toString()) {
                 val granted = gattServer!!.sendResponse(device, requestId,
                         BluetoothGatt.GATT_SUCCESS, 0, null)
                 UMLog.l(UMLog.DEBUG, 691,

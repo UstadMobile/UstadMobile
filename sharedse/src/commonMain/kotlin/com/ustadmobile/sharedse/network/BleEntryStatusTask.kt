@@ -19,7 +19,7 @@ import kotlinx.coroutines.Runnable
  *
  * @author kileha3
  */
-abstract class BleEntryStatusTask : Runnable {
+abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
 
     /**
      * Message object which carries list of entry Ids to be checked for availability.
@@ -110,7 +110,7 @@ abstract class BleEntryStatusTask : Runnable {
      * @param sourceDeviceAddress Server device bluetooth MAC address
      * @param response Message received as a response from the server device.
      */
-    fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
+    override open fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
 
 //        val responseRequestType = response?.requestType ?: -1
 //

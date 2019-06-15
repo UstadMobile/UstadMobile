@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.app.Service
 import android.content.ComponentName
@@ -12,10 +12,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.ACTION_START_FOREGROUND_SERVICE
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.GROUP_SUMMARY_ID
-import com.ustadmobile.port.android.netwokmanager.DownloadNotificationService.Companion.JOB_ID_TAG
+import com.ustadmobile.sharedse.network.DownloadNotificationService.Companion.ACTION_START_FOREGROUND_SERVICE
+import com.ustadmobile.sharedse.network.DownloadNotificationService.Companion.GROUP_SUMMARY_ID
+import com.ustadmobile.sharedse.network.DownloadNotificationService.Companion.JOB_ID_TAG
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import kotlinx.coroutines.newSingleThreadContext
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -33,7 +34,7 @@ class NetworkManagerBleAndroidService : Service() {
 
     private val mBinder = this.LocalServiceBinder()
 
-    private val managerAndroidBleRef = AtomicReference<NetworkManagerAndroidBle?>()
+    private val managerAndroidBleRef = AtomicReference<NetworkManagerBle?>()
 
     private val mHttpServiceBound = AtomicBoolean(false)
 
@@ -70,7 +71,7 @@ class NetworkManagerBleAndroidService : Service() {
     /**
      * @return Running instance of the NetworkManagerBleCommon
      */
-    val networkManagerBle: NetworkManagerAndroidBle?
+    val networkManagerBle: NetworkManagerBle?
         get() = managerAndroidBleRef.get()
 
 
@@ -96,8 +97,8 @@ class NetworkManagerBleAndroidService : Service() {
     }
 
     private fun handleHttpdServiceBound() {
-        val managerAndroidBle = NetworkManagerAndroidBle(this,
-                httpdRef.get())
+        val managerAndroidBle = NetworkManagerBle(this,
+                newSingleThreadContext("NetworkManager-SingleThread"),httpdRef.get())
         managerAndroidBleRef.set(managerAndroidBle)
         managerAndroidBle.onCreate()
     }

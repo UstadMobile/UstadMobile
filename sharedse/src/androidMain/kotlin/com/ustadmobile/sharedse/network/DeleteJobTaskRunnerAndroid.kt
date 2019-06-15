@@ -1,9 +1,8 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.content.Context
 import androidx.work.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.port.sharedse.networkmanager.DeleteJobTaskRunner
 import java.util.*
 
 /**
@@ -26,8 +25,8 @@ class DeleteJobTaskRunnerAndroid internal constructor(context: Any?, args: Map<S
     override fun run() {
 
         val requestData = Data.Builder()
-        if (args != null && args[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] != null) {
-            requestData.putLong(DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID,
+        if (args != null && args[ARG_DOWNLOAD_JOB_UID] != null) {
+            requestData.putLong(ARG_DOWNLOAD_JOB_UID,
                     java.lang.Long.parseLong(Objects.requireNonNull<String>(args[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID])))
 
         }

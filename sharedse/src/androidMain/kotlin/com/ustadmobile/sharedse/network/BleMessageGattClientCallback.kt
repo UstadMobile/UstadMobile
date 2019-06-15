@@ -1,14 +1,13 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 
 import android.bluetooth.*
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.port.sharedse.networkmanager.BleMessage
-import com.ustadmobile.port.sharedse.networkmanager.BleMessageResponseListener
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.DEFAULT_MTU_SIZE
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.USTADMOBILE_BLE_SERVICE_UUID
+import com.ustadmobile.sharedse.network.NetworkManagerBle.Companion.USTADMOBILE_BLE_SERVICE_UUID_UUID
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
+import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -134,7 +133,7 @@ class BleMessageGattClientCallback
         val characteristics = service.characteristics
 
         val characteristic = characteristics[0]
-        if (characteristic.uuid == USTADMOBILE_BLE_SERVICE_UUID) {
+        if (characteristic.uuid == USTADMOBILE_BLE_SERVICE_UUID_UUID) {
             characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             gatt.setCharacteristicNotification(characteristic, true)
             onCharacteristicWrite(gatt, characteristic, BluetoothGatt.GATT_SUCCESS)
@@ -216,7 +215,7 @@ class BleMessageGattClientCallback
     }
 
     private fun matchesServiceUuidString(serviceIdString: String): Boolean {
-        return uuidMatches(serviceIdString, USTADMOBILE_BLE_SERVICE_UUID.toString())
+        return uuidMatches(serviceIdString, USTADMOBILE_BLE_SERVICE_UUID)
     }
 
 

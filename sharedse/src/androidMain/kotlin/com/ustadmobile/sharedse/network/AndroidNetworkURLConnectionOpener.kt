@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.annotation.TargetApi
 import android.net.Network

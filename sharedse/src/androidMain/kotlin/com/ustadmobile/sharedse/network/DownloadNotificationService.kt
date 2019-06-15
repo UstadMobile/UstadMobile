@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.app.*
 import android.content.ComponentName
@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -59,7 +58,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val mNetworkServiceBound = AtomicBoolean(false)
 
-    private var networkManagerBle: NetworkManagerAndroidBle? = null
+    private var networkManagerBle: NetworkManagerBle? = null
 
     private var totalBytesToBeDownloaded: Long = 0
 
@@ -289,7 +288,8 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         builder.setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setWhen(System.currentTimeMillis())
-                .setColor(ContextCompat.getColor(this, R.color.primary))
+                //TODO: set the color
+                //.setColor(ContextCompat.getColor(this, R.color.primary))
                 .setOngoing(true)
                 .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 .setAutoCancel(true)
@@ -297,8 +297,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 .setDefaults(Notification.DEFAULT_SOUND)
 
         if (isVersionLollipopOrAbove) {
-            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            //TODO: fix this icon - add to res
+//            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
+//                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         }
 
         val notificationHolder = NotificationHolder(notificationId, contentTitle,

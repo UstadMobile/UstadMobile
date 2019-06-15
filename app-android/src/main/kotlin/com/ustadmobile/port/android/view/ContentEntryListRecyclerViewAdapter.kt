@@ -20,12 +20,16 @@ import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity, private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
-                                                               private val managerAndroidBle: NetworkManagerAndroidBle?) : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK), LocalAvailabilityListener, OnDownloadJobItemChangeListener {
+                                                               private val managerAndroidBle: NetworkManagerBle?) : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK), LocalAvailabilityListener, OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
 
@@ -226,19 +230,29 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
-            managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
-                    object : UmResultCallback<DownloadJobItemStatus?> {
-                        override fun onDone(result: DownloadJobItemStatus?) {
-                            if (result != null) {
-                                activity.runOnUiThread {
-                                    holder.downloadView.progressVisibility = View.VISIBLE
-                                    holder.onDownloadJobItemChange(result)
-                                }
-                            } else {
-                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
-                            }
-                        }
-                    })
+            GlobalScope.launch(Dispatchers.Main) {
+                val downloadJobItemStatus = managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(
+                    entry.contentEntryUid)
+                if(downloadJobItemStatus != null){
+                    holder.downloadView.progressVisibility = View.VISIBLE
+                    holder.onDownloadJobItemChange(downloadJobItemStatus)
+                }else {
+                    holder.downloadView.progressVisibility == View.INVISIBLE
+                }
+            }
+//            managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
+//                    object : UmResultCallback<DownloadJobItemStatus?> {
+//                        override fun onDone(result: DownloadJobItemStatus?) {
+//                            if (result != null) {
+//                                activity.runOnUiThread {
+//                                    holder.downloadView.progressVisibility = View.VISIBLE
+//                                    holder.onDownloadJobItemChange(result)
+//                                }
+//                            } else {
+//                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
+//                            }
+//                        }
+//                    })
         }
     }
 

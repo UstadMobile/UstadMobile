@@ -53,6 +53,9 @@ kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.android, 'android')
+
+        //Uncomment the line below if you want autocomplete etc. to work in the IDE. Comment out again before building.
+        //fromPreset(presets.jvm, 'commonJvm')
     }
 
     jvm {
@@ -84,12 +87,24 @@ kotlin {
             }
         }
 
+        commonJvmMain {
+            dependencies {
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+            }
+        }
+
         /*
          Normally we would add a sourceSet and then use dependsOn. Unfortunately this does not
          work when running unit tests in the IDE.
          */
         androidMain {
-            kotlin.srcDir("src/commonJvmMain/kotlin")
+            dependsOn commonJvmMain
+            //kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
 
             dependencies {
                 implementation project(":lib-database-android")
@@ -101,6 +116,8 @@ kotlin {
 
                 implementation "androidx.room:room-runtime:$version_android_room"
 
+                implementation "android.arch.work:work-runtime:$version_android_workmanager"
+
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
 
@@ -110,19 +127,16 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
                 //end SharedSE Android and JVM dependencies
             }
         }
 
+
+
         jvmMain {
-            kotlin.srcDir("src/commonJvmMain/kotlin")
+            dependsOn commonJvmMain
 
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
@@ -136,13 +150,8 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
                 implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
-                implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-                implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
                 //end Android and JVM dependencies
             }
         }

@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothProfile;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.sharedse.network.BleMessageGattClientCallback;
 
 import org.junit.Before;
 import org.junit.Test;

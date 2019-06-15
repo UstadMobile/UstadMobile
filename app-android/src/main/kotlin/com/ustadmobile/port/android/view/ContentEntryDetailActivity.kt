@@ -27,8 +27,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import java.util.*
 
 class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener, LocalAvailabilityMonitor, LocalAvailabilityListener {
@@ -36,7 +35,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
 
     private var entryDetailPresenter: ContentEntryDetailPresenter? = null
 
-    private var managerAndroidBle: NetworkManagerAndroidBle? = null
+    private var managerAndroidBle: NetworkManagerBle? = null
 
     private var localAvailabilityStatusText: TextView? = null
 
@@ -73,7 +72,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
-        managerAndroidBle = networkManagerBle as NetworkManagerAndroidBle?
+        managerAndroidBle = networkManagerBle as NetworkManagerBle?
         entryDetailPresenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
                 this, networkManagerBle)

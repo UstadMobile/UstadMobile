@@ -12,6 +12,8 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessage;
 import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle;
+import com.ustadmobile.sharedse.network.BleGattServerAndroid;
+import com.ustadmobile.sharedse.network.NetworkManagerBle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +74,7 @@ public class BleGattServerAndroidTest {
             e.printStackTrace();
         }
 
-        NetworkManagerAndroidBle networkManager = new NetworkManagerAndroidBle(context, httpd);
+        NetworkManagerBle networkManager = new NetworkManagerBle(context, httpd);
         networkManager.setBluetoothManager(mockBluetoothManager);
 
         mGattServer = new BleGattServerAndroid(context,networkManager);

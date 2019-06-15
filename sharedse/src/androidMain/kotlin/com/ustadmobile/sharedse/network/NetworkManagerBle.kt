@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.netwokmanager
+package com.ustadmobile.sharedse.network
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -31,14 +31,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.networkmanager.*
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -47,8 +45,6 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.net.InetAddress
-import java.net.URL
-import java.net.URLConnection
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -71,13 +67,20 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * @author kileha3
  */
-class NetworkManagerAndroidBle
+actual class NetworkManagerBle
 /**
  * Constructor to be used when creating new instance
  *
  * @param context Platform specific application context
  */
-(context: Any, val httpServer: EmbeddedHTTPD) : NetworkManagerBle(context), EmbeddedHTTPD.ResponseListener {
+actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
+    : NetworkManagerBleCommon(context, singleThreadDispatcher), EmbeddedHTTPD.ResponseListener {
+
+    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD): this(context, singleThreadDispatcher) {
+        this.httpd = httpd
+    }
+
+    private lateinit var httpd: EmbeddedHTTPD
 
     private var wifiManager: WifiManager? = null
 
@@ -94,7 +97,7 @@ class NetworkManagerAndroidBle
 
     private val mContext: Context = context as Context
 
-    private val parcelServiceUuid = ParcelUuid(NetworkManagerBle.USTADMOBILE_BLE_SERVICE_UUID)
+    private val parcelServiceUuid = ParcelUuid(UUID.fromString(USTADMOBILE_BLE_SERVICE_UUID))
 
     private var wifiP2pChannel: WifiP2pManager.Channel? = null
 
@@ -126,8 +129,7 @@ class NetworkManagerAndroidBle
 
     private val numActiveRequests = AtomicInteger()
 
-    override val httpd: EmbeddedHTTPD
-        get() = httpServer
+
 
     init {
         startMonitoringNetworkChanges()
@@ -189,7 +191,7 @@ class NetworkManagerAndroidBle
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE advertising service")
                 gattServerAndroid = BleGattServerAndroid(mContext,
-                        this@NetworkManagerAndroidBle)
+                        this@NetworkManagerBle)
                 bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
 
                 val service = BluetoothGattService(parcelServiceUuid.uuid,
@@ -305,7 +307,7 @@ class NetworkManagerAndroidBle
         }
     }
 
-    private class WifiP2PGroupServiceManager(private val networkManager: NetworkManagerAndroidBle) : AsyncServiceManager(STATE_STOPPED, { runnable, delay -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
+    private class WifiP2PGroupServiceManager(private val networkManager: NetworkManagerBle) : AsyncServiceManager(STATE_STOPPED, { runnable, delay -> networkManager.delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
 
         private val wiFiDirectGroup = AtomicReference<WiFiDirectGroupBle>()
 
@@ -446,10 +448,10 @@ class NetworkManagerAndroidBle
 
 
     private fun handleDisconnected() {
-        localConnectionOpener = null
+        //localConnectionOpener = null
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
-        connectivityStatusRef.set(ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
-                false, null))
+        connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+                false, null)
         GlobalScope.launch {
             umAppDatabase.connectivityStatusDao
                     .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
@@ -468,7 +470,7 @@ class NetworkManagerAndroidBle
 
         val networkInfo: NetworkInfo?
 
-        if (isVersionLollipopOrAbove) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             networkInfo = connectivityManager!!.getNetworkInfo(network)
         } else {
             networkInfo = connectivityManager!!.activeNetworkInfo
@@ -478,17 +480,18 @@ class NetworkManagerAndroidBle
         val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
         val status = ConnectivityStatus(state, true,
                 ssid)
-        connectivityStatusRef.set(status)
+        connectivityStatusRef.value = status
 
         //get network SSID
         if (ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
             if (isVersionLollipopOrAbove) {
-                localConnectionOpener = object : URLConnectionOpener {
-                    override fun openConnection(url: URL): URLConnection {
-                        return network!!.openConnection(url)
-                    }
-                }
+                //TODO: implement this as an ktor httpclient generator
+//                localConnectionOpener = object : URLConnectionOpener {
+//                    override fun openConnection(url: URL): URLConnection {
+//                        return network!!.openConnection(url)
+//                    }
+//                }
             }
         }
 
@@ -543,8 +546,10 @@ class NetworkManagerAndroidBle
             intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
             mContext.registerReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver, intentFilter)
 
-            bluetoothManager = mContext.getSystemService(Context.BLUETOOTH_SERVICE)
-            bluetoothAdapter = (bluetoothManager as BluetoothManager).adapter
+            if(Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
+                bluetoothManager = mContext.getSystemService(Context.BLUETOOTH_SERVICE)
+                bluetoothAdapter = (bluetoothManager as BluetoothManager).adapter
+            }
 
             /**
              * Android will not send an initial state on startup as happens for most other
@@ -601,13 +606,13 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override val isWiFiEnabled: Boolean
+    actual override val isWiFiEnabled: Boolean
         get() = wifiManager!!.isWifiEnabled
 
     /**
      * {@inheritDoc}
      */
-    override val isBleCapable: Boolean
+    actual override val isBleCapable: Boolean
         get() {
             return if (isBleDeviceSDKVersion)
                 BluetoothAdapter.getDefaultAdapter() != null && mContext.packageManager
@@ -620,7 +625,7 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override val isBluetoothEnabled: Boolean
+    actual override val isBluetoothEnabled: Boolean
         get() = (bluetoothAdapter != null && bluetoothAdapter!!.isEnabled
                 && bluetoothAdapter!!.state == BluetoothAdapter.STATE_ON)
 
@@ -628,15 +633,16 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun canDeviceAdvertise(): Boolean {
-        return (isAdvertiser && bluetoothAdapter != null
+    actual override fun canDeviceAdvertise(): Boolean {
+        return Build.VERSION.SDK_INT > BLE_ADVERTISE_MIN_SDK_VERSION &&
+                (isAdvertiser && bluetoothAdapter != null
                 && bluetoothAdapter!!.isMultipleAdvertisementSupported)
     }
 
     /**
      * {@inheritDoc}
      */
-    override fun openBluetoothSettings() {
+    actual override fun openBluetoothSettings() {
         mContext.startActivity(Intent(
                 android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
     }
@@ -644,12 +650,12 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun setWifiEnabled(enabled: Boolean): Boolean {
+    actual override fun setWifiEnabled(enabled: Boolean): Boolean {
         return wifiManager!!.setWifiEnabled(enabled)
     }
 
 
-    override fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle {
+    fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle {
         wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis())
         wifiP2pGroupServiceManager!!.setEnabled(true)
         wifiP2pGroupServiceManager!!.await({ state -> state == AsyncServiceManager.STATE_STARTED || state == AsyncServiceManager.STATE_STOPPED },
@@ -661,7 +667,7 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int) {
+    actual override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int) {
         deleteTemporaryWifiDirectSsids()
         endAnyLocalSession()
 
@@ -796,7 +802,7 @@ class NetworkManagerAndroidBle
     }
 
 
-    override fun restoreWifi() {
+    actual override fun restoreWifi() {
         UMLog.l(UMLog.INFO, 339, "NetworkManager: restore wifi")
         endAnyLocalSession()
         wifiManager!!.disconnect()
@@ -808,23 +814,26 @@ class NetworkManagerAndroidBle
      * Send an http request to the server so it knows we are done
      */
     private fun endAnyLocalSession() {
-        if (connectivityStatusRef.get() == null
-                || connectivityStatusRef.get().wifiSsid == null
-                || !connectivityStatusRef.get().wifiSsid!!.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
+        val currentConnectivityStatus = connectivityStatusRef.value
+        val currentWifiSsid = currentConnectivityStatus?.wifiSsid
+        if (currentConnectivityStatus == null
+                || currentWifiSsid == null
+                || !currentWifiSsid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
             return
 
         val endpoint = umAppDatabase.networkNodeDao.getEndpointUrlByGroupSsid(
-                connectivityStatusRef.get().wifiSsid!!)
+                currentWifiSsid)
         if (endpoint == null) {
             UMLog.l(UMLog.ERROR, 699,
-                    "ERROR: No endpoint url for ssid" + connectivityStatusRef.get().wifiSsid!!)
+                    "ERROR: No endpoint url for ssid" + currentWifiSsid)
             return
         }
 
         try {
             val endSessionUrl = endpoint + "endsession"
-            val response = UstadMobileSystemImpl.instance.makeRequestSync(UmHttpRequest(mContext,
-                    endSessionUrl))
+            //TODO: send this request
+//            val response = UstadMobileSystemImpl.instance.makeRequestSync(UmHttpRequest(mContext,
+//                    endSessionUrl))
             UMLog.l(UMLog.INFO, 699, "Send end of session request $endSessionUrl")
         } catch (e: IOException) {
             e.printStackTrace()
@@ -859,9 +868,9 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>,
+    actual override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>,
                                      peerToCheck: NetworkNode?): BleEntryStatusTask? {
-        if (isBleDeviceSDKVersion) {
+        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val entryStatusTask = BleEntryStatusTaskAndroid(
                     context as Context, this, entryUidsToCheck, peerToCheck!!)
             entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
@@ -873,10 +882,10 @@ class NetworkManagerAndroidBle
     /**
      * {@inheritDoc}
      */
-    override fun makeEntryStatusTask(context: Any, message: BleMessage,
+    actual override fun makeEntryStatusTask(context: Any, message: BleMessage,
                                      peerToSendMessageTo: NetworkNode,
                                      responseListener: BleMessageResponseListener): BleEntryStatusTask? {
-        if (isBleDeviceSDKVersion) {
+        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val task = BleEntryStatusTaskAndroid(context as Context, this, message, peerToSendMessageTo, responseListener)
             task.setBluetoothManager(bluetoothManager as BluetoothManager)
             return task
@@ -884,7 +893,7 @@ class NetworkManagerAndroidBle
         return null
     }
 
-    override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner {
+    actual override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner {
         return DeleteJobTaskRunnerAndroid(`object`, args)
     }
 
@@ -897,7 +906,7 @@ class NetworkManagerAndroidBle
         connectivityManager = mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        if (isVersionLollipopOrAbove) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val networkRequest = NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -974,10 +983,10 @@ class NetworkManagerAndroidBle
         super.onDestroy()
     }
 
-    override val isVersionLollipopOrAbove: Boolean
+    actual override val isVersionLollipopOrAbove: Boolean
         get() =  Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
-    override val isVersionKitKatOrBelow: Boolean
+    actual override val isVersionKitKatOrBelow: Boolean
         get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
 
 
@@ -1002,6 +1011,11 @@ class NetworkManagerAndroidBle
          */
         val BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000
 
+        val USTADMOBILE_BLE_SERVICE_UUID_UUID = UUID.fromString(NetworkManagerBleCommon.USTADMOBILE_BLE_SERVICE_UUID)
+
+        const val BLE_ADVERTISE_MIN_SDK_VERSION = 21
+
+        const val BLE_MIN_SDK_VERSION = 18
 
         /**
          * Android normally but not always surrounds an SSID with quotes on it's configuration objects.

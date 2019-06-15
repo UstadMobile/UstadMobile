@@ -17,6 +17,8 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
@@ -33,16 +35,20 @@ import kotlinx.io.ByteArrayOutputStream
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
  *
+ *
+ * @property context system context to use
+ * @property singleThreadDispatcher A single thread based dispatcher that is used for tracking download
+ *                                  status. DownloadJobItemManager requires a single thread environment
+ *
  * @author kileha3
  */
-
-abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWorkQueue.OnQueueEmptyListener*/
+abstract class NetworkManagerBleCommon(
+        val context: Any = Any(),
+        val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default) : LocalAvailabilityMonitor,/*, LiveDataWorkQueue.OnQueueEmptyListener*/
         /*DownloadJobItemManager.OnDownloadJobItemChangeListener,*/
         DownloadJobItemStatusProvider {
 
     private val knownNodesLock = Any()
-
-    private var mContext: Any? = null
 
     private var isStopMonitoring = false
 
@@ -70,7 +76,7 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
 
     private val locallyAvailableContainerUids = mutableSetOf<Long>()
 
-    //protected var connectivityStatusRef = atomic(null as ConnectivityStatus?)
+    protected var connectivityStatusRef = atomic(null as ConnectivityStatus?)
 
     protected var wifiLockHolders = mutableListOf<Any>()
 
@@ -79,6 +85,8 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
     //private val scheduledExecutorService = Executors.newScheduledThreadPool(3)
 
     private lateinit var umAppDatabase: UmAppDatabase
+
+    private lateinit var umAppDatabaseRepo: UmAppDatabase
 
     private val localAvailabilityListeners = mutableListOf<LocalAvailabilityListener>()
 
@@ -159,28 +167,6 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
 //    val activeDownloadJobItemManagers: List<DownloadJobItemManager>
 //        get() = jobItemManagerList!!.getActiveDownloadJobItemManagers()
 
-    /**
-     * Constructor to be used when creating new instance
-     * @param context Platform specific application context
-     */
-    constructor(context: Any) {
-        this.mContext = context
-    }
-
-    /**
-     * Constructor to be used for testing purpose (mocks)
-     */
-    constructor() {
-
-    }
-
-    /**
-     * Set platform specific context
-     * @param context Platform's context to be set
-     */
-    fun setContext(context: Any) {
-        this.mContext = context
-    }
 
     /**
      * Only for testing - allows the unit test to set this without running the main onCreate method
@@ -195,8 +181,10 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
      * Start web server, advertising and discovery
      */
     open fun onCreate() {
-        umAppDatabase = UmAppDatabase.getInstance(mContext!!)
-//        jobItemManagerList = DownloadJobItemManagerList(umAppDatabase!!)
+        umAppDatabase = UmAppDatabase.getInstance(context)
+        umAppDatabaseRepo = umAppDatabase
+        jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
+
 //        downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)
 //        downloadJobItemWorkQueue!!.adapter = mJobItemAdapter
 //        downloadJobItemWorkQueue!!.start(umAppDatabase!!.downloadJobItemDao.findNextDownloadJobItems())
@@ -223,7 +211,7 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
     fun handleNodeDiscovered(node: NetworkNode) {
         synchronized(knownNodesLock) {
 
-            val networkNodeDao = UmAppDatabase.getInstance(mContext!!).networkNodeDao
+            val networkNodeDao = umAppDatabase.networkNodeDao
 
             if (!knownPeerNodes.containsKey(node.bluetoothMacAddress)) {
 
@@ -285,8 +273,8 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
             UMLog.l(UMLog.DEBUG, 694, "Registered a monitor with "
                     + entryUidsToMonitor.size + " entry(s) to be monitored")
 
-            val networkNodeDao = UmAppDatabase.getInstance(mContext!!).networkNodeDao
-            val responseDao = UmAppDatabase.getInstance(mContext!!).entryStatusResponseDao
+            val networkNodeDao = umAppDatabase.networkNodeDao
+            val responseDao = umAppDatabase.entryStatusResponseDao
 
             val lastUpdateTime = getSystemTimeInMillis() - (60 * 1000)
 
@@ -320,7 +308,7 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
             //Make entryStatusTask as per node list and entryUuids found
             for (nodeId in nodeToCheckEntryList.keys) {
                 val networkNode = networkNodeDao.findNodeById(nodeId.toLong())
-                val entryStatusTask = makeEntryStatusTask(mContext,
+                val entryStatusTask = makeEntryStatusTask(context,
                         nodeToCheckEntryList[nodeId]!!, networkNode)
                 entryStatusTasks.add(entryStatusTask!!)
                 //entryStatusTaskExecutorService.execute(entryStatusTask)
@@ -425,7 +413,7 @@ abstract class NetworkManagerBleCommon : LocalAvailabilityMonitor,/*, LiveDataWo
         val taskArgs = HashMap<String, String>()
         taskArgs[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] = downloadJobUid.toString()
 
-        makeDeleteJobTask(mContext, taskArgs).run()
+        makeDeleteJobTask(context, taskArgs).run()
     }
 
 

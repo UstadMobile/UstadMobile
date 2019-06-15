@@ -31,10 +31,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.port.android.impl.UserFeedbackException
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import com.ustadmobile.port.sharedse.util.RunnableQueue
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
 import java.lang.ref.WeakReference
