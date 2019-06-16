@@ -121,7 +121,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 
-@UmDatabase(version = 21, entities = {
+@UmDatabase(version = 23, entities = {
         DownloadSet.class,
         DownloadSetItem.class, NetworkNode.class, EntryStatusResponse.class,
         DownloadJobItemHistory.class,
