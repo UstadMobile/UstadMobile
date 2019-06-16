@@ -155,19 +155,19 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 ACTION_STOP_FOREGROUND_SERVICE -> stopForegroundService()
 
                 ACTION_PAUSE_DOWNLOAD -> if (notificationHolder != null) {
-                    Thread {
+                    GlobalScope.launch {
                         umAppDatabase!!.downloadJobDao
                                 .updateJobAndItems(downloadJobId, JobStatus.PAUSED,
                                         JobStatus.PAUSING)
-                    }.start()
+                    }
                 }
 
                 ACTION_CANCEL_DOWNLOAD -> if (notificationHolder != null) {
-                    Thread {
+                    GlobalScope.launch {
                         umAppDatabase!!.downloadJobDao
                                 .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
                                         JobStatus.CANCELLING)
-                    }.start()
+                    }
                 }
             }
         }
