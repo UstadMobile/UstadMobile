@@ -153,6 +153,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
                 .getLatestDownloadJobUidForContentEntryUid(contentEntryUid)
         if (currentJobId == null || currentJobId == 0) {
             createDownloadJobRecursive()
+        }else {
+            //TODO : set jobItemManager
         }
 
         startObservingJob()

@@ -20,8 +20,9 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
     suspend fun run() {
         val startTime = getSystemTimeInMillis()
         val downloadJobUid = jobItemManager.downloadJobUid
+        jobItemManager.awaitLoaded()
         val contentEntryUid = jobItemManager.rootContentEntryUid
-
+        println("Prepare download job for content entry uid: $contentEntryUid")
         UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: start " +
                 "entry uid = " + contentEntryUid + " download job uid = " + downloadJobUid)
 
