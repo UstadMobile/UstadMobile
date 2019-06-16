@@ -55,7 +55,7 @@ class BleGattServerCommonTest {
        //`when`(mockedNetworkManager!!.httpd).thenReturn(httpd)
 
         umAppDatabase = UmAppDatabase.getInstance(context)
-       // umAppDatabase!!.clearAllTables()
+        umAppDatabase!!.clearAllTables()
 
         gattServer = spy<BleGattServerCommon>(BleGattServerCommon::class.java)
         gattServer!!.setContext(context)
@@ -145,7 +145,7 @@ class BleGattServerCommonTest {
     fun givenRequestWithUnAvailableEntries_whenHandlingIt_thenShouldReplyTheyAreNotAvailable() {
 
         val messageToSend = BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(), bleMessageLongToBytes(containerUids))
-        //umAppDatabase!!.clearAllTables()
+        umAppDatabase!!.clearAllTables()
         val responseMessage = gattServer!!.handleRequest(messageToSend)
         val responseList = BleMessageUtil.bleMessageBytesToLong(responseMessage!!.payload!!)
         var availabilityCounter = 0
