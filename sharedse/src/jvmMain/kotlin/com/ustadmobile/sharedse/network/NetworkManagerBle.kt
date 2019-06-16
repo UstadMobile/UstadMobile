@@ -44,4 +44,8 @@ actual class NetworkManagerBle actual constructor(context: Any, singleThreadDisp
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

@@ -21,6 +21,8 @@ expect class NetworkManagerBle(context: Any = Any(),
 
     override fun openBluetoothSettings()
 
+    override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle
+
     override fun setWifiEnabled(enabled: Boolean): Boolean
 
     override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int)

@@ -1,26 +1,23 @@
 package com.ustadmobile.sharedse.network
 
+//import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+//import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
+import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.EntryStatusResponse
+import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-//import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-//import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
 import kotlinx.atomicfu.AtomicInt
-import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
 import kotlinx.io.ByteArrayOutputStream
 
@@ -233,7 +230,7 @@ abstract class NetworkManagerBleCommon(
         }
     }
 
-    //abstract fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle
+    abstract fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle
 
     /**
      * Open bluetooth setting section from setting panel
@@ -697,7 +694,7 @@ abstract class NetworkManagerBleCommon(
         /**
          * Bluetooth Low Energy service UUID for our app
          */
-        val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
+        const val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
 
         const val WIFI_DIRECT_GROUP_SSID_PREFIX = "DIRECT-"
 

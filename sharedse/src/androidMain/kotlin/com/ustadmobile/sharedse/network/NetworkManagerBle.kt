@@ -37,6 +37,7 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -80,7 +81,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         this.httpd = httpd
     }
 
-    private lateinit var httpd: EmbeddedHTTPD
+    lateinit var httpd: EmbeddedHTTPD
 
     private var wifiManager: WifiManager? = null
 
@@ -190,7 +191,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             if (canDeviceAdvertise()) {
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE advertising service")
-                gattServerAndroid = BleGattServerAndroid(mContext,
+                gattServerAndroid = BleGattServer(mContext,
                         this@NetworkManagerBle)
                 bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
 
@@ -203,13 +204,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
                 service.addCharacteristic(writeCharacteristic)
                 if (gattServerAndroid == null
-                        || (gattServerAndroid as BleGattServerAndroid).gattServer == null
+                        || (gattServerAndroid as BleGattServer).gattServer == null
                         || bleServiceAdvertiser == null) {
                     notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                     return
                 }
 
-                (gattServerAndroid as BleGattServerAndroid).gattServer!!.addService(service)
+                (gattServerAndroid as BleGattServer).gattServer!!.addService(service)
 
                 val settings = AdvertiseSettings.Builder()
                         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
@@ -246,7 +247,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         override fun stop() {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    val mGattServer = (gattServerAndroid as BleGattServerAndroid).gattServer
+                    val mGattServer = (gattServerAndroid as BleGattServer).gattServer
                     mGattServer!!.clearServices()
                     mGattServer.close()
                 }
@@ -412,11 +413,11 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
         companion object {
 
-            private val TIMEOUT_AFTER_GROUP_CREATION = 2 * 60 * 1000
+            private const val TIMEOUT_AFTER_GROUP_CREATION = 2 * 60 * 1000
 
-            private val TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000
+            private const val TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000
 
-            private val TIMEOUT_CHECK_INTERVAL = 30 * 1000
+            private const val TIMEOUT_CHECK_INTERVAL = 30 * 1000
         }
     }
 
@@ -655,11 +656,11 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
 
-    fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle {
+    actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
         wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis())
         wifiP2pGroupServiceManager!!.setEnabled(true)
         wifiP2pGroupServiceManager!!.await({ state -> state == AsyncServiceManager.STATE_STARTED || state == AsyncServiceManager.STATE_STOPPED },
-                timeout, timeoutUnit)
+                timeout)
         return wifiP2pGroupServiceManager!!.group
     }
 
