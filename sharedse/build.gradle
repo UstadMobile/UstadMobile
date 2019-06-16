@@ -211,6 +211,9 @@ kotlin {
                 api project(":lib-database-android")
                 api project(":lib-door-runtime")
                 api project(":lib-database-mpp")
+
+                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+
             }
         }
 

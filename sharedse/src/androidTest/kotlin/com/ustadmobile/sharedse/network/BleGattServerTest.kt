@@ -6,10 +6,13 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.DEFAULT_MTU_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
+import kotlinx.coroutines.Dispatchers
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
+import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import java.util.*
 
@@ -20,7 +23,7 @@ import java.util.*
  * @author kileha3
  */
 
-
+@RunWith(RobolectricTestRunner::class)
 class BleGattServerTest {
 
     private var mockedCharacteristics: BluetoothGattCharacteristic? = null
@@ -55,7 +58,7 @@ class BleGattServerTest {
             e.printStackTrace()
         }
 
-        val networkManager = NetworkManagerBle(context)
+        val networkManager = NetworkManagerBle(context, Dispatchers.Default)
          networkManager.setBluetoothManager(mockBluetoothManager)
 
         mGattServer = BleGattServer(context, networkManager)
