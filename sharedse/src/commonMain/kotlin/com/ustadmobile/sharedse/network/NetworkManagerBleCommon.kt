@@ -45,7 +45,8 @@ import kotlinx.io.ByteArrayOutputStream
  */
 abstract class NetworkManagerBleCommon(
         val context: Any = Any(),
-        val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default) : LocalAvailabilityMonitor,/*, LiveDataWorkQueue.OnQueueEmptyListener*/
+        val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
+        val mainDispatcher: CoroutineDispatcher = Dispatchers.Default) : LocalAvailabilityMonitor,/*, LiveDataWorkQueue.OnQueueEmptyListener*/
         /*DownloadJobItemManager.OnDownloadJobItemChangeListener,*/
         DownloadJobItemStatusProvider {
 
@@ -173,10 +174,13 @@ abstract class NetworkManagerBleCommon(
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabaseRepo = umAppDatabase
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
-//        downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
-//                {item1, item2 -> item1.djiUid == item2.djiUid}) {
-//            DownloadJobI
-//        }
+        downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
+                {item1, item2 -> item1.djiUid == item2.djiUid}, mainDispatcher = mainDispatcher) {
+            DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
+                    umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
+                    connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher).download()
+        }
+        GlobalScope.launch { downloadJobItemWorkQueue.start() }
 
 
 //        downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)

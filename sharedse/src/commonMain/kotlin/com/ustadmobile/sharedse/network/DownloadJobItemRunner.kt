@@ -45,12 +45,15 @@ class DownloadJobItemRunner
  * @param networkManager BLE network manager for network operation controls.
  * @param appDb Application database instance
  * @param endpointUrl Endpoint to get the file from.
+ * @param mainCoroutineDispatcher A coroutine dispatcher that will, on Android, dispatch on the main
+ * thread. This is required because Room's LiveData.observeForever must be called from the main thread
  */
 (private val context: Any, private val downloadItem: DownloadJobItem,
  private val networkManager: NetworkManagerBleCommon, private val appDb: UmAppDatabase,
  private val appDbRepo: UmAppDatabase,
  private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
- private val retryDelay: Long = 3000) {
+ private val retryDelay: Long = 3000,
+ private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
     private val downloadJobItemManager: DownloadJobItemManager?
 
@@ -234,9 +237,12 @@ class DownloadJobItemRunner
                 downloadContext?.cancel()
             }
 
-            statusLiveData!!.removeObserver(statusObserver!!)
-            downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
-            downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
+            withContext(mainCoroutineDispatcher) {
+                statusLiveData!!.removeObserver(statusObserver!!)
+                downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
+                downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
+            }
+
             //entryStatusLiveData.removeObserver(entryStatusObserver);
 
             //statusCheckTimer.cancel()
@@ -278,12 +284,15 @@ class DownloadJobItemRunner
         statusObserver = ObserverFnWrapper(this::handleConnectivityStatusChanged)
         downloadJobItemObserver = ObserverFnWrapper(this::handleDownloadJobItemStatusChanged)
 
+        withContext(mainCoroutineDispatcher) {
+            statusLiveData!!.observeForever(statusObserver!!)
+
+
+            downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
+            downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
+        }
         //entryStatusObserver = this::handleContentEntryFileStatus;
-        statusLiveData!!.observeForever(statusObserver!!)
 
-
-        downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
-        downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         //entryStatusLiveData.observeForever(entryStatusObserver);
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
@@ -303,8 +312,8 @@ class DownloadJobItemRunner
      * Start downloading a file
      */
     private suspend fun startDownload() {
-        UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                " StartDownload: ContainerUid = " + downloadItem.djiContainerUid)
+        UMLog.l(UMLog.INFO, 699,
+                "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
         var attemptsRemaining = 3
 
         val container = appDbRepo.containerDao
@@ -397,6 +406,7 @@ class DownloadJobItemRunner
                                 val destFile = FileSe(FileSe(destinationDir!!),
                                         entry.ceCefUid.toString() + ".tmp")
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
+                                UMLog.l(UMLog.VERBOSE, 100, "Download $downloadUrl to $destFile")
                                 val resumableDownload = ResumableDownload2(downloadUrl,
                                         destFile.getAbsolutePath(), httpClient = httpClient)
 //                            httpDownload!!.connectionOpener = connectionOpener

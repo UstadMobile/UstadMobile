@@ -135,7 +135,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         entryDetailsDesc!!.text = contentEntry.description
         entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
 
-        if(contentEntry.thumbnailUrl != null){
+        if(!contentEntry.thumbnailUrl.isNullOrBlank()){
             Picasso.get()
                     .load(contentEntry.thumbnailUrl)
                     .into(findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)

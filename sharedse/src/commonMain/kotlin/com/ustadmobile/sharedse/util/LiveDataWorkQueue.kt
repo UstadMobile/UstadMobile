@@ -8,10 +8,21 @@ import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
+/**
+ *
+ *
+ * @property liveDataSource A DoorLiveData object that will provide a list of a given type
+ * @property sameItemFn This is essentially a diffutil so that we can avoid running the same item twice
+ * @property numProcessors The number of coroutine receivers to launch to process data
+ * @property mainDispatcher A coroutine dispatcher, that on Android, will dispatch onto the main thread.
+ * This is required because observerForever on Android must be called from the main thread.
+ * @property itemRunner A suspended function that will be executed for each new object received from the LiveData
+ */
 class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val sameItemFn: (item1: T, item2: T) -> Boolean,
                            private val numProcessors: Int = 1,
                            private val coroutineScope: CoroutineScope = GlobalScope,
+                           private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
     private val recentlyRunItems = mutableSetOf<T>()
@@ -34,8 +45,9 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
         }
 
 
-
-        liveDataSource.observeForever(this)
+        withContext(mainDispatcher) {
+            liveDataSource.observeForever(this@LiveDataWorkQueue)
+        }
     }
 
     override fun onChanged(t: List<T>) {
@@ -48,7 +60,9 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
     }
 
     suspend fun stop() {
-        liveDataSource.removeObserver(this)
+        withContext(mainDispatcher) {
+            liveDataSource.removeObserver(this@LiveDataWorkQueue)
+        }
         coroutineCtx.cancel()
     }
 }
