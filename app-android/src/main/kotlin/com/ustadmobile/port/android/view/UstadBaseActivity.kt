@@ -1,9 +1,11 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -71,6 +73,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var localeOnCreate: String? = null
 
+    private var runAfterFileSelection: Runnable? = null
+
     /**
      * Can be used to check if the activity has been started.
      *
@@ -90,6 +94,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private var permissionDialogMessage: String? = null
 
     private var permission: String? = null
+
+    internal var selectedFileUri: Uri?= null
+
+    internal var isOpeningFilePickerOrCamera = false
 
 
     private val mSyncServiceConnection = object : ServiceConnection {
@@ -320,6 +328,18 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(resultCode == RESULT_OK){
+            if (requestCode == FILE_SELECTION_REQUEST_CODE) {
+                selectedFileUri = data?.data
+                runAfterFileSelection?.run()
+                runAfterFileSelection = null
+            }
+        }
+    }
+
+
     /**
      * Handle our own delegation of back button presses.  This allows UstadBaseFragment child classes
      * to handle back button presses if they want to.
@@ -361,6 +381,28 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun showNotification(notification: String, length: Int) {
         runOnUiThread { Toast.makeText(this, notification, length).show() }
+    }
+
+
+    @SuppressLint("ObsoleteSdkInt")
+    protected fun runAfterFileSection(runnable: java.lang.Runnable, vararg mimeTypes: String) {
+        this.runAfterFileSelection = runnable
+
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        } else {
+            val mimeTypesStr = StringBuilder()
+            for (mimeType in mimeTypes) {
+                mimeTypesStr.append(mimeType).append("|")
+            }
+            intent.type = mimeTypesStr.substring(0, mimeTypesStr.length - 1)
+        }
+        startActivityForResult(Intent.createChooser(intent, ""),
+                FILE_SELECTION_REQUEST_CODE)
     }
 
     /**
@@ -446,5 +488,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     companion object {
 
         private const val RUN_TIME_REQUEST_CODE = 111
+
+        private const val FILE_SELECTION_REQUEST_CODE = 112
     }
 }

@@ -78,6 +78,8 @@ open class ContentEntry() {
 
     var leaf: Boolean = false
 
+    var imported: Boolean = false
+
     /**
      * Represents if this content entry is public for anyone to use
      *
@@ -188,6 +190,8 @@ open class ContentEntry() {
         const val DOCUMENT_TYPE = 6
 
         const val ARTICLE_TYPE = 7
+
+        const val LICENSE_TYPE_OTHER = 8
     }
 
 }

@@ -2,12 +2,11 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmObserver
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -15,39 +14,42 @@ import kotlinx.coroutines.launch
 
 class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String>,
                                      view: ContentEditorPageListView,
-                                     private val pageDelegate: ContentEditorPageDelegate)
+                                     private val pageActionDelegate: ContentEditorPageActionDelegate)
     : UstadBaseController<ContentEditorPageListView>(context, arguments, view) {
 
     private val appDb: UmAppDatabase = UmAppDatabase.getInstance(context)
 
     private val entryUuid = arguments.getValue(ContentEditorView.CONTENT_ENTRY_UID).toLong()
 
+    private var entryLiveData: DoorLiveData<ContentEntry?>? = null
+
     private var selectedPage: String? = null
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        val entryLiveData: UmLiveData<ContentEntry> = appDb.contentEntryDao.getLiveContentEntry(entryUuid)
-        entryLiveData.observe(this, object : UmObserver<ContentEntry> {
-            override fun onChanged(t: ContentEntry?) {
-                if(t != null){
-                    view.runOnUiThread(Runnable { view.setDocumentTitle(t.title!!)})
-                    setUpOrUpdateDocumentPages()
-                }
-            }
-        })
+        entryLiveData  = appDb.contentEntryDao.findLiveContentEntry(entryUuid)
+        entryLiveData!!.observe(this, this::onEntryValueChanged)
+    }
+
+
+    private fun onEntryValueChanged(entry: ContentEntry?){
+        if(entry != null){
+            view.runOnUiThread(Runnable { view.setDocumentTitle(entry.title!!)})
+            setUpOrUpdateDocumentPages()
+        }
     }
 
     private fun setUpOrUpdateDocumentPages(){
         view.runOnUiThread(Runnable {
-            view.updatePageList(pageDelegate.getCurrentDocument()
+            view.updatePageList(pageActionDelegate.getCurrentDocument()
                     .toc?.getChildren() as MutableList<EpubNavItem>, selectedPage)
         })
     }
 
     fun handleAddPage(title: String){
         GlobalScope.launch {
-            val result = pageDelegate.addPage(title)
+            val result = pageActionDelegate.addPage(title)
             if(result){
                 setUpOrUpdateDocumentPages()
             }
@@ -56,13 +58,13 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
 
     fun handlePageOrderChanged(navItems:List<EpubNavItem>){
         GlobalScope.launch {
-            pageDelegate.changePageOrder(navItems as MutableList<EpubNavItem>)
+            pageActionDelegate.changePageOrder(navItems as MutableList<EpubNavItem>)
         }
     }
 
 
     fun handlePageSelected(href: String) {
-        pageDelegate.loadPage(href)
+        pageActionDelegate.loadPage(href)
         view.dismissDialog()
     }
 
@@ -72,7 +74,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
 
     fun handlePageUpdate(page: EpubNavItem){
         GlobalScope.launch {
-            val result = pageDelegate.updatePage(page)
+            val result = pageActionDelegate.updatePage(page)
             if(result){
                 setUpOrUpdateDocumentPages()
             }
@@ -81,9 +83,9 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
 
     fun handleRemovePage(href: String){
         GlobalScope.launch {
-            val result = pageDelegate.removePage(href)
+            val result = pageActionDelegate.removePage(href)
             if(selectedPage == href){
-                pageDelegate.loadPage(result)
+                pageActionDelegate.loadPage(result!!)
             }
             setUpOrUpdateDocumentPages()
         }

@@ -255,7 +255,6 @@
     <string name="catalog_language">Catalog Language</string>
     <string name="also_available_in">Also available in</string>
 
-    <string name="content_entry_not_found">ContentEntry Not Found</string>
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
@@ -295,6 +294,7 @@
     <string name="entry_details_license">License</string>
     <string name="entry_details_description">Description</string>
     <string name="library_reading_level">Reading Level</string>
+    <string name="file_not_found">File Not Found</string>
 
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
@@ -393,5 +393,8 @@
     <string name="content_update_massage">Updated successfully</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
+    <string name="content_entry_importing">Importing, please wait</string>
+
+
 
 </resources>

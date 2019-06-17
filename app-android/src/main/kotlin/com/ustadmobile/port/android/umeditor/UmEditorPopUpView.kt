@@ -190,7 +190,7 @@ class UmEditorPopUpView
             holder.meuTitle.setText(format.formatTitle)
             changeState(holder.menuIcon, holder.menuHolder, holder.meuTitle, format.isActive)
 
-            holder.itemView.setOnClickListener { v ->
+            holder.itemView.setOnClickListener {
                 listener!!.onMenuClicked(format)
                 popupWindow!!.dismiss()
             }

@@ -1,8 +1,18 @@
 package com.ustadmobile.core.impl
 
+import android.content.ContentResolver
+import android.content.Context
+import android.content.res.Resources
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.View
+import android.webkit.MimeTypeMap
+import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.FragmentActivity
 
 import java.util.HashMap
 import java.util.Hashtable
@@ -122,6 +132,112 @@ object UMAndroidUtil {
      */
     fun normalizeAndroidWifiSsid(ssid: String?): String? {
         return ssid?.replace("\"", "") ?: ssid
+    }
+
+
+    /**
+     * Get file mime type
+     * @param context application context
+     * @param uri Uri to be resolved
+     * @return mime type of the file
+     */
+    fun getMimeType(context: Context, @NonNull uri: Uri): String? {
+        val mimeType: String?
+        mimeType = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            val cr = context.contentResolver
+            cr.getType(uri)
+        } else {
+            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString())
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase())
+        }
+        return mimeType
+    }
+
+    /**
+     * Get current device locale
+     * @param context Application context
+     * @return current locale
+     */
+    @JvmStatic
+    fun getCurrentLocale(context: Context): String {
+        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            context.resources.configuration.locales.get(0)
+        else
+            context.resources.configuration.locale).toString()
+    }
+
+    /**
+     * Get current device language directionality
+     * @param context Application context
+     * @return current directionality i.e rtl or ltr
+     */
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @JvmStatic
+    fun getDirectionality(context: Context): String {
+        val config = context.resources.configuration
+        return if (config.layoutDirection == View.LAYOUT_DIRECTION_RTL) "rtl" else "ltr"
+    }
+
+    /**
+     * Get actionbar size
+     * @param context application context
+     * @return toolbar height
+     */
+    fun getActionBarSize(context: Context): Int {
+        val tv = TypedValue()
+        return if (context.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            TypedValue.complexToDimensionPixelSize(tv.data,
+                    context.resources.displayMetrics)
+        } else 0
+    }
+
+    /**
+     * Get device display width
+     * @param activity Active fragment activity
+     * @return width
+     */
+    fun getDisplayWidth(activity: FragmentActivity): Int {
+        val display = activity.windowManager.defaultDisplay
+        val outMetrics = DisplayMetrics()
+        display.getMetrics(outMetrics)
+        val density = activity.resources.displayMetrics.density
+        return Math.round(outMetrics.widthPixels / density)
+    }
+
+    /**
+     * Covert density pixels to pixels
+     * @param dp density pixels to be converted
+     * @return converted pixels
+     */
+    fun convertDpToPixel(dp: Int): Int {
+        val metrics = Resources.getSystem().displayMetrics
+        return Math.round(dp * (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT))
+    }
+
+    /**
+     * Convert pixels to density pixels
+     * @param px pixels to be converted
+     * @return converted density pixels
+     */
+    fun convertPixelsToDp(px: Float): Int {
+        val metrics = Resources.getSystem().displayMetrics
+        return Math.round(px / (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT))
+    }
+
+    /**
+     * Gets number of rows to be displayed as per screen size
+     * @param width Width of a single item
+     * @return number of columns which will fit the screen
+     */
+    fun getSpanCount(activity: FragmentActivity, @NonNull width: Int?): Int {
+        val display = activity.windowManager.defaultDisplay
+        val outMetrics = DisplayMetrics()
+        display.getMetrics(outMetrics)
+        val density = activity.resources.displayMetrics.density
+        val dpWidth = outMetrics.widthPixels / density
+        return Math.round(dpWidth / width!!)
     }
 
 }

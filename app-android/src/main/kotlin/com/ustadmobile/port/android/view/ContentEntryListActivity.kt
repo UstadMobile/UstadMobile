@@ -23,7 +23,7 @@ class ContentEntryListActivity : UstadBaseActivity(), ContentEntryListFragment.C
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-        val currentFrag = ContentEntryListFragment.newInstance(intent.extras)
+        val currentFrag = ContentEntryListFragment.newInstance(intent.extras!!)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                     .add(R.id.entry_content, currentFrag)

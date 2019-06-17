@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
@@ -11,7 +12,6 @@ import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.InputStream
@@ -33,32 +33,11 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         get() = getNavDocument()
         set(value) {}
 
-    /**
-     * Check if tinymce is initialized on currenlty selected section
-     * @return initialization status.
-     */
-    var isEditorInitialized = false
 
     private var containerManager: ContainerManager ? = null
 
     private var nextNavItem: EpubNavItem? = null
 
-    /**
-     * Check if you are about to navigate to preview activity
-     * @return preview status flag.
-     */
-    var isOpenPreviewRequest = false
-
-    /**
-     * Check if the content is being previewed on the editor
-     * @return
-     */
-    var isInEditorPreview = false
-
-    /**
-     * Set frag to indicate when page manager is active.
-     */
-    var isPageManagerOpen = false
 
     actual override suspend fun createDocument(title: String, description: String): Boolean {
         var filePath = "/http/$EDITOR_BASE_DIR_NAME/templates"
@@ -71,19 +50,20 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         container.lastModified = System.currentTimeMillis()
         container.mimeType = MIME_TYPE_DOCUMENT
         container.containerUid = umAppRepo.containerDao.insert(container)
+        currentContainerUid = container.containerUid
 
         var status = umDatabase.contentEntryStatusDao.findByUidAsync(contentEntryUid)
         if (status == null) {
             status = ContentEntryStatus(contentEntryUid, true,
                     container.fileSize)
-            status!!.locallyAvailable = true
+            status.locallyAvailable = true
             umDatabase.contentEntryStatusDao.insert(status)
         }
 
 
 
         containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath,
-                mutableMapOf<String, ContainerEntryWithContainerEntryFile>())
+                mutableMapOf())
         var tmpFile: File? = null
         var tmpOut: FileOutputStream? = null
         try {
@@ -101,7 +81,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
                     tmpOut = null
 
                     //add entries from zip
-                    addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager)
+                    addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager!!)
 
                     if (!tmpFile!!.delete())
                         tmpFile!!.deleteOnExit()
@@ -133,7 +113,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         val mediaFile = File(path)
         try {
             addManifestItem(mediaFile.name, mimetype)
-            addEntriesFromZipToContainer(mediaFile.absolutePath, containerManager)
+            addEntriesFromZipToContainer(mediaFile.absolutePath, containerManager!!)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -143,7 +123,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     actual override suspend fun saveContentToFile(filename: String, content: String) {
         var inputStream: InputStream? = null
         try {
-            inputStream = containerManager.getInputStream(containerManager.getEntry(filename))
+            inputStream = containerManager?.getInputStream(containerManager?.getEntry(filename)!!)!!
             val tmpFile = File.createTempFile(TEMP_FILE_PREFIX, filename)
             copyFile(inputStream, tmpFile)
 
@@ -184,12 +164,12 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         try {
 
             href = PAGE_PREFIX + System.currentTimeMillis() + ".html"
-            inputStream = containerManager.getInputStream(containerManager.getEntry(PAGE_TEMPLATE))
+            inputStream = containerManager?.getInputStream(containerManager!!.getEntry(PAGE_TEMPLATE)!!)!!
             val tmpFile = File.createTempFile("fileHelperTmp", href)
             copied = copyFile(inputStream, tmpFile)
             copied = copied && (addNavItem(href, pageTitle) && addManifestItem(href, MIME_TYPE_PAGE)
                     && addSpineItem(href, MIME_TYPE_PAGE))
-            addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager)
+            addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager!!)
 
             if (!tmpFile.delete() && copied)
                 tmpFile.delete()
@@ -322,7 +302,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
                         System.currentTimeMillis().toString())
 
             writeToFile(tmpFile, content)
-            addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager)
+            addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager!!)
 
             if (!tmpFile.delete())
                 tmpFile.delete()
@@ -545,8 +525,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     private fun getEpubOpfDocument(): OpfDocument ?{
         try {
-            val inputStream = containerManager.getInputStream(
-                    containerManager.getEntry(CONTENT_OPF_FILE))
+            val inputStream = containerManager?.getInputStream(
+                    containerManager?.getEntry(CONTENT_OPF_FILE)!!)!!
             val xpp = impl.newPullParser(inputStream)
             val opfDocument = OpfDocument()
             opfDocument.loadFromOPF(xpp)
@@ -592,8 +572,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     private fun getNavDocument() : EpubNavDocument?{
         try {
-            val inputStream = containerManager.getInputStream(
-                    containerManager.getEntry(getEpubOpfDocument()!!.navItem!!.href))
+            val inputStream = containerManager?.getInputStream(
+                    containerManager?.getEntry(getEpubOpfDocument()!!.navItem!!.href!!)!!)!!
 
             val navDocument = EpubNavDocument()
             navDocument.load(impl.newPullParser(inputStream, UTF_8.name()))

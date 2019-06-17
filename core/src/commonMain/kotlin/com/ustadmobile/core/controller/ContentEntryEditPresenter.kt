@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONTENT_ENTRY
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -8,7 +9,8 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorView
-import com.ustadmobile.core.view.ContentEntryDetailView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
 import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
@@ -162,9 +164,9 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
                             false)})
                 CONTENT_CREATE_CONTENT -> {
                     view.runOnUiThread(Runnable { view.dismissDialog() })
-                    args[ContentEditorView.CONTENT_ENTRY_UID] =
+                    args[CONTENT_ENTRY_UID] =
                             contentEntry.contentEntryUid.toString()
-                    args[ContentEditorView.CONTENT_STORAGE_OPTION] =
+                    args[CONTENT_STORAGE_OPTION] =
                             getSelectedStorageOption()
                     if(isNewContent)
                         impl.go(ContentEditorView.VIEW_NAME, args, context)

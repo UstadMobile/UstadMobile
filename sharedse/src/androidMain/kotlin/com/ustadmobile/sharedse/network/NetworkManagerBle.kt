@@ -960,6 +960,10 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     }
 
+    fun getHTTPD() : EmbeddedHTTPD{
+        return httpd
+    }
+
     /**
      * {@inheritDoc}
      */

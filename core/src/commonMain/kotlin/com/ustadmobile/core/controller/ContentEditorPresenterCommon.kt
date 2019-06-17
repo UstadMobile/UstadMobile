@@ -8,6 +8,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEditorView
+import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.view.EpubContentView.Companion.ARG_INITIAL_PAGE_HREF
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -15,7 +17,7 @@ import kotlinx.coroutines.launch
 /**
  * Interface which acts as delegate between UI and editor
  */
-interface ContentEditorPageDelegate {
+interface ContentEditorPageActionDelegate {
 
     fun loadPage(href: String)
 
@@ -56,7 +58,7 @@ interface ContentEditorPageDelegate {
 
 abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String?>, view: ContentEditorView,
                                             private val storage: String?,internal val mountContainer: suspend (Long) -> String)
-    : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageDelegate{
+    : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageActionDelegate{
 
     internal var contentEntryUid: Long = 0L
 
@@ -64,7 +66,11 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     var currentPage: String = ""
 
+    var currentFileContent :String = ""
+
     var documentPath : String? = null
+
+    var currentContainerUid : Long = 0
 
     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
@@ -73,6 +79,30 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
     internal val umAppRepo : UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
 
     internal val umDatabase :UmAppDatabase = UmAppDatabase.getInstance(context)
+
+
+    /**
+     * Check if tinymce is initialized on currenlty selected section
+     * @return initialization status.
+     */
+    var isEditorInitialized = false
+
+    /**
+     * Check if you are about to navigate to preview activity
+     * @return preview status flag.
+     */
+    var isOpenPreviewRequest = false
+
+    /**
+     * Check if the content is being previewed on the editor
+     * @return
+     */
+    var isInEditorPreview = false
+
+    /**
+     * Set frag to indicate when page manager is active.
+     */
+    var isPageManagerOpen = false
 
     /**
      * Create new document with title and description
@@ -149,6 +179,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
             if(contentEntry != null){
                val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
                 if(container != null){
+                    currentContainerUid = container.containerUid
                     val created = createDocument(contentEntry.title!!,
                             contentEntry.description!!)
                     if(created){
@@ -223,8 +254,18 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * Save content from the editor
      */
     fun handleSaveContent(content: String){
+        if(content.isNotEmpty()){
+            this.currentFileContent = content
+        }
         GlobalScope.launch {
-            saveContentToFile(currentPage, content)
+            saveContentToFile(currentPage, currentFileContent)
+            if(isOpenPreviewRequest){
+                val args = HashMap<String, String?>()
+                args.putAll(arguments)
+                args[EpubContentView.ARG_CONTAINER_UID] = currentContainerUid.toString()
+                args[ARG_INITIAL_PAGE_HREF] = currentPage
+                UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
+            }
         }
     }
 
