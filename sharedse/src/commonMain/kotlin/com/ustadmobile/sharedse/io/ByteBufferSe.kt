@@ -14,6 +14,12 @@ expect class ByteBufferSe {
 
     fun get(dst: ByteArray, offset: Int, length: Int): ByteBufferSe
 
+    fun remaining(): Int
+
+    fun position(): Int
+
+    fun slice(): ByteBufferSe
+
     companion object {
         fun wrap(array: ByteArray): ByteBufferSe
     }

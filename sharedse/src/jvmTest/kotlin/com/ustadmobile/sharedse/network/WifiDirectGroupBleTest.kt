@@ -3,7 +3,7 @@ package com.ustadmobile.sharedse.network
 import org.junit.Assert
 import org.junit.Test
 
-class NetworkManagerBleCommonTest {
+class WifiDirectGroupBleTest {
 
     @Test
     fun test() {

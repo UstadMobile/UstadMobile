@@ -35,8 +35,11 @@ open class WiFiDirectGroupBle {
         var originalLength = byteArr.size
         val ip = buffer.getInt()
         val port = buffer.getChar().toInt()
-        val byteArray = ByteArray(originalLength - 5)
-        buffer.get(byteArray, 5, originalLength - 5)
+        println("position: " + buffer.position())
+        println("remain: " + buffer.remaining())
+        val byteArray = ByteArray(buffer.remaining())
+        buffer.get(byteArray, buffer.position(), buffer.remaining())
+        println("buffer size" + byteArray.size)
         val splitString = stringFromUtf8Bytes(byteArray).split("|")
         val group = WiFiDirectGroupBle(splitString[0], splitString[1])
         group.ipAddress = NetworkManagerBleCommon.convertIpAddressToString(ip)
