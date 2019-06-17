@@ -24,11 +24,11 @@ open class WiFiDirectGroupBle
     /**
      * @return Node listening port
      */
-    var port: Int = 0
+    var port: Int? = 0
 
     /**
      * @return Node ip address
      */
-    var ipAddress: String? = null
+    var ipAddress: String? = ""
 
 }

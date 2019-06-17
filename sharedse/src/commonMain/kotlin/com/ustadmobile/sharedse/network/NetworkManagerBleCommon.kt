@@ -14,12 +14,15 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.sharedse.io.ByteBufferSe
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.ByteArrayOutputStream
+import kotlinx.io.ByteBuffer
+import kotlinx.serialization.stringFromUtf8Bytes
+import kotlinx.serialization.toUtf8Bytes
+import kotlin.collections.set
 
 //import java.io.*
 //import java.util.*
@@ -544,32 +547,6 @@ abstract class NetworkManagerBleCommon(
         //entryStatusTaskExecutorService.shutdown()
     }
 
-    /**
-     * Convert IP address to decimals
-     * @param address IPV4 address
-     * @return decimal representation of an IP address
-     */
-    private fun convertIpAddressToInteger(address: String): Int {
-        var result = 0
-        val ipAddressInArray = address.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        for (i in 3 downTo 0) {
-            //val ip = Integer.parseInt(ipAddressInArray[3 - i])
-            val ip = ipAddressInArray[3 - i].toInt()
-            result = result or (ip shl i * 8)
-        }
-        return result
-    }
-
-    /**
-     * Convert decimal representation of an ip address back to IPV4 format.
-     * @param ip decimal representation
-     * @return IPV4 address
-     */
-    private fun convertIpAddressToString(ip: Int): String {
-        return ((ip shr 24 and 0xFF).toString() + "." + (ip shr 16 and 0xFF) + "."
-                + (ip shr 8 and 0xFF) + "." + (ip and 0xFF))
-    }
-
 
     /**
      * Convert group information to bytes so that they can be transmitted using [BleMessage]
@@ -578,22 +555,14 @@ abstract class NetworkManagerBleCommon(
      */
 
     fun getWifiGroupInfoAsBytes(group: WiFiDirectGroupBle): ByteArray {
-        val bos = ByteArrayOutputStream()
-        var infoAsbytes = byteArrayOf()
-//        val outputStream = DataOutputStream(bos)
-//        try {
-//            outputStream.writeUTF(group.ssid)
-//            outputStream.writeUTF(group.passphrase)
-//            outputStream.writeInt(convertIpAddressToInteger(group.ipAddress!!))
-//            outputStream.writeChar((group.port + 'a'.toInt()).toChar().toInt())
-//            infoAsbytes = bos.toByteArray()
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        } finally {
-//            UMIOUtils.closeOutputStream(outputStream)
-//            UMIOUtils.closeOutputStream(bos)
-//        }
-        return infoAsbytes
+
+        val string = (group.ssid + "|" + group.passphrase)
+        val buffer = ByteBuffer.allocate(string.toUtf8Bytes().size + 4 + 2)
+                .putInt(convertIpAddressToInteger(group.ipAddress!!))
+                .putChar(group.port!!.toChar())
+                .put(string.toUtf8Bytes())
+
+        return buffer.array()
     }
 
 
@@ -603,23 +572,19 @@ abstract class NetworkManagerBleCommon(
      * @return constructed WiFiDirectGroupBle
      */
     fun getWifiGroupInfoFromBytes(payload: ByteArray): WiFiDirectGroupBle {
-        val inputStream = ByteArrayInputStream(payload)
-        //val dataInputStream = DataInputStream(inputStream)
-        var groupBle: WiFiDirectGroupBle? = null
-        try {
-//            groupBle = WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF())
-//            groupBle.ipAddress = convertIpAddressToString(dataInputStream.readInt())
-//            groupBle.port = dataInputStream.readChar() - 'a'
-        } catch (e: Exception) {
-//            e.printStackTrace()
-        } finally {
-//            UMIOUtils.closeInputStream(dataInputStream)
-            inputStream.close()
-        }
-
+        val buffer = ByteBufferSe.wrap(payload)
+        var originalLength = payload.size
+        val ip = buffer.getInt()
+        val port = buffer.getChar().toInt()
+        val byteArray = ByteArray(originalLength - 5)
+        buffer.get(byteArray, 5, originalLength - 5)
+        val splitString = stringFromUtf8Bytes(byteArray).split("|")
+        val group = WiFiDirectGroupBle(splitString[0], splitString[1])
+        group.ipAddress = convertIpAddressToString(ip)
+        group.port = port
         UMLog.l(UMLog.INFO, 699,
-                "Group information received with ssid = " + groupBle!!.ssid)
-        return groupBle
+                "Group information received with ssid = " + group.ssid)
+        return group
     }
 
     /**
@@ -647,18 +612,41 @@ abstract class NetworkManagerBleCommon(
         jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid)
     }
 
-    override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long)
-            = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)
+    override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long) = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)
 
-    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
-         = jobItemManagerList!!.addDownloadChangeListener(listener)
+    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) = jobItemManagerList!!.addDownloadChangeListener(listener)
 
 
-    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
-        = jobItemManagerList!!.removeDownloadChangeListener(listener)
+    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener) = jobItemManagerList!!.removeDownloadChangeListener(listener)
 
 
     companion object {
+
+        /**
+         * Convert decimal representation of an ip address back to IPV4 format.
+         * @param ip decimal representation
+         * @return IPV4 address
+         */
+        fun convertIpAddressToString(ip: Int): String {
+            return ((ip shr 24 and 0xFF).toString() + "." + (ip shr 16 and 0xFF) + "."
+                    + (ip shr 8 and 0xFF) + "." + (ip and 0xFF))
+        }
+
+
+        /**
+         * Convert IP address to decimals
+         * @param address IPV4 address
+         * @return decimal representation of an IP address
+         */
+        fun convertIpAddressToInteger(address: String): Int {
+            var result = 0
+            val ipAddressInArray = address.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            for (i in 3 downTo 0) {
+                val ip = ipAddressInArray[3 - i].toInt()
+                result = result or (ip shl i * 8)
+            }
+            return result
+        }
 
         /**
          * Flag to indicate entry status request

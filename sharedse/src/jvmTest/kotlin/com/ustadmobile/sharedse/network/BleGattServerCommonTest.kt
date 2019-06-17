@@ -110,7 +110,7 @@ class BleGattServerCommonTest {
 
         val responseMessage = gattServer!!.handleRequest(messageToSend)
 
-        val groupBle = mockedNetworkManager!!.getWifiGroupInfoFromBytes(responseMessage?.payload!!)
+        val groupBle = mockedNetworkManager!!.getWifiGroupInfoFromBytes(responseMessage!!.payload!!)
 
         //Verify that wifi direct group creation was initiated
         verify<NetworkManagerBleCommon>(mockedNetworkManager).awaitWifiDirectGroupReady(anyLong())
