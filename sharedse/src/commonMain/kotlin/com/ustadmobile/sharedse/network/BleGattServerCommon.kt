@@ -83,7 +83,7 @@ abstract class BleGattServerCommon {
             WIFI_GROUP_REQUEST -> {
                 val group = networkManager!!.awaitWifiDirectGroupReady(5000)
                 return BleMessage(WIFI_GROUP_CREATION_RESPONSE, 42.toByte(),
-                        networkManager!!.getWifiGroupInfoAsBytes(group))
+                        group.toBytes())
             }
             else -> return null
         }

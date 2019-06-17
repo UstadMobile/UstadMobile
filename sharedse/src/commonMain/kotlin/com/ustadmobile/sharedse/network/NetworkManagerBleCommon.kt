@@ -14,14 +14,10 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import com.ustadmobile.sharedse.io.ByteBufferSe
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.io.ByteBuffer
-import kotlinx.serialization.stringFromUtf8Bytes
-import kotlinx.serialization.toUtf8Bytes
 import kotlin.collections.set
 
 //import java.io.*
@@ -545,46 +541,6 @@ abstract class NetworkManagerBleCommon(
     open fun onDestroy() {
         //downloadJobItemWorkQueue.shutdown();
         //entryStatusTaskExecutorService.shutdown()
-    }
-
-
-    /**
-     * Convert group information to bytes so that they can be transmitted using [BleMessage]
-     * @param group WiFiDirectGroupBle
-     * @return constructed bytes  array from the group info.
-     */
-
-    fun getWifiGroupInfoAsBytes(group: WiFiDirectGroupBle): ByteArray {
-
-        val string = (group.ssid + "|" + group.passphrase)
-        val buffer = ByteBuffer.allocate(string.toUtf8Bytes().size + 4 + 2)
-                .putInt(convertIpAddressToInteger(group.ipAddress!!))
-                .putChar(group.port!!.toChar())
-                .put(string.toUtf8Bytes())
-
-        return buffer.array()
-    }
-
-
-    /**
-     * Construct WiFiDirectGroupBle from received message payload
-     * @param payload received payload
-     * @return constructed WiFiDirectGroupBle
-     */
-    fun getWifiGroupInfoFromBytes(payload: ByteArray): WiFiDirectGroupBle {
-        val buffer = ByteBufferSe.wrap(payload)
-        var originalLength = payload.size
-        val ip = buffer.getInt()
-        val port = buffer.getChar().toInt()
-        val byteArray = ByteArray(originalLength - 5)
-        buffer.get(byteArray, 5, originalLength - 5)
-        val splitString = stringFromUtf8Bytes(byteArray).split("|")
-        val group = WiFiDirectGroupBle(splitString[0], splitString[1])
-        group.ipAddress = convertIpAddressToString(ip)
-        group.port = port
-        UMLog.l(UMLog.INFO, 699,
-                "Group information received with ssid = " + group.ssid)
-        return group
     }
 
     /**

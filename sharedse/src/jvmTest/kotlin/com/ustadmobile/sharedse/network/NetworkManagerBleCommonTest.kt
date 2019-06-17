@@ -11,9 +11,8 @@ class NetworkManagerBleCommonTest {
         wifi.ipAddress = "126.0.0.0"
         wifi.port = 25
 
-        val manager = NetworkManagerBle()
-        val bytes = manager.getWifiGroupInfoAsBytes(wifi)
-        val newWifi = manager.getWifiGroupInfoFromBytes(bytes)
+        val bytes = wifi.toBytes()
+        val newWifi = WiFiDirectGroupBle(bytes)
 
         println(newWifi.ssid)
         println(newWifi.passphrase)
