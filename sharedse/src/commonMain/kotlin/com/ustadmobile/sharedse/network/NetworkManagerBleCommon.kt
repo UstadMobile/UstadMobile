@@ -12,6 +12,7 @@ import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 //import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 //import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
 import kotlinx.atomicfu.AtomicInt
@@ -67,7 +68,7 @@ abstract class NetworkManagerBleCommon(
      */
     private val entryStatusTasks = mutableListOf<BleEntryStatusTask>()
 
-    //private var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>? = null
+    private lateinit var downloadJobItemWorkQueue: LiveDataWorkQueue<DownloadJobItem>
 
     private val entryStatusResponses = mutableMapOf<Long, MutableList<EntryStatusResponse>>()
 
@@ -172,6 +173,11 @@ abstract class NetworkManagerBleCommon(
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabaseRepo = umAppDatabase
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
+//        downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
+//                {item1, item2 -> item1.djiUid == item2.djiUid}) {
+//            DownloadJobI
+//        }
+
 
 //        downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)
 //        downloadJobItemWorkQueue!!.adapter = mJobItemAdapter

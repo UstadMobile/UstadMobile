@@ -60,7 +60,7 @@ class DownloadDialogPresenterTest {
 
     private val MAX_THREAD_SLEEP_TIME = 2
 
-    private var mockedNetworkManager: NetworkManagerBleCommon? = null
+    private lateinit var mockedNetworkManager: NetworkManagerBleCommon
 
     private lateinit var mockedDeleteTaskRunner: DeleteJobTaskRunner
 
@@ -92,7 +92,7 @@ class DownloadDialogPresenterTest {
         mockedNetworkManager = spy<NetworkManagerBleCommon> {
             on { makeDeleteJobTask(any(), any()) }.doReturn(mockedDeleteTaskRunner)
         }
-        mockedNetworkManager!!.onCreate()
+        mockedNetworkManager.onCreate()
 
 
         rootEntry = ContentEntry("Lorem ipsum title",
