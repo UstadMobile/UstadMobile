@@ -1,0 +1,30 @@
+package com.ustadmobile.core.controller
+
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
+import com.ustadmobile.core.view.ContentEditorView
+
+expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?>,
+                                    view: ContentEditorView, storage: String?, mountContainer: suspend (Long) -> String)
+    : ContentEditorPresenterCommon{
+
+    override suspend fun createDocument(title: String, description: String): Boolean
+
+    override suspend fun addMediaContent(path: String, mimetype: String)
+
+    override suspend fun saveContentToFile(filename: String, content: String)
+
+    override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String?
+
+    override suspend fun addPageToDocument(pageTitle: String): Boolean
+
+    override suspend fun removePageFromDocument(href: String): String?
+
+    override suspend fun updatePageInDocument(page: EpubNavItem): Boolean
+
+    override suspend fun changeDocumentPageOrder(pageList: MutableList<EpubNavItem>)
+
+    override suspend fun removeUnUsedResources(): Boolean
+
+    override suspend fun getDocumentPath(storage: String?): String
+
+}
