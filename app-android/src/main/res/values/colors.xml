@@ -10,12 +10,15 @@
     <color name="accent">#FF9800</color>
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
+    <color name="secondary_text_light">#41727272</color>
 
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
     <color name="icons">#FFFFFF</color>
     <color name="icons_light">#ABFFFFFF</color>
     <color name="divider">#BDBDBD</color>
+    <color name="divider_faint">#50BDBDBD</color>
+    <color name="divider_faint_blank">#50b4b4b4</color>
 
     <color name="background_light">#E8EAED</color>
 
@@ -52,5 +55,12 @@
     <color name="entry_learner_progresss_failed">#ffa904</color>
 
     <color name="entry_learner_progress_passed">#6bb865</color>
+
+    <!--content editor screen colors-->
+    <color name="content_overlay_color">#50000000</color>
+    <color name="content_white_btn_ripple">#50BDBDBD</color>
+    <color name="content_icon_active">#263238</color>
+    <color name="content_white_fab_pressed">#fcfcfc</color>
+    <color name="colorTextSecondaryTransparent">#21757575</color>
 
 </resources>

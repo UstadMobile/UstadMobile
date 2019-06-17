@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/dimen_16dp"
+    android:paddingBottom="@dimen/dimen_16dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/linkTextInput"
+        android:layout_margin="@dimen/dimen_16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="@color/text_secondary">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:id="@+id/linkText"
+            android:maxLines="3"
+            android:textColorHint="@color/primary"
+            android:layout_height="wrap_content"
+            android:hint="@string/content_editor_link_text"
+            android:textColor="@color/text_primary" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_below="@+id/linkTextInput"
+        android:layout_margin="@dimen/dimen_16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="@color/text_secondary">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:id="@+id/linkUrl"
+            android:textColorHint="@color/primary"
+            android:maxLines="1"
+            android:layout_height="wrap_content"
+            android:hint="@string/content_editor_link_url"
+            android:textColor="@color/text_primary" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+</RelativeLayout>

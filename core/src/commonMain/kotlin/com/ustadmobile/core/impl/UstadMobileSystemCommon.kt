@@ -312,6 +312,10 @@ abstract class UstadMobileSystemCommon {
     @JsName("getStorageDirs")
     abstract fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
 
+
+    @JsName("getStorageDirAsync")
+    abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
+
     /**
      * Return the mime type for the given extension
      *

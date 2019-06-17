@@ -299,6 +299,29 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }.start()
     }
 
+
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
+        val dirList = ArrayList<UMStorageDir>()
+        val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
+        val contentDirName = getContentDirName(context)
+
+        var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
+        if (!umDir.exists()) umDir.mkdirs()
+        dirList.add(UMStorageDir(umDir.absolutePath,
+                getString(MessageID.phone_memory, context), true,
+                true, false, canWriteFileInDir(umDir.absolutePath)))
+
+        if (storageOptions.size > 1) {
+            val sdCardStorage = storageOptions[sdCardStorageIndex]
+            umDir = File(sdCardStorage, contentDirName)
+            if (!umDir.exists()) umDir.mkdirs()
+            dirList.add(UMStorageDir(umDir.absolutePath,
+                    getString(MessageID.memory_card, context), true,
+                    true, false, canWriteFileInDir(umDir.absolutePath)))
+        }
+        return dirList
+    }
+
     /**
      * Get an asset (from files that are in core/src/flavorName/assets)
      *
@@ -563,5 +586,17 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
     }
+
+    /**
+     * Get asset as an input stream asynchronously
+     */
+    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
+        var mPath = path
+        if (path.startsWith("/")) {
+            mPath = path.substring(1)
+        }
+       return (context as Context).assets.open(mPath);
+    }
+
 
 }
