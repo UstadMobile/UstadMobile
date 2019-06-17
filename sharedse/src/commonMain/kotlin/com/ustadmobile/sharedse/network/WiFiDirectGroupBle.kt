@@ -32,20 +32,14 @@ open class WiFiDirectGroupBle {
 
     constructor(byteArr: ByteArray) {
         val buffer = ByteBufferSe.wrap(byteArr)
-        var originalLength = byteArr.size
-        val ip = buffer.getInt()
-        val port = buffer.getChar().toInt()
-        println("position: " + buffer.position())
-        println("remain: " + buffer.remaining())
-        val byteArray = ByteArray(buffer.remaining())
-        buffer.get(byteArray, buffer.position(), buffer.remaining())
-        println("buffer size" + byteArray.size)
-        val splitString = stringFromUtf8Bytes(byteArray).split("|")
-        val group = WiFiDirectGroupBle(splitString[0], splitString[1])
-        group.ipAddress = NetworkManagerBleCommon.convertIpAddressToString(ip)
-        group.port = port
-        UMLog.l(UMLog.INFO, 699,
-                "Group information received with ssid = " + group.ssid)
+        val ipInt = buffer.getInt()
+        port = buffer.getChar().toInt()
+        ipAddress = NetworkManagerBleCommon.convertIpAddressToString(ipInt)
+        val ssidAndPassphraseArr = ByteArray(buffer.remaining())
+        buffer.get(ssidAndPassphraseArr, 0, buffer.remaining())
+        val ssidAndPassphrase = stringFromUtf8Bytes(ssidAndPassphraseArr).split("|")
+        ssid = ssidAndPassphrase[0]
+        passphrase = ssidAndPassphrase[1]
     }
 
     fun toBytes(): ByteArray {

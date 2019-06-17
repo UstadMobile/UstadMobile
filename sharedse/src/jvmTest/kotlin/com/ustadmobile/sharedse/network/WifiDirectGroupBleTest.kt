@@ -20,7 +20,7 @@ class WifiDirectGroupBleTest {
         println(newWifi.port)
 
         Assert.assertTrue("ssid match", wifi.ssid == newWifi.ssid)
-        Assert.assertTrue("pass match", wifi.passphrase == newWifi.ssid)
+        Assert.assertTrue("pass match", wifi.passphrase == newWifi.passphrase)
         Assert.assertTrue("port match", wifi.port == newWifi.port)
         Assert.assertTrue("ip match", wifi.ipAddress == newWifi.ipAddress)
 
