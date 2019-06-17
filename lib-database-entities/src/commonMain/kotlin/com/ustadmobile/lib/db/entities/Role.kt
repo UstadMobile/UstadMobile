@@ -8,8 +8,7 @@ import com.ustadmobile.lib.database.annotation.*
 @Entity
 class Role() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
 
     var roleName: String? = null

@@ -9,8 +9,7 @@ import com.ustadmobile.lib.database.annotation.*
 @Entity
 class EntityRole() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var erUid: Long = 0
 
     @UmSyncMasterChangeSeqNum

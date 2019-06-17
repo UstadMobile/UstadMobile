@@ -16,7 +16,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 

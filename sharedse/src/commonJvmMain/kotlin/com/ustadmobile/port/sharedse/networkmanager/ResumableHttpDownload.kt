@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @author mike
  */
+@Deprecated("This is replace with ResumableDownload2 which uses coroutines")
 class ResumableHttpDownload(private val httpSrc: String, private val destinationFile: String) {
 
     private var httpIn: InputStream? = null

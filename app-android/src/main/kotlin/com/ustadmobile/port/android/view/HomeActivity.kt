@@ -19,8 +19,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -75,7 +74,7 @@ class HomeActivity : UstadBaseActivity(), HomeView {
         super.onBleNetworkServiceBound(networkManagerBle)
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                Runnable { (networkManagerBle as NetworkManagerAndroidBle).checkP2PBleServices() },
+                Runnable { (networkManagerBle as NetworkManagerBle).checkP2PBleServices() },
                 impl.getString(MessageID.location_permission_title, this),
                 impl.getString(MessageID.location_permission_message, this))
     }

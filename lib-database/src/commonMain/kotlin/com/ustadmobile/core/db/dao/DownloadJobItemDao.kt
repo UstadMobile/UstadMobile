@@ -132,6 +132,9 @@ abstract class DownloadJobItemDao {
     abstract fun getTotalDownloadJobItems(djiDjUid: Int): Int
 
     @Query("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
+    abstract suspend fun getTotalDownloadJobItemsAsync(djiDjUid: Int): Int
+
+    @Query("SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid =:djiDjUid")
     abstract fun countDownloadJobItems(djiDjUid: Long): DoorLiveData<Int>
 
     @Query("SELECT destinationFile FROM DownloadJobItem WHERE djiUid != 0 AND djiDsiUid IN(:djiDsiUids)")

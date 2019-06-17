@@ -10,7 +10,7 @@ import android.os.IBinder
 
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService
+import com.ustadmobile.sharedse.network.EmbeddedHttpdService
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.util.RunnableQueue

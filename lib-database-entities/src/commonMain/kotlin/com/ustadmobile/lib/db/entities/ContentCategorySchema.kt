@@ -14,8 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentCategorySchema.Companion.TABLE_ID
 @Entity
 class ContentCategorySchema() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var contentCategorySchemaUid: Long = 0
 
     var schemaName: String? = null

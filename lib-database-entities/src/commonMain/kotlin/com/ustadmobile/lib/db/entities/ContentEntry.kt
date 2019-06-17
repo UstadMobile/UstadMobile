@@ -17,8 +17,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TABLE_ID
 @Entity
 open class ContentEntry() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+
+    @PrimaryKey(autoGenerate = true)
     var contentEntryUid: Long = 0
 
     var title: String? = null

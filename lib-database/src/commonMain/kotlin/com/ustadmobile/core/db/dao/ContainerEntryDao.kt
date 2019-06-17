@@ -1,9 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.ContainerEntry
@@ -21,6 +18,9 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
             entry.ceUid = insert(entry)
         }
     }
+
+    @Insert
+    abstract suspend fun insertListAsync(containerEntryList: List<ContainerEntry>)
 
     @Delete
     abstract fun deleteList(containerEntryList: List<ContainerEntry>)

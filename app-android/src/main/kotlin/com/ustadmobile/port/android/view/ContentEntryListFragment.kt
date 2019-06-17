@@ -25,7 +25,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 
 
@@ -52,7 +52,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private var ustadBaseActivity: UstadBaseActivity? = null
 
-    private var managerAndroidBle: NetworkManagerAndroidBle? = null
+    private var managerAndroidBle: NetworkManagerBle? = null
 
     private var recyclerAdapter: ContentEntryListRecyclerViewAdapter? = null
 
@@ -127,7 +127,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             ustadBaseActivity!!.runAfterServiceConnection(Runnable{
                 ustadBaseActivity!!.runOnUiThread {
                     managerAndroidBle = ustadBaseActivity!!
-                            .networkManagerBle as NetworkManagerAndroidBle
+                            .networkManagerBle as NetworkManagerBle
                     checkReady()
                 }
             })

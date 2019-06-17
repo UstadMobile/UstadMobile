@@ -34,9 +34,13 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.collections.ArrayList
 
 
@@ -69,7 +73,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * Get a string for use in the UI
      */
     actual fun getString(messageCode: Int, context: Any): String{
-        TODO("not implemented")
+        return ""
     }
 
 
@@ -124,8 +128,57 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      *
      */
     actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>){
-        TODO("not implemented")
+        GlobalScope.launch {
+            var inStream = null as InputStream?
+            try {
+                try {
+                    inStream = this::class.java.getResourceAsStream(path)
+                }catch(e: Exception) {
+                    //ignore and try again
+                }
+
+                if(inStream == null) {
+                    for(searchPath in listOf("src/commonMain/resources", "src/jvmMain/resources")) {
+                        val resDir = File(System.getProperty("user.dir"), searchPath)
+                        val resFile = File(resDir, path)
+                        if(resFile.exists()) {
+                            inStream = FileInputStream(resFile)
+                            break
+                        }
+                    }
+                }
+            }finally {
+
+            }
+
+            callback.onSuccess(inStream)
+        }
     }
+
+
+    actual fun getAssetSync(context: Any, path: String): InputStream {
+        val latch = CountDownLatch(1)
+        val ref = AtomicReference<InputStream?>()
+        getAsset(context, path, object: UmCallback<InputStream> {
+            override fun onSuccess(result: InputStream?) {
+                ref.set(result)
+                latch.countDown()
+            }
+
+            override fun onFailure(exception: Throwable?) {
+                latch.countDown()
+            }
+        })
+
+        latch.await()
+        val result = ref.get()
+        if(result != null) {
+            return result
+        }else {
+            throw IOException("Could not lookup $path")
+        }
+    }
+
 
     /**
      * Get a preference for the app
@@ -217,12 +270,8 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         TODO("not implemented")
     }
 
-    actual fun getAssetSync(context: Any, path: String): InputStream {
-        TODO("not implemented")
-    }
-
     actual fun getSystemBaseDir(context: Any): String{
-        TODO("not implemented")
+        return System.getProperty("user.dir")
     }
 
 
@@ -238,7 +287,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @return The value of the manifest preference key if found, null otherwise
      */
     actual override fun getManifestPreference(key: String, context: Any): String? {
-        TODO("not implemented")
+        return null
     }
 
     /**

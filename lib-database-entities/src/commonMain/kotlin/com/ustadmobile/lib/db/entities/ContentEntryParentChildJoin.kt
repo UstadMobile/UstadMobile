@@ -15,8 +15,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin.Companion.TAB
 @Entity(indices = arrayOf(Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])))
 class ContentEntryParentChildJoin() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var cepcjUid: Long = 0
 
     var cepcjChildContentEntryUid: Long = 0

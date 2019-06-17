@@ -9,8 +9,7 @@ import com.ustadmobile.lib.db.entities.Location.Companion.TABLE_ID
 @Entity
 class Location() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var locationUid: Long = 0
 
     var title: String? = null
