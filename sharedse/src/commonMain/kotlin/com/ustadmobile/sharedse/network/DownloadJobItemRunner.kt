@@ -53,7 +53,7 @@ class DownloadJobItemRunner
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
  private val numConcurrentEntryDownloads: Int = 4) {
 
-    private val downloadJobItemManager: DownloadJobItemManager? = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)
+    private val downloadJobItemManager: DownloadJobItemManager = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)!!
 
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
@@ -292,7 +292,7 @@ class DownloadJobItemRunner
                     totalInProgress += inProgressDownloadCounters[i].value
                 }
                 val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
-                downloadJobItemManager!!.updateProgress(downloadItem.djiUid, downloadSoFar, downloadItem.downloadLength)
+                downloadJobItemManager.updateProgress(downloadItem.djiUid, downloadSoFar, downloadItem.downloadLength)
             }
         }
 
@@ -421,7 +421,7 @@ class DownloadJobItemRunner
         if(downloadCompleted) {
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
 
-            downloadJobItemManager!!.updateProgress(downloadItem.djiUid,
+            downloadJobItemManager.updateProgress(downloadItem.djiUid,
                     completedEntriesBytesDownloaded.value, downloadItem.downloadLength)
         }
 
@@ -570,7 +570,7 @@ class DownloadJobItemRunner
      * @see JobStatus
      */
     private suspend fun updateItemStatus(itemStatus: Int) {
-        downloadJobItemManager!!.updateStatus(downloadItem.djiUid, itemStatus)
+        downloadJobItemManager.updateStatus(downloadItem.djiUid, itemStatus)
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} Setting status to:  ${JobStatus.statusToString(itemStatus)}")
     }

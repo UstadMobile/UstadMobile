@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
@@ -16,7 +15,6 @@ import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 //import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 //import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
 import kotlinx.atomicfu.AtomicInt
-import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -24,14 +22,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
 import kotlinx.io.ByteArrayOutputStream
-
-//import java.io.*
-//import java.util.*
-//import java.util.concurrent.Executors
-//import java.util.concurrent.RejectedExecutionException
-//import java.util.concurrent.TimeUnit
-//import java.util.concurrent.atomic.AtomicInteger
-//import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -154,9 +144,8 @@ abstract class NetworkManagerBleCommon(
 
     abstract val isVersionKitKatOrBelow: Boolean
 
-//    val activeDownloadJobItemManagers: List<DownloadJobItemManager>
-//        get() = jobItemManagerList!!.getActiveDownloadJobItemManagers()
-
+    val activeDownloadJobItemManagers
+        get() = jobItemManagerList!!.activeDownloadJobItemManagers
 
     /**
      * Only for testing - allows the unit test to set this without running the main onCreate method
@@ -181,12 +170,6 @@ abstract class NetworkManagerBleCommon(
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher).download()
         }
         GlobalScope.launch { downloadJobItemWorkQueue.start() }
-
-
-//        downloadJobItemWorkQueue = LiveDataWorkQueue(MAX_THREAD_COUNT)
-//        downloadJobItemWorkQueue!!.adapter = mJobItemAdapter
-//        downloadJobItemWorkQueue!!.start(umAppDatabase!!.downloadJobItemDao.findNextDownloadJobItems())
-//        scheduledExecutorService.scheduleAtFixedRate(nodeLastSeenTrackerTask, 0, 10, TimeUnit.SECONDS)
     }
 
     /*override */fun onQueueEmpty() {
