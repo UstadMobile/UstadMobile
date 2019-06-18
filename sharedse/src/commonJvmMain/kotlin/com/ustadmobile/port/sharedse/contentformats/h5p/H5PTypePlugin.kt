@@ -5,7 +5,6 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.port.sharedse.contentformats.ContentTypePlugin
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.parse
 import java.io.File
@@ -32,18 +31,15 @@ class H5PTypePlugin : H5PContentType(), ContentTypePlugin {
 
                     val fileName = zipEntry!!.name
                     if (fileName == "h5p.json") {
-                        val jsonStr = UMIOUtils.readStreamToString(zipIn)
-                        val jsonObj = Json.parse<HashMap<String,String>>(jsonStr)
+                        val h5pJsonString = UMIOUtils.readStreamToString(zipIn)
+                        val h5pJsonObj = Json.parse<H5PContentSerializer>(h5pJsonString)
 
                         contentEntry = ContentEntry()
                         contentEntry!!.imported = true
-                        contentEntry!!.title = jsonObj[TITLE_TAG]
-                        val description = if (jsonObj.containsKey(DESCRIPTION_TAG))
-                            jsonObj[DESCRIPTION_TAG]
-                        else
-                            ""
-                        val license = if (jsonObj.containsKey(LICENSE_TAG)) jsonObj[LICENSE_TAG] else ""
-                        val author = if (jsonObj.containsKey(AUTHOR_TAG)) jsonObj[AUTHOR_TAG] else ""
+                        contentEntry!!.title = h5pJsonObj.title
+                        val description = h5pJsonObj.metaDescription ?: ""
+                        val license = h5pJsonObj.license ?: ""
+                        val author = h5pJsonObj.author ?: ""
                         contentEntry!!.author = author
                         contentEntry!!.description = description
                         contentEntry!!.licenseType = UMUtil.getH5pLicenceId(license)
@@ -58,16 +54,5 @@ class H5PTypePlugin : H5PContentType(), ContentTypePlugin {
         }
 
         return contentEntry
-    }
-
-    companion object {
-
-        private const val TITLE_TAG = "title"
-
-        private const val DESCRIPTION_TAG = "metaDescription"
-
-        private const val AUTHOR_TAG = "author"
-
-        private const val LICENSE_TAG = "license"
     }
 }
