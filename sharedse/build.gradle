@@ -55,7 +55,7 @@ kotlin {
         fromPreset(presets.android, 'android')
 
         //Uncomment the line below if you want autocomplete etc. to work in the IDE. Comment out again before building.
-        //fromPreset(presets.jvm, 'commonJvm')
+        fromPreset(presets.jvm, 'commonJvm')
     }
 
     jvm {
@@ -104,7 +104,7 @@ kotlin {
          */
         androidMain {
             dependsOn commonJvmMain
-            //kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
+            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
 
             dependencies {
                 implementation project(":lib-database-android")

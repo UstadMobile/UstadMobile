@@ -83,6 +83,10 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     private val viewNameToAndroidImplMap = mapOf<String,Any>(
             "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
             VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
+            ContentEditorView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorActivity"),
+            ContentEditorPageListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorPageListFragment"),
+            ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
+            ContentEntryEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryEditFragment"),
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),

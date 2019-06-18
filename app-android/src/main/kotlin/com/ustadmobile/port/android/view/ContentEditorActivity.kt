@@ -61,7 +61,6 @@ import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.lib.util.Base64Coder
-import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler
 import com.ustadmobile.port.android.umeditor.*
 import com.ustadmobile.port.android.umeditor.UmEditorAnimatedViewSwitcher.Companion.ANIMATED_CONTENT_OPTION_PANEL
 import com.ustadmobile.port.android.umeditor.UmEditorAnimatedViewSwitcher.Companion.ANIMATED_SOFT_KEYBOARD_PANEL
@@ -77,6 +76,7 @@ import java.io.File
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -85,6 +85,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
     private var presenter: ContentEditorPresenter? = null
 
     private var viewSwitcher: UmEditorAnimatedViewSwitcher? = null
+
+    private val assetsDir = String.format("assets-%s",
+            SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date()))
 
     @get:VisibleForTesting
     var mediaSourceBottomSheetBehavior: BottomSheetBehavior<NestedScrollView>? = null
@@ -153,11 +156,12 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
         if(networkManagerBle != null){
             val embeddedHttp =  networkManagerBle.getHTTPD()
-            embeddedHttp.addBaseAssetHandler(AndroidAssetsHandler::class.java)
+
+            embeddedHttp.addRoute(assetsDir+"(.)+",AndroidAssetsHandler::class.java, applicationContext)
             presenter = ContentEditorPresenter(this, args!!, this,
                     args!![CONTENT_STORAGE_OPTION]){
 
-                val mountedPath: String = embeddedHttp!!.mountContainer(it, null)
+                val mountedPath: String = embeddedHttp!!.mountContainer(it, null)!!
                 val counterMountedUrl: String = joinPaths(embeddedHttp!!.localHttpUrl,
                         mountedPath)
                 counterMountedUrl

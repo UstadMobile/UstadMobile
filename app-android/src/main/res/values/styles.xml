@@ -4,33 +4,21 @@
 
     <style name="Theme.UstadTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-
-
-    <style name="ThemeOnboarding" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/icons</item>
-        <item name="colorPrimaryDark">@color/divider</item>
-        <item name="colorAccent">@color/icons</item>
-        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/divider</item>
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowBackground">@color/icons</item>
+    <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/icons</item>
+        <item name="tabIndicatorHeight">@dimen/dimen_2dp</item>
+        <item name="tabPaddingStart">@dimen/dimen_8dp</item>
+        <item name="tabPaddingEnd">@dimen/dimen_8dp</item>
+        <item name="tabBackground">?attr/selectableItemBackground</item>
+        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
     </style>
 
-    <style name="UmTheme.Button.Stacked" parent="Widget.AppCompat.Button.Borderless.Colored">
-        <item name="android:textColor">@color/primary</item>
-        <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:paddingStart">@dimen/dimen_16dp</item>
-        <item name="android:paddingEnd">@dimen/dimen_16dp</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:layout_alignParentEnd">true</item>
-        <item name="android:layout_marginTop">@dimen/dimen_10dp</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-
-
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/primary_light</item>
+        <item name="textAllCaps">true</item>
     </style>
-
 
     <style name="FullScreenDialogStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowNoTitle">true</item>
@@ -81,10 +69,36 @@
         <item name="android:popupBackground">@android:color/white</item>
     </style>
 
+    <style name="ThemeOnboarding" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/icons</item>
+        <item name="colorPrimaryDark">@color/divider</item>
+        <item name="colorAccent">@color/icons</item>
+        <item name="android:statusBarColor"
+            tools:targetApi="lollipop">@color/divider</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/icons</item>
+    </style>
+
+    <style name="UmTheme.Button.Stacked" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:paddingStart">@dimen/dimen_16dp</item>
+        <item name="android:paddingEnd">@dimen/dimen_16dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:layout_alignParentEnd">true</item>
+        <item name="android:layout_marginTop">@dimen/dimen_10dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+
     <style name="HintText" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">16sp</item>
     </style>
+
 
     <style name="TextInputLayoutAppearance" parent="Widget.Design.TextInputLayout">
         <item name="hintTextAppearance">@style/HintText</item>

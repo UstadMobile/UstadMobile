@@ -115,7 +115,7 @@
             android:theme="@style/Theme.UstadTheme"
             />
 
-
+        <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"

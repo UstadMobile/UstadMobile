@@ -207,7 +207,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
             view.showMessageAndDismissDialog(message, false)})
     }
 
-    fun handleSelectedFileToImport(content: HashMap<String, Any>){
+    fun handleSelectedFileToImport(content: HashMap<String, Any?>){
         val contentEntry = if (content.containsKey(CONTENT_ENTRY))
             content[CONTENT_ENTRY] as ContentEntry? else null
         if(contentEntry == null){

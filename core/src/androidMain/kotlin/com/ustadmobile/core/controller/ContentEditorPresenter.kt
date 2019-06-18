@@ -38,7 +38,6 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     private var nextNavItem: EpubNavItem? = null
 
-
     actual override suspend fun createDocument(title: String, description: String): Boolean {
         var filePath = "/http/$EDITOR_BASE_DIR_NAME/templates"
         filePath = joinPaths(filePath, ContentEditorView.RESOURCE_BLANK_DOCUMENT)

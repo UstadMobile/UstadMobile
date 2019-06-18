@@ -22,6 +22,8 @@ import com.ustadmobile.core.view.ContentEntryEditView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import java.io.File
 import java.util.*
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
 
 
 /**
@@ -295,7 +297,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 
     fun checkIfIsSupportedFile(file: File) {
         this.selectedFile = file
-        val content = ContentTypeUtilSe.getContent(file)
+        val content = getContent(file)
         presenter!!.handleSelectedFilePath(selectedFile!!.absolutePath)
         presenter!!.handleSelectedFileToImport(content)
     }
@@ -309,8 +311,8 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
     }
 
     override fun importContent(content: HashMap<String, Any?>) {
-        importContentEntryFromFile(activity, content, presenter!!.getSelectedStorageOption(),
-                selectedFile, object : UmCallback<ContentEntry> {
+        importContentEntryFromFile(activity!!, content, presenter!!.getSelectedStorageOption(),
+                selectedFile!!, object : UmCallback<ContentEntry> {
             override fun onSuccess(result: ContentEntry?) {
                 presenter!!.handleImportedFile(result, selectedFile!!.length())
             }
