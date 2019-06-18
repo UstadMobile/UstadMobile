@@ -14,11 +14,12 @@ data class H5PContentSerializer(
         val title: String? = null,
         val contentType: String? = null,
         val metaDescription: String? = null
-)
+){
+    @Serializable
+    data class PreloadedDependenciesItem(
+            val majorVersion: Int? = null,
+            val minorVersion: Int? = null,
+            val machineName: String? = null
+    )
+}
 
-@Serializable
-data class PreloadedDependenciesItem(
-        val majorVersion: Int? = null,
-        val minorVersion: Int? = null,
-        val machineName: String? = null
-)

@@ -80,8 +80,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId// Respond to the action bar's Up/Home button
-        when (id) {
+        when (item.itemId) {
             android.R.id.home -> presenter!!.handleBackNavigation()
             R.id.create_new_content ->
                 contentCreationOptionBehaviour!!.setState(BottomSheetBehavior.STATE_EXPANDED)

@@ -40,7 +40,8 @@ import kotlinx.coroutines.Runnable
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView, ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
+class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
     override val viewContext: Any
         get() = context!!
 
@@ -98,10 +99,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         fun setLanguageFilterSpinner(result: List<Language>)
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -175,7 +172,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     override fun showError() {
-        Toast.makeText(getContext(), R.string.content_entry_not_found, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.content_entry_not_found, Toast.LENGTH_SHORT).show()
     }
 
 
@@ -192,14 +189,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         ustadBaseActivity!!.runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
-                impl.getString(MessageID.download_storage_permission_title, getContext()!!),
-                impl.getString(MessageID.download_storage_permission_message, getContext()!!))
+                impl.getString(MessageID.download_storage_permission_title, context!!),
+                impl.getString(MessageID.download_storage_permission_message, context!!))
     }
 
-    override fun startMonitoringAvailability(monitor: Any, containerUidsToMonitor: List<Long>) {
+    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
         Thread {
             if (managerAndroidBle != null) {
-                managerAndroidBle!!.startMonitoringAvailability(monitor, containerUidsToMonitor)
+                managerAndroidBle!!.startMonitoringAvailability(monitor, entryUidsToMonitor)
             }
         }.start()
     }

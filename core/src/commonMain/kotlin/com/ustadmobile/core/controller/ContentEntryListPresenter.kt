@@ -41,29 +41,6 @@ class ContentEntryListPresenter (context: Any, arguments: Map<String, String>?, 
     }
 
 
-    fun handleImportedFile(contentEntry: ContentEntry?, fileSize: Long){
-        GlobalScope.launch {
-            if(contentEntry != null){
-                val appDatabase = UmAppDatabase.getInstance(context)
-                val contentJoin =  ContentEntryParentChildJoin()
-                contentJoin.cepcjParentContentEntryUid = contentEntryUid
-                contentJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                appDatabase.contentEntryParentChildJoinDao.insert(contentJoin)
-
-                val status =  ContentEntryStatus(contentEntry.contentEntryUid,
-                        true, fileSize)
-                status.downloadStatus = JobStatus.COMPLETE
-                status.cesLeaf = true
-                status.cesUid = appDatabase.contentEntryStatusDao.insert(status)
-
-            }
-            val message = impl.getString(if(contentEntry == null)
-                MessageID.content_import_failure_message else
-                MessageID.content_import_success_message,context)
-            view.runOnUiThread(Runnable { view.showMessage(message) })
-        }
-    }
-
     fun handleContentCreation(contentType: Int, newContent: Boolean){
         val args = HashMap<String,String?>()
         args.putAll(arguments)
