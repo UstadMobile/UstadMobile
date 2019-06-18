@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.Nullable
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.squareup.picasso.Picasso
@@ -25,9 +26,8 @@ import java.util.*
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.importContentEntryFromFile
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.getContent
 
-
 /**
- * A simple [Fragment] subclass.
+ * Fragment responsible for editing entry details
  */
 class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
 

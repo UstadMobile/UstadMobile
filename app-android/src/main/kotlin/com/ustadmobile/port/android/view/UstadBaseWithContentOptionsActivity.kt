@@ -117,7 +117,6 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(), ContentEnt
 
     override fun updateDocument(title: String, description: String) {}
 
-
     override fun onAttachFragment(fragment: Fragment?) {
         if (fragment is ContentEntryEditFragment) {
             entryFragment = fragment
@@ -125,16 +124,15 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(), ContentEnt
         }
     }
 
-
     override fun createNewFolder(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, getContext())
+        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
     }
 
     override fun startFileBrowser(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, getContext())
+        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
     }
 
     override fun createNewContent(arguments: HashMap<String, String?>) {
-        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, getContext())
+        impl!!.go(ContentEntryEditView.VIEW_NAME, arguments, this)
     }
 }

@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
@@ -127,7 +128,7 @@ class ContentEntryListFragmentPresenter(context: Any, arguments: Map<String, Str
                     impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.viewContext)
+                    impl.go(ContentEntryListView.VIEW_NAME, args, view.viewContext)
                 }
             } catch (e: Exception) {
                 fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })

@@ -21,7 +21,8 @@ import java.util.zip.ZipInputStream
  */
 class H5PTypePlugin : H5PContentType(), ContentTypePlugin {
 
-    @ImplicitReflectionSerializer
+    //This declaration is experimental and its usage must be marked with '' or '@UseExperimental(kotlinx.serialization.ImplicitReflectionSerializer::class)'
+    @kotlinx.serialization.ImplicitReflectionSerializer
     override fun getContentEntry(file: File): ContentEntry? {
         var contentEntry: ContentEntry? = null
         try {
@@ -32,7 +33,7 @@ class H5PTypePlugin : H5PContentType(), ContentTypePlugin {
                     val fileName = zipEntry!!.name
                     if (fileName == "h5p.json") {
                         val jsonStr = UMIOUtils.readStreamToString(zipIn)
-                        val jsonObj = Json.parse<Map<String,String>>(jsonStr)
+                        val jsonObj = Json.parse<HashMap<String,String>>(jsonStr)
 
                         contentEntry = ContentEntry()
                         contentEntry!!.imported = true

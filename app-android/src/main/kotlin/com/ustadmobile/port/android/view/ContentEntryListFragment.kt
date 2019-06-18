@@ -64,7 +64,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         entryListPresenter!!.handleClickFilterByLanguage(langUid)
     }
 
-    fun filterBySchemaCategory(contentCategoryUid: Long, contentCategorySchemaUid: Long) {
+    fun filterBySchemaCategory(contentCategoryUid: Long) {
         entryListPresenter!!.handleClickFilterByCategory(contentCategoryUid)
     }
 
