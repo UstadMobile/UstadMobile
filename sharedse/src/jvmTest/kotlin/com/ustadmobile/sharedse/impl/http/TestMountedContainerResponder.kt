@@ -1,6 +1,7 @@
 package com.ustadmobile.sharedse.impl.http
 
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
@@ -47,7 +48,7 @@ class TestMountedContainerResponder {
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/sharedse/container/testfile1.png",
                 tmpExtractFile)
         runBlocking {
-            containerManager!!.addEntries(ContainerManager.FileEntrySource(tmpExtractFile, "subfolder/testfile1.png"))
+            containerManager!!.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = false), ContainerManager.FileEntrySource(tmpExtractFile, "subfolder/testfile1.png"))
         }
     }
 
