@@ -22,7 +22,7 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val sameItemFn: (item1: T, item2: T) -> Boolean,
                            private val numProcessors: Int = 1,
                            private val coroutineScope: CoroutineScope = GlobalScope,
-                           private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+                           private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
     private val recentlyRunItems = mutableSetOf<T>()

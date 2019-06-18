@@ -10,6 +10,7 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.filter
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.io.ByteBuffer
 import kotlinx.io.IOException
@@ -38,6 +39,10 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
     private var md5SumBytes: ByteArray? = null
 
+    var onDownloadProgress: (Long) -> Unit = {}
+
+    private val bytesDownloaded = atomic(0L)
+
     val md5Sum: ByteArray
         get() = /*if(md5SumBytes == null) {
                 throw IllegalStateException("Download not complete: cannot provide md5")
@@ -54,8 +59,6 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
         try {
             val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)
             val dlPartFile = FileSe(destinationFile + DLPART_EXTENSION)
-            println("Start download: $httpUrl")
-
 
             val dlInfoMap = mutableMapOf<String, String?>()
 
@@ -113,6 +116,9 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     }
 
                     appendOutput = (httpResponse.status == HttpStatusCode.PartialContent)
+                    if(appendOutput)
+                        bytesDownloaded.value = startFrom
+
 
                     //save the etag and last modified info (if known)
                     dlInfoMap.clear()
@@ -138,6 +144,8 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                             throw CancellationException("coroutine canceled - not reading anymore")
                         }
                         if (rc == -1) break
+                        bytesDownloaded.addAndGet(rc.toLong())
+                        onDownloadProgress(bytesDownloaded.value)
                         //copied += rc
                         fileOutput.writeFully(buffer)
                     } while (true)
@@ -160,7 +168,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     delay(retryDelay.toLong())
                 }finally {
                     withContext(NonCancellable) {
-                        println("Cleaning up resumabledownload of $httpUrl")
+                        //println("Cleaning up resumabledownload of $httpUrl")
                         httpIn?.close()
                         httpResponse?.close()
                         fileOutput?.close()

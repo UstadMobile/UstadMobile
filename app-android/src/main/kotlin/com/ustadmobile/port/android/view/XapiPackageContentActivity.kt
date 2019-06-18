@@ -14,7 +14,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.XapiPackageContentView
 import java.util.concurrent.atomic.AtomicReference
 
