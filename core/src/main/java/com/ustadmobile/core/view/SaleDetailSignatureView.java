@@ -20,6 +20,7 @@ public interface SaleDetailSignatureView extends UstadView {
      */
     void finish();
 
+    void updateSaleOnView(Sale sale);
 
 
 }

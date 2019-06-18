@@ -89,7 +89,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     private ConstraintLayout addPaymentCL;
     private RecyclerView pRecyclerView;
     private TextView balanceDueTV, balanceTV, balanceCurrencyTV;
-    private View paymentHLineBeforeRV, anotherOneHLine;
+    private View paymentHLineBeforeRV, anotherOneHLine, signatureHLine;
 
     //Signature
     private TextView signatureTitleTV;
@@ -374,6 +374,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         stopIB = findViewById(R.id.activity_sale_detail_order_notes_delete_ib);
         signatureTitleTV = findViewById(R.id.activity_sale_detail_signature_title);
         signatureIB = findViewById(R.id.activity_sale_detail_signature_button);
+        signatureHLine = findViewById(R.id.hlineAfterSignature);
 
         c1 = findViewById(R.id.textView21);
         c2 = findViewById(R.id.activity_sale_detail_disc_currency4);
@@ -653,7 +654,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                         String saleSignature= sale.getSaleSignature();
                         SVG svg = SVG.getFromString(saleSignature);
 
-                        //TODO: Crop signature
                         Picture signPic = svg.renderToPicture();
 
                         int picW = signPic.getWidth();
@@ -675,37 +675,6 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         });
 
     }
-
-//    public static PictureDrawable crop(PictureDrawable image) {
-//        int minY = 0, maxY = 0, minX = Integer.MAX_VALUE, maxX = 0;
-//        boolean isBlank, minYIsDefined = false;
-//
-//        for (int y = 0; y < image.getHeight(); y++) {
-//            isBlank = true;
-//
-//            for (int x = 0; x < image.getWidth(); x++) {
-//                //Change condition to (raster.getSample(x, y, 3) != 0)
-//                //for better performance
-//                if (raster.getPixel(x, y, (int[]) null)[3] != 0) {
-//                    isBlank = false;
-//
-//                    if (x < minX) minX = x;
-//                    if (x > maxX) maxX = x;
-//                }
-//            }
-//
-//            if (!isBlank) {
-//                if (!minYIsDefined) {
-//                    minY = y;
-//                    minYIsDefined = true;
-//                } else {
-//                    if (y > maxY) maxY = y;
-//                }
-//            }
-//        }
-//
-//        return image.getSubimage(minX, minY, maxX - minX + 1, maxY - minY + 1);
-//    }
 
     public Picture rotatePicture(float degrees, Picture picture) {
         int width = picture.getWidth();
@@ -758,6 +727,9 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         totalAfterDiscount.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         totalAfterDiscount.setEnabled(show);
         hlineCalc.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        signatureIB.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        signatureHLine.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        signatureTitleTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
     }
 
     @Override
@@ -776,6 +748,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     public void showSignature(boolean show) {
         runOnUiThread(() -> {
             signatureIB.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+            signatureHLine.setVisibility(show?View.VISIBLE:View.INVISIBLE);
             signatureTitleTV.setVisibility(show?View.VISIBLE:View.INVISIBLE);
         });
     }

@@ -199,6 +199,12 @@ public class UMCalendarUtil {
     }
 
 
+    /***
+     * Returns date as 23/Jan/1989
+     * @param thisDate  Long date
+     * @param locale    Locale
+     * @return          String "23/Jan/1989"
+     */
     public static String getPrettyDateSimpleFromLong(long thisDate, Locale locale){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(thisDate);

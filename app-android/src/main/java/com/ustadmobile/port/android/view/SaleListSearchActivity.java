@@ -21,8 +21,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarChangeListener;
-import com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SaleListSearchPresenter;
 import com.ustadmobile.core.db.UmProvider;
@@ -62,7 +60,11 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == R.id.action_search){
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        else if(id == R.id.action_search){
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -86,8 +88,13 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.action_search)
                 .getActionView();
+        searchView.setIconifiedByDefault(true);
+        searchView.setFocusable(true);
+        searchView.setIconified(false);
+        searchView.requestFocusFromTouch();
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(getComponentName()));
+        searchView.setQueryHint(getText(R.string.product_name));
 
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
@@ -117,6 +124,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         });
 
 
+
         return true;
     }
 
@@ -143,7 +151,8 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         locationSpinner = findViewById(R.id.activity_sale_list_search_location_spinner);
         dateRangeET = findViewById(R.id.activity_sale_list_search_date_range_edittext);
         dateRangeET.setFocusable(false);
-        CrystalRangeSeekbar valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar);
+        RangeSeekCustom valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar);
+
         valueRangeTV = findViewById(R.id.activity_sale_list_search_value_range_textview);
         sortSpinner = findViewById(R.id.activity_sale_list_search_sort_spinner);
 
@@ -196,7 +205,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
 
         String toS = formatter.format(to);
         String fromS = formatter.format(from);
-        String rangeText = getText(R.string.from) + " " + fromS + " - " + toS ;
+        String rangeText = getText(R.string.from) + " " + fromS + " Afs - " + toS + " Afs";
         valueRangeTV.setText(rangeText);
     }
 

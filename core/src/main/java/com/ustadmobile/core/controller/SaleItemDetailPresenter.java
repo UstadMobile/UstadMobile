@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import com.ustadmobile.core.view.AddReminderDialogView;
 import com.ustadmobile.core.view.SaleItemDetailView;
@@ -17,7 +18,7 @@ import com.ustadmobile.lib.db.entities.SaleItem;
 import com.ustadmobile.lib.db.entities.SaleItemReminder;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 
-import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_DUE_DATE;
+import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_DUE_DATE;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_NAME;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_PRODUCT_UID;
 import static com.ustadmobile.core.view.SaleItemDetailView.ARG_SALE_ITEM_UID;
@@ -36,6 +37,7 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
     private SaleItem currentSaleItem, updatedSaleItem;
     private long productUid, producerUid, saleItemUid, saleItemDueDate;
     private String saleTitle;
+    private String saleProductName;
 
     private boolean refreshSaleItem = true;
 
@@ -79,8 +81,8 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
             saleTitle = getArguments().get(ARG_SALE_ITEM_NAME).toString();
         }
 
-        if(getArguments().containsKey(ARG_SALE_DUE_DATE)){
-            saleItemDueDate = Long.parseLong(getArguments().get(ARG_SALE_DUE_DATE).toString());
+        if(getArguments().containsKey(ARG_SALE_ITEM_DUE_DATE)){
+            saleItemDueDate = Long.parseLong(getArguments().get(ARG_SALE_ITEM_DUE_DATE).toString());
         }
 
         if(getArguments().containsKey(ARG_SALE_ITEM_UID)){
@@ -143,12 +145,14 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
                             new UmCallback<SaleProduct>() {
                                 @Override
                                 public void onSuccess(SaleProduct saleProduct) {
-                                    String productName = "";
+
                                     if (saleProduct != null) {
-                                        productName = saleProduct.getSaleProductName();
-                                    }
-                                    view.updateSaleItemOnView(updatedSaleItem,
-                                            productName);
+                                        saleProductName = saleProduct.getSaleProductName();
+                                        if(saleTitle == null){
+                                            saleTitle = saleProductName;
+                                        }
+                                                                            }
+                                    view.updateSaleItemOnView(updatedSaleItem, saleProductName);
                                 }
 
                                 @Override
@@ -206,32 +210,6 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
         }
     }
 
-    public void handleClickSave() {
-
-        if(updatedSaleItem!= null){
-            updatedSaleItem.setSaleItemActive(true);
-
-            if(producerUid != 0 && productUid != 0){
-                updatedSaleItem.setSaleItemProductUid(productUid);
-                updatedSaleItem.setSaleItemProducerUid(producerUid);
-            }
-
-            if (updatedSaleItem.getSaleItemQuantity() == 0){
-                updatedSaleItem.setSaleItemQuantity(1);
-            }
-
-            saleItemDao.updateAsync(updatedSaleItem, new UmCallback<Integer>() {
-                @Override
-                public void onSuccess(Integer result) {
-                    view.finish();
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {exception.printStackTrace();}
-            });
-        }
-    }
-
     public void handleChangeQuantity(int quantity){
         updatedSaleItem.setSaleItemQuantity(quantity);
 
@@ -250,8 +228,14 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
         updatedSaleItem.setSaleItemSold(sold);
     }
     public void setPreOrder(boolean po){
+        if(!updatedSaleItem.isSaleItemPreorder() && po){
+            //Add 1 day reminder
+            handleAddReminder(1);
+        }
         updatedSaleItem.setSaleItemSold(!po);
         updatedSaleItem.setSaleItemPreorder(po);
+        //If recently clicked. Set Reminder. Set reminder on Save as well.
+
     }
 
     public void handleChangeOrderDueDate(long date){
@@ -262,14 +246,17 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable<String, String> args = new Hashtable<>();
+
         if(getArguments().containsKey(ARG_SALE_ITEM_UID)) {
             args.put(ARG_SALE_ITEM_UID, getArguments().get(ARG_SALE_ITEM_UID).toString());
         }
         if(getArguments().containsKey(ARG_SALE_ITEM_NAME)){
             args.put(ARG_SALE_ITEM_NAME, getArguments().get(ARG_SALE_ITEM_NAME).toString());
+        }else{
+            args.put(ARG_SALE_ITEM_NAME, saleProductName);
         }
-        if(getArguments().containsKey(ARG_SALE_DUE_DATE)){
-            args.put(ARG_SALE_DUE_DATE, getArguments().get(ARG_SALE_DUE_DATE).toString());
+        if(getArguments().containsKey(ARG_SALE_ITEM_DUE_DATE)){
+            args.put(ARG_SALE_ITEM_DUE_DATE, getArguments().get(ARG_SALE_ITEM_DUE_DATE).toString());
         }
         impl.go(AddReminderDialogView.VIEW_NAME, args, context);
 
@@ -280,19 +267,78 @@ public class SaleItemDetailPresenter extends UstadBaseController<SaleItemDetailV
         reminderDao.invalidateReminder(saleItemReminderUid, null);
     }
 
+    public void handleClickSave() {
+
+        if(updatedSaleItem!= null){
+            updatedSaleItem.setSaleItemActive(true);
+
+            if(producerUid != 0 && productUid != 0){
+                updatedSaleItem.setSaleItemProductUid(productUid);
+                updatedSaleItem.setSaleItemProducerUid(producerUid);
+            }
+
+            if (updatedSaleItem.getSaleItemQuantity() == 0){
+                updatedSaleItem.setSaleItemQuantity(1);
+            }
+
+            saleItemDao.updateAsync(updatedSaleItem, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+
+                    //Update reminders as well.
+                    //Get all remidners.
+                    reminderDao.findBySaleItemUidAsync(updatedSaleItem.getSaleItemUid(),
+                        new UmCallback<List<SaleItemReminder>>() {
+                            @Override
+                            public void onSuccess(List<SaleItemReminder> result) {
+                                for(SaleItemReminder everyReminder:result){
+                                    int days = everyReminder.getSaleItemReminderDays();
+                                    view.setReminderNotification(days, saleTitle, saleItemDueDate);
+                                }
+                                view.finish();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable exception) {
+
+                            }
+                        });
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {exception.printStackTrace();}
+            });
+        }
+    }
+
     public void handleAddReminder(int days){
         SaleItemReminder reminder = new SaleItemReminder(days, saleItemUid, true);
         SaleItemReminderDao reminderDao = repository.getSaleItemReminderDao();
-        reminderDao.insertAsync(reminder, new UmCallback<Long>() {
+        reminderDao.findBySaleItemUidAndDaysAsync(saleItemUid, days, new UmCallback<List<SaleItemReminder>>() {
             @Override
-            public void onSuccess(Long result) {
-                view.setReminderNotification(days, saleTitle, saleItemDueDate);
+            public void onSuccess(List<SaleItemReminder> result) {
+                if(result != null && result.size() > 0){
+                    //It has it already. Skipp it.
+                }else{
+                    reminderDao.insertAsync(reminder, new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long result) {
+                            //Do nothing. Persisting on save only.
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();;
+                        }
+                    });
+                }
             }
 
             @Override
             public void onFailure(Throwable exception) {
-                exception.printStackTrace();;
+                exception.printStackTrace();
             }
         });
+
     }
 }

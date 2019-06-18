@@ -82,14 +82,14 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             " (SELECT SaleItem.saleItemQuantity " +
             " FROM Sale stg " +
             " LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid " +
-            " WHERE stg.saleUid = sl.saleUid " +
+            " WHERE stg.saleUid = sl.saleUid AND SaleItem.saleItemActive = 1 " +
             " ORDER BY stg.saleCreationDate ASC LIMIT 1 " +
             " )  " +
             " || 'x ' || " +
             " (SELECT SaleProduct.saleProductName " +
             " FROM SaleItem sitg " +
             " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = sitg.saleItemProductUid " +
-            " WHERE sitg.saleItemSaleUid = sl.saleUid " +
+            " WHERE sitg.saleItemSaleUid = sl.saleUid AND sitg.saleItemActive = 1 " +
             " ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) " +
             " || " +
             " (select " +
@@ -101,6 +101,9 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             "  end) " +
             " from sale) " +
             " AS saleTitleGen, " +
+            " (Select GROUP_CONCAT(SaleProduct.saleProductName)  FROM SaleItem " +
+            "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
+            "   WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleProductNames," +
             " Location.title AS locationName, " +
             " COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - " +
             "            SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = " +
@@ -298,7 +301,7 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             " AND " +
             " sl.saleLocationUid = :locationuid " +
             " AND saleAmount > :amountl AND saleAmount < :amounth " +
-            " AND saleTitleGen LIKE :title " +
+            " AND saleProductNames LIKE :title " +
             " OR (sl.saleCreationDate > :from AND sl.saleCreationDate < :to )" ;
     private static final String FILTER_ORDER_BY_DATE_ASC = " ORDER BY sl.saleCreationDate ASC " ;
     private static final String FILTER_ORDER_BY_PRICE_ASC = " ORDER BY saleAmount ASC ";

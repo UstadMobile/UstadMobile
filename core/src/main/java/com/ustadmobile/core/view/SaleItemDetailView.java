@@ -17,9 +17,10 @@ public interface SaleItemDetailView extends UstadView {
     //Any argument keys:
     String ARG_SALE_ITEM_UID = "ArgSaleItemUid";
     String ARG_SALE_ITEM_PRODUCT_UID = "ArgSaleItemProducerUid";
-    String ARG_SALE_DUE_DATE = "ArgSaleDueDate";
+    String ARG_SALE_ITEM_DUE_DATE = "ArgSaleDueDate";
 
     String ARG_SALE_ITEM_NAME = "ArgSaleItemName";
+    String ARG_SALE_DUE_DAYS = "ArgSaleDueDays";
 
 
     /**

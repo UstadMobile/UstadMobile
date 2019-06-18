@@ -3,9 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
-import android.app.TimePickerDialog;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
@@ -18,12 +16,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
@@ -36,11 +32,9 @@ import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.SaleItemDetailView;
 import com.ustadmobile.lib.db.entities.SaleItem;
 import com.ustadmobile.lib.db.entities.SaleItemReminder;
-import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.port.android.impl.ReminderReceiver;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Objects;
 
@@ -323,6 +317,8 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
     public void setReminderNotification(int days, String message, long saleDueDate){
         Intent intent = new Intent(this, ReminderReceiver.class);
         intent.putExtra(ARG_SALE_ITEM_NAME, message);
+        intent.putExtra(ARG_SALE_ITEM_DUE_DATE, saleDueDate);
+        intent.putExtra(ARG_SALE_DUE_DAYS, days);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REMINER_REQUEST_CODE, intent, 0);
         AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
         long reminderMilli = getNextMidnightReminder(days, saleDueDate);

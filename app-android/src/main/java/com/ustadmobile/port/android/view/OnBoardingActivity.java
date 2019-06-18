@@ -39,7 +39,7 @@ public class OnBoardingActivity extends UstadBaseActivity implements OnBoardingV
 
 
         SCREEN_1(R.string.onboarding_goldozi_1,R.string.onboarding_goldozi_1b
-                ,R.layout.onboard_screen_view, R.drawable.goldozi_logo1),
+                ,R.layout.onboard_screen_view, R.drawable.ic_goldozi_logo_cropped_outline),
         SCREEN_2(R.string.onboarding_goldozi_2,R.string.onboarding_empty,
                 R.layout.onboard_screen_view, R.drawable.goldozi_products1),
         SCREEN_3(R.string.onboarding_goldozi_3,R.string.onboarding_empty,

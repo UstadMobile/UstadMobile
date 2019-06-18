@@ -48,6 +48,7 @@ public class SaleDetailSignaturePresenter extends UstadBaseController<SaleDetail
                 @Override
                 public void onSuccess(Sale result) {
                     currentSale = result;
+                    view.updateSaleOnView(currentSale);
                 }
 
                 @Override

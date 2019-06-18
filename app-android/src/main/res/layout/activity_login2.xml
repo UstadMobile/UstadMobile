@@ -33,7 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_appbar"
-        app:srcCompat="@drawable/goldozi_logo1" />
+        app:srcCompat="@drawable/ic_goldozi_logo_cropped_outline" />
 
     <EditText
         android:id="@+id/activity_login_username"

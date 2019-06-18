@@ -33,7 +33,7 @@
 
     <!-- Catalog Entry View colors-->
     <item name="catalog_entry_remove_modify_button_background" type="color">@color/primary_dark</item>
-    <item name="catalog_entry_remove_modify_button_text" type="color">@color/primary_text</item>
+    <item name="catalog_entry_remove_modify_button_text" type="color">@color/primary_text</item>`
 
     <item name="catalog_entry_download_button_background" type="color">@color/primary</item>
     <item name="catalog_entry_download_button_text" type="color">@color/primary_text</item>

@@ -405,6 +405,7 @@
 
     <!--Sprint 4-->
     <string name="i_have_received_order">I have received order</string>
+    <string name="i_have_received_the_order">I have received this order</string>
     <string name="clear">Clear</string>
     <string name="delivery_signature">Delivery signature</string>
     <string name="record_signature">Record signature</string>
@@ -423,5 +424,9 @@
     <string name="highest_price">Highest price</string>
     <string name="sale_reminder">Sale reminder</string>
     <string name="sale_due_today">Due today is sale </string>
+    <string name="due_in">Due in</string>
+    <string name="days">days</string>
+    <string name="is_sale">is sale</string>
+    <string name="product_name">Product name..</string>
 
 </resources>

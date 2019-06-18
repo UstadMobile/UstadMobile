@@ -25,6 +25,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/location"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_appbar" />
@@ -57,6 +58,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/date_range"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline1" />
@@ -108,26 +110,33 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/value"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline2" />
 
 
-    <com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
+    <com.ustadmobile.port.android.view.RangeSeekCustom
         android:id="@+id/activity_sale_list_search_value_seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         app:bar_color="@color/color_gray"
-        app:bar_highlight_color="@color/accent"
-        app:corner_radius="5"
+        app:bar_height="1dp"
+        app:bar_highlight_color="@color/fab"
+        app:corner_radius="2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_value_range_textview"
+        app:left_thumb_color="@color/fab"
+        app:left_thumb_color_pressed="@color/fab"
         app:max_value="100"
-        app:min_value="0" />
+        app:min_value="0"
+        app:right_thumb_color="@color/fab"
+        app:right_thumb_color_pressed="@color/fab" />
 
     <View
         android:id="@+id/activity_sale_list_search_hline3"
@@ -142,7 +151,7 @@
         android:id="@+id/activity_sale_list_search_sort_by_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="25dp"
         android:text="@string/sort_by"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/activity_sale_list_search_sort_spinner"
@@ -152,7 +161,7 @@
         android:id="@+id/activity_sale_list_search_sort_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline3" />
 

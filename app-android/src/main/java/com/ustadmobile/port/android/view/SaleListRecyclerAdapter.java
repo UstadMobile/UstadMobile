@@ -58,7 +58,14 @@ public class SaleListRecyclerAdapter extends
         ImageView saleDueDateImage = holder.itemView.findViewById(R.id.item_sale_order_due_date_image);
 
         assert entity != null;
-        saleTitle.setText(entity.getSaleTitle());
+        if(entity.getSaleTitle() != null && !entity.getSaleTitle().isEmpty()){
+            saleTitle.setText(entity.getSaleTitle());
+        }else if(entity.getSaleTitleGen() != null && !entity.getSaleTitleGen().isEmpty()){
+            saleTitle.setText(entity.getSaleTitleGen());
+        }else{
+            saleTitle.setText("");
+        }
+
         String saleAmountWithCurrency = Math.round(entity.getSaleAmount()) + " " +
                 entity.getSaleCurrency();
         saleLocation.setText(entity.getLocationName());

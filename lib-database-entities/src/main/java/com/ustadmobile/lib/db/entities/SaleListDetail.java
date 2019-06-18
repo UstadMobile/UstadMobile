@@ -10,6 +10,7 @@ public class SaleListDetail extends Sale {
     String saleCurrency;
     int saleItemCount;
     String saleTitleGen;
+    String saleProductNames;
     float saleAmountPaid;
     float saleAmountDue;
     long earliestDueDate;
@@ -88,11 +89,12 @@ public class SaleListDetail extends Sale {
         this.saleItemPreOrder = saleItemPreOrder;
     }
 
-//    public String getCategoryName() {
-//        return categoryName;
-//    }
-//
-//    public void setCategoryName(String categoryName) {
-//        this.categoryName = categoryName;
-//    }
+    public String getSaleProductNames() {
+        return saleProductNames;
+    }
+
+    public void setSaleProductNames(String saleProductNames) {
+        this.saleProductNames = saleProductNames;
+    }
+
 }
