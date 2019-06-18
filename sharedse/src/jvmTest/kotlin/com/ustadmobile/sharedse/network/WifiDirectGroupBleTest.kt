@@ -14,11 +14,6 @@ class WifiDirectGroupBleTest {
         val bytes = wifi.toBytes()
         val newWifi = WiFiDirectGroupBle(bytes)
 
-        println(newWifi.ssid)
-        println(newWifi.passphrase)
-        println(newWifi.ipAddress)
-        println(newWifi.port)
-
         Assert.assertTrue("ssid match", wifi.ssid == newWifi.ssid)
         Assert.assertTrue("pass match", wifi.passphrase == newWifi.passphrase)
         Assert.assertTrue("port match", wifi.port == newWifi.port)

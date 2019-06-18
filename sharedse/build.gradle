@@ -9,7 +9,6 @@ buildscript {
             url "https://kotlin.bintray.com/kotlinx"
         }
     }
-
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -39,11 +38,17 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+    }
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+        }
     }
 }
 
@@ -200,6 +205,8 @@ kotlin {
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
                 implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "androidx.test:rules:$version_android_junit_runner"
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"

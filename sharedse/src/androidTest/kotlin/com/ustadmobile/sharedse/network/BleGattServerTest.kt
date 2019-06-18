@@ -58,8 +58,8 @@ class BleGattServerTest {
             e.printStackTrace()
         }
 
-        val networkManager = NetworkManagerBle(context, Dispatchers.Default)
-         networkManager.setBluetoothManager(mockBluetoothManager)
+        val networkManager = NetworkManagerBle(context, Dispatchers.Default, httpd)
+        networkManager.setBluetoothManager(mockBluetoothManager)
 
         mGattServer = BleGattServer(context, networkManager)
         mGattServer!!.gattServer = mockedGattServer

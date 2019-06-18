@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.sharedse.io.ByteBufferSe
 import kotlinx.io.ByteBuffer
 import kotlinx.serialization.stringFromUtf8Bytes
