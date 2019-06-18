@@ -1,27 +1,26 @@
 package com.ustadmobile.sharedse.network
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.core.container.*
-import com.ustadmobile.core.db.WaitForLiveData
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.util.ReverseProxyDispatcher
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -29,8 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipFile
 import javax.naming.InitialContext
@@ -107,12 +104,11 @@ class DownloadJobItemRunnerTest {
     private lateinit var downloadJobItemManager: DownloadJobItemManager
 
 
-
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
-        val c1 =  InitialContext()
+        val c1 = InitialContext()
         val c2 = InitialContext()
 
         //UmAppDatabase.getInstance(context).clearAllTables()
@@ -135,7 +131,7 @@ class DownloadJobItemRunnerTest {
         }
         mockedNetworkManager.setDatabase(clientDb)
         mockedNetworkManager.setJobItemManagerList(DownloadJobItemManagerList(clientDb,
-                newSingleThreadContext("DownloadJobItemRunnerTest") ))
+                newSingleThreadContext("DownloadJobItemRunnerTest")))
 
         mockedNetworkManagerBleWorking.set(true)
 
@@ -224,14 +220,14 @@ class DownloadJobItemRunnerTest {
         peerRepo.containerDao.insert(container)
         peerContainerFileTmpDir = UmFileUtilSe.makeTempDir("peerContainerFileTmpDir",
                 "" + System.currentTimeMillis())
-        val peerContainerManager = com.ustadmobile.port.sharedse.container.ContainerManager(container,
+        val peerContainerManager = ContainerManager(container,
                 peerDb, peerRepo, peerContainerFileTmpDir.absolutePath)
 
         peerTmpContentEntryFile = File.createTempFile("peerTmpContentEntryFile",
                 "" + System.currentTimeMillis() + ".zip")
         extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile)
         val peerZipFile = ZipFile(peerTmpContentEntryFile)
-        peerContainerManager.addEntriesFromZip(peerZipFile, com.ustadmobile.port.sharedse.container.ContainerManager.OPTION_COPY)
+        addEntriesFromZipToContainer(peerTmpContentEntryFile.absolutePath, peerContainerManager)
         peerZipFile.close()
 
         peerServer = EmbeddedHTTPD(0, context, peerDb)
@@ -419,10 +415,10 @@ class DownloadJobItemRunnerTest {
 
             try {
                 waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
-                        item.djiUid), MAX_LATCH_WAITING_TIME) {
-                    status -> status == JobStatus.WAITING_FOR_CONNECTION
+                        item.djiUid), MAX_LATCH_WAITING_TIME) { status ->
+                    status == JobStatus.WAITING_FOR_CONNECTION
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 println("Exception with live data cancel?")
                 e.printStackTrace()
             }
@@ -456,8 +452,8 @@ class DownloadJobItemRunnerTest {
             clientDb.downloadJobItemDao.updateStatus(item.djiUid, JobStatus.STOPPING)
 
             waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
-                    item.djiUid), MAX_LATCH_WAITING_TIME) {
-                status -> status == JobStatus.STOPPED
+                    item.djiUid), MAX_LATCH_WAITING_TIME) { status ->
+                status == JobStatus.STOPPED
             }
 
             item = clientDb.downloadJobItemDao.findByUid(
@@ -492,8 +488,8 @@ class DownloadJobItemRunnerTest {
             launch { jobItemRunner.download() }
 
             waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
-                    item.djiUid), MAX_LATCH_WAITING_TIME) {
-                status -> status >= JobStatus.RUNNING_MIN
+                    item.djiUid), MAX_LATCH_WAITING_TIME) { status ->
+                status >= JobStatus.RUNNING_MIN
             }
 
             delay(MAX_THREAD_SLEEP_TIME)
@@ -503,8 +499,8 @@ class DownloadJobItemRunnerTest {
                     item.djiDjUid, false)
 
             waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
-                    item.djiUid), MAX_LATCH_WAITING_TIME) {
-                status -> status == JobStatus.WAITING_FOR_CONNECTION
+                    item.djiUid), MAX_LATCH_WAITING_TIME) { status ->
+                status == JobStatus.WAITING_FOR_CONNECTION
             }
         }
 
@@ -539,8 +535,8 @@ class DownloadJobItemRunnerTest {
             clientDb.connectivityStatusDao.updateState(ConnectivityStatus.STATE_DISCONNECTED, "")
 
             waitForLiveData(clientDb.downloadJobItemDao.getLiveStatus(
-                    item.djiUid), MAX_LATCH_WAITING_TIME) {
-                status -> status == JobStatus.WAITING_FOR_CONNECTION
+                    item.djiUid), MAX_LATCH_WAITING_TIME) { status ->
+                status == JobStatus.WAITING_FOR_CONNECTION
             }
         }
 
