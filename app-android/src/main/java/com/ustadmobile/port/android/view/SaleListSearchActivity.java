@@ -73,10 +73,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
     @Override
     public void onBackPressed() {
         // close search view on back button pressed
-        if (!searchView.isIconified()) {
-            searchView.setIconified(true);
-            return;
-        }
+        
         super.onBackPressed();
     }
 
@@ -88,7 +85,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.action_search)
                 .getActionView();
-        searchView.setIconifiedByDefault(true);
+
         searchView.setFocusable(true);
         searchView.setIconified(false);
         searchView.requestFocusFromTouch();
@@ -122,7 +119,6 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
             mPresenter.updateFilter(currentValue);
             return false;
         });
-
 
 
         return true;
