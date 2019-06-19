@@ -19,6 +19,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import com.ustadmobile.port.sharedse.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -37,9 +38,8 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
             //TODO: this needs fixed to use the modified download manager
-//            networkManagerBle!!.addDownloadChangeListener(this@DownloadNotificationService)
-//            val activeDownloadManagers = networkManagerBle!!
-//                    .activeDownloadJobItemManagers
+            networkManagerBle!!.addDownloadChangeListener(this@DownloadNotificationService)
+            val activeDownloadManagers = networkManagerBle!!.activeDownloadJobItemManagers
 //            for (manager in activeDownloadManagers) {
 //                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
 //                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
@@ -82,8 +82,6 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val stopped = AtomicBoolean(false)
 
-    private val isVersionLollipopOrAbove: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
     /**
      * Holder class for the entire notification
@@ -296,10 +294,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 .setContentIntent(mNotificationPendingIntent)
                 .setDefaults(Notification.DEFAULT_SOUND)
 
-        if (isVersionLollipopOrAbove) {
-            //TODO: fix this icon - add to res
-//            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
-//                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         }
 
         val notificationHolder = NotificationHolder(notificationId, contentTitle,
@@ -376,10 +373,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
      */
     private fun stopForegroundService() {
         if (!stopped.getAndSet(true)) {
-            val networkManager = networkManagerBle
-            //TODO: fix this once we update to use the new download manager
-//            if (networkManager != null)
-//                networkManagerBle!!.removeDownloadChangeListener(this)
+            networkManagerBle?.removeDownloadChangeListener(this)
 
             downloadJobIdToNotificationMap.clear()
             stopForeground(true)

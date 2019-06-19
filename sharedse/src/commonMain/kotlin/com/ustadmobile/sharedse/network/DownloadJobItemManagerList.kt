@@ -20,6 +20,9 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
 
     private val changeListeners = copyOnWriteListOf<OnDownloadJobItemChangeListener>()
 
+    val activeDownloadJobItemManagers
+        get() = managerMap.values.toList()
+
     fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
         newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
         val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
@@ -34,9 +37,9 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
         return managerMap.get(downloadJobId)
     }
 
-    fun getActiveDownloadJobItemManagers(): List<DownloadJobItemManager> {
-        return managerMap.values.toList()
-    }
+//    fun getActiveDownloadJobItemManagers(): List<DownloadJobItemManager> {
+//        return managerMap.values.toList()
+//    }
 
 
     override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long)  : DownloadJobItemStatus?{

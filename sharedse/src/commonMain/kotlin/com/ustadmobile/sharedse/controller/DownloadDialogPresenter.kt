@@ -23,7 +23,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.jvm.Volatile
 
-class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon?,
+class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               private var appDatabase: UmAppDatabase?, private val appDatabaseRepo: UmAppDatabase)
     : UstadBaseController<DownloadDialogView>(context, arguments, view) {
@@ -40,7 +40,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
      * Testing purpose
      */
     @Volatile
-    var currentJobId: Int? = 0
+    var currentJobId: Int = 0
         private set
 
     private var impl: UstadMobileSystemImpl? = null
@@ -151,8 +151,10 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun setup() {
         currentJobId = appDatabase!!.downloadJobDao
                 .getLatestDownloadJobUidForContentEntryUid(contentEntryUid)
-        if (currentJobId == null || currentJobId == 0) {
+        if (currentJobId == 0) {
             createDownloadJobRecursive()
+        }else {
+            jobItemManager = networkManagerBle.getDownloadJobItemManager(currentJobId)
         }
 
         startObservingJob()
@@ -165,7 +167,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
         jobItemManager = networkManagerBle?.createNewDownloadJobItemManager(newDownloadJob)
-        currentJobId = jobItemManager?.downloadJobUid
+        currentJobId = jobItemManager?.downloadJobUid ?: 0
         GlobalScope.launch {
             DownloadJobPreparer(jobItemManager!!, appDatabase!!, appDatabaseRepo).run()
         }

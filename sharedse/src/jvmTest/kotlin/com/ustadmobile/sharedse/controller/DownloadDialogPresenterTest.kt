@@ -1,6 +1,7 @@
 package com.ustadmobile.sharedse.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.WaitForLiveData
 import com.ustadmobile.core.db.waitForLiveData
@@ -13,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
@@ -20,6 +22,7 @@ import com.ustadmobile.sharedse.network.DeleteJobTaskRunner
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon
 import com.ustadmobile.util.test.checkJndiSetup
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -57,11 +60,13 @@ class DownloadDialogPresenterTest {
 
     private val MAX_THREAD_SLEEP_TIME = 2
 
-    private var mockedNetworkManager: NetworkManagerBleCommon? = null
+    private lateinit var mockedNetworkManager: NetworkManagerBleCommon
 
     private lateinit var mockedDeleteTaskRunner: DeleteJobTaskRunner
 
     var TEST_ROOT_CONTENT_ENTRY_UID: Long = 0
+
+    var downloadJobPreparer: DownloadJobPreparer? = null
 
     @Before
     @Throws(IOException::class)
@@ -87,12 +92,13 @@ class DownloadDialogPresenterTest {
         mockedNetworkManager = spy<NetworkManagerBleCommon> {
             on { makeDeleteJobTask(any(), any()) }.doReturn(mockedDeleteTaskRunner)
         }
-        mockedNetworkManager!!.onCreate()
+        mockedNetworkManager.onCreate()
 
 
         rootEntry = ContentEntry("Lorem ipsum title",
                 "Lorem ipsum description", false, true)
         rootEntry.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(rootEntry)
+        println("Insert root entry uid = ${rootEntry.contentEntryUid}")
         TEST_ROOT_CONTENT_ENTRY_UID = rootEntry.contentEntryUid
 
 
@@ -134,16 +140,19 @@ class DownloadDialogPresenterTest {
 
     private fun insertDownloadJobAndJobItems(meteredNetworkAllowed: Boolean = false, status: Int) {
         Assert.assertNotEquals(0, rootEntry.contentEntryUid)
-        UMLog.l(UMLog.DEBUG, 420, "DownloadDialogPresenterTest " +
+        println("DownloadDialogPresenterTest " +
                 "root entry uid = " + rootEntry.contentEntryUid)
         downloadJob = DownloadJob(rootEntry.contentEntryUid,
                 System.currentTimeMillis())
+        println("DownloadJob contentEntryUid = ${downloadJob.djRootContentEntryUid}")
         downloadJob.meteredNetworkAllowed = meteredNetworkAllowed
         downloadJob.djStatus = status
         val itemManager = mockedNetworkManager!!
                 .createNewDownloadJobItemManager(downloadJob)
+        println("Item manager content entry uid = ${itemManager.rootContentEntryUid}")
         runBlocking {
-            DownloadJobPreparer(itemManager, umAppDatabase, umAppDatabaseRepo).run()
+            downloadJobPreparer = DownloadJobPreparer(itemManager, umAppDatabase, umAppDatabaseRepo)
+            downloadJobPreparer!!.run()
         }
         println("job prepared")
     }
@@ -175,6 +184,7 @@ class DownloadDialogPresenterTest {
         waitForLiveData(umAppDatabase.downloadJobItemDao.findByContentEntryUidLive(
                 rootEntry.contentEntryUid), 5000) {
             dji -> dji != null && dji.downloadLength == totalBytesToDownload
+                && umAppDatabase.downloadJobItemDao.findAll().size == 4
         }
 
         val numDownloadItems = umAppDatabase.downloadJobItemDao.findAll().size
@@ -187,6 +197,131 @@ class DownloadDialogPresenterTest {
                 umAppDatabase.downloadJobItemDao
                         .findByContentEntryUid2(rootEntry.contentEntryUid)!!.downloadLength)
         Unit
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadJobCreated_whenHandleClickCalled_shouldSetStatusToQueued() {
+        runBlocking {
+            val viewReadyLatch = CountDownLatch(1)
+            doAnswer { invocation ->
+                viewReadyLatch.countDown()
+                null
+            }.`when`(mockedDialogView).setWifiOnlyOptionVisible(true)
+
+            val args = HashMap<String, String>()
+
+            args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+            presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
+                    umAppDatabase, umAppDatabaseRepo)
+            presenter.onCreate(HashMap<String, String>())
+            presenter.onStart()
+
+            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+
+            presenter.handleClickPositive()
+
+            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId!!),
+                    MAX_LATCH_WAITING_TIME.toLong()) {
+                it != null && it.djStatus == JobStatus.QUEUED
+            }
+
+            val queuedJob = umAppDatabase.downloadJobDao.findByUid(presenter.currentJobId!!)
+            assertEquals("Job status was changed to Queued after clicking continue",
+                    JobStatus.QUEUED, queuedJob!!.djStatus)
+        }
+
+    }
+
+
+    @Test
+    fun givenDownloadRunning_whenCreated_shouldShowStackedOptions() {
+        insertDownloadJobAndJobItems(status = JobStatus.RUNNING)
+        val downloadJobUid = umAppDatabase.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(
+                rootEntry.contentEntryUid)
+
+        Assert.assertNotEquals(0, downloadJobUid)
+
+        val args = mapOf(ARG_CONTENT_ENTRY_UID to rootEntry.contentEntryUid.toString())
+        presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
+                umAppDatabase, umAppDatabaseRepo)
+        presenter.onCreate(HashMap<String, String>())
+        presenter.onStart()
+
+        verify(mockedDialogView, timeout(5000)).setStackedOptions(any(), any())
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadRunning_whenClickPause_shouldSetStatusToPaused() {
+        runBlocking {
+            insertDownloadJobAndJobItems(status = JobStatus.RUNNING)
+
+            val viewReadyLatch = CountDownLatch(1)
+            doAnswer { invocation ->
+                viewReadyLatch.countDown()
+                null
+            }.`when`(mockedDialogView).setWifiOnlyOptionVisible(true)
+
+            val args = HashMap<String, String>()
+
+            args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+            presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
+                    umAppDatabase, umAppDatabaseRepo)
+            presenter.onCreate(HashMap<String, String>())
+            presenter.onStart()
+
+            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+
+            presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
+
+            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId!!),
+                    MAX_LATCH_WAITING_TIME.toLong()) {
+                it != null && it.djStatus == JobStatus.PAUSED
+            }
+
+            val finishedJob = umAppDatabase.downloadJobDao.findByUid(downloadJob.djUid)
+            assertEquals("Job status was changed to paused after clicking pause button",
+                    JobStatus.PAUSED, finishedJob!!.djStatus)
+        }
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadRunning_whenClickCancel_shouldSetStatusToCancelling() {
+        runBlocking {
+            insertDownloadJobAndJobItems(status = JobStatus.RUNNING)
+
+            val viewReadyLatch = CountDownLatch(1)
+            doAnswer { invocation ->
+                viewReadyLatch.countDown()
+                null
+            }.`when`(mockedDialogView).setWifiOnlyOptionVisible(true)
+
+            val args = HashMap<String, String>()
+
+            args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+            presenter = DownloadDialogPresenter(context, mockedNetworkManager, args, mockedDialogView,
+                    umAppDatabase, umAppDatabaseRepo)
+            presenter.onCreate(HashMap<String, String>())
+            presenter.onStart()
+
+            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+
+            presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL)
+
+            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId!!),
+                    MAX_LATCH_WAITING_TIME.toLong()) {
+                it != null && it.djStatus == JobStatus.CANCELLING
+            }
+
+            assertEquals("Job status was changed to cancelling after clicking cancel download",
+                    JobStatus.CANCELED.toLong(),
+                    umAppDatabase.downloadJobDao.findByUid(downloadJob.djUid)!!
+                            .djStatus.toLong())
+        }
+
+
     }
 
 }

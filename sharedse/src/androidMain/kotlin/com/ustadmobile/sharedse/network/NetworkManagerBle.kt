@@ -37,6 +37,7 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -74,7 +75,7 @@ actual class NetworkManagerBle
  * @param context Platform specific application context
  */
 actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
-    : NetworkManagerBleCommon(context, singleThreadDispatcher), EmbeddedHTTPD.ResponseListener {
+    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main), EmbeddedHTTPD.ResponseListener {
 
     constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD): this(context, singleThreadDispatcher) {
         this.httpd = httpd
