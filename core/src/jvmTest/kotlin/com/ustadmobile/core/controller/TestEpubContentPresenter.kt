@@ -2,7 +2,8 @@
 //
 //import com.nhaarman.mockitokotlin2.anyArray
 //import com.nhaarman.mockitokotlin2.mock
-//import com.nhaarman.mockitokotlin2.whenever
+//import com.ustadmobile.core.container.ContainerManager
+//import com.ustadmobile.core.container.addEntriesFromZipToContainer
 //import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 //import com.ustadmobile.core.db.UmAppDatabase
 //import com.ustadmobile.core.impl.UmCallback
@@ -12,10 +13,8 @@
 //import com.ustadmobile.core.util.UMFileUtil
 //import com.ustadmobile.core.view.EpubContentView
 //import com.ustadmobile.lib.db.entities.Container
-//import com.ustadmobile.port.sharedse.container.ContainerManager
 //import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 //import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-//import com.ustadmobile.test.core.impl.PlatformTestUtil
 //import org.junit.After
 //import org.junit.Assert
 //import org.junit.Before
@@ -51,33 +50,33 @@
 //    @Before
 //    @Throws(IOException::class, XmlPullParserException::class)
 //    fun setup() {
-//        db = UmAppDatabase.getInstance(PlatformTestUtil.targetContext)
-//        repo = db!!.getRepository("http://localhost/dummy/", "")
+//        db = UmAppDatabase.getInstance(Any())
+//        repo = db //db!!.getRepository("http://localhost/dummy/", "")
 //        db!!.clearAllTables()
 //
 //        epubContainer = Container()
-//        epubContainer!!.containerUid = repo!!.containerDao.insert(epubContainer)
+//        epubContainer!!.containerUid = repo!!.containerDao.insert(epubContainer!!)
 //
 //        epubTmpFile = File.createTempFile("testepubcontentpresenter", "epubTmpFile")
 //
 //        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
-//                epubTmpFile)
+//                epubTmpFile!!)
 //
 //        containerDirTmp = UmFileUtilSe.makeTempDir("testpubcontentpresenter", "containerDirTmp")
-//        val containerManager = ContainerManager(epubContainer, db, repo,
+//        val containerManager = ContainerManager(epubContainer!!, db!!, repo!!,
 //                containerDirTmp!!.absolutePath)
 //
 //        val epubZipFile = ZipFile(epubTmpFile!!)
-//        containerManager.addEntriesFromZip(epubZipFile, ContainerManager.OPTION_COPY)
+//        addEntriesFromZipToContainer(epubTmpFile!!.absolutePath, containerManager)
 //        epubZipFile.close()
 //
-//        httpd = EmbeddedHTTPD(0, PlatformTestUtil.targetContext, db, repo)
+//        httpd = EmbeddedHTTPD(0, Any(), db!!, repo!!)
 //        httpd!!.start()
 //
 //        doAnswer {
 //            Thread{
 //                val mountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-//                        httpd!!.mountContainer(it.getArgument(0), ""))
+//                        httpd!!.mountContainer(it.getArgument(0), "")!!)
 //                UmCallbackUtil.onSuccessIfNotNull(it.getArgument<UmCallback<String>>(1), mountedUrl)
 //            }.start()
 //            null
@@ -90,7 +89,7 @@
 //        }.`when`<EpubContentView>(mockEpubView).runOnUiThread(any<Runnable>())
 //
 //        //Used for verification purposes
-//        val opfIn = containerManager.getInputStream(containerManager.getEntry("OEBPS/package.opf"))
+//        val opfIn = containerManager.getInputStream(containerManager.getEntry("OEBPS/package.opf")!!)
 //        opf = OpfDocument()
 //        opf!!.loadFromOPF(UstadMobileSystemImpl.instance.newPullParser(opfIn, "UTF-8"))
 //        opfIn.close()
@@ -115,7 +114,7 @@
 //            null!!
 //        }.`when`(mockEpubView)?.setSpineUrls(anyArray())
 //
-//        val presenter = EpubContentPresenter(PlatformTestUtil.targetContext,
+//        val presenter = EpubContentPresenter(Any(),
 //                args, mockEpubView)
 //        presenter.onCreate(args)
 //
@@ -130,7 +129,7 @@
 //            Assert.assertTrue("Spine itemk $i ends with expected url",
 //                    linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
 //            val response = UstadMobileSystemImpl.instance.makeRequestSync(
-//                    UmHttpRequest(PlatformTestUtil.targetContext, linearSpineUrls[i]))
+//                    UmHttpRequest(Any(), linearSpineUrls[i]))
 //            Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
 //                    response.status.toLong())
 //        }

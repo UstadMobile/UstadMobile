@@ -25,7 +25,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.UmViewActions
 import org.hamcrest.CoreMatchers.*
@@ -82,9 +83,7 @@ class EpubContentActivityEspressoTest {
 
         epubContainerManager = ContainerManager(epubContainer!!, db!!, repo!!,
                 containerTmpDir!!.absolutePath)
-        val zipFile = ZipFile(epubTmpFile)
-        epubContainerManager!!.addEntriesFromZip(zipFile, ContainerManager.OPTION_COPY)
-        zipFile.close()
+        addEntriesFromZipToContainer(epubTmpFile!!.absolutePath, epubContainerManager)
 
         val opfIn = epubContainerManager!!.getInputStream(
                 epubContainerManager!!.getEntry("OEBPS/package.opf")!!)

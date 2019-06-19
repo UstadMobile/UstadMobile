@@ -1,5 +1,6 @@
 //package com.ustadmobile.core.controller
 //
+//import com.sun.net.httpserver.HttpServer
 //import com.ustadmobile.core.CoreTestConfig
 //import com.ustadmobile.core.db.UmAppDatabase
 //import com.ustadmobile.core.db.dao.PersonAuthDao
@@ -46,16 +47,13 @@
 //
 //    @Before
 //    fun setUp() {
-//        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
-//                CoreTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true)
-//
 //        mainImpl = UstadMobileSystemImpl.instance
 //        systemImplSpy = Mockito.spy(mainImpl)
 //        UstadMobileSystemImpl.setMainInstance(systemImplSpy)
 //        server = startServer()
 //
-//        db = UmAppDatabase.getInstance(PlatformTestUtil.targetContext)
-//        repo = db!!.getRepository(TEST_URI, "")
+//        db = UmAppDatabase.getInstance(Any())
+//        repo = db//db!!.getRepository(TEST_URI, "")
 //
 //        db!!.clearAllTables()
 //        val testPerson = Person()
@@ -85,16 +83,16 @@
 //        val args = Hashtable<String,String>()
 //        args.put(Login2Presenter.ARG_NEXT, "somewhere")
 //
-//        val presenter = Login2Presenter(PlatformTestUtil.targetContext,
+//        val presenter = Login2Presenter(Any(),
 //                args, mockView!!)
 //        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI)
 //
 //
 //        verify<UstadMobileSystemImpl>(systemImplSpy, timeout(5000)).go("somewhere",
-//                PlatformTestUtil.targetContext)
+//                Any())
 //
 //        val activeAccount = UmAccountManager.getActiveAccount(
-//                PlatformTestUtil.targetContext)
+//                Any())
 //        Assert.assertNotNull(activeAccount)
 //    }
 //
@@ -102,12 +100,12 @@
 //    fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
 //        val args = Hashtable<String , String>()
 //
-//        val presenter = Login2Presenter(PlatformTestUtil.targetContext,
+//        val presenter = Login2Presenter(Any(),
 //                args, mockView!!)
 //        presenter.handleClickLogin(VALID_USER, "wrongpassword", TEST_URI)
 //
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-//                MessageID.wrong_user_pass_combo, PlatformTestUtil.targetContext)
+//                MessageID.wrong_user_pass_combo, Any())
 //
 //        verify<Login2View>(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg)
 //        verify<Login2View>(mockView, timeout(5000)).setPassword("")
@@ -123,7 +121,7 @@
 //                args, mockView!!)
 //        presenter.handleClickLogin(VALID_USER, VALID_PASS, TEST_URI)
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-//                MessageID.login_network_error, PlatformTestUtil.targetContext)
+//                MessageID.login_network_error, Any())
 //        verify<Login2View>(mockView, timeout(5000)).setErrorMessage(expectedErrorMsg)
 //    }
 //
