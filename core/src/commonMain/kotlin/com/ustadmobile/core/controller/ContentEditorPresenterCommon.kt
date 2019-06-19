@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
@@ -180,13 +181,18 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
                val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
                 if(container != null){
                     currentContainerUid = container.containerUid
-                    val created = createDocument(contentEntry.title!!,
-                            contentEntry.description!!)
-                    if(created){
-                        currentPage = epubNavDocument?.toc?.getChild(0)?.href!!
+                    mountedFileAccessibleUrl = mountContainer(currentContainerUid)
+
+                    if(mountedFileAccessibleUrl!!.isNotEmpty()){
                         loadCurrentPage()
                     }
 
+                }else{
+                    val created = createDocument(contentEntry.title!!,
+                            contentEntry.description!!)
+                    if(created){
+                        loadCurrentPage()
+                    }
                 }
 
             }
@@ -202,7 +208,8 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
 
     private fun loadCurrentPage(){
-        val url = UMFileUtil.joinPaths("", currentPage)
+        currentPage = epubNavDocument?.toc?.getChild(0)?.href!!
+        val url = UMFileUtil.joinPaths(mountedFileAccessibleUrl!!, currentPage)
         view.runOnUiThread(Runnable {
             view.loadPage(url)
         })

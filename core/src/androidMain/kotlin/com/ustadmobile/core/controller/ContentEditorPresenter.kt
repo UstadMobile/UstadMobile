@@ -20,9 +20,8 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import kotlin.text.Charsets.UTF_8
+import com.ustadmobile.core.container.ContainerManager.FileEntrySource
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
                                                        view: ContentEditorView, storage: String?,
@@ -42,7 +41,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         var filePath = "/http/$EDITOR_BASE_DIR_NAME/templates"
         filePath = joinPaths(filePath, ContentEditorView.RESOURCE_BLANK_DOCUMENT)
 
-        val asset : InputStream = impl.getAssetInputStreamAsync(context,filePath)
+        val assetInputStream : InputStream = impl.getAssetInputStreamAsync(context,filePath)
 
         val container = Container()
         container.containerContentEntryUid = contentEntryUid
@@ -63,41 +62,22 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
         containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath,
                 mutableMapOf())
-        var tmpFile: File? = null
-        var tmpOut: FileOutputStream? = null
+        val tmpFile: File = File.createTempFile("umEmptyFileTmp", ".zip")
         try {
-            ZipInputStream(asset).use { zin ->
-                var fileCount = 0
-                var entry: ZipEntry? = null
-                while ({entry = zin.nextEntry; entry}() != null) {
-                    if (entry!!.isDirectory)
-                        continue
-
-                    tmpFile = File.createTempFile("fileHelperTmp", "" + fileCount++)
-                    tmpOut = FileOutputStream(tmpFile)
-                    UMIOUtils.readFully(zin, tmpOut!!)
-                    tmpOut!!.close()
-                    tmpOut = null
-
-                    //add entries from zip
-                    addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager!!)
-
-                    if (!tmpFile!!.delete())
-                        tmpFile!!.deleteOnExit()
-                }
+            FileOutputStream(tmpFile).use{
+                outputStream -> UMIOUtils.readFully(assetInputStream, outputStream)
             }
-        } catch (e: IOException) {
+            addEntriesFromZipToContainer(tmpFile.absolutePath, containerManager!!)
+        } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
-            UMIOUtils.closeOutputStream(tmpOut)
-            if (tmpFile != null && !tmpFile!!.delete())
-                tmpFile!!.deleteOnExit()
+        }finally {
+            if (!tmpFile.delete())
+                tmpFile.deleteOnExit()
         }
-
         val updateDocument = updateDocumentMetaInfo(title, description, true)
         if(updateDocument != null){
             val pageTitle = impl.getString(MessageID.content_untitled_page, context)
-            val pageAdded = addPage(pageTitle)
+            val pageAdded = addPageToDocument(pageTitle)
             if(pageAdded){
                 val contentEntry = umAppRepo.containerDao.getMostRecentContainerForContentEntryAsync(contentEntryUid)
                 if(contentEntry != null){
@@ -112,7 +92,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         val mediaFile = File(path)
         try {
             addManifestItem(mediaFile.name, mimetype)
-            addEntriesFromZipToContainer(mediaFile.absolutePath, containerManager!!)
+            containerManager!!.addEntries(FileEntrySource(mediaFile,mediaFile.name))
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -168,7 +148,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             copied = copyFile(inputStream, tmpFile)
             copied = copied && (addNavItem(href, pageTitle) && addManifestItem(href, MIME_TYPE_PAGE)
                     && addSpineItem(href, MIME_TYPE_PAGE))
-            addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager!!)
+
+            containerManager!!.addEntries(FileEntrySource(tmpFile,href))
 
             if (!tmpFile.delete() && copied)
                 tmpFile.delete()
@@ -245,7 +226,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     }
 
     actual override suspend fun removeUnUsedResources(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO implement this
+        return true
     }
 
 
@@ -271,7 +253,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param uuid epub pub-id
      * @return True if meta data were updated successfully otherwise they were not update.
      */
-    private fun updateOpfMetadataInfo(title: String?, description: String?, uuid: String?): Boolean {
+    private suspend fun updateOpfMetadataInfo(title: String?, description: String?, uuid: String?): Boolean {
         val opfDocument = getEpubOpfDocument()!!
         opfDocument.title = title ?: opfDocument.title
         opfDocument.description = description ?: opfDocument.description
@@ -292,7 +274,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     }
 
 
-    private fun addEntryWithContent(filename: String, content: String) {
+    private suspend fun addEntryWithContent(filename: String, content: String) : Boolean {
+        var entryAdded = false
         try {
             val tmpFile = File.createTempFile(TEMP_FILE_PREFIX,
                     if (filename != CONTENT_OPF_FILE)
@@ -301,7 +284,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
                         System.currentTimeMillis().toString())
 
             writeToFile(tmpFile, content)
-            addEntriesFromZipToContainer(tmpFile!!.absolutePath, containerManager!!)
+            containerManager!!.addEntries(FileEntrySource(tmpFile,filename))
+            entryAdded = true
 
             if (!tmpFile.delete())
                 tmpFile.delete()
@@ -309,7 +293,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
+        return entryAdded
     }
 
 
@@ -330,7 +314,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param href page index to be updates
      * @return true if updated otherwise false.
      */
-    private fun addSpineItem(href: String, mimeType: String): Boolean {
+    private suspend fun addSpineItem(href: String, mimeType: String): Boolean {
         val opfDocument = getEpubOpfDocument()
         val spineItem = OpfItem()
         spineItem.href = href
@@ -362,7 +346,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param href spine href to be removed
      * @return True if a spine item was removed otherwise it wasn't
      */
-    private fun removeSpineItem(href: String): Boolean {
+    private suspend fun removeSpineItem(href: String): Boolean {
         val opfDocument = getEpubOpfDocument()
 
         if (opfDocument!!.getSpine().size == 1)
@@ -394,7 +378,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param title item title.
      * @return true if added otherwise false.
      */
-    private fun addNavItem(href: String, title: String): Boolean {
+    private suspend fun addNavItem(href: String, title: String): Boolean {
         val document = epubNavDocument!!
         val navItem = EpubNavItem(title, href, null, DEFAULT_NAVDOC_DEPTH)
         document.toc!!.addChild(navItem)
@@ -423,7 +407,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param href href of an item to be removed
      * @return True if it was successfully removed otherwise it wasn't
      */
-    private fun removeNavItem(href: String): Boolean {
+    private suspend fun removeNavItem(href: String): Boolean {
         val document = epubNavDocument!!
         val navItem = getNavItemByHref(href, document.toc!!)
         val navItems = document.toc!!.getChildren()
@@ -466,7 +450,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param mimeType manifest item mime type
      * @return true if an item was added otherwise false.
      */
-    private fun addManifestItem(href: String, mimeType: String): Boolean {
+    private suspend fun addManifestItem(href: String, mimeType: String): Boolean {
         var metaInfoUpdated = false
         val opfDocument = getEpubOpfDocument()
         val manifestItem = OpfItem()
@@ -497,7 +481,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @param itemId Id of an item to be removed
      * @return True if an item was removed otherwise it wasn't
      */
-    private fun removeManifestItem(itemId: String): Boolean {
+    private suspend fun removeManifestItem(itemId: String): Boolean {
         val opfDocument = getEpubOpfDocument()
         val opfItem = opfDocument!!.getManifestItems().remove(itemId)
         var metaInfoUpdated = false
@@ -584,6 +568,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         }
         return null
     }
+
 
     internal actual override suspend fun getDocumentPath(storage: String?): String {
         val documentPath: String?

@@ -17,6 +17,7 @@ abstract class ContainerContentActivity: UstadBaseActivity() {
     private val httpdServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             httpContainer = ((service as EmbeddedHttpdService.LocalServiceBinder).getHttpd())
+            onHttpdConnected(httpContainer!!)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {

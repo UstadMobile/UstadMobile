@@ -28,7 +28,7 @@ actual class ContainerManager actual constructor(container: Container,
 
     val mutex = Mutex()
 
-    class FileEntrySource(private val file: File, override val pathInContainer: String) : EntrySource {
+    open class FileEntrySource(private val file: File, override val pathInContainer: String) : EntrySource {
         override val length: Long
             get() = file.length()
 

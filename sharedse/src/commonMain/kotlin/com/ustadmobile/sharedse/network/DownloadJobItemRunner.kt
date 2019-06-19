@@ -9,9 +9,6 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERE
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLOUD
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-//import com.ustadmobile.port.sharedse.container.ContainerManager
-//import com.ustadmobile.port.sharedse.impl.http.IContainerEntryListService
-//import com.ustadmobile.port.sharedse.networkmanager.*
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_CREATION_RESPONSE
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.WIFI_GROUP_REQUEST
 import com.ustadmobile.core.container.ContainerManager
@@ -21,9 +18,9 @@ import com.ustadmobile.sharedse.io.FileSe
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
+import kotlinx.atomicfu.AtomicLongArray
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.produce
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
@@ -45,14 +42,18 @@ class DownloadJobItemRunner
  * @param networkManager BLE network manager for network operation controls.
  * @param appDb Application database instance
  * @param endpointUrl Endpoint to get the file from.
+ * @param mainCoroutineDispatcher A coroutine dispatcher that will, on Android, dispatch on the main
+ * thread. This is required because Room's LiveData.observeForever must be called from the main thread
  */
 (private val context: Any, private val downloadItem: DownloadJobItem,
  private val networkManager: NetworkManagerBleCommon, private val appDb: UmAppDatabase,
  private val appDbRepo: UmAppDatabase,
  private val endpointUrl: String, private var connectivityStatus: ConnectivityStatus?,
- private val retryDelay: Long = 3000) {
+ private val retryDelay: Long = 3000,
+ private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
+ private val numConcurrentEntryDownloads: Int = 4) {
 
-    private val downloadJobItemManager: DownloadJobItemManager?
+    private val downloadJobItemManager: DownloadJobItemManager = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)!!
 
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
 
@@ -73,8 +74,6 @@ class DownloadJobItemRunner
 
     private val completedEntriesBytesDownloaded = atomic(0L)
 
-    //private val statusCheckTimer = Timer()
-
     private val runnerStatus = atomic(JobStatus.NOT_QUEUED)
 
     private val meteredConnectionAllowed = atomic(-1)
@@ -92,8 +91,6 @@ class DownloadJobItemRunner
 
     private val downloadWiFiLock = Any()
 
-    //private val containerEntryListService: IContainerEntryListService
-
     private var destinationDir: String? = null
 
     private val numFailures = atomic(0)
@@ -102,22 +99,7 @@ class DownloadJobItemRunner
 
     private var downloadContext: CoroutineContext? = null
 
-    /**
-     * Timer task to keep track of the download status
-     */
-//    private inner class StatusCheckTask : TimerTask() {
-//
-//        override fun run() {
-//            val httpDownload = httpDownloadRef.get()
-//            if (runnerStatus.get() == JobStatus.RUNNING) {
-//                val bytesSoFar = completedEntriesBytesDownloaded.get() + (httpDownload?.downloadedSoFar
-//                        ?: 0)
-//                TODO("Fix this for coroutine")
-////                downloadJobItemManager!!.updateProgress(downloadItem.djiUid.toInt(),
-////                        bytesSoFar, downloadItem.downloadLength)
-//            }
-//        }
-//    }
+    private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
 
     class DownloadedEntrySource(override val pathInContainer: String,
                                 private val file: FileSe,
@@ -129,12 +111,6 @@ class DownloadJobItemRunner
         override val inputStream = FileInputStreamSe(file)
 
     }
-
-
-    init {
-        this.downloadJobItemManager = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)
-    }
-
 
     fun setWiFiConnectionTimeout(lWiFiConnectionTimeout: Int) {
         this.lWiFiConnectionTimeout = lWiFiConnectionTimeout
@@ -212,15 +188,6 @@ class DownloadJobItemRunner
     //    }
 
 
-//    /**
-//     * Stop download task Async
-//     * @param newStatus net status
-//     */
-//    suspend fun stopAsync(newStatus: Int) {
-//        runnerStatus.value = JobStatus.STOPPING
-//        Thread { stop(newStatus) }.start()
-//    }
-
     /**
      * Stop the download task from continuing (if not already stopped). Calling stop for a second
      * time will have no effect.
@@ -234,12 +201,11 @@ class DownloadJobItemRunner
                 downloadContext?.cancel()
             }
 
-            statusLiveData!!.removeObserver(statusObserver!!)
-            downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
-            downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
-            //entryStatusLiveData.removeObserver(entryStatusObserver);
-
-            //statusCheckTimer.cancel()
+            withContext(mainCoroutineDispatcher) {
+                statusLiveData!!.removeObserver(statusObserver!!)
+                downloadJobItemLiveData!!.removeObserver(downloadJobItemObserver!!)
+                downloadSetConnectivityData!!.removeObserver(downloadSetConnectivityObserver!!)
+            }
 
             updateItemStatus(newStatus)
             networkManager.releaseWifiLock(this)
@@ -268,7 +234,6 @@ class DownloadJobItemRunner
         //        entryStatusLiveData = appDb.getEntryStatusResponseDao()
         //                .getLiveEntryStatus(downloadItem.getDjiContentEntryFileUid());
 
-        //downloadSetConnectivityObserver = DoorObserver { t -> handleDownloadSetMeteredConnectionAllowedChanged(t) }
         downloadSetConnectivityObserver = object : DoorObserver<Boolean> {
             override fun onChanged(t: Boolean) {
                 handleDownloadSetMeteredConnectionAllowedChanged(t)
@@ -278,12 +243,13 @@ class DownloadJobItemRunner
         statusObserver = ObserverFnWrapper(this::handleConnectivityStatusChanged)
         downloadJobItemObserver = ObserverFnWrapper(this::handleDownloadJobItemStatusChanged)
 
+        withContext(mainCoroutineDispatcher) {
+            statusLiveData!!.observeForever(statusObserver!!)
+            downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
+            downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
+        }
         //entryStatusObserver = this::handleContentEntryFileStatus;
-        statusLiveData!!.observeForever(statusObserver!!)
 
-
-        downloadJobItemLiveData!!.observeForever(downloadJobItemObserver!!)
-        downloadSetConnectivityData!!.observeForever(downloadSetConnectivityObserver!!)
         //entryStatusLiveData.observeForever(entryStatusObserver);
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
@@ -302,9 +268,9 @@ class DownloadJobItemRunner
     /**
      * Start downloading a file
      */
-    private suspend fun startDownload() {
-        UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                " StartDownload: ContainerUid = " + downloadItem.djiContainerUid)
+    private suspend fun startDownload() = coroutineScope {
+        UMLog.l(UMLog.INFO, 699,
+                "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
         var attemptsRemaining = 3
 
         val container = appDbRepo.containerDao
@@ -317,6 +283,18 @@ class DownloadJobItemRunner
         val maxFailureFromTimeStamp = currentTimeStamp - (5 * 60 * 1000)
 
         var numEntriesToDownload = -1
+
+        val progressUpdater = async {
+            while (isActive) {
+                delay(1000)
+                var totalInProgress = 0L
+                for(i in 0..(numConcurrentEntryDownloads-1)) {
+                    totalInProgress += inProgressDownloadCounters[i].value
+                }
+                val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
+                downloadJobItemManager.updateProgress(downloadItem.djiUid, downloadSoFar, downloadItem.downloadLength)
+            }
+        }
 
         for(attemptNum in attemptsRemaining downTo 0) {
             numEntriesToDownload = -1
@@ -364,6 +342,7 @@ class DownloadJobItemRunner
                 //connectionOpener = networkManager.localConnectionOpener
             }
 
+            //TODO: use a pool or shared client for this instead
             val containerEntryListClient = HttpClient() {
                 install(JsonFeature)
             }
@@ -390,19 +369,24 @@ class DownloadJobItemRunner
                         entriesToDownload.forEach { send(it) }
                     }
 
-                    repeat(4) {
+                    repeat(numConcurrentEntryDownloads) { procNum ->
                         launch {
                             val httpClient = HttpClient()
                             for(entry in producer) {
+                                var entryBytesSoFar = 0L
                                 val destFile = FileSe(FileSe(destinationDir!!),
                                         entry.ceCefUid.toString() + ".tmp")
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
+                                UMLog.l(UMLog.VERBOSE, 100, "Downloader $procNum $downloadUrl -> $destFile")
                                 val resumableDownload = ResumableDownload2(downloadUrl,
                                         destFile.getAbsolutePath(), httpClient = httpClient)
+                                resumableDownload.onDownloadProgress = {inProgressDownloadCounters[procNum].value = it}
 //                            httpDownload!!.connectionOpener = connectionOpener
                                 if (resumableDownload.download()) {
                                     entriesDownloaded.incrementAndGet()
-                                    completedEntriesBytesDownloaded.addAndGet(destFile.length())
+                                    inProgressDownloadCounters[procNum].value = 0L
+                                    val completedDl = destFile.length()
+                                    completedEntriesBytesDownloaded.addAndGet(completedDl)
                                     containerManager.addEntries(
                                             ContainerManagerCommon.AddEntryOptions(moveExistingFiles = true,
                                                     dontUpdateTotals = true),
@@ -437,13 +421,11 @@ class DownloadJobItemRunner
         if(downloadCompleted) {
             appDb.downloadJobDao.updateBytesDownloadedSoFarAsync(downloadItem.djiDjUid)
 
-            //val totalDownloaded = completedEntriesBytesDownloaded.get() + if (httpDownload != null) httpDownload!!.downloadedSoFar else 0
-
-
-            downloadJobItemManager!!.updateProgress(downloadItem.djiUid,
-                    0, 0)
+            downloadJobItemManager.updateProgress(downloadItem.djiUid,
+                    completedEntriesBytesDownloaded.value, downloadItem.downloadLength)
         }
 
+        progressUpdater.cancel()
         stop(if (downloadCompleted) JobStatus.COMPLETE else JobStatus.FAILED)
     }
 
@@ -588,7 +570,7 @@ class DownloadJobItemRunner
      * @see JobStatus
      */
     private suspend fun updateItemStatus(itemStatus: Int) {
-        downloadJobItemManager!!.updateStatus(downloadItem.djiUid, itemStatus)
+        downloadJobItemManager.updateStatus(downloadItem.djiUid, itemStatus)
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} Setting status to:  ${JobStatus.statusToString(itemStatus)}")
     }

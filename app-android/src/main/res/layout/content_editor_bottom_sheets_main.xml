@@ -19,7 +19,7 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <android.support.design.widget.TabLayout
+            <com.google.android.material.tabs.TabLayout
                 android:id="@+id/content_types_tabs"
                 android:layout_weight="1"
                 android:layout_width="0dp"
@@ -39,7 +39,7 @@
             android:background="@color/divider_faint"
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
-        <android.support.v4.view.ViewPager
+        <androidx.viewpager.widget.ViewPager
             android:id="@+id/content_types_viewpager"
             android:layout_width="match_parent"
             android:layout_height="150dp"/>
