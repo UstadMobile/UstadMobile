@@ -214,11 +214,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
                                             private val urlList: Array<String>) : FragmentStatePagerAdapter(fm) {
 
 
-        internal var pagesMap: WeakHashMap<Int, EpubContentPageFragment>
-
-        init {
-            this.pagesMap = WeakHashMap()
-        }
+        internal var pagesMap: WeakHashMap<Int, EpubContentPageFragment> = WeakHashMap()
 
         override
                 /**

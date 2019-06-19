@@ -80,7 +80,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         this.httpd = httpd
     }
 
-    private lateinit var httpd: EmbeddedHTTPD
+    public lateinit var httpd: EmbeddedHTTPD
 
     private var wifiManager: WifiManager? = null
 
@@ -960,9 +960,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     }
 
-    fun getHTTPD() : EmbeddedHTTPD{
-        return httpd
-    }
 
     /**
      * {@inheritDoc}

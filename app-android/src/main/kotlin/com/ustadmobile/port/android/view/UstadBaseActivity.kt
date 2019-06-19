@@ -197,8 +197,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             dialogInterface.cancel()
         }
         builder.setNegativeButton(R.string.cancel) { dialogInterface, i -> dialogInterface.cancel() }
-        builder.setOnDismissListener { dialogInterface -> feedbackDialogVisible = false }
-        builder.setOnCancelListener { dialogInterface -> feedbackDialogVisible = false }
+        builder.setOnDismissListener { feedbackDialogVisible = false }
+        builder.setOnCancelListener { feedbackDialogVisible = false }
         val dialog = builder.create()
         dialog.show()
 

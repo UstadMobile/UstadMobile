@@ -155,9 +155,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
         super.onBleNetworkServiceBound(networkManagerBle)
 
         if(networkManagerBle != null){
-            val embeddedHttp =  networkManagerBle.getHTTPD()
+            val embeddedHttp =  networkManagerBle.httpd
 
-            embeddedHttp.addRoute(assetsDir+"(.)+",AndroidAssetsHandler::class.java, applicationContext)
+            embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
             presenter = ContentEditorPresenter(this, args!!, this,
                     args!![CONTENT_STORAGE_OPTION]){
 

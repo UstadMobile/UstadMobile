@@ -237,9 +237,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
                     context, object : UmCallback<Any> {
-                override fun onSuccess(result: Any?) {
 
-                }
+                override fun onSuccess(result: Any ?) {}
 
                 override fun onFailure(exception: Throwable?) {
                     if (exception != null) {
@@ -267,6 +266,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
     }
+
 
     fun handleLocalAvailabilityStatus(locallyAvailableEntries: Set<Long>) {
         val icon = if (locallyAvailableEntries.contains(

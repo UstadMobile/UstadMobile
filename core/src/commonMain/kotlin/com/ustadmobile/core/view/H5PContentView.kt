@@ -8,13 +8,15 @@ import com.ustadmobile.core.impl.UmCallback
 
 interface H5PContentView : UstadView {
 
-    fun setTitle(title: String)
+    fun setContentTitle(title: String)
 
     fun setContentHtml(baseUrl: String, html: String)
 
     companion object {
 
         const val VIEW_NAME = "H5PContentView"
+
+        val ANDROID_ASSETS_PATH = "/android-assets/"
     }
 
 

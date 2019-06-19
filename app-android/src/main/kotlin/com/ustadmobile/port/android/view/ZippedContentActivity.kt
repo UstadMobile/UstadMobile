@@ -48,11 +48,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
 
     private class MountZipAsyncTask(callback: UmCallback<*>, private val httpd: EmbeddedHTTPD) : AsyncTask<String, Void, String>() {
 
-        private val callback: UmCallback<String>
-
-        init {
-            this.callback = callback as UmCallback<String>
-        }
+        private val callback: UmCallback<String> = callback as UmCallback<String>
 
         public override fun doInBackground(vararg strings: String): String {
             val mountedUri = httpd.mountZipOnHttp(strings[0], null)
@@ -66,11 +62,7 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
     }
 
     private class MountContainerAsyncTask(callback: UmCallback<*>?, private val httpd: EmbeddedHTTPD) : AsyncTask<Long, Void, String>() {
-        private val callback: UmCallback<String>
-
-        init {
-            this.callback = callback as UmCallback<String>
-        }
+        private val callback: UmCallback<String> = callback as UmCallback<String>
 
         override fun doInBackground(vararg p0: Long?): String {
             val mountedUri = httpd.mountContainer(p0[0]!!, null)

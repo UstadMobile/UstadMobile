@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Html
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -132,7 +133,7 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
     override fun setContentEntry(contentEntry: ContentEntry) {
         entryDetailsTitle!!.text = contentEntry.title
         supportActionBar!!.title = contentEntry.title
-        entryDetailsDesc!!.text = contentEntry.description
+        entryDetailsDesc!!.text = Html.fromHtml(contentEntry.description)
         entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
 
         if(contentEntry.thumbnailUrl != null &&  contentEntry.thumbnailUrl!!.isNotEmpty()){
