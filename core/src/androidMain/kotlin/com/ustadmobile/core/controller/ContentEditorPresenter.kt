@@ -24,31 +24,29 @@ import kotlin.text.Charsets.UTF_8
 import com.ustadmobile.core.container.ContainerManager.FileEntrySource
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
-                                                       view: ContentEditorView, storage: String?,
+                                                       view: ContentEditorView, val storage: String?,
                                                        mountContainer: suspend (Long) -> String)
     :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
 
-    override var epubNavDocument: EpubNavDocument?
-        get() = getNavDocument()
-        set(value) {}
-
-
-    private var containerManager: ContainerManager ? = null
 
     private var nextNavItem: EpubNavItem? = null
+
+    private var documentPath : String? = null
+
+    private var containerManager: ContainerManager? = null
 
     actual override suspend fun createDocument(title: String, description: String): Boolean {
         var filePath = "/http/$EDITOR_BASE_DIR_NAME/templates"
         filePath = joinPaths(filePath, ContentEditorView.RESOURCE_BLANK_DOCUMENT)
 
-        val assetInputStream : InputStream = impl.getAssetInputStreamAsync(context,filePath)
+        val emptyDocInputStream : InputStream = impl.getAssetInputStreamAsync(context,filePath)
 
         val container = Container()
         container.containerContentEntryUid = contentEntryUid
         container.lastModified = System.currentTimeMillis()
         container.mimeType = MIME_TYPE_DOCUMENT
         container.containerUid = umAppRepo.containerDao.insert(container)
-        currentContainerUid = container.containerUid
+        containerUid = container.containerUid
 
         var status = umDatabase.contentEntryStatusDao.findByUidAsync(contentEntryUid)
         if (status == null) {
@@ -57,15 +55,12 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             status.locallyAvailable = true
             umDatabase.contentEntryStatusDao.insert(status)
         }
-
-
-
-        containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath,
-                mutableMapOf())
-        val tmpFile: File = File.createTempFile("umEmptyFileTmp", ".zip")
+        documentPath = getDocumentPath(storage)
+        containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath)
+        val tmpFile: File = File.createTempFile(TEMP_FILE_PREFIX, ".zip")
         try {
             FileOutputStream(tmpFile).use{
-                outputStream -> UMIOUtils.readFully(assetInputStream, outputStream)
+                outputStream -> UMIOUtils.readFully(emptyDocInputStream, outputStream)
             }
             addEntriesFromZipToContainer(tmpFile.absolutePath, containerManager!!)
         } catch (e: Exception) {
@@ -85,6 +80,15 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
                 }
             }
         }
+        return  mountedFileAccessibleUrl != null
+    }
+
+
+    actual override suspend fun openExistingDocument(container: Container): Boolean {
+        containerUid = container.containerUid
+        documentPath = getDocumentPath(storage)
+        mountedFileAccessibleUrl = mountContainer(containerUid)
+        containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath)
         return  mountedFileAccessibleUrl != null
     }
 
@@ -144,7 +148,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
             href = PAGE_PREFIX + System.currentTimeMillis() + ".html"
             inputStream = containerManager?.getInputStream(containerManager!!.getEntry(PAGE_TEMPLATE)!!)!!
-            val tmpFile = File.createTempFile("fileHelperTmp", href)
+            val tmpFile = File.createTempFile(TEMP_FILE_PREFIX, href)
             copied = copyFile(inputStream, tmpFile)
             copied = copied && (addNavItem(href, pageTitle) && addManifestItem(href, MIME_TYPE_PAGE)
                     && addSpineItem(href, MIME_TYPE_PAGE))
@@ -164,7 +168,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     }
 
     actual override suspend fun updatePageInDocument(page: EpubNavItem): Boolean {
-        val document = epubNavDocument!!
+        val document = getEpubNavDocument()!!
         val parent = document.toc
 
         val navItem = getNavItemByHref(page.href!!, document.toc!!)
@@ -193,7 +197,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             UMIOUtils.closeOutputStream(bout)
         }
 
-        return epubNavDocument!!.getNavById(page.href!!) == null && metaInfoUpdated
+        return getEpubNavDocument()!!.getNavById(page.href!!) == null && metaInfoUpdated
     }
 
     actual override suspend fun removePageFromDocument(href: String): String? {
@@ -203,7 +207,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     }
 
     actual override suspend fun changeDocumentPageOrder(pageList: MutableList<EpubNavItem>) {
-        val document = epubNavDocument
+        val document = getEpubNavDocument()
         document!!.toc?.getChildren()?.clear()
         document.toc!!.getChildren()!!.addAll(pageList)
 
@@ -379,7 +383,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @return true if added otherwise false.
      */
     private suspend fun addNavItem(href: String, title: String): Boolean {
-        val document = epubNavDocument!!
+        val document = getEpubNavDocument()!!
         val navItem = EpubNavItem(title, href, null, DEFAULT_NAVDOC_DEPTH)
         document.toc!!.addChild(navItem)
         var bout: ByteArrayOutputStream? = null
@@ -399,7 +403,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         } finally {
             UMIOUtils.closeOutputStream(bout)
         }
-        return getNavItemByHref(href, epubNavDocument?.toc!!) != null && metaInfoUpdated
+        return getNavItemByHref(href, getEpubNavDocument()?.toc!!) != null && metaInfoUpdated
     }
 
     /**
@@ -408,7 +412,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
      * @return True if it was successfully removed otherwise it wasn't
      */
     private suspend fun removeNavItem(href: String): Boolean {
-        val document = epubNavDocument!!
+        val document = getEpubNavDocument()!!
         val navItem = getNavItemByHref(href, document.toc!!)
         val navItems = document.toc!!.getChildren()
         val tobeDeletedNavIndex = navItems!!.indexOf(navItem)
@@ -440,7 +444,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             }
         }
 
-        return getNavItemByHref(href, epubNavDocument?.toc!!) == null && metaInfoUpdated
+        return getNavItemByHref(href, getEpubNavDocument()?.toc!!) == null && metaInfoUpdated
     }
 
 
@@ -553,7 +557,30 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return fileOutput!!
     }
 
-    private fun getNavDocument() : EpubNavDocument?{
+
+    actual override suspend fun getDocumentPath(storage: String?): String {
+        val documentPath: String?
+        val documentsDir = "documents/"
+        documentPath = if (storage != null && storage.isNotEmpty()) {
+            val baseContentDir = File(storage)
+            val documentsRootDir = File(baseContentDir, documentsDir)
+            if (!documentsRootDir.exists()) documentsRootDir.mkdirs()
+
+            //isTestExecution = baseContentDir.absolutePath.startsWith("/var/")
+
+            val documentDir = File(documentsRootDir, contentEntryUid.toString())
+
+            if (!documentDir.exists()) documentDir.mkdirs()
+
+            documentDir.absolutePath
+        } else {
+            val baseDir: String  = UstadMobileSystemImpl.instance.getStorageDirsAsync(context)[0]!!.dirURI!!
+            joinPaths(baseDir,documentsDir, contentEntryUid.toString())
+        }
+        return documentPath!!
+    }
+
+    actual override fun getEpubNavDocument(): EpubNavDocument? {
         try {
             val inputStream = containerManager?.getInputStream(
                     containerManager?.getEntry(getEpubOpfDocument()!!.navItem!!.href!!)!!)!!
@@ -566,27 +593,6 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        return null
-    }
-
-
-    internal actual override suspend fun getDocumentPath(storage: String?): String {
-        val documentPath: String?
-        documentPath = if (storage != null && storage.isNotEmpty()) {
-            val baseContentDir = File(storage)
-            val documentsRootDir = File(baseContentDir, "documents/")
-            if (!documentsRootDir.exists()) documentsRootDir.mkdirs()
-
-            //isTestExecution = baseContentDir.absolutePath.startsWith("/var/")
-
-            val documentDir = File(documentsRootDir, contentEntryUid.toString())
-
-            if (!documentDir.exists()) documentDir.mkdirs()
-
-            documentDir.absolutePath
-        } else {
-            UstadMobileSystemImpl.instance.getStorageDirsAsync(context)[0]!!.dirURI
-        }
-        return documentPath!!
+        return  null
     }
 }

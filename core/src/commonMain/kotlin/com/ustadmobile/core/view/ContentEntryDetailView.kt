@@ -4,7 +4,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import kotlin.js.JsName
 
-interface ContentEntryDetailView : UstadView, ViewWithErrorNotifier {
+interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier {
 
     val allKnowAvailabilityStatus: Set<Long>
 

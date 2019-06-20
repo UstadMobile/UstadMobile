@@ -107,11 +107,12 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
         mDrawerLayout!!.closeDrawers()
     }
 
-    override fun setSpineUrls(spineUrls: Array<String>?) {
+    override fun setSpineUrls(urls: Array<String>?, index : Int) {
         mPagerAdapter = ContainerViewPagerAdapter(supportFragmentManager,
-                spineUrls!!)
+                urls!!)
         mPager!!.offscreenPageLimit = 1
         mPager!!.adapter = mPagerAdapter
+        mPager!!.setCurrentItem(index, true)
     }
 
     override fun setPageTitle(pageTitle: String?) {

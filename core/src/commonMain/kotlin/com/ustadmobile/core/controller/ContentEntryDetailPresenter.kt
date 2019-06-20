@@ -12,9 +12,9 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.ContentEntryUtil
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.ContentEntryListFragmentView
-import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
@@ -46,16 +46,19 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private val monitorStatus = atomic(false)
 
+    private val args = HashMap<String, String?>()
+
     private val isListeningToDownloadStatus = atomic(false)
 
     private var statusUmLiveData: DoorLiveData<ContentEntryStatus?>? = null
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
+    private  val appdb = UmAppDatabase.getInstance(context)
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-        val appdb = UmAppDatabase.getInstance(context)
         val contentRelatedEntryDao = repoAppDatabase.contentEntryRelatedEntryJoinDao
         val contentEntryDao = repoAppDatabase.contentEntryDao
         val contentEntryStatusDao = appdb.contentEntryStatusDao
@@ -283,6 +286,29 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
+
+
+    fun handleStartEditingContent(){
+
+        GlobalScope.launch {
+            val entry = appdb.contentEntryDao.findByEntryId(entryUuid)
+
+            if(entry != null){
+                args.putAll(arguments)
+                args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
+                args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
+                args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
+                args[ContentEntryEditView.CONTENT_TYPE] = (if(entry.imported) CONTENT_IMPORT_FILE
+                else CONTENT_CREATE_CONTENT).toString()
+
+                if(entry.imported)
+                    view.startFileBrowser(args)
+                else
+                    impl.go(ContentEditorView.VIEW_NAME, args, context)
+            }
+        }
+    }
+
 
 
     override fun onDestroy() {

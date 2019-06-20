@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.ContainerManagerCommon
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.EpubContentView.Companion.ARG_INITIAL_PAGE_HREF
+import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -69,13 +70,9 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     var currentFileContent :String = ""
 
-    var documentPath : String? = null
-
-    var currentContainerUid : Long = 0
+    var containerUid : Long = 0
 
     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
-
-    abstract var epubNavDocument: EpubNavDocument?
 
     internal val umAppRepo : UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -111,6 +108,8 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * @param description document description
      */
     abstract suspend fun createDocument(title: String, description:String) : Boolean
+
+    abstract suspend fun openExistingDocument(container: Container) : Boolean
 
     /**
      * Add media content to the document
@@ -162,34 +161,28 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      */
     abstract suspend fun removeUnUsedResources(): Boolean
 
+
+    abstract fun getEpubNavDocument(): EpubNavDocument?
     /**
      * Get current document path
      */
-    internal abstract suspend fun getDocumentPath(storage: String?) : String
+    abstract suspend fun getDocumentPath(storage: String?) : String
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         contentEntryUid = arguments.getOrElse(ContentEditorView.CONTENT_ENTRY_UID, {"0"})!!.toLong()
 
         GlobalScope.launch {
-
-            //setup document path
-            documentPath = getDocumentPath(storage)
-
             val contentEntry = umAppRepo.contentEntryDao.findByEntryId(contentEntryUid)
             if(contentEntry != null){
                val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
                 if(container != null){
-                    currentContainerUid = container.containerUid
-                    mountedFileAccessibleUrl = mountContainer(currentContainerUid)
-
-                    if(mountedFileAccessibleUrl!!.isNotEmpty()){
+                    val prepared = openExistingDocument(container)
+                    if(prepared){
                         loadCurrentPage()
                     }
-
                 }else{
-                    val created = createDocument(contentEntry.title!!,
-                            contentEntry.description!!)
+                    val created = createDocument(contentEntry.title!!, contentEntry.description!!)
                     if(created){
                         loadCurrentPage()
                     }
@@ -208,7 +201,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
 
     private fun loadCurrentPage(){
-        currentPage = epubNavDocument?.toc?.getChild(0)?.href!!
+        currentPage = getEpubNavDocument()!!.toc?.getChild(0)?.href!!
         val url = UMFileUtil.joinPaths(mountedFileAccessibleUrl!!, currentPage)
         view.runOnUiThread(Runnable {
             view.loadPage(url)
@@ -231,7 +224,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
     }
 
     override fun getCurrentDocument(): EpubNavDocument {
-        return epubNavDocument!!
+        return getEpubNavDocument()!!
     }
 
     override suspend fun addPage(title: String):Boolean {
@@ -267,9 +260,10 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
         GlobalScope.launch {
             saveContentToFile(currentPage, currentFileContent)
             if(isOpenPreviewRequest){
+                isOpenPreviewRequest = false
                 val args = HashMap<String, String?>()
                 args.putAll(arguments)
-                args[EpubContentView.ARG_CONTAINER_UID] = currentContainerUid.toString()
+                args[EpubContentView.ARG_CONTAINER_UID] = containerUid.toString()
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
             }
@@ -372,7 +366,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
         const val MIME_TYPE_DOCUMENT = "application/epub+zip"
 
-        const val TEMP_FILE_PREFIX = "UmEditorFileHelper"
+        const val TEMP_FILE_PREFIX = "UmEditorTempFile"
 
         const val PAGE_PREFIX = "page_"
 

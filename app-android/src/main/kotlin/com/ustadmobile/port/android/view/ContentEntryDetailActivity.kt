@@ -10,9 +10,11 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
@@ -29,10 +31,11 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import java.util.*
 
-class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener, LocalAvailabilityMonitor, LocalAvailabilityListener {
 
+class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
+        ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
+        LocalAvailabilityMonitor, LocalAvailabilityListener {
 
     private var entryDetailPresenter: ContentEntryDetailPresenter? = null
 
@@ -105,6 +108,19 @@ class ContentEntryDetailActivity : UstadBaseActivity(), ContentEntryDetailView, 
         setUMToolbar(R.id.entry_detail_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        val editBtn = findViewById<FloatingActionButton>(R.id.edit_content)
+        findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
+            if (scrollY > oldScrollY) {
+                editBtn.hide()
+            } else {
+                editBtn.show()
+            }
+        }
+
+        editBtn.setOnClickListener {
+            entryDetailPresenter!!.handleStartEditingContent()
+        }
 
     }
 

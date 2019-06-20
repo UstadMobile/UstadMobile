@@ -3,17 +3,19 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.view.ContentEditorView
+import com.ustadmobile.lib.db.entities.Container
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
                                                        view: ContentEditorView, storage: String?,
                                                        mountContainer: suspend (Long) -> String)
     :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
 
-    override var epubNavDocument: EpubNavDocument?
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-        set(value) {}
 
     actual override suspend fun createDocument(title: String, description: String): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    actual override suspend fun openExistingDocument(container: Container): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -46,8 +48,13 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    internal actual override suspend fun getDocumentPath(storage: String?): String {
+    actual override suspend fun getDocumentPath(storage: String?): String {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    actual override fun getEpubNavDocument(): EpubNavDocument? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
 }

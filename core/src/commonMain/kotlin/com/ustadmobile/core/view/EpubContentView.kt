@@ -41,7 +41,7 @@ interface EpubContentView : UstadView {
 
     fun setContainerTitle(containerTitle: String)
 
-    fun setSpineUrls(urls: Array<String>?)
+    fun setSpineUrls(urls: Array<String>?, index :Int)
 
     fun setPageTitle(pageTitle: String?)
 
@@ -85,6 +85,7 @@ interface EpubContentView : UstadView {
         const val ARG_CONTAINER_UID = "containerUid"
 
         const val ARG_INITIAL_PAGE_HREF = "initialPageHref"
-    }
 
+
+    }
 }

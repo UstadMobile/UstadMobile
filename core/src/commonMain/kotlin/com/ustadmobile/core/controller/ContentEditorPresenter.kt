@@ -1,13 +1,17 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.view.ContentEditorView
+import com.ustadmobile.lib.db.entities.Container
 
 expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?>,
                                     view: ContentEditorView, storage: String?, mountContainer: suspend (Long) -> String)
     : ContentEditorPresenterCommon{
 
     override suspend fun createDocument(title: String, description: String): Boolean
+
+    override suspend fun openExistingDocument(container: Container): Boolean
 
     override suspend fun addMediaContent(path: String, mimetype: String)
 
@@ -26,5 +30,7 @@ expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?
     override suspend fun removeUnUsedResources(): Boolean
 
     override suspend fun getDocumentPath(storage: String?): String
+
+    override fun getEpubNavDocument(): EpubNavDocument?
 
 }
