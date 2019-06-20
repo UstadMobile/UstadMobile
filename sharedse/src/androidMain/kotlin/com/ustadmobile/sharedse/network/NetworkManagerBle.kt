@@ -77,7 +77,7 @@ actual class NetworkManagerBle
 actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main), EmbeddedHTTPD.ResponseListener {
 
-    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD): this(context, singleThreadDispatcher) {
+    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD) : this(context, singleThreadDispatcher) {
         this.httpd = httpd
     }
 
@@ -129,7 +129,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     private val wifiDirectRequestLastCompletedTime = AtomicLong()
 
     private val numActiveRequests = AtomicInteger()
-
 
 
     init {
@@ -515,7 +514,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
 
-
     override fun onCreate() {
         if (wifiManager == null) {
             wifiManager = mContext.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -547,7 +545,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
             mContext.registerReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver, intentFilter)
 
-            if(Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
+            if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
                 bluetoothManager = mContext.getSystemService(Context.BLUETOOTH_SERVICE)
                 bluetoothAdapter = (bluetoothManager as BluetoothManager).adapter
             }
@@ -637,7 +635,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     actual override fun canDeviceAdvertise(): Boolean {
         return Build.VERSION.SDK_INT > BLE_ADVERTISE_MIN_SDK_VERSION &&
                 (isAdvertiser && bluetoothAdapter != null
-                && bluetoothAdapter!!.isMultipleAdvertisementSupported)
+                        && bluetoothAdapter!!.isMultipleAdvertisementSupported)
     }
 
     /**
@@ -870,7 +868,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>,
-                                     peerToCheck: NetworkNode?): BleEntryStatusTask? {
+                                            peerToCheck: NetworkNode?): BleEntryStatusTask? {
         if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val entryStatusTask = BleEntryStatusTaskAndroid(
                     context as Context, this, entryUidsToCheck, peerToCheck!!)
@@ -884,8 +882,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override fun makeEntryStatusTask(context: Any, message: BleMessage,
-                                     peerToSendMessageTo: NetworkNode,
-                                     responseListener: BleMessageResponseListener): BleEntryStatusTask? {
+                                            peerToSendMessageTo: NetworkNode,
+                                            responseListener: BleMessageResponseListener): BleEntryStatusTask? {
         if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val task = BleEntryStatusTaskAndroid(context as Context, this, message, peerToSendMessageTo, responseListener)
             task.setBluetoothManager(bluetoothManager as BluetoothManager)
@@ -985,7 +983,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
     actual override val isVersionLollipopOrAbove: Boolean
-        get() =  Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
     actual override val isVersionKitKatOrBelow: Boolean
         get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
