@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
@@ -8,6 +7,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.EpubContentView.Companion.ARG_INITIAL_PAGE_HREF
@@ -59,7 +59,8 @@ interface ContentEditorPageActionDelegate {
  */
 
 abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String?>, view: ContentEditorView,
-                                            private val storage: String?,internal val mountContainer: suspend (Long) -> String)
+                                            private val storage: String?,internal val mountContainer: suspend (Long) -> String,
+                                            internal val unmountContainer: suspend (String) -> Unit)
     : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageActionDelegate{
 
     internal var contentEntryUid: Long = 0L
@@ -67,8 +68,6 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
     internal var mountedFileAccessibleUrl: String ? = null
 
     var currentPage: String = ""
-
-    var currentFileContent :String = ""
 
     var containerUid : Long = 0
 
@@ -109,6 +108,10 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      */
     abstract suspend fun createDocument(title: String, description:String) : Boolean
 
+    /**
+     * Prepare existing document so that can be loaded to the editor
+     * @param container given most recent container
+     */
     abstract suspend fun openExistingDocument(container: Container) : Boolean
 
     /**
@@ -157,12 +160,17 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
     abstract suspend fun changeDocumentPageOrder(pageList: MutableList<EpubNavItem>)
 
     /**
-     * Remove all unsed resources from the document
+     * Remove all unused resources from the document
      */
     abstract suspend fun removeUnUsedResources(): Boolean
 
-
+    /**
+     * Get EPUB navigation document
+     */
     abstract fun getEpubNavDocument(): EpubNavDocument?
+
+    abstract suspend fun remountContainer(openPicker: Boolean) : Boolean
+
     /**
      * Get current document path
      */
@@ -187,7 +195,6 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
                         loadCurrentPage()
                     }
                 }
-
             }
         }
     }
@@ -214,6 +221,18 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
             if(result == null){
                 view.runOnUiThread(Runnable {
                     showErrorMessage(impl.getString(MessageID.error_message_update_document, context)) })
+            }
+        }
+    }
+
+    fun handlePageManager(close: Boolean){
+        if(close){
+            if(isEditorInitialized){
+                view.cleanUnUsedResources()
+            }
+        }else{
+            if(isPageManagerOpen){
+                impl.go(ContentEditorPageListView.VIEW_NAME,arguments, context)
             }
         }
     }
@@ -254,18 +273,26 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * Save content from the editor
      */
     fun handleSaveContent(content: String){
-        if(content.isNotEmpty()){
-            this.currentFileContent = content
-        }
         GlobalScope.launch {
-            saveContentToFile(currentPage, currentFileContent)
-            if(isOpenPreviewRequest){
-                isOpenPreviewRequest = false
+            saveContentToFile(currentPage, content)
+        }
+    }
+
+
+    fun handlePreviewAndFilePicker(openPreview: Boolean, openPicker: Boolean){
+        GlobalScope.launch {
+            val remounted = remountContainer(openPicker)
+            if(remounted && openPreview){
                 val args = HashMap<String, String?>()
                 args.putAll(arguments)
                 args[EpubContentView.ARG_CONTAINER_UID] = containerUid.toString()
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
+            }else{
+                if(!remounted){
+                    view.runOnUiThread(Runnable {
+                        showErrorMessage(impl.getString(MessageID.error_message_load_page, context))})
+                }
             }
         }
     }

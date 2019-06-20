@@ -22,11 +22,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.text.Charsets.UTF_8
 import com.ustadmobile.core.container.ContainerManager.FileEntrySource
+import java.net.MalformedURLException
+import java.net.URL
+
+
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
                                                        view: ContentEditorView, val storage: String?,
-                                                       mountContainer: suspend (Long) -> String)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
+                                                       mountContainer: suspend (Long) -> String, unmountContainer: suspend (String) -> Unit)
+    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer, unmountContainer){
 
 
     private var nextNavItem: EpubNavItem? = null
@@ -35,6 +39,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
     private var containerManager: ContainerManager? = null
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun createDocument(title: String, description: String): Boolean {
         var filePath = "/http/$EDITOR_BASE_DIR_NAME/templates"
         filePath = joinPaths(filePath, ContentEditorView.RESOURCE_BLANK_DOCUMENT)
@@ -83,7 +90,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return  mountedFileAccessibleUrl != null
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun openExistingDocument(container: Container): Boolean {
         containerUid = container.containerUid
         documentPath = getDocumentPath(storage)
@@ -92,6 +101,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return  mountedFileAccessibleUrl != null
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun addMediaContent(path: String, mimetype: String) {
         val mediaFile = File(path)
         try {
@@ -103,6 +115,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun saveContentToFile(filename: String, content: String) {
         var inputStream: InputStream? = null
         try {
@@ -123,6 +138,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String? {
         try {
             if (updateOpfMetadataInfo(documentTitle, description,
@@ -139,6 +157,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return null
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun addPageToDocument(pageTitle: String): Boolean {
         var copied = false
         val href: String?
@@ -167,6 +188,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return copied
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun updatePageInDocument(page: EpubNavItem): Boolean {
         val document = getEpubNavDocument()!!
         val parent = document.toc
@@ -200,12 +224,18 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return getEpubNavDocument()!!.getNavById(page.href!!) == null && metaInfoUpdated
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun removePageFromDocument(href: String): String? {
         return if (removeNavItem(href) && removeSpineItem(href) && removeManifestItem(href)) {
             href
         } else null
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun changeDocumentPageOrder(pageList: MutableList<EpubNavItem>) {
         val document = getEpubNavDocument()
         document!!.toc?.getChildren()?.clear()
@@ -229,6 +259,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun removeUnUsedResources(): Boolean {
         //TODO implement this
         return true
@@ -538,7 +571,6 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             }
         }
         return dest.exists()
-
     }
 
 
@@ -557,7 +589,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return fileOutput!!
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     actual override suspend fun getDocumentPath(storage: String?): String {
         val documentPath: String?
         val documentsDir = "documents/"
@@ -580,6 +614,30 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return documentPath!!
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    actual override suspend fun remountContainer(openPicker: Boolean): Boolean {
+        var remounted = false
+        if(containerManager != null && !openPicker){
+            containerManager = containerManager!!.copyToNewContainer()
+            try{
+                val mountedUrl = URL(mountedFileAccessibleUrl)
+                unmountContainer(mountedUrl.path)
+            }catch(e: MalformedURLException) {
+                /* should not happen - the mounted url is formed using the port provided */
+            }
+            val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)!!
+            containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath)
+            mountedFileAccessibleUrl = mountContainer(container.containerUid)
+            remounted = mountedFileAccessibleUrl != null
+        }
+        return remounted
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     actual override fun getEpubNavDocument(): EpubNavDocument? {
         try {
             val inputStream = containerManager?.getInputStream(

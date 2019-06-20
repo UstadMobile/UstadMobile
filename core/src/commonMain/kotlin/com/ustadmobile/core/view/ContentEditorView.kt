@@ -135,6 +135,8 @@ interface ContentEditorView : UstadView {
 
     fun saveContent()
 
+    fun cleanUnUsedResources()
+
     companion object {
 
         const val VIEW_NAME = "ContentEditor"

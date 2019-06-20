@@ -56,7 +56,6 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
-import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
 import com.ustadmobile.core.view.ViewWithErrorNotifier
@@ -85,6 +84,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
     private var presenter: ContentEditorPresenter? = null
 
     private var viewSwitcher: UmEditorAnimatedViewSwitcher? = null
+
+    private val impl = UstadMobileSystemImpl.instance
 
     private val assetsDir = String.format("assets-%s",
             SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date()))
@@ -159,13 +160,15 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
             embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
             presenter = ContentEditorPresenter(this, args!!, this,
-                    args!![CONTENT_STORAGE_OPTION]){
+                    args!![CONTENT_STORAGE_OPTION], {
 
                 val mountedPath: String = embeddedHttp!!.mountContainer(it, null)!!
                 val counterMountedUrl: String = joinPaths(embeddedHttp!!.localHttpUrl,
                         mountedPath)
                 counterMountedUrl
-            }
+            },{
+                embeddedHttp.unmountContainer(it)
+            })
             presenter!!.onCreate(bundleToMap(mSavedInstance))
         }
     }
@@ -681,8 +684,6 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
             SCREEN_ORIENTATION_UNSPECIFIED
         }
 
-        impl = UstadMobileSystemImpl.instance
-
         umDb = UmAppDatabase.getInstance(applicationContext)
 
         umRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
@@ -921,18 +922,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
 
     override fun onAllAnimatedViewsClosed(finish: Boolean) {
-        if (presenter != null) {
-            if (finish) {
-                if (presenter!!.isEditorInitialized) {
-                    cleanUnUsedResources()
-                }
-            } else {
-                if (presenter!!.isPageManagerOpen) {
-                    impl!!.go(ContentEditorPageListView.VIEW_NAME,
-                            bundleToMap(intent.extras), applicationContext)
-                }
-            }
-        }
+        presenter!!.handlePageManager(finish)
     }
 
     override fun onFocusRequested() {
@@ -1046,10 +1036,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
     }
 
     override fun onStop() {
-        if (presenter != null) {
-            if (!presenter!!.isOpenPreviewRequest) {
-                presenter!!.handleSaveContent("")
-            }
+        if(!presenter!!.isOpenPreviewRequest){
+            presenter!!.handlePreviewAndFilePicker(false, isOpeningFilePickerOrCamera)
         }
         super.onStop()
     }
@@ -1099,13 +1087,13 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
     /**
      * Clean unused files
      */
-    private fun cleanUnUsedResources() {
+    override fun cleanUnUsedResources() {
         GlobalScope.launch {
             val result =  presenter!!.handleRemoveUnUsedResources()
             if(result){
                 runOnUiThread {
                     if (presenter!!.isOpenPreviewRequest) {
-                        presenter!!.handleSaveContent("")
+                        presenter!!.handlePreviewAndFilePicker(true, isOpeningFilePickerOrCamera)
                     } else {
                         handleFinishActivity()
                     }
@@ -1163,11 +1151,11 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
      */
     private fun showMediaTypeDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle(impl!!.getString(MessageID.content_media_title, this))
-        builder.setMessage(impl!!.getString(MessageID.content_media_message, this))
-        builder.setPositiveButton(impl!!.getString(MessageID.content_media_photo, this)
+        builder.setTitle(impl.getString(MessageID.content_media_title, this))
+        builder.setMessage(impl.getString(MessageID.content_media_message, this))
+        builder.setPositiveButton(impl.getString(MessageID.content_media_photo, this)
         ) { _, _ -> startCameraIntent(true) }
-        builder.setNegativeButton(impl!!.getString(MessageID.content_media_video, this)
+        builder.setNegativeButton(impl.getString(MessageID.content_media_video, this)
         ) { _, _ -> startCameraIntent(false) }
         builder.setCancelable(false)
         builder.show()
@@ -1353,10 +1341,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
         const val EDITOR_METHOD_PREFIX = "UmEditorCore."
 
-        private var impl: UstadMobileSystemImpl? = null
-
         private var umRepo : UmAppDatabase ? = null
 
-        private var umDb: UmAppDatabase ? = null;
+        private var umDb: UmAppDatabase ? = null
     }
 }

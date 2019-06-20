@@ -27,6 +27,11 @@ import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.ImageView
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 
 
 /**
@@ -41,7 +46,9 @@ import kotlinx.coroutines.Runnable
  * fragment (e.g. upon screen orientation changes).
  */
 class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
-        ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor,
+        ContentEntryListRecyclerViewAdapter.EmptyStateListener {
+
     override val viewContext: Any
         get() = context!!
 
@@ -60,6 +67,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     private var savedInstanceState: Bundle? = null
 
     private var rootContainer: View? = null
+
+    private var emptyViewHolder: RelativeLayout? = null
 
     fun filterByLang(langUid: Long) {
         entryListPresenter!!.handleClickFilterByLanguage(langUid)
@@ -109,6 +118,26 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         val context = rootContainer!!.context
         recyclerView = rootContainer!!.findViewById(R.id.content_entry_list)
         recyclerView!!.layoutManager = LinearLayoutManager(context)
+
+        emptyViewHolder = rootContainer!!.findViewById(R.id.emptyView)
+
+        val emptyViewImage :ImageView = rootContainer!!.findViewById(R.id.emptyViewImage)
+        val emptyViewText: TextView = rootContainer!!.findViewById(R.id.emptyViewText)
+
+        val isDownloadedSection = bundleToMap(arguments).containsKey(ARG_DOWNLOADED_CONTENT)
+
+        val labelText = UstadMobileSystemImpl.instance.getString(
+                if (isDownloadedSection) MessageID.empty_state_downloaded
+                else MessageID.empty_state_libraries,
+                context)
+
+        val resource = if (isDownloadedSection)
+            R.drawable.ic_file_download_black_24dp
+        else
+            R.drawable.ic_folder_black_24dp
+        emptyViewImage.setImageResource(resource)
+        emptyViewText.text = labelText
+
         val dividerItemDecoration = DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL)
         recyclerView!!.addItemDecoration(dividerItemDecoration)
@@ -158,6 +187,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
                 managerAndroidBle)
         recyclerAdapter!!.addListeners()
+        recyclerAdapter!!.setEmptyStateListener(this)
         val data = LivePagedListBuilder(entryProvider, 20).build()
         data.observe(this, Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
 
@@ -210,6 +240,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onStop() {
         stopMonitoringAvailability(this)
         super.onStop()
+    }
+
+    override fun onEntriesLoaded() {
+        emptyViewHolder!!.visibility = View.GONE
     }
 
     override fun onDestroy() {

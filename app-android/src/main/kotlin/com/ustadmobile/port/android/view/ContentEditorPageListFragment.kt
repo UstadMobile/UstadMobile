@@ -38,11 +38,17 @@ import java.util.*
 
 
 /**
- * A simple [Fragment] subclass.
+ * Fragment which handles page removal,  creation and updating
  */
-class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialogFragment(), UmOnStartDragListener, ContentEditorPageListView {
+class ContentEditorPageListFragment : UstadDialogFragment(),
+        UmOnStartDragListener, ContentEditorPageListView {
+
+    override val viewContext: Any
+        get() = activity!!
 
     private var mItemTouchHelper: ItemTouchHelper? = null
+
+    private val impl = UstadMobileSystemImpl.instance
 
     private var adapter: PageListAdapter? = null
 
@@ -54,7 +60,9 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
 
     private var titleView: TextView? = null
 
-    private inner class PageListAdapter internal constructor(private val mDragStartListener: UmOnStartDragListener) : RecyclerView.Adapter<PageListAdapter.PageViewHolder>(), UmPageItemTouchAdapter {
+    private inner class PageListAdapter
+    internal constructor(private val mDragStartListener: UmOnStartDragListener)
+        : RecyclerView.Adapter<PageListAdapter.PageViewHolder>(), UmPageItemTouchAdapter {
 
         override fun getItemCount(): Int {
             return pageList.size
@@ -113,8 +121,9 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
                     else
                         R.color.icons))
 
-            holder.pageOptionHandle.setOnClickListener { showPopUpMenu(holder.itemView.context, holder.pageOptionHandle, pageItem) }
-            holder.itemView.setOnClickListener { v -> presenter!!.handlePageSelected(pageItem.href!!) }
+            holder.pageOptionHandle.setOnClickListener { showPopUpMenu(holder.itemView.context,
+                    holder.pageOptionHandle, pageItem) }
+            holder.itemView.setOnClickListener { presenter!!.handlePageSelected(pageItem.href!!) }
         }
 
         private fun getColor(content: Context, resource: Int): Int {
@@ -212,7 +221,8 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                btnAddPage.visibility = if (newState != RecyclerView.SCROLL_STATE_IDLE && !isScrollDirectionUp)
+                btnAddPage.visibility =
+                        if (newState != RecyclerView.SCROLL_STATE_IDLE && !isScrollDirectionUp)
                     View.VISIBLE
                 else
                     View.GONE
@@ -220,7 +230,7 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
             }
         })
 
-        btnAddPage.setOnClickListener { v ->
+        btnAddPage.setOnClickListener {
             presenter!!.handlePageOptionsClicked(
                     null)
         }
@@ -242,18 +252,17 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
         }
     }
 
+    @SuppressLint("InflateParams")
     override fun showAddOrUpdatePageDialog(@Nullable page: EpubNavItem?, newPage: Boolean) {
         val isNewPage = page == null
 
-        val dialogTitle = if (newPage)
-            impl.getString(MessageID.content_update_document_title,
+        val dialogTitle = when {
+            newPage -> impl.getString(MessageID.content_update_document_title,
                     activity!!)
-        else
-            if (isNewPage)
-                impl.getString(MessageID.content_add_page,
-                        activity!!)
-            else
-                impl.getString(MessageID.content_update_page_title, activity!!)
+            isNewPage -> impl.getString(MessageID.content_add_page,
+                    activity!!)
+            else -> impl.getString(MessageID.content_update_page_title, activity!!)
+        }
 
         val positiveBtnLabel = impl.getString(if (isNewPage)
             MessageID.content_page_dialog_add
@@ -269,7 +278,8 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
         val builder = AlertDialog.Builder(activity)
 
         val inflater = this.layoutInflater
-        val dialogView = inflater.inflate(R.layout.umcontent_dialog_option_actionview, null, false)
+        val dialogView = inflater.inflate(R.layout.umcontent_dialog_option_actionview,
+                null, false)
 
         val titleWrapper :TextInputLayout = dialogView.findViewById(R.id.titleWrapper)
         titleWrapper.hint = impl.getString(MessageID.content_editor_page_view_hint,
@@ -280,10 +290,10 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
         builder.setView(dialogView)
         builder.setTitle(dialogTitle)
 
-        builder.setPositiveButton(positiveBtnLabel) { dialog, which ->
+        builder.setPositiveButton(positiveBtnLabel) { dialog, _ ->
 
             if (isNewPage) {
-                presenter!!.handleAddPage(titleView.getText().toString())
+                presenter!!.handleAddPage(titleView.text.toString())
             } else {
                 page!!.title = titleView.text.toString()
                 presenter!!.handlePageUpdate(page)
@@ -300,11 +310,9 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
         mItemTouchHelper!!.startDrag(viewHolder)
     }
 
-
     override fun dismissDialog() {
         dismiss()
     }
-
 
     override fun setDocumentTitle(title: String) {
         titleView!!.text = title
@@ -313,10 +321,4 @@ class ContentEditorPageListFragment(override val viewContext: Any) : UstadDialog
     override fun updatePageList(pageList: MutableList<EpubNavItem>, selectedPage: String?) {
         adapter!!.setPageList(pageList, selectedPage)
     }
-
-    companion object {
-
-        private val impl = UstadMobileSystemImpl.instance
-    }
-
 }
