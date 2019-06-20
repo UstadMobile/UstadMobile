@@ -94,10 +94,10 @@ abstract class NetworkManagerBleCommon(
 //    }
 
 //    private val nodeLastSeenTrackerTask = Runnable {
-//        if (knownPeerNodes.size > 0) {
+//        if (knownPeerNodes.isNotEmpty()) {
 //            val nodeMap = HashMap(knownPeerNodes)
 //            GlobalScope.launch {
-//                umAppDatabase!!.networkNodeDao.updateNodeLastSeen(nodeMap)
+//                umAppDatabase.networkNodeDao.updateNodeLastSeen(nodeMap)
 //                UMLog.l(UMLog.DEBUG, 694, "Updating "
 //                        + knownPeerNodes.size + " nodes from the Db")
 //            }
@@ -164,7 +164,7 @@ abstract class NetworkManagerBleCommon(
         umAppDatabaseRepo = umAppDatabase
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
         downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
-                {item1, item2 -> item1.djiUid == item2.djiUid}, mainDispatcher = mainDispatcher) {
+                { item1, item2 -> item1.djiUid == item2.djiUid }, mainDispatcher = mainDispatcher) {
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
                     umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher).download()
@@ -211,8 +211,8 @@ abstract class NetworkManagerBleCommon(
 //
 //                        if (!isStopMonitoring) {
 //                            if (entryUidsToMonitor.size > 0) {
-//                                val entryStatusTask = makeEntryStatusTask(mContext, entryUidsToMonitor, node)
-//                                entryStatusTasks.add(entryStatusTask)
+//                                val entryStatusTask = makeEntryStatusTask(context, entryUidsToMonitor, node)
+//                                entryStatusTasks.add(entryStatusTask!!)
 //                                entryStatusTaskExecutorService.execute(entryStatusTask)
 //                            }
 //                        }
@@ -309,7 +309,7 @@ abstract class NetworkManagerBleCommon(
      */
     override fun stopMonitoringAvailability(monitor: Any) {
         availabilityMonitoringRequests.remove(monitor)
-        isStopMonitoring = availabilityMonitoringRequests.size == 0
+        isStopMonitoring = availabilityMonitoringRequests.isEmpty()
     }
 
     /**
@@ -483,35 +483,35 @@ abstract class NetworkManagerBleCommon(
      */
     fun handleNodeConnectionHistory(bluetoothAddress: String, success: Boolean) {
 
-//        var record: AtomicInteger? = knownBadNodeTrackList[bluetoothAddress]
-//
-//        if (record == null || success) {
-//            record = AtomicInteger(0)
-//            knownBadNodeTrackList[bluetoothAddress] = record
-//            UMLog.l(UMLog.DEBUG, 694,
-//                    "Connection succeeded bad node counter was set to " + record.get()
-//                            + " for " + bluetoothAddress)
-//        }
-//
-//        if (!success) {
-//            record.set(record.incrementAndGet())
-//            knownBadNodeTrackList[bluetoothAddress] = record
-//            UMLog.l(UMLog.DEBUG, 694,
-//                    "Connection failed and bad node counter set to " + record.get()
-//                            + " for " + bluetoothAddress)
-//        }
-//
-//        if (knownBadNodeTrackList[bluetoothAddress]!!.get() > 5) {
-//            UMLog.l(UMLog.DEBUG, 694,
-//                    "Bad node counter exceeded threshold (5), removing node with address "
-//                            + bluetoothAddress + " from the list")
-//            knownBadNodeTrackList.remove(bluetoothAddress)
-//            knownPeerNodes.remove(bluetoothAddress)
-//            umAppDatabase!!.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
-//
-//            UMLog.l(UMLog.DEBUG, 694, "Node with address "
-//                    + bluetoothAddress + " removed from the list")
-//        }
+        var record: AtomicInt? = knownBadNodeTrackList[bluetoothAddress]
+
+        if (record == null || success) {
+            record = atomic(0)
+            knownBadNodeTrackList[bluetoothAddress] = record
+            UMLog.l(UMLog.DEBUG, 694,
+                    "Connection succeeded bad node counter was set to " + record.value
+                            + " for " + bluetoothAddress)
+        }
+
+        if (!success) {
+            record.value = (record.incrementAndGet())
+            knownBadNodeTrackList[bluetoothAddress] = record
+            UMLog.l(UMLog.DEBUG, 694,
+                    "Connection failed and bad node counter set to " + record.value
+                            + " for " + bluetoothAddress)
+        }
+
+        if (knownBadNodeTrackList[bluetoothAddress]!!.value > 5) {
+            UMLog.l(UMLog.DEBUG, 694,
+                    "Bad node counter exceeded threshold (5), removing node with address "
+                            + bluetoothAddress + " from the list")
+            knownBadNodeTrackList.remove(bluetoothAddress)
+            knownPeerNodes.remove(bluetoothAddress)
+            umAppDatabase.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
+
+            UMLog.l(UMLog.DEBUG, 694, "Node with address "
+                    + bluetoothAddress + " removed from the list")
+        }
     }
 
     /**

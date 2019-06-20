@@ -4,6 +4,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
 //import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
 //import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
@@ -112,41 +114,39 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
      */
     override open fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
 
-//        val responseRequestType = response?.requestType ?: -1
-//
-//        when (responseRequestType) {
-//
-//            ENTRY_STATUS_RESPONSE -> {
-//                val umAppDatabase = UmAppDatabase.getInstance(context)
-//                val entryStatusResponseDao = umAppDatabase.entryStatusResponseDao
-//                val networkNodeDao = umAppDatabase.networkNodeDao
-//
-//                val networkNodeId = networkNodeDao.findNodeByBluetoothAddress(sourceDeviceAddress)!!.nodeId
-//                val entryFileStatusResponseList = ArrayList<EntryStatusResponse>()
-//                val statusCheckResponse = bleMessageBytesToLong(response!!.payload!!)
-//
-//                val time = System.currentTimeMillis()
-//                if (entryUidsToCheck == null)
-//                    return
-//
-//                for (entryCounter in entryUidsToCheck!!.indices) {
-//                    val containerUid = entryUidsToCheck!![entryCounter]
-//
-//                    entryFileStatusResponseList.add(EntryStatusResponse(containerUid, time,
-//                            networkNodeId, statusCheckResponse[entryCounter] != 0L))
-//
-//                }
-//                val rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList)
-//                if (rowCount.size == entryFileStatusResponseList.size) {
-//                    UMLog.l(UMLog.DEBUG, 698, rowCount.size.toString()
-//                            + " response(s) logged from " + sourceDeviceAddress)
-//                }
-//
-//                managerBle.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList)
-//            }
-//        }
-//
-//        responseListener?.onResponseReceived(sourceDeviceAddress, response, error)
+        when (response?.requestType ?: -1) {
+
+            ENTRY_STATUS_RESPONSE -> {
+                val umAppDatabase = UmAppDatabase.getInstance(context)
+                val entryStatusResponseDao = umAppDatabase.entryStatusResponseDao
+                val networkNodeDao = umAppDatabase.networkNodeDao
+
+                val networkNodeId = networkNodeDao.findNodeByBluetoothAddress(sourceDeviceAddress)!!.nodeId
+                val entryFileStatusResponseList = ArrayList<EntryStatusResponse>()
+                val statusCheckResponse = bleMessageBytesToLong(response!!.payload!!)
+
+                val time = getSystemTimeInMillis()
+                if (entryUidsToCheck == null)
+                    return
+
+                for (entryCounter in entryUidsToCheck!!.indices) {
+                    val containerUid = entryUidsToCheck!![entryCounter]
+
+                    entryFileStatusResponseList.add(EntryStatusResponse(containerUid, time,
+                            networkNodeId, statusCheckResponse[entryCounter] != 0L))
+
+                }
+                val rowCount = entryStatusResponseDao.insert(entryFileStatusResponseList)
+                if (rowCount.size == entryFileStatusResponseList.size) {
+                    UMLog.l(UMLog.DEBUG, 698, rowCount.size.toString()
+                            + " response(s) logged from " + sourceDeviceAddress)
+                }
+
+                managerBle.handleLocalAvailabilityResponsesReceived(entryFileStatusResponseList)
+            }
+        }
+
+        responseListener?.onResponseReceived(sourceDeviceAddress, response, error)
 
     }
 }

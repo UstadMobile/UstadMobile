@@ -4,7 +4,7 @@ import com.ustadmobile.lib.db.entities.NetworkNode
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-expect class NetworkManagerBle(context: Any = Any(),
+expect open class NetworkManagerBle(context: Any = Any(),
                                singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default) : NetworkManagerBleCommon {
 
     override val isWiFiEnabled: Boolean

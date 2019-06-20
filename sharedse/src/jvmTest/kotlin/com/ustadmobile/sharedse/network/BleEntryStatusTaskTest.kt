@@ -33,7 +33,7 @@ class BleEntryStatusTaskTest {
 
     private var networkNodeDao: NetworkNodeDao? = null
 
-    private var networkNode: NetworkNode? = null
+    private lateinit var networkNode: NetworkNode
 
     private var context = Any()
 
@@ -48,8 +48,8 @@ class BleEntryStatusTaskTest {
         managerBle!!.onCreate()
 
         networkNode = NetworkNode()
-        networkNode!!.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
-        networkNode!!.nodeId = 1
+        networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
+        networkNode.nodeId = 1
         networkNodeDao = umAppDatabase.networkNodeDao
         networkNodeDao!!.insert(networkNode!!)
 
@@ -66,11 +66,11 @@ class BleEntryStatusTaskTest {
 
         val responseMessage = BleMessage(ENTRY_STATUS_RESPONSE, 42.toByte(),
                 bleMessageLongToBytes(localAvailabilityCheckResponse))
-        mockedEntryStatusTask!!.onResponseReceived(networkNode!!.bluetoothMacAddress!!, responseMessage, null)
+        mockedEntryStatusTask!!.onResponseReceived(networkNode.bluetoothMacAddress!!, responseMessage, null)
 
         assertNotNull("entry check status response will be saved to the database",
                 entryStatusResponseDao!!.findByContainerUidAndNetworkNode(containerUids[0],
-                        networkNode!!.nodeId))
+                        networkNode.nodeId))
     }
 
 
@@ -98,6 +98,6 @@ class BleEntryStatusTaskTest {
                 networkNodeDao!!.findNodeByBluetoothAddress(networkNode!!.bluetoothMacAddress!!))
 
         assertEquals("Counter was reset to 0", 0,
-                managerBle!!.getBadNodeTracker(networkNode!!.bluetoothMacAddress!!)!!)
+                managerBle!!.getBadNodeTracker(networkNode.bluetoothMacAddress!!)!!.value)
     }
 }
