@@ -1,10 +1,11 @@
 package com.ustadmobile.sharedse.impl.http
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -67,25 +68,36 @@ class TestEmbeddedHTTPD {
         val responseListener = mock(EmbeddedHTTPD.ResponseListener::class.java)
         httpd!!.addResponseListener(responseListener)
 
-        val response = UstadMobileSystemImpl.instance.makeRequestSync(
-                UmHttpRequest(context!!, httpd!!.localHttpUrl + "dir/filename.txt"))
+        val client = HttpClient()
 
-        val sessionArgumentCaptor = ArgumentCaptor.forClass(
-                NanoHTTPD.IHTTPSession::class.java)
-        val responseArgumentCaptor = ArgumentCaptor.forClass(
-                NanoHTTPD.Response::class.java)
+        client.launch{
+            client.get<ByteArray>(httpd!!.localHttpUrl + "dir/filename.txt")
 
-        verify(responseListener).responseStarted(sessionArgumentCaptor.capture(),
-                responseArgumentCaptor.capture())
-        Assert.assertEquals("Received expected request on response started",
-                "/dir/filename.txt", sessionArgumentCaptor.value.uri)
+            //val response = UstadMobileSystemImpl.instance.makeRequestSync(
+           //         UmHttpRequest(context!!, httpd!!.localHttpUrl + "dir/filename.txt"))
+            val sessionArgumentCaptor = ArgumentCaptor.forClass(
+                    NanoHTTPD.IHTTPSession::class.java)
+            val responseArgumentCaptor = ArgumentCaptor.forClass(
+                    NanoHTTPD.Response::class.java)
 
-        verify(responseListener, timeout(10000)).responseFinished(sessionArgumentCaptor.capture(),
-                responseArgumentCaptor.capture())
-        Assert.assertEquals("Received expected request on response finished",
-                "/dir/filename.txt", sessionArgumentCaptor.value.uri)
+            verify(responseListener).responseStarted(sessionArgumentCaptor.capture(),
+                    responseArgumentCaptor.capture())
+            Assert.assertEquals("Received expected request on response started",
+                    "/dir/filename.txt", sessionArgumentCaptor.value.uri)
 
-        httpd!!.removeResponseListener(responseListener)
+            verify(responseListener, timeout(10000)).responseFinished(sessionArgumentCaptor.capture(),
+                    responseArgumentCaptor.capture())
+            Assert.assertEquals("Received expected request on response finished",
+                    "/dir/filename.txt", sessionArgumentCaptor.value.uri)
+
+            httpd!!.removeResponseListener(responseListener)
+
+        }
+
+
+
+
+
     }
 
 

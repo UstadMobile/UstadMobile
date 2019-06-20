@@ -68,7 +68,7 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * @author kileha3
  */
-actual class NetworkManagerBle
+actual open class NetworkManagerBle
 /**
  * Constructor to be used when creating new instance
  *
@@ -824,7 +824,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 currentWifiSsid)
         if (endpoint == null) {
             UMLog.l(UMLog.ERROR, 699,
-                    "ERROR: No endpoint url for ssid" + currentWifiSsid)
+                    "ERROR: No endpoint url for ssid$currentWifiSsid")
             return
         }
 
