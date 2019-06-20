@@ -60,7 +60,7 @@ tasks {
     generateXliffTask.dependsOn(xlateTask)
   }
 
- register("webdriverUpdate", YarnTask::class) {
+  register("webdriverUpdate", YarnTask::class) {
     args = listOf("run", "update-driver")
   }
 
