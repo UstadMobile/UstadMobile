@@ -19,6 +19,13 @@ abstract class ContainerManagerCommon(protected val container: Container,
     val allEntries: List<ContainerEntryWithContainerEntryFile>
         get() = pathToEntryMap.values.toList()
 
+
+    init {
+        ///load from database
+        val entryList = db.containerEntryDao.findByContainer(container.containerUid)
+        pathToEntryMap.putAll(entryList.map { it.cePath!! to it }.toMap())
+    }
+
     interface EntrySource {
 
         /**
@@ -49,6 +56,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
         val md5Sum: ByteArray
 
     }
+
 
     /**
      * Make a copy of this container as a new container - e.g. when making a new version of this
