@@ -2,15 +2,19 @@ package com.ustadmobile.sharedse.network
 
 import android.bluetooth.*
 import android.content.Context
+import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.lib.db.entities.NetworkNode
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
 import java.util.*
 
 /**
@@ -19,6 +23,7 @@ import java.util.*
  *
  * @author kileha3
  */
+@RunWith(RobolectricTestRunner::class)
 class BleEntryStatusTaskAndroidTest {
 
     private var entries: List<Long>? = null
@@ -34,15 +39,13 @@ class BleEntryStatusTaskAndroidTest {
         val mockedBluetoothAdapter = mock(BluetoothAdapter::class.java)
         val mockedDevice = mock(BluetoothDevice::class.java)
         val mockedGatt = mock(BluetoothGatt::class.java)
-        val context = mock(Context::class.java)
+        val context = InstrumentationRegistry.getInstrumentation().context
 
-
-        val managerBle: NetworkManagerBle = com.nhaarman.mockitokotlin2.spy {
-
-        }
+        val manager = NetworkManagerBle(context)
+        Mockito.spy(manager)
         val networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:11:22:33:FF:EE"
-        statusTask = BleEntryStatusTaskAndroid(context, managerBle, entries!!, networkNode)
+        statusTask = BleEntryStatusTaskAndroid(context, manager, entries!!, networkNode)
         statusTask!!.setBluetoothManager(mockedBluetoothManager)
 
         `when`(mockedBluetoothManager.adapter)
