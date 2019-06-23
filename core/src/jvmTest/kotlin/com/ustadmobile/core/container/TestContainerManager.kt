@@ -3,6 +3,8 @@ package com.ustadmobile.core.container
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntry
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.runBlocking
@@ -18,7 +20,7 @@ import java.io.IOException
 
 class TestContainerManager  {
 
-    val testFileNames = listOf("testfile1.png", "testfile2.png")
+    private val testFileNames = listOf("testfile1.png", "testfile2.png")
 
     lateinit var db: UmAppDatabase
 
@@ -26,7 +28,7 @@ class TestContainerManager  {
 
     val context = Any()
 
-    val tmpFilesToDelete = mutableListOf<File>()
+    private val tmpFilesToDelete = mutableListOf<File>()
 
     lateinit var containerTmpDir: File
 
@@ -89,17 +91,17 @@ class TestContainerManager  {
             val container1 = Container()
             container1.containerUid = repo.containerDao.insert(container1)
             val manager1 = ContainerManager(container1, db, repo,
-                    containerTmpDir.getAbsolutePath())
+                    containerTmpDir.absolutePath)
             manager1.addEntries(ContainerManager.FileEntrySource(testFiles[0], "testfile1.png"))
 
             val container2 = Container()
             container2.containerUid = repo.containerDao.insert(container2)
             val manager2 = ContainerManager(container2, db, repo,
-                    containerTmpDir.getAbsolutePath())
+                    containerTmpDir.absolutePath)
 
             val filesToAdd2 = HashMap<File, String>()
-            filesToAdd2[testFiles.get(0)] = "testfileothername.png"
-            filesToAdd2[testFiles.get(1)] = "anotherimage.png"
+            filesToAdd2[testFiles[0]] = "testfileothername.png"
+            filesToAdd2[testFiles[1]] = "anotherimage.png"
             manager2.addEntries(
                     ContainerManager.FileEntrySource(testFiles[0], "testfileothername.png"),
                     ContainerManager.FileEntrySource(testFiles[1], "anotherimage.png"))
@@ -121,7 +123,7 @@ class TestContainerManager  {
         runBlocking {
             val container = Container()
             container.containerUid = repo.containerDao.insert(container)
-            val manager = ContainerManager(container, db, repo, containerTmpDir.getAbsolutePath())
+            val manager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
 
             manager.addEntries(ContainerManager.FileEntrySource(testFiles[0], "testfileothername.png"),
                     ContainerManager.FileEntrySource(testFiles[1], "anotherimage.png"))
@@ -145,7 +147,7 @@ class TestContainerManager  {
         runBlocking {
             val container = Container()
             container.containerUid = repo.containerDao.insert(container)
-            val manager = ContainerManager(container, db, repo, containerTmpDir.getAbsolutePath())
+            val manager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
 
             val version1Content = "Version-1"
             val version2Content = "Version-2"
@@ -179,8 +181,48 @@ class TestContainerManager  {
                     1, db.containerEntryDao.findByContainer(container.containerUid).size)
         }
 
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun givenExistingContainerWithEntries_whenNewContainerManagerIsCreated_thenEntryShouldBeFound(){
+        runBlocking {
+            val pathList = mutableListOf("path1.txt", "path2.txt","path3.txt","path4.txt")
+            val entry = ContentEntry()
+            entry.title = "Sample Entry Title"
+            entry.leaf = true
+            entry.contentEntryUid = db.contentEntryDao.insert(entry)
+            val container = Container()
+            container.containerContentEntryUid = entry.contentEntryUid
+            container.containerUid = repo.containerDao.insert(container)
+
+            val containerManager = ContainerManager(container,db,repo,containerTmpDir.absolutePath)
+
+            val fileSources = mutableListOf<ContainerManager.FileEntrySource>()
+
+            pathList.forEach {
+                fileSources.add(ContainerManager.FileEntrySource(
+                        File.createTempFile("tmp", it), it))
+            }
+            containerManager.addEntries(*fileSources.toTypedArray())
+
+            Assert.assertTrue("Entries were added to the container", containerManager.allEntries.isNotEmpty())
+
+            val foundContainer = repo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(entry.contentEntryUid)
+            Assert.assertNotNull("Container Dao doesn't return empty container",foundContainer)
+
+            val manager = ContainerManager(foundContainer!!,db,repo,containerTmpDir.absolutePath)
+
+            Assert.assertEquals("New container manager should have same number of entries as it was created",
+                    containerManager.allEntries.size, manager.allEntries.size)
+
+            val foundEntry = manager.getEntry(pathList.first())
+
+            Assert.assertNotNull("Found entry from constructed container should not be null",
+                    foundEntry)
 
 
+        }
     }
 
 
