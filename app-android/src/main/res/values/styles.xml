@@ -4,21 +4,39 @@
 
     <style name="Theme.UstadTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
+    <style name="TabLayoutStyleHome" parent="Widget.Design.TabLayout">
         <item name="tabIndicatorColor">@color/icons</item>
         <item name="tabIndicatorHeight">@dimen/dimen_2dp</item>
         <item name="tabPaddingStart">@dimen/dimen_8dp</item>
         <item name="tabPaddingEnd">@dimen/dimen_8dp</item>
         <item name="tabBackground">?attr/selectableItemBackground</item>
-        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+        <item name="tabTextAppearance">@style/HomeTabTextAppearance</item>
         <item name="tabSelectedTextColor">@android:color/white</item>
     </style>
 
-    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+    <style name="HomeTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/primary_light</item>
         <item name="textAllCaps">true</item>
     </style>
+
+
+    <style name="TabLayoutStyleFormat" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/icons</item>
+        <item name="tabIndicatorHeight">@dimen/dimen_2dp</item>
+        <item name="tabPaddingStart">@dimen/dimen_8dp</item>
+        <item name="tabPaddingEnd">@dimen/dimen_8dp</item>
+        <item name="tabBackground">?attr/selectableItemBackground</item>
+        <item name="tabTextAppearance">@style/FormatTabTextAppearance</item>
+        <item name="tabSelectedTextColor">@color/primary</item>
+    </style>
+
+    <style name="FormatTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
 
     <style name="FullScreenDialogStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowNoTitle">true</item>

@@ -58,7 +58,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_STORAGE_OPTION
-import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.lib.util.Base64Coder
 import com.ustadmobile.port.android.umeditor.*
 import com.ustadmobile.port.android.umeditor.UmEditorAnimatedViewSwitcher.Companion.ANIMATED_CONTENT_OPTION_PANEL
@@ -71,6 +70,8 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.IOException
 import java.io.UnsupportedEncodingException
@@ -79,7 +80,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
-open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), ContentEditorView, ViewWithErrorNotifier, UmWebContentEditorChromeClient.JsLoadingCallback, UmEditorActionView.OnQuickActionMenuItemClicked, UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
+open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
+        ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback, UmEditorActionView.OnQuickActionMenuItemClicked, UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
 
     private var presenter: ContentEditorPresenter? = null
 
@@ -120,6 +122,10 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
     private var mSavedInstance: Bundle? = null
 
+    private var mViewPager: ViewPager ? = null
+
+    private var mTabLayout: TabLayout ? = null
+
     @VisibleForTesting
     fun insertTestContent(content: String) {
         presenter!!.handleEditorActions(ContentEditorView.ACTION_INSERT_CONTENT, content)
@@ -148,9 +154,6 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
         @VisibleForTesting
         get() = presenter!!.isEditorInitialized
 
-    override fun showError(message: String) {
-        showErrorNotification(message, null!!, 0)
-    }
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
         super.onBleNetworkServiceBound(networkManagerBle)
@@ -170,6 +173,10 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
                 embeddedHttp.unmountContainer(it)
             })
             presenter!!.onCreate(bundleToMap(mSavedInstance))
+
+            val adapter = ContentFormattingPagerAdapter(supportFragmentManager)
+            mViewPager!!.adapter = adapter
+            mTabLayout!!.setupWithViewPager(mViewPager!!)
         }
     }
 
@@ -188,18 +195,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
     /**
      * Class which represent a format control state
      */
-    inner class UmFormatState {
-        //Format Command
-        var command: String? = null
 
-        //Format command state (Activated / Deactivate)
-        var isActive: Boolean = false
-            private set
-
-        fun setStatus(status: Boolean) {
-            this.isActive = status
-        }
-    }
+    @Serializable
+    data class UmFormatState(val command: String?, val status: Boolean = false)
 
 
     /**
@@ -366,7 +364,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
             for (state in formatStates) {
                 val index = getFormattingIndex(state.command)
-                formatList[index].isActive = state.isActive
+                if(index != -1){
+                    formatList[index].active = state.status
+                }
             }
 
             for (dispatcher in dispatcherList) {
@@ -385,7 +385,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
             for (format in directionality) {
                 if (activeFormat != null) {
                     directionality[directionality.indexOf(format)]
-                            .isActive = format.formatId == activeFormat.formatId
+                            .active = format.formatId == activeFormat.formatId
 
                 }
             }
@@ -402,7 +402,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
             for (format in fontList) {
                 if (activeFormat != null) {
                     fontList[fontList.indexOf(format)]
-                            .isActive = format.formatId == activeFormat.formatId
+                            .active = format.formatId == activeFormat.formatId
                 }
             }
             return fontList
@@ -419,7 +419,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
                 if (format.formatCommand!!.contains(mTag) && command!!.contains(mTag)
                         && format.formatCommand != command) {
                     val index = paragraphFormatList.indexOf(format)
-                    format.isActive = false
+                    format.active = false
                     formatList[index] = format
                 }
             }
@@ -436,7 +436,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
                 if (format.formatCommand!!.contains(mTag) && command!!.contains(mTag)
                         && format.formatCommand != command) {
                     val index = listOrdersTypes.indexOf(format)
-                    format.isActive = false
+                    format.active = false
                     formatList[index] = format
                 }
             }
@@ -521,12 +521,13 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
             return contentFormattingTypeLabel.size
         }
 
-        internal var contentFormattingTypeLabel = arrayOf<String>(getResources().getString(R.string.content_format_text), getResources().getString(R.string.content_format_paragraph))
+        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.content_format_text),
+                resources.getString(R.string.content_format_paragraph))
 
 
         override fun getItem(position: Int): Fragment {
             return FormattingFragment.newInstance(position,
-                    umFormatHelper, presenter)
+                    umFormatHelper!!, presenter!!)
         }
 
         @Nullable
@@ -570,7 +571,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
                 val mIcon :ImageView = holder.itemView.findViewById(R.id.format_icon)
                 val mLayout:RelativeLayout = holder.itemView.findViewById(R.id.format_holder)
                 mIcon.setImageResource(format.formatIcon)
-                changeState(mIcon, mLayout, format.isActive)
+                changeState(mIcon, mLayout, format.active)
                 if (!isTobeHighlighted(format.formatCommand!!)) {
                     changeState(mIcon, mLayout, false)
                 }
@@ -657,8 +658,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
             /**
              * Create new instance of a content formatting fragment
              */
-            fun newInstance(formatType: Int, formatHelper: UmFormatHelper?,
-                            presenter: ContentEditorPresenter?): FormattingFragment {
+            fun newInstance(formatType: Int, formatHelper: UmFormatHelper,
+                            presenter: ContentEditorPresenter): FormattingFragment {
                 val fragment = FormattingFragment()
                 mPresenter = presenter
                 umFormatHelper = formatHelper
@@ -692,6 +693,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
 
         this.mSavedInstance = savedInstanceState
 
+        this.coordinatorLayout = findViewById(R.id.coordinationLayout)
+
         val formattingBottomSheetBehavior = BottomSheetBehavior
                 .from(findViewById<NestedScrollView>(R.id.bottom_sheet_container))
         mediaSourceBottomSheetBehavior = BottomSheetBehavior
@@ -722,8 +725,8 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
                         formattingBottomSheetBehavior, mediaSourceBottomSheetBehavior!!)
         viewSwitcher!!.closeActivity(false)
 
-        val mViewPager = findViewById<ViewPager>(R.id.content_types_viewpager)
-        val mTabLayout = findViewById<TabLayout>(R.id.content_types_tabs)
+        mViewPager = findViewById<ViewPager>(R.id.content_types_viewpager)
+        mTabLayout = findViewById<TabLayout>(R.id.content_types_tabs)
 
 
         umFormatHelper = UmFormatHelper()
@@ -790,10 +793,6 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
                     this@ContentEditorActivity)
         }
 
-
-        val adapter = ContentFormattingPagerAdapter(supportFragmentManager)
-        mViewPager.adapter = adapter
-        mTabLayout.setupWithViewPager(mViewPager)
 
         val webSettings = mWebView!!.settings
         webSettings.javaScriptEnabled = true
@@ -901,6 +900,12 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
         }
     }
 
+
+    override fun showErrorMessage(message: String) {
+        showBaseMessage(message)
+    }
+
+
     override fun onCallbackReceived(value: String) {
         if (value.contains("action")) {
             val callback = Gson().fromJson(value, UmWebJsResponse::class.java)
@@ -945,6 +950,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
      * Process values returned from JS calls
      * @param callback object returned
      */
+    @UseExperimental(ImplicitReflectionSerializer::class)
     private fun processJsCallLogValues(callback: UmWebJsResponse) {
 
         val content = Base64Coder.decodeBase64(callback.content!!)
@@ -1204,13 +1210,18 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(), Conten
             rawFile
 
         GlobalScope.launch {
-            presenter!!.handleAddMediaContent(mFile!!.absolutePath, mimeType)
-            runOnUiThread {
+            val inserted = presenter!!.handleAddMediaContent(mFile!!.absolutePath, mimeType)
+            if(inserted){
                 isOpeningFilePickerOrCamera = false
-                progressDialog!!.visibility = View.GONE
-                executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "insertMediaContent",
-                        this@ContentEditorActivity, mFile.name, mimeType)
+                runOnUiThread {
+                    progressDialog!!.visibility = View.GONE
+                    executeJsFunction(mWebView!!, EDITOR_METHOD_PREFIX + "insertMediaContent",
+                            this@ContentEditorActivity, mFile.name, mimeType)
+                }
+            }else{
+                showErrorMessage(getString(R.string.failed_message))
             }
+
         }
     }
 

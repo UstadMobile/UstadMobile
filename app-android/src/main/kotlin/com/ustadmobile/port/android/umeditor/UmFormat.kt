@@ -41,7 +41,7 @@ class UmFormat : Serializable {
      * Change formatting state
      * @param active True if it is activated otherwise false.
      */
-    var isActive: Boolean = false
+    var active: Boolean = false
 
     /**
      * Get type of the formatting (Text / Paragraph)
@@ -67,7 +67,7 @@ class UmFormat : Serializable {
     constructor(formatIcon: Int, formatCommand: String, active: Boolean, formatType: Int) {
         this.formatIcon = formatIcon
         this.formatCommand = formatCommand
-        this.isActive = active
+        this.active = active
         this.formatType = formatType
     }
 
@@ -83,7 +83,7 @@ class UmFormat : Serializable {
                 formatType: Int, formatId: Int) {
         this.formatIcon = formatIcon
         this.formatCommand = formatCommand
-        this.isActive = active
+        this.active = active
         this.formatType = formatType
         this.formatId = formatId
     }
@@ -92,7 +92,7 @@ class UmFormat : Serializable {
                 formatType: Int, formatId: Int, formatTitle: Int) {
         this.formatIcon = formatIcon
         this.formatCommand = formatCommand
-        this.isActive = active
+        this.active = active
         this.formatType = formatType
         this.formatId = formatId
         this.formatTitle = formatTitle

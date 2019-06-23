@@ -21,7 +21,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    actual override suspend fun addMediaContent(path: String, mimetype: String) {
+    actual override suspend fun addMediaContent(path: String, mimetype: String):Boolean {
     }
 
     actual override suspend fun saveContentToFile(filename: String, content: String) {

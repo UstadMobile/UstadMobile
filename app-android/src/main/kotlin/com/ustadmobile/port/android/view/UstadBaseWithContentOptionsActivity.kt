@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
+import android.os.PersistableBundle
 import android.provider.OpenableColumns
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
@@ -22,18 +23,18 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.security.AccessController.getContext
 import java.util.concurrent.TimeUnit
 
 
-open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(), ContentEntryEditFragment.EntryCreationActionListener, ContentWithOptionsView {
-
+open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
+        ContentEntryEditFragment.EntryCreationActionListener, ContentWithOptionsView {
 
     internal var coordinatorLayout: CoordinatorLayout? = null
 
     private var entryFragment: ContentEntryEditFragment? = null
 
     private var impl: UstadMobileSystemImpl? = null
+
 
     @SuppressLint("StaticFieldLeak") // this is a short lived task, so any leak would not be very short lived.
     inner class HandleFileSelectionAsyncTask(private val onDone: UmResultCallback<String>?) : AsyncTask<Uri, Void, String>() {

@@ -188,7 +188,7 @@ class UmEditorPopUpView
             holder.menuIcon.visibility = if (visible) View.VISIBLE else View.GONE
             holder.menuIcon.setImageResource(format.formatIcon)
             holder.meuTitle.setText(format.formatTitle)
-            changeState(holder.menuIcon, holder.menuHolder, holder.meuTitle, format.isActive)
+            changeState(holder.menuIcon, holder.menuHolder, holder.meuTitle, format.active)
 
             holder.itemView.setOnClickListener {
                 listener!!.onMenuClicked(format)

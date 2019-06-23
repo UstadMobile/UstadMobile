@@ -37,7 +37,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
         LocalAvailabilityMonitor, LocalAvailabilityListener {
 
-    private var entryDetailPresenter: ContentEntryDetailPresenter? = null
+    private var presenter: ContentEntryDetailPresenter? = null
 
     private var managerAndroidBle: NetworkManagerBle? = null
 
@@ -77,11 +77,11 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         }
 
         managerAndroidBle = networkManagerBle as NetworkManagerBle?
-        entryDetailPresenter = ContentEntryDetailPresenter(this,
+        presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
                 this, networkManagerBle)
-        entryDetailPresenter!!.onCreate(bundleToMap(Bundle()))
-        entryDetailPresenter!!.onStart()
+        presenter!!.onCreate(bundleToMap(Bundle()))
+        presenter!!.onStart()
         managerAndroidBle!!.addLocalAvailabilityListener(this)
 
     }
@@ -101,6 +101,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         downloadSize = findViewById(R.id.entry_detail_content_size)
         translationAvailableLabel = findViewById(R.id.entry_detail_available_label)
         flexBox = findViewById(R.id.entry_detail_flex)
+        coordinatorLayout = findViewById(R.id.coordinationLayout)
 
         fileStatusIcon[LOCALLY_AVAILABLE_ICON] = R.drawable.ic_nearby_black_24px
         fileStatusIcon[LOCALLY_NOT_AVAILABLE_ICON] = R.drawable.ic_cloud_download_black_24dp
@@ -119,7 +120,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         }
 
         editBtn.setOnClickListener {
-            entryDetailPresenter!!.handleStartEditingContent()
+            presenter!!.handleStartEditingContent()
         }
 
     }
@@ -138,8 +139,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private fun clickUpNavigation() {
         runOnUiThread {
-            if (entryDetailPresenter != null) {
-                entryDetailPresenter!!.handleUpNavigation()
+            if (presenter != null) {
+                presenter!!.handleUpNavigation()
             }
         }
 
@@ -236,8 +237,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun setDownloadButtonClickableListener(isDownloadComplete: Boolean) {
         downloadButton!!.setOnClickListener { _ ->
-            entryDetailPresenter!!.handleDownloadButtonClick(isDownloadComplete,
-                    entryDetailPresenter!!.entryUuid)
+            presenter!!.handleDownloadButtonClick(isDownloadComplete,
+                    presenter!!.entryUuid)
         }
     }
 
@@ -251,7 +252,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
-        entryDetailPresenter!!.handleClickTranslatedEntry(contentEntryUid)
+        presenter!!.handleClickTranslatedEntry(contentEntryUid)
     }
 
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
@@ -263,13 +264,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun onDestroy() {
-        entryDetailPresenter!!.onDestroy()
+        presenter!!.onDestroy()
         networkManagerBle?.removeLocalAvailabilityListener(this)
         super.onDestroy()
     }
 
     override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
-        entryDetailPresenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
+        presenter!!.handleLocalAvailabilityStatus(locallyAvailableEntries)
     }
 
     override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>, entryUuid: Long) {

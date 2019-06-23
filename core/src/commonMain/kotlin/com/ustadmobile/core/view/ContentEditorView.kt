@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEditorView : UstadView {
+interface ContentEditorView : ViewWithErrorNotifier {
 
 
     /**
@@ -131,7 +131,7 @@ interface ContentEditorView : UstadView {
      */
     fun focusNextLink()
 
-    fun showError(message: String)
+    fun showErrorMessage(message: String)
 
     fun saveContent()
 

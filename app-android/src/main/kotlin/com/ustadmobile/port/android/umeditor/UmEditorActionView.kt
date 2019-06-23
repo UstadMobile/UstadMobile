@@ -108,7 +108,7 @@ class UmEditorActionView : Toolbar, UmFormatStateChangeListener {
             setImageSize(formatIcon)
             val formatHolder = rootView.findViewById<FrameLayout>(R.id.icon_holder)
             formatIcon.setImageResource(format.formatIcon)
-            changeState(formatIcon, formatHolder, format.isActive)
+            changeState(formatIcon, formatHolder, format.active)
             formatHolder.setOnClickListener {
                 if (!isQuickAction) {
                     onQuickActionMenuItemClicked!!.onQuickMenuViewClicked(format.formatId)
@@ -173,7 +173,7 @@ class UmEditorActionView : Toolbar, UmFormatStateChangeListener {
                 val formatIcon: ImageView = rootView.findViewById(R.id.format_icon)
                 setImageSize(formatIcon)
                 val formatHolder = rootView.findViewById<FrameLayout>(R.id.icon_holder)
-                changeState(formatIcon, formatHolder, umFormat.isActive && ContentEditorActivity.UmFormatHelper
+                changeState(formatIcon, formatHolder, umFormat.active && ContentEditorActivity.UmFormatHelper
                         .isTobeHighlighted(umFormat.formatCommand.toString()))
             }
         }

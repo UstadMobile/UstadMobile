@@ -54,6 +54,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
+    private var entryLiveData: DoorLiveData<ContentEntry?>? = null
+
     private  val appdb = UmAppDatabase.getInstance(context)
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -65,19 +67,18 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         containerDao = repoAppDatabase.containerDao
         networkNodeDao = appdb.networkNodeDao
 
+
+
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments.getValue(ARG_REFERRER) ?: ""
+
+        entryLiveData  = contentEntryDao.findLiveContentEntry(entryUuid)
+        entryLiveData!!.observe(this, this::onEntryChanged)
 
         GlobalScope.launch {
             val result = contentEntryDao.getContentByUuidAsync(entryUuid)
             if (result != null) {
-                val licenseType = getLicenseType(result)
-                view.runOnUiThread(Runnable {
-                    view.setContentEntryLicense(licenseType)
-                    with(result) {
-                        view.setContentEntry(this)
-                    }
-                })
+
             }
         }
 
@@ -104,6 +105,18 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
+    }
+
+    private fun onEntryChanged(entry: ContentEntry?){
+        if(entry != null){
+            val licenseType = getLicenseType(entry)
+            view.runOnUiThread(Runnable {
+                view.setContentEntryLicense(licenseType)
+                with(entry) {
+                    view.setContentEntry(this)
+                }
+            })
+        }
     }
 
     private fun getLicenseType(result: ContentEntry): String {

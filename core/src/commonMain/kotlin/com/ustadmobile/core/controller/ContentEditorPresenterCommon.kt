@@ -119,7 +119,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * @param media path
      * @param mimetype media mimetype
      */
-    abstract suspend fun addMediaContent(path: String, mimetype: String)
+    abstract suspend fun addMediaContent(path: String, mimetype: String):Boolean
 
     /**
      * Save new content to the file currently being edited
@@ -184,16 +184,18 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
             val contentEntry = umAppRepo.contentEntryDao.findByEntryId(contentEntryUid)
             if(contentEntry != null){
                val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry.contentEntryUid)
-                if(container != null){
-                    val prepared = openExistingDocument(container)
-                    if(prepared){
-                        loadCurrentPage()
-                    }
+
+                val loadPage = if(container != null){
+                    openExistingDocument(container)
                 }else{
-                    val created = createDocument(contentEntry.title!!, contentEntry.description!!)
-                    if(created){
-                        loadCurrentPage()
-                    }
+                    createDocument(contentEntry.title!!, contentEntry.description!!)
+                }
+
+                if(loadPage){
+                    currentPage = getEpubNavDocument()!!.toc?.getChild(0)?.href!!
+                    loadCurrentPage()
+                }else{
+                    showErrorMessage(impl.getString(MessageID.error_message_load_page, context))
                 }
             }
         }
@@ -202,13 +204,12 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     private fun showErrorMessage(message: String){
         view.runOnUiThread(Runnable {
-            view.showError(message)
+            view.showErrorMessage(message)
         })
     }
 
 
     private fun loadCurrentPage(){
-        currentPage = getEpubNavDocument()!!.toc?.getChild(0)?.href!!
         val url = UMFileUtil.joinPaths(mountedFileAccessibleUrl!!, currentPage)
         view.runOnUiThread(Runnable {
             view.loadPage(url)
@@ -289,7 +290,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
             }else{
-                if(!remounted){
+                if(!remounted && !openPicker){
                     view.runOnUiThread(Runnable {
                         showErrorMessage(impl.getString(MessageID.error_message_load_page, context))})
                 }
@@ -301,7 +302,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
     /**
      * Add media content to the document
      */
-    suspend fun handleAddMediaContent(path: String, mimeType: String) {
+    suspend fun handleAddMediaContent(path: String, mimeType: String) : Boolean {
         return addMediaContent(path, mimeType)
     }
 

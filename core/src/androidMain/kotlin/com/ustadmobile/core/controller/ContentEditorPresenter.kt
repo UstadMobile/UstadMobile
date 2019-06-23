@@ -22,8 +22,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.text.Charsets.UTF_8
 import com.ustadmobile.core.container.ContainerManager.FileEntrySource
+import com.ustadmobile.core.container.ContainerManagerCommon
 import java.net.MalformedURLException
 import java.net.URL
+import com.ustadmobile.core.container.ContainerManagerCommon.AddEntryOptions
 
 
 
@@ -104,15 +106,18 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     /**
      * {@inheritDoc}
      */
-    actual override suspend fun addMediaContent(path: String, mimetype: String) {
+    actual override suspend fun addMediaContent(path: String, mimetype: String):Boolean {
         val mediaFile = File(path)
         try {
             addManifestItem(mediaFile.name, mimetype)
-            containerManager!!.addEntries(FileEntrySource(mediaFile,mediaFile.name))
+            containerManager!!.addEntries(
+                    AddEntryOptions(moveExistingFiles = true, dontUpdateTotals = true),
+                    FileEntrySource(mediaFile,mediaFile.name))
+            return true
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        return
+        return false
     }
 
     /**
