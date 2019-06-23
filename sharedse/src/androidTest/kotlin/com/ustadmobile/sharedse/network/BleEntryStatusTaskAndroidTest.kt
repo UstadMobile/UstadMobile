@@ -3,8 +3,8 @@ package com.ustadmobile.sharedse.network
 import android.bluetooth.*
 import android.content.Context
 import com.ustadmobile.lib.db.entities.NetworkNode
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNotNull
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
