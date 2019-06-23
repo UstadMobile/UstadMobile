@@ -7,9 +7,8 @@ import com.ustadmobile.lib.db.entities.Container
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
                                                        view: ContentEditorView, storage: String?,
-                                                       mountContainer: suspend (Long) -> String,
-                                                       unmountContainer: suspend (String) -> Unit)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer, unmountContainer){
+                                                       mountContainer: suspend (Long) -> String)
+    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
 
 
 
@@ -22,6 +21,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     }
 
     actual override suspend fun addMediaContent(path: String, mimetype: String):Boolean {
+        TODO("not implemented")
     }
 
     actual override suspend fun saveContentToFile(filename: String, content: String) {
@@ -57,9 +57,4 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     actual override fun getEpubNavDocument(): EpubNavDocument? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
-
-    actual override suspend fun remountContainer(openPicker: Boolean): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 }

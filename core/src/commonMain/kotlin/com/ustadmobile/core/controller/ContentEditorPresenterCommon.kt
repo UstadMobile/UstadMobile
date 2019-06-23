@@ -59,8 +59,7 @@ interface ContentEditorPageActionDelegate {
  */
 
 abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String?>, view: ContentEditorView,
-                                            private val storage: String?,internal val mountContainer: suspend (Long) -> String,
-                                            internal val unmountContainer: suspend (String) -> Unit)
+                                            private val storage: String?,internal val mountContainer: suspend (Long) -> String)
     : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageActionDelegate{
 
     internal var contentEntryUid: Long = 0L
@@ -168,8 +167,6 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * Get EPUB navigation document
      */
     abstract fun getEpubNavDocument(): EpubNavDocument?
-
-    abstract suspend fun remountContainer(openPicker: Boolean) : Boolean
 
     /**
      * Get current document path
@@ -282,15 +279,14 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     fun handlePreviewAndFilePicker(openPreview: Boolean, openPicker: Boolean){
         GlobalScope.launch {
-            val remounted = remountContainer(openPicker)
-            if(remounted && openPreview){
+            if(openPreview){
                 val args = HashMap<String, String?>()
                 args.putAll(arguments)
                 args[EpubContentView.ARG_CONTAINER_UID] = containerUid.toString()
                 args[ARG_INITIAL_PAGE_HREF] = currentPage
                 UstadMobileSystemImpl.instance.go(EpubContentView.VIEW_NAME, args,context)
             }else{
-                if(!remounted && !openPicker){
+                if(!openPicker){
                     view.runOnUiThread(Runnable {
                         showErrorMessage(impl.getString(MessageID.error_message_load_page, context))})
                 }

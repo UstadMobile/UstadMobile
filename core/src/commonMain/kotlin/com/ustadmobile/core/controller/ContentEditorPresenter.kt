@@ -6,8 +6,8 @@ import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
 
 expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?>,
-                                    view: ContentEditorView, storage: String?, mountContainer: suspend (Long) -> String,
-                                    unmountContainer: suspend (String) -> Unit)
+                                    view: ContentEditorView, storage: String?,
+                                    mountContainer: suspend (Long) -> String)
     : ContentEditorPresenterCommon{
 
     override suspend fun createDocument(title: String, description: String): Boolean
@@ -33,7 +33,5 @@ expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?
     override suspend fun getDocumentPath(storage: String?): String
 
     override fun getEpubNavDocument(): EpubNavDocument?
-
-    override suspend fun remountContainer(openPicker: Boolean): Boolean
 
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManager.FileEntrySource
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
@@ -21,18 +22,12 @@ import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.text.Charsets.UTF_8
-import com.ustadmobile.core.container.ContainerManager.FileEntrySource
-import com.ustadmobile.core.container.ContainerManagerCommon
-import java.net.MalformedURLException
-import java.net.URL
-import com.ustadmobile.core.container.ContainerManagerCommon.AddEntryOptions
-
 
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
                                                        view: ContentEditorView, val storage: String?,
-                                                       mountContainer: suspend (Long) -> String, unmountContainer: suspend (String) -> Unit)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer, unmountContainer){
+                                                       mountContainer: suspend (Long) -> String)
+    :ContentEditorPresenterCommon(context,arguments,view,storage,mountContainer){
 
 
     private var nextNavItem: EpubNavItem? = null
@@ -110,9 +105,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         val mediaFile = File(path)
         try {
             addManifestItem(mediaFile.name, mimetype)
-            containerManager!!.addEntries(
-                    AddEntryOptions(moveExistingFiles = true, dontUpdateTotals = true),
-                    FileEntrySource(mediaFile,mediaFile.name))
+            containerManager!!.addEntries(FileEntrySource(mediaFile,mediaFile.name))
             return true
         } catch (e: IOException) {
             e.printStackTrace()
@@ -182,7 +175,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             containerManager!!.addEntries(FileEntrySource(tmpFile,href))
 
             if (!tmpFile.delete() && copied)
-                tmpFile.delete()
+                tmpFile.deleteOnExit()
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -330,7 +323,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             entryAdded = true
 
             if (!tmpFile.delete())
-                tmpFile.delete()
+                tmpFile.deleteOnExit()
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -619,26 +612,6 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         return documentPath!!
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    actual override suspend fun remountContainer(openPicker: Boolean): Boolean {
-        var remounted = false
-        if(containerManager != null && !openPicker){
-            containerManager = containerManager!!.copyToNewContainer()
-            try{
-                val mountedUrl = URL(mountedFileAccessibleUrl)
-                unmountContainer(mountedUrl.path)
-            }catch(e: MalformedURLException) {
-                /* should not happen - the mounted url is formed using the port provided */
-            }
-            val container = umAppRepo.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntryUid)!!
-            containerManager = ContainerManager(container, umDatabase, umAppRepo, documentPath)
-            mountedFileAccessibleUrl = mountContainer(container.containerUid)
-            remounted = mountedFileAccessibleUrl != null
-        }
-        return remounted
-    }
 
     /**
      * {@inheritDoc}
