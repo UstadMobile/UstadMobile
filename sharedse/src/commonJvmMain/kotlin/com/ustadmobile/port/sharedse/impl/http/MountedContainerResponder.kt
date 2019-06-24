@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http
 
-import com.ustadmobile.port.sharedse.container.ContainerManager
+import com.ustadmobile.core.impl.UmAccountManager
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.xmlpull.v1.XmlPullParserException
@@ -71,19 +71,23 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         try {
+
             var requestUri = RouterNanoHTTPD.normalizeUri(session.uri)
             requestUri = URI(requestUri).normalize().toString()
             val pathInContainer = requestUri.substring(
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
-            val container = uriResource.initParameter(0, ContainerManager::class.java)
-            val entry = container.getEntry(pathInContainer)
+            val containerUid = uriResource.uri.split("/")[CONTAINER_UID_INDEX].toLong()
+            val context = uriResource.initParameter(0, Object::class.java)
+            val umRepo = UmAccountManager.getRepositoryForActiveAccount(context)
+            val entryFile = umRepo.containerEntryDao.findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                            "text/plain", "Entry not found in container")
+                    "text/plain", "Entry not found in container")
+
 
             val filterList = uriResource.initParameter(1, List::class.java)
                     as List<MountedContainerFilter>
-            var response = FileResponder.newResponseFromFile(uriResource, session,
-                    FileResponder.FileSource(File(entry.containerEntryFile!!.cefPath!!)))
+            var response = newResponseFromFile(uriResource, session,
+                    FileSource(File(entryFile.containerEntryFile!!.cefPath!!)))
             for (filter in filterList) {
                 response = filter.filterResponse(response, uriResource, urlParams, session)
             }
@@ -119,6 +123,8 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
          * The string that is added
          */
         const val URI_ROUTE_POSTFIX = "(.)+"
+
+        const val CONTAINER_UID_INDEX = 1
 
         private val HTML_EXTENSIONS = ArrayList<String>()
 
