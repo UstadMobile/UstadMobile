@@ -31,10 +31,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.ViewWithErrorNotifier
 import com.ustadmobile.port.android.impl.UserFeedbackException
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService
+import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
 import com.ustadmobile.port.sharedse.util.RunnableQueue
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
 import java.lang.ref.WeakReference
@@ -58,10 +58,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     protected lateinit var umToolbar: Toolbar
 
     /**
-     * Currently running instance of NetworkManagerBle
+     * Currently running instance of NetworkManagerBleCommon
      */
     /**
-     * @return Active NetworkManagerBle
+     * @return Active NetworkManagerBleCommon
      */
      var networkManagerBle: NetworkManagerBle? = null
 
@@ -435,7 +435,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
     /**
-     * Make sure NetworkManagerBle is not null when running a certain logic
+     * Make sure NetworkManagerBleCommon is not null when running a certain logic
      *
      * @param runnable Future task to be executed
      */

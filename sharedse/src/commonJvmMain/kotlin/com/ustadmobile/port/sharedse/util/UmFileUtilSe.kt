@@ -1,10 +1,11 @@
 package com.ustadmobile.port.sharedse.util
 
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import java.io.*
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -164,7 +165,7 @@ object UmFileUtilSe {
                     containerFileDir.absolutePath)
 
             zipFile = ZipFile(tmpZipFile!!)
-            containerManager.addEntriesFromZip(zipFile, ContainerManager.OPTION_COPY)
+            addEntriesFromZipToContainer(tmpZipFile.absolutePath, containerManager)
             return TempZipContainer(container, containerManager, containerFileDir)
         } catch (e: IOException) {
             throw e

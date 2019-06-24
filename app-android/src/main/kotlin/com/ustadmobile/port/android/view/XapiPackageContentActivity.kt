@@ -32,6 +32,8 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
 
     private var mProgressBar: ProgressBar? = null
 
+    private var savedState: Bundle? = null
+
     @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,16 +69,16 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
 
         mMountedPath = AtomicReference()
 
-        mPresenter.onCreate(bundleToMap(savedInstanceState))
         mProgressBar!!.isIndeterminate = true
         mProgressBar!!.visibility = View.VISIBLE
+        savedState = savedInstanceState
     }
 
     override fun onHttpdConnected(httpd: EmbeddedHTTPD) {
         mPresenter = XapiPackageContentPresenter(this,
                 bundleToMap(intent.extras), this, httpd.containerMounter)
 
-        mPresenter.onCreate(null)
+        mPresenter.onCreate(bundleToMap(savedState))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

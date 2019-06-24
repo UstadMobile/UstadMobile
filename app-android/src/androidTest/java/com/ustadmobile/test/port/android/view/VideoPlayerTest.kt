@@ -8,13 +8,14 @@ import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.view.VideoPlayerActivity
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.Test
@@ -22,7 +23,6 @@ import org.junit.runner.RunWith
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
-import java.util.*
 
 @RunWith(AndroidJUnit4::class)
 class VideoPlayerTest {
@@ -40,7 +40,7 @@ class VideoPlayerTest {
             val context = InstrumentationRegistry.getTargetContext()
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
-            return  UmAppDatabase.getInstance(context)//db.getRepository("https://localhost", "")
+            return UmAppDatabase.getInstance(context)//db.getRepository("https://localhost", "")
         }
 
     @Throws(IOException::class)
@@ -88,12 +88,11 @@ class VideoPlayerTest {
         val manager = ContainerManager(container, db,
                 repo, dir.absolutePath)
 
-        val fileMap = HashMap<File, String>()
-        fileMap[videoFile] = "video1.webm"
-        fileMap[audioTempFile] = "audio.c2"
-        fileMap[srtTmpFile] = "subtitle.srt"
-        manager.addEntries(fileMap, true)
-
+        runBlocking {
+            manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video1.webm"),
+                    ContainerManager.FileEntrySource(audioTempFile, "audio.c2"),
+                    ContainerManager.FileEntrySource(srtTmpFile, "subtitle.srt"))
+        }
     }
 
 

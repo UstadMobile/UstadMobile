@@ -17,10 +17,11 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.port.android.view.WebChunkActivity
-import com.ustadmobile.port.sharedse.container.ContainerManager
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.Test
@@ -54,7 +55,7 @@ class WebChunkEspressoTest {
         context = InstrumentationRegistry.getTargetContext()
         db = UmAppDatabase.getInstance(context)
         db!!.clearAllTables()
-        return  UmAppDatabase.getInstance(context) //db!!.getRepository("https://localhost", "")
+        return UmAppDatabase.getInstance(context) //db!!.getRepository("https://localhost", "")
     }
 
     @Throws(IOException::class)
@@ -146,7 +147,11 @@ class WebChunkEspressoTest {
 
         val manager = ContainerManager(container, db!!,
                 repo!!, dir!!.absolutePath)
-        manager.addEntries(countingMap, true)
+        runBlocking {
+            countingMap.forEach {
+                manager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
+            }
+        }
     }
 
 

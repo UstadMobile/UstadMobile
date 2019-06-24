@@ -11,7 +11,7 @@ import java.io.*
 import java.util.*
 import java.util.zip.ZipFile
 
-
+@Deprecated("Use com.ustadmobile.sharedse.container.ContainerManager instead which is coroutine compatible")
 class ContainerManager {
 
     private var db: UmAppDatabase? = null

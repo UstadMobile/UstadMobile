@@ -87,6 +87,16 @@ kotlin {
             dependsOn commonJvmMain
         }
 
+        commonTest{
+
+        }
+
+        jvmTest{
+            dependencies {
+                implementation "junit:junit:$version_junit"
+            }
+        }
+
 
     }
 }

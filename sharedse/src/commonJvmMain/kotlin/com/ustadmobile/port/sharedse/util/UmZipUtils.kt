@@ -13,19 +13,19 @@ object UmZipUtils {
         var entryOut: OutputStream? = null
         try {
             ZipInputStream(FileInputStream(zipFile)).use { zipIn ->
-                var zipEntry: ZipEntry
+                var zipEntry: ZipEntry?
                 while (zipIn.nextEntry.also { zipEntry = it } != null) {
 
-                val fileName = zipEntry.name
+                val fileName = zipEntry!!.name
                 val fileToCreate = File(destDir, fileName)
 
-                val dirToCreate = if (zipEntry.isDirectory) fileToCreate else fileToCreate.parentFile
+                val dirToCreate = if (zipEntry!!.isDirectory) fileToCreate else fileToCreate.parentFile
                 if (!dirToCreate.isDirectory) {
                     if (!dirToCreate.mkdirs()) {
                         throw RuntimeException("Could not create directory to extract to: " + fileToCreate.parentFile)
                     }
                 }
-                if (!zipEntry.isDirectory) {
+                if (!zipEntry!!.isDirectory) {
                     entryOut = FileOutputStream(fileToCreate)
                     UMIOUtils.readFully(zipIn, entryOut!!)
                     entryOut!!.close()

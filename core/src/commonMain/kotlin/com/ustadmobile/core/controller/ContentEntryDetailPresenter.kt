@@ -135,12 +135,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         if (isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = true
             statusProvider?.addDownloadChangeListener(this)
-            statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid,
-                    object : UmResultCallback<DownloadJobItemStatus?> {
-                        override fun onDone(result: DownloadJobItemStatus?) {
-                            onDownloadJobItemChange(result, result?.jobItemUid ?: 0)
-                        }
-                    })
+            GlobalScope.launch {
+                val dlJobStatusResult = statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid)
+                onDownloadJobItemChange(dlJobStatusResult, dlJobStatusResult?.jobItemUid ?: 0)
+            }
+
             view.setDownloadButtonVisible(false)
             view.setDownloadProgressVisible(true)
         } else if (!isDownloading && isListeningToDownloadStatus.value) {

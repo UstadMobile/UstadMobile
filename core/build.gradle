@@ -45,10 +45,13 @@ targetCompatibility = '1.8'
 /*
  * This might be required to be able to run unit tests via the IDE.
  */
-task dumpEnvProperties {
+task copyTestResources(type: Copy) {
     outputs.upToDateWhen {
         project.file("build/local.env.properties").exists()
     }
+
+    from project.file("src/commonTest/resources")
+    into rootProject.file("build/classes/test/core_jvmTest")
 
     doFirst {
         if(!project.file("build").exists())
@@ -63,9 +66,10 @@ task dumpEnvProperties {
 
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
-        task.dependsOn(dumpEnvProperties)
+        task.dependsOn(copyTestResources)
     }
 }
+
 
 kotlin {
 
@@ -94,7 +98,7 @@ kotlin {
         }
         //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
         // the project to avoid it being seen as an extra jvm variant
-        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
+//        fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
 
 
@@ -116,6 +120,7 @@ kotlin {
                 implementation project(":lib-util")
             }
         }
+
         commonJvmMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
@@ -125,6 +130,9 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                compileOnly project(':lib-database')
+                compileOnly project(':lib-database-entities')
 
             }
         }
@@ -151,6 +159,7 @@ kotlin {
             dependencies {
                 implementation "junit:junit:$version_junit"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -291,7 +300,7 @@ task prepareWebLocale{
         Map<String, String> idToTranslationMap = new HashMap<>()
 
         if(file.absolutePath.split("-").size() > 1){
-            localeCode = file.absolutePath.split("-")[1].split(File.separator)[0]
+            localeCode = file.absolutePath.split("-")[1].split("\\\\")[0]
         }
         File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
         if(tempFile.exists()){

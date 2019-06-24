@@ -1,10 +1,14 @@
 package com.ustadmobile.core.util
 
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.coroutines.coroutineContext
 
 /**
  * Created by mike on 6/18/17.
