@@ -159,7 +159,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     fileOutput.close()
                     fileOutput = null
 
-                    if (dlPartFile.renameTo(FileSe(destinationFile))) {
+                    if (dlPartFile.renameFile(FileSe(destinationFile))) {
                         return true
                     } else {
                         return false
