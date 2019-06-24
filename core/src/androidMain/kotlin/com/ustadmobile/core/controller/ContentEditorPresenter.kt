@@ -116,8 +116,9 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
     /**
      * {@inheritDoc}
      */
-    actual override suspend fun saveContentToFile(filename: String, content: String) {
+    actual override suspend fun saveContentToFile(filename: String, content: String) : Boolean {
         var inputStream: InputStream? = null
+        var contentSaved = false;
         try {
             inputStream = containerManager?.getInputStream(containerManager?.getEntry(filename)!!)!!
             val tmpFile = File.createTempFile(TEMP_FILE_PREFIX, filename)
@@ -127,13 +128,14 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
             tmpFile.delete()
             val contentContainer = document.select(".um-editor")
             contentContainer.first().html(content)
-            addEntryWithContent(filename, document.html())
+            contentSaved = addEntryWithContent(filename, document.html())
 
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
             UMIOUtils.closeInputStream(inputStream)
         }
+        return contentSaved
     }
 
     /**

@@ -2,19 +2,19 @@ package com.ustadmobile.port.sharedse.contentformats
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONTENT_ENTRY
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONTENT_MIMETYPE
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.contentformats.epub.EpubTypePlugin
 import com.ustadmobile.port.sharedse.contentformats.h5p.H5PTypePlugin
 import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.zip.ZipException
-import java.util.zip.ZipFile
 
 object ContentTypeUtil {
 
@@ -64,8 +64,7 @@ object ContentTypeUtil {
                 val containerManager = ContainerManager(container, appDatabase,
                         appRepo, baseDir)
                 try {
-                    containerManager.addEntriesFromZip(ZipFile(file),
-                            ContainerManager.OPTION_COPY or ContainerManager.OPTION_UPDATE_TOTALS)
+                    addEntriesFromZipToContainer(file.absolutePath, containerManager)
                     callback.onSuccess(contentEntry)
                 } catch (e: ZipException) {
                     e.printStackTrace()

@@ -1,14 +1,14 @@
 package com.ustadmobile.port.sharedse.util
 
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import java.io.*
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.zip.ZipFile
 
 object UmFileUtilSe {
 
@@ -152,7 +152,6 @@ object UmFileUtilSe {
                                            repo: UmAppDatabase,
                                            resourcePath: String,
                                            containerFileDir: File = makeTempDir("makeTempContainerDir", "." + System.currentTimeMillis())): TempZipContainer {
-        var zipFile: ZipFile? = null
         var tmpZipFile: File? = null
         try {
             tmpZipFile = File.createTempFile("makeTempContainerFromClass", "." + System.currentTimeMillis())
@@ -163,13 +162,11 @@ object UmFileUtilSe {
             val containerManager = ContainerManager(container, db, repo,
                     containerFileDir.absolutePath)
 
-            zipFile = ZipFile(tmpZipFile!!)
-            containerManager.addEntriesFromZip(zipFile, ContainerManager.OPTION_COPY)
+            addEntriesFromZipToContainer(tmpZipFile!!.absolutePath, containerManager)
             return TempZipContainer(container, containerManager, containerFileDir)
         } catch (e: IOException) {
             throw e
         } finally {
-            zipFile?.close()
 
             if (tmpZipFile != null && !tmpZipFile.delete())
                 tmpZipFile.deleteOnExit()

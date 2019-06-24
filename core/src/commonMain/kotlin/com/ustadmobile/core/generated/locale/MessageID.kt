@@ -243,6 +243,8 @@ object MessageID{
 
     const val download_state_downloading = 2182
 
+    const val content_editor_save_error = 2302
+
     const val enter_name = 2082
 
     const val content_update_page_title = 2237

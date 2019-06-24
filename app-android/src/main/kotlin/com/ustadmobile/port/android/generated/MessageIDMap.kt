@@ -125,6 +125,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.add] = R.string.add
 	ID_MAP[MessageID.options_job_short] = R.string.options_job_short
 	ID_MAP[MessageID.download_state_downloading] = R.string.download_state_downloading
+	ID_MAP[MessageID.content_editor_save_error] = R.string.content_editor_save_error
 	ID_MAP[MessageID.enter_name] = R.string.enter_name
 	ID_MAP[MessageID.content_update_page_title] = R.string.content_update_page_title
 	ID_MAP[MessageID.content_media_message] = R.string.content_media_message

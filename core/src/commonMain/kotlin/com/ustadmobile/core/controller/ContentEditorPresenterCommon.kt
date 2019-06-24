@@ -70,6 +70,8 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
     var containerUid : Long = 0
 
+    var currentFileContent : String = ""
+
     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
     internal val umAppRepo : UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -125,7 +127,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      * @param filename name of the file being edited
      * @param content content to be saved
      */
-    abstract suspend fun saveContentToFile(filename: String, content: String)
+    abstract suspend fun saveContentToFile(filename: String, content: String): Boolean
 
     /**
      * Update document title and description
@@ -237,7 +239,14 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
 
 
     override fun loadPage(href: String) {
-         handleSelectedPage(href)
+         GlobalScope.launch {
+             val saved = saveContentToFile(currentPage, currentFileContent)
+             if(saved){
+                 handleSelectedPage(href)
+             }else{
+                 showErrorMessage(impl.getString(MessageID.content_editor_save_error, context))
+             }
+         }
     }
 
     override fun getCurrentDocument(): EpubNavDocument {
@@ -272,6 +281,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      */
     fun handleSaveContent(content: String){
         GlobalScope.launch {
+            currentFileContent = content
             saveContentToFile(currentPage, content)
         }
     }

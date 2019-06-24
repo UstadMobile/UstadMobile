@@ -16,7 +16,7 @@ expect class ContentEditorPresenter(context: Any, arguments: Map<String, String?
 
     override suspend fun addMediaContent(path: String, mimetype: String): Boolean
 
-    override suspend fun saveContentToFile(filename: String, content: String)
+    override suspend fun saveContentToFile(filename: String, content: String): Boolean
 
     override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String?
 

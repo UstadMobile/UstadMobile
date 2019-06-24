@@ -23,7 +23,8 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         TODO("not implemented")
     }
 
-    actual override suspend fun saveContentToFile(filename: String, content: String) {
+    actual override suspend fun saveContentToFile(filename: String, content: String):Boolean {
+        TODO("not implemented")
     }
 
     actual override suspend fun updateDocumentMetaInfo(documentTitle: String, description: String, isNewDocument: Boolean): String? {
