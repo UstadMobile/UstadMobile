@@ -8,7 +8,7 @@ interface VideoPlayerView : UstadView {
 
     fun setVideoInfo(result: ContentEntry)
 
-    fun setVideoParams(videoPath: String, audioPath: String, srtPath: String)
+    fun setVideoParams(videoPath: String?, audioPath: String?, srtPath: String?)
 
     companion object {
 
