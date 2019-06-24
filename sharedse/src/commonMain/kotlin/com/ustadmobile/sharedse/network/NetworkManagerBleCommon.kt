@@ -46,8 +46,6 @@ abstract class NetworkManagerBleCommon(
 
     private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
 
-    protected var knownBadNodeTrackList = mutableMapOf<String, AtomicInt>()
-
 //    /**
 //     * @return Active URLConnectionOpener
 //     */
@@ -575,6 +573,8 @@ abstract class NetworkManagerBleCommon(
 
     companion object {
 
+
+
         /**
          * Convert decimal representation of an ip address back to IPV4 format.
          * @param ip decimal representation
@@ -600,6 +600,8 @@ abstract class NetworkManagerBleCommon(
             }
             return result
         }
+
+        protected var knownBadNodeTrackList: HashMap<String, AtomicInt?> = HashMap()
 
         /**
          * Flag to indicate entry status request
