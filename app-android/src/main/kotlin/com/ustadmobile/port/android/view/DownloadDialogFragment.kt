@@ -204,9 +204,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mPresenter != null) {
-            mPresenter!!.onDestroy()
-        }
+        mPresenter?.onDestroy()
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {

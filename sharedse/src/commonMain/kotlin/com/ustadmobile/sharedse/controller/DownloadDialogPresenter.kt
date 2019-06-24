@@ -8,9 +8,11 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
@@ -26,7 +28,7 @@ import kotlin.jvm.Volatile
 class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               private var appDatabase: UmAppDatabase?, private val appDatabaseRepo: UmAppDatabase)
-    : UstadBaseController<DownloadDialogView>(context, arguments, view) {
+    : UstadBaseController<DownloadDialogView>(context, arguments, view), OnDownloadJobItemChangeListener {
 
     private var deleteFileOptions = false
 
@@ -73,6 +75,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             }
 
         })
+        networkManagerBle.addDownloadChangeListener(this)
     }
 
 
@@ -135,16 +138,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
                         MessageID.download_cancel_label, context))
             }
 
-
-            GlobalScope.launch {
-                val totalDownloadJobItems = appDatabase!!.downloadJobItemDao
-                        .getTotalDownloadJobItemsAsync(currentJobId!!)
-                val rootStatus = jobItemManager!!.rootItemStatus
-                view.runOnUiThread(Runnable {
-                    view.setStatusText(statusMessage!!, totalDownloadJobItems,
-                            UMFileUtil.formatFileSize(rootStatus?.totalBytes ?: 0))
-                })
-            }
+            onDownloadJobItemChange(jobItemManager?.rootItemStatus, downloadJob.djUid)
         }
     }
 
@@ -154,7 +148,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
         if (currentJobId == 0) {
             createDownloadJobRecursive()
         }else {
-            jobItemManager = networkManagerBle.getDownloadJobItemManager(currentJobId)
+            jobItemManager = networkManagerBle.getDownloadJobItemManager(currentJobId)!!
         }
 
         startObservingJob()
@@ -163,10 +157,24 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     }
 
+    override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+        println("onDownloadJobItemChange: $status  / $downloadJobUid")
+        if(status != null && status.contentEntryUid == jobItemManager?.rootContentEntryUid) {
+            GlobalScope.launch {
+                val rootStatus = jobItemManager?.rootItemStatus
+                view.runOnUiThread(Runnable {
+                    view.setStatusText(statusMessage!!, jobItemManager?.size ?: 0,
+                            UMFileUtil.formatFileSize(rootStatus?.totalBytes ?: 0))
+                })
+            }
+        }
+
+    }
+
     private fun createDownloadJobRecursive() {
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
-        jobItemManager = networkManagerBle?.createNewDownloadJobItemManager(newDownloadJob)
+        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)!!
         currentJobId = jobItemManager?.downloadJobUid ?: 0
         GlobalScope.launch {
             DownloadJobPreparer(jobItemManager!!, appDatabase!!, appDatabaseRepo).run()
@@ -250,6 +258,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     override fun onDestroy() {
         super.onDestroy()
+        networkManagerBle.removeDownloadChangeListener(this)
     }
 
     companion object {
