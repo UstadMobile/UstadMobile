@@ -27,7 +27,7 @@ import kotlin.jvm.Volatile
 
 class DownloadDialogPresenter(context: Any, private val networkManagerBle: NetworkManagerBleCommon,
                               arguments: Map<String, String>, view: DownloadDialogView,
-                              private var appDatabase: UmAppDatabase?, private val appDatabaseRepo: UmAppDatabase)
+                              private var appDatabase: UmAppDatabase, private val appDatabaseRepo: UmAppDatabase)
     : UstadBaseController<DownloadDialogView>(context, arguments, view), OnDownloadJobItemChangeListener {
 
     private var deleteFileOptions = false
@@ -75,13 +75,14 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             }
 
         })
+
         networkManagerBle.addDownloadChangeListener(this)
     }
 
 
     private fun startObservingJob() {
         view.runOnUiThread(Runnable {
-            downloadDownloadJobLive = appDatabase!!.downloadJobDao.getJobLive(currentJobId!!)
+            downloadDownloadJobLive = appDatabase.downloadJobDao.getJobLive(currentJobId!!)
             downloadDownloadJobLive.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobStatusChange)
         })
@@ -89,7 +90,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private fun startObservingDownloadJobMeteredState() {
         view.runOnUiThread(Runnable {
-            allowedMeteredLive = appDatabase!!.downloadJobDao
+            allowedMeteredLive = appDatabase.downloadJobDao
                     .getLiveMeteredNetworkAllowed(currentJobId!!)
             allowedMeteredLive!!.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobMeteredStateChange)
@@ -143,18 +144,21 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     }
 
     private fun setup() {
-        currentJobId = appDatabase!!.downloadJobDao
+        currentJobId = appDatabase.downloadJobDao
                 .getLatestDownloadJobUidForContentEntryUid(contentEntryUid)
-        if (currentJobId == 0) {
-            createDownloadJobRecursive()
-        }else {
-            jobItemManager = networkManagerBle.getDownloadJobItemManager(currentJobId)!!
+
+        GlobalScope.launch {
+            if (currentJobId == 0) {
+                createDownloadJobRecursive()
+            }else {
+                jobItemManager = networkManagerBle.openDownloadJobItemManager(currentJobId)!!
+            }
         }
+
 
         startObservingJob()
 
         startObservingDownloadJobMeteredState()
-
     }
 
     override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
@@ -163,7 +167,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             GlobalScope.launch {
                 val rootStatus = jobItemManager?.rootItemStatus
                 view.runOnUiThread(Runnable {
-                    view.setStatusText(statusMessage!!, jobItemManager?.size ?: 0,
+                    view.setStatusText(statusMessage ?: "", jobItemManager?.size ?: 0,
                             UMFileUtil.formatFileSize(rootStatus?.totalBytes ?: 0))
                 })
             }
@@ -174,10 +178,11 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     private fun createDownloadJobRecursive() {
         val newDownloadJob = DownloadJob(contentEntryUid, getSystemTimeInMillis())
         newDownloadJob.djDestinationDir = destinationDir
-        jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)!!
-        currentJobId = jobItemManager?.downloadJobUid ?: 0
         GlobalScope.launch {
-            DownloadJobPreparer(jobItemManager!!, appDatabase!!, appDatabaseRepo).run()
+            jobItemManager = networkManagerBle.createNewDownloadJobItemManager(newDownloadJob)
+            jobItemManager!!.awaitLoaded()
+            currentJobId = jobItemManager!!.downloadJobUid ?: 0
+            DownloadJobPreparer(jobItemManager!!, appDatabase, appDatabaseRepo).run()
         }
     }
 
@@ -209,7 +214,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
     fun handleClickStackedButton(idClicked: Int) {
         when (idClicked) {
             STACKED_BUTTON_PAUSE -> GlobalScope.launch {
-                appDatabase!!.downloadJobDao.updateJobAndItems(currentJobId!!,
+                appDatabase.downloadJobDao.updateJobAndItems(currentJobId!!,
                         JobStatus.PAUSED, JobStatus.PAUSING)
             }.start()
 
@@ -224,7 +229,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private fun continueDownloading() {
         GlobalScope.launch {
-            appDatabase!!.downloadJobDao.updateJobAndItems(currentJobId!!,
+            appDatabase.downloadJobDao.updateJobAndItems(currentJobId!!,
                     JobStatus.QUEUED, -1)
         }.start()
     }
@@ -235,7 +240,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private fun cancelDownload() {
         GlobalScope.launch {
-            appDatabase!!.downloadJobDao
+            appDatabase.downloadJobDao
                     .updateJobAndItems(currentJobId!!, JobStatus.CANCELED,
                             JobStatus.CANCELLING)
         }.start()
@@ -243,7 +248,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     fun handleWiFiOnlyOption(wifiOnly: Boolean) {
         GlobalScope.launch {
-            appDatabase!!.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId!!,
+            appDatabase.downloadJobDao.setMeteredConnectionAllowedByJobUidAsync(currentJobId!!,
                     !wifiOnly)
         }
 
@@ -251,7 +256,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     fun handleStorageOptionSelection(selectedDir: String) {
         GlobalScope.launch {
-            appDatabase!!.downloadJobDao.updateDestinationDirectoryAsync(
+            appDatabase.downloadJobDao.updateDestinationDirectoryAsync(
                     currentJobId!!, selectedDir)
         }
     }

@@ -53,6 +53,7 @@ class DownloadJobItemRunner
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
  private val numConcurrentEntryDownloads: Int = 4) {
 
+    //TODO: This should be converted to use openDownloadJobItemManager
     private val downloadJobItemManager: DownloadJobItemManager = networkManager.getDownloadJobItemManager(downloadItem.djiDjUid)!!
 
     private var statusLiveData: DoorLiveData<ConnectivityStatus?>? = null
