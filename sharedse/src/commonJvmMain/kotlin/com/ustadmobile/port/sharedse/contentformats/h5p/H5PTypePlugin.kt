@@ -20,7 +20,6 @@ import java.util.zip.ZipInputStream
  */
 class H5PTypePlugin : H5PContentType(), ContentTypePlugin {
 
-    //This declaration is experimental and its usage must be marked with '' or '@UseExperimental(kotlinx.serialization.ImplicitReflectionSerializer::class)'
     @kotlinx.serialization.ImplicitReflectionSerializer
     override fun getContentEntry(file: File): ContentEntry? {
         var contentEntry: ContentEntry? = null

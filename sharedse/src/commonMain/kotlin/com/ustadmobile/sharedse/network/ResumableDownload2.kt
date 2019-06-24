@@ -150,13 +150,16 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                         fileOutput.writeFully(buffer)
                     } while (true)
 
-
                     copyTime = getSystemTimeInMillis() - copyStartTime
 
                     //Can be added for checking performance
                     //println("Response time: $responseTime ms | Copy time: $copyTime")
 
-                    if (dlPartFile.renameTo(FileSe(destinationFile))) {
+                    fileOutput.flush()
+                    fileOutput.close()
+                    fileOutput = null
+
+                    if (dlPartFile.renameFile(FileSe(destinationFile))) {
                         return true
                     } else {
                         return false
@@ -171,6 +174,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                         //println("Cleaning up resumabledownload of $httpUrl")
                         httpIn?.close()
                         httpResponse?.close()
+                        fileOutput?.flush()
                         fileOutput?.close()
                         headResponse?.close()
                         buffer.release(IoBuffer.Pool)

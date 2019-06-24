@@ -1,5 +1,6 @@
 //package com.ustadmobile.core.controller
 //
+//import com.sun.net.httpserver.HttpServer
 //import com.ustadmobile.core.CoreTestConfig
 //import com.ustadmobile.core.db.UmAppDatabase
 //import com.ustadmobile.core.generated.locale.MessageID
@@ -22,6 +23,7 @@
 //
 //import com.ustadmobile.test.core.util.CoreTestUtil.TEST_URI
 //import com.ustadmobile.test.core.util.CoreTestUtil.startServer
+//import com.ustadmobile.util.test.checkJndiSetup
 //import org.mockito.ArgumentMatchers.any
 //import org.mockito.Mockito.doAnswer
 //import org.mockito.Mockito.timeout
@@ -45,19 +47,15 @@
 //
 //    @Before
 //    fun setUp() {
-//        DriverConnectionPoolInitializer.bindDataSource("UmAppDatabase",
-//                CoreTestConfig.TESTDB_JDBCURL_UMMAPPDATABASE, true)
-//        DriverConnectionPoolInitializer.bindDataSource("db1",
-//                CoreTestConfig.TESTDB_JDBCURL_DB1, false)
-//
+//        checkJndiSetup()
 //        val mainImpl = UstadMobileSystemImpl.instance
 //        systemImplSpy = Mockito.spy(mainImpl)
 //        UstadMobileSystemImpl.setMainInstance(systemImplSpy)
 //        server = startServer()
 //
-//        val db = UmAppDatabase.getInstance(PlatformTestUtil.targetContext)
-//        clientDb = UmAppDatabase.getInstance(PlatformTestUtil.targetContext, "db1")
-//        repo = db.getRepository(TEST_URI, "")
+//        val db = UmAppDatabase.getInstance(Any())
+//        clientDb = UmAppDatabase.getInstance(Any(), "db1")
+//        repo = db //db.getRepository(TEST_URI, "")
 //
 //        db.clearAllTables()
 //        clientDb!!.clearAllTables()
@@ -88,27 +86,27 @@
 //    //TODO: Re-enable this test after the DAO checks for this
 //    //@Test
 //    fun givenExistingPersonDetails_whenHandleRegisterCalled_thenShouldNotCreateAccount() {
-//        repo!!.personDao.insert(testPerson)
-//        val presenter = Register2Presenter(PlatformTestUtil.targetContext, args!!, mockView!!)
+//        repo!!.personDao.insert(testPerson!!)
+//        val presenter = Register2Presenter(Any(), args!!, mockView!!)
 //        presenter.handleClickRegister(testPerson!!, VALID_PASS, TEST_URI)
 //
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-//                MessageID.err_registering_new_user, PlatformTestUtil.targetContext)
+//                MessageID.err_registering_new_user, Any())
 //        verify<Register2View>(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg)
 //    }
 //
 //    @Test
 //    fun givenNewPersonDetails_whenHandleRegisterCalled_thenShouldCreateAnAccountAndGenerateAuthToken() {
-//        val presenter = Register2Presenter(PlatformTestUtil.targetContext, args!!, mockView!!)
+//        val presenter = Register2Presenter(Any(), args!!, mockView!!)
 //        presenter.setClientDb(clientDb!!)
 //        presenter.setRepo(repo!!)
 //        presenter.handleClickRegister(testPerson!!, VALID_PASS, TEST_URI)
 //
 //        verify<UstadMobileSystemImpl>(systemImplSpy, timeout((5000 * 100).toLong())).go(DESTINATION,
-//                PlatformTestUtil.targetContext)
+//                Any())
 //
 //        val activeAccount = UmAccountManager.getActiveAccount(
-//                PlatformTestUtil.targetContext)
+//                Any())
 //        Assert.assertNotNull(activeAccount)
 //        Assert.assertNotEquals("Active account uid is set ( != 0 )",
 //                activeAccount!!.personUid, 0)
@@ -124,19 +122,19 @@
 //        val args = Hashtable<String,String>()
 //        server!!.shutdownNow()
 //
-//        val presenter = Register2Presenter(PlatformTestUtil.targetContext,
+//        val presenter = Register2Presenter(Any(),
 //                args, mockView!!)
 //        presenter.handleClickRegister(testPerson!!, VALID_PASS, TEST_URI)
 //
 //        val expectedErrorMsg = UstadMobileSystemImpl.instance.getString(
-//                MessageID.login_network_error, PlatformTestUtil.targetContext)
+//                MessageID.login_network_error, Any())
 //        verify<Register2View>(mockView, timeout(5000)).setErrorMessageView(expectedErrorMsg)
 //    }
 //
 //    companion object {
 //
-//        private val VALID_PASS = "secret"
+//        private const val VALID_PASS = "secret"
 //
-//        private val DESTINATION = "somewhere"
+//        private const val DESTINATION = "somewhere"
 //    }
 //}

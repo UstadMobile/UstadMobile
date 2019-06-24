@@ -3,7 +3,7 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.lib.db.entities.NetworkNode
 import kotlinx.coroutines.CoroutineDispatcher
 
-actual class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher) : NetworkManagerBleCommon() {
+actual open class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher) : NetworkManagerBleCommon() {
     actual override val isWiFiEnabled: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     actual override val isBleCapable: Boolean
@@ -41,6 +41,10 @@ actual class NetworkManagerBle actual constructor(context: Any, singleThreadDisp
     }
 
     actual override fun makeDeleteJobTask(`object`: Any?, args: Map<String, String>): DeleteJobTaskRunner {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

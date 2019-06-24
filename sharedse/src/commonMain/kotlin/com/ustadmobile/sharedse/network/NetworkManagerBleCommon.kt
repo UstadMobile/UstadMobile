@@ -1,5 +1,7 @@
 package com.ustadmobile.sharedse.network
 
+//import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+//import com.ustadmobile.port.sharedse.util.LiveDataWorkQueue
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
@@ -8,7 +10,6 @@ import com.ustadmobile.core.networkmanager.DownloadJobItemStatusProvider
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
@@ -20,8 +21,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.ByteArrayOutputStream
+import kotlin.collections.set
 
 /**
  * This is an abstract class which is used to implement platform specific NetworkManager
@@ -45,8 +45,6 @@ abstract class NetworkManagerBleCommon(
     private var isStopMonitoring = false
 
     private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
-
-    protected var knownBadNodeTrackList = mutableMapOf<String, AtomicInt>()
 
 //    /**
 //     * @return Active URLConnectionOpener
@@ -94,10 +92,10 @@ abstract class NetworkManagerBleCommon(
 //    }
 
 //    private val nodeLastSeenTrackerTask = Runnable {
-//        if (knownPeerNodes.size > 0) {
+//        if (knownPeerNodes.isNotEmpty()) {
 //            val nodeMap = HashMap(knownPeerNodes)
 //            GlobalScope.launch {
-//                umAppDatabase!!.networkNodeDao.updateNodeLastSeen(nodeMap)
+//                umAppDatabase.networkNodeDao.updateNodeLastSeen(nodeMap)
 //                UMLog.l(UMLog.DEBUG, 694, "Updating "
 //                        + knownPeerNodes.size + " nodes from the Db")
 //            }
@@ -164,7 +162,7 @@ abstract class NetworkManagerBleCommon(
         umAppDatabaseRepo = umAppDatabase
         jobItemManagerList = DownloadJobItemManagerList(umAppDatabase, singleThreadDispatcher)
         downloadJobItemWorkQueue = LiveDataWorkQueue(umAppDatabase.downloadJobItemDao.findNextDownloadJobItems(),
-                {item1, item2 -> item1.djiUid == item2.djiUid}, mainDispatcher = mainDispatcher) {
+                { item1, item2 -> item1.djiUid == item2.djiUid }, mainDispatcher = mainDispatcher) {
             DownloadJobItemRunner(context, it, this@NetworkManagerBleCommon,
                     umAppDatabase, umAppDatabaseRepo, UmAccountManager.getActiveEndpoint(context)!!,
                     connectivityStatusRef.value, mainCoroutineDispatcher = mainDispatcher).download()
@@ -211,8 +209,8 @@ abstract class NetworkManagerBleCommon(
 //
 //                        if (!isStopMonitoring) {
 //                            if (entryUidsToMonitor.size > 0) {
-//                                val entryStatusTask = makeEntryStatusTask(mContext, entryUidsToMonitor, node)
-//                                entryStatusTasks.add(entryStatusTask)
+//                                val entryStatusTask = makeEntryStatusTask(context, entryUidsToMonitor, node)
+//                                entryStatusTasks.add(entryStatusTask!!)
 //                                entryStatusTaskExecutorService.execute(entryStatusTask)
 //                            }
 //                        }
@@ -226,7 +224,7 @@ abstract class NetworkManagerBleCommon(
         }
     }
 
-    //abstract fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle
+    abstract fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle
 
     /**
      * Open bluetooth setting section from setting panel
@@ -309,7 +307,7 @@ abstract class NetworkManagerBleCommon(
      */
     override fun stopMonitoringAvailability(monitor: Any) {
         availabilityMonitoringRequests.remove(monitor)
-        isStopMonitoring = availabilityMonitoringRequests.size == 0
+        isStopMonitoring = availabilityMonitoringRequests.isEmpty()
     }
 
     /**
@@ -483,35 +481,35 @@ abstract class NetworkManagerBleCommon(
      */
     fun handleNodeConnectionHistory(bluetoothAddress: String, success: Boolean) {
 
-//        var record: AtomicInteger? = knownBadNodeTrackList[bluetoothAddress]
-//
-//        if (record == null || success) {
-//            record = AtomicInteger(0)
-//            knownBadNodeTrackList[bluetoothAddress] = record
-//            UMLog.l(UMLog.DEBUG, 694,
-//                    "Connection succeeded bad node counter was set to " + record.get()
-//                            + " for " + bluetoothAddress)
-//        }
-//
-//        if (!success) {
-//            record.set(record.incrementAndGet())
-//            knownBadNodeTrackList[bluetoothAddress] = record
-//            UMLog.l(UMLog.DEBUG, 694,
-//                    "Connection failed and bad node counter set to " + record.get()
-//                            + " for " + bluetoothAddress)
-//        }
-//
-//        if (knownBadNodeTrackList[bluetoothAddress]!!.get() > 5) {
-//            UMLog.l(UMLog.DEBUG, 694,
-//                    "Bad node counter exceeded threshold (5), removing node with address "
-//                            + bluetoothAddress + " from the list")
-//            knownBadNodeTrackList.remove(bluetoothAddress)
-//            knownPeerNodes.remove(bluetoothAddress)
-//            umAppDatabase!!.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
-//
-//            UMLog.l(UMLog.DEBUG, 694, "Node with address "
-//                    + bluetoothAddress + " removed from the list")
-//        }
+        var record: AtomicInt? = knownBadNodeTrackList[bluetoothAddress]
+
+        if (record == null || success) {
+            record = atomic(0)
+            knownBadNodeTrackList[bluetoothAddress] = record
+            UMLog.l(UMLog.DEBUG, 694,
+                    "Connection succeeded bad node counter was set to " + record.value
+                            + " for " + bluetoothAddress)
+        }
+
+        if (!success) {
+            record.value = (record.incrementAndGet())
+            knownBadNodeTrackList[bluetoothAddress] = record
+            UMLog.l(UMLog.DEBUG, 694,
+                    "Connection failed and bad node counter set to " + record.value
+                            + " for " + bluetoothAddress)
+        }
+
+        if (knownBadNodeTrackList[bluetoothAddress]!!.value > 5) {
+            UMLog.l(UMLog.DEBUG, 694,
+                    "Bad node counter exceeded threshold (5), removing node with address "
+                            + bluetoothAddress + " from the list")
+            knownBadNodeTrackList.remove(bluetoothAddress)
+            knownPeerNodes.remove(bluetoothAddress)
+            umAppDatabase.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
+
+            UMLog.l(UMLog.DEBUG, 694, "Node with address "
+                    + bluetoothAddress + " removed from the list")
+        }
     }
 
     /**
@@ -541,84 +539,6 @@ abstract class NetworkManagerBleCommon(
     }
 
     /**
-     * Convert IP address to decimals
-     * @param address IPV4 address
-     * @return decimal representation of an IP address
-     */
-    private fun convertIpAddressToInteger(address: String): Int {
-        var result = 0
-        val ipAddressInArray = address.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        for (i in 3 downTo 0) {
-            //val ip = Integer.parseInt(ipAddressInArray[3 - i])
-            val ip = ipAddressInArray[3 - i].toInt()
-            result = result or (ip shl i * 8)
-        }
-        return result
-    }
-
-    /**
-     * Convert decimal representation of an ip address back to IPV4 format.
-     * @param ip decimal representation
-     * @return IPV4 address
-     */
-    private fun convertIpAddressToString(ip: Int): String {
-        return ((ip shr 24 and 0xFF).toString() + "." + (ip shr 16 and 0xFF) + "."
-                + (ip shr 8 and 0xFF) + "." + (ip and 0xFF))
-    }
-
-
-    /**
-     * Convert group information to bytes so that they can be transmitted using [BleMessage]
-     * @param group WiFiDirectGroupBle
-     * @return constructed bytes  array from the group info.
-     */
-
-    fun getWifiGroupInfoAsBytes(group: WiFiDirectGroupBle): ByteArray {
-        val bos = ByteArrayOutputStream()
-        var infoAsbytes = byteArrayOf()
-//        val outputStream = DataOutputStream(bos)
-//        try {
-//            outputStream.writeUTF(group.ssid)
-//            outputStream.writeUTF(group.passphrase)
-//            outputStream.writeInt(convertIpAddressToInteger(group.ipAddress!!))
-//            outputStream.writeChar((group.port + 'a'.toInt()).toChar().toInt())
-//            infoAsbytes = bos.toByteArray()
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        } finally {
-//            UMIOUtils.closeOutputStream(outputStream)
-//            UMIOUtils.closeOutputStream(bos)
-//        }
-        return infoAsbytes
-    }
-
-
-    /**
-     * Construct WiFiDirectGroupBle from received message payload
-     * @param payload received payload
-     * @return constructed WiFiDirectGroupBle
-     */
-    fun getWifiGroupInfoFromBytes(payload: ByteArray): WiFiDirectGroupBle {
-        val inputStream = ByteArrayInputStream(payload)
-        //val dataInputStream = DataInputStream(inputStream)
-        var groupBle: WiFiDirectGroupBle? = null
-        try {
-//            groupBle = WiFiDirectGroupBle(dataInputStream.readUTF(), dataInputStream.readUTF())
-//            groupBle.ipAddress = convertIpAddressToString(dataInputStream.readInt())
-//            groupBle.port = dataInputStream.readChar() - 'a'
-        } catch (e: Exception) {
-//            e.printStackTrace()
-        } finally {
-//            UMIOUtils.closeInputStream(dataInputStream)
-            inputStream.close()
-        }
-
-        UMLog.l(UMLog.INFO, 699,
-                "Group information received with ssid = " + groupBle!!.ssid)
-        return groupBle
-    }
-
-    /**
      * Inserts a DownloadJob into the database for a given
      *
      * @param newDownloadJob the new DownloadJob to be created (with properties set)
@@ -643,18 +563,45 @@ abstract class NetworkManagerBleCommon(
         jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid)
     }
 
-    override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long)
-            = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)
+    override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long) = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)
 
-    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
-         = jobItemManagerList!!.addDownloadChangeListener(listener)
+    override fun addDownloadChangeListener(listener: OnDownloadJobItemChangeListener) = jobItemManagerList!!.addDownloadChangeListener(listener)
 
 
-    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener)
-        = jobItemManagerList!!.removeDownloadChangeListener(listener)
+    override fun removeDownloadChangeListener(listener: OnDownloadJobItemChangeListener) = jobItemManagerList!!.removeDownloadChangeListener(listener)
 
 
     companion object {
+
+
+
+        /**
+         * Convert decimal representation of an ip address back to IPV4 format.
+         * @param ip decimal representation
+         * @return IPV4 address
+         */
+        fun convertIpAddressToString(ip: Int): String {
+            return ((ip shr 24 and 0xFF).toString() + "." + (ip shr 16 and 0xFF) + "."
+                    + (ip shr 8 and 0xFF) + "." + (ip and 0xFF))
+        }
+
+
+        /**
+         * Convert IP address to decimals
+         * @param address IPV4 address
+         * @return decimal representation of an IP address
+         */
+        fun convertIpAddressToInteger(address: String): Int {
+            var result = 0
+            val ipAddressInArray = address.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            for (i in 3 downTo 0) {
+                val ip = ipAddressInArray[3 - i].toInt()
+                result = result or (ip shl i * 8)
+            }
+            return result
+        }
+
+        protected var knownBadNodeTrackList: HashMap<String, AtomicInt?> = HashMap()
 
         /**
          * Flag to indicate entry status request
@@ -690,7 +637,7 @@ abstract class NetworkManagerBleCommon(
         /**
          * Bluetooth Low Energy service UUID for our app
          */
-        val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
+        const val USTADMOBILE_BLE_SERVICE_UUID = "7d2ea28a-f7bd-485a-bd9d-92ad6ecfe93a"
 
         const val WIFI_DIRECT_GROUP_SSID_PREFIX = "DIRECT-"
 

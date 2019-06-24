@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.port.sharedse.networkmanager.BleGattServer
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADMOBILE_BLE_SERVICE_UUID
 
 
@@ -35,14 +34,14 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.USTADM
  * @author kileha3
  */
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-class BleGattServerAndroid
+class BleGattServer
 /**
- * Constructor which will be used when creating new instance of BleGattServerAndroid
+ * Constructor which will be used when creating new instance of BleGattServer
  * @param context Application context
  * @param networkManager Instance of a NetworkManagerBle for getting
  * BluetoothManager instance.
  */
-(context: Context, networkManager: NetworkManagerBle) : BleGattServer(context) {
+(context: Context, networkManager: NetworkManagerBle) : BleGattServerCommon(context) {
 
     /**
      * Get instance of a BluetoothGattServer

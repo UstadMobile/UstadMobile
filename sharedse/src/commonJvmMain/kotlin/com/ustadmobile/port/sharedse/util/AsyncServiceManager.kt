@@ -101,7 +101,7 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
         stateChangeListeners.remove(listener)
     }
 
-    fun await(checker: (Int) -> Boolean, timeout: Long, timeoutUnit: TimeUnit) {
+    fun await(checker: (Int) -> Boolean, timeout: Long) {
         if (checker.invoke(state))
             return
 
@@ -114,7 +114,7 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
         }
         addOnStateChangeListener(listener)
         try {
-            latch.await(timeout, timeoutUnit)
+            latch.await(timeout, TimeUnit.MILLISECONDS)
         } catch (e: InterruptedException) { /*should not happen*/
         }
 
@@ -128,13 +128,13 @@ abstract class AsyncServiceManager(var initialState: Int, var delayedExecutor: (
 
     companion object {
 
-        val STATE_STOPPED = 0
+        const val STATE_STOPPED = 0
 
-        val STATE_STARTING = 1
+        const val STATE_STARTING = 1
 
-        val STATE_STARTED = 2
+        const val STATE_STARTED = 2
 
-        val STATE_STOPPING = 3
+        const val STATE_STOPPING = 3
     }
 
 

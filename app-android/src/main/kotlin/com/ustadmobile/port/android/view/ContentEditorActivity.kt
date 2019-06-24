@@ -1143,7 +1143,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
         fileFromCamera = File(dir, imageId + if (isImage) "_image.png" else "_video.mp4")
         val sourceUri = FileProvider.getUriForFile(this,
-                "$packageName.fileprovider", fileFromCamera!!)
+                "$packageName.provider", fileFromCamera!!)
         mimeType = getMimeType(this, sourceUri).toString()
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, sourceUri)
         startActivityForResult(cameraIntent, CAMERA_IMAGE_CAPTURE_REQUEST)

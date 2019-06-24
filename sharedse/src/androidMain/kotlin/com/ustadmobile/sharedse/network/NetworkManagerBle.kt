@@ -68,7 +68,7 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * @author kileha3
  */
-actual class NetworkManagerBle
+actual open class NetworkManagerBle
 /**
  * Constructor to be used when creating new instance
  *
@@ -77,11 +77,11 @@ actual class NetworkManagerBle
 actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main), EmbeddedHTTPD.ResponseListener {
 
-    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD): this(context, singleThreadDispatcher) {
+    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD) : this(context, singleThreadDispatcher) {
         this.httpd = httpd
     }
 
-    public lateinit var httpd: EmbeddedHTTPD
+    lateinit var httpd: EmbeddedHTTPD
 
     private var wifiManager: WifiManager? = null
 
@@ -129,7 +129,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     private val wifiDirectRequestLastCompletedTime = AtomicLong()
 
     private val numActiveRequests = AtomicInteger()
-
 
 
     init {
@@ -191,7 +190,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             if (canDeviceAdvertise()) {
                 UMLog.l(UMLog.DEBUG, 689,
                         "Starting BLE advertising service")
-                gattServerAndroid = BleGattServerAndroid(mContext,
+                gattServerAndroid = BleGattServer(mContext,
                         this@NetworkManagerBle)
                 bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
 
@@ -204,13 +203,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
                 service.addCharacteristic(writeCharacteristic)
                 if (gattServerAndroid == null
-                        || (gattServerAndroid as BleGattServerAndroid).gattServer == null
+                        || (gattServerAndroid as BleGattServer).gattServer == null
                         || bleServiceAdvertiser == null) {
                     notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
                     return
                 }
 
-                (gattServerAndroid as BleGattServerAndroid).gattServer!!.addService(service)
+                (gattServerAndroid as BleGattServer).gattServer!!.addService(service)
 
                 val settings = AdvertiseSettings.Builder()
                         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
@@ -247,7 +246,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         override fun stop() {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    val mGattServer = (gattServerAndroid as BleGattServerAndroid).gattServer
+                    val mGattServer = (gattServerAndroid as BleGattServer).gattServer
                     mGattServer!!.clearServices()
                     mGattServer.close()
                 }
@@ -413,11 +412,11 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
         companion object {
 
-            private val TIMEOUT_AFTER_GROUP_CREATION = 2 * 60 * 1000
+            private const val TIMEOUT_AFTER_GROUP_CREATION = 2 * 60 * 1000
 
-            private val TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000
+            private const val TIMEOUT_AFTER_LAST_REQUEST = 30 * 1000
 
-            private val TIMEOUT_CHECK_INTERVAL = 30 * 1000
+            private const val TIMEOUT_CHECK_INTERVAL = 30 * 1000
         }
     }
 
@@ -469,13 +468,12 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         else
             ConnectivityStatus.STATE_UNMETERED
 
-        val networkInfo: NetworkInfo?
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            networkInfo = connectivityManager!!.getNetworkInfo(network)
+        val networkInfo: NetworkInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectivityManager!!.getNetworkInfo(network)
         } else {
-            networkInfo = connectivityManager!!.activeNetworkInfo
+            connectivityManager!!.activeNetworkInfo
         }
+
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" + prettyPrintNetwork(networkInfo))
 
         val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
@@ -515,7 +513,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
 
-
     override fun onCreate() {
         if (wifiManager == null) {
             wifiManager = mContext.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -547,7 +544,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
             mContext.registerReceiver(mBluetoothAndWifiStateChangeBroadcastReceiver, intentFilter)
 
-            if(Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
+            if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
                 bluetoothManager = mContext.getSystemService(Context.BLUETOOTH_SERVICE)
                 bluetoothAdapter = (bluetoothManager as BluetoothManager).adapter
             }
@@ -637,7 +634,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     actual override fun canDeviceAdvertise(): Boolean {
         return Build.VERSION.SDK_INT > BLE_ADVERTISE_MIN_SDK_VERSION &&
                 (isAdvertiser && bluetoothAdapter != null
-                && bluetoothAdapter!!.isMultipleAdvertisementSupported)
+                        && bluetoothAdapter!!.isMultipleAdvertisementSupported)
     }
 
     /**
@@ -656,11 +653,11 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
 
-    fun awaitWifiDirectGroupReady(timeout: Long, timeoutUnit: TimeUnit): WiFiDirectGroupBle {
+    actual override fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle {
         wifiDirectGroupLastRequestedTime.set(System.currentTimeMillis())
         wifiP2pGroupServiceManager!!.setEnabled(true)
         wifiP2pGroupServiceManager!!.await({ state -> state == AsyncServiceManager.STATE_STARTED || state == AsyncServiceManager.STATE_STOPPED },
-                timeout, timeoutUnit)
+                timeout)
         return wifiP2pGroupServiceManager!!.group
     }
 
@@ -826,7 +823,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
                 currentWifiSsid)
         if (endpoint == null) {
             UMLog.l(UMLog.ERROR, 699,
-                    "ERROR: No endpoint url for ssid" + currentWifiSsid)
+                    "ERROR: No endpoint url for ssid$currentWifiSsid")
             return
         }
 
@@ -870,7 +867,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override fun makeEntryStatusTask(context: Any?, entryUidsToCheck: List<Long>,
-                                     peerToCheck: NetworkNode?): BleEntryStatusTask? {
+                                            peerToCheck: NetworkNode?): BleEntryStatusTask? {
         if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val entryStatusTask = BleEntryStatusTaskAndroid(
                     context as Context, this, entryUidsToCheck, peerToCheck!!)
@@ -884,8 +881,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
      * {@inheritDoc}
      */
     actual override fun makeEntryStatusTask(context: Any, message: BleMessage,
-                                     peerToSendMessageTo: NetworkNode,
-                                     responseListener: BleMessageResponseListener): BleEntryStatusTask? {
+                                            peerToSendMessageTo: NetworkNode,
+                                            responseListener: BleMessageResponseListener): BleEntryStatusTask? {
         if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION) {
             val task = BleEntryStatusTaskAndroid(context as Context, this, message, peerToSendMessageTo, responseListener)
             task.setBluetoothManager(bluetoothManager as BluetoothManager)
@@ -905,7 +902,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     private fun startMonitoringNetworkChanges() {
 
         connectivityManager = mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val networkRequest = NetworkRequest.Builder()
@@ -961,7 +958,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -986,7 +982,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
     actual override val isVersionLollipopOrAbove: Boolean
-        get() =  Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
     actual override val isVersionKitKatOrBelow: Boolean
         get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
@@ -1011,9 +1007,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
          * When we use BLE for advertising and scanning, we need wait a little bit after one starts
          * before the other can start
          */
-        val BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000
+        const val BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000
 
-        val USTADMOBILE_BLE_SERVICE_UUID_UUID = UUID.fromString(NetworkManagerBleCommon.USTADMOBILE_BLE_SERVICE_UUID)
+        val USTADMOBILE_BLE_SERVICE_UUID_UUID = UUID.fromString(USTADMOBILE_BLE_SERVICE_UUID)
 
         const val BLE_ADVERTISE_MIN_SDK_VERSION = 21
 
