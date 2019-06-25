@@ -133,10 +133,10 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
         player!!.playWhenReady = playWhenReady
         player!!.seekTo(currentWindow, playbackPosition)
-        setVideoParams(mPresenter!!.videoPath!!, mPresenter!!.audioPath!!, mPresenter!!.srtPath!!)
+        setVideoParams(mPresenter!!.videoPath, mPresenter!!.audioPath, mPresenter!!.srtPath)
     }
 
-    override fun setVideoParams(videoPath: String, audioPath: String, srtPath: String) {
+    override fun setVideoParams(videoPath: String?, audioPath: String?, srtPath: String?) {
         if (audioPath != null && !audioPath.isEmpty()) {
 
             player!!.addListener(object : Player.DefaultEventListener() {

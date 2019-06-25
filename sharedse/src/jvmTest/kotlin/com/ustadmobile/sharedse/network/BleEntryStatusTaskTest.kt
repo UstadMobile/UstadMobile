@@ -85,7 +85,7 @@ class BleEntryStatusTaskTest {
                 networkNodeDao!!.findNodeByBluetoothAddress(networkNode!!.bluetoothMacAddress!!))
     }
 
-    @Test
+    //@Test
     fun givenNodeWithFailureBelowThreshold_whenSucceed_shouldResetTheFailureCounterToZero() {
 
         for (i in 0..2) {

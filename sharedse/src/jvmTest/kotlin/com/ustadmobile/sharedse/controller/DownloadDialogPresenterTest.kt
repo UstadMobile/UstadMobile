@@ -140,21 +140,23 @@ class DownloadDialogPresenterTest {
 
     private fun insertDownloadJobAndJobItems(meteredNetworkAllowed: Boolean = false, status: Int) {
         Assert.assertNotEquals(0, rootEntry.contentEntryUid)
-        println("DownloadDialogPresenterTest " +
-                "root entry uid = " + rootEntry.contentEntryUid)
-        downloadJob = DownloadJob(rootEntry.contentEntryUid,
-                System.currentTimeMillis())
-        println("DownloadJob contentEntryUid = ${downloadJob.djRootContentEntryUid}")
-        downloadJob.meteredNetworkAllowed = meteredNetworkAllowed
-        downloadJob.djStatus = status
-        val itemManager = mockedNetworkManager!!
-                .createNewDownloadJobItemManager(downloadJob)
-        println("Item manager content entry uid = ${itemManager.rootContentEntryUid}")
         runBlocking {
-            downloadJobPreparer = DownloadJobPreparer(itemManager, umAppDatabase, umAppDatabaseRepo)
-            downloadJobPreparer!!.run()
+            println("DownloadDialogPresenterTest " +
+                    "root entry uid = " + rootEntry.contentEntryUid)
+            downloadJob = DownloadJob(rootEntry.contentEntryUid,
+                    System.currentTimeMillis())
+            println("DownloadJob contentEntryUid = ${downloadJob.djRootContentEntryUid}")
+            downloadJob.meteredNetworkAllowed = meteredNetworkAllowed
+            downloadJob.djStatus = status
+            val itemManager = mockedNetworkManager!!
+                    .createNewDownloadJobItemManager(downloadJob)
+            println("Item manager content entry uid = ${itemManager.rootContentEntryUid}")
+            runBlocking {
+                downloadJobPreparer = DownloadJobPreparer(itemManager, umAppDatabase, umAppDatabaseRepo)
+                downloadJobPreparer!!.run()
+            }
+            println("job prepared")
         }
-        println("job prepared")
     }
 
     @Test

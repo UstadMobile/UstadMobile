@@ -88,7 +88,7 @@ class H5PContentPresenterTest {
 
         h5PPresenter.onCreate(null)
 
-        verify(h5pContentView, timeout(15000 * 1000)).setTitle("True/False Question")
+        verify(h5pContentView, timeout(15000 * 1000)).setContentTitle("True/False Question")
 
         //A higher fidelity test is run using Espresso testing
         verify(h5pContentView, timeout(15000)).setContentHtml(any(), any())

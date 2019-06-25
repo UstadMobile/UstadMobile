@@ -5,6 +5,7 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Assert
@@ -70,8 +71,8 @@ class TestEmbeddedHTTPD {
 
         val client = HttpClient()
 
-        client.launch{
-            client.get<ByteArray>(httpd!!.localHttpUrl + "dir/filename.txt")
+        GlobalScope.launch{
+            client.get<String>(httpd!!.localHttpUrl + "dir/filename.txt")
 
             //val response = UstadMobileSystemImpl.instance.makeRequestSync(
            //         UmHttpRequest(context!!, httpd!!.localHttpUrl + "dir/filename.txt"))

@@ -27,6 +27,10 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     var rootContentEntryUid: Long = 0
         private set
 
+    val size: Int
+        get()  = jobItemUidToStatusMap.size
+
+
     private lateinit var loadJob: Deferred<Unit>
 
     init {
