@@ -4,7 +4,7 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
-import androidx.test.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.web.assertion.WebViewAssertions.webContent
 import androidx.test.espresso.web.matcher.DomMatchers.hasElementWithId
@@ -33,15 +33,17 @@ class XapiPackageContentActivityEspressoTest {
 
     private var tempXapiPackageContainer: UmFileUtilSe.TempZipContainer? = null
 
+    private var context = InstrumentationRegistry.getInstrumentation().context
+
     @Before
     @Throws(IOException::class)
     fun setup() {
-        db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
-        repo = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext()) //db!!.getRepository("http://localhost/dummy/", "")
+        db = UmAppDatabase.getInstance(context)
+        repo = db //db!!.getRepository("http://localhost/dummy/", "")
         db!!.clearAllTables()
 
         val storageDir = ContextCompat.getExternalFilesDirs(
-                InstrumentationRegistry.getTargetContext(), null)[0]
+                context, null)[0]
         val containerTmpDir = File(storageDir, "XapiPackageCOntentActivityEspressoTest." + System.currentTimeMillis())
         containerTmpDir.mkdirs()
 

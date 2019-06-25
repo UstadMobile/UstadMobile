@@ -10,11 +10,12 @@ import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-
 import com.ustadmobile.port.sharedse.networkmanager.DownloadJobPreparer
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
@@ -82,7 +83,7 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     private fun startObservingJob() {
         view.runOnUiThread(Runnable {
-            downloadDownloadJobLive = appDatabase.downloadJobDao.getJobLive(currentJobId!!)
+            downloadDownloadJobLive = appDatabase.downloadJobDao.getJobLive(currentJobId)
             downloadDownloadJobLive.observe(this@DownloadDialogPresenter.context as DoorLifecycleOwner,
                     this@DownloadDialogPresenter::handleDownloadJobStatusChange)
         })
