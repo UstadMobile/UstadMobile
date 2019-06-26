@@ -59,7 +59,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var flexBox: RecyclerView? = null
 
-    private var downloadButton: Button? = null
+    private lateinit var downloadButton: Button
 
     private var downloadProgress: DownloadProgressView? = null
 
@@ -72,7 +72,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow) {
-            downloadButton!!.setBackgroundResource(
+            downloadButton.setBackgroundResource(
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
@@ -92,7 +92,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
         localAvailabilityStatusText = findViewById(R.id.content_status_text)
         localAvailabilityStatusIcon = findViewById(R.id.content_status_icon)
-        downloadButton = findViewById(R.id.entry_detail_button)
+        downloadButton = findViewById(R.id.entry_download_open_button)
         downloadProgress = findViewById(R.id.entry_detail_progress)
         entryDetailsTitle = findViewById(R.id.entry_detail_title)
         entryDetailsDesc = findViewById(R.id.entry_detail_description)
@@ -121,6 +121,9 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
         editBtn.setOnClickListener {
             presenter!!.handleStartEditingContent()
+        }
+        downloadButton.setOnClickListener {
+            presenter!!.handleDownloadButtonClick()
         }
 
     }
@@ -236,10 +239,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun setDownloadButtonClickableListener(isDownloadComplete: Boolean) {
-        downloadButton!!.setOnClickListener {
-            presenter!!.handleDownloadButtonClick(isDownloadComplete,
-                    presenter!!.entryUuid)
-        }
+
     }
 
     override fun showDownloadOptionsDialog(map: HashMap<String, String>) {

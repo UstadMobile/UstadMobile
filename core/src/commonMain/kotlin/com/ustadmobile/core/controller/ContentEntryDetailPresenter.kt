@@ -56,7 +56,9 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var entryLiveData: DoorLiveData<ContentEntry?>? = null
 
-    private  val appdb = UmAppDatabase.getInstance(context)
+    private val appdb = UmAppDatabase.getInstance(context)
+
+    private var isDownloadComplete: Boolean = false
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -72,7 +74,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         navigation = arguments[ARG_REFERRER]
 
-        entryLiveData  = contentEntryDao.findLiveContentEntry(entryUuid)
+        entryLiveData = contentEntryDao.findLiveContentEntry(entryUuid)
         entryLiveData!!.observe(this, this::onEntryChanged)
 
         GlobalScope.launch {
@@ -100,8 +102,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
     }
 
-    private fun onEntryChanged(entry: ContentEntry?){
-        if(entry != null){
+    private fun onEntryChanged(entry: ContentEntry?) {
+        if (entry != null) {
             val licenseType = getLicenseType(entry)
             view.runOnUiThread(Runnable {
                 view.setContentEntryLicense(licenseType)
@@ -128,7 +130,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private fun onEntryStatusChanged(status: ContentEntryStatus?) {
 
-        val isDownloadComplete = status != null && status.downloadStatus == JobStatus.COMPLETE
+        isDownloadComplete = status != null && status.downloadStatus == JobStatus.COMPLETE
 
         val buttonLabel = impl.getString(if (status == null || !isDownloadComplete)
             MessageID.download
@@ -161,7 +163,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable {
             view.setButtonTextLabel(buttonLabel)
             view.setDownloadButtonVisible(!isDownloading)
-            view.setDownloadButtonClickableListener(isDownloadComplete)
             view.setDownloadProgressVisible(isDownloading)
             view.setDownloadProgressLabel(progressLabel)
             view.setLocalAvailabilityStatusViewVisible(isDownloading)
@@ -241,13 +242,13 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
     }
 
-    fun handleDownloadButtonClick(isDownloadComplete: Boolean, entryUuid: Long) {
+    fun handleDownloadButtonClick() {
         val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
         if (isDownloadComplete) {
             ContentEntryUtil.goToContentEntry(entryUuid, repoAppDatabase, impl, isDownloadComplete,
                     context, object : UmCallback<Any> {
 
-                override fun onSuccess(result: Any ?) {}
+                override fun onSuccess(result: Any?) {}
 
                 override fun onFailure(exception: Throwable?) {
                     if (exception != null) {
@@ -294,27 +295,26 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
 
-    fun handleStartEditingContent(){
+    fun handleStartEditingContent() {
 
         GlobalScope.launch {
             val entry = appdb.contentEntryDao.findByEntryId(entryUuid)
 
-            if(entry != null){
+            if (entry != null) {
                 args.putAll(arguments)
                 args[ContentEditorView.CONTENT_ENTRY_UID] = entryUuid.toString()
                 args[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
                 args[ContentEditorView.CONTENT_STORAGE_OPTION] = ""
-                args[ContentEntryEditView.CONTENT_TYPE] = (if(entry.imported) CONTENT_IMPORT_FILE
+                args[ContentEntryEditView.CONTENT_TYPE] = (if (entry.imported) CONTENT_IMPORT_FILE
                 else CONTENT_CREATE_CONTENT).toString()
 
-                if(entry.imported)
+                if (entry.imported)
                     view.startFileBrowser(args)
                 else
                     impl.go(ContentEditorView.VIEW_NAME, args, context)
             }
         }
     }
-
 
 
     override fun onDestroy() {

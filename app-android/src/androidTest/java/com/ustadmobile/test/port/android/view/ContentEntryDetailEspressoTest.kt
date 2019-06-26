@@ -29,14 +29,12 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.WebChunkActivity
-import com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.core.AllOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -53,7 +51,6 @@ class ContentEntryDetailEspressoTest {
 
 
     private var statusDao: ContentEntryStatusDao? = null
-    private var targetFile: File? = null
 
     val db: UmAppDatabase
         get() {
@@ -200,13 +197,8 @@ class ContentEntryDetailEspressoTest {
         val file = Container()
         file.mimeType = "application/webchunk+zip"
         file.lastModified = System.currentTimeMillis()
-        file.containerContentEntryUid = 18
+        file.containerContentEntryUid = 18L
         containerDao.insert(file)
-
-        targetFile = readFromTestResources(
-                "/com/ustadmobile/app/android/counting-out-1-20-objects.zip",
-                "counting-out-1-20-objects.zip")
-
 
     }
 
@@ -247,7 +239,7 @@ class ContentEntryDetailEspressoTest {
 
         onView(allOf<View>(withId(R.id.entry_detail_title), withText("وقت الاختبار")))
 
-        onView(allOf<View>(withId(R.id.entry_detail_button),
+        onView(allOf<View>(withId(R.id.entry_download_open_button),
                 withEffectiveVisibility(Visibility.VISIBLE),
                 withText("Download")))
 
@@ -263,7 +255,7 @@ class ContentEntryDetailEspressoTest {
         launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 6L.toString())
         mActivityRule.launchActivity(launchActivityIntent)
 
-        onView(withId(R.id.entry_detail_button))
+        onView(withId(R.id.entry_download_open_button))
                 .check(matches(withText("Download")))
                 .check(matches(withEffectiveVisibility(
                         Visibility.VISIBLE)))
@@ -279,7 +271,7 @@ class ContentEntryDetailEspressoTest {
         launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 10L.toString())
         mActivityRule.launchActivity(launchActivityIntent)
 
-        onView(withId(R.id.entry_detail_button))
+        onView(withId(R.id.entry_download_open_button))
                 .check(matches(withEffectiveVisibility(
                         Visibility.GONE)))
     }
@@ -294,7 +286,7 @@ class ContentEntryDetailEspressoTest {
         launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 14L.toString())
         mActivityRule.launchActivity(launchActivityIntent)
 
-        onView(withId(R.id.entry_detail_button))
+        onView(withId(R.id.entry_download_open_button))
                 .check(matches(withText("Open")))
                 .check(matches(withEffectiveVisibility(
                         Visibility.VISIBLE)))
@@ -310,15 +302,14 @@ class ContentEntryDetailEspressoTest {
         launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 14L.toString())
         mActivityRule.launchActivity(launchActivityIntent)
 
-        onView(allOf<View>(withId(R.id.entry_detail_button), withText("OPEN")))
-                .perform(click())
+        onView(withId(R.id.entry_download_open_button)).perform(click())
 
         Thread.sleep(5000)
 
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity::class.java.canonicalName),
                 hasExtra(equalTo(WebChunkView.ARG_CONTAINER_UID),
-                        equalTo("18")
+                        equalTo(18L.toString())
                 )))
 
     }

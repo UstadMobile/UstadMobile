@@ -105,15 +105,13 @@
                 app:layout_constraintTop_toBottomOf="@id/labelBarrier">
 
                 <Button
-                    android:clickable="true"
                     android:textStyle="bold"
-                    android:id="@+id/entry_detail_button"
+                    android:id="@+id/entry_download_open_button"
                     android:layout_width="match_parent"
                     android:padding="@dimen/dimen_16dp"
                     android:layout_height="wrap_content"
                     app:backgroundTint="@color/primary"
-                    android:textColor="@android:color/white"
-                    android:focusable="true" />
+                    android:textColor="@android:color/white" />
 
                 <com.ustadmobile.port.android.view.DownloadProgressView
                     android:id="@+id/entry_detail_progress"
