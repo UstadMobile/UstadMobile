@@ -468,13 +468,12 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         else
             ConnectivityStatus.STATE_UNMETERED
 
-        val networkInfo: NetworkInfo?
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            networkInfo = connectivityManager!!.getNetworkInfo(network)
+        val networkInfo: NetworkInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            connectivityManager!!.getNetworkInfo(network)
         } else {
-            networkInfo = connectivityManager!!.activeNetworkInfo
+            connectivityManager!!.activeNetworkInfo
         }
+
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: onAvailable" + prettyPrintNetwork(networkInfo))
 
         val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
@@ -1008,9 +1007,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
          * When we use BLE for advertising and scanning, we need wait a little bit after one starts
          * before the other can start
          */
-        val BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000
+        const val BLE_SCAN_WAIT_AFTER_ADVERTISING = 4000
 
-        val USTADMOBILE_BLE_SERVICE_UUID_UUID = UUID.fromString(NetworkManagerBleCommon.USTADMOBILE_BLE_SERVICE_UUID)
+        val USTADMOBILE_BLE_SERVICE_UUID_UUID = UUID.fromString(USTADMOBILE_BLE_SERVICE_UUID)
 
         const val BLE_ADVERTISE_MIN_SDK_VERSION = 21
 

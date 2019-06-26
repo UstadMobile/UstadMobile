@@ -16,6 +16,8 @@ abstract class ContainerManagerCommon(protected val container: Container,
     data class AddEntryOptions(val moveExistingFiles: Boolean = false,
                                val dontUpdateTotals: Boolean = false)
 
+    var containerUid: Long = 0
+
     val allEntries: List<ContainerEntryWithContainerEntryFile>
         get() = pathToEntryMap.values.toList()
 
@@ -23,6 +25,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
     init {
         ///load from database
         val entryList = db.containerEntryDao.findByContainer(container.containerUid)
+        containerUid = container.containerUid
         pathToEntryMap.putAll(entryList.map { it.cePath!! to it }.toMap())
     }
 

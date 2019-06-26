@@ -17,6 +17,8 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.response.HttpResponse
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Assert
@@ -31,6 +33,7 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
+import com.ustadmobile.core.util.UMFileUtil.joinPaths
 
 class TestEpubContentPresenter {
 
@@ -78,8 +81,8 @@ class TestEpubContentPresenter {
 
         doAnswer {
             Thread {
-                val mountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                        httpd!!.mountContainer(it.getArgument(0), "")!!)
+                val mountedUrl = joinPaths(httpd!!.localHttpUrl,
+                        httpd!!.mountContainer(it.getArgument(0),null)!!)
                 UmCallbackUtil.onSuccessIfNotNull(it.getArgument<UmCallback<String>>(1), mountedUrl)
             }.start()
             null
@@ -115,7 +118,7 @@ class TestEpubContentPresenter {
         doAnswer {
             hrefListReference.set(it.getArgument(0))
             null!!
-        }.`when`(mockEpubView)?.setSpineUrls(anyArray())
+        }.`when`(mockEpubView)?.setSpineUrls(anyArray(), eq(0))
 
         val presenter = EpubContentPresenter(Any(),
                 args, mockEpubView)
@@ -125,7 +128,7 @@ class TestEpubContentPresenter {
                 any<UmCallback<String>>())
         verify<EpubContentView>(mockEpubView, timeout(15000)).setContainerTitle(opf!!.title!!)
 
-        verify<EpubContentView>(mockEpubView, timeout(15000)).setSpineUrls(any())
+        verify<EpubContentView>(mockEpubView, timeout(15000)).setSpineUrls(any(), eq(0))
 
         val linearSpineUrls = hrefListReference.get() as Array<String>
         for (i in linearSpineUrls.indices) {
@@ -134,10 +137,10 @@ class TestEpubContentPresenter {
             //val response = UstadMobileSystemImpl.instance.makeRequestSync(
               //      UmHttpRequest(Any(), linearSpineUrls[i]))
             val client = HttpClient()
-            client.launch {
-                val response = client.get<UmHttpResponse>(linearSpineUrls[i])
+            GlobalScope.launch {
+                val response = client.get<HttpResponse>(linearSpineUrls[i])
                 Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
-                        response.status.toLong())
+                        response.status.value)
             }
 
         }

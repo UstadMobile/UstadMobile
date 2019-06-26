@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -16,8 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
@@ -40,7 +44,10 @@ import kotlinx.coroutines.Runnable
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView, ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor {
+class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentView,
+        ContentEntryListRecyclerViewAdapter.AdapterViewListener, LocalAvailabilityMonitor,
+        ContentEntryListRecyclerViewAdapter.EmptyStateListener {
+
     override val viewContext: Any
         get() = context!!
 
@@ -60,11 +67,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private var rootContainer: View? = null
 
+    private var emptyViewHolder: RelativeLayout? = null
+
     fun filterByLang(langUid: Long) {
         entryListPresenter!!.handleClickFilterByLanguage(langUid)
     }
 
-    fun filterBySchemaCategory(contentCategoryUid: Long, contentCategorySchemaUid: Long) {
+    fun filterBySchemaCategory(contentCategoryUid: Long) {
         entryListPresenter!!.handleClickFilterByCategory(contentCategoryUid)
     }
 
@@ -99,10 +108,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         rootContainer = inflater.inflate(R.layout.fragment_contententry_list, container, false)
@@ -112,6 +117,26 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         val context = rootContainer!!.context
         recyclerView = rootContainer!!.findViewById(R.id.content_entry_list)
         recyclerView!!.layoutManager = LinearLayoutManager(context)
+
+        emptyViewHolder = rootContainer!!.findViewById(R.id.emptyView)
+
+        val emptyViewImage :ImageView = rootContainer!!.findViewById(R.id.emptyViewImage)
+        val emptyViewText: TextView = rootContainer!!.findViewById(R.id.emptyViewText)
+
+        val isDownloadedSection = bundleToMap(arguments).containsKey(ARG_DOWNLOADED_CONTENT)
+
+        val labelText = UstadMobileSystemImpl.instance.getString(
+                if (isDownloadedSection) MessageID.empty_state_downloaded
+                else MessageID.empty_state_libraries,
+                context)
+
+        val resource = if (isDownloadedSection)
+            R.drawable.ic_file_download_black_24dp
+        else
+            R.drawable.ic_folder_black_24dp
+        emptyViewImage.setImageResource(resource)
+        emptyViewText.text = labelText
+
         val dividerItemDecoration = DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL)
         recyclerView!!.addItemDecoration(dividerItemDecoration)
@@ -127,7 +152,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             ustadBaseActivity!!.runAfterServiceConnection(Runnable{
                 ustadBaseActivity!!.runOnUiThread {
                     managerAndroidBle = ustadBaseActivity!!
-                            .networkManagerBle as NetworkManagerBle
+                            .networkManagerBle
                     checkReady()
                 }
             })
@@ -141,10 +166,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
-        if (entryListPresenter == null && managerAndroidBle != null && rootContainer != null) {
+        if (entryListPresenter == null && rootContainer != null) {
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
-                    UMAndroidUtil.bundleToMap(arguments), this)
-            entryListPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+                    bundleToMap(arguments), this)
+            entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
         }
     }
 
@@ -161,6 +186,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         recyclerAdapter = ContentEntryListRecyclerViewAdapter(activity!!, this, this,
                 managerAndroidBle)
         recyclerAdapter!!.addListeners()
+        recyclerAdapter!!.setEmptyStateListener(this)
         val data = LivePagedListBuilder(entryProvider, 20).build()
         data.observe(this, Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
 
@@ -175,7 +201,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     override fun showError() {
-        Toast.makeText(getContext(), R.string.content_entry_not_found, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.content_entry_not_found, Toast.LENGTH_SHORT).show()
     }
 
 
@@ -192,14 +218,14 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
         ustadBaseActivity!!.runAfterGrantingPermission(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
-                impl.getString(MessageID.download_storage_permission_title, getContext()!!),
-                impl.getString(MessageID.download_storage_permission_message, getContext()!!))
+                impl.getString(MessageID.download_storage_permission_title, context!!),
+                impl.getString(MessageID.download_storage_permission_message, context!!))
     }
 
-    override fun startMonitoringAvailability(monitor: Any, containerUidsToMonitor: List<Long>) {
+    override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
         Thread {
             if (managerAndroidBle != null) {
-                managerAndroidBle!!.startMonitoringAvailability(monitor, containerUidsToMonitor)
+                managerAndroidBle!!.startMonitoringAvailability(monitor, entryUidsToMonitor)
             }
         }.start()
     }
@@ -213,6 +239,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onStop() {
         stopMonitoringAvailability(this)
         super.onStop()
+    }
+
+    override fun onEntriesLoaded() {
+        emptyViewHolder!!.visibility = View.GONE
     }
 
     override fun onDestroy() {

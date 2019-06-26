@@ -8,6 +8,8 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Manages a list of DownloadJobItemManagers. Creates new items, closes downloadjobs that have finished etc.
@@ -23,19 +25,48 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
     val activeDownloadJobItemManagers
         get() = managerMap.values.toList()
 
-    fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
-        newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
-        val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
-                coroutineDispatcher)
-        manager.onDownloadJobItemChangeListener = this::onDownloadJobItemChange
-        managerMap[newDownloadJob.djUid] = manager
+    private val mutex = Mutex()
 
-        return manager
+    suspend fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
+        mutex.withLock {
+            newDownloadJob.djUid = appDatabase.downloadJobDao.insert(newDownloadJob).toInt()
+            val manager = DownloadJobItemManager(appDatabase, newDownloadJob.djUid,
+                    coroutineDispatcher)
+            manager.onDownloadJobItemChangeListener = this::onDownloadJobItemChange
+            managerMap[newDownloadJob.djUid] = manager
+
+            return manager
+        }
     }
 
+    /**
+     * Will return a downloadmanager IF and only if it is currently active and in the memory,
+     * otherwise returns null
+     *
+     * @param downloadJobId ID of the download job to load
+     */
     fun getDownloadJobItemManager(downloadJobId: Int): DownloadJobItemManager? {
         return managerMap.get(downloadJobId)
     }
+
+    /**
+     * Will open a downloadjobitemmanager. If the downloadjobitemmanager for this downloadjob
+     * has already been loaded, it will be returned. Otherwise the downloadjob will be loaded
+     * from the database
+     */
+    suspend fun openDownloadJobItemManager(downloadJobId: Int): DownloadJobItemManager? {
+        return mutex.withLock {
+            val downloadJob = appDatabase.downloadJobDao.findByUid(downloadJobId)
+            if(downloadJob == null)
+                return null
+
+            val downloadJobItemManager = DownloadJobItemManager(appDatabase, downloadJobId,
+                    coroutineDispatcher)
+            managerMap[downloadJob.djUid] = downloadJobItemManager
+            downloadJobItemManager
+        }
+    }
+
 
 //    fun getActiveDownloadJobItemManagers(): List<DownloadJobItemManager> {
 //        return managerMap.values.toList()
@@ -70,19 +101,22 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
         }
     }
 
-    fun deleteUnusedDownloadJob(downloadJobUid: Int) {
-        val downloadJobManager = managerMap[downloadJobUid]
-        val rootItemStatus = downloadJobManager?.rootItemStatus
-        if (downloadJobManager != null && rootItemStatus != null) {
-            //TODO: fix this
-            //downloadJobManager.updateStatus(rootItemStatus.jobItemUid, JobStatus.CANCELED, null)
+    suspend fun deleteUnusedDownloadJob(downloadJobUid: Int) {
+        mutex.withLock {
+            val downloadJobManager = managerMap[downloadJobUid]
+            val rootItemStatus = downloadJobManager?.rootItemStatus
+            if (downloadJobManager != null && rootItemStatus != null) {
+                //TODO: fix this
+                //downloadJobManager.updateStatus(rootItemStatus.jobItemUid, JobStatus.CANCELED, null)
+            }
+
+            if (downloadJobManager != null) {
+                managerMap.remove(downloadJobUid)
+            }
+
+            appDatabase.downloadJobDao.cleanupUnused(downloadJobUid)
         }
 
-        if (downloadJobManager != null) {
-            managerMap.remove(downloadJobUid)
-        }
-
-        appDatabase.downloadJobDao.cleanupUnused(downloadJobUid)
     }
 
 }

@@ -5,10 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
@@ -17,7 +18,6 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import com.ustadmobile.port.android.view.WebChunkActivity
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmAndroidTestUtil.readAllFilesInDirectory
@@ -35,10 +35,10 @@ import java.util.*
 @RunWith(AndroidJUnit4::class)
 class WebChunkEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(WebChunkActivity::class.java, false, false)
 
-    @Rule
+    @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
 
@@ -52,7 +52,7 @@ class WebChunkEspressoTest {
 
 
     fun getDb(): UmAppDatabase {
-        context = InstrumentationRegistry.getTargetContext()
+        context = InstrumentationRegistry.getInstrumentation().context
         db = UmAppDatabase.getInstance(context)
         db!!.clearAllTables()
         return UmAppDatabase.getInstance(context) //db!!.getRepository("https://localhost", "")

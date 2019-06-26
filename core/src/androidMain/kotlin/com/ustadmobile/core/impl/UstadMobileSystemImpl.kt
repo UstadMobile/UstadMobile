@@ -83,6 +83,10 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     private val viewNameToAndroidImplMap = mapOf<String,Any>(
             "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
             VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
+            ContentEditorView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorActivity"),
+            ContentEditorPageListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorPageListFragment"),
+            ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
+            ContentEntryEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryEditFragment"),
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
@@ -249,7 +253,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * Get a string for use in the UI
      */
     actual fun getString(messageCode: Int, context: Any): String{
-        val androidId = messageIdMap.get(messageCode)
+        val androidId = messageIdMap[messageCode]
         return if (androidId != null) {
             (context as Context).resources.getString(androidId)
         } else {
@@ -297,6 +301,29 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
             callback.onDone(dirList)
         }.start()
+    }
+
+
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
+        val dirList = ArrayList<UMStorageDir>()
+        val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
+        val contentDirName = getContentDirName(context)
+
+        var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
+        if (!umDir.exists()) umDir.mkdirs()
+        dirList.add(UMStorageDir(umDir.absolutePath,
+                getString(MessageID.phone_memory, context), true,
+                true, false, canWriteFileInDir(umDir.absolutePath)))
+
+        if (storageOptions.size > 1) {
+            val sdCardStorage = storageOptions[sdCardStorageIndex]
+            umDir = File(sdCardStorage, contentDirName)
+            if (!umDir.exists()) umDir.mkdirs()
+            dirList.add(UMStorageDir(umDir.absolutePath,
+                    getString(MessageID.memory_card, context), true,
+                    true, false, canWriteFileInDir(umDir.absolutePath)))
+        }
+        return dirList
     }
 
     /**
@@ -563,5 +590,17 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
         return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
     }
+
+    /**
+     * Get asset as an input stream asynchronously
+     */
+    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
+        var mPath = path
+        if (path.startsWith("/")) {
+            mPath = path.substring(1)
+        }
+       return (context as Context).assets.open(mPath);
+    }
+
 
 }

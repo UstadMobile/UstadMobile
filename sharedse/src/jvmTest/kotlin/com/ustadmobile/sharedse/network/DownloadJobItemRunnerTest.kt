@@ -181,7 +181,9 @@ class DownloadJobItemRunnerTest {
         downloadJob.djStatus = JobStatus.QUEUED
         downloadJob.djDestinationDir = clientContainerDir.absolutePath
 
-        downloadJobItemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob)
+        runBlocking {
+            downloadJobItemManager = mockedNetworkManager.createNewDownloadJobItemManager(downloadJob)
+        }
 
         downloadJobItem = DownloadJobItem(downloadJob, contentEntry.contentEntryUid,
                 container.containerUid, container.fileSize)

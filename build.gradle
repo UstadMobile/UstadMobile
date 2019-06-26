@@ -31,6 +31,8 @@ allprojects {
         maven {
             url "https://dl.bintray.com/soywiz/soywiz"
         }
+
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -130,6 +132,7 @@ ext {
     version_android_facebook_login = "4.37.0"
     version_android_twitter_login = "3.3.0"
     version_android_seismic = "1.0.2"
+    version_android_fab_extended = "0.0.4"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

@@ -71,6 +71,8 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
 
     override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
 
+    override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
+
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
      *
@@ -83,6 +85,12 @@ expect class UstadMobileSystemImpl : UstadMobileSystemCommon {
      *
      */
     fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>)
+
+
+    /**
+     * Get asset as an input stream asynchronously
+     */
+    suspend fun getAssetInputStreamAsync(context: Any, path: String) : InputStream
 
     /**
      * Get a preference for the app

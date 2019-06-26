@@ -13,7 +13,6 @@ import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
@@ -24,8 +23,8 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
+
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity, private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
@@ -34,6 +33,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     private val containerUidsToMonitor = HashSet<Long>()
 
     private val boundViewHolders: MutableSet<ViewHolder>
+
+    private var emptyStateListener: EmptyStateListener? = null
 
     /**
      * @return List of container uids that can be monitored (Requires status).
@@ -61,13 +62,17 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     fun addListeners() {
-        managerAndroidBle!!.addLocalAvailabilityListener(this)
-        managerAndroidBle.addDownloadChangeListener(this)
+        managerAndroidBle?.addLocalAvailabilityListener(this)
+        managerAndroidBle?.addDownloadChangeListener(this)
     }
 
     fun removeListeners() {
-        managerAndroidBle!!.removeLocalAvailabilityListener(this)
-        managerAndroidBle.removeDownloadChangeListener(this)
+        managerAndroidBle?.removeLocalAvailabilityListener(this)
+        managerAndroidBle?.removeDownloadChangeListener(this)
+    }
+
+    fun setEmptyStateListener(stateListener: EmptyStateListener) {
+        this.emptyStateListener = stateListener
     }
 
     override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
@@ -102,6 +107,11 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         fun downloadStatusClicked(entry: ContentEntry?)
     }
 
+    interface EmptyStateListener {
+
+        fun onEntriesLoaded()
+    }
+
     override fun onViewRecycled(holder: ViewHolder) {
         synchronized(boundViewHolders) {
             boundViewHolders.remove(holder)
@@ -128,6 +138,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position)
+
+        emptyStateListener!!.onEntriesLoaded()
 
         synchronized(boundViewHolders) {
             boundViewHolders.add(holder)
@@ -231,7 +243,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             GlobalScope.launch(Dispatchers.Main) {
-                val downloadJobItemStatus = managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(
+                val downloadJobItemStatus = managerAndroidBle?.findDownloadJobItemStatusByContentEntryUid(
                     entry.contentEntryUid)
                 if(downloadJobItemStatus != null){
                     holder.downloadView.progressVisibility = View.VISIBLE

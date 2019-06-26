@@ -105,8 +105,8 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
             val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
             GlobalScope.launch {
                 try {
-                    var client = HttpClient()
-                    var ocfContent = client.get<String>(containerUri)
+                    val client = HttpClient()
+                    val ocfContent = client.get<String>(containerUri)
 
                     ocf = OcfDocument()
                     val ocfParser = KMPXmlParser()
@@ -116,7 +116,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                     //get and parse the first publication
                     val opfUrl = UMFileUtil.joinPaths(mountedUrl!!,
                             ocf!!.rootFiles[0].fullPath!!)
-                    var opfContent = client.get<String>(opfUrl)
+                    val opfContent = client.get<String>(opfUrl)
 
                     val opf = OpfDocument()
                     val opfParser = KMPXmlParser()
@@ -141,8 +141,11 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                         null
 
                     epubContentView!!.runOnUiThread(Runnable {
+                        val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF)) opf.getLinearSpinePositionByHREF(
+                                arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)!!) else 0
+
                         epubContentView.setContainerTitle(opf.title!!)
-                        epubContentView.setSpineUrls(linearSpineUrls!!)
+                        epubContentView.setSpineUrls(linearSpineUrls!!, if(position >= 0) position else 0)
                         if (opfCoverImageItem != null) {
                             epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl!!,
                                     opfCoverImageItem.href!!))
@@ -159,7 +162,7 @@ class EpubContentPresenter(context: Any, args: Map<String, String>?, private val
                     val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
                             mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
 
-                    var navContent = client.get<String>(navXhtmlUrl)
+                    val navContent = client.get<String>(navXhtmlUrl)
 
                     val navDocument = EpubNavDocument()
                     val navParser = KMPXmlParser()

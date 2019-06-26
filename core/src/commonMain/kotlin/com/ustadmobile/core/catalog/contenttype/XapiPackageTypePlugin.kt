@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.XapiPackageContentView
  *
  */
 
-class XapiPackageTypePlugin : ContentTypePlugin() {
+class XapiPackageTypePlugin : ContentTypePlugin {
 
     override val viewName: String
         get() = XapiPackageContentView.VIEW_NAME

@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.entities.Container
 import java.io.*
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.zip.ZipFile
 
 object UmFileUtilSe {
 
@@ -153,7 +152,6 @@ object UmFileUtilSe {
                                            repo: UmAppDatabase,
                                            resourcePath: String,
                                            containerFileDir: File = makeTempDir("makeTempContainerDir", "." + System.currentTimeMillis())): TempZipContainer {
-        var zipFile: ZipFile? = null
         var tmpZipFile: File? = null
         try {
             tmpZipFile = File.createTempFile("makeTempContainerFromClass", "." + System.currentTimeMillis())
@@ -164,13 +162,11 @@ object UmFileUtilSe {
             val containerManager = ContainerManager(container, db, repo,
                     containerFileDir.absolutePath)
 
-            zipFile = ZipFile(tmpZipFile!!)
-            addEntriesFromZipToContainer(tmpZipFile.absolutePath, containerManager)
+            addEntriesFromZipToContainer(tmpZipFile!!.absolutePath, containerManager)
             return TempZipContainer(container, containerManager, containerFileDir)
         } catch (e: IOException) {
             throw e
         } finally {
-            zipFile?.close()
 
             if (tmpZipFile != null && !tmpZipFile.delete())
                 tmpZipFile.deleteOnExit()

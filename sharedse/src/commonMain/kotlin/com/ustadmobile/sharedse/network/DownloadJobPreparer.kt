@@ -26,8 +26,6 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
         UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: start " +
                 "entry uid = " + contentEntryUid + " download job uid = " + downloadJobUid)
 
-        var numItemsCreated = 0
-
         val jobItemDao = appDatabase.downloadJobItemDao
         var childItemsToCreate: List<DownloadJobItemDao.DownloadJobItemToBeCreated2>
         val rootEntryContainer = appDatabaseRepo.containerDao
@@ -36,6 +34,8 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 jobItemManager.downloadJobUid, contentEntryUid,
                 rootEntryContainer?.containerUid ?: 0,
                 rootEntryContainer?.fileSize ?: 0)
+
+        var numItemsCreated = 1
 
         jobItemManager.insertDownloadJobItems(listOf(rootDownlaodJobItem))
 

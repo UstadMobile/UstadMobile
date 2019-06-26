@@ -27,7 +27,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        this.containerUid = arguments[UstadView.ARG_CONTAINER_UID]!!.toLong()
+        this.containerUid = (arguments[UstadView.ARG_CONTAINER_UID] ?: error("")).toLong()
         GlobalScope.launch {
             val h5pPath = mountH5PDist()
             val containerPath = containerMounter(containerUid)
@@ -53,7 +53,7 @@ class H5PContentPresenter(context: Any, arguments: Map<String, String?>, view: H
             }
 
             with(view) {
-                runOnUiThread(Runnable {setTitle(h5pTitle) })
+                runOnUiThread(Runnable {setContentTitle(h5pTitle) })
             }
         }
     }

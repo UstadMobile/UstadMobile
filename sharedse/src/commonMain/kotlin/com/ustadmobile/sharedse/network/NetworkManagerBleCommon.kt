@@ -481,35 +481,35 @@ abstract class NetworkManagerBleCommon(
      */
     fun handleNodeConnectionHistory(bluetoothAddress: String, success: Boolean) {
 
-        var record: AtomicInt? = knownBadNodeTrackList[bluetoothAddress]
-
-        if (record == null || success) {
-            record = atomic(0)
-            knownBadNodeTrackList[bluetoothAddress] = record
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Connection succeeded bad node counter was set to " + record.value
-                            + " for " + bluetoothAddress)
-        }
-
-        if (!success) {
-            record.value = (record.incrementAndGet())
-            knownBadNodeTrackList[bluetoothAddress] = record
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Connection failed and bad node counter set to " + record.value
-                            + " for " + bluetoothAddress)
-        }
-
-        if (knownBadNodeTrackList[bluetoothAddress]!!.value > 5) {
-            UMLog.l(UMLog.DEBUG, 694,
-                    "Bad node counter exceeded threshold (5), removing node with address "
-                            + bluetoothAddress + " from the list")
-            knownBadNodeTrackList.remove(bluetoothAddress)
-            knownPeerNodes.remove(bluetoothAddress)
-            umAppDatabase.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
-
-            UMLog.l(UMLog.DEBUG, 694, "Node with address "
-                    + bluetoothAddress + " removed from the list")
-        }
+//        var record: AtomicInt? = knownBadNodeTrackList[bluetoothAddress]
+//
+//        if (record == null || success) {
+//            record = atomic(0)
+//            knownBadNodeTrackList[bluetoothAddress] = record
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Connection succeeded bad node counter was set to " + record.value
+//                            + " for " + bluetoothAddress)
+//        }
+//
+//        if (!success) {
+//            record.value = (record.incrementAndGet())
+//            knownBadNodeTrackList[bluetoothAddress] = record
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Connection failed and bad node counter set to " + record.value
+//                            + " for " + bluetoothAddress)
+//        }
+//
+//        if (knownBadNodeTrackList[bluetoothAddress]!!.value > 5) {
+//            UMLog.l(UMLog.DEBUG, 694,
+//                    "Bad node counter exceeded threshold (5), removing node with address "
+//                            + bluetoothAddress + " from the list")
+//            knownBadNodeTrackList.remove(bluetoothAddress)
+//            knownPeerNodes.remove(bluetoothAddress)
+//            umAppDatabase.networkNodeDao.deleteByBluetoothAddress(bluetoothAddress)
+//
+//            UMLog.l(UMLog.DEBUG, 694, "Node with address "
+//                    + bluetoothAddress + " removed from the list")
+//        }
     }
 
     /**
@@ -545,11 +545,11 @@ abstract class NetworkManagerBleCommon(
      *
      * @return
      */
-    fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
+    suspend fun createNewDownloadJobItemManager(newDownloadJob: DownloadJob): DownloadJobItemManager {
         return jobItemManagerList!!.createNewDownloadJobItemManager(newDownloadJob)
     }
 
-    fun createNewDownloadJobItemManager(rootContentEntryUid: Long): DownloadJobItemManager {
+    suspend fun createNewDownloadJobItemManager(rootContentEntryUid: Long): DownloadJobItemManager {
         return createNewDownloadJobItemManager(DownloadJob(rootContentEntryUid,
                 getSystemTimeInMillis()))
     }
@@ -559,8 +559,10 @@ abstract class NetworkManagerBleCommon(
         return jobItemManagerList!!.getDownloadJobItemManager(downloadJobId)
     }
 
+    suspend fun openDownloadJobItemManager(downloadJobUid: Int) = jobItemManagerList!!.openDownloadJobItemManager(downloadJobUid)
+
     fun deleteUnusedDownloadJob(downloadJobUid: Int) {
-        jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid)
+        GlobalScope.launch { jobItemManagerList!!.deleteUnusedDownloadJob(downloadJobUid) }
     }
 
     override suspend fun findDownloadJobItemStatusByContentEntryUid(contentEntryUid: Long) = jobItemManagerList!!.findDownloadJobItemStatusByContentEntryUid(contentEntryUid)

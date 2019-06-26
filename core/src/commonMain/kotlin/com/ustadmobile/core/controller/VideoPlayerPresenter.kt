@@ -67,7 +67,7 @@ class VideoPlayerPresenter(context: Any, arguments: Map<String, String>?, view: 
                     }
                 }
             }
-            view.runOnUiThread(Runnable { view.setVideoParams(videoPath!!, audioPath!!, srtPath!!) })
+            view.runOnUiThread(Runnable { view.setVideoParams(videoPath, audioPath, srtPath) })
         }
 
     }

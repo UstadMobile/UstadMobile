@@ -26,7 +26,8 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-
         ':lib-database-annotation-processor',
         ':lib-database',
         ':lib-database-android',
-        ':lib-room-annotations'
+        ':lib-room-annotations',
+        ':lib-content-editor'
         //':lib-content-scrapers'
 //include ':app-rest-server'
 
