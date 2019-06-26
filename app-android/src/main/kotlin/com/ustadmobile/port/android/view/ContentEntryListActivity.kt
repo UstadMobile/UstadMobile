@@ -47,7 +47,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
 
         contentCreationOptionBehaviour = BottomSheetBehavior
-                .from<LinearLayout>(findViewById(R.id.bottom_content_option_sheet))
+                .from(findViewById(R.id.bottom_content_option_sheet))
 
         findViewById<View>(R.id.action_close_options).setOnClickListener {
             val collapsed = contentCreationOptionBehaviour!!.state == BottomSheetBehavior.STATE_COLLAPSED

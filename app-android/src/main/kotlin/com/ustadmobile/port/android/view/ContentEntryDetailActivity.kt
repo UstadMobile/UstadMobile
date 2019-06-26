@@ -76,13 +76,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }
 
-        managerAndroidBle = networkManagerBle as NetworkManagerBle?
+        managerAndroidBle = networkManagerBle
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this,
                 this, networkManagerBle)
         presenter!!.onCreate(bundleToMap(Bundle()))
         presenter!!.onStart()
-        managerAndroidBle!!.addLocalAvailabilityListener(this)
+        managerAndroidBle?.addLocalAvailabilityListener(this)
 
     }
 
@@ -236,7 +236,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun setDownloadButtonClickableListener(isDownloadComplete: Boolean) {
-        downloadButton!!.setOnClickListener { _ ->
+        downloadButton!!.setOnClickListener {
             presenter!!.handleDownloadButtonClick(isDownloadComplete,
                     presenter!!.entryUuid)
         }

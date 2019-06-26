@@ -22,7 +22,7 @@ import java.io.IOException
 
 class Login2ActivityEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(Login2Activity::class.java, false, false)
 
     private lateinit var mockRestServer: MockWebServer

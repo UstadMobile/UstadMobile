@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -16,8 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.view.ContentEntryListFragmentView
@@ -27,11 +31,6 @@ import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
-import android.widget.RelativeLayout
-import android.widget.TextView
-import android.widget.ImageView
-import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 
 
 /**
@@ -153,7 +152,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
             ustadBaseActivity!!.runAfterServiceConnection(Runnable{
                 ustadBaseActivity!!.runOnUiThread {
                     managerAndroidBle = ustadBaseActivity!!
-                            .networkManagerBle as NetworkManagerBle
+                            .networkManagerBle
                     checkReady()
                 }
             })
@@ -167,10 +166,10 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     }
 
     private fun checkReady() {
-        if (entryListPresenter == null && managerAndroidBle != null && rootContainer != null) {
+        if (entryListPresenter == null && rootContainer != null) {
             entryListPresenter = ContentEntryListFragmentPresenter(context as Context,
-                    UMAndroidUtil.bundleToMap(arguments), this)
-            entryListPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+                    bundleToMap(arguments), this)
+            entryListPresenter!!.onCreate(bundleToMap(savedInstanceState))
         }
     }
 

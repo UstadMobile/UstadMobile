@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -14,24 +13,26 @@ import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryStatusDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.view.ContentEntryDetailActivity
 import com.ustadmobile.port.android.view.WebChunkActivity
-import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.test.port.android.UmAndroidTestUtil.readFromTestResources
-import org.hamcrest.Matchers.allOf
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.core.AllOf
-import org.hamcrest.core.IsEqual.equalTo
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,12 +42,12 @@ import java.io.IOException
 @RunWith(AndroidJUnit4::class)
 class ContentEntryDetailEspressoTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(ContentEntryDetailActivity::class.java, false, false)
 
     lateinit var context: Context
 
-    @Rule
+    @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
 
@@ -56,7 +57,7 @@ class ContentEntryDetailEspressoTest {
 
     val db: UmAppDatabase
         get() {
-            context = InstrumentationRegistry.getTargetContext()
+            context = InstrumentationRegistry.getInstrumentation().context
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
             return  UmAppDatabase.getInstance(context)// db.getRepository("https://localhost", "")
@@ -65,6 +66,8 @@ class ContentEntryDetailEspressoTest {
     @Throws(IOException::class)
     fun createDummyContent() {
         val repo = db
+
+        UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
 
         val contentDao = repo.contentEntryDao
         val contentEntryRelatedEntryJoinDao = repo.contentEntryRelatedEntryJoinDao
@@ -245,7 +248,7 @@ class ContentEntryDetailEspressoTest {
         onView(allOf<View>(withId(R.id.entry_detail_title), withText("وقت الاختبار")))
 
         onView(allOf<View>(withId(R.id.entry_detail_button),
-                withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE),
+                withEffectiveVisibility(Visibility.VISIBLE),
                 withText("Download")))
 
 
@@ -263,7 +266,7 @@ class ContentEntryDetailEspressoTest {
         onView(withId(R.id.entry_detail_button))
                 .check(matches(withText("Download")))
                 .check(matches(withEffectiveVisibility(
-                        ViewMatchers.Visibility.VISIBLE)))
+                        Visibility.VISIBLE)))
     }
 
     @Test
@@ -278,7 +281,7 @@ class ContentEntryDetailEspressoTest {
 
         onView(withId(R.id.entry_detail_button))
                 .check(matches(withEffectiveVisibility(
-                        ViewMatchers.Visibility.GONE)))
+                        Visibility.GONE)))
     }
 
 
@@ -294,7 +297,7 @@ class ContentEntryDetailEspressoTest {
         onView(withId(R.id.entry_detail_button))
                 .check(matches(withText("Open")))
                 .check(matches(withEffectiveVisibility(
-                        ViewMatchers.Visibility.VISIBLE)))
+                        Visibility.VISIBLE)))
 
     }
 
@@ -307,15 +310,15 @@ class ContentEntryDetailEspressoTest {
         launchActivityIntent.putExtra(ARG_CONTENT_ENTRY_UID, 14L.toString())
         mActivityRule.launchActivity(launchActivityIntent)
 
-        onView(allOf<View>(withId(R.id.entry_detail_button), withText("Open")))
+        onView(allOf<View>(withId(R.id.entry_detail_button), withText("OPEN")))
                 .perform(click())
 
         Thread.sleep(5000)
 
         intended(AllOf.allOf(
                 hasComponent(WebChunkActivity::class.java.canonicalName),
-                hasExtra(equalTo(WebChunkView.ARG_CHUNK_PATH),
-                        equalTo(targetFile!!.path.toString())
+                hasExtra(equalTo(WebChunkView.ARG_CONTAINER_UID),
+                        equalTo("18")
                 )))
 
     }

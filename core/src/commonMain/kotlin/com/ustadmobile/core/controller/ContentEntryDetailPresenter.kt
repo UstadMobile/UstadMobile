@@ -70,17 +70,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
-        navigation = arguments.getValue(ARG_REFERRER) ?: ""
+        navigation = arguments[ARG_REFERRER]
 
         entryLiveData  = contentEntryDao.findLiveContentEntry(entryUuid)
         entryLiveData!!.observe(this, this::onEntryChanged)
-
-        GlobalScope.launch {
-            val result = contentEntryDao.getContentByUuidAsync(entryUuid)
-            if (result != null) {
-
-            }
-        }
 
         GlobalScope.launch {
             val result = containerDao!!.findFilesByContentEntryUid(entryUuid)

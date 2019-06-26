@@ -1,9 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.db.JobStatus
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.core.view.ContentEntryEditView
@@ -11,12 +8,7 @@ import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryStatus
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
 
 class ContentEntryListPresenter (context: Any, arguments: Map<String, String>?, view: ContentEntryListView)
     : UstadBaseController<ContentEntryListView>(context, arguments!!, view)  {

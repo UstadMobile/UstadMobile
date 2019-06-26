@@ -62,13 +62,13 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     fun addListeners() {
-        managerAndroidBle!!.addLocalAvailabilityListener(this)
-        managerAndroidBle.addDownloadChangeListener(this)
+        managerAndroidBle?.addLocalAvailabilityListener(this)
+        managerAndroidBle?.addDownloadChangeListener(this)
     }
 
     fun removeListeners() {
-        managerAndroidBle!!.removeLocalAvailabilityListener(this)
-        managerAndroidBle.removeDownloadChangeListener(this)
+        managerAndroidBle?.removeLocalAvailabilityListener(this)
+        managerAndroidBle?.removeDownloadChangeListener(this)
     }
 
     fun setEmptyStateListener(stateListener: EmptyStateListener) {
@@ -243,7 +243,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             GlobalScope.launch(Dispatchers.Main) {
-                val downloadJobItemStatus = managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(
+                val downloadJobItemStatus = managerAndroidBle?.findDownloadJobItemStatusByContentEntryUid(
                     entry.contentEntryUid)
                 if(downloadJobItemStatus != null){
                     holder.downloadView.progressVisibility = View.VISIBLE

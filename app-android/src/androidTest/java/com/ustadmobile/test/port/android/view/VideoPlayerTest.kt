@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
 import com.ustadmobile.core.container.ContainerManager
@@ -27,9 +27,9 @@ import java.nio.file.Files
 @RunWith(AndroidJUnit4::class)
 class VideoPlayerTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(VideoPlayerActivity::class.java, false, false)
-    @Rule
+    @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
     private var containerUid: Long = 0
@@ -37,7 +37,7 @@ class VideoPlayerTest {
 
     val db: UmAppDatabase
         get() {
-            val context = InstrumentationRegistry.getTargetContext()
+            val context = InstrumentationRegistry.getInstrumentation().context
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
             return UmAppDatabase.getInstance(context)//db.getRepository("https://localhost", "")
@@ -45,7 +45,7 @@ class VideoPlayerTest {
 
     @Throws(IOException::class)
     fun createDummyContent() {
-        val db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
+        val db = db
         val repo = db
         val contentDao = repo.contentEntryDao
         val containerDao = repo.containerDao

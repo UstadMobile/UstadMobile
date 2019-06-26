@@ -13,7 +13,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.core.view.H5PContentView.Companion.ANDROID_ASSETS_PATH
 import com.ustadmobile.sharedse.network.AndroidAssetsHandler
-import com.ustadmobile.sharedse.network.EmbeddedHttpdService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.serialization.ImplicitReflectionSerializer
 
@@ -49,13 +48,16 @@ class H5PContentActivity : UstadBaseActivity(), H5PContentView {
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        val httpd = networkManagerBle!!.httpd
-        httpd.addRoute("$ANDROID_ASSETS_PATH(.)+",
-                AndroidAssetsHandler::class.java, applicationContext)
-        mPresenter = H5PContentPresenter(this,
-                UMAndroidUtil.bundleToMap(intent.extras), this,
-                httpd.containerMounter)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras))
+        val httpd = networkManagerBle?.httpd
+        if (httpd != null) {
+            httpd.addRoute("$ANDROID_ASSETS_PATH(.)+",
+                    AndroidAssetsHandler::class.java, applicationContext)
+            mPresenter = H5PContentPresenter(this,
+                    UMAndroidUtil.bundleToMap(intent.extras), this,
+                    httpd.containerMounter)
+            mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras))
+        }
+
     }
 
     override fun setContentTitle(title: String) {
@@ -68,7 +70,7 @@ class H5PContentActivity : UstadBaseActivity(), H5PContentView {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-        if(item.itemId == android.R.id.home){
+        if (item.itemId == android.R.id.home) {
             finish()
         }
         return super.onOptionsItemSelected(item)
