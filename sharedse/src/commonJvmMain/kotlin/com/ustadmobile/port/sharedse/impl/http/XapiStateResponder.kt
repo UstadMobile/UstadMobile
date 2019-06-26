@@ -89,7 +89,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             else
                 ""
 
-            val contentType = session.headers["Content-Type"]
+            val contentType = session.headers["content-type"]
 
             val gson = Gson()
             val agent = gson.fromJson(agentJson, Actor::class.java)
@@ -126,7 +126,6 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
 
             val map = HashMap<String, String>()
             session.parseBody(map)
-            val stateString = session.queryParameterString
             val queryParams = session.parameters
             val activityId = queryParams["activityId"]?.get(0)
             val agentJson = queryParams["agent"]?.get(0)
@@ -139,9 +138,9 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             val gson = Gson()
             val agent = gson.fromJson(agentJson, Actor::class.java)
             val contentMap: HashMap<String, Any>
-            contentMap = gson.fromJson(stateString, contentMapToken)
+            contentMap = gson.fromJson(map["postData"], contentMapToken)
 
-            val contentType = session.headers["Content-Type"]
+            val contentType = session.headers["content-type"]
 
             val state = State(stateId, agent, activityId, contentMap, registration)
             val endpoint = StateEndpoint(repo, gson, contentType)

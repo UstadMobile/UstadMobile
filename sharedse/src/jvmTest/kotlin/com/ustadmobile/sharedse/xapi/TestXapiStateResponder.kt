@@ -66,12 +66,13 @@ class TestXapiStateResponder {
         val httpCon = URL(urlString).openConnection() as HttpURLConnection
         httpCon.doOutput = true
         httpCon.requestMethod = "PUT"
+        httpCon.setRequestProperty("Content-Type", "application/json")
         val out = OutputStreamWriter(
                 httpCon.outputStream)
         out.write(content)
         out.close()
-        httpCon.connect()
 
+        httpCon.connect()
         val code = httpCon.responseCode
 
         Assert.assertEquals(204, code.toLong())
@@ -84,12 +85,7 @@ class TestXapiStateResponder {
     @Throws(IOException::class)
     fun testPost() {
 
-        var urlString = "http://localhost:" + httpd!!.listeningPort + "/xpi/activities/state"
-
-        val tmpFile = File.createTempFile("testState", "state")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/state", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
-
+        var urlString = "http://localhost:" + httpd!!.listeningPort + "/xapi/activities/state"
         urlString += "?activityId=" +
                 URLEncoder.encode("http://www.example.com/activities/1", StandardCharsets.UTF_8.toString()) +
                 "&agent=" +
@@ -97,16 +93,8 @@ class TestXapiStateResponder {
                         StandardCharsets.UTF_8.toString()) +
                 "&stateId=" +
                 URLEncoder.encode("http://www.example.com/states/1", StandardCharsets.UTF_8.toString())
-        val httpCon = URL(urlString).openConnection() as HttpURLConnection
-        httpCon.doOutput = true
-        httpCon.requestMethod = "POST"
-        val out = OutputStreamWriter(
-                httpCon.outputStream)
-        out.write(content)
-        out.close()
-        httpCon.connect()
 
-        val code = httpCon.responseCode
+        val code = PostMethod(urlString).responseCode
 
         Assert.assertEquals(204, code.toLong())
         val agentEntity = appRepo!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
@@ -118,11 +106,6 @@ class TestXapiStateResponder {
     @Throws(IOException::class)
     fun testAll() {
         var urlString = "http://localhost:" + httpd!!.listeningPort + "/xapi/activities/state"
-
-        val tmpFile = File.createTempFile("testState", "state")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/state", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
-
         urlString += "?activityId=" +
                 URLEncoder.encode("http://www.example.com/activities/1", StandardCharsets.UTF_8.toString()) +
                 "&agent=" +
@@ -130,20 +113,12 @@ class TestXapiStateResponder {
                         StandardCharsets.UTF_8.toString()) +
                 "&stateId=" +
                 URLEncoder.encode("http://www.example.com/states/1", StandardCharsets.UTF_8.toString())
-        val httpCon = URL(urlString).openConnection() as HttpURLConnection
-        httpCon.doOutput = true
-        httpCon.requestMethod = "POST"
-        val out = OutputStreamWriter(
-                httpCon.outputStream)
-        out.write(content)
-        out.close()
-        httpCon.connect()
 
-        val code = httpCon.responseCode
+        val code = PostMethod(urlString).responseCode
 
         Assert.assertEquals(204, code.toLong())
         val agentEntity = appRepo!!.agentDao.getAgentByAnyId("", "", "123", "http://www.example.com/users/", "")
-        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/states/1", "")
+        val stateEntity = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity!!.agentUid, "http://www.example.com/activities/1", "")
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
 
         val getCon = URL(urlString).openConnection() as HttpURLConnection
@@ -162,9 +137,27 @@ class TestXapiStateResponder {
 
         Assert.assertEquals(204, deleteCode.toLong())
 
-        val deletedState = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity.agentUid, "http://www.example.com/states/1", "")
-        Assert.assertFalse("is set to inactive", deletedState!!.isIsactive)
+        val deletedState = appRepo!!.stateDao.findByStateId("http://www.example.com/states/1", agentEntity.agentUid, "http://www.example.com/activities/1", "")
+        Assert.assertNull(deletedState)
 
+    }
+
+    private fun PostMethod(urlString: String): HttpURLConnection {
+        val tmpFile = File.createTempFile("testState", "state")
+        extractTestResourceToFile("/com/ustadmobile/port/sharedse/state", tmpFile)
+        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
+
+        val httpCon = URL(urlString).openConnection() as HttpURLConnection
+        httpCon.doOutput = true
+        httpCon.requestMethod = "POST"
+        httpCon.setRequestProperty("Content-Type", "application/json")
+        val out = OutputStreamWriter(
+                httpCon.outputStream)
+        out.write(content)
+        out.close()
+        httpCon.connect()
+
+        return httpCon
     }
 
 }

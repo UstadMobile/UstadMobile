@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.StateEntity
 @UmRepository
 abstract class StateDao : BaseDao<StateEntity> {
 
-    @Query("SELECT * FROM StateEntity WHERE stateId = :id AND agentUid = :agentUid AND activityId = :activityId " + "AND registration = :registration AND isIsactive LIMIT 1")
+    @Query("SELECT * FROM StateEntity WHERE stateId = :id AND agentUid = :agentUid AND activityId = :activityId AND registration = :registration AND isIsactive LIMIT 1")
     abstract fun findByStateId(id: String?, agentUid: Long, activityId: String?, registration: String?): StateEntity?
 
     @Query("SELECT * FROM StateEntity WHERE agentUid = :agentUid AND activityId = :activityId " + "AND registration = :registration AND isIsactive AND timestamp > :since")
