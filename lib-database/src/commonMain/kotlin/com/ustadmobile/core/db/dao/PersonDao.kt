@@ -3,9 +3,12 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
+import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
@@ -115,8 +118,27 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract fun findByUid(uid: Long): Person?
 
+    @Query("SELECT * From Person WHERE personUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Person>
+
     @Query("SELECT Count(*) FROM Person")
     abstract fun countAll(): Long
+
+    @Query("SELECT * FROM Person WHERE personUid = :uid")
+    abstract suspend fun findByUidAsync(uid: Long) : Person
+
+
+    @Query("SELECT * FROM Person WHERE active =1")
+    abstract fun findAllPeopleProvider(): UmProvider<Person>
+
+    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
+    abstract fun findAllPeopleNameAscProvider(): UmProvider<Person>
+
+    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
+    abstract fun findAllPeopleNameDescProvider(): UmProvider<Person>
+
+    @Update
+    abstract fun updateAsync(entity: Person):Int
 
     companion object {
 

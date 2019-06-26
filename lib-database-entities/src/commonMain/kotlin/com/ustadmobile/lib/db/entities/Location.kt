@@ -22,6 +22,8 @@ class Location() {
 
     var parentLocationUid: Long = 0
 
+    var locationActive: Boolean = false
+
     @UmSyncLocalChangeSeqNum
     var locationLocalChangeSeqNum: Long = 0
 

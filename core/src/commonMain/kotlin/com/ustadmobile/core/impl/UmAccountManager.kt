@@ -19,6 +19,8 @@ object UmAccountManager {
 
     private const val PREFKEY_ENDPOINT_URL = "umaccount.endpointurl"
 
+    private const val PREFKEY_PASSWORD_HASH = "umaccount.passwordhash"
+
     @Synchronized
     fun getActiveAccount(context: Any, impl: UstadMobileSystemImpl): UmAccount? {
         if (activeAccount == null) {
@@ -47,6 +49,10 @@ object UmAccountManager {
 
     fun getActiveAccount(context: Any): UmAccount? {
         return getActiveAccount(context, UstadMobileSystemImpl.instance)
+    }
+
+    fun updatePasswordHash(password: String?, context: Any, impl: UstadMobileSystemImpl) {
+        impl.setAppPref(PREFKEY_PASSWORD_HASH, password, context)
     }
 
     @Synchronized

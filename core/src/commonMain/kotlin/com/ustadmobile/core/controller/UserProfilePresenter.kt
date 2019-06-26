@@ -1,0 +1,129 @@
+package com.ustadmobile.core.controller
+
+import com.soywiz.klock.DateTime
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ChangePasswordView
+import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.SelectLanguageDialogView
+import com.ustadmobile.core.view.UserProfileView
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonPicture
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
+/**
+ * Presenter for UserProfile view
+ */
+class UserProfilePresenter(context: Any,
+                           arguments: Map<String, String?>,
+                           view: UserProfileView)
+    : UstadBaseController<UserProfileView>(context, arguments, view) {
+
+    internal var repository: UmAppDatabase =
+            UmAccountManager.getRepositoryForActiveAccount(context)
+    private val personDao: PersonDao
+    private var loggedInPerson: Person? = null
+    private var personPictureDao: PersonPictureDao? = null
+
+    var loggedInPersonUid = 0L
+
+
+    init {
+
+        //Get provider Dao
+        personDao = repository.personDao
+        personPictureDao = repository.personPictureDao
+
+    }
+
+    override fun onCreate(savedState: Map<String, String?>?) {
+        super.onCreate(savedState)
+
+        val activeAccount = UmAccountManager.getActiveAccount(context)
+
+        if (activeAccount != null) {
+            loggedInPersonUid = activeAccount.personUid
+            GlobalScope.launch {
+                val result = personDao.findByUidAsync(loggedInPersonUid)
+                loggedInPerson = result
+                if (loggedInPerson != null) {
+                    val personName = result.firstNames + " " + result.lastName
+                    view.updateToolbarTitle(personName)
+
+                    personPictureDao = repository.personPictureDao
+                    val personPicture =
+                            personPictureDao!!.findByPersonUidAsync(loggedInPerson!!.personUid)
+                    if (personPicture != null) {
+                        //TODO: Fix for KMP
+//                                view.updateImageOnView(personPictureDao!!.getAttachmentPath
+//                                (personPicture.personPictureUid))
+                    }
+                }
+            }
+        }
+
+    }
+
+    fun handleClickChangePassword() {
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        impl.go(ChangePasswordView.VIEW_NAME, args, context)
+    }
+
+    fun handleClickChangeLanguage() {
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        impl.go(SelectLanguageDialogView.VIEW_NAME, args, context)
+
+    }
+
+    fun handleClickLogout() {
+        UmAccountManager.setActiveAccount(null!!, context)
+        UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.instance)
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        impl.go(Login2View.VIEW_NAME, args, context)
+    }
+
+    fun openPictureDialog(imagePath: String) {
+        //Open Dialog
+        val impl = UstadMobileSystemImpl.instance
+        val args = HashMap<String, String>()
+        //TODO If needed:
+        //        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+        //        args.put(ARG_PERSON_UID, personUid);
+        //        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
+    }
+
+    //TODO: Changed to File path instead of File object
+    fun handleCompressedImage(imageFilePath: String) {
+        val personPictureDao = repository.personPictureDao
+        val personPicture = PersonPicture()
+        personPicture.personPicturePersonUid = loggedInPersonUid
+        personPicture.picTimestamp = DateTime.nowUnixLong().toInt() //Check this TODO
+
+        val personDao = repository.personDao
+
+        GlobalScope.launch {
+            try {
+                val personPictureUid = personPictureDao.insertAsync(personPicture)
+                //TODO: fix for KMP
+                //personPictureDao.setAttachmentFromTmpFile(personPictureUid, imageFile)
+
+                //Update person and generate feeds for person
+                personDao.updateAsync(loggedInPerson!!) //TODO: Check this
+
+                //TODO: Fix for KMP
+                //view.updateImageOnView(personPictureDao.getAttachmentPath(personPictureUid))
+            }catch(e:Exception){
+                println(e.message)
+            }
+
+
+        }
+    }
+}

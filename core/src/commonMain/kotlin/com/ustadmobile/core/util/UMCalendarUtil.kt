@@ -1,9 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.soywiz.klock.DateFormat
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.ISO8601
-import com.soywiz.klock.parse
+import com.soywiz.klock.*
 
 /**
  * Basic calendar related utility methods. These are isolated in their own class as Calendar is not
@@ -68,6 +65,19 @@ object UMCalendarUtil {
         } else {
             year
         }
+    }
+
+    /**
+    * Gets date in long plus/minus the days specified from today.
+    *
+    * @param days  The days (positive or negative) off from today
+    * @return  The date in long
+    */
+    public fun getDateInMilliPlusDays(nDays: Int):Long {
+        val now = DateTime.now()
+        val duration = nDays.days
+        val then = now + duration
+        return then.unixMillisLong
     }
 
 }

@@ -8,6 +8,18 @@ import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
+import com.ustadmobile.core.db.dao.SaleItemReminderDao
+import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
+import com.ustadmobile.core.db.dao.SaleVoiceNoteDao
+import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao
+import com.ustadmobile.core.db.dao.SaleProductGroupDao
+import com.ustadmobile.core.db.dao.SalePaymentDao
+import com.ustadmobile.core.db.dao.SaleProductPictureDao
+import com.ustadmobile.core.db.dao.SaleProductDao
+import com.ustadmobile.core.db.dao.SaleItemDao
+import com.ustadmobile.core.db.dao.SaleDao
+
+
 
 @Database(entities = [NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
@@ -18,7 +30,12 @@ import kotlin.jvm.Volatile
     EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
     LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class], version = 22)
+    Container::class, ContainerEntry::class, ContainerEntryFile::class,
+    //Goldozi :
+    Sale::class, SaleItem::class, SalePayment::class, SaleProductGroup::class,
+    SaleProductGroupJoin::class, SaleProductPicture::class, SaleProduct::class,
+    SaleVoiceNote::class, SaleProductParentJoin::class,
+    SaleItemReminder::class], version = 22)
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
@@ -100,6 +117,30 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
+
+    //Goldozi bit:
+
+    abstract fun getSaleDao(): SaleDao
+
+    abstract fun getSaleItemDao(): SaleItemDao
+
+    abstract fun getSaleProductDao(): SaleProductDao
+
+    abstract fun getSaleProductPictureDao(): SaleProductPictureDao
+
+    abstract fun getSalePaymentDao(): SalePaymentDao
+
+    abstract fun getSaleProductGroupDao(): SaleProductGroupDao
+
+    abstract fun getProductGroupJoinDao(): SaleProductGroupJoinDao
+
+    abstract fun getSaleVoiceNoteDao(): SaleVoiceNoteDao
+
+    abstract fun getSaleProductParentJoinDao(): SaleProductParentJoinDao
+
+    abstract fun getSaleItemReminderDao(): SaleItemReminderDao
+
+    //end of Goldozi bit.
 
     // val deviceBits: Int
     //     get() = syncablePrimaryKeyDao.getDeviceBits()

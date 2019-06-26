@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Location
+
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @Dao
@@ -40,5 +42,11 @@ abstract class LocationDao : BaseDao<Location> {
 
     @Query("SELECT * FROM Location WHERE title = :name")
     abstract suspend fun findByTitleAsync(name: String): List<Location>
+
+    @Query("SELECT * FROM Location")
+    abstract fun findAllActiveLocationsLive(): DoorLiveData<List<Location>>
+
+    @Query("SELECT * FROM Location WHERE locationActive = 1")
+    abstract fun findAllActiveLocationsProvider(): DoorLiveData<List<Location>>
 
 }
