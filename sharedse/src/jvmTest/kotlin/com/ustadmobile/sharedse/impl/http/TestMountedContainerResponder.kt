@@ -30,6 +30,8 @@ class TestMountedContainerResponder {
 
     private var containerManager: ContainerManager? = null
 
+    private var context = Any()
+
     @Before
     @Throws(IOException::class)
     fun setup() {
@@ -67,8 +69,8 @@ class TestMountedContainerResponder {
         `when`(mockSession.uri).thenReturn(mountPath + "subfolder/testfile1.png")
 
         val mockUriResource = mock(RouterNanoHTTPD.UriResource::class.java)
-        `when`(mockUriResource.initParameter(0, ContainerManager::class.java))
-                .thenReturn(containerManager)
+        `when`(mockUriResource.initParameter(0, Any::class.java))
+                .thenReturn(context)
         `when`(mockUriResource.initParameter(1, MutableList::class.java)).thenReturn(mutableListOf<Any>())
         `when`(mockUriResource.uri).thenReturn(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
 
@@ -94,8 +96,8 @@ class TestMountedContainerResponder {
         `when`(mockSession.uri).thenReturn(mountPath + "subfolder/doesnotexist.png")
 
         val mockUriResource = mock(RouterNanoHTTPD.UriResource::class.java)
-        `when`(mockUriResource.initParameter(0, ContainerManager::class.java))
-                .thenReturn(containerManager)
+        `when`(mockUriResource.initParameter(0, Any::class.java))
+                .thenReturn(context)
         `when`(mockUriResource.initParameter(1, MutableList::class.java)).thenReturn(mutableListOf<Any>())
         `when`(mockUriResource.uri).thenReturn(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
 

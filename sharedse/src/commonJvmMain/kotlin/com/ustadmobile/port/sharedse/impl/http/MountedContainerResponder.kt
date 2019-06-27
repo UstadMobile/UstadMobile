@@ -77,7 +77,7 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
             val pathInContainer = requestUri.substring(
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
             val containerUid = uriResource.uri.split("/")[CONTAINER_UID_INDEX].toLong()
-            val context = uriResource.initParameter(0, Object::class.java)
+            val context = uriResource.initParameter(0, Any::class.java)
             val umRepo = UmAccountManager.getRepositoryForActiveAccount(context)
             val entryFile = umRepo.containerEntryDao.findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
