@@ -47,8 +47,8 @@
             android:noHistory="true"/>
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}"
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -65,10 +65,6 @@
             android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label=""
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.BasePointActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
@@ -93,7 +89,7 @@
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.port.android.view.DummyActivity"
+            android:name="com.ustadmobile.port.android.view.HomeActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label=""
             android:theme="@style/Theme.UstadTheme" />
@@ -119,24 +115,13 @@
             android:theme="@style/Theme.UstadTheme"
             />
 
-        <service android:name="com.ustadmobile.port.android.netwokmanager.DownloadNotificationService"
-            android:enabled="true"
-            android:exported="true"/>
+        <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
-            android:enabled="true"
-            android:exported="true"/>
+            android:enabled="true"/>
 
-        <service
-            android:name="com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService"
-            android:enabled="true"
-            android:exported="true"/>
 
-        <service
-            android:name="com.ustadmobile.port.android.netwokmanager.EmbeddedHttpdService"
-            android:enabled="true"
-            android:exported="true"/>
 
     </application>
 

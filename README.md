@@ -9,7 +9,18 @@ powered by open standards:
 
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
 
-The platform consisits of a main cross platform 'core' and an implementation of the UI and platform specific ports in app-platformname .
+### Code structure
+
+This is a multi-module gradle project utilizing Kotlin Multiplatform. 
+Non Kotlin Multiplatform modules (e.g. Java modules) that depends on
+Kotlin Multiplatform modules use the jvmDefault configuration, e.g.:
+
+```
+implementation project(path: ":shared-kotlin-multiplatform-module", configuration: "jvmDefault")
+``` 
+
+Kotlin multiplatform modules common code must depend only on other Kotlin
+Multiplatform modules.
 
 Code is contained (mostly) in the following modules:
 * [core](core/) : Contains Presenters, Views Interfaces, and core business logic.
@@ -23,6 +34,7 @@ Code is contained (mostly) in the following modules:
 merged into sharedse.
 * [lib-database](lib-database/): core Database and Data Access Object (DAO) classes. See this
 module's README for further details on the relationship between different database modules.
+* [lib-database-entities](lib-database-entities): Database entity objects
 * [lib-database-android](lib-database-android/) Android database
 implementation (a Room Persistence Framework database generated from lib-database).
 * [lib-database-annotation](lib-database-annotation/): annotation classes used for entities
@@ -30,10 +42,7 @@ implementation (a Room Persistence Framework database generated from lib-databas
 * [lib-database-annotation-processor-core](lib-database-annotation-processor-core/): database annotation processor
   used to generate DAOs and database classes for different platforms.
 * [lib-database-entities](lib-database-entities/) contains database POJO entity classes.
-* [lib-database-entity-processor](lib-database-entity-processor/) executable that adds Room Persistence Framework
-annotations to POJOs from lib-entities and outputs them to lib-database-android.
 * [lib-util](lib-util/): Small utility functions
-
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
 
@@ -49,7 +58,7 @@ during the build and testing process.
   can be overriden by setting the com.ustadmobile.core.appconfig manifest property (e.g. meta-data
   in AndroidManifest.xml).
 
-The build configuration system uses .properties files in each module: 
+The build configuration system uses two .properties files: 
 * **buildconfig.default.properties**: Contains default options
 * **buildconfig.local.properties** : Contains any custom options and is excluded from git. Any option set in buildconfig.local.properties will override what's set in the default properties.
 

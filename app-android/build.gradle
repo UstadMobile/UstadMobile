@@ -16,14 +16,17 @@ buildscript {
         classpath "digital.wup:android-maven-publish:$version_android_maven_publish"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: "kotlin-multiplatform"
+apply plugin: 'kotlin-android-extensions'
 apply plugin: "jacoco"
 apply plugin: 'digital.wup.android-maven-publish'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlinx-serialization'
+apply plugin: "kotlin-kapt"
 
 
 configurations.all {
@@ -31,34 +34,25 @@ configurations.all {
     exclude group: "org.json", module: "json"
 }
 
-ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
-if (project.file("buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
-}
+kotlin {
 
-
-/*
-  TODO: Refactor to use another task to trigger these tasks
-
-  WARNING: API 'variant.getJavaCompiler()' is obsolete and has been replaced with 'variant.getJavaCompileProvider()'.
-  It will be removed at the end of 2019.
-  For more information, see https://d.android.com/r/tools/task-configuration-avoidance.
-  REASON: Called from: /home/mike/src/UstadMobile/app-android/build.gradle:37
- */
-afterEvaluate {
-    android.libraryVariants.all { variant ->
-        variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
-        variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
-        variant.javaCompiler.dependsOn(checkBuildConfig)
+    targets {
+        fromPreset(presets.android, 'android')
     }
 }
 
-tasks.whenTaskAdded { task ->
+afterEvaluate {
+    android.libraryVariants.all { variant ->
+        variant.javaCompileProvider.get().dependsOn(copyMainXmlLocaleFilesFromCore)
+        variant.javaCompileProvider.get().dependsOn(generateCoreStringToAndroidResMap)
+    }
+}
+
+/*tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().endsWith("androidtest")) {
         task.dependsOn(":lib-http-testserver:startDaemon")
     }
-}
+}*/
 
 android {
     sourceSets {
@@ -103,15 +97,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
-        buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
-        buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
-        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"] + "\""
-        buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
-        buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
-
-
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
     }
 
@@ -151,6 +137,15 @@ android {
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"
+                exclude "META-INF/ktor-http.kotlin_module"
+                exclude 'META-INF/kmpxmlpullparser.kotlin_module'
+                exclude 'META-INF/kotlinx-io.kotlin_module'
+                exclude 'META-INF/atomicfu.kotlin_module'
+                exclude 'META-INF/ktor-utils.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
+                exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+                exclude 'META-INF/ktor-http-cio.kotlin_module'
+                exclude 'META-INF/ktor-*'
             }
         }
     }
@@ -175,22 +170,17 @@ android {
  * Disable running tests of the vanilla build (this requires multidex, so we use vanillamultidex instead)
  */
 gradle.taskGraph.useFilter { task ->
-    if(task.name.equals("connectedVanillaDebugAndroidTest")
-        || task.name.equals("createVanillaDebugCoverageReport")
-        || task.name.equals("testVanillaDebugUnitTest")
-        || task.name.equals("testVanillaReleaseUnitTest")
-        || task.name.equals("processVanillaDebugAndroidTestManifest")
-        || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
+    if (task.name.equals("connectedVanillaDebugAndroidTest")
+            || task.name.equals("createVanillaDebugCoverageReport")
+            || task.name.equals("testVanillaDebugUnitTest")
+            || task.name.equals("testVanillaReleaseUnitTest")
+            || task.name.equals("processVanillaDebugAndroidTestManifest")
+            || task.name.equals("transformDexArchiveWithExternalLibsDexMergerForVanillaDebugAndroidTest")) {
         return false;
     }
 
     return true;
 }
-
-task checkBuildConfig {
-    inputs.files("buildconfig.*.properties")
-}
-assemble.dependsOn(checkBuildConfig)
 
 task copyMainXmlLocaleFilesFromCore(type: Copy) {
     inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
@@ -214,7 +204,7 @@ task generateCoreStringToAndroidResMap {
                 inputLastModified = file.lastModified()
         }
 
-        File outputFile = project.file("src/main/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        File outputFile = project.file("src/main/kotlin/com/ustadmobile/port/android/generated/MessageIDMap.kt")
         return outputFile.lastModified() < inputLastModified;
     }
 
@@ -224,13 +214,13 @@ task generateCoreStringToAndroidResMap {
         String genSrcHeader, genSrcFooter
         String genSrcBody = ""
 
-        genSrcHeader = "package com.ustadmobile.port.android.generated;\n"
-        genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID;\n"
-        genSrcHeader += "import com.toughra.ustadmobile.R;\n"
-        genSrcHeader += "import java.util.HashMap;\n"
-        genSrcHeader += "public class MessageIDMap {\n"
-        genSrcHeader += "\tpublic static final HashMap<Integer, Integer> ID_MAP = new HashMap<>();\n"
-        genSrcHeader += "\tstatic{\n"
+        genSrcHeader = "package com.ustadmobile.port.android.generated\n"
+        genSrcHeader += "import com.ustadmobile.core.generated.locale.MessageID\n"
+        genSrcHeader += "import com.toughra.ustadmobile.R\n"
+        genSrcHeader += "import java.util.HashMap\n"
+        genSrcHeader += "object MessageIDMap {\n"
+        genSrcHeader += "\tval ID_MAP = HashMap<Int, Int>()\n"
+        genSrcHeader += "\tinit {\n"
 
         System.out.println("Looking in: core/locale/main")
         rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
@@ -247,23 +237,23 @@ task generateCoreStringToAndroidResMap {
         Iterator<String> nameIterator = messageIds.keySet().iterator();
         while (nameIterator.hasNext()) {
             String strName = nameIterator.next()
-            genSrcBody += "\t\tID_MAP.put(MessageID." + strName + ", R.string." + strName + ");\n"
+            genSrcBody += "\tID_MAP[MessageID." + strName + "] = R.string." + strName + "\n"
         }
 
         genSrcFooter = "\t}\n"
         genSrcFooter += "}\n"
 
-        File oldMessageIdFile = project.file("src/main/java/com/ustadmobile/port/android/generated/MessageIDMap.java")
+        File oldMessageIdFile = project.file("src/main/kotlin/com/ustadmobile/port/android/generated/MessageIDMap.kt")
         if (oldMessageIdFile.exists()) {
             oldMessageIdFile.delete()
         }
 
-        File outDir = project.file("src/main/java/com/ustadmobile/port/android/generated")
+        File outDir = project.file("src/main/kotlin/com/ustadmobile/port/android/generated")
         if (!outDir.isDirectory()) {
             outDir.mkdirs()
         }
 
-        File outFile = new File(outDir, "MessageIDMap.java")
+        File outFile = new File(outDir, "MessageIDMap.kt")
         outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
     }
 }
@@ -271,35 +261,45 @@ assemble.dependsOn(generateCoreStringToAndroidResMap)
 
 configurations.all {
     resolutionStrategy {
-        force "android.arch.lifecycle:livedata-core:$version_android_lifecycle"
-        force "android.arch.lifecycle:runtime:$version_android_lifecycle"
-        force "android.arch.core:runtime:$version_android_lifecycle"
+        force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
+        force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
+        force "androidx.arch.core:core-runtime:$version_androidx_lifecycle"
     }
 }
 
 dependencies {
-    api project(':core')
-    api project(':sharedse')
-    api project(":lib-core-fs")
-    implementation project(':lib-database-runtime')
-    implementation project(':lib-database')
+    implementation project(':core')
+    implementation project(':sharedse')
+
+    /*
+     * This is a hack: Intellisense does not seem to recognize classes that are outside the common
+     * sourceset (e.g. android/jvm sourcesets) in Kotlin multiplatform project dependencies. Adding
+     * this will allow autocomplete etc. to work.
+     */
+    //compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
+
+    implementation project(':lib-door-runtime')
     implementation project(':lib-database-android')
+    implementation project(":lib-database-entities")
+    implementation project(":lib-database-annotations")
     implementation project(":lib-util")
 
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    vanillamultidexApi "com.android.support:multidex:$version_android_multidex"
-
-    androidTestImplementation project(":core-tests")
+    implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
+    vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
-    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+    kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
-    implementation "android.arch.persistence.room:runtime:$version_android_room"
+    implementation "androidx.room:room-runtime:$version_android_room"
+
+    implementation "androidx.core:core-ktx:$version_androidx_core"
 
     // Paging
-    implementation "android.arch.paging:runtime:$version_android_paging"
+    implementation "androidx.paging:paging-runtime:$version_androidx_paging"
 
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
@@ -307,31 +307,33 @@ dependencies {
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-
-    androidTestImplementation project(":core-tests")
-
+    //Crash reporting
+    implementation "ch.acra:acra-http:$version_android_acra"
 
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -
      * use this format:
      *  implementation group: 'com.android.support', name: "appcompat-v7", version: "[26+, 27+]"
      */
-    implementation "com.android.support:support-core-utils:$version_android_support_lib"
-    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
-    implementation "com.android.support:cardview-v7:$version_android_support_lib"
-    implementation "com.android.support:design:$version_android_support_lib"
-    implementation "com.android.support:support-v4:$version_android_support_lib"
-    implementation "com.android.support:recyclerview-v7:$version_android_support_lib"
-    implementation "com.android.support.constraint:constraint-layout:$version_android_constraint_layout"
+    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
+    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+    implementation "androidx.cardview:cardview:$version_androidx_support_lib"
+    implementation "com.google.android.material:material:$version_androidx_support_lib"
+    implementation "androidx.legacy:legacy-support-v4:$version_androidx_support_lib"
+    implementation "androidx.recyclerview:recyclerview:$version_androidx_support_lib"
+    implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
 
     //Image loading library
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
     //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
 
     //Page indicator
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
+
+    // shake detector
+    implementation "com.squareup:seismic:$version_android_seismic"
 
     implementation 'de.hdodenhof:circleimageview:2.1.0'
 
@@ -355,17 +357,17 @@ dependencies {
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
     androidTestImplementation "junit:junit:$version_junit"
-    androidTestImplementation group: "com.android.support", name: "support-annotations", version: "$version_android_support_lib"
+    androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_support_lib"
 
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
-    androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
-    androidTestImplementation "com.android.support.test:rules:$version_android_junit_runner"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
-    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$version_android_espresso"
-    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$version_android_espresso"
-    androidTestImplementation "com.android.support.test.espresso:espresso-web:$version_android_espresso"
+    androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
+    androidTestImplementation "androidx.test:rules:$version_android_junit_runner"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:$version_android_espresso"
+    androidTestImplementation "androidx.test.espresso:espresso-web:$version_android_espresso"
 
-    androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$version_android_uiautomator"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
@@ -384,6 +386,15 @@ dependencies {
 
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+
+    //image compressor
+    implementation "id.zelory:compressor:$version_compressor"
+
+    //extended fab
+    implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
+
+    //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
+    androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 }
 
 task sourceJar(type: Jar) {

@@ -8,7 +8,7 @@
 # Android studio IML file
 *.iml
 
-.idea
+.idea/
 
 
 # Java class files
@@ -24,6 +24,9 @@ gen/
 # Gradle files
 .gradle/
 build/
+
+# Android Studio classes generated when running unit tests in the Ide
+classes/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -212,4 +215,8 @@ app-gwt/*
 .classpath
 .settings
 
-.idea/
+lib-content-editor/
+
+build/
+build/
+.vscode/

@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         maven {
@@ -6,21 +5,24 @@ buildscript {
         }
 
         mavenCentral()
+        maven {
+            url "https://kotlin.bintray.com/kotlinx"
+        }
     }
-
     dependencies {
-        classpath "gradle.plugin.de.fuerstenau:BuildConfigPlugin:$version_gradle_buildconfig_plugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
+        classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$version_atomicfu"
     }
 }
 
-apply plugin: 'java-library'
+apply plugin: "kotlin-multiplatform"
+apply plugin: "kotlinx-atomicfu"
+apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: "maven-publish"
-apply plugin: "de.fuerstenau.buildconfig"
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
 
 repositories {
     mavenCentral()
@@ -29,79 +31,239 @@ repositories {
     }
 }
 
-buildConfig {
-    appName = "sharedse"
+android {
+    compileSdkVersion rootProject.ext.version_android_compile_sdk
+    buildToolsVersion rootProject.ext.version_android_buildtools
 
-    sourceSets {
-        test {
-            packageName = "com.ustadmobile.sharedse"
-            clsName = "SharedSeTestConfig"
-            buildConfigField 'String', 'TESTDB_JDBCURL_UMMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.UmAppDatabase.url']
-            buildConfigField 'String', 'TESTDB_JDBCURL_CLIENTUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.clientdb.url']
-            buildConfigField 'String', 'TESTDB_JDBCURL_PEERUMAPPDATABASE', rootProject.ext.buildConfigProperties['test.db.peerdb.url']
+    defaultConfig {
+        minSdkVersion rootProject.ext.version_android_min_sdk
+        targetSdkVersion rootProject.ext.version_android_target_sdk
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
         }
     }
 }
 
+
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.android, 'android')
+
+        //Uncomment the line below if you want autocomplete etc. to work in the IDE. Comment out again before building.
+        //fromPreset(presets.jvm, 'commonJvm')
+    }
+
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation project(":core")
+                implementation project(":lib-util")
+
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
+
+
+                implementation project(':lib-door-runtime')
+                compileOnly project(':lib-database')
+                compileOnly project(':lib-database-entities')
+                compileOnly project(":lib-room-annotations")
+            }
+        }
+
+        commonJvmMain {
+            dependencies {
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+            }
+        }
+
+        /*
+         Normally we would add a sourceSet and then use dependsOn. Unfortunately this does not
+         work when running unit tests in the IDE.
+         */
+        androidMain {
+            dependsOn commonJvmMain
+            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
+
+            dependencies {
+                implementation project(":lib-database-android")
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+                implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation project(":lib-database-android")
+
+                implementation "androidx.room:room-runtime:$version_android_room"
+
+                implementation "android.arch.work:work-runtime:$version_android_workmanager"
+
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+
+                //Begin SharedSE Android and JVM dependencies
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+                //end SharedSE Android and JVM dependencies
+            }
+        }
+
+
+        jvmMain {
+            dependsOn commonJvmMain
+
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                //Begin Android and JVM dependencies
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.google.code.gson:gson:$version_gson"
+                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
+                //end Android and JVM dependencies
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-util")
+
+                implementation "com.github.aakira:napier:$version_napier"
+                implementation "com.soywiz:klock-metadata:$version_klock"
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "com.soywiz:klock-jvm:$version_klock"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":lib-database-annotations")
+                api project(":lib-database-mpp")
+
+            }
+
+        }
+        androidTest {
+            dependencies {
+                implementation "junit:junit:$version_junit"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
+                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "androidx.test:rules:$version_android_junit_runner"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                api project(":sharedse")
+                api project(":lib-room-annotations")
+                api project(":core")
+                api project(":lib-database-annotations")
+                api project(":lib-database-android")
+                api project(":lib-door-runtime")
+                api project(":lib-database-mpp")
+
+                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+
+            }
+        }
+
+
+    }
+
+}
+
 /*
- * Added to overcome limitation on Android studio as per:
- *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
+ * This might be required to be able to run unit tests via the IDE.
  */
 task copyTestResources(type: Copy) {
-    from "${projectDir}/src/test/resources"
-    from "${projectDir}/../core-tests/src/main/resources"
-    from "${projectDir}/../sharedse-tests/src/main/resources"
-    into "${buildDir}/classes/test"
+    outputs.upToDateWhen {
+        project.file("build/local.env.properties").exists()
+    }
+
+    from project.file("src/commonTest/resources")
+    into rootProject.file("build/classes/test/sharedse_jvmTest")
+
+    doFirst {
+        println("Dump sharedse local.env.properties")
+        if (!project.file("build").exists())
+            project.file("build").mkdir()
+
+        def outWriter = new FileWriter(project.file("build/local.env.properties"))
+        System.getProperties().store(outWriter, "System properties for use with running unit tests in IDE")
+        outWriter.flush()
+        outWriter.close()
+    }
 }
-processTestResources.dependsOn copyTestResources
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
+tasks.whenTaskAdded { task ->
+    if (task.name == "compileTestKotlinJvm") {
+        println("Add task to jvmTest")
+        task.dependsOn(copyTestResources)
+    }
 }
+jvmTest.dependsOn(copyTestResources)
 
-dependencies {
-    //compile fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-    implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-    implementation "net.sf.kxml:kxml2:$version_kxml";
-    implementation "com.google.code.gson:gson:$version_gson"
-    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-    implementation "org.json:json:$version_json"
-
-    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
-    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
-    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
-
-
-    implementation project(":core")
-    testImplementation project (':lib-database-jdbc')
-    implementation project(":lib-database")
-    implementation project(":lib-database-runtime")
-    compileOnly project(':lib-database-entities')
-    compileOnly project(':core-compile-only')
-    implementation project(':lib-core-fs')
-    implementation project(":lib-util")
-
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "org.mockito:mockito-core:$version_android_mockito"
-    testImplementation project(":core-tests")
-    testImplementation project (':lib-database-entities')
-    testImplementation project(":app-javase")
-    testImplementation project(":lib-database-runtime-jdbc")
-
-
-    //SQLite dependencies for running db-driven tests
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-    //MockWebServer
-    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-
-    testImplementation project(":app-javase")
-}
 
 publishing {
     publications {
@@ -109,12 +271,6 @@ publishing {
             groupId rootProject.group
             artifactId project.name
             version rootProject.version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier = 'sources'
-            }
         }
     }
 

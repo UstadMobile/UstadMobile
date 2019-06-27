@@ -1,23 +1,34 @@
-include ':app-android', ':core-compile-only',
+pluginManagement {
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "com.crowdproj.plugins.jar2pm") {
+                useModule("com.crowdproj.plugins:jar2npm-plugin:${requested.version}")
+            }
+        }
+    }
+
+    repositories {
+        gradlePluginPortal()
+        maven { setUrl("https://dl.bintray.com/svok/jar2npm") }
+    }
+}
+
+include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular',
+        ':lib-test-util',
         ':core',
         ':sharedse',
-        ':core-tests',
-        ':app-javase',
         ':app-android-launcher',
-        ':lib-core-fs',
         ':lib-database-entities',
         ':lib-util',
-        ':lib-database-entity-processor',
-        ':lib-database-runtime',
+        ':lib-database-mpp',
         ':lib-http-testserver',
         ':lib-database-annotation-processor',
         ':lib-database',
         ':lib-database-android',
-        ':lib-database-runtime-jdbc',
         ':lib-room-annotations',
-        ':lib-content-scrapers'
-include ':lib-database-jdbc'
-include ':app-rest-server'
-include ':lib-database-retrofitrepository'
-include ':lib-database-runtime-core-compileonly'
-include ':lib-database-runtime-android'
+        ':lib-content-editor'
+        //':lib-content-scrapers'
+//include ':app-rest-server'
+
+

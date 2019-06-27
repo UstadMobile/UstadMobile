@@ -56,14 +56,20 @@ the jndi-config directory for tests).
 
 ## Debugging the annotation processor using IntelliJ
 
-In gradle.properties, uncomment the lines:
+### Using kapt
+
 ```
-#org.gradle.daemon=true
-#org.gradle.jvmargs=-Xmx3072m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006
+./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5006\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:jvmTest
 ```
 
 In IntelliJ select Run, Debug..., Add a remote configuration, and 
 enter the por as per org.gradle.jvmargs (e.g. 5006)
+
+### Running tests
+
+```
+./gradlew lib-database-annotation-processor:jvmTest
+```
 
 ## Known Issues
 

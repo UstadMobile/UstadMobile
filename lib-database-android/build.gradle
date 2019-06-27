@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: "kotlin-android"
+apply plugin: 'kotlin-kapt'
 
 buildscript {
     repositories {
@@ -16,7 +18,7 @@ android {
 
 
     sourceSets {
-        main.java.srcDirs += ["build/generated/source/umentities", "build/generated/source/umdbprocessor"]
+        main.java.srcDirs += ["build/generated/source/door"]
     }
 
     defaultConfig {
@@ -25,7 +27,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -44,45 +46,55 @@ android {
 
 }
 
-task generateRoomEntities {
-    inputs.files(fileTree(dir: rootProject.file("lib-database/src/main/java")).matching { include '**/*.java' })
-    outputs.dir("build/generated/source/umentities")
+/**
+ * The Android Kotlin must not have the @JsName annotation that is present in the lib-database
+ * project.
+ */
+task copyLibDatabase(type: Copy) {
+    from "../lib-database/src/commonMain/kotlin"
+    into "build/generated/source/door"
+    include "**/*.kt"
+    filter {line -> line.trim().startsWith("@JsName") || (line.trim().startsWith("import")  && line.contains("kotlin.js.JsName")) ? "" : line }
 }
-
-generateRoomEntities.dependsOn(":lib-database-entity-processor:runRoomProcessor")
 
 afterEvaluate {
     android.libraryVariants.all { variant ->
-        variant.javaCompiler.dependsOn(generateRoomEntities)
+        variant.javaCompileProvider.get().dependsOn(copyLibDatabase)
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation project(':lib-database')
-    implementation project(':lib-database-runtime')
-    implementation project(':lib-database-runtime-android')
+    implementation project(":lib-database-entities")
+    implementation project(':lib-door-runtime')
+    implementation project(":lib-database-annotations")
     implementation project(":lib-util")
-    implementation project(":lib-database-retrofitrepository")
+
+    //Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //ViewModel and LiveData
-    implementation "android.arch.lifecycle:extensions:$version_android_lifecycle"
-    annotationProcessor "android.arch.lifecycle:common-java8:$version_android_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+    kapt "androidx.lifecycle:lifecycle-compiler:$version_androidx_lifecycle"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
     //Room persistence
-    implementation "android.arch.persistence.room:runtime:$version_android_room"
-    annotationProcessor "android.arch.persistence.room:compiler:$version_android_room"
+    implementation "androidx.room:room-runtime:$version_android_room"
+    kapt "androidx.room:room-compiler:$version_android_room"
+
+    implementation "androidx.room:room-ktx:$version_android_room"
+
 
     // Paging
-    implementation "android.arch.paging:runtime:$version_android_paging"
+    implementation "androidx.paging:paging-runtime:$version_androidx_paging"
 
-    implementation "com.android.support:appcompat-v7:$version_android_support_lib"
-    implementation "com.android.support:support-core-utils:$version_android_support_lib"
+    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
 
     testImplementation "junit:junit:$version_junit"
-    androidTestImplementation "com.android.support.test:runner:$version_android_junit_runner"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$version_android_espresso"
+    androidTestImplementation "androidx.test:runner:$version_android_junit_runner"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
 }
 
 publishing {
