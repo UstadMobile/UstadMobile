@@ -48,8 +48,6 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
     private var mItemTouchHelper: ItemTouchHelper? = null
 
-    private val impl = UstadMobileSystemImpl.instance
-
     private var adapter: PageListAdapter? = null
 
     private var presenter: ContentEditorPageListPresenter? = null
@@ -257,21 +255,18 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
         val isNewPage = page == null
 
         val dialogTitle = when {
-            newPage -> impl.getString(MessageID.content_update_document_title,
-                    activity!!)
-            isNewPage -> impl.getString(MessageID.content_add_page,
-                    activity!!)
-            else -> impl.getString(MessageID.content_update_page_title, activity!!)
+            newPage -> R.string.content_update_document_title
+            isNewPage -> R.string.content_add_page
+            else -> R.string.content_update_page_title
         }
 
-        val positiveBtnLabel = impl.getString(if (isNewPage)
-            MessageID.content_page_dialog_add
+        val positiveBtnLabel = if (isNewPage)
+            R.string.add
         else
-            MessageID.content_page_dialog_update, context!!)
+            R.string.update
 
         val titleToUpdateFrom = if (isNewPage)
-            impl.getString(MessageID.content_untitled_page,
-                    activity!!)
+            getString(R.string.content_untitled_page)
         else
             page!!.title
 
@@ -280,10 +275,6 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
         val inflater = this.layoutInflater
         val dialogView = inflater.inflate(R.layout.umcontent_dialog_option_actionview,
                 null, false)
-
-        val titleWrapper :TextInputLayout = dialogView.findViewById(R.id.titleWrapper)
-        titleWrapper.hint = impl.getString(MessageID.content_editor_page_view_hint,
-                activity!!)
 
         val titleView:TextInputEditText = dialogView.findViewById(R.id.title)
         titleView.setText(titleToUpdateFrom)
@@ -300,8 +291,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
             }
             dialog.dismiss()
         }
-        builder.setNegativeButton(impl.getString(MessageID.content_page_dialog_cancel,
-                activity!!)) { dialog, _ -> dialog.dismiss() }
+        builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
         builder.show()
     }
 

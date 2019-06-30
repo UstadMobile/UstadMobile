@@ -73,12 +73,10 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
         wifiOnlyView = rootView!!.findViewById(R.id.wifi_only_option)
         mStorageOptions = rootView!!.findViewById(R.id.storage_option)
         calculateHolder = rootView!!.findViewById(R.id.download_calculate_holder)
-        val calculateTextView = rootView!!.findViewById<TextView>(R.id.download_dialog_calculating)
         wifiOnlyHolder = rootView!!.findViewById(R.id.wifi_only_option_holder)
 
         impl = UstadMobileSystemImpl.instance
 
-        (rootView!!.findViewById<View>(R.id.wifi_only_option_label) as TextView).text = impl!!.getString(MessageID.download_wifi_only, getContext()!!)
 
         val builder = AlertDialog.Builder(context!!)
         builder.setPositiveButton(R.string.ok, this)
@@ -90,7 +88,6 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
         wifiOnlyView!!.setOnCheckedChangeListener(this)
         wifiOnlyHolder!!.setOnClickListener(this)
-        calculateTextView.text = impl!!.getString(MessageID.download_calculating, context!!)
 
         //mapping presenter constants to view ids
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download

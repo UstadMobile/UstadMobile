@@ -1013,7 +1013,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 linkText.setText(umLink.linkText)
                 linkUrl.setText(umLink.linkUrl)
                 builder.setView(view)
-                builder.setNegativeButton(R.string.content_page_dialog_cancel
+                builder.setNegativeButton(R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }
                 if (umLink.linkUrl!!.isNotEmpty()) {
                     builder.setNeutralButton(R.string.content_editor_link_remove) { _, _ ->
@@ -1156,12 +1156,10 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
      */
     private fun showMediaTypeDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle(impl.getString(MessageID.content_media_title, this))
-        builder.setMessage(impl.getString(MessageID.content_media_message, this))
-        builder.setPositiveButton(impl.getString(MessageID.content_media_photo, this)
-        ) { _, _ -> startCameraIntent(true) }
-        builder.setNegativeButton(impl.getString(MessageID.content_media_video, this)
-        ) { _, _ -> startCameraIntent(false) }
+        builder.setTitle(R.string.content_media_title)
+        builder.setMessage(R.string.content_media_message)
+        builder.setPositiveButton(R.string.content_media_photo) { _, _ -> startCameraIntent(true) }
+        builder.setNegativeButton(R.string.content_media_video) { _, _ -> startCameraIntent(false) }
         builder.setCancelable(false)
         builder.show()
     }
@@ -1218,7 +1216,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                             this@ContentEditorActivity, mFile.name, mimeType)
                 }
             }else{
-                showErrorMessage(getString(R.string.failed_message))
+                showErrorMessage(getString(R.string.try_again))
             }
 
         }

@@ -116,7 +116,6 @@
 
     <string name='data_usage_label'>د ګرځنده تېلفون د ډاټا ټولیز مصرف</string>
     <string name='app_interface_language'>د اپلکېشن ژبه</string>
-    <string name='enable_supernode'>سوپرنوډ فعاله کړئ</string>
     <string name='share_application'>اپلکېشن شریک کړئ</string>
     <string name='share_via'>له دې لارې یې شریک کړئ</string>
     <string name='share'>شریک کول</string>

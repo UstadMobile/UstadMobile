@@ -71,9 +71,12 @@ class ContentEditorActivityEspressoTest {
 
         val mContext = InstrumentationRegistry.getInstrumentation().targetContext
         val database = UmAppDatabase.getInstance(mContext)
+        database.clearAllTables()
         val entry = ContentEntry("Sample title", "Sample description", leaf = true, publik = true)
         entry.contentEntryUid = CONTENT_ENTRY_UID
         database.contentEntryDao.insert(entry)
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(10))
     }
 
     @Test
@@ -245,7 +248,7 @@ class ContentEditorActivityEspressoTest {
 
     companion object {
 
-        private const val MAX_WAIT_TIME = 10
+        private const val MAX_WAIT_TIME = 50
 
         private const val CONTENT_ENTRY_UID = 12L
     }

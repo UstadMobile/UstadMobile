@@ -10,6 +10,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/titleWrapper"
         android:padding="@dimen/dimen_16dp"
+        android:hint="@string/content_editor_page_view_hint"
         android:theme="@style/TextInputLayoutAppearance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

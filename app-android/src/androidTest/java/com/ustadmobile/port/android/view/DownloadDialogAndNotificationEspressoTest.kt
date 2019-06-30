@@ -6,19 +6,20 @@ import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.SystemClock
 import android.view.View
-import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.JobStatus
@@ -43,7 +44,6 @@ import org.junit.runner.RunWith
 import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.util.*
 
 
 /**
@@ -62,10 +62,10 @@ import java.util.*
 class DownloadDialogAndNotificationEspressoTest {
 
     @get:Rule
-    var mActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
+    public var mActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
 
     @get:Rule
-    var mPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+    public var mPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.CHANGE_NETWORK_STATE,
             Manifest.permission.BLUETOOTH,
@@ -86,22 +86,22 @@ class DownloadDialogAndNotificationEspressoTest {
 
     private var serverActivePort = 0
 
-    private var connectedToUnmeteredConnection = false
+    private var connectedToUnMeteredConnection = false
 
 
     @Before
     @Throws(IOException::class, JSONException::class)
     fun setEndpoint() {
-        mContext = InstrumentationRegistry.getTargetContext()
+        mContext = InstrumentationRegistry.getInstrumentation().context
 
         //check active network
 
         val wifiManager = mContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
-        connectedToUnmeteredConnection = wifiManager?.connectionInfo
+        connectedToUnMeteredConnection = wifiManager?.connectionInfo
                 ?.ssid?.toLowerCase()?.contains("androidwifi") ?: false
 
         // TODO for Lukundo
-       // testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
+       testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
 
         val response = sendCommand("new", 0)
         serverActivePort = Integer.parseInt(response.getString("port"))
@@ -144,11 +144,11 @@ class DownloadDialogAndNotificationEspressoTest {
 
     private fun startDownloading(wifiOnly: Boolean) {
         onView(allOf<View>(
-                isDescendantOfA(withTagValue(equalTo(entry1!!.contentEntryUid))),
+                isDescendantOfA(withTagValue(equalTo(entry1.contentEntryUid))),
                 withId(R.id.content_entry_item_download)
         )).perform(click())
 
-        SystemClock.sleep(MIN_SLEEP_TIME.toLong())
+        SystemClock.sleep(MIN_SLEEP_TIME)
 
         onView(withId(R.id.wifi_only_option)).perform(
                 UmViewActions.setChecked(wifiOnly))
@@ -161,26 +161,25 @@ class DownloadDialogAndNotificationEspressoTest {
         UmAppDatabase.getInstance(mContext).clearAllTables()
         umAppDatabase = UmAppDatabase.getInstance(mContext)
         rootEntry = ContentEntry("Lorem ipsum title",
-                "Lorem ipsum description", false, true)
-        rootEntry!!.contentEntryUid = TEST_CONTENT_ENTRY_FILE_UID
+                "Lorem ipsum description", leaf = false, publik = true)
+        rootEntry.contentEntryUid = TEST_CONTENT_ENTRY_FILE_UID
         umAppDatabase!!.contentEntryDao.insert(rootEntry)
 
-        entry1 = ContentEntry("title 1", "description 1", true, true)
-        val entry2 = ContentEntry("title 2", "description 2", true, true)
-        val entry3 = ContentEntry("title 3", "description 3", true, false)
-        val entry4 = ContentEntry("title 4", "description 4", true, false)
+        entry1 = ContentEntry("title 1", "description 1", leaf = true, publik = true)
+        val entry2 = ContentEntry("title 2", "description 2", leaf = true, publik = true)
+        val entry3 = ContentEntry("title 3", "description 3", leaf = true, publik = false)
+        val entry4 = ContentEntry("title 4", "description 4", leaf = true, publik = false)
 
         entry1.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry1)
         entry2.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry2)
         entry3.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry3)
         entry4.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry4)
 
-        umAppDatabase!!.contentEntryParentChildJoinDao.insertList(Arrays.asList(
-                ContentEntryParentChildJoin(rootEntry, entry1, 0),
-                ContentEntryParentChildJoin(rootEntry, entry2, 0),
-                ContentEntryParentChildJoin(rootEntry, entry3, 0),
-                ContentEntryParentChildJoin(rootEntry, entry4, 0)
-        ))
+        umAppDatabase!!.contentEntryParentChildJoinDao.insertList(
+                listOf(ContentEntryParentChildJoin(rootEntry, entry1, 0),
+                        ContentEntryParentChildJoin(rootEntry, entry2, 0),
+                        ContentEntryParentChildJoin(rootEntry, entry3, 0),
+                        ContentEntryParentChildJoin(rootEntry, entry4, 0)))
 
         /*   ContentEntryFile entryFile = new ContentEntryFile();
         entryFile.setLastModified(System.currentTimeMillis());
@@ -209,13 +208,13 @@ class DownloadDialogAndNotificationEspressoTest {
 
         sendCommand("throttle", THROTTLE_BYTES)
 
-        startDownloading(connectedToUnmeteredConnection)
+        startDownloading(connectedToUnMeteredConnection)
 
-        SystemClock.sleep(MIN_SLEEP_TIME.toLong())
+        SystemClock.sleep(MIN_SLEEP_TIME)
 
         val openNotificationTray = mDevice!!.openNotification()
 
-        mDevice!!.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MIN_SLEEP_TIME.toLong())
+        mDevice!!.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MIN_SLEEP_TIME)
 
         val title = mDevice!!.findObject(By.textContains(NOTIFICATION_TITLE_PREFIX))
 
@@ -226,10 +225,10 @@ class DownloadDialogAndNotificationEspressoTest {
         assertTrue("Download notification was shown",
                 title.text.contains(NOTIFICATION_TITLE_PREFIX))
 
-        assertEquals("Notification shown was for  " + entry1!!.title!!,
-                entryName.text, entry1!!.title)
+        assertEquals("Notification shown was for  " + entry1.title!!,
+                entryName.text, entry1.title)
 
-        SystemClock.sleep(MIN_SLEEP_TIME.toLong())
+        SystemClock.sleep(MIN_SLEEP_TIME)
 
 
     }
@@ -241,7 +240,7 @@ class DownloadDialogAndNotificationEspressoTest {
 
         sendCommand("throttle", THROTTLE_BYTES)
 
-        startDownloading(connectedToUnmeteredConnection)
+        startDownloading(connectedToUnMeteredConnection)
 
         WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
                 MAX_THRESHOLD * 60000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
@@ -264,13 +263,13 @@ class DownloadDialogAndNotificationEspressoTest {
     @Throws(IOException::class, JSONException::class)
     fun givenDownloadIconClickedOnEntryListItem_whenDownloadingAndConnectionChangedToMetered_shouldStopDownloading() {
 
-        Assume.assumeTrue("Device is connected on metered connection, can execute the test", connectedToUnmeteredConnection)
+        Assume.assumeTrue("Device is connected on metered connection, can execute the test", connectedToUnMeteredConnection)
 
         sendCommand("throttle", THROTTLE_BYTES)
 
         SystemClock.sleep(MIN_SLEEP_TIME)
 
-        startDownloading(connectedToUnmeteredConnection)
+        startDownloading(connectedToUnMeteredConnection)
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
 
@@ -306,7 +305,7 @@ class DownloadDialogAndNotificationEspressoTest {
 
         sendCommand("throttle", (THROTTLE_BYTES * MAX_THRESHOLD))
 
-        startDownloading(connectedToUnmeteredConnection)
+        startDownloading(connectedToUnMeteredConnection)
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
 
