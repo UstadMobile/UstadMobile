@@ -169,7 +169,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                         R.drawable.ic_collections_bookmark_black_24dp, R.color.default_back_color);
         AHBottomNavigationItem reports_item =
                 new AHBottomNavigationItem(R.string.reports,
-                        R.drawable.ic_collections_bookmark_black_24dp, R.color.default_back_color);
+                        R.drawable.ic_insert_chart_black_24dp, R.color.default_back_color);
 
 
         bottomNavigation.addItem(catalog_item);
@@ -418,7 +418,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
             nString = "";
         }
         bottomNavigation.setNotification(nString,
-                bottomNavigation.getItemsCount() - 2);
+                bottomNavigation.getItemsCount() - 3);
     }
 
     /**

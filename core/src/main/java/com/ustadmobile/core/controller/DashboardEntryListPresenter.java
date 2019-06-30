@@ -206,18 +206,32 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
         view.showSetTitle(existingTitle, entryUid);
     }
 
-    public void handlePinEntry(long entryUid){
-        dashboardEntryDao.pinEntry(entryUid, new UmCallback<Integer>() {
-            @Override
-            public void onSuccess(Integer result) {
-                //Do nothing..
-            }
+    public void handlePinEntry(long entryUid, boolean pinned){
+        if(pinned){
+            dashboardEntryDao.unpinEntry(entryUid, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    //Do nothing..
+                }
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }else {
+            dashboardEntryDao.pinEntry(entryUid, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    //Do nothing..
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }
     }
 
 }

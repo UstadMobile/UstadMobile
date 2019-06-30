@@ -14,6 +14,8 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,16 +57,27 @@ public class DashboardEntryListFragment
 
 
         //Inflate view
-        rootContainer = inflater.inflate(R.layout.fragment_dashboard_entry_list, container,false);
+        rootContainer = inflater.inflate(R.layout.fragment_dashboard_entry_list,
+                container,false);
         setHasOptionsMenu(true);
 
         //Set recycler views
         //RecyclerView - Entries
         entriesRV = rootContainer.findViewById(
                     R.id.fragment_dashboard_entry_list_entries_rv);
+
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float density  = getResources().getDisplayMetrics().density;
+        float dpWidth  = outMetrics.widthPixels / density;
+        int spanCount = Math.round(dpWidth/450);
+
+
         RecyclerView.LayoutManager mRecyclerLayoutManager =
-                new GridLayoutManager(getContext(), 2);
-//        LinearLayoutManager mRecyclerLayoutManager
+                new GridLayoutManager(getContext(), spanCount);
+//        RecyclerView.LayoutManager mRecyclerLayoutManager
 //                = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         entriesRV.setLayoutManager(mRecyclerLayoutManager);
 
@@ -78,7 +91,8 @@ public class DashboardEntryListFragment
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
         //Set listeners
-        floatingActionMenu = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu);
+        floatingActionMenu =
+                rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu);
         rootContainer.findViewById(R.id.fragment_dashboard_entry_list_fab_menu_sales_performance)
                 .setOnClickListener(v -> {
                     floatingActionMenu.close(true);

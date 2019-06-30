@@ -20,12 +20,17 @@ public abstract class DashboardEntryDao
     public abstract void updateTitle(long uid, String title, UmCallback<Integer> resultCallback);
 
     @UmQuery("SELECT * FROM DashboardEntry WHERE " +
-            "dashboardEntryPersonUid = :uid AND dashboardEntryActive = 1")
+            "dashboardEntryPersonUid = :uid AND dashboardEntryActive = 1 ORDER BY dashboardEntryIndex ASC")
     public abstract UmProvider<DashboardEntry> findByPersonAndActiveProvider(long uid);
 
 
     @UmQuery("UPDATE DashboardEntry SET dashboardEntryIndex = -1 WHERE  dashboardEntryUid = :uid")
     public abstract void pinEntry(long uid, UmCallback<Integer> resultCallback);
+
+    @UmQuery("UPDATE DashboardEntry SET dashboardEntryIndex = " +
+            "(SELECT (SELECT MAX(dashboardEntryIndex) FROM DashboardEntry) +1) " +
+            "WHERE dashboardEntryUid = :uid")
+    public abstract void unpinEntry(long uid, UmCallback<Integer> resultCallback);
 
     @UmQuery("UPDATE DashboardEntry SET dashboardEntryActive = 0 WHERE dashboardEntryUid = :uid")
     public abstract void deleteEntry(long uid, UmCallback<Integer> resultCallback);

@@ -94,6 +94,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     public static final String PREFKEY_LAST_ACTIVE = "prefke.lastactive";
 
+    public static final Long TIMEOUT_LOGOUT = 600000L;
+
 
     private ServiceConnection mSyncServiceConnection = new ServiceConnection() {
         @Override
@@ -241,7 +243,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         }
 
         long timeoutExceeded = System.currentTimeMillis() - lt;
-        long logoutTimeout = 300000; //TODO: Get and set from app pref
+        long logoutTimeout = TIMEOUT_LOGOUT; //TODO: Get and set from app pref
         if(timeoutExceeded > logoutTimeout){
             handleLogout();
         }

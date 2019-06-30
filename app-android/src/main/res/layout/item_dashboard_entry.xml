@@ -12,7 +12,7 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/item_dashboard_entry_cl"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?android:selectableItemBackground">
 
@@ -20,8 +20,8 @@
             android:id="@+id/item_dashboard_entry_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
 
             app:layout_constraintEnd_toStartOf="@+id/item_dashboard_entry_dots"
             app:layout_constraintTop_toTopOf="parent"
@@ -31,8 +31,8 @@
             android:id="@+id/item_dashboard_entry_dots"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_more_vert_black_24dp" />
@@ -54,15 +54,18 @@
 
         <View
             android:id="@+id/view9"
-            android:layout_width="250dp"
-            android:layout_height="300dp"
+            android:layout_width="400dp"
+            android:layout_height="280dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_dashboard_entry_title"></View>
 
         <TextView
             android:id="@+id/item_dashboard_entry_tag_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
 
             android:text="@string/tags"
@@ -70,12 +73,14 @@
             app:layout_constraintTop_toBottomOf="@+id/view9" />
 
         <android.support.design.chip.ChipGroup
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_dashboard_entry_tag_title">
 
         </android.support.design.chip.ChipGroup>

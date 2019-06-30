@@ -49,6 +49,7 @@ public class DashboardEntry {
         this.dashboardEntryReportType = reportType;
         this.dashboardEntryPersonUid = personUid;
         this.dashboardEntryActive = true;
+        this.dashboardEntryIndex = 42;
     }
 
     public long getDashboardEntryUid() {

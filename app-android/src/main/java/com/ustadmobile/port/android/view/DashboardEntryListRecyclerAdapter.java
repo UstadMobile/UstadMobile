@@ -58,7 +58,7 @@ public class DashboardEntryListRecyclerAdapter extends
         //Options to Edit/Delete every schedule in the list
         dots.setOnClickListener((View v) -> {
             //creating a popup menu
-            PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+            PopupMenu popup = new PopupMenu(theContext, v);
             popup.setOnMenuItemClickListener(item -> {
                 int i = item.getItemId();
                 if (i == R.id.edit) {
@@ -83,12 +83,19 @@ public class DashboardEntryListRecyclerAdapter extends
             popup.show();
         });
 
-        pin.setOnClickListener(v -> mPresenter.handlePinEntry(entryUid));
+        boolean pinned;
+        if(entity.getDashboardEntryIndex()<
+                0){
+            pinned = true;
+        }else{
+            pinned = false;
+        }
+
+        boolean finalPinned = pinned;
+        pin.setOnClickListener(v -> mPresenter.handlePinEntry(entryUid, finalPinned));
 
         TextView title = holder.itemView.findViewById(R.id.item_dashboard_entry_title);
         title.setText(entity.getDashboardEntryTitle());
-
-
 
 
     }
