@@ -457,6 +457,7 @@
     <string name="last_active_on_app">Last Active on App</string>
     <string name="products">Products</string>
     <string name="sale_value">Sale Value</string>
+    <string name="set_title">Set title</string>
 
 
 </resources>

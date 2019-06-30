@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
@@ -44,6 +45,12 @@ public class DashboardEntryListRecyclerAdapter extends
 
         AppCompatImageView dots = holder.itemView.findViewById(R.id.item_dashboard_entry_dots);
         AppCompatImageView pin = holder.itemView.findViewById(R.id.item_dashboard_entry_flag);
+
+        if(entity.getDashboardEntryIndex() < 0 ){
+            pin.setColorFilter(ContextCompat.getColor(theContext, R.color.primary_dark));
+        }else{
+            pin.setColorFilter(ContextCompat.getColor(theContext, R.color.text_primary));
+        }
 
         long entryUid = entity.getDashboardEntryUid();
         String existingTitle = entity.getDashboardEntryTitle();

@@ -11,6 +11,7 @@ import android.support.design.chip.Chip;
 import android.support.design.chip.ChipGroup;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -61,9 +62,11 @@ public class DashboardEntryListFragment
         //RecyclerView - Entries
         entriesRV = rootContainer.findViewById(
                     R.id.fragment_dashboard_entry_list_entries_rv);
-        LinearLayoutManager layoutManager
-                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        entriesRV.setLayoutManager(layoutManager);
+        RecyclerView.LayoutManager mRecyclerLayoutManager =
+                new GridLayoutManager(getContext(), 2);
+//        LinearLayoutManager mRecyclerLayoutManager
+//                = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        entriesRV.setLayoutManager(mRecyclerLayoutManager);
 
         tags = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_tags_cg);
         //tagAll = rootContainer.findViewById(R.id.fragment_dashboard_entry_list_chip_all);
