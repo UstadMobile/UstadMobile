@@ -33,10 +33,32 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation kotlin("stdlib-common:$version_kotlin")
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
+            }
+        }
+
+        androidMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+            }
+        }
+
+        jsMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
             }
         }
     }
+
+
+
+
 }
 
 publishing {
