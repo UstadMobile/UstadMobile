@@ -334,6 +334,7 @@ task prepareWebLocale{
 
         Map<String, String> idToTranslationMap = new HashMap<>()
 
+        //TODO: this needs to be
         if(file.absolutePath.split("-").size() > 1){
             localeCode = file.absolutePath.split("-")[1].split("/")[0]
         }
@@ -342,6 +343,9 @@ task prepareWebLocale{
             tempFile.delete()
         }
         outFile = tempFile
+        if(!outFile.getParentFile().exists()) {
+            outFile.getParentFile().mkdirs()
+        }
 
         def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
         def counter = 0
