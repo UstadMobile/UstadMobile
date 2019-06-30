@@ -16,18 +16,10 @@
     <string name="download">Download</string>
     <string name="downloaded" value="81">Downloaded</string>
     <string name="libraries">Libraries</string>
-    <string name="paused">Paused</string>
     <string name="pause_download">Pause download</string>
-    <string name='download_q'>Download?</string>
-    <string name='download_all_q'>Download all %s entries?</string>
     <string name='ok'>OK</string>
     <string name="confirm">Confirm</string>
     <string name='cancel'>Cancel</string>
-    <string name="cancel_download">Cancel download</string>
-    <string name="resume_download">Resume download</string>
-    <string name="only_download_on_wifi">Only download on Wi-FI</string>
-    <string name='delete_q'>Delete?</string>
-    <string name='delete_x_entries_from_device'>Delete %s entries from device?</string>
     <string name='delete'>Delete</string>
     <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
     <string name='loading'>Loading</string>
@@ -76,12 +68,7 @@
     <string name='email'>Email</string>
     <string name='regcode'>Signup Code</string>
     <string name='home'>Home</string>
-    <string name='my_libraries' value="80">My Libraries</string>
-    <string name='add_library'>Add Library</string>
-    <string name='select_library'>Select Library</string>
     <string name='add'>Add</string>
-    <string name='library_title'>Library Name e.g. A Library</string>
-    <string name='library_url'>Library OPDS URL e.g. http://..</string>
     <string name='enter_phone_num'>Please enter phone number</string>
     <string name="phone">Phone</string>
     <string name="tablet">Tablet</string>
@@ -95,15 +82,6 @@
     <string name='forgot_password'>Forgot password</string>
     <string name='connections'>Connection</string>
     <string name='notifications'>Notifications</string>
-    <string name='reset_counter_label'>Reset data counter</string>
-    <string name='usage_statistics'>Usage statistics</string>
-    <string name='wifi_data_label'>When using mobile data</string>
-    <string name='cell_data_label'>When using WiFi only</string>
-    <string name='data_label'>Send answers, scores and usage information.</string>
-    <string name='p2p_connection_label'>P2P Connections</string>
-    <string name='node_title_list'>Node List</string>
-    <string name='file_available_locally'>Available nearby</string>
-    <string name='file_unavailable_locally'>Available online</string>
     <string name='connection'>General Connection</string>
     <string name='data_usage_label'>Total mobile data usage</string>
     <string name='account'>Account</string>
@@ -119,12 +97,10 @@
     <string name="send">Send</string>
     <string name="size">Size</string>
     <string name="see_also">See also</string>
-    <string name="not_taken">Not Taken</string>
     <string name="download_in_another_language">Download in another language</string>
     <string name="modify">Modify</string>
     <string name="open">Open</string>
     <string name="passed">Passed</string>
-    <string name="failed_message">Try again</string>
     <string name="in_progress">In progress</string>
     <string name="downloading">Downloading</string>
     <string name="waiting">Waiting</string>
@@ -161,11 +137,6 @@
 
     <string name="cancel_invite">Cancel invite</string>
     <string name="inviting">Inviting</string>
-
-    <string name="device_name">Device name</string>
-    <string name="scanning">Scanning</string>
-    <string name="connecting">Connecting</string>
-    <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
 
 
@@ -250,9 +221,7 @@
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="send_in_zip_file">Send in zip file</string>
-    <string name="kilobytes_per_second_abbreviated">KB/s</string>
 
-    <string name="catalog_language">Catalog Language</string>
     <string name="also_available_in">Also available in</string>
 
     <string name="onboarding_get_started_label">Get Started</string>
@@ -263,10 +232,7 @@
     <string name="location_permission_title">Location permissions required</string>
     <string name="location_permission_message">This app requires location permissions to enable you to download and share content offline.</string>
 
-    <string name="download_pause_stacked_label">Pause download</string>
     <string name="download_delete_btn_label">Delete</string>
-    <string name="download_cancel_stacked_label">Cancel download</string>
-    <string name="download_cancel_label">Cancel</string>
     <string name="download_continue_stacked_label">Continue download</string>
     <string name="download_continue_btn_label">Continue</string>
     <string name="download_wifi_only">WiFi only</string>
@@ -276,6 +242,7 @@
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
     <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
     <string name="download_cancel_all">CANCEL ALL</string>
+    <string name="download_cancel_label">Cancel download</string>
     <string name="download_pause_all">PAUSE ALL</string>
     <string name="download_pause_download">Pause</string>
     <string name="download_storage_option_device">Use %1$s - %2$s free</string>
@@ -284,10 +251,8 @@
     <string name="download_locally_availability">Available nearby</string>
     <string name="download_cloud_availability">Available on cloud</string>
     <string name="clear_history">Clear History</string>
-    <string name="download_entry_state_downloading">Downloading</string>
     <string name="download_entry_state_paused">Paused</string>
     <string name="download_entry_state_queued">Queued</string>
-    <string name="download_entry_state_downloaded">Downloaded</string>
     <string name="get_app">Get app</string>
     <string name="no_app_found">"No app found to open file"</string>
     <string name="entry_details_author">Author</string>
@@ -335,9 +300,6 @@
     <string name="content_editor_page_view_hint">Title</string>
     <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
     <string name="content_entry_not_found">ContentEntry Not Found</string>
-    <string name='content_page_dialog_add'>Add</string>
-    <string name='content_page_dialog_update'>Update</string>
-    <string name='content_page_dialog_cancel'>Cancel</string>
     <string name="content_editor_directionality">Directionality</string>
     <string name='content_editor_menu_undo'>Undo</string>
     <string name='content_editor_menu_redo'>Redo</string>
@@ -395,7 +357,4 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-
-
-
 </resources>

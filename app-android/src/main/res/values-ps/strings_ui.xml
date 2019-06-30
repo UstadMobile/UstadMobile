@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name='app_name'>‫أستاد موبايل‬</string>
+    <string name='dir'>ltr</string>
     <string name='login'> ننوتون</string>
     <string name='error'> تېروتنه</string>
     <string name='err_registering_new_user'>تیروتنه د نوی کارونکی په ثبت</string>
     <string name='registering'>شاملونه</string>
+    <string name="register_empty_fields">Please fill out all required fields</string>
+    <string name="register_incorrect_email">Wrong email address</string>
     <string name='wrong_user_pass_combo'> غلطه کارونکی نوم/شفر: بیا کوښښ وکړی</string>
     <string name='login_network_error'>چک وکری په کرښه یی د جال تیروتنه! مهربانی</string>
     <string name='authenticating'> تصدیق كول</string>
     <string name='course_catalog_load_error'>بخښنه! تیروتنه په بارولو کښی </string>
     <string name='download'> رالېښل</string>
-    <string name='download_q'> رالېښل</string>
-    <string name='download_all_q'>د تول ننوتونو رالیښل</string>
     <string name='ok'>صحیح</string>
+    <string name="confirm">Confirm</string>
     <string name='cancel'>لغو کول</string>
-    <string name='delete_q'> ړنګول</string>
-    <string name='delete_x_entries_from_device'>ړنګول تول ننوتونو د وزلی نه</string>
     <string name='delete'>ړنګول</string>
     <string name='error_loading_catalog'>بخښنه! تیروتنه د اساسی لست په بارولو کښی</string>
     <string name='loading'>بارونه</string>
@@ -63,11 +63,7 @@
     <string name='email'>ایمیل</string>
     <string name='regcode'>کد</string>
     <string name='home'>کور پاڼه</string>
-    <string name='my_libraries'>زما کتابتون</string>
-    <string name='add_library'>د کتابتون زیاتول</string>
-    <string name='select_library'>د کتابتون ټاکل</string>
     <string name='add'>زیاتول</string>
-    <string name='library_title'>د کتابتوب نوم، لکه کتابتون A</string>
 
     <string name='enter_phone_num'>په مهربانۍ سره د ټېلفون شمېره ننباسئ</string>
     <string name='enter_name'>په مهربانۍ سره نوم ننباسئ</string>
@@ -81,21 +77,16 @@
     <string name='forgot_password'>له سیسټم څخه وتل</string>
     <string name='connections'>اتصال</string>
     <string name='notifications'>اعلان</string>
-
-
-    <string name='wifi_data_label'>د ټېلفوني معلوماتو د استفادې پرمهال</string>
-    <string name='cell_data_label'>یواځې د وای فای د استفادې پر مهال</string>
-    <string name='data_label'>ځوابونه، امتیازونه او د لګښت معلومات ولېږئ</string>
-    <string name='p2p_connection_label'>د P2P اتصالات</string>
-
-    <string name='file_available_locally'>په ځايي توګه د لاسرسي وړ</string>
-    <string name='file_unavailable_locally'>په ځايي توګه د نه لاسرسي وړ</string>
     <string name='connection'>عمومي اتصال</string>
 
     <string name='account'>حساب</string>
 
     <string name="modify">بدلول</string>
     <string name="open">پرانیستل</string>
+
+    <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
+
+    <string name="share_offline_zip_checkbox_label">Send in zip file</string>
 
     <string name='welcome'>ښه راغلاست</string>
     <string name='welcome_dialog_subheader'>د دندې د ترلاسه کولو هڅه\n د بریالیتوب مهارتونه دلته ترلاسه کړئ</string>
@@ -210,22 +201,17 @@
     <string name="options_job_part" value="1019">نیمه ورځ</string>
     <string name="options_job_full" value="1020">پوره ورځ</string>
 
-    <!-- Registration dialog feedback -->
-    <string name="field_password_min">Minimum 5 characters</string>
-
-    <!-- Update student details action button -->
-    <string name="update">Update</string>
-
 
     <string name='login_successful'>بریالی ننوتل</string>
     <string name='registration_successful'>بریالۍ نوم لیکنه</string>
     <string name='share_offline_dialog_message'>کولای شئ دا اپلکېشن په آنلاین توګه شریک کړئ. هغه آله چې تاسو یې غواړئ د هغې په واسطه یې شریک کړئ:\n  تنظیمات پرانیسئ &lt; د بلوتوث تنظیمات\n ډاډ ترلاسه کړئ چې آله د لیدو وړ ده.\n </string>
     <string name='send_in_zip_file'>د زېپ په فایل کې ولېږئ</string>
-    <string name='device_name'>د وزلې نوم</string>
     <string name='accept'>منل</string>
     <string name='decline'>رد کول</string>
 
     <string name='downloaded'>دانلوډ شو</string>
+    <string name="libraries">Libraries</string>
+    <string name="pause_download">Pause download</string>
     <string name='new_password'>نوی تېرنويى</string>
     <string name='phone'>ټېلفون</string>
     <string name='tablet'>تبلټ</string>
@@ -234,15 +220,61 @@
     <string name='send_course_instructions'>په بلې آله کې، اپلکېشن پرانیسئ، د مینو پورته ښي اړخه څخه د ترلاسه کول وټاکئ.\n  د لاندې لیسټ څخه بله آله انتخاب کړئ:</string>
     <string name='cancel_invite'>د بلني لغوه </string>
     <string name='inviting'>د بلنې په حال کې</string>
-    <string name='connecting'>د اړیکې په حال کې</string>
-    <string name='connected_but_host_not_sharing'>اړیکه/اتصال رامنځ ته شو، خو هغه بله وسله چې له دې اپلکېشن څخه استفاده کوي هېڅ شی نه شریکوي.</string>
+    <string name="try_again">Try again</string>
     <string name='field_required_prompt'>دا برخه لازمه ده </string>
+    <!-- Registration dialog feedback -->
+    <string name="field_password_min">Minimum 5 characters</string>
+    <string name="field_password_error_min">Password should be at least 5 characters</string>
+    <string name="filed_password_no_match">Password doesn\'t match, try again</string>
+
+    <!-- Update student details action button -->
+    <string name="update">Update</string>
+
+    <string name="catalog">Catalog</string>
+    <string name="closed">Closed</string>
+
+    <string name="cannot_update">Cannot update</string>
+
+    <string name="error_unsupported_content_type">Error: unsupported content type</string>
+
     <string name="also_available_in">همدارنګه د لاسترسي وړ دی</string>
     <string name="entry_details_author">Author</string>
     <string name="entry_details_license">License</string>
     <string name="entry_details_description">Description</string>
     <string name="library_reading_level">Reading Level</string>
     <string name="file_not_found">File Not Found</string>
+
+    <string name="onboarding_get_started_label">Get Started</string>
+    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
+    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
+    <string name="onboarding_offline_sharing">Share offline</string>
+    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
+    <string name="location_permission_title">Location permissions required</string>
+    <string name="location_permission_message">This app requires location permissions to enable you to download and share content offline.</string>
+
+    <string name="download_delete_btn_label">Delete</string>
+    <string name="download_continue_stacked_label">Continue download</string>
+    <string name="download_continue_btn_label">Continue</string>
+    <string name="download_wifi_only">WiFi only</string>
+    <string name="download_calculating">Calculating...</string>
+    <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
+    <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
+    <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
+    <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
+    <string name="download_cancel_all">CANCEL ALL</string>
+    <string name="download_cancel_label">Cancel download</string>
+    <string name="download_pause_all">PAUSE ALL</string>
+    <string name="download_pause_download">Pause</string>
+    <string name="download_storage_option_device">Use %1$s - %2$s free</string>
+    <string name="download_storage_permission_title">File permissions required</string>
+    <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
+    <string name="download_locally_availability">Available nearby</string>
+    <string name="download_cloud_availability">Available on cloud</string>
+    <string name="clear_history">Clear History</string>
+    <string name="download_entry_state_paused">Paused</string>
+    <string name="download_entry_state_queued">Queued</string>
+    <string name="get_app">Get app</string>
+    <string name="no_app_found">"No app found to open file"</string>
 
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
@@ -283,9 +315,6 @@
     <string name="content_editor_page_view_hint">Title</string>
     <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
     <string name="content_entry_not_found">ContentEntry Not Found</string>
-    <string name='content_page_dialog_add'>Add</string>
-    <string name='content_page_dialog_update'>Update</string>
-    <string name='content_page_dialog_cancel'>Cancel</string>
     <string name="content_editor_directionality">Directionality</string>
     <string name='content_editor_menu_undo'>Undo</string>
     <string name='content_editor_menu_redo'>Redo</string>
@@ -343,8 +372,4 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-
-
-
-
 </resources>
