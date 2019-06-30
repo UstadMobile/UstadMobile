@@ -98,8 +98,6 @@ public class KhanContentIndexer implements Runnable {
         UMLogUtil.logDebug(args[0]);
         UMLogUtil.setLevel(args.length == 3 ? args[2] : "");
 
-        // UMLogUtil.logError(args[1]);
-
         try {
             ScrapeRunDao runDao = UmAppDatabase.getInstance(null).getScrapeRunDao();
 
@@ -210,7 +208,7 @@ public class KhanContentIndexer implements Runnable {
                 indexerLatch.countDown());
         indexWorkQueue.start();
         CountDownLatch scraperLatch = new CountDownLatch(1);
-        scrapeWorkQueue = new WorkQueue(scraperSource, 6);
+        scrapeWorkQueue = new WorkQueue(scraperSource, 1);
         scrapeWorkQueue.start();
 
         try {
@@ -282,10 +280,13 @@ public class KhanContentIndexer implements Runnable {
 
                 if (node.getWholeData().contains("ReactComponent(")) {
 
+                    UMLogUtil.logTrace("React Component");
                     String data = node.getWholeData();
+                    UMLogUtil.logTrace(data);
                     try {
                         int index = data.indexOf("ReactComponent(") + 15;
                         int end = data.indexOf("loggedIn\": false})") + 17;
+                        UMLogUtil.logTrace("index " + index + " end  =" + end);
                         return data.substring(index, end);
                     } catch (IndexOutOfBoundsException e) {
                         UMLogUtil.logError("Could not get json from the script for url " + url);
@@ -293,12 +294,19 @@ public class KhanContentIndexer implements Runnable {
                     }
                 } else if (node.getWholeData().contains("{\"initialState\"")) {
 
+                    UMLogUtil.logTrace("initialState");
                     String data = node.getWholeData();
+                    UMLogUtil.logTrace(data);
                     try {
                         int index = data.indexOf("{\"initialState\"");
                         int end = data.lastIndexOf("})");
+                        if (end == -1) {
+                            end = data.lastIndexOf("}") + 1;
+                        }
+                        UMLogUtil.logTrace("index " + index + " end  =" + end);
                         return data.substring(index, end);
                     } catch (IndexOutOfBoundsException e) {
+
                         UMLogUtil.logError("Could not get json from the script for url " + url);
                         return EMPTY_STRING;
                     }

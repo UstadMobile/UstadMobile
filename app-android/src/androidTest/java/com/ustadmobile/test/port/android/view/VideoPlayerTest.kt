@@ -65,7 +65,8 @@ class VideoPlayerTest {
         tmpDir.mkdirs()
         val videoFile = File(tmpDir, "video1.webm")
         val audioTempFile = File(tmpDir, "audio.c2")
-        val srtTmpFile = File(tmpDir, "subtitle.srt")
+        val srtTmpFile = File(tmpDir, "subtitle-english.srt")
+        val germanTmpFile = File(tmpDir, "subtitle-Deutsch.srt")
 
         FileUtils.copyInputStreamToFile(
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/video1.webm")!!,
@@ -75,8 +76,12 @@ class VideoPlayerTest {
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/video1-codec2-version2.c2")!!,
                 audioTempFile)
         FileUtils.copyInputStreamToFile(
-                javaClass.getResourceAsStream("/com/ustadmobile/app/android/srtfile.srt")!!,
+                javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-english.srt")!!,
                 srtTmpFile)
+
+        FileUtils.copyInputStreamToFile(
+                javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-Deutsch.srt")!!,
+                germanTmpFile)
 
         val dir = Environment.getExternalStorageDirectory()
 
@@ -91,7 +96,8 @@ class VideoPlayerTest {
         runBlocking {
             manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video1.webm"),
                     ContainerManager.FileEntrySource(audioTempFile, "audio.c2"),
-                    ContainerManager.FileEntrySource(srtTmpFile, "subtitle.srt"))
+                    ContainerManager.FileEntrySource(srtTmpFile, "subtitle-english.srt"),
+                    ContainerManager.FileEntrySource(germanTmpFile, "subtitle-Deutsch.srt"))
         }
     }
 

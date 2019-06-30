@@ -98,7 +98,7 @@ kotlin {
         }
         //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
         // the project to avoid it being seen as an extra jvm variant
-//        fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
+        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
 
 

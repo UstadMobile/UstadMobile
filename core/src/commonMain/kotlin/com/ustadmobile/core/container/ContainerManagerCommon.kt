@@ -2,7 +2,6 @@ package com.ustadmobile.core.container
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.io.InputStream
@@ -83,7 +82,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
                 ContainerEntryWithContainerEntryFile(it.value.cePath!!, newContainer, it.value.containerEntryFile!!)
         }.toMap()
 
-        db.containerEntryDao.insertList(newEntryMap.values.map { it as ContainerEntry })
+        db.containerEntryDao.insertList(newEntryMap.values.map { it })
         return ContainerManager(newContainer, db, dbRepo, newFilePath,
                 newEntryMap.toMutableMap())
     }
