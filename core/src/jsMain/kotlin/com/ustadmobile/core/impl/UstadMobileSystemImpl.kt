@@ -219,5 +219,15 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
 
 
+    /**
+     * Get asset as an input stream asynchronously
+     */
+    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
 }

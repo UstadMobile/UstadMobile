@@ -1,21 +1,25 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.timeout
+import com.nhaarman.mockitokotlin2.verify
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import java.io.File
-import java.io.IOException
 import com.ustadmobile.core.view.H5PContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.test.core.util.checkJndiSetup
-import com.ustadmobile.test.core.util.extractTestResourceToFile
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.extractTestResourceToFile
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import org.mockito.Mockito
+import java.io.File
+import java.io.IOException
 import java.util.zip.ZipFile
 
 class H5PContentPresenterTest {
@@ -57,8 +61,8 @@ class H5PContentPresenterTest {
         val containerManager = ContainerManager(h5pContainer, db, repo,
                 containerTmpDir.absolutePath)
         val zipFile = ZipFile(h5pTmpFile)
-        containerManager.addEntriesFromZip(zipFile,
-                ContainerManager.OPTION_COPY or ContainerManager.OPTION_UPDATE_TOTALS)
+        addEntriesFromZipToContainer(h5pTmpFile.absolutePath,
+                containerManager)
         zipFile.close()
 
         Mockito.doAnswer { invocation ->
@@ -84,7 +88,7 @@ class H5PContentPresenterTest {
 
         h5PPresenter.onCreate(null)
 
-        verify(h5pContentView, timeout(15000 * 1000)).setTitle("True/False Question")
+        verify(h5pContentView, timeout(15000 * 1000)).setContentTitle("True/False Question")
 
         //A higher fidelity test is run using Espresso testing
         verify(h5pContentView, timeout(15000)).setContentHtml(any(), any())

@@ -9,7 +9,7 @@ package com.ustadmobile.core.catalog.contenttype
  *
  * Created by mike on 9/9/17.
  */
-abstract class ContentTypePlugin {
+interface ContentTypePlugin {
 
     //    /**
     //     *
@@ -29,16 +29,24 @@ abstract class ContentTypePlugin {
      *
      * @return Name of view to open for this type of content
      */
-    abstract val viewName: String
+    val viewName: String
 
     /**
      * Return an array of mime types that are used by this content type.
      *
      * @return
      */
-    abstract val mimeTypes: Array<String>
+    val mimeTypes: Array<String>
 
-    abstract val fileExtensions: Array<String>
+    val fileExtensions: Array<String>
+
+
+    companion object {
+
+        const val CONTENT_ENTRY = "content_entry"
+
+        const val CONTENT_MIMETYPE = "content_mimetype"
+    }
 
 
 }

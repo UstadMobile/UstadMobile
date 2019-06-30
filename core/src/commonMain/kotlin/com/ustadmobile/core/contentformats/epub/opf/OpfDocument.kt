@@ -399,7 +399,7 @@ class OpfDocument {
         return languages
     }
 
-    fun getSpine(): List<OpfItem> {
+    fun getSpine(): MutableList<OpfItem> {
         return spine
     }
 
@@ -414,19 +414,19 @@ class OpfDocument {
 
     companion object {
 
-        private val NAMESPACE_OPF = "http://www.idpf.org/2007/opf"
+        private const val NAMESPACE_OPF = "http://www.idpf.org/2007/opf"
 
-        private val NAMESPACE_DC = "http://purl.org/dc/elements/1.1/"
+        private const val NAMESPACE_DC = "http://purl.org/dc/elements/1.1/"
 
         /**
          * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
          */
-        val PARSE_METADATA = 1
+        const val PARSE_METADATA = 1
 
         /**
          * Flag value to indicate we should parse the manifest
          */
-        val PARSE_MANIFEST = 2
+        const val PARSE_MANIFEST = 2
 
         fun getExtension(filename: String): String? {
             val dotPos = filename.lastIndexOf('.')

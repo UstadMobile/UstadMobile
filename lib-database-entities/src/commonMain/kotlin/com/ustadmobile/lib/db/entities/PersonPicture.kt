@@ -5,12 +5,10 @@ import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.PersonPicture.Companion.TABLE_ID
 
-@UmEntity(tableId = TABLE_ID)
 @Entity
 class PersonPicture() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personPictureUid: Long = 0
 
     var personPicturePersonUid: Long = 0

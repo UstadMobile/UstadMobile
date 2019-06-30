@@ -4,13 +4,95 @@
 
     <style name="Theme.UstadTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="TabLayoutStyleHome" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/icons</item>
+        <item name="tabIndicatorHeight">@dimen/dimen_2dp</item>
+        <item name="tabPaddingStart">@dimen/dimen_8dp</item>
+        <item name="tabPaddingEnd">@dimen/dimen_8dp</item>
+        <item name="tabBackground">?attr/selectableItemBackground</item>
+        <item name="tabTextAppearance">@style/HomeTabTextAppearance</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+    </style>
 
+    <style name="HomeTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/primary_light</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+
+    <style name="TabLayoutStyleFormat" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/icons</item>
+        <item name="tabIndicatorHeight">@dimen/dimen_2dp</item>
+        <item name="tabPaddingStart">@dimen/dimen_8dp</item>
+        <item name="tabPaddingEnd">@dimen/dimen_8dp</item>
+        <item name="tabBackground">?attr/selectableItemBackground</item>
+        <item name="tabTextAppearance">@style/FormatTabTextAppearance</item>
+        <item name="tabSelectedTextColor">@color/primary</item>
+    </style>
+
+    <style name="FormatTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+
+    <style name="FullScreenDialogStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+
+        <!-- Set this to true if you want Full Screen without status bar -->
+        <item name="android:windowFullscreen">false</item>
+
+        <item name="android:windowIsFloating">false</item>
+
+        <!-- This is important! Don't forget to set window background -->
+        <item name="android:windowBackground">@color/icons</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+    </style>
+
+
+    <style name="PageListStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:textColor">@color/icons</item>
+        <item name="android:textColorPrimary">@color/icons</item>
+        <item name="android:textColorHint">@color/icons</item>
+
+        <!-- Set this to true if you want Full Screen without status bar -->
+        <item name="android:windowFullscreen">false</item>
+
+        <item name="android:windowIsFloating">false</item>
+
+        <!-- This is important! Don't forget to set window background -->
+        <item name="android:windowBackground">@color/icons</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/anim_slide_in_right</item>
+        <item name="android:windowExitAnimation">@anim/anim_slide_out_right</item>
+    </style>
+
+
+    <style name="PopupMenu" parent="@android:style/Widget.PopupMenu">
+        <item name="android:popupBackground">@android:color/white</item>
+    </style>
 
     <style name="ThemeOnboarding" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/icons</item>
         <item name="colorPrimaryDark">@color/divider</item>
         <item name="colorAccent">@color/icons</item>
-        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/divider</item>
+        <item name="android:statusBarColor"
+            tools:targetApi="lollipop">@color/divider</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@color/icons</item>
@@ -27,8 +109,25 @@
         <item name="android:layout_marginTop">@dimen/dimen_10dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-
-
     </style>
+
+
+    <style name="HintText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+
+    <style name="TextInputLayoutAppearance" parent="Widget.Design.TextInputLayout">
+        <item name="hintTextAppearance">@style/HintText</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="colorControlNormal">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:labelTextSize">12sp</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="colorControlHighlight">@color/primary</item>
+    </style>
+
 
 </resources>

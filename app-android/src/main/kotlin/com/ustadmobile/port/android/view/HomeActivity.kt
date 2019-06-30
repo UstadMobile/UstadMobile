@@ -16,21 +16,27 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Compani
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
+import com.ustadmobile.core.view.ContentEditorView.Companion.CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_ENTRY_LEAF
+import com.ustadmobile.core.view.ContentEntryEditView.Companion.CONTENT_TYPE
+import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class HomeActivity : UstadBaseActivity(), HomeView {
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dummy)
+        setContentView(R.layout.activity_home)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
+        coordinatorLayout = findViewById(R.id.coordinationLayout)
         setSupportActionBar(toolbar)
         supportActionBar!!.setTitle(R.string.app_name)
 
@@ -43,29 +49,38 @@ class HomeActivity : UstadBaseActivity(), HomeView {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_dummy_activity, menu)
+        menuInflater.inflate(R.menu.menu_home_activity, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
 
-        if (itemId == R.id.action_open_about) {
-            UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
-        } else if (itemId == R.id.action_clear_history) {
-            GlobalScope.launch {
-                val database = UmAppDatabase.getInstance(this)
-                database.networkNodeDao.deleteAllAsync()
-                database.entryStatusResponseDao.deleteAllAsync()
-                database.downloadJobItemHistoryDao.deleteAllAsync()
-                database.downloadJobDao.deleteAllAsync()
-                database.downloadJobItemDao.deleteAllAsync()
-                database.contentEntryStatusDao.deleteAllAsync()
+        when (item.itemId) {
+            R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
+            R.id.action_clear_history -> {
+                GlobalScope.launch {
+                    val database = UmAppDatabase.getInstance(this)
+                    database.networkNodeDao.deleteAllAsync()
+                    database.entryStatusResponseDao.deleteAllAsync()
+                    database.downloadJobItemHistoryDao.deleteAllAsync()
+                    database.downloadJobDao.deleteAllAsync()
+                    database.downloadJobItemDao.deleteAllAsync()
+                    database.contentEntryStatusDao.deleteAllAsync()
+                }
+                networkManagerBle?.clearHistories()
             }
-            networkManagerBle?.clearHistories()
-        } else if (itemId == R.id.action_send_feedback) {
-            hearShake()
+            R.id.create_new_content -> {
+                val args = HashMap<String,String?>()
+                args.putAll(UMAndroidUtil.bundleToMap(intent.extras))
+                args[CONTENT_TYPE] = CONTENT_CREATE_FOLDER.toString()
+                args[CONTENT_ENTRY_LEAF] = false.toString()
+                args[CONTENT_ENTRY_UID] = 0.toString()
+                args[ARG_CONTENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
+                UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME, args,
+                        this)
+            }
+            R.id.action_send_feedback -> hearShake()
         }
 
         return super.onOptionsItemSelected(item)
@@ -75,17 +90,13 @@ class HomeActivity : UstadBaseActivity(), HomeView {
         super.onBleNetworkServiceBound(networkManagerBle)
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                Runnable { (networkManagerBle as NetworkManagerAndroidBle).checkP2PBleServices() },
+                Runnable { networkManagerBle!!.checkP2PBleServices() },
                 impl.getString(MessageID.location_permission_title, this),
                 impl.getString(MessageID.location_permission_message, this))
     }
 
     class LibraryPagerAdapter internal constructor(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
-        private val impl: UstadMobileSystemImpl
-
-        init {
-            impl = UstadMobileSystemImpl.instance
-        }
+        private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
         // Returns total number of pages
         override fun getCount(): Int {
@@ -96,18 +107,18 @@ class HomeActivity : UstadBaseActivity(), HomeView {
         override fun getItem(position: Int): Fragment? {
             val bundle = Bundle()
 
-            when (position) {
+            return when (position) {
                 0 // Fragment # 0 - This will show FirstFragment
                 -> {
                     bundle.putString(ARG_CONTENT_ENTRY_UID, MASTER_SERVER_ROOT_ENTRY_UID.toString())
-                    return ContentEntryListFragment.newInstance(bundle)
+                    ContentEntryListFragment.newInstance(bundle)
                 }
                 1 // Fragment # 0 - This will show FirstFragment different title
                 -> {
                     bundle.putString(ARG_DOWNLOADED_CONTENT, "")
-                    return ContentEntryListFragment.newInstance(bundle)
+                    ContentEntryListFragment.newInstance(bundle)
                 }
-                else -> return null
+                else -> null
             }
         }
 
@@ -123,14 +134,12 @@ class HomeActivity : UstadBaseActivity(), HomeView {
         }
 
         companion object {
-            private val NUM_ITEMS = 2
+            private const val NUM_ITEMS = 2
         }
 
     }
 
     companion object {
-
-
-        val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
     }
 }

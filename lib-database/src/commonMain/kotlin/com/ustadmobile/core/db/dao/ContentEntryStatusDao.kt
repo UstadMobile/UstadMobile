@@ -17,6 +17,9 @@ abstract class ContentEntryStatusDao : BaseDao<ContentEntryStatus> {
     @JsName("deleteAllAsync")
     abstract suspend fun deleteAllAsync()
 
+    @Query("SELECT * FROM ContentEntryStatus WHERE cesUid = :contentEntryUid")
+    abstract suspend fun findByUidAsync(contentEntryUid : Long): ContentEntryStatus?
+
     @Query("UPDATE ContentEntryStatus SET bytesDownloadSoFar = :bytesDownloadSoFar " + "WHERE cesUid = :contentEntryUid")
     @JsName("updateLeafBytesDownloaded")
     abstract fun updateLeafBytesDownloaded(contentEntryUid: Long, bytesDownloadSoFar: Long)

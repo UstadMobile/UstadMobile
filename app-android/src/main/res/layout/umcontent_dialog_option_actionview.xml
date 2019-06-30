@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:paddingBottom="@dimen/dimen_20dp"
+    android:paddingTop="@dimen/dimen_20dp"
+    android:layout_marginStart="@dimen/dimen_16dp"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/titleWrapper"
+        android:padding="@dimen/dimen_16dp"
+        android:theme="@style/TextInputLayoutAppearance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            android:lineSpacingExtra="@dimen/dimen_8dp"
+            android:paddingTop="@dimen/dimen_10dp"
+            android:textSize="@dimen/text_title"
+            android:id="@+id/title"
+            android:maxLines="2"
+            android:textColor="@color/text_primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</FrameLayout>

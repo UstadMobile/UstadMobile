@@ -14,9 +14,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.XapiPackageContentView
 import java.util.concurrent.atomic.AtomicReference
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 
 /**
  * Created by mike on 9/14/17.
@@ -31,6 +31,8 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
     private var mWebView: WebView? = null
 
     private var mProgressBar: ProgressBar? = null
+
+    private var savedState: Bundle? = null
 
     @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,16 +69,16 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
 
         mMountedPath = AtomicReference()
 
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
         mProgressBar!!.isIndeterminate = true
         mProgressBar!!.visibility = View.VISIBLE
+        savedState = savedInstanceState
     }
 
-    override fun onHttpdConnected(httpd: com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD) {
+    override fun onHttpdConnected(httpd: EmbeddedHTTPD) {
         mPresenter = XapiPackageContentPresenter(this,
                 bundleToMap(intent.extras), this, httpd.containerMounter)
 
-        mPresenter.onCreate(null)
+        mPresenter.onCreate(bundleToMap(savedState))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -100,9 +102,9 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
     }
 
     override fun onDestroy() {
-//        val mountedPath = mMountedPath!!.get()
-//        if (mountedPath != null)
-//            super.unmountContainer(mountedPath)
+       /* val mountedPath = mMountedPath!!.get()
+        if (mountedPath != null)
+            super.unmountContainer(mountedPath) */
 
         super.onDestroy()
     }

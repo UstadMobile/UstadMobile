@@ -17,7 +17,7 @@ actual object WaitForLiveData {
      * @param checker interface to check for value
      * @param <T> The type of value returned by the live data
     </T> */
-    actual fun <T> observeUntil(liveData: DoorLiveData<T>, timeout: Long, checker: WaitForChecker<T>) {
+    actual fun <T> observeUntil(liveData: DoorLiveData<T?>, timeout: Long, checker: WaitForChecker<T>) {
     }
 
 

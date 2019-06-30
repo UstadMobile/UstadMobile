@@ -13,23 +13,28 @@ import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithStatusAndMostRecentContainerUid
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroidBle
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
+
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity, private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
-                                                               private val managerAndroidBle: NetworkManagerAndroidBle?) : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK), LocalAvailabilityListener, OnDownloadJobItemChangeListener {
+                                                               private val managerAndroidBle: NetworkManagerBle?) : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK), LocalAvailabilityListener, OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
 
     private val boundViewHolders: MutableSet<ViewHolder>
+
+    private var emptyStateListener: EmptyStateListener? = null
 
     /**
      * @return List of container uids that can be monitored (Requires status).
@@ -57,13 +62,17 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     fun addListeners() {
-        managerAndroidBle!!.addLocalAvailabilityListener(this)
-        managerAndroidBle.addDownloadChangeListener(this)
+        managerAndroidBle?.addLocalAvailabilityListener(this)
+        managerAndroidBle?.addDownloadChangeListener(this)
     }
 
     fun removeListeners() {
-        managerAndroidBle!!.removeLocalAvailabilityListener(this)
-        managerAndroidBle.removeDownloadChangeListener(this)
+        managerAndroidBle?.removeLocalAvailabilityListener(this)
+        managerAndroidBle?.removeDownloadChangeListener(this)
+    }
+
+    fun setEmptyStateListener(stateListener: EmptyStateListener) {
+        this.emptyStateListener = stateListener
     }
 
     override fun onLocalAvailabilityChanged(locallyAvailableEntries: Set<Long>) {
@@ -98,6 +107,11 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
         fun downloadStatusClicked(entry: ContentEntry?)
     }
 
+    interface EmptyStateListener {
+
+        fun onEntriesLoaded()
+    }
+
     override fun onViewRecycled(holder: ViewHolder) {
         synchronized(boundViewHolders) {
             boundViewHolders.remove(holder)
@@ -124,6 +138,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = getItem(position)
+
+        emptyStateListener!!.onEntriesLoaded()
 
         synchronized(boundViewHolders) {
             boundViewHolders.add(holder)
@@ -226,19 +242,29 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
-            managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
-                    object : UmResultCallback<DownloadJobItemStatus?> {
-                        override fun onDone(result: DownloadJobItemStatus?) {
-                            if (result != null) {
-                                activity.runOnUiThread {
-                                    holder.downloadView.progressVisibility = View.VISIBLE
-                                    holder.onDownloadJobItemChange(result)
-                                }
-                            } else {
-                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
-                            }
-                        }
-                    })
+            GlobalScope.launch(Dispatchers.Main) {
+                val downloadJobItemStatus = managerAndroidBle?.findDownloadJobItemStatusByContentEntryUid(
+                    entry.contentEntryUid)
+                if(downloadJobItemStatus != null){
+                    holder.downloadView.progressVisibility = View.VISIBLE
+                    holder.onDownloadJobItemChange(downloadJobItemStatus)
+                }else {
+                    holder.downloadView.progressVisibility == View.INVISIBLE
+                }
+            }
+//            managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
+//                    object : UmResultCallback<DownloadJobItemStatus?> {
+//                        override fun onDone(result: DownloadJobItemStatus?) {
+//                            if (result != null) {
+//                                activity.runOnUiThread {
+//                                    holder.downloadView.progressVisibility = View.VISIBLE
+//                                    holder.onDownloadJobItemChange(result)
+//                                }
+//                            } else {
+//                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
+//                            }
+//                        }
+//                    })
         }
     }
 

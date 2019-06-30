@@ -3,9 +3,12 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.core.db.UmLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerWithContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 @Dao
@@ -97,5 +100,10 @@ abstract class ContainerDao : BaseDao<Container> {
     @Query("UPDATE Container SET mimeType = :mimeType WHERE Container.containerUid = :containerUid")
     @JsName("updateMimeType")
     abstract fun updateMimeType(mimeType: String, containerUid: Long)
+
+    @Query("Select Container.* FROM Container " +
+            "WHERE Container.containerContentEntryUid = :contentEntry " +
+            "ORDER BY Container.lastModified DESC LIMIT 1")
+    abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
 
 }

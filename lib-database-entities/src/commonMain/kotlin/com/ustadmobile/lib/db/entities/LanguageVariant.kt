@@ -10,8 +10,8 @@ import com.ustadmobile.lib.db.entities.LanguageVariant.Companion.TABLE_ID
 @Entity
 class LanguageVariant() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+
+    @PrimaryKey(autoGenerate = true)
     var langVariantUid: Long = 0
 
     var langUid: Long = 0

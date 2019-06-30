@@ -2,6 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Define the background properties like color etc -->
+
     <item android:id="@+id/background">
         <shape>
             <gradient

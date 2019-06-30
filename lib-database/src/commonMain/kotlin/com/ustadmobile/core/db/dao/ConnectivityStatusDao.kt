@@ -14,6 +14,9 @@ abstract class ConnectivityStatusDao {
     abstract fun status(): ConnectivityStatus?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insert(connectivityStatus: ConnectivityStatus): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertAsync(connectivityStatus: ConnectivityStatus): Long
 
     @Query("UPDATE ConnectivityStatus SET connectivityState = :connectivityState")

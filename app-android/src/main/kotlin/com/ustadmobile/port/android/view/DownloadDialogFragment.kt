@@ -54,7 +54,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
-            val managerBle = context.networkManagerBle
+            val managerBle = context.networkManagerBle!!
             mPresenter = DownloadDialogPresenter(getContext() as Context, managerBle,
                     bundleToMap(arguments), this, UmAppDatabase.getInstance(context),
                     UmAccountManager.getRepositoryForActiveAccount(context))
@@ -204,9 +204,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mPresenter != null) {
-            mPresenter!!.onDestroy()
-        }
+        mPresenter?.onDestroy()
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {

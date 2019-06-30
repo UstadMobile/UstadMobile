@@ -16,8 +16,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.TA
 @Entity
 class ContentEntryRelatedEntryJoin() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+
+    @PrimaryKey(autoGenerate = true)
     var cerejUid: Long = 0
 
     var cerejContentEntryUid: Long = 0

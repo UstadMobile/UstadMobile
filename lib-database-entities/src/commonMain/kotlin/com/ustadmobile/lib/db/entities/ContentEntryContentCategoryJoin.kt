@@ -14,8 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin.Companion
 @Entity
 class ContentEntryContentCategoryJoin() {
 
-    @UmPrimaryKey(autoGenerateSyncable = true)
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var ceccjUid: Long = 0
 
     @UmIndexField
