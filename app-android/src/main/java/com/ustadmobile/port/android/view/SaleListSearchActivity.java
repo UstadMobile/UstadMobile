@@ -73,7 +73,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
     @Override
     public void onBackPressed() {
         // close search view on back button pressed
-        
+
         super.onBackPressed();
     }
 

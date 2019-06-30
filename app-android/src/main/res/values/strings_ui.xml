@@ -429,4 +429,34 @@
     <string name="is_sale">is sale</string>
     <string name="product_name">Product name..</string>
 
+    <!--Sprint 5-->
+    <string name="tags">Tags</string>
+    <string name="pinned">Pinned</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="mne">M&amp;E</string>
+    <string name="mne_dashboard">M&amp;E Dashboard</string>
+    <string name="total_sales">Total Sales</string>
+    <string name="top_les">Top LEs</string>
+    <string name="sales_performance">Sales performance</string>
+    <string name="sales_log">Sales log</string>
+    <string name="all">All</string>
+    <string name="add_tag">Add tag</string>
+    <string name="report_options">Report Options</string>
+    <string name="product_types">Product types</string>
+    <string name="create_report">Create report</string>
+    <string name="group_by">Group by</string>
+    <string name="show_average">Show average</string>
+    <string name="product_type">Product type</string>
+    <string name="grantee">Grantee</string>
+    <string name="sales_price">Sales price</string>
+    <string name="add_to_dashboard">Add to dashboard</string>
+    <string name="sales_performance_report">Sales Performance Report</string>
+    <string name="sales_log_report">Sales Log Report</string>
+    <string name="top_les_report">Top LEs Report</string>
+    <string name="lead_entrepreneur">Lead Entrepreneur</string>
+    <string name="last_active_on_app">Last Active on App</string>
+    <string name="products">Products</string>
+    <string name="sale_value">Sale Value</string>
+
+
 </resources>

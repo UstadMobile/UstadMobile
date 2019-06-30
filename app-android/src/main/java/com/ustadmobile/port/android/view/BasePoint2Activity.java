@@ -35,6 +35,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePoint2Presenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePoint2View;
+import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -62,11 +63,13 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     private SaleListFragment saleListFragment;
     private ComingSoonFragment comingSoonFragment;
     private CatalogListFragment catalogListFragment;
+    private DashboardEntryListFragment dashboardEntryListFragment;
 
     public static final int VIEW_POSITION_POSITION_CATALOG = 0;
     public static final int VIEW_POSITION_POSITION_INVENTORY = 1;
     public static final int VIEW_POSITION_POSITION_SALES = 2;
     public static final int VIEW_POSITION_POSITION_COURSES = 3;
+    public static final int VIEW_POSITION_POSITION_REPORTS = 4;
 
     AHBottomNavigation bottomNavigation;
     private ActionBar ab;
@@ -96,6 +99,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                     saleListFragment.goToSearch();
                     break;
                 case VIEW_POSITION_POSITION_COURSES:
+                    break;
+                case VIEW_POSITION_POSITION_REPORTS:
                     break;
                 default:
                     break;
@@ -162,11 +167,16 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         AHBottomNavigationItem courses_item =
                 new AHBottomNavigationItem(R.string.courses,
                         R.drawable.ic_collections_bookmark_black_24dp, R.color.default_back_color);
+        AHBottomNavigationItem reports_item =
+                new AHBottomNavigationItem(R.string.reports,
+                        R.drawable.ic_collections_bookmark_black_24dp, R.color.default_back_color);
+
 
         bottomNavigation.addItem(catalog_item);
         bottomNavigation.addItem(inventory_item);
         bottomNavigation.addItem(sales_item);
         bottomNavigation.addItem(courses_item);
+        bottomNavigation.addItem(reports_item);
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
@@ -194,6 +204,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                 case 3:
                     updateTitle(getText(R.string.courses).toString());
                     break;
+                case 4:
+                    updateTitle(getText(R.string.mne_dashboard).toString());
 
             }
             return true;
@@ -320,6 +332,8 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                     break;
                 case VIEW_POSITION_POSITION_COURSES:
                     break;
+                case VIEW_POSITION_POSITION_REPORTS:
+                    break;
                 default:
                     break;
             }
@@ -414,7 +428,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
         //Map of position and fragment
         private WeakHashMap<Integer, UstadBaseFragment> positionMap;
-        private static final int BASEPOINT_ITEM_COUNT = 4;
+        private static final int BASEPOINT_ITEM_COUNT = 5;
 
         private
 
@@ -432,6 +446,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
          */
         @Override
         public Fragment getItem(int position) {
+
             UstadBaseFragment thisFragment = positionMap.get(position);
             if(thisFragment != null){
                 return thisFragment;
@@ -453,9 +468,12 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                         comingSoonFragment = ComingSoonFragment.newInstance();
                         this.positionMap.put(position, comingSoonFragment);
                         return comingSoonFragment;
+                    case 4:
+                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
+                        this.positionMap.put(position, dashboardEntryListFragment);
+                        return dashboardEntryListFragment;
                     default:
                         return null;
-
                 }
             }
 

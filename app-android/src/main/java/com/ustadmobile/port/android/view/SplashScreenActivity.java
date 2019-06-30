@@ -49,6 +49,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.OnBoardingView;
+import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.Sale;
@@ -128,6 +129,8 @@ public class SplashScreenActivity extends UstadBaseActivity{
         SaleProductDao saleProductDao = repo.getSaleProductDao();
         SaleProductParentJoinDao productParentJoinDao = repo.getSaleProductParentJoinDao();
         PersonDao personDao = repo.getPersonDao();
+
+
 
         //Create a new location
         locationDao.findByTitleAsync("Test location", new UmCallback<List<Location>>() {

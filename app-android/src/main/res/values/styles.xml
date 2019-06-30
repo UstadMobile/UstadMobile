@@ -4,8 +4,6 @@
 
     <style name="Theme.UstadTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-
-
     <style name="ThemeOnboarding" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/icons</item>
         <item name="colorPrimaryDark">@color/divider</item>
