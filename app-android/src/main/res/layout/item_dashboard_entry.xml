@@ -52,14 +52,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <View
-            android:id="@+id/view9"
-            android:layout_width="400dp"
+        <LinearLayout
+            android:id="@+id/item_dashboard_entry_ll"
+            android:layout_width="350dp"
             android:layout_height="280dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_dashboard_entry_title"></View>
+            app:layout_constraintTop_toBottomOf="@id/item_dashboard_entry_title">
+
+            <View
+                android:id="@+id/item_dashboard_entry_report_view_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"></View>
+
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/item_dashboard_entry_tag_title"
@@ -70,9 +81,10 @@
 
             android:text="@string/tags"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/view9" />
+            app:layout_constraintTop_toBottomOf="@+id/item_dashboard_entry_ll" />
 
         <android.support.design.chip.ChipGroup
+            android:id="@+id/chipGroup"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -84,6 +96,18 @@
             app:layout_constraintTop_toBottomOf="@id/item_dashboard_entry_tag_title">
 
         </android.support.design.chip.ChipGroup>
+
+        <TextView
+            android:id="@+id/item_dahboard_entry_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="-95"
+            android:text="@string/currency_afs"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintBottom_toBottomOf="@+id/item_dashboard_entry_ll"
+            app:layout_constraintEnd_toStartOf="@+id/item_dashboard_entry_ll"
+            app:layout_constraintTop_toTopOf="@+id/item_dashboard_entry_ll"
+            tools:visibility="visible" />
 
 
     </android.support.constraint.ConstraintLayout>
