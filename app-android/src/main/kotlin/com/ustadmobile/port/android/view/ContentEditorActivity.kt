@@ -1013,7 +1013,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 linkText.setText(umLink.linkText)
                 linkUrl.setText(umLink.linkUrl)
                 builder.setView(view)
-                builder.setNegativeButton(R.string.content_page_dialog_cancel
+                builder.setNegativeButton(R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }
                 if (umLink.linkUrl!!.isNotEmpty()) {
                     builder.setNeutralButton(R.string.content_editor_link_remove) { _, _ ->
@@ -1218,7 +1218,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                             this@ContentEditorActivity, mFile.name, mimeType)
                 }
             }else{
-                showErrorMessage(getString(R.string.failed_message))
+                showErrorMessage(getString(R.string.failed))
             }
 
         }

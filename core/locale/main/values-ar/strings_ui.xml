@@ -119,12 +119,6 @@
     <string name="preparing">Preparing</string>
 
 
-
-    <string name="welcome">Welcome!</string>
-    <string name="welcome_dialog_subheader">Trying to get a job?\nLearn the skills that you need to succeed!</string>
-    <string name="welcome_dialog_box1"><![CDATA[<b><font color="#2196f3">Download:</font></b> The modules in this app are free! Download them to access their contents. You can complete them offline anytime, anywhere!]]></string>
-    <string name="welcome_dialog_box2"><![CDATA[<b><font color="#2196f3">Learn:</font></b> Interactive videos will teach you CV writing, interview skills, communication skills, and more!]]></string>
-    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or a recent graduate, you can attend in-person classes at USWDP centers for free after passing the modules in this app.]]></string>
     <string name="select_language">Select language</string>
     <!-- For language selector where %s is replaced by the device type name -->
     <string name="device_language">Use device language</string>
@@ -141,68 +135,6 @@
     <string name="inviting">Inviting</string>
     <string name="try_again">Try again</string>
 
-
-    <!-- Registration fields -->
-    <string name="field_university" value="980">University Name</string>
-    <string name="field_fullname" value="981">Full Name</string>
-    <string name="field_email" value="982">Email</string>
-    <string name="field_gender" value="983">Gender</string>
-    <string name="field_phonenumber" value="984">Phone Number</string>
-    <string name="field_faculty" value="985">Faculty</string>
-    <string name="field_father_name" value="986">Father Name</string>
-    <string name="field_address" value="987">Address</string>
-    <string name="field_tazkira_id" value="988">Tazkira Number</string>
-    <string name="field_relationship" value="989">Relationship</string>
-    <string name="field_department" value="990">Department</string>
-    <string name="field_academic_year" value="991">Year of graduation</string>
-    <string name="field_gpa" value="992">GPA in %</string>
-    <string name="field_would_work" value="993">Would you like to work?</string>
-    <string name="field_would_work_elaborate" value="994">Why do you want or dont want to work?</string>
-    <string name="field_have_work_experience" value="995">Do you have work experience?</string>
-    <string name="field_type_job" value="996">What type of Job would you like?</string>
-    <string name="field_english_proficiency" value="997">What is your English proficiency?</string>
-    <string name="field_computer_application" value="998">What computer applications are you able to use?</string>
-    <string name="field_post_graduate" value="999">What is your plan after you graduate?</string>
-    <string name="field_comments" value="1000">Comments and/or questions</string>
-    <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
-    <string name="university_name" value="10001">University name</string>
-
-    <!-- Registration options-->
-    <string name="options_uni_kabul_uni" value="1002">Kabul University</string>
-    <string name="options_uni_kabul_polytechnic_uni" value="1003">Kabul Polytechnic University</string>
-    <string name="options_uni_kabul_education_uni" value="1004">Kabul Education University</string>
-    <string name="options_uni_other" value="1005">Other</string>
-    <string name="options_uni_i_dont_know" value="1006">I don\'t know</string>
-    <string name="options_uni_none" value="1020">None</string>
-    <string name="options_uni_kabul_medical_science" value="1021">Kabul University of Medical Science</string>
-    <string name="options_uni_shaheed_rabani" value="1022">Shaheed Rabbani Education University</string>
-    <string name="options_uni_jawzjan" value="1023">Jawzjan University</string>
-    <string name="options_uni_herat" value="1024">Herat University</string>
-    <string name="options_uni_balkh" value="1025">Balkh University</string>
-    <string name="options_uni_nagahar" value="1026">Nangahar University</string>
-    <string name="options_uni_khost" value="1027">Sheikh Zayed University (Khost)</string>
-    <string name="options_uni_kandahar" value="1028">Kandahar University</string>
-    <string name="options_uni_kunduz" value="1029">Kunduz University</string>
-
-
-    <string name="options_gender_female" value="1007">Female</string>
-    <string name="options_gender_male" value="1008">Male</string>
-
-    <string name="options_relationship_single" value="1009">Single</string>
-    <string name="options_relationship_married" value="1010">Married</string>
-
-    <string name="options_english_fluent" value="1011">Fluent</string>
-    <string name="options_english_good" value="1012">Good</string>
-    <string name="options_english_fair" value="1013">Fair</string>
-    <string name="options_english_poor" value="1014">Poor</string>
-
-    <string name="options_yes" value="1015">Yes</string>
-    <string name="options_no" value="1016">No</string>
-
-    <string name="options_job_short" value="1017">Short-term</string>
-    <string name="options_job_long" value="1018">Long-term</string>
-    <string name="options_job_part" value="1019">Part-time</string>
-    <string name="options_job_full" value="1020">Full-time</string>
 
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
