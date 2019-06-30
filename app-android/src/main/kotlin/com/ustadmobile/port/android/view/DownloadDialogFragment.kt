@@ -16,7 +16,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter
+import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import java.io.File
 import java.util.*
@@ -64,7 +64,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull<Context>(getContext())
+        val inflater = Objects.requireNonNull<Context>(context)
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_download_layout_view, null)
 
@@ -80,7 +80,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
         (rootView!!.findViewById<View>(R.id.wifi_only_option_label) as TextView).text = impl!!.getString(MessageID.download_wifi_only, getContext()!!)
 
-        val builder = AlertDialog.Builder(getContext()!!)
+        val builder = AlertDialog.Builder(context!!)
         builder.setPositiveButton(R.string.ok, this)
         builder.setNegativeButton(R.string.cancel, this)
         builder.setView(rootView)
@@ -90,7 +90,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
         wifiOnlyView!!.setOnCheckedChangeListener(this)
         wifiOnlyHolder!!.setOnClickListener(this)
-        calculateTextView.text = impl!!.getString(MessageID.download_calculating, getContext()!!)
+        calculateTextView.text = impl!!.getString(MessageID.download_calculating, context!!)
 
         //mapping presenter constants to view ids
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
@@ -106,13 +106,13 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
         this.storageDirs = storageDirs
         for (umStorageDir in storageDirs) {
             val deviceStorageLabel = String.format(impl!!.getString(
-                    MessageID.download_storage_option_device, getContext()!!), umStorageDir.name,
+                    MessageID.download_storage_option_device, context!!), umStorageDir.name,
                     UMFileUtil.formatFileSize(File(umStorageDir.dirURI!!).usableSpace))
             storageOptions.add(deviceStorageLabel)
         }
 
         val storageOptionAdapter = ArrayAdapter(
-                Objects.requireNonNull<Context>(getContext()),
+                Objects.requireNonNull<Context>(context),
                 android.R.layout.simple_spinner_item, storageOptions)
         storageOptionAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item)
