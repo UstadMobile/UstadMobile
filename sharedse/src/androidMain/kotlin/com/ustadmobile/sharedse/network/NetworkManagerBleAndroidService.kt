@@ -68,15 +68,9 @@ class NetworkManagerBleAndroidService : Service() {
         umAppDatabase!!.networkNodeDao.deleteOldAndBadNode(minLastSeen, 5)
     }
 
-    /**
-     * @return Running instance of the NetworkManagerBleCommon
-     */
-    val networkManagerBle: NetworkManagerBle?
-        get() = managerAndroidBleRef.get()
-
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        return Service.START_STICKY
+        return START_STICKY
     }
 
     override fun onCreate() {
@@ -88,7 +82,7 @@ class NetworkManagerBleAndroidService : Service() {
         bindService(serviceIntent, mHttpdServiceConnection, Context.BIND_AUTO_CREATE)
 
         activeDownloadJobData = umAppDatabase!!.downloadJobDao.anyActiveDownloadJob()
-        activeDownloadJobObserver = DoorObserver<Boolean> { t -> handleActiveJob(t!!) }
+        activeDownloadJobObserver = DoorObserver { t -> handleActiveJob(t!!) }
         activeDownloadJobData!!.observeForever(activeDownloadJobObserver!!)
 
         mBadNodeExecutorService = Executors.newScheduledThreadPool(1)
@@ -101,6 +95,7 @@ class NetworkManagerBleAndroidService : Service() {
                 newSingleThreadContext("NetworkManager-SingleThread"),httpdRef.get())
         managerAndroidBleRef.set(managerAndroidBle)
         managerAndroidBle.onCreate()
+        mBinder.listener.onServiceReady(managerAndroidBleRef.get()!!)
     }
 
     private fun handleActiveJob(anyActivityJob: Boolean) {
@@ -132,8 +127,7 @@ class NetworkManagerBleAndroidService : Service() {
         if (mHttpDownloadServiceActive.get())
             activeDownloadJobData!!.removeObserver(activeDownloadJobObserver!!)
 
-        if (badNodeDeletionTask != null)
-            mBadNodeExecutorService!!.shutdown()
+        mBadNodeExecutorService!!.shutdown()
 
         val managerAndroidBle = managerAndroidBleRef.get()
         managerAndroidBle?.onDestroy()
@@ -144,9 +138,21 @@ class NetworkManagerBleAndroidService : Service() {
      * runs in the same process as its clients, we won't be dealing with IPC.
      */
     inner class LocalServiceBinder : Binder() {
+        internal lateinit var listener: HttpdServiceBindListener
         val service: NetworkManagerBleAndroidService
             get() = this@NetworkManagerBleAndroidService
 
+        fun setHttpdServiceBindListener(listener: HttpdServiceBindListener){
+            this.listener = listener
+        }
+
+    }
+
+    /**
+     * Listen for HTTPD service bound and notify listening parts of the app
+     */
+    interface HttpdServiceBindListener{
+        fun onServiceReady(networkManagerBle: NetworkManagerBle)
     }
 
 }

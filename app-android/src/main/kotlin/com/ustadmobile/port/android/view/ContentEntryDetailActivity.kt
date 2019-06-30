@@ -69,9 +69,9 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         get() = managerAndroidBle!!.getLocallyAvailableContainerUids()
 
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow) {
+        if (networkManagerBle.isVersionKitKatOrBelow) {
             downloadButton.setBackgroundResource(
                     R.drawable.pre_lollipop_btn_selector_bg_entry_details)
         }

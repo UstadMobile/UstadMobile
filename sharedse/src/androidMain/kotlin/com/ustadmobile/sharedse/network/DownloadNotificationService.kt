@@ -35,16 +35,22 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     private val mNetworkServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             mNetworkServiceBound.set(true)
-            networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
-                    .service.networkManagerBle
-            //TODO: this needs fixed to use the modified download manager
-            networkManagerBle!!.addDownloadChangeListener(this@DownloadNotificationService)
-            val activeDownloadManagers = networkManagerBle!!.activeDownloadJobItemManagers
-//            for (manager in activeDownloadManagers) {
-//                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
-//                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
-//                }
-//            }
+
+            (service as NetworkManagerBleAndroidService.LocalServiceBinder).setHttpdServiceBindListener(object : NetworkManagerBleAndroidService.HttpdServiceBindListener{
+                override fun onServiceReady(networkManagerBle: NetworkManagerBle) {
+                    //TODO: this needs fixed to use the modified download manager
+                    networkManagerBle.addDownloadChangeListener(this@DownloadNotificationService)
+                    val activeDownloadManagers = networkManagerBle.activeDownloadJobItemManagers
+        //            for (manager in activeDownloadManagers) {
+        //                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
+        //                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
+        //                }
+        //            }
+                }
+
+            })
+
+
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
