@@ -176,13 +176,12 @@ public class DashboardEntryListFragment
 
     @Override
     public void showSetTitle(String existingTitle, long entryUid) {
-        String newTitle = "";
         final EditText edittext = new EditText(getContext());
         edittext.setText(existingTitle);
 
         AlertDialog.Builder adb = new AlertDialog.Builder(getContext())
-                .setTitle(getText(R.string.set_title))
-                .setMessage("")
+                .setTitle("")
+                .setMessage(getText(R.string.set_title))
                 .setView(edittext)
                 .setPositiveButton(R.string.ok, (dialog, which) -> {
                     mPresenter.handleSetTitle(entryUid, edittext.getText().toString());

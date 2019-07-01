@@ -458,6 +458,8 @@
     <string name="products">Products</string>
     <string name="sale_value">Sale Value</string>
     <string name="set_title">Set title</string>
+    <string name="show_average_desc">Select to display the average in your report.</string>
+    <string name="les">LEs</string>
 
 
 </resources>

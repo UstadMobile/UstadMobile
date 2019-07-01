@@ -35,4 +35,7 @@ public abstract class DashboardEntryDao
     @UmQuery("UPDATE DashboardEntry SET dashboardEntryActive = 0 WHERE dashboardEntryUid = :uid")
     public abstract void deleteEntry(long uid, UmCallback<Integer> resultCallback);
 
+    @UmQuery("SELECT * FROM DashboardEntry WHERE dashboardEntryUid = :uid")
+    public void findByUidAsync(long uid, UmCallback<DashboardEntry> resultCallback);
+
 }

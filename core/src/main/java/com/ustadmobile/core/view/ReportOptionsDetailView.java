@@ -11,6 +11,8 @@ public interface ReportOptionsDetailView extends UstadView {
     String VIEW_NAME = "ReportOptionsDetail";
 
     //Any argument keys:
+    String ARG_DASHBOARD_ENTRY_UID = "ArgDashboardEntryUid";
+    String ARG_REPORT_TYPE = "ArgReportType";
 
     /**
      * Method to finish the screen / view.
@@ -35,6 +37,8 @@ public interface ReportOptionsDetailView extends UstadView {
     void setSalePriceFrom(int from);
 
     void setSalePriceTo(int to);
+
+    void setGroupByPresets(String[] presets);
 
 }
 

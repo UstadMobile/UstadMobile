@@ -82,6 +82,7 @@ import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Register2View;
+import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.SaleDetailSignatureView;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
@@ -92,6 +93,7 @@ import com.ustadmobile.core.view.SaleProductDetailView;
 import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SelectDateRangeDialogView;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
+import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
 import com.ustadmobile.core.view.SelectProducerView;
 import com.ustadmobile.core.view.SelectSaleProductView;
 import com.ustadmobile.core.view.UserProfileView;
@@ -117,6 +119,7 @@ import com.ustadmobile.port.android.view.H5PContentActivity;
 import com.ustadmobile.port.android.view.Login2Activity;
 import com.ustadmobile.port.android.view.OnBoardingActivity;
 import com.ustadmobile.port.android.view.Register2Activity;
+import com.ustadmobile.port.android.view.ReportOptionsDetailActivity;
 import com.ustadmobile.port.android.view.SaleDetailActivity;
 import com.ustadmobile.port.android.view.SaleDetailSignatureActivity;
 import com.ustadmobile.port.android.view.SaleItemDetailActivity;
@@ -127,6 +130,7 @@ import com.ustadmobile.port.android.view.SaleProductDetailActivity;
 import com.ustadmobile.port.android.view.ScormPackageActivity;
 import com.ustadmobile.port.android.view.SelectDateRangeDialogFragment;
 import com.ustadmobile.port.android.view.SelectLanguageDialogFragment;
+import com.ustadmobile.port.android.view.SelectMultipleTreeDialogFragment;
 import com.ustadmobile.port.android.view.SelectProducerActivity;
 import com.ustadmobile.port.android.view.SelectSaleProductActivity;
 import com.ustadmobile.port.android.view.UserProfileActivity;
@@ -220,6 +224,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SaleDetailSignatureView.VIEW_NAME, SaleDetailSignatureActivity.class);
         viewNameToAndroidImplMap.put(SelectDateRangeDialogView.VIEW_NAME, SelectDateRangeDialogFragment.class);
         viewNameToAndroidImplMap.put(AddReminderDialogView.VIEW_NAME, AddReminderDialogFragment.class);
+        viewNameToAndroidImplMap.put(ReportOptionsDetailView.VIEW_NAME, ReportOptionsDetailActivity.class);
+        viewNameToAndroidImplMap.put(SelectMultipleTreeDialogView.VIEW_NAME, SelectMultipleTreeDialogFragment.class);
 
 
     }

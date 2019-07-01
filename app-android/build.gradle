@@ -398,6 +398,9 @@ dependencies {
     //SVG
     implementation "com.caverock:androidsvg-aar:$version_androidsvg"
 
+    //Recycler tree view library
+    implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
+
 }
 
 task sourceJar(type: Jar) {

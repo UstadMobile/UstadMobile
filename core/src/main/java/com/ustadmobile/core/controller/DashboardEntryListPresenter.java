@@ -12,9 +12,11 @@ import java.util.Hashtable;
 import java.util.List;
 
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DashboardEntryListView;
 
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 
 import com.ustadmobile.core.db.dao.DashboardEntryDao;
@@ -22,6 +24,8 @@ import com.ustadmobile.lib.db.entities.DashboardTag;
 import com.ustadmobile.lib.db.entities.Person;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
+import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
+import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_TYPE;
 import static com.ustadmobile.lib.db.entities.DashboardEntry.REPORT_TYPE_SALES_LOG;
 import static com.ustadmobile.lib.db.entities.DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE;
 import static com.ustadmobile.lib.db.entities.DashboardEntry.REPORT_TYPE_TOP_LES;
@@ -108,54 +112,68 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
     }
 
     public void handleClickNewSalePerformanceReport(){
-        //TODO
-        DashboardEntry newEntry = new DashboardEntry("Sales performance Report",
-                REPORT_TYPE_SALES_PERFORMANCE, loggedInPersonUid);
-        dashboardEntryDao.insertAsync(newEntry, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                //Do nothing.
-            }
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_REPORT_TYPE, String.valueOf(REPORT_TYPE_SALES_PERFORMANCE));
+        impl.go(ReportOptionsDetailView.VIEW_NAME, args, context);
+
+//        //TODO
+//        DashboardEntry newEntry = new DashboardEntry("Sales performance Report",
+//                REPORT_TYPE_SALES_PERFORMANCE, loggedInPersonUid);
+//        dashboardEntryDao.insertAsync(newEntry, new UmCallback<Long>() {
+//            @Override
+//            public void onSuccess(Long result) {
+//                //Do nothing.
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable exception) {
+//                exception.printStackTrace();
+//            }
+//        });
     }
 
     public void handleClickNewSalesLogReport(){
-        //TODO
-        DashboardEntry newEntry = new DashboardEntry("Sales log Report",
-                REPORT_TYPE_SALES_LOG, loggedInPersonUid);
-        dashboardEntryDao.insertAsync(newEntry, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                //Do nothing.
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_REPORT_TYPE, String.valueOf(REPORT_TYPE_SALES_LOG));
+        impl.go(ReportOptionsDetailView.VIEW_NAME, args, context);
+//        //TODO
+//        DashboardEntry newEntry = new DashboardEntry("Sales log Report",
+//                REPORT_TYPE_SALES_LOG, loggedInPersonUid);
+//        dashboardEntryDao.insertAsync(newEntry, new UmCallback<Long>() {
+//            @Override
+//            public void onSuccess(Long result) {
+//                //Do nothing.
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable exception) {
+//                exception.printStackTrace();
+//            }
+//        });
     }
 
     public void handleClickTopLEsReport(){
-        //TODO
-        DashboardEntry newEntry = new DashboardEntry("Top LEs Report",
-                REPORT_TYPE_TOP_LES, loggedInPersonUid);
-        dashboardEntryDao.insertAsync(newEntry, new UmCallback<Long>() {
-            @Override
-            public void onSuccess(Long result) {
-                //Do nothing.
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_REPORT_TYPE, String.valueOf(REPORT_TYPE_TOP_LES));
+        impl.go(ReportOptionsDetailView.VIEW_NAME, args, context);
+//        //TODO
+//        DashboardEntry newEntry = new DashboardEntry("Top LEs Report",
+//                REPORT_TYPE_TOP_LES, loggedInPersonUid);
+//        dashboardEntryDao.insertAsync(newEntry, new UmCallback<Long>() {
+//            @Override
+//            public void onSuccess(Long result) {
+//                //Do nothing.
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable exception) {
+//                exception.printStackTrace();
+//            }
+//        });
     }
 
     /**
@@ -199,6 +217,10 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
 
     public void handleEditEntry(long entryUid){
         //Go to Report Options with the data here.
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable<String, String> args = new Hashtable<>();
+        args.put(ARG_DASHBOARD_ENTRY_UID, String.valueOf(entryUid));
+        impl.go(ReportOptionsDetailView.VIEW_NAME, args, context);
     }
 
     public void handleChangeTitle(long entryUid, String existingTitle){

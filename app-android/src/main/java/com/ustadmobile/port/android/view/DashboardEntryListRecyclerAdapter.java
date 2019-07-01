@@ -55,20 +55,29 @@ public class DashboardEntryListRecyclerAdapter extends
     @Override
     public void onBindViewHolder(@NonNull DashboardEntryListViewHolder holder, int position) {
 
-        DashboardEntry entity = getItem(position);
-        //TODO
+        DashboardEntry dashboardEntry = getItem(position);
+        long entryUid = dashboardEntry.getDashboardEntryUid();
+        String existingTitle = dashboardEntry.getDashboardEntryTitle();
 
         AppCompatImageView dots = holder.itemView.findViewById(R.id.item_dashboard_entry_dots);
         AppCompatImageView pin = holder.itemView.findViewById(R.id.item_dashboard_entry_flag);
+        TextView title = holder.itemView.findViewById(R.id.item_dashboard_entry_title);
 
-        if(entity.getDashboardEntryIndex() < 0 ){
+        //Title
+        title.setText(existingTitle);
+
+        //Pinned
+        boolean pinned;
+        if(dashboardEntry.getDashboardEntryIndex() < 0 ){
+            pinned=true;
             pin.setColorFilter(ContextCompat.getColor(theContext, R.color.primary_dark));
         }else{
+            pinned = false;
             pin.setColorFilter(ContextCompat.getColor(theContext, R.color.text_primary));
         }
+        boolean finalPinned = pinned;
+        pin.setOnClickListener(v -> mPresenter.handlePinEntry(entryUid, finalPinned));
 
-        long entryUid = entity.getDashboardEntryUid();
-        String existingTitle = entity.getDashboardEntryTitle();
 
         //Options to Edit/Delete every schedule in the list
         dots.setOnClickListener((View v) -> {
@@ -98,20 +107,6 @@ public class DashboardEntryListRecyclerAdapter extends
             popup.show();
         });
 
-        boolean pinned;
-        if(entity.getDashboardEntryIndex()<
-                0){
-            pinned = true;
-        }else{
-            pinned = false;
-        }
-
-        boolean finalPinned = pinned;
-        pin.setOnClickListener(v -> mPresenter.handlePinEntry(entryUid, finalPinned));
-
-        TextView title = holder.itemView.findViewById(R.id.item_dashboard_entry_title);
-        title.setText(entity.getDashboardEntryTitle());
-
 
         //The actual report
         View reportPlaceholder =
@@ -121,7 +116,8 @@ public class DashboardEntryListRecyclerAdapter extends
         TextView currencyTV =
                 holder.itemView.findViewById(R.id.item_dahboard_entry_currency);
 
-        switch (entity.getDashboardEntryReportType()){
+        chartLL.removeAllViews();
+        switch (dashboardEntry.getDashboardEntryReportType()){
             case DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE:
                 reportPlaceholder.setVisibility(View.GONE);
                 BarChart barChart = createBarChart();
