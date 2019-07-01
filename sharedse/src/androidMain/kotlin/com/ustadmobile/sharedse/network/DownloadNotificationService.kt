@@ -10,7 +10,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -36,19 +35,16 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             mNetworkServiceBound.set(true)
 
-            (service as NetworkManagerBleAndroidService.LocalServiceBinder).setHttpdServiceBindListener(object : NetworkManagerBleAndroidService.HttpdServiceBindListener{
-                override fun onServiceReady(networkManagerBle: NetworkManagerBle) {
-                    //TODO: this needs fixed to use the modified download manager
-                    networkManagerBle.addDownloadChangeListener(this@DownloadNotificationService)
-                    val activeDownloadManagers = networkManagerBle.activeDownloadJobItemManagers
-        //            for (manager in activeDownloadManagers) {
-        //                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
-        //                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
-        //                }
-        //            }
+            networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
+                    .service.networkManagerBle
+            networkManagerBle?.addDownloadChangeListener(this@DownloadNotificationService)
+            val activeDownloadManagers = networkManagerBle?.activeDownloadJobItemManagers!!
+            for (manager in activeDownloadManagers) {
+                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
+                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
                 }
+            }
 
-            })
 
 
         }
@@ -181,7 +177,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     @Synchronized
     override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
         val notificationHolder = downloadJobIdToNotificationMap[downloadJobUid]
-        val isRunning = status!!.status >= JobStatus.RUNNING_MIN && status!!.status <= JobStatus.RUNNING_MAX
+        val isRunning = status!!.status >= JobStatus.RUNNING_MIN && status.status <= JobStatus.RUNNING_MAX
 
         if (notificationHolder == null) {
             UMLog.l(UMLog.VERBOSE, 699,

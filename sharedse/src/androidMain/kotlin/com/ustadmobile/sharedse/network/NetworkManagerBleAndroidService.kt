@@ -63,6 +63,13 @@ class NetworkManagerBleAndroidService : Service() {
     }
 
 
+    /**
+     * @return Running instance of the NetworkManagerBleCommon
+     */
+    val networkManagerBle: NetworkManagerBle?
+        get() = managerAndroidBleRef.get()
+
+
     private val badNodeDeletionTask = Runnable {
         val minLastSeen = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)
         umAppDatabase!!.networkNodeDao.deleteOldAndBadNode(minLastSeen, 5)
@@ -95,7 +102,6 @@ class NetworkManagerBleAndroidService : Service() {
                 newSingleThreadContext("NetworkManager-SingleThread"),httpdRef.get())
         managerAndroidBleRef.set(managerAndroidBle)
         managerAndroidBle.onCreate()
-        mBinder.listener.onServiceReady(managerAndroidBleRef.get()!!)
     }
 
     private fun handleActiveJob(anyActivityJob: Boolean) {
@@ -138,21 +144,9 @@ class NetworkManagerBleAndroidService : Service() {
      * runs in the same process as its clients, we won't be dealing with IPC.
      */
     inner class LocalServiceBinder : Binder() {
-        internal lateinit var listener: HttpdServiceBindListener
         val service: NetworkManagerBleAndroidService
             get() = this@NetworkManagerBleAndroidService
 
-        fun setHttpdServiceBindListener(listener: HttpdServiceBindListener){
-            this.listener = listener
-        }
-
-    }
-
-    /**
-     * Listen for HTTPD service bound and notify listening parts of the app
-     */
-    interface HttpdServiceBindListener{
-        fun onServiceReady(networkManagerBle: NetworkManagerBle)
     }
 
 }

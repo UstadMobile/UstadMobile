@@ -233,7 +233,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.availabilityStatus.visibility = viewVisibility
 
             val containerUidList = uniqueContainerUidsListTobeMonitored
-            if (!containerUidList.isEmpty()) {
+            if (containerUidList.isNotEmpty()) {
                 containerUidsToMonitor.addAll(containerUidList)
                 monitor!!.startMonitoringAvailability(monitor, containerUidList)
             }
@@ -269,29 +269,18 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     }
 
     inner class ViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view) {
-        internal val entryTitle: TextView
-        internal val entryDescription: TextView
-        val entrySize: TextView
-        internal val thumbnailView: ImageView
-        val availabilityIcon: ImageView
-        val availabilityStatus: TextView
-        val downloadView: DownloadStatusButton
-        val iconView: ImageView
+        internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
+        internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
+        private val entrySize: TextView = view.findViewById(R.id.content_entry_item_library_size)
+        internal val thumbnailView: ImageView = view.findViewById(R.id.content_entry_item_thumbnail)
+        val availabilityIcon: ImageView = view.findViewById(R.id.content_entry_local_availability_icon)
+        val availabilityStatus: TextView = view.findViewById(R.id.content_entry_local_availability_status)
+        val downloadView: DownloadStatusButton = view.findViewById(R.id.content_entry_item_download)
+        val iconView: ImageView = view.findViewById(R.id.content_entry_item_imageview)
 
         internal var containerUid: Long = 0
 
         var contentEntryUid: Long = 0
-
-        init {
-            entryTitle = view.findViewById(R.id.content_entry_item_title)
-            entryDescription = view.findViewById(R.id.content_entry_item_description)
-            entrySize = view.findViewById(R.id.content_entry_item_library_size)
-            thumbnailView = view.findViewById(R.id.content_entry_item_thumbnail)
-            downloadView = view.findViewById(R.id.content_entry_item_download)
-            iconView = view.findViewById(R.id.content_entry_item_imageview)
-            availabilityIcon = view.findViewById(R.id.content_entry_local_availability_icon)
-            availabilityStatus = view.findViewById(R.id.content_entry_local_availability_status)
-        }
 
         internal fun updateLocallyAvailabilityStatus(available: Boolean) {
             val icon = if (available)

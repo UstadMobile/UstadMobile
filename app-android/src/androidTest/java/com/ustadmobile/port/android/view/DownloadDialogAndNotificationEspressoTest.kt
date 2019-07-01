@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.SystemClock
+import android.util.Base64
 import android.view.View
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -25,13 +26,16 @@ import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Compani
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.WaitForLiveData
-import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.withTimeoutOrNull
 import org.apache.commons.io.IOUtils
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
@@ -44,6 +48,7 @@ import org.junit.runner.RunWith
 import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -55,14 +60,22 @@ import java.nio.charset.StandardCharsets
  * [DownloadDialogAndNotificationEspressoTest.givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons],
  * you must to use [ViewMatchers.isDisplayed] on view matcher,
  * otherwise matcher will match match multiple view with the same Id and test will fail.
+ *
+ * **How to run this test**
+ * 1. Get your local machine IP address
+ * 2. buildconfig.local.properties and change test.um_http_testserver value to your acquired IP address
+ * 3. Start local test server by running this task = lib-http-testserver:runHttpTestServer
  */
-
+@ExperimentalStdlibApi
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class DownloadDialogAndNotificationEspressoTest {
 
     @get:Rule
-    public var mActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
+    public var mHomeActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
+
+
+    lateinit var networkManagerBle: NetworkManagerBle
 
     @get:Rule
     public var mPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
@@ -75,8 +88,11 @@ class DownloadDialogAndNotificationEspressoTest {
     private lateinit var rootEntry: ContentEntry
 
     private lateinit var entry1: ContentEntry
+    private lateinit var entry2: ContentEntry
 
-    private var umAppDatabase: UmAppDatabase? = null
+    private lateinit var umAppDatabase: UmAppDatabase
+
+    private lateinit var umRepo: UmAppDatabase
 
     private lateinit var mContext: Context
 
@@ -93,6 +109,7 @@ class DownloadDialogAndNotificationEspressoTest {
     @Throws(IOException::class, JSONException::class)
     fun setEndpoint() {
         mContext = InstrumentationRegistry.getInstrumentation().context
+        UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
 
         //check active network
 
@@ -100,20 +117,22 @@ class DownloadDialogAndNotificationEspressoTest {
         connectedToUnMeteredConnection = wifiManager?.connectionInfo
                 ?.ssid?.toLowerCase()?.contains("androidwifi") ?: false
 
-        // TODO for Lukundo
-       testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
+        testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
 
         val response = sendCommand("new", 0)
         serverActivePort = Integer.parseInt(response.getString("port"))
 
-       // val testEndpoint = "http://" + BuildConfig.TEST_HOST +
-        //        ":" + serverActivePort + "/"
+        val testEndpoint = "http://" + BuildConfig.TEST_HOST +
+               ":" + serverActivePort + "/"
 
-      //  val testAccount = UmAccount(0, "test", "",
-      //          testEndpoint)
-      //  UmAccountManager.setActiveAccount(testAccount, InstrumentationRegistry.getTargetContext())
+        val testAccount = UmAccount(0, "test", "",testEndpoint)
 
-        prepareContentEntriesAndFiles()
+        UmAccountManager.setActiveAccount(testAccount, mContext)
+
+        umRepo = UmAccountManager.getRepositoryForActiveAccount(mContext)
+
+
+        prepareContentEntries()
         SystemClock.sleep(MIN_SLEEP_TIME)
 
 
@@ -121,7 +140,7 @@ class DownloadDialogAndNotificationEspressoTest {
         val mIntent = Intent()
         mIntent.putExtra(ARG_CONTENT_ENTRY_UID, rootEntry.contentEntryUid)
         mIntent.putExtra(ARG_DOWNLOADED_CONTENT, "")
-        mActivityRule.launchActivity(mIntent)
+        mHomeActivityRule.launchActivity(mIntent)
 
     }
 
@@ -144,7 +163,14 @@ class DownloadDialogAndNotificationEspressoTest {
 
     private fun startDownloading(wifiOnly: Boolean) {
         onView(allOf<View>(
-                isDescendantOfA(withTagValue(equalTo(entry1.contentEntryUid))),
+                withTagValue(equalTo(entry1.contentEntryUid)),
+                withId(R.id.entry_holder)
+        )).perform(click())
+
+        SystemClock.sleep(MIN_SLEEP_TIME)
+
+        onView(allOf<View>(
+                isDescendantOfA(withTagValue(equalTo(entry2.contentEntryUid))),
                 withId(R.id.content_entry_item_download)
         )).perform(click())
 
@@ -157,48 +183,64 @@ class DownloadDialogAndNotificationEspressoTest {
     }
 
 
-    private fun prepareContentEntriesAndFiles() {
+    private fun prepareContentEntries() {
         UmAppDatabase.getInstance(mContext).clearAllTables()
+
         umAppDatabase = UmAppDatabase.getInstance(mContext)
         rootEntry = ContentEntry("Lorem ipsum title",
                 "Lorem ipsum description", leaf = false, publik = true)
         rootEntry.contentEntryUid = TEST_CONTENT_ENTRY_FILE_UID
-        umAppDatabase!!.contentEntryDao.insert(rootEntry)
+        umAppDatabase.contentEntryDao.insert(rootEntry)
 
-        entry1 = ContentEntry("title 1", "description 1", leaf = true, publik = true)
-        val entry2 = ContentEntry("title 2", "description 2", leaf = true, publik = true)
+        entry1 = ContentEntry("title 1", "description 1", leaf = false, publik = true)
+
+
+        entry2 = ContentEntry("title 2", "description 2", leaf = true, publik = true)
+        entry2.contentEntryUid = TEST_CONTAINER_UID
         val entry3 = ContentEntry("title 3", "description 3", leaf = true, publik = false)
         val entry4 = ContentEntry("title 4", "description 4", leaf = true, publik = false)
 
-        entry1.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry1)
-        entry2.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry2)
-        entry3.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry3)
-        entry4.contentEntryUid = umAppDatabase!!.contentEntryDao.insert(entry4)
+        entry1.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry1)
+        entry2.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry2)
+        entry3.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry3)
+        entry4.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry4)
 
-        umAppDatabase!!.contentEntryParentChildJoinDao.insertList(
+        val container = Container(entry2)
+        container.containerUid = entry2.contentEntryUid
+        container.fileSize = 4678063L
+        container.lastModified = System.currentTimeMillis()
+        container.cntNumEntries = 1
+
+        umRepo.containerDao.insert(container)
+
+        umAppDatabase.contentEntryParentChildJoinDao.insertList(
                 listOf(ContentEntryParentChildJoin(rootEntry, entry1, 0),
-                        ContentEntryParentChildJoin(rootEntry, entry2, 0),
+                        ContentEntryParentChildJoin(entry1, entry2, 0),
                         ContentEntryParentChildJoin(rootEntry, entry3, 0),
                         ContentEntryParentChildJoin(rootEntry, entry4, 0)))
 
-        /*   ContentEntryFile entryFile = new ContentEntryFile();
-        entryFile.setLastModified(System.currentTimeMillis());
-        entryFile.setFileSize(5100000);
-        entryFile.setContentEntryFileUid(TEST_CONTENT_ENTRY_FILE_UID);
-        umAppDatabase.getContentEntryFileDao().insert(entryFile);
+        val entryFile = ContainerEntryFile(Base64.encodeToString(TEST_CONTAINER_UID.toString().encodeToByteArray(),
+                Base64.DEFAULT),container.fileSize,container.fileSize,0,System.currentTimeMillis())
 
-        ContentEntryContentEntryFileJoin fileJoin1 = new ContentEntryContentEntryFileJoin(entry1, entryFile);
-        fileJoin1.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin1));
+        val newEntries = mutableListOf<ContainerEntryWithContainerEntryFile>()
+        entryFile.cefUid = umAppDatabase.containerEntryFileDao.insert(entryFile)
+        newEntries.add(ContainerEntryWithContainerEntryFile(TEST_CONTAINER_UID.toString(), container,
+                entryFile))
 
-        ContentEntryContentEntryFileJoin fileJoin2 = new ContentEntryContentEntryFileJoin(entry2, entryFile);
-        fileJoin2.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin2));
+        umAppDatabase.containerEntryDao.insertAndSetIds(newEntries)
+    }
 
-        ContentEntryContentEntryFileJoin fileJoin3 = new ContentEntryContentEntryFileJoin(entry3, entryFile);
-        fileJoin3.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin3));
+    private suspend fun waitForDesiredStatus(managerBle: NetworkManagerBle, status: Int, timeout: Long){
+        val activeDownloadManagers = managerBle.activeDownloadJobItemManagers
+        val channel = Channel<Boolean>(1)
+        for (manager in activeDownloadManagers) {
+            if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
 
-        ContentEntryContentEntryFileJoin fileJoin4 = new ContentEntryContentEntryFileJoin(entry4, entryFile);
-        fileJoin4.setCecefjUid(umAppDatabase.getContentEntryContentEntryFileJoinDao().insert(fileJoin4)); */
-
+                if(manager.rootItemStatus!!.status == status)
+                    channel.offer(true)
+            }
+        }
+        withTimeoutOrNull(timeout) { channel.receive() }!!
     }
 
     @Test
@@ -209,8 +251,6 @@ class DownloadDialogAndNotificationEspressoTest {
         sendCommand("throttle", THROTTLE_BYTES)
 
         startDownloading(connectedToUnMeteredConnection)
-
-        SystemClock.sleep(MIN_SLEEP_TIME)
 
         val openNotificationTray = mDevice!!.openNotification()
 
@@ -225,8 +265,8 @@ class DownloadDialogAndNotificationEspressoTest {
         assertTrue("Download notification was shown",
                 title.text.contains(NOTIFICATION_TITLE_PREFIX))
 
-        assertEquals("Notification shown was for  " + entry1.title!!,
-                entryName.text, entry1.title)
+        assertEquals("Notification shown was for  " + entry2.title!!,
+                entryName.text, entry2.title)
 
         SystemClock.sleep(MIN_SLEEP_TIME)
 
@@ -242,20 +282,12 @@ class DownloadDialogAndNotificationEspressoTest {
 
         startDownloading(connectedToUnMeteredConnection)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
-                MAX_THRESHOLD * 60000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
-            override fun done(value: DownloadJob): Boolean {
-                return value.djStatus == JobStatus.COMPLETE
-            }
-        })
-
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(TimeUnit.SECONDS.toMillis(30))
 
         onView(allOf<View>(isDisplayed(),
-                isDescendantOfA(withTagValue(equalTo(entry1.contentEntryUid))),
+                isDescendantOfA(withTagValue(equalTo(entry2.contentEntryUid))),
                 withId(R.id.view_download_status_button_img)
         )).check(matches(withContentDescription(equalTo(DOWNLOADED_CONTENT_DESC))))
-
     }
 
 
@@ -273,7 +305,7 @@ class DownloadDialogAndNotificationEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+        WaitForLiveData.observeUntil(umAppDatabase.downloadJobDao.lastJobLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
             override fun done(value: DownloadJob): Boolean {
                 return value.djStatus == JobStatus.WAITING_FOR_CONNECTION
@@ -281,13 +313,13 @@ class DownloadDialogAndNotificationEspressoTest {
         })
 
         assertEquals("Download task was paused and waiting for connectivity",
-                umAppDatabase!!.downloadJobDao.lastJob()?.djStatus,
+                umAppDatabase.downloadJobDao.lastJob()?.djStatus,
                 JobStatus.WAITING_FOR_CONNECTION)
 
 
         //reset for next test
         UmAndroidTestUtil.setAirplaneModeEnabled(false)
-        WaitForLiveData.observeUntil(umAppDatabase!!.connectivityStatusDao.statusLive(),
+        WaitForLiveData.observeUntil(umAppDatabase.connectivityStatusDao.statusLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
             override fun done(value: ConnectivityStatus): Boolean {
                 return value.connectivityState != ConnectivityStatus.STATE_DISCONNECTED
@@ -309,7 +341,7 @@ class DownloadDialogAndNotificationEspressoTest {
 
         UmAndroidTestUtil.setAirplaneModeEnabled(true)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+        WaitForLiveData.observeUntil(umAppDatabase.downloadJobDao.lastJobLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
             override fun done(value: DownloadJob): Boolean {
                 return value.djStatus == JobStatus.WAITING_FOR_CONNECTION
@@ -320,14 +352,14 @@ class DownloadDialogAndNotificationEspressoTest {
 
         SystemClock.sleep(MAX_SLEEP_TIME)
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.connectivityStatusDao.statusLive(),
+        WaitForLiveData.observeUntil(umAppDatabase.connectivityStatusDao.statusLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
             override fun done(value: ConnectivityStatus): Boolean {
                 return value.connectivityState != ConnectivityStatus.STATE_DISCONNECTED
             }
         })
 
-        WaitForLiveData.observeUntil(umAppDatabase!!.downloadJobDao.lastJobLive(),
+        WaitForLiveData.observeUntil(umAppDatabase.downloadJobDao.lastJobLive(),
                 MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
             override fun done(value: DownloadJob): Boolean {
                 return value.djStatus == JobStatus.COMPLETE
@@ -335,7 +367,7 @@ class DownloadDialogAndNotificationEspressoTest {
         })
 
         assertEquals("Download task was completed successfully",
-                umAppDatabase!!.downloadJobDao.lastJob()?.djStatus, JobStatus.COMPLETE)
+                umAppDatabase.downloadJobDao.lastJob()?.djStatus, JobStatus.COMPLETE)
         SystemClock.sleep(MIN_SLEEP_TIME)
     }
 
@@ -356,6 +388,8 @@ class DownloadDialogAndNotificationEspressoTest {
         private const val DOWNLOADED_CONTENT_DESC = "Downloaded"
 
         private const val TEST_CONTENT_ENTRY_FILE_UID = -4103245208651563007L
+
+        private const val TEST_CONTAINER_UID = -4103245208651563017L
 
         private const val THROTTLE_BYTES = 200000L
     }

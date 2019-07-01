@@ -1,10 +1,15 @@
 package com.ustadmobile.test.http;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
+import fi.iki.elonen.NanoHTTPD;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -64,28 +69,47 @@ public class UmTestServer extends Dispatcher{
 
     @Override
     public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-        File responseFile = new File(baseDir, request.getPath());
-        if(!responseFile.exists()) {
-            return new MockResponse().setResponseCode(404);
-        }
+        String requestPath = request.getPath();
+        MockResponse mockResponse = new MockResponse();
+        if(requestPath.contains("containerUid")){
+            String containerUid = requestPath.split("=")[1];
+            JSONObject mObject = new JSONObject();
+            mObject.put("cefMd5", new String(Base64.getEncoder().encode(containerUid.getBytes())));
+            mObject.put("ceUid","9090");
+            mObject.put("ceContainerUid",containerUid);
+            mObject.put("cePath",containerUid);
+            mObject.put("ceCefUid",containerUid);
+            JSONArray mEntries = new JSONArray();
+            mEntries.put(mObject);
+            mockResponse.addHeader("Content-Type", "application/json; charset=UTF-8");
+            mockResponse.setResponseCode(200)
+                    .setBody(mEntries.toString());
+            return mockResponse;
+        }else{
+            File responseFile = new File(baseDir, requestPath);
 
-        try {
-            MockResponse mockResponse = new MockResponse();
-            BufferedSource fileBuffer = Okio.buffer(Okio.source(responseFile));
-            Buffer outBuffer = new Buffer();
-            fileBuffer.readFully(outBuffer, responseFile.length());
-            mockResponse.setBody(outBuffer);
-            mockResponse.setResponseCode(200);
-            if(throttleBytesPerPeriod > 0) {
-                mockResponse.throttleBody(throttleBytesPerPeriod, throttlePeriodDuration,
-                        throttleTimeUnit);
+            if(!responseFile.exists()) {
+                return new MockResponse().setResponseCode(404);
             }
 
-            return mockResponse;
-        }catch(IOException e) {
-            e.printStackTrace();
-            return new MockResponse().setResponseCode(500).setBody(e.toString());
+            try {
+                BufferedSource fileBuffer = Okio.buffer(Okio.source(responseFile));
+                Buffer outBuffer = new Buffer();
+                fileBuffer.readFully(outBuffer, responseFile.length());
+                mockResponse.setBody(outBuffer);
+                mockResponse.setResponseCode(200);
+                if(throttleBytesPerPeriod > 0) {
+                    mockResponse.throttleBody(throttleBytesPerPeriod, throttlePeriodDuration,
+                            throttleTimeUnit);
+                }
+
+                return mockResponse;
+            }catch(IOException e) {
+                e.printStackTrace();
+                return mockResponse.setResponseCode(500).setBody(e.toString());
+            }
         }
+
     }
 
     public void throttle(long bytePerPeriod, long periodDuration, TimeUnit timeUnit){

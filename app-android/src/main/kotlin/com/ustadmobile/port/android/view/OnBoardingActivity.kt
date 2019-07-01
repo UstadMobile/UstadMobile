@@ -34,13 +34,8 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
     /**
      * Model for the the onboarding screen
      */
-    private enum class OnBoardScreen private constructor(val headlineStringResId: Int, val subHeadlineStringResId: Int,
-                                                         val layoutResId: Int, val drawableResId: Int) {
-
-        SCREEN_1(R.string.onboarding_no_internet_headline, R.string.onboarding_no_internet_subheadline, R.layout.onboard_screen_view, R.drawable.downloading_data),
-        SCREEN_2(R.string.onboarding_offline_sharing, R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view, R.drawable.sharing_data)
-    }
+    private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
+                                     val layoutResId: Int, val drawableResId: Int)
 
 
     /**

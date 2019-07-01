@@ -293,7 +293,7 @@ class DownloadJobItemRunner
             while (isActive) {
                 delay(1000)
                 var totalInProgress = 0L
-                for(i in 0..(numConcurrentEntryDownloads-1)) {
+                for(i in 0 until numConcurrentEntryDownloads) {
                     totalInProgress += inProgressDownloadCounters[i].value
                 }
                 val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
@@ -370,7 +370,7 @@ class DownloadJobItemRunner
                 val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
                 history.startTime = getSystemTimeInMillis()
                 withContext(coroutineContext) {
-                    val producer = produce<ContainerEntryWithMd5> {
+                    val producer = produce {
                         entriesToDownload.forEach { send(it) }
                     }
 
@@ -383,7 +383,7 @@ class DownloadJobItemRunner
                                         entry.ceCefUid.toString() + ".tmp")
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
                                 UMLog.l(UMLog.VERBOSE, 100, "Downloader $procNum $downloadUrl -> $destFile")
-                                val resumableDownload = ResumableDownload2(downloadUrl,
+                                 val resumableDownload = ResumableDownload2(downloadUrl,
                                         destFile.getAbsolutePath(), httpClient = httpClient)
                                 resumableDownload.onDownloadProgress = {inProgressDownloadCounters[procNum].value = it}
 //                            httpDownload!!.connectionOpener = connectionOpener
@@ -595,12 +595,12 @@ class DownloadJobItemRunner
 
     companion object {
 
-        internal val CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5"
+        internal const val CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5"
 
-        internal val CONTAINER_ENTRY_FILE_PATH = "ContainerEntryFile/"
+        internal const val CONTAINER_ENTRY_FILE_PATH = "ContainerEntryFile/"
 
-        val BAD_PEER_FAILURE_THRESHOLD = 2
+        const val BAD_PEER_FAILURE_THRESHOLD = 2
 
-        private val CONNECTION_TIMEOUT = 60
+        private const val CONNECTION_TIMEOUT = 60
     }
 }

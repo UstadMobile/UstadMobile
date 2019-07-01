@@ -123,7 +123,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
                     view.setStackOptionsVisible(true)
                     view.setBottomButtonsVisible(false)
                     val optionTexts = arrayOf(impl!!.getString(MessageID.pause_download, context),
-                            impl!!.getString(MessageID.download_cancel_label, context), impl!!.getString(MessageID.download_continue_stacked_label, context))
+                            impl!!.getString(MessageID.download_cancel_label, context),
+                            impl!!.getString(MessageID.download_continue_stacked_label, context))
                     statusMessage = impl!!.getString(MessageID.download_state_downloading,
                             context)
                     view.setStackedOptions(
