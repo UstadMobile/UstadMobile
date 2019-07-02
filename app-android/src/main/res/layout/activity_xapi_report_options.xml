@@ -134,13 +134,25 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/filters_label" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/whoChipGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/whoFlex"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:flexWrap="wrap"
+                app:alignItems="stretch"
+                app:alignContent="stretch"
+                android:layout_margin="@dimen/dimen_4dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/who_label" />
+                app:layout_constraintTop_toBottomOf="@id/who_label">
 
+                <AutoCompleteTextView
+                    android:id="@+id/whoAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
+
+            </com.google.android.flexbox.FlexboxLayout>
 
             <TextView
                 android:id="@+id/did_label"
@@ -149,25 +161,27 @@
                 android:text="Did"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whoChipGroup" />
+            app:layout_constraintTop_toBottomOf="@id/whoFlex" />
 
-            <AutoCompleteTextView
-                android:id="@+id/autoCompleteTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/didChipGroup"
-                app:layout_constraintTop_toTopOf="@id/didChipGroup" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/didChipGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/didFlex"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:flexWrap="wrap"
+                app:alignItems="stretch"
+                app:alignContent="stretch"
+                android:layout_margin="@dimen/dimen_4dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/did_label">
 
-            </com.google.android.material.chip.ChipGroup>
+                <AutoCompleteTextView
+                    android:id="@+id/didAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
 
+            </com.google.android.flexbox.FlexboxLayout>
 
             <TextView
                 android:id="@+id/whatLabel"
@@ -176,14 +190,27 @@
                 android:text="What"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/didChipGroup" />
+                app:layout_constraintTop_toBottomOf="@id/didFlex" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/whatChipGroup"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/whatFlex"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                app:flexWrap="wrap"
+                app:alignItems="stretch"
+                app:alignContent="stretch"
+                android:layout_margin="@dimen/dimen_4dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whatLabel" />
+                app:layout_constraintTop_toBottomOf="@id/whatLabel">
+
+                <AutoCompleteTextView
+                    android:id="@+id/whatAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
+
+            </com.google.android.flexbox.FlexboxLayout>
 
             <TextView
                 android:id="@+id/when_label"
@@ -192,14 +219,27 @@
                 android:text="When"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whatChipGroup" />
+                app:layout_constraintTop_toBottomOf="@id/whatFlex" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/whenChipGroup"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/whenFlex"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                app:flexWrap="wrap"
+                app:alignItems="stretch"
+                app:alignContent="stretch"
+                android:layout_margin="@dimen/dimen_4dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/when_label" />
+                app:layout_constraintTop_toBottomOf="@id/when_label">
+
+                <AutoCompleteTextView
+                    android:id="@+id/whenAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
+
+            </com.google.android.flexbox.FlexboxLayout>
 
             <TextView
                 android:id="@+id/where_label"
@@ -208,14 +248,27 @@
                 android:text="Where"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whenChipGroup" />
+                app:layout_constraintTop_toBottomOf="@id/whenFlex" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/whereChipGroup"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/whereFlex"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                app:flexWrap="wrap"
+                app:alignItems="stretch"
+                app:alignContent="stretch"
+                android:layout_margin="@dimen/dimen_4dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/where_label" />
+                app:layout_constraintTop_toBottomOf="@id/where_label">
+
+                <AutoCompleteTextView
+                    android:id="@+id/whereAutoCompleteTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="75dp"
+                    app:layout_flexGrow="1" />
+
+            </com.google.android.flexbox.FlexboxLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

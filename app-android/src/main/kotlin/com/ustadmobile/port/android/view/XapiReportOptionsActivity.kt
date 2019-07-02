@@ -1,26 +1,21 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.Spanned
-import android.text.style.ImageSpan
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
-import com.google.android.material.chip.ChipDrawable
-import com.google.android.material.chip.ChipGroup
+import com.google.android.flexbox.FlexboxLayout
+import com.google.android.material.chip.Chip
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiReportOptionsPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.XapiReportOptionsView
 import java.util.*
-
-
-
-
 
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
@@ -37,7 +32,9 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     private lateinit var presenter: XapiReportOptionsPresenter
 
-    private lateinit var didChipGroup: ChipGroup
+    private lateinit var didFlexBoxLayout: FlexboxLayout
+
+    var didCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,13 +44,12 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         yAxisSpinner = findViewById(R.id.yaxis_spinner)
         xAxisSpinner = findViewById(R.id.xaxis_spinner)
         subGroupSpinner = findViewById(R.id.sub_group_spinner)
-        autoCompleteView = findViewById(R.id.autoCompleteTextView)
-        didChipGroup = findViewById(R.id.didChipGroup)
+        autoCompleteView = findViewById(R.id.didAutoCompleteTextView)
+        didFlexBoxLayout = findViewById(R.id.didFlex)
 
         val toolbar = findViewById<Toolbar>(R.id.new_report_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.title = "NewXapiReportOptions"
-         
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -67,31 +63,25 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         return super.onCreateOptionsMenu(menu)
     }
 
+    private fun setAdapterForSpinner(list: List<String>, spinner: Spinner) {
+        val dataAdapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, list)
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = dataAdapter
+    }
+
 
     override fun fillVisualChartType(translatedGraphList: List<String>) {
-        val dataAdapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, translatedGraphList)
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        visualTypeSpinner.adapter = dataAdapter
+        setAdapterForSpinner(translatedGraphList, visualTypeSpinner)
     }
 
     override fun fillYAxisData(translatedYAxisList: List<String>) {
-        val dataAdapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, translatedYAxisList)
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        yAxisSpinner.adapter = dataAdapter
+        setAdapterForSpinner(translatedYAxisList, yAxisSpinner)
     }
 
     override fun fillXAxisAndSubGroupData(translatedXAxisList: List<String>) {
-        val dataAdapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, translatedXAxisList)
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        xAxisSpinner.adapter = dataAdapter
-
-        val subgroupAdapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, translatedXAxisList)
-        subgroupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        subGroupSpinner.adapter = subgroupAdapter
+        setAdapterForSpinner(translatedXAxisList, xAxisSpinner)
+        setAdapterForSpinner(translatedXAxisList, subGroupSpinner)
     }
 
     override fun fillDidData(didList: List<String>) {
@@ -99,28 +89,22 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
                 android.R.layout.simple_spinner_item, didList)
         autoCompleteView.setAdapter(dataAdapter)
         autoCompleteView.setOnItemClickListener { parent, _, position, _ ->
-
-
+            autoCompleteView.text = null
             val selected = parent.getItemAtPosition(position) as String
-            addChipToGroup(selected, didChipGroup,autoCompleteView.text)
+            addChipToDidFlexLayout(selected, didFlexBoxLayout)
 
         }
     }
 
-
-    private fun addChipToGroup(person: String, chipGroup: ChipGroup, text: Editable) {
-        //val chip = LayoutInflater.from(this).inflate(R.layout.view_chip, chipGroup, false) as Chip
-
-        val chip = ChipDrawable.createFromResource(this, R.xml.drawable_chip)
-        chip.setText(person)
-        chip.setBounds(0, 0, chip.intrinsicWidth, chip.intrinsicHeight)
-        val span = ImageSpan(chip)
-        text.setSpan(span, 0, person.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        // necessary to get single selection working
-       // chipGroup.addView(chip as View)
-        //chip.setOnCloseIconClickListener { chipGroup.removeView(chip as View) }
+    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout) {
+        val chip = LayoutInflater.from(this).inflate(R.layout.view_chip, flexGroup, false) as Chip
+        chip.text = text
+        flexGroup.addView(chip, didCount++)
+        chip.setOnCloseIconClickListener {
+            flexGroup.removeView(chip as View)
+            --didCount
+        }
     }
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
