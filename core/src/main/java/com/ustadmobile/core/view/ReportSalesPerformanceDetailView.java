@@ -11,12 +11,7 @@ public interface ReportSalesPerformanceDetailView extends ReportDetailView {
 
 
     // This defines the view name that is an argument value in the go() in impl.
-    String VIEW_NAME = "ReportSalesPerformance";
-
-    //Any argument keys:
-
-
-
+    String VIEW_NAME = "ReportSalesPerformanceDetail";
 
 }
 

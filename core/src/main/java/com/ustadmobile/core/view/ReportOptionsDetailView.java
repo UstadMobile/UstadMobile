@@ -13,6 +13,7 @@ public interface ReportOptionsDetailView extends UstadView {
     //Any argument keys:
     String ARG_DASHBOARD_ENTRY_UID = "ArgDashboardEntryUid";
     String ARG_REPORT_TYPE = "ArgReportType";
+    String ARG_REPORT_OPTIONS = "ArgReportOptions";
 
     /**
      * Method to finish the screen / view.
@@ -28,17 +29,15 @@ public interface ReportOptionsDetailView extends UstadView {
 
     void setLESelected(String leSelected);
 
-    void setGroupBySelected(String groupBySelected);
-
     void setProductTypeSelected(String productTypeSelected);
 
     void setDateRangeSelected(String dateRangeSelected);
 
-    void setSalePriceFrom(int from);
+    void setSalePriceRangeSelected(int from, int to, String salePriceSelected);
 
-    void setSalePriceTo(int to);
+    void setGroupByPresets(String[] presets, int setGroupByPresets);
 
-    void setGroupByPresets(String[] presets);
+    void setEditMode(boolean editMode);
 
 }
 

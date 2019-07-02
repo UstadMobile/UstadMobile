@@ -14,7 +14,6 @@ public abstract class ReportDetailPresenter<V extends ReportDetailView>
         extends UstadBaseController<V>  {
 
     UmAppDatabase repository;
-    DashboardEntryDao dashboardEntryDao;
 
     public ReportDetailPresenter(Object context) {
         super(context);
@@ -25,18 +24,10 @@ public abstract class ReportDetailPresenter<V extends ReportDetailView>
         super(context, arguments, (V) view);
     }
 
-    /**
-     * Primary action on item.
-     * @param arg   The argument to be passed to the presenter for primary action pressed.
-     */
-    public abstract void handleCommonPressed(Object arg, Object arg2);
-
-    /**
-     * Secondary action on item.
-     * @param arg   The argument to be passed to the presenter for secondary action pressed.
-     */
-    public abstract void handleSecondaryPressed(Object arg);
-
     public abstract void handleClickAddToDashboard();
+
+    public abstract void handleClickEditReport();
+
+    public abstract void handleClickDownloadReport();
 
 }

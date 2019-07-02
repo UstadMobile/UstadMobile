@@ -58,6 +58,8 @@ public class DashboardEntryListRecyclerAdapter extends
         DashboardEntry dashboardEntry = getItem(position);
         long entryUid = dashboardEntry.getDashboardEntryUid();
         String existingTitle = dashboardEntry.getDashboardEntryTitle();
+        String entryParams = dashboardEntry.getDashboardEntryReportParam();
+        int reportType = dashboardEntry.getDashboardEntryReportType();
 
         AppCompatImageView dots = holder.itemView.findViewById(R.id.item_dashboard_entry_dots);
         AppCompatImageView pin = holder.itemView.findViewById(R.id.item_dashboard_entry_flag);
@@ -119,53 +121,41 @@ public class DashboardEntryListRecyclerAdapter extends
         chartLL.removeAllViews();
         switch (dashboardEntry.getDashboardEntryReportType()){
             case DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE:
-                reportPlaceholder.setVisibility(View.GONE);
+                if(reportPlaceholder!=null)
+                    reportPlaceholder.setVisibility(View.GONE);
                 BarChart barChart = createBarChart();
                 chartLL.addView(barChart);
                 currencyTV.setVisibility(View.VISIBLE);
 
                 break;
             case DashboardEntry.REPORT_TYPE_SALES_LOG:
-                reportPlaceholder.setVisibility(View.GONE);
+                if(reportPlaceholder!=null)
+                    reportPlaceholder.setVisibility(View.GONE);
                 LinearLayout logs = createSalesLog();
                 chartLL.addView(logs);
                 currencyTV.setVisibility(View.INVISIBLE);
                 break;
             case DashboardEntry.REPORT_TYPE_TOP_LES:
-                reportPlaceholder.setVisibility(View.GONE);
+                if(reportPlaceholder!=null)
+                    reportPlaceholder.setVisibility(View.GONE);
                 LinearLayout topLEs = createTopLEs();
                 chartLL.addView(topLEs);
                 currencyTV.setVisibility(View.INVISIBLE);
                 break;
             default:
-                reportPlaceholder.setVisibility(View.VISIBLE);
+                if(reportPlaceholder!=null)
+                    reportPlaceholder.setVisibility(View.VISIBLE);
                 currencyTV.setVisibility(View.INVISIBLE);
                 break;
         }
 
+        chartLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.handleClickReport(entryUid, entryParams, reportType);
+            }
+        });
     }
-
-
-
-    private BarChart setUpCharts(BarChart barChart) {
-
-        Description description = new Description();
-        barChart.setDescription(description);
-
-        //barChart.getAxisLeft().setValueFormatter((value, axis) -> (int) value + "%");
-        barChart.getXAxis().setValueFormatter((value, axis) -> (int) value + "");
-
-        barChart.getXAxis().setLabelCount(4, true);
-
-        //For Dates:
-        Locale currentLocale = theContext.getResources().getConfiguration().locale;
-        barChart.getXAxis().setValueFormatter((value, axis) ->
-                UMCalendarUtil.getPrettyDateSuperSimpleFromLong((long) value * 1000,
-                        currentLocale));
-
-        return barChart;
-    }
-
 
     private BarChart hideEverythingInBarChart(BarChart barChart){
 

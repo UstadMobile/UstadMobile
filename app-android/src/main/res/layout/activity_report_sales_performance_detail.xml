@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_report_sales_performance_detail_appbar"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_report_sales_performance_detail_toolbar"
+            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/sales_performance_report" />
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_report_sales_performance_detail_fab"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center" android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp" android:layout_marginStart="8dp"
+        app:floating_background_color="@color/accent" app:floating_left_icon="@drawable/fab_add"
+        app:floating_title="@string/add_to_dashboard"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/activity_report_sales_perforance_detail_y_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="52dp"
+        android:text="@string/week"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/activity_report_sales_performance_detail_fab"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/activity_report_sales_perforance_detail_x_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="8dp"
+        android:rotation="-95"
+        android:text="@string/currency_afs"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_sales_performance_detail_appbar"
+        tools:visibility="invisible" />
+
+    <LinearLayout
+        android:id="@+id/activity_report_sales_perforance_detail_report_ll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="52dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/activity_report_sales_perforance_detail_y_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/activity_report_sales_perforance_detail_x_label"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_sales_performance_detail_appbar" />
+
+</android.support.constraint.ConstraintLayout>

@@ -451,8 +451,11 @@
     <string name="sales_price">Sales price</string>
     <string name="add_to_dashboard">Add to dashboard</string>
     <string name="sales_performance_report">Sales Performance Report</string>
+    <string name="sales_performance_report_options">Sales Performance Report Options</string>
     <string name="sales_log_report">Sales Log Report</string>
+    <string name="sales_log_report_options">Sales Log Report Options</string>
     <string name="top_les_report">Top LEs Report</string>
+    <string name="top_les_report_options">Top LEs Report Options</string>
     <string name="lead_entrepreneur">Lead Entrepreneur</string>
     <string name="last_active_on_app">Last Active on App</string>
     <string name="products">Products</string>
@@ -460,6 +463,6 @@
     <string name="set_title">Set title</string>
     <string name="show_average_desc">Select to display the average in your report.</string>
     <string name="les">LEs</string>
-
-
+    <string name="done">Done</string>
+    <string name="week">Week</string>
 </resources>

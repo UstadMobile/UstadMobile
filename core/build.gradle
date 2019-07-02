@@ -76,6 +76,9 @@ dependencies {
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+
+    implementation "com.google.code.gson:gson:$version_gson"
 }
 
 

@@ -27,19 +27,15 @@ import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.reflect.Field;
-import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
-
-;
 
 public class ReportOptionsDetailActivity extends UstadBaseActivity
         implements ReportOptionsDetailView {
 
     private Toolbar toolbar;
     private ReportOptionsDetailPresenter mPresenter;
-    private Menu menu;
 
     ConstraintLayout productTypesCL, groupByCL, showAverageCL, lesCL, locationCL, dateRangeCL;
     TextView productTypesTV, lesTV, locationTV, dateRangeTV, salesPriceTV;
@@ -47,23 +43,30 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
     RangeSeekCustom rangeSeek;
     CheckBox showAverageCB;
 
+    Menu menu;
+    boolean editMode = false;
+
     private long fromDate, toDate;
-    private int apl =0, aph = 0;
     AlertDialog dialog;
 
     String[] groupByPresets;
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
-     * @param menu  The menu options
+     * @param thisMenu  The menu options
      * @return  true. always.
      */
-    public boolean onCreateOptionsMenu(Menu menu) {
-        this.menu = menu;
+    public boolean onCreateOptionsMenu(Menu thisMenu) {
+        menu = thisMenu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_create_report, menu);
 
         menu.findItem(R.id.menu_create_report).setVisible(true);
+        if(editMode){
+            menu.findItem(R.id.menu_create_report).setTitle(R.string.save);
+        }else{
+            menu.findItem(R.id.menu_create_report).setTitle(R.string.create_report);
+        }
         return true;
     }
 
@@ -110,6 +113,7 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         rangeSeek = findViewById(R.id.activity_report_options_detail_sales_price_rangeseekcustom);
         showAverageCB = findViewById(R.id.activity_report_options_detail_show_average_cb);
 
+
         productTypesTV = findViewById(R.id.activity_report_options_detail_product_types_value);
         groupBySpinner = findViewById(R.id.activity_report_options_detail_group_by_value);
         lesTV = findViewById(R.id.activity_report_options_detail_les_value);
@@ -117,6 +121,9 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         dateRangeTV = findViewById(R.id.activity_report_options_detail_date_range_value);
         salesPriceTV = findViewById(R.id.activity_report_options_detail_sales_price_value);
 
+        //Sales price based on range seeker
+        rangeSeek.setMaxValue(100000);
+        rangeSeek.setMinValue(0);
 
 
         //Call the Presenter
@@ -126,13 +133,10 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
 
         //Views
 
-        //Sales price based on range seeker
-        rangeSeek.setMaxValue(100000);
-        rangeSeek.setMinValue(0);
         rangeSeek.setOnRangeSeekbarChangeListener((minValue, maxValue) -> {
-            updateValueRangeOnView(minValue.intValue(), maxValue.intValue());
-            apl = (minValue.intValue());
-            aph = (maxValue.intValue());
+            mPresenter.setFromPrice(minValue.intValue());
+            mPresenter.setToPrice(maxValue.intValue());
+            mPresenter.updateSalePriceRangeOnView();
 
         });
 
@@ -157,11 +161,8 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         lesCL.setOnClickListener(v-> mPresenter.goToLEsSelect());
 
         //Average:
-        showAverageCB.setFocusable(false);
-        showAverageCL.setOnClickListener(v -> {
-            showAverageCB.toggle();
-            mPresenter.handleToggleAverage(showAverageCB.isChecked());
-
+        showAverageCB.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPresenter.handleToggleAverage(isChecked);
         });
 
         //Location
@@ -174,70 +175,64 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         rangeDialog.show();
     }
 
-    private void updateValueRangeOnView(int from, int to){
-        fromDate = from;
-        toDate = to;
-        DecimalFormat formatter = new DecimalFormat("#,###");
-
-        String toS = formatter.format(to);
-        String fromS = formatter.format(from);
-        String rangeText = getText(R.string.from) + " " + fromS + " Afs - " + toS + " Afs";
-        salesPriceTV.setText(rangeText);
-    }
 
     @Override
     public void setTitle(String title) {
-        toolbar.setTitle(title);
+        runOnUiThread(() -> toolbar.setTitle(title));
     }
 
     @Override
     public void setShowAverage(boolean showAverage) {
-
+        runOnUiThread(() -> showAverageCB.setChecked(showAverage));
     }
 
     @Override
     public void setLocationSelected(String locationSelected) {
-
+        runOnUiThread(() -> locationTV.setText(locationSelected));
     }
 
     @Override
     public void setLESelected(String leSelected) {
-
-    }
-
-    @Override
-    public void setGroupBySelected(String groupBySelected) {
-
+        runOnUiThread(() -> lesTV.setText(leSelected));
     }
 
     @Override
     public void setProductTypeSelected(String productTypeSelected) {
-
+        runOnUiThread(() -> productTypesTV.setText(productTypeSelected));
     }
 
     @Override
     public void setDateRangeSelected(String dateRangeSelected) {
-
+        runOnUiThread(() -> dateRangeTV.setText(dateRangeSelected));
     }
 
     @Override
-    public void setSalePriceFrom(int from) {
-
+    public void setSalePriceRangeSelected(int from, int to, String salePriceSelected) {
+        runOnUiThread(() -> salesPriceTV.setText(salePriceSelected));
     }
 
     @Override
-    public void setSalePriceTo(int to) {
-
-    }
-
-
-    @Override
-    public void setGroupByPresets(String[] presets) {
+    public void setGroupByPresets(String[] presets, int selectedPosition) {
         this.groupByPresets = presets;
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.item_simple_spinner, groupByPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        groupBySpinner.setAdapter(adapter);
+
+        runOnUiThread(() -> {
+            groupBySpinner.setAdapter(adapter);
+            if(selectedPosition > 0) {
+                groupBySpinner.setSelection(selectedPosition);
+            }
+        });
+
+    }
+
+    @Override
+    public void setEditMode(boolean editMode) {
+       this.editMode = editMode;
+       if(menu!=null){
+           menu.getItem(R.id.menu_create_report).setTitle(editMode?R.string.save:R.string.create_report);
+       }
     }
 
     public void setToDate(long toDate) {
@@ -250,8 +245,6 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
 
 
     private Dialog createDateRangeDialog(){
-
-
 
         LayoutInflater inflater =
                 (LayoutInflater) Objects.requireNonNull(getSystemService(
@@ -322,15 +315,11 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         DatePickerDialog finalFromDateFieldPicker = fromDateFieldPicker;
         fromET.setOnClickListener(v -> finalFromDateFieldPicker.show());
 
-
-
         DialogInterface.OnClickListener positiveOCL =
                 (dialog, which) -> {
-                    String dateRangeText = UMCalendarUtil.getPrettyDateSimpleFromLong(fromDate,
-                            currentLocale) + " - " + UMCalendarUtil.getPrettyDateSimpleFromLong(toDate,
-                            currentLocale);
-
-                    dateRangeTV.setText(dateRangeText);
+                    mPresenter.setFromDate(fromDate);
+                    mPresenter.setToDate(toDate);
+                    mPresenter.updateDateRangeOnView();
 
                 };
 

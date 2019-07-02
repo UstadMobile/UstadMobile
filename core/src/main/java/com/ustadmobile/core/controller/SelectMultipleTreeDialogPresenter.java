@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
-import static com.ustadmobile.core.view.ReportEditView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.SelectMultipleTreeDialogView.ARG_LOCATIONS_SET;
 
 
 /**
@@ -34,12 +34,19 @@ public class SelectMultipleTreeDialogPresenter
         if (arguments.containsKey(ARG_LOCATIONS_SET)) {
             long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
             selectedLocationsList =
-                    ReportOverallAttendancePresenter.convertLongArray(locationsArray);
+                    convertLongArray(locationsArray);
         }
 
         selectedOptions = new HashMap<>();
         getTopLocations();
 
+    }
+
+    public static ArrayList<Long> convertLongArray(long[] array) {
+        ArrayList<Long> result = new ArrayList<Long>(array.length);
+        for (long item : array)
+            result.add(item);
+        return result;
     }
 
     public HashMap<String, Long> getSelectedOptions() {

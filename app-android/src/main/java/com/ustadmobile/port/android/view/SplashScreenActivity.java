@@ -141,7 +141,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     newLocation = new Location();
                     newLocation.setTitle("Test location");
                     newLocation.setParentLocationUid(0);
-                    newLocation.setLocationActive(true);
+                    newLocation.setLocationActive(false);
                     newLocation.setDescription("Test location added from Dummy data");
                     newLocation.setLocationUid(locationDao.insert(newLocation));
 

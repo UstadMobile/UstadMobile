@@ -193,6 +193,18 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/register"
             android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.ReportSalesPerformanceDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.ReportSalesLogDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.ReportTopLEsDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
 
 
         <!--Services-->

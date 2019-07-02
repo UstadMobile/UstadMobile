@@ -23,6 +23,8 @@ public interface ReportDetailView extends UstadView {
 
     void showDownloadButton(boolean show);
 
+    void showAddToDashboardButton(boolean show);
+
     void setReportData(Map<Object, Object> dataSet);
 
     void setReportType(int reportType);

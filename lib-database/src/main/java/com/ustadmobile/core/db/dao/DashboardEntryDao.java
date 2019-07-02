@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.database.annotation.UmRepository;
+import com.ustadmobile.lib.database.annotation.UmUpdate;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
@@ -36,6 +37,9 @@ public abstract class DashboardEntryDao
     public abstract void deleteEntry(long uid, UmCallback<Integer> resultCallback);
 
     @UmQuery("SELECT * FROM DashboardEntry WHERE dashboardEntryUid = :uid")
-    public void findByUidAsync(long uid, UmCallback<DashboardEntry> resultCallback);
+    public abstract void findByUidAsync(long uid, UmCallback<DashboardEntry> resultCallback);
+
+    @UmUpdate
+    public abstract void updateAsync(DashboardEntry entity, UmCallback<Integer> resultCallback);
 
 }
