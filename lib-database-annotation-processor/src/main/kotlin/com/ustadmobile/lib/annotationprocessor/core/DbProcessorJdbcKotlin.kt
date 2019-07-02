@@ -28,7 +28,7 @@ import javax.lang.model.util.SimpleTypeVisitor7
 import javax.tools.Diagnostic
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
-        String::class.asTypeName())
+        String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
 
 
 fun isList(type: TypeMirror, processingEnv: ProcessingEnvironment): Boolean =
@@ -149,7 +149,7 @@ fun getFieldSqlType(fieldEl: VariableElement, processingEnv: ProcessingEnvironme
 }
 
 //As per https://github.com/square/kotlinpoet/issues/236
-private fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
+internal fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
     (rawType.javaToKotlinType() as ClassName).parameterizedBy(
             *typeArguments.map { it.javaToKotlinType() }.toTypedArray()
     )
@@ -211,17 +211,23 @@ fun resolveReturnTypeIfSuspended(method: ExecutableType) : TypeName {
     return if(continuationParam != null) {
         //The continuation parameter is always the last parameter, and has one type argument
         val contReturnType = (method.parameterTypes.last() as DeclaredType).typeArguments.first().extendsBoundOrSelf().asTypeName()
-
+        removeTypeProjection(contReturnType)
         //Open classes can result in <out T> being generated instead of just <T>. Therefor we want to remove the wildcard
-        if(contReturnType is ParameterizedTypeName && contReturnType.typeArguments[0] is WildcardTypeName) {
-            contReturnType.rawType.parameterizedBy((contReturnType.typeArguments[0] as WildcardTypeName).outTypes[0]).javaToKotlinType()
-        }else {
-            contReturnType.javaToKotlinType()
-        }
     }else {
         method.returnType.asTypeName().javaToKotlinType()
     }
 }
+
+/**
+ * Remove <out T>
+ */
+fun removeTypeProjection(typeName: TypeName) =
+    if(typeName is ParameterizedTypeName && typeName.typeArguments[0] is WildcardTypeName) {
+        typeName.rawType.parameterizedBy((typeName.typeArguments[0] as WildcardTypeName).outTypes[0]).javaToKotlinType()
+    }else {
+        typeName.javaToKotlinType()
+    }
+
 
 /**
  * If the return type is LiveData, Factory, etc. then unwrap that into the result type.
