@@ -265,9 +265,9 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
         }
 
         val positiveBtnLabel = impl.getString(if (isNewPage)
-            MessageID.content_page_dialog_add
+            MessageID.content_add_page
         else
-            MessageID.content_page_dialog_update, context!!)
+            MessageID.update, context!!)
 
         val titleToUpdateFrom = if (isNewPage)
             impl.getString(MessageID.content_untitled_page,
@@ -300,7 +300,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
             }
             dialog.dismiss()
         }
-        builder.setNegativeButton(impl.getString(MessageID.content_page_dialog_cancel,
+        builder.setNegativeButton(impl.getString(MessageID.cancel,
                 activity!!)) { dialog, _ -> dialog.dismiss() }
         builder.show()
     }

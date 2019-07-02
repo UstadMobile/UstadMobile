@@ -336,7 +336,7 @@ task prepareWebLocale{
 
         //TODO: this needs to be
         if(file.absolutePath.split("-").size() > 1){
-            localeCode = file.absolutePath.split("-")[1].split("\\\\")[0]
+            localeCode = file.absolutePath.split("-")[1].split("/")[0]
         }
         File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
         if(tempFile.exists()){

@@ -190,7 +190,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 val dlStatus = status!!.downloadStatus
 
                 if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.totalSize > 0) {
-                    contentDescription = context.getString(R.string.download_entry_state_downloading)
+                    contentDescription = context.getString(R.string.downloading)
                 } else {
                     contentDescription = context.getString(R.string.download_entry_state_queued)
                 }
@@ -201,7 +201,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 } else if (dlStatus == JobStatus.COMPLETE) {
                     showLocallyAvailabilityViews = false
                     holder.downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
-                    contentDescription = context.getString(R.string.download_entry_state_downloaded)
+                    contentDescription = context.getString(R.string.downloaded)
                 } else {
                     holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
                 }

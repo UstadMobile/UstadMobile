@@ -46,17 +46,15 @@ class H5PContentActivity : UstadBaseActivity(), H5PContentView {
 
     }
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        val httpd = networkManagerBle?.httpd
-        if (httpd != null) {
-            httpd.addRoute("$ANDROID_ASSETS_PATH(.)+",
-                    AndroidAssetsHandler::class.java, applicationContext)
-            mPresenter = H5PContentPresenter(this,
-                    UMAndroidUtil.bundleToMap(intent.extras), this,
-                    httpd.containerMounter)
-            mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras))
-        }
+        val httpd = networkManagerBle.httpd
+        httpd.addRoute("$ANDROID_ASSETS_PATH(.)+",
+                AndroidAssetsHandler::class.java, applicationContext)
+        mPresenter = H5PContentPresenter(this,
+                UMAndroidUtil.bundleToMap(intent.extras), this,
+                httpd.containerMounter)
+        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(intent.extras))
 
     }
 

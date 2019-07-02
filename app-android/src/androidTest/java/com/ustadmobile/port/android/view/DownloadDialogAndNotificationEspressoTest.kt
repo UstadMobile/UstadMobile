@@ -28,7 +28,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.port.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
 import org.apache.commons.io.IOUtils
