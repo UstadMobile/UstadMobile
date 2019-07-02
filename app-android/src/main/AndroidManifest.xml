@@ -40,7 +40,8 @@
         android:required="false" />
 
     <application android:supportsRtl="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.UstadTheme">
         <activity
             android:theme="@style/ThemeOnboarding"
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
@@ -117,10 +118,12 @@
 
         <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
 
+        <activity android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity"
+            android:theme="@style/Theme.UstadTheme"/>
+
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true"/>
-
 
 
     </application>

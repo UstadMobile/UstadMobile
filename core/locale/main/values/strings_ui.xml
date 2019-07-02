@@ -396,6 +396,22 @@
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
 
+    <string name="bar_chart" value="100">Bar Chart</string>
+    <string name="line_graph" value="101">Line Graph</string>
+    <string name="freq_graph" value="102">Frequency Graph</string>
+
+    <string name="score" value="200">Score</string>
+    <string name="duration" value="201">Duration</string>
+    <string name="count_activity" value="202"># of activities</string>
+
+    <string name="xapi_day" value="300">Day</string>
+    <string name="xapi_week" value="301">Week</string>
+    <string name="xapi_month" value="302">Month</string>
+    <string name="xapi_custom_date" value="303">Custom Date</string>
+    <string name="xapi_content_entry" value="304">Content Entry</string>
+    <string name="xapi_location" value="305">Location</string>
+    <string name="xapi_gender" value="306">Gender</string>
+
 
 
 </resources>

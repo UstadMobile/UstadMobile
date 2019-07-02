@@ -21,7 +21,7 @@ import kotlin.jvm.Volatile
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
-    StateEntity::class, StateContentEntity::class], version = 24)
+    StateEntity::class, StateContentEntity::class, XLangMapEntry::class], version = 24)
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
@@ -115,6 +115,8 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val stateContentDao: StateContentDao
 
     abstract val agentDao: AgentDao
+
+    abstract val xLangMapEntryDao: XLangMapEntryDao
 
     //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
 
