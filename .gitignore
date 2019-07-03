@@ -220,3 +220,4 @@ lib-content-editor/
 build/
 build/
 .vscode/
+core/src/commonMain/kotlin/com/ustadmobile/core/generated/
