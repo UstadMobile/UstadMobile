@@ -10,4 +10,6 @@ interface XapiReportOptionsView : UstadView {
 
     fun fillDidData(didList: List<String>)
 
+    fun fillWhoData(whoList: List<String>)
+
 }

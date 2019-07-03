@@ -28,13 +28,16 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     private lateinit var subGroupSpinner: Spinner
 
-    private lateinit var autoCompleteView: AutoCompleteTextView
-
-    private lateinit var presenter: XapiReportOptionsPresenter
+    private lateinit var didAutoCompleteView: AutoCompleteTextView
 
     private lateinit var didFlexBoxLayout: FlexboxLayout
 
-    var didCount = 0
+    private lateinit var whoAutoCompleteView: AutoCompleteTextView
+
+    private lateinit var whoFlexBoxLayout: FlexboxLayout
+
+    private lateinit var presenter: XapiReportOptionsPresenter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +47,10 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         yAxisSpinner = findViewById(R.id.yaxis_spinner)
         xAxisSpinner = findViewById(R.id.xaxis_spinner)
         subGroupSpinner = findViewById(R.id.sub_group_spinner)
-        autoCompleteView = findViewById(R.id.didAutoCompleteTextView)
+        didAutoCompleteView = findViewById(R.id.didAutoCompleteTextView)
         didFlexBoxLayout = findViewById(R.id.didFlex)
+        whoAutoCompleteView = findViewById(R.id.whoAutoCompleteTextView)
+        whoFlexBoxLayout = findViewById(R.id.whoFlex)
 
         val toolbar = findViewById<Toolbar>(R.id.new_report_toolbar)
         setSupportActionBar(toolbar)
@@ -87,22 +92,32 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
     override fun fillDidData(didList: List<String>) {
         val dataAdapter = ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, didList)
-        autoCompleteView.setAdapter(dataAdapter)
-        autoCompleteView.setOnItemClickListener { parent, _, position, _ ->
-            autoCompleteView.text = null
+        didAutoCompleteView.setAdapter(dataAdapter)
+        didAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
+            didAutoCompleteView.text = null
             val selected = parent.getItemAtPosition(position) as String
-            addChipToDidFlexLayout(selected, didFlexBoxLayout)
+            addChipToDidFlexLayout(selected, didFlexBoxLayout, didFlexBoxLayout.childCount - 1)
 
         }
     }
 
-    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout) {
+    override fun fillWhoData(whoList: List<String>) {
+        val dataAdapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, whoList)
+        whoAutoCompleteView.setAdapter(dataAdapter)
+        whoAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
+            whoAutoCompleteView.text = null
+            val selected = parent.getItemAtPosition(position) as String
+            addChipToDidFlexLayout(selected, whoFlexBoxLayout, whoFlexBoxLayout.childCount - 1)
+        }
+    }
+
+    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout, count: Int) {
         val chip = LayoutInflater.from(this).inflate(R.layout.view_chip, flexGroup, false) as Chip
         chip.text = text
-        flexGroup.addView(chip, didCount++)
+        flexGroup.addView(chip, count)
         chip.setOnCloseIconClickListener {
             flexGroup.removeView(chip as View)
-            --didCount
         }
     }
 
