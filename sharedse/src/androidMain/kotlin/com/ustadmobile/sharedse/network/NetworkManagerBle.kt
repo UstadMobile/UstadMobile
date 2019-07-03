@@ -533,9 +533,9 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
         if (isBleDeviceSDKVersion && isBleCapable) {
 
-            bleScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
+            bleScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
                 val networkNode = NetworkNode()
-                networkNode.bluetoothMacAddress = device.getAddress()
+                networkNode.bluetoothMacAddress = device.address
                 handleNodeDiscovered(networkNode)
             }
 

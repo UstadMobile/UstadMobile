@@ -119,6 +119,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                     .service.networkManagerBle
             bleServiceBound = true
             if(networkManagerBle != null){
+                UstadMobileSystemImpl.instance.networkManager = networkManagerBle
                 onBleNetworkServiceBound(networkManagerBle!!)
             }
             runWhenServiceConnectedQueue.setReady(true)

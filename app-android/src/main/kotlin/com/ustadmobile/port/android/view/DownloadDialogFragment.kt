@@ -183,11 +183,13 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
 
     override fun onClick(dialog: DialogInterface, which: Int) {
-        when (which) {
-            DialogInterface.BUTTON_POSITIVE -> mPresenter!!.handleClickPositive()
+       if(mPresenter != null){
+           when (which) {
+               DialogInterface.BUTTON_POSITIVE -> mPresenter!!.handleClickPositive()
 
-            DialogInterface.BUTTON_NEGATIVE -> mPresenter!!.handleClickNegative()
-        }
+               DialogInterface.BUTTON_NEGATIVE -> mPresenter!!.handleClickNegative()
+           }
+       }
     }
 
     override fun onClick(stackedButton: View) {

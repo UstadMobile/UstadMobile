@@ -34,8 +34,8 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     lateinit var managerBle: NetworkManagerBle
 
-    private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
 
+    private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)

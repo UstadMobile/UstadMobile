@@ -25,17 +25,18 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.WaitForLiveData
+import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.withTimeoutOrNull
 import org.apache.commons.io.IOUtils
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
@@ -75,8 +76,6 @@ class DownloadDialogAndNotificationEspressoTest {
     public var mHomeActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
 
 
-    lateinit var networkManagerBle: NetworkManagerBle
-
     @get:Rule
     public var mPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -114,8 +113,9 @@ class DownloadDialogAndNotificationEspressoTest {
         //check active network
 
         val wifiManager = mContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
-        connectedToUnMeteredConnection = wifiManager?.connectionInfo
-                ?.ssid?.toLowerCase()?.contains("androidwifi") ?: false
+        val ssid = wifiManager?.connectionInfo?.ssid?.toLowerCase()!!
+        connectedToUnMeteredConnection = !ssid.contains("androidwifi")
+                && !ssid.contains("unknown ssid")
 
         testManagerUrl = "http://" + BuildConfig.TEST_HOST + ":" + BuildConfig.TEST_PORT + "/"
 
@@ -133,7 +133,7 @@ class DownloadDialogAndNotificationEspressoTest {
 
 
         prepareContentEntries()
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
 
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -167,17 +167,19 @@ class DownloadDialogAndNotificationEspressoTest {
                 withId(R.id.entry_holder)
         )).perform(click())
 
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         onView(allOf<View>(
                 isDescendantOfA(withTagValue(equalTo(entry2.contentEntryUid))),
                 withId(R.id.content_entry_item_download)
         )).perform(click())
 
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         onView(withId(R.id.wifi_only_option)).perform(
                 UmViewActions.setChecked(wifiOnly))
+
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         onView(withId(android.R.id.button1)).perform(click())
     }
@@ -189,14 +191,14 @@ class DownloadDialogAndNotificationEspressoTest {
         umAppDatabase = UmAppDatabase.getInstance(mContext)
         rootEntry = ContentEntry("Lorem ipsum title",
                 "Lorem ipsum description", leaf = false, publik = true)
-        rootEntry.contentEntryUid = TEST_CONTENT_ENTRY_FILE_UID
+        rootEntry.contentEntryUid = CONTENT_ENTRY_UID
         umAppDatabase.contentEntryDao.insert(rootEntry)
 
         entry1 = ContentEntry("title 1", "description 1", leaf = false, publik = true)
 
 
         entry2 = ContentEntry("title 2", "description 2", leaf = true, publik = true)
-        entry2.contentEntryUid = TEST_CONTAINER_UID
+        entry2.contentEntryUid = CONTAINER_UID
         val entry3 = ContentEntry("title 3", "description 3", leaf = true, publik = false)
         val entry4 = ContentEntry("title 4", "description 4", leaf = true, publik = false)
 
@@ -217,44 +219,48 @@ class DownloadDialogAndNotificationEspressoTest {
                 listOf(ContentEntryParentChildJoin(rootEntry, entry1, 0),
                         ContentEntryParentChildJoin(entry1, entry2, 0),
                         ContentEntryParentChildJoin(rootEntry, entry3, 0),
-                        ContentEntryParentChildJoin(rootEntry, entry4, 0)))
+                        ContentEntryParentChildJoin(entry1, entry4, 0)))
 
-        val entryFile = ContainerEntryFile(Base64.encodeToString(TEST_CONTAINER_UID.toString().encodeToByteArray(),
+        val entryFile = ContainerEntryFile(Base64.encodeToString(CONTAINER_UID.toString().encodeToByteArray(),
                 Base64.DEFAULT),container.fileSize,container.fileSize,0,System.currentTimeMillis())
 
         val newEntries = mutableListOf<ContainerEntryWithContainerEntryFile>()
         entryFile.cefUid = umAppDatabase.containerEntryFileDao.insert(entryFile)
-        newEntries.add(ContainerEntryWithContainerEntryFile(TEST_CONTAINER_UID.toString(), container,
+        newEntries.add(ContainerEntryWithContainerEntryFile(CONTAINER_UID.toString(), container,
                 entryFile))
 
         umAppDatabase.containerEntryDao.insertAndSetIds(newEntries)
     }
 
-    private suspend fun waitForDesiredStatus(managerBle: NetworkManagerBle, status: Int, timeout: Long){
-        val activeDownloadManagers = managerBle.activeDownloadJobItemManagers
+    private suspend fun  waitForStatus(checkerStatus: Int, timeout: Long){
         val channel = Channel<Boolean>(1)
-        for (manager in activeDownloadManagers) {
-            if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
+        val networkManager = UstadMobileSystemImpl.instance.networkManager as NetworkManagerBle
 
-                if(manager.rootItemStatus!!.status == status)
-                    channel.offer(true)
+        networkManager.addDownloadChangeListener(object : OnDownloadJobItemChangeListener{
+            override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+                if(status != null){
+                    if(status.status == checkerStatus)
+                        channel.offer(status.status == checkerStatus)
+                }
             }
-        }
-        withTimeoutOrNull(timeout) { channel.receive() }!!
+
+        })
+
+        withTimeoutOrNull(timeout) { channel.receive() }
     }
 
     @Test
     @Throws(IOException::class, JSONException::class)
     fun givenDownloadIconClickedOnEntryListItem_whenDownloading_shouldStartForegroundServiceAndShowNotification() {
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
-        sendCommand("throttle", THROTTLE_BYTES)
+        sendCommand("throttle", SLOW_THROTTLE_BYTES)
 
         startDownloading(connectedToUnMeteredConnection)
 
         val openNotificationTray = mDevice!!.openNotification()
 
-        mDevice!!.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), MIN_SLEEP_TIME)
+        mDevice!!.wait(Until.hasObject(By.textContains(NOTIFICATION_TITLE_PREFIX)), WAIT_TIME_MIN)
 
         val title = mDevice!!.findObject(By.textContains(NOTIFICATION_TITLE_PREFIX))
 
@@ -268,26 +274,28 @@ class DownloadDialogAndNotificationEspressoTest {
         assertEquals("Notification shown was for  " + entry2.title!!,
                 entryName.text, entry2.title)
 
-        SystemClock.sleep(MIN_SLEEP_TIME)
-
-
+        SystemClock.sleep(WAIT_TIME_MIN)
     }
 
     @Test
     @Throws(IOException::class, JSONException::class)
     fun givenDownloadIconClickedOnEntryListItem_whenDownloadCompleted_shouldChangeTheIcons() {
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
-        sendCommand("throttle", THROTTLE_BYTES)
+        sendCommand("throttle", AVG_THROTTLE_BYTES)
 
         startDownloading(connectedToUnMeteredConnection)
 
-        SystemClock.sleep(TimeUnit.SECONDS.toMillis(30))
+        runBlocking { waitForStatus(JobStatus.COMPLETE, TimeUnit.SECONDS.toMillis(30))}
+
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         onView(allOf<View>(isDisplayed(),
                 isDescendantOfA(withTagValue(equalTo(entry2.contentEntryUid))),
                 withId(R.id.view_download_status_button_img)
+
         )).check(matches(withContentDescription(equalTo(DOWNLOADED_CONTENT_DESC))))
+
     }
 
 
@@ -295,22 +303,17 @@ class DownloadDialogAndNotificationEspressoTest {
     @Throws(IOException::class, JSONException::class)
     fun givenDownloadIconClickedOnEntryListItem_whenDownloadingAndConnectionChangedToMetered_shouldStopDownloading() {
 
-        Assume.assumeTrue("Device is connected on metered connection, can execute the test", connectedToUnMeteredConnection)
+        Assume.assumeTrue("Device is connected on un-metered connection, can execute the test", connectedToUnMeteredConnection)
 
-        sendCommand("throttle", THROTTLE_BYTES)
+        sendCommand("throttle", AVG_THROTTLE_BYTES)
 
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         startDownloading(connectedToUnMeteredConnection)
 
-        UmAndroidTestUtil.setAirplaneModeEnabled(true)
+        UmAndroidTestUtil.setAirplaneModeEnabled(enabled = true, backTwice = false)
 
-        WaitForLiveData.observeUntil(umAppDatabase.downloadJobDao.lastJobLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
-            override fun done(value: DownloadJob): Boolean {
-                return value.djStatus == JobStatus.WAITING_FOR_CONNECTION
-            }
-        })
+        runBlocking { waitForStatus(JobStatus.WAITING_FOR_CONNECTION, TimeUnit.SECONDS.toMillis(3))}
 
         assertEquals("Download task was paused and waiting for connectivity",
                 umAppDatabase.downloadJobDao.lastJob()?.djStatus,
@@ -319,12 +322,6 @@ class DownloadDialogAndNotificationEspressoTest {
 
         //reset for next test
         UmAndroidTestUtil.setAirplaneModeEnabled(false)
-        WaitForLiveData.observeUntil(umAppDatabase.connectivityStatusDao.statusLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                return value.connectivityState != ConnectivityStatus.STATE_DISCONNECTED
-            }
-        })
 
     }
 
@@ -333,53 +330,38 @@ class DownloadDialogAndNotificationEspressoTest {
     @Throws(IOException::class, JSONException::class)
     fun givenDownloadStarted_whenConnectivityInterrupted_shouldResumeAndCompleteDownload() {
 
-        SystemClock.sleep(MIN_SLEEP_TIME)
+        SystemClock.sleep(WAIT_TIME_MIN)
 
-        sendCommand("throttle", (THROTTLE_BYTES * MAX_THRESHOLD))
+        sendCommand("throttle", FAST_THROTTLE_BYTES)
+
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         startDownloading(connectedToUnMeteredConnection)
 
-        UmAndroidTestUtil.setAirplaneModeEnabled(true)
+        SystemClock.sleep(WAIT_TIME_MAX)
 
-        WaitForLiveData.observeUntil(umAppDatabase.downloadJobDao.lastJobLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
-            override fun done(value: DownloadJob): Boolean {
-                return value.djStatus == JobStatus.WAITING_FOR_CONNECTION
-            }
-        })
+        UmAndroidTestUtil.setAirplaneModeEnabled(enabled = true, backTwice = false)
 
-        UmAndroidTestUtil.setAirplaneModeEnabled(false)
+        SystemClock.sleep(WAIT_TIME_MAX)
 
-        SystemClock.sleep(MAX_SLEEP_TIME)
+        assertEquals("Download task was stopped and waiting for connection",
+                umAppDatabase.downloadJobDao.lastJob()?.djStatus, JobStatus.WAITING_FOR_CONNECTION)
 
-        WaitForLiveData.observeUntil(umAppDatabase.connectivityStatusDao.statusLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<ConnectivityStatus> {
-            override fun done(value: ConnectivityStatus): Boolean {
-                return value.connectivityState != ConnectivityStatus.STATE_DISCONNECTED
-            }
-        })
+        runBlocking { waitForStatus(JobStatus.WAITING_FOR_CONNECTION, TimeUnit.SECONDS.toMillis(3))}
 
-        WaitForLiveData.observeUntil(umAppDatabase.downloadJobDao.lastJobLive(),
-                MAX_LATCH_TIME * 1000, object : WaitForLiveData.WaitForChecker<DownloadJob> {
-            override fun done(value: DownloadJob): Boolean {
-                return value.djStatus == JobStatus.COMPLETE
-            }
-        })
+        UmAndroidTestUtil.setAirplaneModeEnabled(enabled = false, backTwice = false)
+
+        runBlocking { waitForStatus(JobStatus.COMPLETE, TimeUnit.SECONDS.toMillis(30))}
+
 
         assertEquals("Download task was completed successfully",
                 umAppDatabase.downloadJobDao.lastJob()?.djStatus, JobStatus.COMPLETE)
-        SystemClock.sleep(MIN_SLEEP_TIME)
+
+        SystemClock.sleep(WAIT_TIME_MIN)
     }
 
     companion object {
 
-        private const val MIN_SLEEP_TIME = 1000L
-
-        private const val MAX_SLEEP_TIME = 3000L
-
-        private const val MAX_THRESHOLD = 3L
-
-        private const val MAX_LATCH_TIME = 15L
 
         private const val NOTIFICATION_TITLE_PREFIX = "Downloading"
 
@@ -387,11 +369,19 @@ class DownloadDialogAndNotificationEspressoTest {
 
         private const val DOWNLOADED_CONTENT_DESC = "Downloaded"
 
-        private const val TEST_CONTENT_ENTRY_FILE_UID = -4103245208651563007L
+        private const val CONTENT_ENTRY_UID = -4103245208651563007L
 
-        private const val TEST_CONTAINER_UID = -4103245208651563017L
+        private const val CONTAINER_UID = -4103245208651563017L
 
-        private const val THROTTLE_BYTES = 200000L
+        private const val FAST_THROTTLE_BYTES = 350000L
+
+        private const val AVG_THROTTLE_BYTES = 200000L
+
+        private const val SLOW_THROTTLE_BYTES = 100000L
+
+        private const val WAIT_TIME_MIN = 2000L
+
+        private const val WAIT_TIME_MAX = 4500L
     }
 
 }
