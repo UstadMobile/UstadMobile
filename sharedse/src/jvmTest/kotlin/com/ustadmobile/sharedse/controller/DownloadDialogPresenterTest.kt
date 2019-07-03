@@ -170,7 +170,8 @@ class DownloadDialogPresenterTest {
 
         presenter.handleClickPositive()
 
-        viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+        waitForLiveData(umAppDatabase.downloadJobDao.lastJobLive(), 6000) {
+            dj -> dj != null }
 
         val downloadJobUid = umAppDatabase.downloadJobDao
                 .findDownloadJobUidByRootContentEntryUid(rootEntry.contentEntryUid)
@@ -212,16 +213,17 @@ class DownloadDialogPresenterTest {
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
-            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
-
             presenter.handleClickPositive()
 
-            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId!!),
+            waitForLiveData(umAppDatabase.downloadJobDao.lastJobLive(), 6000) {
+                dj -> dj != null }
+
+            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId),
                     MAX_LATCH_WAITING_TIME.toLong()) {
                 it != null && it.djStatus == JobStatus.QUEUED
             }
 
-            val queuedJob = umAppDatabase.downloadJobDao.findByUid(presenter.currentJobId!!)
+            val queuedJob = umAppDatabase.downloadJobDao.findByUid(presenter.currentJobId)
             assertEquals("Job status was changed to Queued after clicking continue",
                     JobStatus.QUEUED, queuedJob!!.djStatus)
         }
