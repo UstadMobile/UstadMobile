@@ -2,6 +2,8 @@ package com.ustadmobile.sharedse.util
 
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
+import kotlinx.atomicfu.AtomicArray
+import kotlinx.atomicfu.atomicArrayOfNulls
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
@@ -25,7 +27,7 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
-    private val recentlyRunItems = mutableSetOf<T>()
+    private val activeWorkItems = atomicArrayOfNulls<T>(numProcessors)
 
     private val channel: Channel<T> = Channel<T>(capacity = UNLIMITED)
 
@@ -34,11 +36,13 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
     suspend fun start(){
         this.coroutineCtx = coroutineContext
         coroutineScope.launch {
-            repeat(numProcessors) {
+            repeat(numProcessors) {procNum ->
                 launch {
                     while(isActive) {
                         val nextItem = channel.receive()
+                        activeWorkItems.get(procNum).value = nextItem
                         itemRunner(nextItem)
+                        activeWorkItems.get(procNum).value = null
                     }
                 }
             }
@@ -51,9 +55,9 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
     }
 
     override fun onChanged(t: List<T>) {
-        t.filter { changedItem -> !recentlyRunItems.any { sameItemFn(it, changedItem) } }.forEach {
+        val runningItems = (0..(numProcessors-1)).toList().map { activeWorkItems.get(it).value }
+        t.filter { changedItem -> !runningItems.any { it != null && sameItemFn(it, changedItem) } }.forEach {
             coroutineScope.launch {
-                recentlyRunItems.add(it)
                 channel.send(it)
             }
         }

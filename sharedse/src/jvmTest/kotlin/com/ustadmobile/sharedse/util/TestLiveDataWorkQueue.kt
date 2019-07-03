@@ -35,7 +35,7 @@ class TestLiveDataWorkQueue {
             queue.start()
             val firstListVals = (1..10).map { TestWorkItem(it) }
             queue.onChanged(firstListVals)
-            withTimeout(5000*1000) {
+            withTimeout(10000) {
                 while(!firstListVals.all { it.runCount.get() == 1 })
                     delay(200)
             }
