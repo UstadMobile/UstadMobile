@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -9,16 +11,22 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.children
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiReportOptionsPresenter
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.XapiReportOptionsView
+import kotlinx.coroutines.Job
 import java.util.*
 
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
+
+    private lateinit var whoDataAdapter: ArrayAdapter<PersonDao.PersonNameAndUid>
 
     private lateinit var visualTypeSpinner: Spinner
 
@@ -38,6 +46,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     private lateinit var presenter: XapiReportOptionsPresenter
 
+    var whoTextChangedJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +69,16 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
                 this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
+        whoDataAdapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, listOf<PersonDao.PersonNameAndUid>())
+        whoAutoCompleteView.setAdapter(whoDataAdapter)
+        whoAutoCompleteView.addTextChangedListener(whoWatcher)
+        whoAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
+            whoAutoCompleteView.text = null
+            val selected = parent.getItemAtPosition(position) as PersonDao.PersonNameAndUid
+            addChipToDidFlexLayout(selected.name, whoFlexBoxLayout, whoFlexBoxLayout.childCount - 1, selected.personUid)
+        }
 
     }
 
@@ -89,32 +108,55 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         setAdapterForSpinner(translatedXAxisList, subGroupSpinner)
     }
 
-    override fun fillDidData(didList: List<String>) {
+    override fun fillDidData(didList: List<XLangMapEntryDao.Verb>) {
         val dataAdapter = ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, didList)
         didAutoCompleteView.setAdapter(dataAdapter)
         didAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
             didAutoCompleteView.text = null
-            val selected = parent.getItemAtPosition(position) as String
-            addChipToDidFlexLayout(selected, didFlexBoxLayout, didFlexBoxLayout.childCount - 1)
-
+            val selected = parent.getItemAtPosition(position) as XLangMapEntryDao.Verb
+            addChipToDidFlexLayout(selected.valueLangMap, didFlexBoxLayout, didFlexBoxLayout.childCount - 1, selected.verbLangMapUid)
         }
     }
 
-    override fun fillWhoData(whoList: List<String>) {
-        val dataAdapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, whoList)
-        whoAutoCompleteView.setAdapter(dataAdapter)
-        whoAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
-            whoAutoCompleteView.text = null
-            val selected = parent.getItemAtPosition(position) as String
-            addChipToDidFlexLayout(selected, whoFlexBoxLayout, whoFlexBoxLayout.childCount - 1)
+    override fun updateWhoDataAdapter(whoList: List<PersonDao.PersonNameAndUid>) {
+        whoDataAdapter.clear()
+        whoDataAdapter.addAll(whoList)
+        whoDataAdapter.notifyDataSetChanged()
+    }
+
+
+    private var whoWatcher = object : TextWatcher {
+
+        private var timer = Timer()
+        private val DELAY: Long = 300 // milliseconds
+
+        override fun afterTextChanged(s: Editable?) {
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            if (count > 2) {
+                timer.cancel()
+                timer = Timer()
+                timer.schedule(
+                        object : TimerTask() {
+                            override fun run() {
+                                val name = whoAutoCompleteView.text.toString()
+                                presenter.handleWhoDataTyped(name)
+                            }
+                        },
+                        DELAY)
+            }
         }
     }
 
-    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout, count: Int) {
+    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout, count: Int, position: Long) {
         val chip = LayoutInflater.from(this).inflate(R.layout.view_chip, flexGroup, false) as Chip
         chip.text = text
+        chip.tag = position
         flexGroup.addView(chip, count)
         chip.setOnCloseIconClickListener {
             flexGroup.removeView(chip as View)
@@ -128,7 +170,13 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
                         visualTypeSpinner.selectedItemPosition,
                         yAxisSpinner.selectedItemPosition,
                         xAxisSpinner.selectedItemPosition,
-                        subGroupSpinner.selectedItemPosition)
+                        subGroupSpinner.selectedItemPosition,
+                        didFlexBoxLayout.children.filter { it is Chip }.map {
+                            (it as Chip).text.toString()
+                        }.toList(),
+                        whoFlexBoxLayout.children.filter { it is Chip }.map {
+                            (it as Chip).tag as Long
+                        }.toList())
                 return true
             }
 

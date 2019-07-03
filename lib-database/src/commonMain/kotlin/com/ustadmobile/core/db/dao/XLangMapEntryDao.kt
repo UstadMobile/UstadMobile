@@ -9,6 +9,23 @@ import com.ustadmobile.lib.db.entities.XLangMapEntry
 @UmRepository
 abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
 
-    @Query("SELECT valueLangMap FROM XLangMapEntry WHERE  objectLangMapUid != 0")
-    abstract suspend fun getAllXObjectValuesAsync(): List<String>
+    @Query("SELECT verbLangMapUid, valueLangMap FROM XLangMapEntry WHERE verbLangMapUid != 0")
+    abstract suspend fun getAllVerbs(): List<Verb>
+
+    @Query("SELECT objectLangMapUid, valueLangMap FROM XLangMapEntry WHERE objectLangMapUid != 0")
+    abstract suspend fun getAllObjects(): List<XObject>
+
+    data class Verb(var verbLangMapUid: Long = 0, var valueLangMap: String = ""){
+
+        override fun toString(): String {
+            return valueLangMap
+        }
+    }
+
+    data class XObject(var objectLangMapUid: Long = 0, var valueLangMap: String = ""){
+
+        override fun toString(): String {
+            return valueLangMap
+        }
+    }
 }

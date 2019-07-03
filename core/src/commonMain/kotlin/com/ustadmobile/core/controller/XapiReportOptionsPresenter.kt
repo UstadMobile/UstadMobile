@@ -16,7 +16,6 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     lateinit var impl: UstadMobileSystemImpl
     lateinit var db: UmAppDatabase
 
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         db = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -33,15 +32,21 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
         view.runOnUiThread(Runnable { view.fillXAxisAndSubGroupData(translatedXAxisList) })
 
         GlobalScope.launch {
-            val objectNames = db.xLangMapEntryDao.getAllXObjectValuesAsync()
-            view.runOnUiThread(Runnable { view.fillDidData(objectNames)})
-
+            val objectNames = db.xLangMapEntryDao.getAllVerbs()
+            view.runOnUiThread(Runnable { view.fillDidData(objectNames) })
         }
 
 
     }
 
-    fun handleViewReportPreview(chartTypePos: Int, yAxisPos: Int, xAxisPos: Int, subGroupPos: Int) {
+    fun handleWhoDataTyped(name: String){
+        GlobalScope.launch {
+            val personsNames = db.personDao.getAllPersons("%$name%")
+            view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
+        }
+    }
+
+    fun handleViewReportPreview(chartTypePos: Int, yAxisPos: Int, xAxisPos: Int, subGroupPos: Int, didListOptions: List<String>, whoListPos: List<Long>) {
         var report = XapiReportOptions(listOfGraphs[chartTypePos], yAxisList[yAxisPos], xAxisList[xAxisPos], xAxisList[subGroupPos])
     }
 

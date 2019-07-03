@@ -5,6 +5,7 @@ import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.XLangMapEntry
 import com.ustadmobile.lib.db.entities.XObjectEntity
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -32,6 +33,27 @@ class NewReportEspressoTest {
 
         val objectDao = db.xObjectDao
         val entryLangMap = db.xLangMapEntryDao
+        val personDao = db.personDao
+
+        var firstPerson = Person()
+        firstPerson.firstNames = "Hello"
+        firstPerson.lastName = "World"
+        personDao.insert(firstPerson)
+
+        var secondPerson = Person()
+        secondPerson.firstNames = "Here"
+        secondPerson.lastName = "Now"
+        personDao.insert(secondPerson)
+
+        var thirdPerson = Person()
+        thirdPerson.firstNames = "Lots"
+        thirdPerson.lastName = "Maker"
+        personDao.insert(thirdPerson)
+
+        var fourthPerson = Person()
+        fourthPerson.firstNames = "Never"
+        fourthPerson.lastName = "Give"
+        personDao.insert(fourthPerson)
 
         var firstObject = XObjectEntity()
         firstObject.objectId =  "hello"

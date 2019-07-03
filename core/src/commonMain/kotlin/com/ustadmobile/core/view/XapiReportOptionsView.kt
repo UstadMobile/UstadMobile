@@ -1,5 +1,8 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.XLangMapEntryDao
+
 interface XapiReportOptionsView : UstadView {
 
     fun fillVisualChartType(translatedGraphList: List<String>)
@@ -8,8 +11,8 @@ interface XapiReportOptionsView : UstadView {
 
     fun fillXAxisAndSubGroupData(translatedXAxisList: List<String>)
 
-    fun fillDidData(didList: List<String>)
+    fun fillDidData(didList: List<XLangMapEntryDao.Verb>)
 
-    fun fillWhoData(whoList: List<String>)
+    fun updateWhoDataAdapter(whoList: List<PersonDao.PersonNameAndUid>)
 
 }
