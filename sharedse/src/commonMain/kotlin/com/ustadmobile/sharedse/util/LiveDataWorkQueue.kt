@@ -27,8 +27,6 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
-    private val recentlyRunItems = mutableSetOf<T>()
-
     private val activeWorkItems = atomicArrayOfNulls<T>(numProcessors)
 
     private val channel: Channel<T> = Channel<T>(capacity = UNLIMITED)
@@ -60,7 +58,6 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
         val runningItems = (0..(numProcessors-1)).toList().map { activeWorkItems.get(it).value }
         t.filter { changedItem -> !runningItems.any { it != null && sameItemFn(it, changedItem) } }.forEach {
             coroutineScope.launch {
-                recentlyRunItems.add(it)
                 channel.send(it)
             }
         }
