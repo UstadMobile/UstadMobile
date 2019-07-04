@@ -113,7 +113,7 @@ ext {
     version_androidx_core = '1.0.2'
     version_android_lifecycle = "1.1.1"
     version_androidx_lifecycle = "2.0.0"
-    version_android_room = "2.1.0-beta01"
+    version_android_room = "2.1.0"
     version_android_multidex = "2.0.0"
     version_android_workmanager = "1.0.0-beta02"
     version_android_paging = "1.0.1"
