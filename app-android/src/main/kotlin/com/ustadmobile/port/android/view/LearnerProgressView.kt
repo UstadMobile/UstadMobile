@@ -77,7 +77,7 @@ class LearnerProgressView : LinearLayout {
 
         init {
             STATUS_TO_COLOR_MAP[MessageID.in_progress] = R.color.entry_learner_progress_in_progress
-            STATUS_TO_COLOR_MAP[MessageID.failed_message] = R.color.entry_learner_progresss_failed
+            STATUS_TO_COLOR_MAP[MessageID.failed] = R.color.entry_learner_progresss_failed
             STATUS_TO_COLOR_MAP[MessageID.passed] = R.color.entry_learner_progress_passed
         }
     }

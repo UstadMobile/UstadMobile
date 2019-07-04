@@ -2,6 +2,9 @@ package com.ustadmobile.sharedse.util
 
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.lib.util.copyOnWriteListOf
+import kotlinx.atomicfu.AtomicArray
+import kotlinx.atomicfu.atomicArrayOfNulls
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
@@ -25,20 +28,21 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
                            private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default,
                            private val itemRunner: suspend (T) -> Unit) : DoorObserver<List<T>> {
 
-    private val recentlyRunItems = mutableSetOf<T>()
-
     private val channel: Channel<T> = Channel<T>(capacity = UNLIMITED)
+
+    private val queuedOrActiveItems = copyOnWriteListOf<T>()
 
     private lateinit var coroutineCtx: CoroutineContext
 
     suspend fun start(){
         this.coroutineCtx = coroutineContext
         coroutineScope.launch {
-            repeat(numProcessors) {
+            repeat(numProcessors) {procNum ->
                 launch {
                     while(isActive) {
                         val nextItem = channel.receive()
                         itemRunner(nextItem)
+                        queuedOrActiveItems.remove(nextItem)
                     }
                 }
             }
@@ -51,9 +55,9 @@ class LiveDataWorkQueue<T>(private val liveDataSource: DoorLiveData<List<T>>,
     }
 
     override fun onChanged(t: List<T>) {
-        t.filter { changedItem -> !recentlyRunItems.any { sameItemFn(it, changedItem) } }.forEach {
+        t.filter { changedItem -> !queuedOrActiveItems.any { sameItemFn(it, changedItem) } }.forEach {
+            queuedOrActiveItems.add(it)
             coroutineScope.launch {
-                recentlyRunItems.add(it)
                 channel.send(it)
             }
         }

@@ -115,11 +115,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      */
     private val bleServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
-                    .service.networkManagerBle
-            bleServiceBound = true
-            onBleNetworkServiceBound(networkManagerBle)
-            runWhenServiceConnectedQueue.setReady(true)
+            (service as NetworkManagerBleAndroidService.LocalServiceBinder).setHttpdServiceBindListener(object :
+                            NetworkManagerBleAndroidService.HttpdServiceBindListener{
+                override fun onServiceReady(networkManagerBle: NetworkManagerBle) {
+                    bleServiceBound = true
+                    onBleNetworkServiceBound(networkManagerBle)
+                    runWhenServiceConnectedQueue.setReady(true)
+                }
+            })
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -227,7 +230,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      *
      * @param networkManagerBle
      */
-    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {}
+    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {}
 
     protected fun onBleNetworkServiceUnbound() {
 

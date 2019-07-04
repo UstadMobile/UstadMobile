@@ -93,7 +93,7 @@ dependencies {
     kapt "org.apache.commons:commons-text:$version_apache_commons_text"
 }
 
-compileKotlinJvm.dependsOn(":lib-database-annotation-processor:build")
+compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")
 
 publishing {
     publications {

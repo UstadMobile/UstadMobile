@@ -60,7 +60,7 @@ public class TestPrathamContentScraper {
                     source.readAll(buffer);
 
                     MockResponse response = new MockResponse().setResponseCode(200);
-                    response.setHeader("ETag", (String.valueOf(buffer.size())
+                    response.setHeader("ETag", (buffer.size()
                             + UTF_ENCODING).hashCode());
                     if (!request.getMethod().equalsIgnoreCase("HEAD"))
                         response.setBody(buffer);

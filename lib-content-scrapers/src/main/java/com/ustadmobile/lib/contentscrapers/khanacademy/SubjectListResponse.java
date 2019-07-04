@@ -9,6 +9,8 @@ class SubjectListResponse {
 
     public ComponentData componentProps;
 
+    public FooterData footerProps;
+
     public class ComponentData {
 
         public Curation curation;
@@ -110,9 +112,18 @@ class SubjectListResponse {
 
                 public String perseusContent;
 
+                public String youtubeId;
+
                 public DownloadUrl downloadUrls;
 
             }
         }
+    }
+
+    public class FooterData {
+
+        public String kaLocale;
+
+        public List<List<String>> languages;
     }
 }

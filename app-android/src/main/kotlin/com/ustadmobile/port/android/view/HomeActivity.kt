@@ -86,11 +86,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
         val impl = UstadMobileSystemImpl.instance
         runAfterGrantingPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
-                Runnable { networkManagerBle!!.checkP2PBleServices() },
+                Runnable { networkManagerBle.checkP2PBleServices() },
                 impl.getString(MessageID.location_permission_title, this),
                 impl.getString(MessageID.location_permission_message, this))
     }

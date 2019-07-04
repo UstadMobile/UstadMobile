@@ -175,8 +175,6 @@ public class IndexPrathamContentScraper {
                 File content = new File(resourceFolder, data.slug + ZIP_EXT);
                 boolean isUpdated = ContentScraperUtil.isFileModified(connection, resourceFolder, String.valueOf(data.id));
 
-                isUpdated = true;
-
                 if (!isUpdated) {
                     continue;
                 }

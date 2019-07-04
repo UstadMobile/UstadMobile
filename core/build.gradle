@@ -98,7 +98,7 @@ kotlin {
         }
         //Uncomment this for autocomplete etc. to work. Comment it out before compiling the rest of
         // the project to avoid it being seen as an extra jvm variant
-//        fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
+        //fromPreset(presets.jvm,'commonJvm') //uncomment for code completion
     }
 
 
@@ -336,7 +336,7 @@ task prepareWebLocale{
 
         //TODO: this needs to be
         if(file.absolutePath.split("-").size() > 1){
-            localeCode = file.absolutePath.split("-")[1].split("\\\\")[0]
+            localeCode = file.absolutePath.split("-")[1].split("/")[0]
         }
         File tempFile = project.file("${translationsOutPath}locale.${localeCode}.json")
         if(tempFile.exists()){
