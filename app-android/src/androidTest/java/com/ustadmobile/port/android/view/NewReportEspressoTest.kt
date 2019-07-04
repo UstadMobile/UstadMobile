@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.lib.db.entities.XLangMapEntry
 import com.ustadmobile.lib.db.entities.XObjectEntity
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -34,6 +35,7 @@ class NewReportEspressoTest {
         val objectDao = db.xObjectDao
         val entryLangMap = db.xLangMapEntryDao
         val personDao = db.personDao
+        val verbDao = db.verbDao
 
         var firstPerson = Person()
         firstPerson.firstNames = "Hello"
@@ -55,6 +57,27 @@ class NewReportEspressoTest {
         fourthPerson.lastName = "Give"
         personDao.insert(fourthPerson)
 
+        var firstVerb = VerbEntity()
+        firstVerb.urlId =  "Did"
+        firstVerb.verbUid = verbDao.insert(firstVerb)
+
+        var firstVerbLangMap = XLangMapEntry( firstVerb.verbUid , 0, 0, 0, "Did")
+        entryLangMap.insert(firstVerbLangMap)
+
+        var secondVerb = VerbEntity()
+        secondVerb.urlId =  "This"
+        secondVerb.verbUid = verbDao.insert(secondVerb)
+
+        var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "This")
+        entryLangMap.insert(secondVerbLangMap)
+
+        var thirdVerb = VerbEntity()
+        thirdVerb.urlId =  "Thing"
+        thirdVerb.verbUid = verbDao.insert(thirdVerb)
+
+        var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Thing")
+        entryLangMap.insert(thirdVerbLangMap)
+
         var firstObject = XObjectEntity()
         firstObject.objectId =  "hello"
         firstObject.xObjectUid = objectDao.insert(firstObject)
@@ -75,6 +98,7 @@ class NewReportEspressoTest {
 
         var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, "Now")
         entryLangMap.insert(thirdObjectLangMap)
+
 
         val intent = Intent()
         mActivityRule.launchActivity(intent)

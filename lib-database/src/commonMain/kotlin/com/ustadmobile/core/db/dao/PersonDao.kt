@@ -96,8 +96,8 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE name LIKE :name")
-    abstract suspend fun getAllPersons(name: String): List<PersonNameAndUid>
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
+    abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
 
 
     /**

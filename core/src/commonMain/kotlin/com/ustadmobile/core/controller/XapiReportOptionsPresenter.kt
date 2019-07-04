@@ -31,18 +31,19 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
         view.runOnUiThread(Runnable { view.fillXAxisAndSubGroupData(translatedXAxisList) })
 
-        GlobalScope.launch {
-            val objectNames = db.xLangMapEntryDao.getAllVerbs()
-            view.runOnUiThread(Runnable { view.fillDidData(objectNames) })
-        }
-
-
     }
 
-    fun handleWhoDataTyped(name: String){
+    fun handleWhoDataTyped(name: String, uidList: List<Long>){
         GlobalScope.launch {
-            val personsNames = db.personDao.getAllPersons("%$name%")
+            val personsNames = db.personDao.getAllPersons("%$name%", uidList)
             view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
+        }
+    }
+
+    fun handleDidDataTyped(verb: String, uidList: List<Long>){
+        GlobalScope.launch {
+            val verbs = db.xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
+            view.runOnUiThread(Runnable { view.updateDidDataAdapter(verbs) })
         }
     }
 

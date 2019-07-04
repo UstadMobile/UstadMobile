@@ -15,4 +15,6 @@ interface XapiReportOptionsView : UstadView {
 
     fun updateWhoDataAdapter(whoList: List<PersonDao.PersonNameAndUid>)
 
+    fun updateDidDataAdapter(didList: List<XLangMapEntryDao.Verb>)
+
 }

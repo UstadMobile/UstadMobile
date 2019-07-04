@@ -26,7 +26,6 @@ import java.util.*
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
-    private lateinit var whoDataAdapter: ArrayAdapter<PersonDao.PersonNameAndUid>
 
     private lateinit var visualTypeSpinner: Spinner
 
@@ -36,9 +35,13 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     private lateinit var subGroupSpinner: Spinner
 
+    private lateinit var didDataAdapter: ArrayAdapter<XLangMapEntryDao.Verb>
+
     private lateinit var didAutoCompleteView: AutoCompleteTextView
 
     private lateinit var didFlexBoxLayout: FlexboxLayout
+
+    private lateinit var whoDataAdapter: ArrayAdapter<PersonDao.PersonNameAndUid>
 
     private lateinit var whoAutoCompleteView: AutoCompleteTextView
 
@@ -73,11 +76,21 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         whoDataAdapter = ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, listOf<PersonDao.PersonNameAndUid>())
         whoAutoCompleteView.setAdapter(whoDataAdapter)
-        whoAutoCompleteView.addTextChangedListener(whoWatcher)
+        whoAutoCompleteView.addTextChangedListener(textWatcher)
         whoAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
             whoAutoCompleteView.text = null
             val selected = parent.getItemAtPosition(position) as PersonDao.PersonNameAndUid
             addChipToDidFlexLayout(selected.name, whoFlexBoxLayout, whoFlexBoxLayout.childCount - 1, selected.personUid)
+        }
+
+        didDataAdapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, listOf<XLangMapEntryDao.Verb>())
+        didAutoCompleteView.setAdapter(didDataAdapter)
+        didAutoCompleteView.addTextChangedListener(textWatcher)
+        didAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
+            didAutoCompleteView.text = null
+            val selected = parent.getItemAtPosition(position) as XLangMapEntryDao.Verb
+            addChipToDidFlexLayout(selected.valueLangMap, didFlexBoxLayout, didFlexBoxLayout.childCount - 1, selected.verbLangMapUid)
         }
 
     }
@@ -86,6 +99,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         menuInflater.inflate(R.menu.menu_new_report, menu)
         return super.onCreateOptionsMenu(menu)
     }
+
 
     private fun setAdapterForSpinner(list: List<String>, spinner: Spinner) {
         val dataAdapter = ArrayAdapter(this,
@@ -125,38 +139,60 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         whoDataAdapter.notifyDataSetChanged()
     }
 
+    override fun updateDidDataAdapter(didList: List<XLangMapEntryDao.Verb>) {
+        didDataAdapter.clear()
+        didDataAdapter.addAll(didList)
+        didDataAdapter.notifyDataSetChanged()
+    }
 
-    private var whoWatcher = object : TextWatcher {
+
+    private var textWatcher = object : TextWatcher {
 
         private var timer = Timer()
-        private val DELAY: Long = 300 // milliseconds
+        private val DELAY: Long = 250 // milliseconds
 
         override fun afterTextChanged(s: Editable?) {
+            timer.cancel()
+            timer = Timer()
+            timer.schedule(
+                    object : TimerTask() {
+                        override fun run() {
+                            val hash = s.hashCode()
+                            if (hash == whoAutoCompleteView.text.hashCode()) {
+                                val name = whoAutoCompleteView.text.toString()
+                                presenter.handleWhoDataTyped(name,whoFlexBoxLayout.children.filter {
+                                    it is Chip
+                                }.map {
+                                    (it as Chip).tag as Long
+                                }.toList())
+
+                            } else if (hash == didAutoCompleteView.text.hashCode()) {
+                                val verb = didAutoCompleteView.text.toString()
+                                presenter.handleDidDataTyped(verb, didFlexBoxLayout.children.filter {
+                                    it is Chip
+                                }.map {
+                                    (it as Chip).tag as Long
+                                }.toList())
+                            }
+                        }
+                    },
+                    DELAY)
+
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            if (count > 2) {
-                timer.cancel()
-                timer = Timer()
-                timer.schedule(
-                        object : TimerTask() {
-                            override fun run() {
-                                val name = whoAutoCompleteView.text.toString()
-                                presenter.handleWhoDataTyped(name)
-                            }
-                        },
-                        DELAY)
-            }
+
         }
     }
 
-    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout, count: Int, position: Long) {
+
+    private fun addChipToDidFlexLayout(text: String, flexGroup: FlexboxLayout, count: Int, uid: Long) {
         val chip = LayoutInflater.from(this).inflate(R.layout.view_chip, flexGroup, false) as Chip
         chip.text = text
-        chip.tag = position
+        chip.tag = uid
         flexGroup.addView(chip, count)
         chip.setOnCloseIconClickListener {
             flexGroup.removeView(chip as View)
