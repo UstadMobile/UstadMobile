@@ -20,10 +20,15 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportSalesPerformanceDetailPresenter;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
+import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -136,10 +141,10 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
     }
 
     @Override
-    public void setReportData(Map<Object, Object> dataSet) {
-        //TODO: Redo with correct data
+    public void setReportData(List<Object> dataSet) {
+
         chartLL.removeAllViews();
-        BarChart barChart = createBarChart();
+        BarChart barChart = createBarChart(dataSet);
         chartLL.addView(barChart);
     }
 
@@ -149,7 +154,7 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
     }
 
 
-    private BarChart createBarChart(){
+    public BarChart createBarChart(List<Object> dataSet){
 
         BarChart barChart = new BarChart(this);
         ViewGroup.LayoutParams params =
@@ -160,59 +165,128 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
         //barChart = setUpCharts(barChart);
         barChart = hideEverythingInBarChart(barChart);
 
-        ArrayList<BarEntry> heratEntries = new ArrayList<>();
-        ArrayList<BarEntry> kabulEntries = new ArrayList<>();
-        ArrayList<BarEntry> khostEntries = new ArrayList<>();
-        ArrayList<BarEntry> kunduzEntries = new ArrayList<>();
-        ArrayList<BarEntry> paktikaEntries = new ArrayList<>();
+        String[] yAxisValues;
 
-        heratEntries.add(new BarEntry(1,18000));
-        heratEntries.add(new BarEntry(2,17000));
-        heratEntries.add(new BarEntry(3,17000));
-        heratEntries.add(new BarEntry(4,16000));
+        List<String> yAxisValueList = new ArrayList<>();
 
-
-        kabulEntries.add(new BarEntry(1,95000));
-        kabulEntries.add(new BarEntry(2,120000));
-        kabulEntries.add(new BarEntry(3,130000));
-        kabulEntries.add(new BarEntry(4,122000));
+        //TODO: Have unlimited variations
+        List<String> barColorsList = new ArrayList<>();
+        barColorsList.add("#FF9800");
+        barColorsList.add("#FF6D00");
+        barColorsList.add("#FF5722");
+        barColorsList.add("#918F8F");
+        barColorsList.add("#666666");
+        String[] barColors = barColorsList.toArray(new String[0]);
 
 
-        khostEntries.add(new BarEntry(1,50500));
-        khostEntries.add(new BarEntry(2,60000));
-        khostEntries.add(new BarEntry(3,59000));
-        khostEntries.add(new BarEntry(4,6000));
+        List<String> allDateOccurences = new ArrayList<>();
+
+        Map<Long, ArrayList<BarEntry>> locationToBarEntriesMap = new HashMap<>();
+
+        Map<Long, String> locationUidToName = new HashMap<>();
 
 
-        kunduzEntries.add(new BarEntry(1,100000));
-        kunduzEntries.add(new BarEntry(2,130000));
-        kunduzEntries.add(new BarEntry(3,70000));
-        kunduzEntries.add(new BarEntry(4,90000));
+        List<String> allDatesInOrder = new ArrayList<>();
+
+        for(Object data:dataSet){
+            ReportSalesPerformance entry = (ReportSalesPerformance) data;
+            if(!allDateOccurences.contains(entry.getFirstDateOccurence())){
+                allDateOccurences.add(entry.getFirstDateOccurence());
+            }
+        }
 
 
-        paktikaEntries.add(new BarEntry(1,40000));
-        paktikaEntries.add(new BarEntry(2,25000));
-        paktikaEntries.add(new BarEntry(3,30000));
-        paktikaEntries.add(new BarEntry(4,20000));
+        for(int i=0; i<dataSet.size();i++){
+            //TODO: Fix date bug
+
+            int index;
+            //Get Report data:
+            Object everyEntryObject = dataSet.get(i);
+            ReportSalesPerformance entry = (ReportSalesPerformance) everyEntryObject;
+
+            long locationUid = entry.getLocationUid();
+            String locationName = entry.getLocationName();
+            if(!locationUidToName.containsKey(locationUid)){
+                locationUidToName.put(locationUid, locationName);
+            }
+            ArrayList<BarEntry> locationBarEntries;
+            if(locationToBarEntriesMap.containsKey(locationUid)){
+                locationBarEntries = locationToBarEntriesMap.get(locationUid);
+            }else{
+                locationBarEntries = new ArrayList<>();
+                int j=0;
+                for(String ignored :allDateOccurences){
+                    j++;
+                    //locationBarEntries.add(new BarEntry(j,0));
+                }
+            }
+
+            //Sale amount
+            long saleAmount = entry.getSaleAmount();
+            //Get date of occurrence
+            String saleOccurrence = entry.getFirstDateOccurence();
+
+            if(!allDateOccurences.contains(saleOccurrence)){
+                //Add it
+                allDateOccurences.add(saleOccurrence);
+                index = 1;
+            }else{
+                index = locationBarEntries.size()+1;
+            }
+            index = allDateOccurences.indexOf(saleOccurrence) + 1;
+            //Add entry in this index
+            locationBarEntries.add(new BarEntry(index, saleAmount));
 
 
-        BarDataSet barDataSet = new BarDataSet(heratEntries,"Herat");
-        barDataSet.setColor(Color.parseColor("#FF9800"));
-        BarDataSet barDataSet1 = new BarDataSet(kabulEntries,"Kabul");
-        barDataSet1.setColors(Color.parseColor("#FF6D00"));
-        BarDataSet barDataSet2 = new BarDataSet(khostEntries,"Khost");
-        barDataSet2.setColors(Color.parseColor("#FF5722"));
-        BarDataSet barDataSet3 = new BarDataSet(kunduzEntries,"Kunduz");
-        barDataSet3.setColors(Color.parseColor("#918F8F"));
-        BarDataSet barDataSet4 = new BarDataSet(paktikaEntries,"Paktika");
-        barDataSet4.setColors(Color.parseColor("#666666"));
+            //END: update bar entries.
+            locationToBarEntriesMap.put(locationUid, locationBarEntries);
 
-        String[] months = new String[] {"5-May", "12-May", "19-May", "26-May"};
-        BarData data = new BarData(barDataSet,barDataSet1,barDataSet2,barDataSet3, barDataSet4);
+
+        }
+
+        //Get data for chart
+        BarData data = new BarData();
+        int colorPos = 0;
+        for (Long barEntry : locationToBarEntriesMap.keySet()) {
+            String locationName = locationUidToName.get(barEntry);
+
+            //Get entries
+            ArrayList<BarEntry> locationEntry = locationToBarEntriesMap.get(barEntry);
+
+            //Create BarDataSet
+            assert locationEntry != null;
+            BarDataSet barDataSet = new BarDataSet(locationEntry, locationName);
+
+            //Color the bar
+            String barColor;
+            if(barColors.length >= colorPos){
+                barColor = barColors[colorPos];
+            }else{
+                barColor = barColors[1];
+            }
+            barDataSet.setColor(Color.parseColor(barColor));
+            colorPos++;
+
+            //Add to data :
+            data.addDataSet(barDataSet);
+
+        }
+
+
+
+        //Get yAxis for chart of date occurrences
+        for(String everyDateOccurrence:allDateOccurences){
+            String prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                    UMCalendarUtil.convertYYYYMMddToLong(everyDateOccurrence), null);
+            yAxisValueList.add(prettyDate);
+        }
+
+        yAxisValues = yAxisValueList.toArray(new String[0]);
+
         barChart.setData(data);
 
         XAxis xAxis = barChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(months));
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(yAxisValues));
         barChart.getAxisLeft().setAxisMinimum(0);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1);
@@ -221,15 +295,16 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
 
         float barSpace = 0.02f;
         float groupSpace = 0.3f;
-        int groupCount = 4;
+        int groupCount = yAxisValueList.size();
 
-        //IMPORTANT *****
         data.setBarWidth(0.15f);
         barChart.getXAxis().setAxisMinimum(0);
-        barChart.getXAxis().setAxisMaximum(0 + barChart.getBarData().getGroupWidth(groupSpace, barSpace) * groupCount);
-        barChart.groupBars(0, groupSpace, barSpace); // perform the "explicit" grouping
-        //***** IMPORTANT
+        barChart.getXAxis().setAxisMaximum(0 +
+                barChart.getBarData().getGroupWidth(groupSpace, barSpace) * groupCount);
 
+        if(colorPos>1){
+            barChart.groupBars(0, groupSpace, barSpace);
+        }
 
         //Hide values on top of every bar
         barChart.getBarData().setDrawValues(false);

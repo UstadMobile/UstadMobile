@@ -208,4 +208,5 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     @UmUpdate
     public abstract void updateAsync(SaleProduct entity, UmCallback<Integer> updateCallback);
 
+
 }

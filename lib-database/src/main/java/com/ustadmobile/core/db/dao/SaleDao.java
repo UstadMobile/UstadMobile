@@ -3,6 +3,9 @@ package com.ustadmobile.core.db.dao;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.db.entities.ReportSalesLog;
+import com.ustadmobile.lib.db.entities.ReportTopLEs;
+import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
 import com.ustadmobile.lib.database.annotation.UmDao;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -387,4 +390,115 @@ public abstract class SaleDao implements SyncableDao<Sale, SaleDao> {
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
             " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
     public abstract UmLiveData<Integer> getPreOrderSaleCountLive();
+
+
+    //REPORTING:
+
+    private static final String SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_SUM = " SELECT " +
+            "   SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleAmount, ";
+
+    public static final String SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_AVERAGE = " SELECT " +
+            "   AVERAGE(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleAmount, ";
+
+    private static final String SALE_PERFORMANCE_REPORT_SELECT_BIT1 =
+            "   Location.title as locationName,  " +
+            "   Location.locationUid as locationUid, " +
+            "   Sale.saleUid, " +
+            "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch') AS saleCreationDate, " +
+            "   strftime('%W-%Y', Sale.saleCreationDate/1000, 'unixepoch') AS dateGroup, ";
+    private static final String SALE_PERFORMANCE_REPORT_SELECT_DATE_WEEKLY =
+            "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-6 day') AS firstDateOccurence, ";
+    //TODO:
+    public static final String SALE_PERFORMANCE_REPORT_SELECT_DATE_MONTHLY =
+            "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-6 day') AS firstDateOccurence, ";
+    //TODO:
+    public static final String SALE_PERFORMANCE_REPORT_SELECT_DATE_YEARLY =
+            "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-6 day') AS firstDateOccurence, ";
+
+
+    private static final String SALE_PERFORMANCE_REPORT_SELECT_BIT2 =
+            "   SaleProduct.saleProductName, " +
+            "   SaleItem.saleItemQuantity, " +
+            "   WE.firstNames||' '||WE.lastName as producerName, " +
+            "   WE.personUid as producerUid, " +
+            "   LE.firstNames||' '||LE.lastName as leName, " +
+            "   LE.personUid as leUid, " +
+            "   ''  AS grantee, " +
+            "   (SELECT PP.saleProductName FROM SaleProductParentJoin " +
+            "   LEFT JOIN SaleProduct AS PP ON SaleProductParentJoin.saleProductParentJoinParentUid = PP.saleProductUid" +
+            "   WHERE SaleProductParentJoin.saleProductParentJoinChildUid = SaleItem.saleItemProductUid) as productTypeName, " +
+            "   (SELECT PP.saleProductUid FROM SaleProductParentJoin " +
+            "   LEFT JOIN SaleProduct AS PP ON SaleProductParentJoin.saleProductParentJoinParentUid = PP.saleProductUid" +
+            "   WHERE SaleProductParentJoin.saleProductParentJoinChildUid = SaleItem.saleItemProductUid) as productTypeUid " +
+            " FROM SALE " +
+            "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
+            "   LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid " +
+            "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
+            "   LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
+            "   LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid " +
+            " WHERE " +
+            "   SALE.saleActive = 1 " +
+            "   AND SaleItem.saleItemActive = 1 " +
+            "   OR leUid in (:leUids) " +
+            "   OR producerUid in (:producerUids) " +
+            "   OR locationUid in (:locationUids) " +
+            "   OR productTypeUid in (:productTypeUids) " +
+            "   AND Sale.saleCreationDate > :fromDate " +
+            "   AND Sale.saleCreationDate < :toDate " ;
+    private static final String SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION =
+            " GROUP BY locationName, firstDateOccurence " ;
+    public static final String SALE_PERFORMANCE_REPORT_GROUP_BY_PRODUCT_TYPE =
+            " GROUP BY productType, firstDateOccurence " ;
+    public static final String SALE_PERFORMANCE_REPORT_GROUP_BY_GRANTEE =
+            " GROUP BY grantee, firstDateOccurence " ;
+    private static final String SALE_PERFORMANCE_REPORT_HAVING_BIT =
+            "   HAVING saleAmount > :fromPrice " +
+            "   AND saleAmount < :toPrice ";
+    private static final String SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC =
+            " ORDER BY " +
+            "   firstDateOccurence ASC ";
+
+    private static final String SALE_PERFORMANCE_REPORT_1 =
+            SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_SUM + SALE_PERFORMANCE_REPORT_SELECT_BIT1 +
+            SALE_PERFORMANCE_REPORT_SELECT_DATE_WEEKLY + SALE_PERFORMANCE_REPORT_SELECT_BIT2 +
+            SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION + SALE_PERFORMANCE_REPORT_HAVING_BIT +
+                    SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC;
+
+    @UmQuery(SALE_PERFORMANCE_REPORT_1)
+    public abstract void getSalesPerformanceReportSumGroupedByLocation(List<Long> leUids,
+            List<Long> producerUids, List<Long> locationUids,
+            List<Long> productTypeUids, long fromDate, long toDate,
+            int fromPrice, int toPrice, UmCallback<List<ReportSalesPerformance>> resultCallback);
+
+    @UmQuery("SELECT    " +
+            " SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as totalSalesValue,  " +
+            "    LE.firstNames||' '||LE.lastName as leName,   " +
+            "   '' as lastActiveOnApp, " +
+            "   '' as leRank, " +
+            "   LE.personUid as leUid " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
+            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
+            " GROUP BY leUid " +
+            "  ORDER BY    totalSalesValue DESC")
+    public abstract void getTopLEs(UmCallback<List<ReportTopLEs>> resultCallback);
+
+    @UmQuery("SELECT   LE.firstNames||' '||LE.lastName as leName, " +
+            " (SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleValue,    " +
+            "  Sale.saleCreationDate AS saleDate,  " +
+            "  SaleProduct.saleProductName as productNames, " +
+            "Location.title as locationName " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
+            " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
+            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1    " +
+            "  ORDER BY    saleDate DESC ")
+    public abstract void getSaleLog(UmCallback<List<ReportSalesLog>> resultCallback);
+
+
+
+
+
+
 }

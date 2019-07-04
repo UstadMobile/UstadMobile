@@ -9,7 +9,7 @@ import java.util.List;
  * SelectMultipleTreeDialog Core View extends Core UstadView. Will be implemented
  * on various implementations.
  */
-public interface SelectMultipleTreeDialogView extends UstadView {
+public interface SelectMultipleLocationTreeDialogView extends UstadView {
 
     String VIEW_NAME = "SelectMultipleTreeDialog";
 

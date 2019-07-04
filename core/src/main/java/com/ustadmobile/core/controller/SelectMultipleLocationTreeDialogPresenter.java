@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView;
 import com.ustadmobile.lib.db.entities.Location;
 
 import java.util.ArrayList;
@@ -12,14 +12,14 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
-import static com.ustadmobile.core.view.SelectMultipleTreeDialogView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.ARG_LOCATIONS_SET;
 
 
 /**
  * The SelectMultipleTreeDialog Presenter.
  */
-public class SelectMultipleTreeDialogPresenter
-        extends CommonEntityHandlerPresenter<SelectMultipleTreeDialogView> {
+public class SelectMultipleLocationTreeDialogPresenter
+        extends CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView> {
 
     HashMap<String, Long> selectedOptions;
 
@@ -27,8 +27,8 @@ public class SelectMultipleTreeDialogPresenter
 
     UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(context);
 
-    public SelectMultipleTreeDialogPresenter(Object context, Hashtable arguments,
-                                             SelectMultipleTreeDialogView view) {
+    public SelectMultipleLocationTreeDialogPresenter(Object context, Hashtable arguments,
+                                                     SelectMultipleLocationTreeDialogView view) {
         super(context, arguments, view);
 
         if (arguments.containsKey(ARG_LOCATIONS_SET)) {

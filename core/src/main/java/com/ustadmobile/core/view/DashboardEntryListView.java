@@ -34,5 +34,7 @@ public interface DashboardEntryListView extends UstadView {
     void loadChips(String[] tags);
 
     void showSetTitle(String existingTitle, long entryUid);
+
+    void renderChart(long uid);
 }
 

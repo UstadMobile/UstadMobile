@@ -3,16 +3,20 @@ package com.ustadmobile.core.controller;
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.DashboardEntryDao;
+import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.ReportOptions;
+import com.ustadmobile.lib.db.entities.ReportSalesLog;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.ReportSalesLogDetailView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_OPTIONS;
@@ -32,6 +36,7 @@ public class ReportSalesLogDetailPresenter
     long loggedInPersonUid;
     String reportOptionsString;
     long dashboardEntryUid;
+    private SaleDao saleDao;
 
 
     public ReportSalesLogDetailPresenter(Object context, Hashtable arguments,
@@ -48,6 +53,7 @@ public class ReportSalesLogDetailPresenter
             loggedInPersonUid = activeAccount.getPersonUid();
         }
 
+        saleDao = repository.getSaleDao();
 
     }
 
@@ -83,11 +89,20 @@ public class ReportSalesLogDetailPresenter
             Gson gson = new Gson();
             reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
 
-            //TODO:
-            //Send to dao for report.
-            //Plot report
-            //TODO
-            view.setReportData(null);
+            //TODO: Check:
+            saleDao.getSaleLog(
+                    new UmCallback<List<ReportSalesLog>>() {
+                        @Override
+                        public void onSuccess(List<ReportSalesLog> result) {
+                            view.runOnUiThread(() -> view.setReportData((List<Object>)(List<?>)result));
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
         }
 
 

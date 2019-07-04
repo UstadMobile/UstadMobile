@@ -14,10 +14,11 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportTopLEsDetailPresenter;
+import com.ustadmobile.lib.db.entities.ReportTopLEs;
 import com.ustadmobile.core.view.ReportTopLEsDetailView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -129,18 +130,45 @@ public class ReportTopLEsDetailActivity extends UstadBaseActivity
     }
 
     @Override
-    public void setReportData(Map<Object, Object> dataSet) {
-        //TODO: Redo with correct data
+    public void setReportData(List<Object> dataSet) {
         chartLL.removeAllViews();
-        LinearLayout topLEs = createTopLEs();
+        LinearLayout topLEs = createTopLEs(dataSet);
         chartLL.addView(topLEs);
     }
 
     @Override
     public void setReportType(int reportType) {
-        runOnUiThread(() -> toolbar.setTitle(R.string.sales_performance_report));
+        runOnUiThread(() -> toolbar.setTitle(R.string.top_les_report));
     }
 
+    private LinearLayout createTopLEs(List<Object> dataSet){
+
+        LinearLayout topLL = new LinearLayout(this);
+        topLL.setOrientation(LinearLayout.VERTICAL);
+        ViewGroup.LayoutParams params =
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+        topLL.setLayoutParams(params);
+
+        for(Object data:dataSet){
+            ReportTopLEs entry = (ReportTopLEs) data;
+            TextView t1 = new TextView(this);
+            t1.setText(entry.getLeName());
+            t1.setPadding(0,8,0,0);
+            topLL.addView(t1);
+            TextView v1 = new TextView(this);
+            v1.setTextSize(18);
+            v1.setTextColor(Color.parseColor("#F57C00"));
+            v1.setText(String.valueOf(entry.getTotalSalesValue()));
+            topLL.addView(v1);
+            v1.setPadding(0,0,0,8);
+            topLL.addView(getHorizontalLine());
+        }
+
+
+        return topLL;
+
+    }
 
     private LinearLayout createTopLEs(){
         LinearLayout topLL = new LinearLayout(this);

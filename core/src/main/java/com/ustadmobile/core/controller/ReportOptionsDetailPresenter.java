@@ -7,12 +7,14 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.ReportOptions;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.ReportSalesLogDetailView;
 import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
 import com.ustadmobile.core.view.ReportTopLEsDetailView;
-import com.ustadmobile.core.view.SelectMultipleTreeDialogView;
+import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView;
+import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 
 import java.text.DecimalFormat;
@@ -24,7 +26,8 @@ import java.util.Locale;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_OPTIONS;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_TYPE;
-import static com.ustadmobile.core.view.SelectMultipleTreeDialogView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.ARG_PRODUCT_SELECTED_SET;
 
 /**
  * Presenter for ReportOptionsDetail view
@@ -35,9 +38,9 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     private DashboardEntryDao dashboardEntryDao;
 
     private Hashtable<Long, Integer> idToGroupByInteger;
-    static final int GROUP_BY_LOCATION = 1;
-    private static final int GROUP_BY_PRODUCT_TYPE = 2;
-    private static final int GROUP_BY_GRANTEE = 3;
+    public static final int GROUP_BY_LOCATION = 1;
+    public static final int GROUP_BY_PRODUCT_TYPE = 2;
+    public static final int GROUP_BY_GRANTEE = 3;
 
     private int currentGroupBy = 0;
 
@@ -115,10 +118,10 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
             if (reportOptionsString != null && !reportOptionsString.isEmpty()) {
                 Gson gson = new Gson();
                 reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
-                fromDate = reportOptions.fromDate;
-                toDate = reportOptions.toDate;
-                fromPrice = reportOptions.fromPrice;
-                toPrice = reportOptions.toPrice;
+                fromDate = reportOptions.getFromDate();
+                toDate = reportOptions.getToDate();
+                fromPrice = reportOptions.getFromPrice();
+                toPrice = reportOptions.getToPrice();
             }
         }
 
@@ -127,10 +130,10 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
 
         //Build report options on view:
 
-        selectedLocations = reportOptions.locations;
-        selectedLEs = reportOptions.les;
-        selectedProducts = reportOptions.productTypes;
-        currentGroupBy = reportOptions.groupBy;
+        selectedLocations = reportOptions.getLocations();
+        selectedLEs = reportOptions.getLes();
+        selectedProducts = reportOptions.getProductTypes();
+        currentGroupBy = reportOptions.getGroupBy();
 
         //Date range
         updateDateRangeOnView();
@@ -139,7 +142,7 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
         updateSalePriceRangeOnView();
 
         //Show Average
-        view.setShowAverage(reportOptions.showAverage);
+        view.setShowAverage(reportOptions.isShowAverage());
 
 
         if(selectedLocations.isEmpty()){
@@ -245,10 +248,10 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     public void handleClickCreateReport(){
 
         //Add remainder bits
-        reportOptions.fromPrice = fromPrice;
-        reportOptions.toPrice = toPrice;
-        reportOptions.fromDate = fromDate;
-        reportOptions.toDate = toDate;
+        reportOptions.setFromPrice(fromPrice);
+        reportOptions.setToPrice(toPrice);
+        reportOptions.setFromDate(fromDate);
+        reportOptions.setToDate(toDate);
 
         //Create json from reportOptions
         Gson gson = new Gson();
@@ -294,15 +297,22 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     /////Select Multi/////
 
     public void goToProductSelect(){
-        //TODO : Open multi tree select
+        Hashtable<String, Object> args = new Hashtable<>();
+
+        if(selectedProducts != null && !selectedProducts.isEmpty()){
+            Long[] selectedLocationsArray =
+                    convertLongList(selectedProducts);
+            args.put(ARG_PRODUCT_SELECTED_SET, selectedLocationsArray);
+        }
+
+        impl.go(SelectMultipleProductTypeTreeDialogView.VIEW_NAME, args, context);
     }
 
     public void goToLEsSelect(){
-        //TODO : Open multi tree select
+        //TODO : Open  List?
     }
 
     public void goToLocationSelect(){
-        //TODO: Open multi tree select
         Hashtable<String, Object> args = new Hashtable<>();
 
         if(selectedLocations != null && !selectedLocations.isEmpty()){
@@ -311,7 +321,7 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
             args.put(ARG_LOCATIONS_SET, selectedLocationsArray);
         }
 
-        impl.go(SelectMultipleTreeDialogView.VIEW_NAME, args, context);
+        impl.go(SelectMultipleLocationTreeDialogView.VIEW_NAME, args, context);
     }
 
     public void setSelectedLocations(List<Long> selectedLocations) {
@@ -339,7 +349,7 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     }
 
     public void handleToggleAverage(boolean ticked){
-        reportOptions.showAverage = ticked;
+        reportOptions.setShowAverage(ticked);
     }
 
     public void setFromDate(long fromDate) {

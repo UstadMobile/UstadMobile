@@ -2,17 +2,23 @@ package com.ustadmobile.core.controller;
 
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.dao.DashboardEntryDao;
+import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 
+import com.ustadmobile.core.model.ReportOptions;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
+import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
@@ -33,6 +39,7 @@ public class ReportSalesPerformanceDetailPresenter
     long loggedInPersonUid;
     String reportOptionsString;
     long dashboardEntryUid;
+    private SaleDao saleDao;
 
 
 
@@ -44,6 +51,7 @@ public class ReportSalesPerformanceDetailPresenter
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
         impl = UstadMobileSystemImpl.getInstance();
         entryDao = repository.getDashboardEntryDao();
+        saleDao = repository.getSaleDao();
 
         UmAccount activeAccount = UmAccountManager.getActiveAccount(context);
 
@@ -84,13 +92,25 @@ public class ReportSalesPerformanceDetailPresenter
             Gson gson = new Gson();
             reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
 
-            //TODO:
-            //Send to dao for report.
-            //Plot report
-            //TODO
-            view.setReportData(null);
-        }
+            int startOfWeek = 6; //Sunday //TODO: GET THIS FROM SETTINGS, etc/
+            List<Long> producerUids= new ArrayList<>();
+            saleDao.getSalesPerformanceReportSumGroupedByLocation(reportOptions.getLes(),
+                    producerUids, reportOptions.getLocations(), reportOptions.getProductTypes(),
+                    reportOptions.getFromDate(), reportOptions.getToDate(),
+                    reportOptions.getFromPrice(), reportOptions.getToPrice(),
+                    new UmCallback<List<ReportSalesPerformance>>() {
+                @Override
+                public void onSuccess(List<ReportSalesPerformance> result) {
+                    view.runOnUiThread(() -> view.setReportData((List<Object>)(List<?>)result));
 
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }
     }
 
     @Override

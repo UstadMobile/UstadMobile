@@ -1,8 +1,10 @@
 package com.ustadmobile.core.controller;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DashboardTagDao;
 import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.db.UmAppDatabase;
 
@@ -13,6 +15,7 @@ import java.util.List;
 
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.ReportOptions;
 import com.ustadmobile.core.view.DashboardEntryListView;
 
 import com.ustadmobile.core.db.UmProvider;
@@ -25,6 +28,7 @@ import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.core.db.dao.DashboardEntryDao;
 import com.ustadmobile.lib.db.entities.DashboardTag;
 import com.ustadmobile.lib.db.entities.Person;
+import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
@@ -52,6 +56,8 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
     private HashMap<Long, Integer> tagToPosition;
     private HashMap<Integer, Long> positionToTag;
 
+    private SaleDao saleDao;
+
     public DashboardEntryListPresenter(Object context, Hashtable arguments,
                                        DashboardEntryListView view) {
         super(context, arguments, view);
@@ -62,6 +68,7 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
         dashboardEntryDao = repository.getDashboardEntryDao();
         tagDao = repository.getDashboardTagDao();
         personDao = repository.getPersonDao();
+        saleDao = repository.getSaleDao();
 
 
     }
@@ -239,6 +246,34 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
                 }
             });
         }
+    }
+
+
+    public List<ReportSalesPerformance> salesPerformanceResult;
+
+    public void getSalesPerformanceReport(long entryUid, String reportOptionsString){
+        Gson gson = new Gson();
+        ReportOptions reportOptions;
+        reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
+
+        int startOfWeek = 6; //Sunday //TODO: GET THIS FROM SETTINGS, etc/
+        List<Long> producerUids= new ArrayList<>();
+        saleDao.getSalesPerformanceReportSumGroupedByLocation(reportOptions.getLes(),
+            producerUids, reportOptions.getLocations(), reportOptions.getProductTypes(),
+            reportOptions.getFromDate(), reportOptions.getToDate(),
+            reportOptions.getFromPrice(), reportOptions.getToPrice(),
+            new UmCallback<List<ReportSalesPerformance>>() {
+                @Override
+                public void onSuccess(List<ReportSalesPerformance> result) {
+                    salesPerformanceResult = result;
+
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+        });
     }
 
 }

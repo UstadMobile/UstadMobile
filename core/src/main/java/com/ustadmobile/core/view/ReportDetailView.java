@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view;
 
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +26,7 @@ public interface ReportDetailView extends UstadView {
 
     void showAddToDashboardButton(boolean show);
 
-    void setReportData(Map<Object, Object> dataSet);
+    void setReportData(List<Object> dataSet);
 
     void setReportType(int reportType);
 

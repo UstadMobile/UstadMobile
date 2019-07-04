@@ -2,6 +2,7 @@ package com.ustadmobile.core.util;
 
 import com.ustadmobile.lib.util.UMUtil;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -172,6 +173,16 @@ public class UMCalendarUtil {
         return format.format(calendar.getTime());
     }
 
+    public static long convertYYYYMMddToLong(String date){
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date d = f.parse(date);
+            return d.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
     /**
      * Appends two digits for the integer i; if i < 10; prepend a leading 0
      *

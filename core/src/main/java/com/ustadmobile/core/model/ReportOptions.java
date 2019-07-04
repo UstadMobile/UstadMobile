@@ -1,4 +1,4 @@
-package com.ustadmobile.core.controller;
+package com.ustadmobile.core.model;
 
 import com.ustadmobile.core.util.UMCalendarUtil;
 
@@ -12,15 +12,15 @@ import static com.ustadmobile.core.controller.ReportOptionsDetailPresenter.GROUP
  */
 public class ReportOptions {
 
-    List<Long> productTypes;
-    int groupBy;
-    boolean showAverage;
-    List<Long> les;
-    List<Long> locations;
-    long fromDate;
-    long toDate;
-    int fromPrice;
-    int toPrice;
+    private List<Long> productTypes;
+    private int groupBy;
+    private boolean showAverage;
+    private List<Long> les;
+    private List<Long> locations;
+    private long fromDate;
+    private long toDate;
+    private int fromPrice;
+    private int toPrice;
 
     public ReportOptions(){
         //Defaults

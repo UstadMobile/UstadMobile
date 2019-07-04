@@ -43,6 +43,8 @@ public class DashboardEntryListFragment
     private ChipGroup tags;
     private Chip tagAll;
 
+    private DashboardEntryListRecyclerAdapter recyclerAdapter;
+
     public static DashboardEntryListFragment newInstance(){
         DashboardEntryListFragment fragment = new DashboardEntryListFragment();
         Bundle args = new Bundle();
@@ -140,7 +142,7 @@ public class DashboardEntryListFragment
     @Override
     public void setDashboardEntryProvider(UmProvider<DashboardEntry> listProvider) {
 
-        DashboardEntryListRecyclerAdapter recyclerAdapter =
+         recyclerAdapter =
                 new DashboardEntryListRecyclerAdapter(DIFF_CALLBACK, mPresenter,
                         getContext());
 
@@ -153,6 +155,8 @@ public class DashboardEntryListFragment
                 new LivePagedListBuilder<>(factory, 20).build();
         //Observe the data:
         data.observe(this, recyclerAdapter::submitList);
+
+
 
         //set the adapter
         entriesRV.setAdapter(recyclerAdapter);
@@ -194,6 +198,11 @@ public class DashboardEntryListFragment
 
         adb.create();
         adb.show();
+    }
+
+    @Override
+    public void renderChart(long uid) {
+        recyclerAdapter.updateMe(uid, mPresenter.salesPerformanceResult);
     }
 
 }

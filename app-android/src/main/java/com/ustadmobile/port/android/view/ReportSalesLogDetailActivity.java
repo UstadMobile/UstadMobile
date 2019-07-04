@@ -14,10 +14,12 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ReportSalesLogDetailPresenter;
+import com.ustadmobile.lib.db.entities.ReportSalesLog;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.ReportSalesLogDetailView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 import ru.dimorinny.floatingtextbutton.FloatingTextButton;
@@ -129,16 +131,66 @@ public class ReportSalesLogDetailActivity extends UstadBaseActivity
     }
 
     @Override
-    public void setReportData(Map<Object, Object> dataSet) {
-        //TODO: Redo with correct data
+    public void setReportData(List<Object> dataSet) {
+
         chartLL.removeAllViews();
-        LinearLayout logs = createSalesLog();
+        LinearLayout logs = createSalesLog(dataSet);
         chartLL.addView(logs);
     }
 
     @Override
     public void setReportType(int reportType) {
         runOnUiThread(() -> toolbar.setTitle(R.string.sales_performance_report));
+    }
+
+
+    private LinearLayout createSalesLog(List<Object> dataSet){
+        LinearLayout topLL = new LinearLayout(this);
+        topLL.setOrientation(LinearLayout.VERTICAL);
+        ViewGroup.LayoutParams params =
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+        ViewGroup.LayoutParams wrapParams =
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+        topLL.setLayoutParams(params);
+
+        for(Object data:dataSet){
+            ReportSalesLog entry = (ReportSalesLog)data;
+
+            TextView t1 = new TextView(this);
+            t1.setText(entry.getLeName() + ", at location " + entry.getLocationName());
+            t1.setPadding(0,8,0,0);
+
+            topLL.addView(t1);
+            TextView v1 = new TextView(this);
+            v1.setTextSize(18);
+            v1.setTextColor(Color.parseColor("#F57C00"));
+            v1.setText(String.valueOf(entry.getSaleValue()));
+
+            LinearLayout tLL = new LinearLayout(this);
+            tLL.setOrientation(LinearLayout.HORIZONTAL);
+            tLL.setLayoutParams(wrapParams);
+            TextView l1 = new TextView(this);
+            l1.setText(entry.getProductNames());
+
+            v1.setPadding(0,0, 32, 0);
+            tLL.addView(v1);
+            l1.setPadding(32,0,0,0);
+            tLL.addView(l1);
+
+            topLL.addView(tLL);
+
+            v1.setPadding(0,0,0,8);
+            TextView d1 = new TextView(this);
+            d1.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(entry.getSaleDate(), null));
+            d1.setPadding(0,0,0,8);
+            topLL.addView(d1);
+            topLL.addView(getHorizontalLine());
+        }
+
+        return topLL;
+
     }
 
 

@@ -4,6 +4,11 @@ import com.toughra.ustadmobile.R;
 
 import tellh.com.recyclertreeview_lib.LayoutItemType;
 
+/**
+ * This Layout Class represents every entry part of the Multi select recycler view.
+ * This is the data that will get fed into the recycler view and hence would need to be
+ * updated with at least the name and uid. Selected and leaf are navigation properties.
+ */
 public class EntityLayoutType implements LayoutItemType {
     public String name;
     public long uid;
@@ -24,10 +29,6 @@ public class EntityLayoutType implements LayoutItemType {
 
     public void setUid(long uid) {
         this.uid = uid;
-    }
-
-    public EntityLayoutType(String name) {
-        this.name = name;
     }
 
     public EntityLayoutType(String name, Long uid, boolean selected, boolean leaf){

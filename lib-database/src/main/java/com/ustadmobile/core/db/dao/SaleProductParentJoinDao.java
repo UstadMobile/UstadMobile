@@ -9,7 +9,6 @@ import com.ustadmobile.lib.db.entities.SaleNameWithImage;
 import com.ustadmobile.lib.db.entities.SaleProduct;
 import com.ustadmobile.lib.db.entities.SaleProductParentJoin;
 import com.ustadmobile.lib.db.entities.SaleProductSelected;
-import com.ustadmobile.lib.db.sync.dao.BaseDao;
 import com.ustadmobile.lib.db.sync.dao.SyncableDao;
 
 import java.util.List;
@@ -106,5 +105,28 @@ public abstract class SaleProductParentJoinDao implements SyncableDao<SaleProduc
             }
         });
     }
+
+    //Find Top
+    @UmQuery("SELECT Parent.* FROM SaleProductParentJoin " +
+            "LEFT JOIN SaleProduct as Parent ON " +
+            "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+            " WHERE SaleProductParentJoinActive = 1  " +
+            "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
+            "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
+            " GROUP BY saleProductParentJoinParentUid")
+    public abstract void findTopSaleProductsAsync(UmCallback<List<SaleProduct>> resultCallback);
+
+
+    //Find categories in a category uid
+    @UmQuery("SELECT Child.* FROM SaleProductParentJoin " +
+            "   LEFT JOIN SaleProduct as Parent " +
+            "   ON Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+            "   LEFT JOIN SaleProduct as Child " +
+            "   ON Child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+            " WHERE SaleProductParentJoinActive = 1 AND Child.saleProductActive = 1 " +
+            "   AND Child.saleProductCategory = 1 " +
+            " AND SaleProductParentJoinParentUid = :uid ")
+    public abstract void findAllChildProductTypesForUidAsync(long uid,
+                                                     UmCallback<List<SaleProduct>> resultCallback);
 
 }

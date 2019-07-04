@@ -27,12 +27,18 @@ import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class ReportOptionsDetailActivity extends UstadBaseActivity
-        implements ReportOptionsDetailView {
+        implements ReportOptionsDetailView,
+        SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,
+        SelectMultipleProductTypeTreeDialogFragment.MultiSelectProductTypeTreeDialogListener{
 
     private Toolbar toolbar;
     private ReportOptionsDetailPresenter mPresenter;
@@ -224,7 +230,6 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
                 groupBySpinner.setSelection(selectedPosition);
             }
         });
-
     }
 
     @Override
@@ -242,7 +247,6 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
     public void setFromDate(long fromDate) {
         this.fromDate = fromDate;
     }
-
 
     private Dialog createDateRangeDialog(){
 
@@ -336,7 +340,7 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         return dialog;
     }
 
-    public DatePickerDialog hideYearFromDatePicker(DatePickerDialog dateFieldPicker){
+    private DatePickerDialog hideYearFromDatePicker(DatePickerDialog dateFieldPicker){
         try {
             Field f[] = dateFieldPicker.getClass().getDeclaredFields();
             for (Field field : f) {
@@ -353,5 +357,37 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
             e.printStackTrace();
         }
         return dateFieldPicker;
+    }
+
+    @Override
+    public void onLocationResult(HashMap<String, Long> selectedLocations) {
+        Iterator<String> selectedLocationsNameIterator = selectedLocations.keySet().iterator();
+        StringBuilder locationsSelectedString = new StringBuilder();
+        while(selectedLocationsNameIterator.hasNext()){
+            locationsSelectedString.append(selectedLocationsNameIterator.next());
+            if(selectedLocationsNameIterator.hasNext()){
+                locationsSelectedString.append(", ");
+            }
+        }
+        List<Long> selectedLocationList = new ArrayList<>(selectedLocations.values());
+        mPresenter.setSelectedLocations(selectedLocationList);
+
+        setLocationSelected(locationsSelectedString.toString());
+    }
+
+    @Override
+    public void onProductTypesResult(HashMap<String, Long> selectedProductTypes) {
+        Iterator<String> selectedProductTypesNameIterator = selectedProductTypes.keySet().iterator();
+        StringBuilder productTypesSelectedString = new StringBuilder();
+        while(selectedProductTypesNameIterator.hasNext()){
+            productTypesSelectedString.append(selectedProductTypesNameIterator.next());
+            if(selectedProductTypesNameIterator.hasNext()){
+                productTypesSelectedString.append(", ");
+            }
+        }
+        List<Long> selectedProductTypeList = new ArrayList<>(selectedProductTypes.values());
+        mPresenter.setSelectedLocations(selectedProductTypeList);
+
+        setProductTypeSelected(productTypesSelectedString.toString());
     }
 }

@@ -3,16 +3,20 @@ package com.ustadmobile.core.controller;
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.DashboardEntryDao;
+import com.ustadmobile.core.db.dao.SaleDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.ReportOptions;
+import com.ustadmobile.lib.db.entities.ReportTopLEs;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.ReportTopLEsDetailView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.lib.db.entities.UmAccount;
 
 import java.util.Hashtable;
+import java.util.List;
 
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_OPTIONS;
@@ -32,6 +36,8 @@ public class ReportTopLEsDetailPresenter extends ReportDetailPresenter<ReportTop
     String reportOptionsString;
     long dashboardEntryUid;
 
+    private SaleDao saleDao;
+
 
     public ReportTopLEsDetailPresenter(Object context, Hashtable arguments, ReportTopLEsDetailView view) {
         super(context, arguments, view);
@@ -41,6 +47,7 @@ public class ReportTopLEsDetailPresenter extends ReportDetailPresenter<ReportTop
         repository = UmAccountManager.getRepositoryForActiveAccount(context);
         impl = UstadMobileSystemImpl.getInstance();
         entryDao = repository.getDashboardEntryDao();
+        saleDao = repository.getSaleDao();
 
         UmAccount activeAccount = UmAccountManager.getActiveAccount(context);
 
@@ -82,11 +89,21 @@ public class ReportTopLEsDetailPresenter extends ReportDetailPresenter<ReportTop
             Gson gson = new Gson();
             reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
 
-            //TODO:
-            //Send to dao for report.
-            //Plot report
-            //TODO
-            view.setReportData(null);
+            //TODO: Check:
+
+            saleDao.getTopLEs(new UmCallback<List<ReportTopLEs>>() {
+                        @Override
+                        public void onSuccess(List<ReportTopLEs> result) {
+                            view.runOnUiThread(() -> view.setReportData((List<Object>)(List<?>)result));
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+
         }
     }
 

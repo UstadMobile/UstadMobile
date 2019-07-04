@@ -29,8 +29,10 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.DashboardEntryListPresenter;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
+import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class DashboardEntryListRecyclerAdapter extends
@@ -123,6 +125,7 @@ public class DashboardEntryListRecyclerAdapter extends
             case DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE:
                 if(reportPlaceholder!=null)
                     reportPlaceholder.setVisibility(View.GONE);
+                mPresenter.getSalesPerformanceReport(entryUid, entryParams);
                 BarChart barChart = createBarChart();
                 chartLL.addView(barChart);
                 currencyTV.setVisibility(View.VISIBLE);
@@ -155,6 +158,11 @@ public class DashboardEntryListRecyclerAdapter extends
                 mPresenter.handleClickReport(entryUid, entryParams, reportType);
             }
         });
+    }
+
+    public void updateMe(long uid, List<ReportSalesPerformance> data){
+
+        int x;
     }
 
     private BarChart hideEverythingInBarChart(BarChart barChart){

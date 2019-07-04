@@ -33,6 +33,7 @@ import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.lib.db.entities.SaleItemListDetail;
 import com.ustadmobile.lib.db.entities.SalePayment;
 import com.ustadmobile.lib.db.entities.SaleVoiceNote;
+import com.ustadmobile.lib.db.entities.UmAccount;
 
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_GEN_NAME;
 import static com.ustadmobile.core.view.SaleDetailView.ARG_SALE_UID;
@@ -69,6 +70,8 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
     private long totalPayment=0;
     private long totalAfterDiscount = 0;
 
+    private long loggedInPersonUid = 0L;
+
     public SaleDetailPresenter(Object context, Hashtable arguments, SaleDetailView view) {
         super(context, arguments, view);
 
@@ -82,6 +85,12 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
         saleVoiceNoteDao = UmAppDatabase.getInstance(context).getSaleVoiceNoteDao();
 
         positionToLocationUid = new Hashtable<>();
+
+        UmAccount activeAccount = UmAccountManager.getActiveAccount(context);
+
+        if(activeAccount != null) {
+            loggedInPersonUid = activeAccount.getPersonUid();
+        }
 
     }
 
@@ -110,6 +119,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
             updatedSale.setSalePreOrder(true); //ie: Not delivered unless ticked.
             updatedSale.setSaleDone(false);
             updatedSale.setSaleActive(false);
+            updatedSale.setSalePersonUid(loggedInPersonUid);
             view.showSignature(false);
 
             saleDao.insertAsync(updatedSale, new UmCallback<Long>() {

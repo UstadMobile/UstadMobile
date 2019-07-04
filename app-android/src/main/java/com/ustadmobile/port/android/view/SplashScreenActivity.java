@@ -440,35 +440,6 @@ public class SplashScreenActivity extends UstadBaseActivity{
                             productParentJoinDao.insert(accessoriesCategoryCollectionJoin));
                 }
 
-                String pinkHatSaleTitle = "20x Pink Hat";
-                SaleProduct finalPinkHatProduct = pinkHatProduct;
-                saleDao.findAllSaleWithTitleAsync(pinkHatSaleTitle, new UmCallback<List<Sale>>() {
-                    @Override
-                    public void onSuccess(List<Sale> result) {
-                        if (result.isEmpty()) {
-                            Sale pinkHatSale = new Sale();
-                            pinkHatSale.setSaleTitle(pinkHatSaleTitle);
-                            pinkHatSale.setSaleActive(true);
-                            pinkHatSale.setSaleCancelled(false);
-                            pinkHatSale.setSalePreOrder(false);
-                            pinkHatSale.setSaleDone(true);
-                            pinkHatSale.setSalePaymentDone(false);
-                            pinkHatSale.setSaleLocationUid(newLocation.getLocationUid());
-                            pinkHatSale.setSaleCreationDate(UMCalendarUtil.getDateInMilliPlusDays(0));
-                            pinkHatSale.setSaleDueDate(0);
-                            pinkHatSale.setSaleUid(saleDao.insert(pinkHatSale));
-
-                            //Insert items.
-                            SaleItem thisSaleItem = new SaleItem(finalPinkHatProduct.getSaleProductUid(),
-                                    20, 500, pinkHatSale.getSaleUid(),
-                                    UMCalendarUtil.getDateInMilliPlusDays(-1));
-                            saleItemDao.insert(thisSaleItem);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Throwable exception) {exception.printStackTrace();}
-                });
 
                 
             }
