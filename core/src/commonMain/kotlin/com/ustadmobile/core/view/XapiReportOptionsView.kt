@@ -17,4 +17,10 @@ interface XapiReportOptionsView : UstadView {
 
     fun updateDidDataAdapter(didList: List<XLangMapEntryDao.Verb>)
 
+    fun updateFromDialogText(fromDate: String)
+
+    fun updateToDialogText(toDate: String)
+
+    fun updateWhenRangeText(rangeText: String)
+
 }

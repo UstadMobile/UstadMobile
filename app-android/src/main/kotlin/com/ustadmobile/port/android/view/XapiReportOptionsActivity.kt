@@ -1,5 +1,10 @@
 package com.ustadmobile.port.android.view
 
+import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.Dialog
+import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,6 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
@@ -20,12 +26,10 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.XapiReportOptionsView
-import kotlinx.coroutines.Job
 import java.util.*
 
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
-
 
     private lateinit var visualTypeSpinner: Spinner
 
@@ -47,9 +51,13 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     private lateinit var whoFlexBoxLayout: FlexboxLayout
 
+    private lateinit var whenAutoComplete: AutoCompleteTextView
+
     private lateinit var presenter: XapiReportOptionsPresenter
 
-    var whoTextChangedJob: Job? = null
+    private lateinit var fromET: EditText
+
+    private lateinit var toET: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +71,10 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         didFlexBoxLayout = findViewById(R.id.didFlex)
         whoAutoCompleteView = findViewById(R.id.whoAutoCompleteTextView)
         whoFlexBoxLayout = findViewById(R.id.whoFlex)
+        whenAutoComplete = findViewById(R.id.whenAutoCompleteTextView)
+        whenAutoComplete.setOnClickListener {
+            createDateRangeDialog().show()
+        }
 
         val toolbar = findViewById<Toolbar>(R.id.new_report_toolbar)
         setSupportActionBar(toolbar)
@@ -145,6 +157,18 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         didDataAdapter.notifyDataSetChanged()
     }
 
+    override fun updateFromDialogText(fromDate: String) {
+        fromET.setText(fromDate)
+    }
+
+    override fun updateToDialogText(toDate: String) {
+        toET.setText(toDate)
+    }
+
+    override fun updateWhenRangeText(rangeText: String) {
+        whenAutoComplete.setText(rangeText, false)
+    }
+
 
     private var textWatcher = object : TextWatcher {
 
@@ -160,7 +184,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
                             val hash = s.hashCode()
                             if (hash == whoAutoCompleteView.text.hashCode()) {
                                 val name = whoAutoCompleteView.text.toString()
-                                presenter.handleWhoDataTyped(name,whoFlexBoxLayout.children.filter {
+                                presenter.handleWhoDataTyped(name, whoFlexBoxLayout.children.filter {
                                     it is Chip
                                 }.map {
                                     (it as Chip).tag as Long
@@ -220,5 +244,90 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         return true
     }
 
+    private fun createDateRangeDialog(): Dialog {
 
+        val inflater = Objects.requireNonNull(getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE)) as LayoutInflater
+
+        val rootView = inflater.inflate(R.layout.fragment_select_date_range_dialog, null)
+
+        fromET = rootView.findViewById(R.id.fragment_select_daterange_dialog_from_time)
+        toET = rootView.findViewById(R.id.fragment_select_daterange_dialog_to_time)
+
+        //TO:
+        //Date pickers's on click listener - sets text
+        val toDateListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+            presenter.setCalendarTo(year, month, dayOfMonth)
+        }
+
+        //Default view: not focusable.
+        toET.isFocusable = false
+
+        //date listener - opens a new date picker.
+        var dateFieldPicker = DatePickerDialog(
+                this, toDateListener, presenter.toDateTime.yearInt,
+                presenter.toDateTime.month0, presenter.toDateTime.dayOfMonth)
+
+        dateFieldPicker = hideYearFromDatePicker(dateFieldPicker)
+
+        //Set onclick listener
+        val finalDateFieldPicker = dateFieldPicker
+        toET.setOnClickListener { finalDateFieldPicker.show() }
+
+        //FROM:
+        //Date pickers's on click listener - sets text
+        val fromDateListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            presenter.setCalendarFrom(year, month, dayOfMonth)
+
+        }
+
+        //Default view: not focusable.
+        fromET.isFocusable = false
+
+        //date listener - opens a new date picker.
+        var fromDateFieldPicker = DatePickerDialog(
+                this, fromDateListener, presenter.fromDateTime.yearInt,
+                presenter.fromDateTime.month0, presenter.fromDateTime.dayOfMonth)
+
+        fromDateFieldPicker = hideYearFromDatePicker(fromDateFieldPicker)
+
+        val finalFromDateFieldPicker = fromDateFieldPicker
+        fromET.setOnClickListener { finalFromDateFieldPicker.show() }
+
+        val positiveOCL = DialogInterface.OnClickListener { dialog, _ ->
+            presenter.handleDateRangeSelected()
+            dialog.cancel()
+            presenter
+        }
+
+        val negativeOCL = DialogInterface.OnClickListener { dialog, _ -> dialog.dismiss() }
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(R.string.date_range)
+        builder.setView(rootView)
+        builder.setPositiveButton(R.string.add, positiveOCL)
+        builder.setNegativeButton(R.string.cancel, negativeOCL)
+
+        return builder.create()
+    }
+
+    private fun hideYearFromDatePicker(dateFieldPicker: DatePickerDialog): DatePickerDialog {
+        try {
+            val f = dateFieldPicker.javaClass.declaredFields
+            for (field in f) {
+                if (field.name == "mYearPicker" || field.name == "mYearSpinner"
+                        || field.name == "mCalendarView") {
+                    field.isAccessible = true
+                    val yearPicker: Any = field.get(dateFieldPicker)
+                    (yearPicker as View).visibility = View.GONE
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return dateFieldPicker
+    }
 }
+
+

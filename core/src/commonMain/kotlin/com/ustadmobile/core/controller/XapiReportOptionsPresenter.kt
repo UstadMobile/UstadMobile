@@ -1,9 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.XapiReportOptionsView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -13,8 +15,12 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     : UstadBaseController<XapiReportOptionsView>(context, arguments!!, view) {
 
 
-    lateinit var impl: UstadMobileSystemImpl
-    lateinit var db: UmAppDatabase
+    private lateinit var impl: UstadMobileSystemImpl
+    private lateinit var db: UmAppDatabase
+
+    var fromDateTime: DateTime = DateTime.now()
+
+    var toDateTime: DateTime = DateTime.now()
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -31,6 +37,21 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
         view.runOnUiThread(Runnable { view.fillXAxisAndSubGroupData(translatedXAxisList) })
 
+    }
+
+    fun setCalendarFrom(year: Int, month: Int, dayOfMonth: Int){
+        fromDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
+        view.runOnUiThread(Runnable { view.updateFromDialogText(fromDateTime.format("dd/MM/YYYY")) })
+    }
+
+    fun setCalendarTo(year: Int, month: Int, dayOfMonth: Int){
+        toDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
+        view.runOnUiThread(Runnable { view.updateToDialogText(toDateTime.format("dd/MM/YYYY")) })
+    }
+
+    fun handleDateRangeSelected() {
+        view.runOnUiThread(Runnable { view.updateWhenRangeText(
+                fromDateTime.format("dd MMM yyyy") + " - " + toDateTime.format("dd MMM yyyy")) })
     }
 
     fun handleWhoDataTyped(name: String, uidList: List<Long>){
@@ -50,6 +71,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     fun handleViewReportPreview(chartTypePos: Int, yAxisPos: Int, xAxisPos: Int, subGroupPos: Int, didListOptions: List<String>, whoListPos: List<Long>) {
         var report = XapiReportOptions(listOfGraphs[chartTypePos], yAxisList[yAxisPos], xAxisList[xAxisPos], xAxisList[subGroupPos])
     }
+
 
     companion object {
 

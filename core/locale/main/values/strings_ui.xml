@@ -306,6 +306,9 @@
     <string name="xapi_location" value="305">Location</string>
     <string name="xapi_gender" value="306">Gender</string>
 
+    <string name="from">From</string>
+    <string name="tocao">To</string>
+    <string name="date_range">Date Range</string>
 
 
 </resources>
