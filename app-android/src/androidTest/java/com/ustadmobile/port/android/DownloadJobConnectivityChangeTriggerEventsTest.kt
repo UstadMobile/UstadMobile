@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.controller
+package com.ustadmobile.port.android
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry

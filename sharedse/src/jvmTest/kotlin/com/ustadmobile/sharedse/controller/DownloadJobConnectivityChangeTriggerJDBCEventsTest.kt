@@ -15,7 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadJobConnectivityChangeTriggerEventsTestx {
+class DownloadJobConnectivityChangeTriggerJDBCEventsTest {
 
 
     private lateinit var umAppDatabase: UmAppDatabase
