@@ -61,6 +61,7 @@
             style="@style/TabLayoutStyleHome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabTextColor="@color/primary_light"
             android:background="?attr/colorPrimary"/>
 
     </com.google.android.material.appbar.AppBarLayout>
