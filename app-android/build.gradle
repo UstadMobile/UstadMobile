@@ -48,11 +48,11 @@ afterEvaluate {
     }
 }
 
-/*tasks.whenTaskAdded { task ->
+tasks.whenTaskAdded { task ->
     if (task.name.toLowerCase().endsWith("androidtest")) {
         task.dependsOn(":lib-http-testserver:startDaemon")
     }
-}*/
+}
 
 android {
     sourceSets {
@@ -191,6 +191,7 @@ task copyMainXmlLocaleFilesFromCore(type: Copy) {
     into "src/main/res"
 }
 assemble.dependsOn(copyMainXmlLocaleFilesFromCore)
+//connectedCheck.dependsOn(":lib-http-testserver:startDaemon")
 
 task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/main/*.xml")
