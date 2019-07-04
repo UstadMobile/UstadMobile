@@ -44,7 +44,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
 
     private var entryUidsToCheck: List<Long>? = null
 
-    private var responseListener: BleMessageResponseListener? = null
+    var responseListener: BleMessageResponseListener? = null
 
     private lateinit var managerBle: NetworkManagerBleCommon
 
@@ -77,6 +77,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
         this.managerBle = managerBle
         this.responseListener = responseListener
     }
+
 
     /**
      * Default constructor for Mockito to spy on this class
