@@ -20,7 +20,7 @@ import static com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.
 public class SelectMultipleProductTypeTreeDialogPresenter
         extends CommonEntityHandlerPresenter<SelectMultipleProductTypeTreeDialogView> {
 
-    HashMap<String, Long> selectedOptions;
+    private HashMap<String, Long> selectedOptions;
 
     private List<Long> selectedProductTypeUidsList;
 
@@ -52,7 +52,7 @@ public class SelectMultipleProductTypeTreeDialogPresenter
         return selectedOptions;
     }
 
-    public void getTopProductTypes() {
+    private void getTopProductTypes() {
         SaleProductParentJoinDao parentJoinDao = repository.getSaleProductParentJoinDao();
         parentJoinDao.findTopSaleProductsAsync(new UmCallback<List<SaleProduct>>() {
             @Override
@@ -81,10 +81,6 @@ public class SelectMultipleProductTypeTreeDialogPresenter
             return new ArrayList<>();
         }
         return selectedProductTypeUidsList;
-    }
-
-    public void setSelectedProductTypeUidsList(List<Long> selectedLocationsList) {
-        this.selectedProductTypeUidsList = selectedLocationsList;
     }
 
     @Override

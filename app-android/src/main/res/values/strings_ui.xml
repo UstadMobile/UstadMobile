@@ -465,4 +465,7 @@
     <string name="les">LEs</string>
     <string name="done">Done</string>
     <string name="week">Week</string>
+    <string name="selected_les">Selected LEs</string>
+    <string name="select_locations">Select locations</string>
+    <string name="select_product_types">Select product types</string>
 </resources>

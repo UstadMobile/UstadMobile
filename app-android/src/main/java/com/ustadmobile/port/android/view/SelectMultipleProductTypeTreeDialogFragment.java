@@ -127,6 +127,7 @@ public class SelectMultipleProductTypeTreeDialogFragment extends UstadDialogFrag
             }
             return false;
         });
+        toolbar.setTitle(R.string.select_product_types);
 
         //TODO: Get dao - Were using DAOs in the Fragment - Something we should consider changing.
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(getContext());
@@ -155,7 +156,8 @@ public class SelectMultipleProductTypeTreeDialogFragment extends UstadDialogFrag
 
     private void initView(){
         //Set recycler view
-        recyclerView = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_recyclerview);
+        recyclerView =
+                rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
@@ -171,8 +173,8 @@ public class SelectMultipleProductTypeTreeDialogFragment extends UstadDialogFrag
             }
             TreeNode<EntityLayoutType> app = new TreeNode<>(
                     new EntityLayoutType(
-                            everyProductType.getSaleProductName(), everyProductType.getSaleProductUid(),
-                            selected, false
+                        everyProductType.getSaleProductName(), everyProductType.getSaleProductUid(),
+                        selected, false
                     )
             );
             nodes.add(app);
@@ -203,13 +205,21 @@ public class SelectMultipleProductTypeTreeDialogFragment extends UstadDialogFrag
                         if(childNode.isLeaf()) {
                             //Find all child's children and add then to the node
                             // (via PopulateTreeNodeCallback class)
-                            long childProductTypeUid = ((EntityLayoutType) childNode.getContent()).getUid();
+                            long childProductTypeUid =
+                                    ((EntityLayoutType) childNode.getContent()).getUid();
                             //Get child locations :
                             joinDao.findAllChildProductTypesForUidAsync(childProductTypeUid,
                                     new PopulateSaleProductTreeNodeCallback(childNode));
                         }
                     }
                     onToggle(treeNode.isExpand(), viewHolder);
+                }else{
+
+                    ImageView arrowIV = viewHolder.itemView.findViewById(
+                            R.id.item_select_multiple_tree_dialog_arrow);
+
+                    arrowIV.setVisibility(((EntityLayoutType)treeNode.getContent()).leaf?
+                            View.INVISIBLE:View.VISIBLE);
                 }
 
                 return false;
@@ -240,7 +250,8 @@ public class SelectMultipleProductTypeTreeDialogFragment extends UstadDialogFrag
         // (parent activity usually)
         selectedOptions = mPresenter.getSelectedOptions();
         if(mAttachedContext instanceof MultiSelectProductTypeTreeDialogListener) {
-            ((MultiSelectProductTypeTreeDialogListener)mAttachedContext).onProductTypesResult(selectedOptions);
+            ((MultiSelectProductTypeTreeDialogListener)
+                    mAttachedContext).onProductTypesResult(selectedOptions);
         }
         dialog.dismiss();
     }

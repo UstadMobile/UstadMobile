@@ -21,7 +21,7 @@ import static com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.ARG
 public class SelectMultipleLocationTreeDialogPresenter
         extends CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView> {
 
-    HashMap<String, Long> selectedOptions;
+    private HashMap<String, Long> selectedOptions;
 
     private List<Long> selectedLocationsList;
 
@@ -33,27 +33,41 @@ public class SelectMultipleLocationTreeDialogPresenter
 
         if (arguments.containsKey(ARG_LOCATIONS_SET)) {
             long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
-            selectedLocationsList =
-                    convertLongArray(locationsArray);
+            selectedLocationsList = convertLongArrayToList(locationsArray);
         }
-
         selectedOptions = new HashMap<>();
+
+        //Get top locations - and populate the view with it.
         getTopLocations();
 
     }
 
-    public static ArrayList<Long> convertLongArray(long[] array) {
+    /**
+     * Getter for selected Locations
+     * @return  selected options (locations) as a HashMap<Location name, Location Uid>
+     */
+    public HashMap<String, Long> getSelectedOptions() {
+        return selectedOptions;
+    }
+
+
+    /**
+     * Util method to convert an array of long to a List of Long
+     * @param array long array
+     * @return  List of Long
+     */
+    private static ArrayList<Long> convertLongArrayToList(long[] array) {
         ArrayList<Long> result = new ArrayList<Long>(array.length);
         for (long item : array)
             result.add(item);
         return result;
     }
 
-    public HashMap<String, Long> getSelectedOptions() {
-        return selectedOptions;
-    }
 
-    public void getTopLocations() {
+    /**
+     * Gets top locations and load initial data to the recycler view
+     */
+    private void getTopLocations() {
         LocationDao locationDao = repository.getLocationDao();
         locationDao.findTopLocationsAsync(new UmCallback<List<Location>>() {
             @Override
@@ -73,21 +87,11 @@ public class SelectMultipleLocationTreeDialogPresenter
         super.onCreate(savedState);
     }
 
-
-    public void handleClickPrimaryActionButton() {
-        view.finish();
-    }
-
-
     public List<Long> getSelectedLocationsList() {
         if (selectedLocationsList == null) {
             return new ArrayList<>();
         }
         return selectedLocationsList;
-    }
-
-    public void setSelectedLocationsList(List<Long> selectedLocationsList) {
-        this.selectedLocationsList = selectedLocationsList;
     }
 
     @Override

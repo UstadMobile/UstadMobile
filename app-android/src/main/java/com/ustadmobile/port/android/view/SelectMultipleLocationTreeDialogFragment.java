@@ -76,9 +76,7 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
     //The interface that the hosting activity will implement. The internal method will get called
     // back with the values
     public interface MultiSelectLocationTreeDialogListener {
-
         void onLocationResult(HashMap<String, Long> selected);
-
     }
 
     @Override
@@ -107,7 +105,8 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
         rootView = inflater.inflate(R.layout.fragment_select_multiple_tree_dialog , null);
 
         //Set up Recycler view
-        initView();
+        recyclerView = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_recyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         //Toolbar
         toolbar = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_toolbar);
@@ -118,24 +117,26 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
         upIcon = getTintedDrawable(upIcon, R.color.icons);
         toolbar.setNavigationIcon(upIcon);
         toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
-
         toolbar.inflateMenu(R.menu.menu_done);
         toolbar.setOnMenuItemClickListener(item -> {
             int i = item.getItemId();
             if (i == R.id.menu_done) {
-                mPresenter.handleClickPrimaryActionButton();
+                finish(); //This will send back the selection to the activity calling this fragment.
             }
             return false;
         });
+        toolbar.setTitle(R.string.select_locations);
 
         //TODO: Get dao - Were using DAOs in the Fragment - Something we should consider changing.
         UmAppDatabase repository = UmAccountManager.getRepositoryForActiveAccount(getContext());
         locationDao = repository.getLocationDao();
 
+        //Presenter
         mPresenter = new SelectMultipleLocationTreeDialogPresenter(getContext(),
                 UMAndroidUtil.bundleToHashtable(getArguments()), this);
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        //Get any locations from given Uids (from previous activity)
         selectedLocationList = mPresenter.getSelectedLocationsList();
 
         dialog = new AlertDialog.Builder(getContext(), R.style.FullScreenDialogStyle)
@@ -146,38 +147,33 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
 
     }
 
-    public Drawable getTintedDrawable(Drawable drawable, int color) {
-        drawable = DrawableCompat.wrap(drawable);
-        int tintColor = ContextCompat.getColor(mAttachedContext,color);
-        DrawableCompat.setTint(drawable, tintColor);
-        return drawable;
-    }
-
-    private void initView(){
-        //Set recycler view
-        recyclerView = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-    }
-
     @Override
     public void populateTopLocation(List<Location> locations) {
+        //1. Create a list of nodes - represents an entry in the Tree list
         List<TreeNode> nodes = new ArrayList<>();
 
-        for(Location every_location : locations){
-            long childLocationUid = every_location.getLocationUid();
+        //Add every Tree entry to the list of notes (ie: Every Location)
+        for(Location everyTopLocation : locations){
+            long topLocationUid = everyTopLocation.getLocationUid();
             boolean selected = false;
-            if(selectedLocationList.contains(childLocationUid)){
+            if(selectedLocationList.contains(topLocationUid)){
                 selected = true;
             }
-            TreeNode<EntityLayoutType> app = new TreeNode<>(
+
+            TreeNode<EntityLayoutType> topLocationEntry = new TreeNode<>(
                     new EntityLayoutType(
-                            every_location.getTitle(), every_location.getLocationUid(),
+                            everyTopLocation.getTitle(),
+                            everyTopLocation.getLocationUid(),
                             selected, false
                     )
             );
-            nodes.add(app);
+
+            //Add the layout entry to nodes
+            nodes.add(topLocationEntry);
         }
 
+
+        //Load children of every Top locations into PopulateLocationTreeNodeCallback
         for(TreeNode childNode : nodes) {
             long childLocationUid = ((EntityLayoutType) childNode.getContent()).getUid();
             locationDao.findAllChildLocationsForUidAsync(childLocationUid,
@@ -210,6 +206,14 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
                         }
                     }
                     onToggle(treeNode.isExpand(), viewHolder);
+                }else{
+
+                    ImageView arrowIV = viewHolder.itemView.findViewById(
+                            R.id.item_select_multiple_tree_dialog_arrow);
+
+                    arrowIV.setVisibility(((EntityLayoutType)treeNode.getContent()).leaf?
+                            View.INVISIBLE:View.VISIBLE);
+
                 }
 
                 return false;
@@ -261,8 +265,21 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
 
 
     /**
+     * Helper method to get color a given drawable
+     * @param drawable  The drawable to color
+     * @param color     The color
+     * @return          The colored drawable
+     */
+    public Drawable getTintedDrawable(Drawable drawable, int color) {
+        drawable = DrawableCompat.wrap(drawable);
+        int tintColor = ContextCompat.getColor(mAttachedContext,color);
+        DrawableCompat.setTint(drawable, tintColor);
+        return drawable;
+    }
+
+    /**
      * A Custom callback - on success will check the return list of entities,
-     *  loop over them, and add them to the node as children on the view.
+     *  loop over them, create child nodes and add them to the parent TreeNode variable.
      *  If there are no entities returned, it will treat the current node as a leaf.
      */
     private class PopulateLocationTreeNodeCallback implements UmCallback<List<Location>> {
@@ -276,17 +293,18 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
         @Override
         public void onSuccess(List<Location> result) {
             runOnUiThread(() -> {
-                for(Location childLocations : result) {
-                    long childLocationUid = childLocations.getLocationUid();
+                for(Location everyLocation : result) {
+                    long locationUid = everyLocation.getLocationUid();
                     boolean selected = false;
-                    if(selectedLocationList.contains(childLocationUid)){
+                    if(selectedLocationList.contains(locationUid)){
                         selected = true;
                     }
 
                     node.addChild(new TreeNode<>(
-                            new EntityLayoutType(childLocations.getTitle(),
-                                    childLocationUid, selected, false)));
+                            new EntityLayoutType(everyLocation.getTitle(),
+                                    locationUid, selected, false)));
                 }
+
                 if(!result.isEmpty()){
                     ((EntityLayoutType)node.getContent()).leaf = false;
                 }else{
@@ -308,7 +326,7 @@ public class SelectMultipleLocationTreeDialogFragment extends UstadDialogFragmen
 
     /**
      * Custom TreeView Adapter written so that we can work with onBindView and manipulate the
-     * view on every tree node. The type is of the EntityLayoutType POJO
+     * view on every tree node.
      *
      */
     public class TreeViewAdapterWithBind extends TreeViewAdapter {

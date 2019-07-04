@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.ReportSalesLogDetailView;
 import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
 import com.ustadmobile.core.view.ReportTopLEsDetailView;
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView;
+import com.ustadmobile.core.view.SelectMultiplePeopleView;
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 
@@ -124,7 +125,6 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
                 toPrice = reportOptions.getToPrice();
             }
         }
-
 
         view.setEditMode(currentDashboardEntry != null);
 
@@ -309,12 +309,14 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     }
 
     public void goToLEsSelect(){
-        //TODO : Open  List?
+        Hashtable<String, String> args = new Hashtable<>();
+        impl.go(SelectMultiplePeopleView.VIEW_NAME, args, context);
     }
 
     public void goToLocationSelect(){
         Hashtable<String, Object> args = new Hashtable<>();
 
+        //TODO: Change to String
         if(selectedLocations != null && !selectedLocations.isEmpty()){
             Long[] selectedLocationsArray =
                     convertLongList(selectedLocations);
@@ -336,7 +338,7 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
         this.selectedLEs = selectedLEs;
     }
 
-    ////////////
+////////////
 
     private static Long[] convertLongList(List<Long> list){
         Long[] array = new Long[list.size()];

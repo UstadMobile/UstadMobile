@@ -38,7 +38,8 @@ import java.util.Objects;
 public class ReportOptionsDetailActivity extends UstadBaseActivity
         implements ReportOptionsDetailView,
         SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,
-        SelectMultipleProductTypeTreeDialogFragment.MultiSelectProductTypeTreeDialogListener{
+        SelectMultipleProductTypeTreeDialogFragment.MultiSelectProductTypeTreeDialogListener,
+        SelectMultiplePeopleFragment.PersonSelectDialogListener{
 
     private Toolbar toolbar;
     private ReportOptionsDetailPresenter mPresenter;
@@ -386,8 +387,26 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
             }
         }
         List<Long> selectedProductTypeList = new ArrayList<>(selectedProductTypes.values());
-        mPresenter.setSelectedLocations(selectedProductTypeList);
+        mPresenter.setSelectedProducts(selectedProductTypeList);
 
         setProductTypeSelected(productTypesSelectedString.toString());
+    }
+
+    @Override
+    public void onSelectPeopleListener(HashMap<String, Long> selected, boolean actor) {
+        Iterator<String> selectedPeopleIterator = selected.keySet().iterator();
+        StringBuilder peopleSelectedString = new StringBuilder();
+        while(selectedPeopleIterator.hasNext()){
+            peopleSelectedString.append(selectedPeopleIterator.next());
+            if(selectedPeopleIterator.hasNext()){
+                peopleSelectedString.append(", ");
+            }
+        }
+        List<Long> selectedPeopleList = new ArrayList<>(selected.values());
+        mPresenter.setSelectedLEs(selectedPeopleList);
+
+        setLESelected(peopleSelectedString.toString());
+
+        setProductTypeSelected(peopleSelectedString.toString());
     }
 }

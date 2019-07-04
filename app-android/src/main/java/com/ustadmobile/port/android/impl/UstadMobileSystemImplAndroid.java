@@ -97,6 +97,7 @@ import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SelectDateRangeDialogView;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView;
+import com.ustadmobile.core.view.SelectMultiplePeopleView;
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView;
 import com.ustadmobile.core.view.SelectProducerView;
 import com.ustadmobile.core.view.SelectSaleProductView;
@@ -138,6 +139,7 @@ import com.ustadmobile.port.android.view.ScormPackageActivity;
 import com.ustadmobile.port.android.view.SelectDateRangeDialogFragment;
 import com.ustadmobile.port.android.view.SelectLanguageDialogFragment;
 import com.ustadmobile.port.android.view.SelectMultipleLocationTreeDialogFragment;
+import com.ustadmobile.port.android.view.SelectMultiplePeopleFragment;
 import com.ustadmobile.port.android.view.SelectMultipleProductTypeTreeDialogFragment;
 import com.ustadmobile.port.android.view.SelectProducerActivity;
 import com.ustadmobile.port.android.view.SelectSaleProductActivity;
@@ -238,6 +240,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReportSalesLogDetailView.VIEW_NAME, ReportSalesLogDetailActivity.class);
         viewNameToAndroidImplMap.put(ReportTopLEsDetailView.VIEW_NAME, ReportTopLEsDetailActivity.class);
         viewNameToAndroidImplMap.put(SelectMultipleProductTypeTreeDialogView.VIEW_NAME, SelectMultipleProductTypeTreeDialogFragment.class);
+        viewNameToAndroidImplMap.put(SelectMultiplePeopleView.VIEW_NAME, SelectMultiplePeopleFragment.class);
 
 
     }

@@ -66,6 +66,7 @@ public class ServletContextClass implements ServletContextListener {
             adminPerson.setUsername("admin");
             adminPerson.setFirstNames("Admin");
             adminPerson.setLastName("Admin");
+            adminPerson.setActive(true);
 
             adminPerson.setPersonUid(personDao.insert(adminPerson));
 
