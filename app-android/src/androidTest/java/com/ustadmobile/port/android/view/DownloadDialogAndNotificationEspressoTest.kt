@@ -353,11 +353,11 @@ class DownloadDialogAndNotificationEspressoTest {
 
         runBlocking { waitForStatus(JobStatus.COMPLETE, TimeUnit.SECONDS.toMillis(30))}
 
+        SystemClock.sleep(WAIT_TIME_MIN)
 
         assertEquals("Download task was completed successfully",
                 umAppDatabase.downloadJobDao.lastJob()?.djStatus, JobStatus.COMPLETE)
 
-        SystemClock.sleep(WAIT_TIME_MIN)
     }
 
     companion object {
