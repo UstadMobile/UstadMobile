@@ -453,6 +453,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
         GlobalScope.launch {
+            addLogs("changed to ${ConnectivityStatus.STATE_DISCONNECTED}, updating DB")
             umAppDatabase.connectivityStatusDao
                     .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
         }
@@ -479,6 +480,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
         val status = ConnectivityStatus(state, true,
                 ssid)
+        addLogs("changed to $state")
         connectivityStatusRef.value = status
 
         //get network SSID
@@ -495,8 +497,14 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
 
         GlobalScope.launch {
+            addLogs("changed to ${status.connectivityState}, updating DB =$umAppDatabase")
             umAppDatabase.connectivityStatusDao.insertAsync(status)
         }
+    }
+
+
+    private fun addLogs(message : String){
+        println("NetworkConnectivityStatus: $message")
     }
 
 
