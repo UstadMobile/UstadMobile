@@ -50,6 +50,8 @@ dependencies {
     implementation "io.ktor:ktor-gson:$version_ktor"
 
 
+    implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    implementation "io.ktor:ktor-client-gson:$version_ktor"
 
     //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")

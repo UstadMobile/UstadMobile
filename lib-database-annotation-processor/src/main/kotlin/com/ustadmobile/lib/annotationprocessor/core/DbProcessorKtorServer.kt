@@ -40,18 +40,13 @@ class DbProcessorKtorServer: AbstractProcessor() {
                 "${daoTypeElement.simpleName}_${SUFFIX_KTOR_ROUTE}")
         daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
 
-        val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}")
+        val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}Route")
                 .receiver(Route::class)
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
         val codeBlock = CodeBlock.builder()
 
-        val getMember = MemberName("io.ktor.routing", "get")
-        val postMember = MemberName("io.ktor.routing", "post")
-        val callMember = MemberName("io.ktor.application", "call")
-        val respondMember = MemberName("io.ktor.response", "respond")
-
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
-                daoTypeElement.simpleName.toString())
+                "${daoTypeElement.simpleName}")
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach { daoSubEl ->
             val daoMethodEl = daoSubEl as ExecutableElement
             val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
@@ -62,71 +57,15 @@ class DbProcessorKtorServer: AbstractProcessor() {
                     .count { !isContinuationParam(it) && !isQueryParam(it) }
 
             val memberFn = if(numNonQueryParams == 1){
-                postMember
+                POST_MEMBER
             }else {
-                getMember
+                GET_MEMBER
             }
 
 
             codeBlock.beginControlFlow("%M(%S)", memberFn, daoSubEl.simpleName)
 
-            val returnType = resolveReturnTypeIfSuspended(daoMethodResolved)
-            if(returnType != UNIT) {
-                codeBlock.add("val _result = ")
-            }
-
-            codeBlock.add("_dao.${daoSubEl.simpleName}(")
-            var paramOutCount = 0
-            daoSubEl.parameters.forEachIndexed {index, el ->
-                val paramTypeName = el.asType().asTypeName().javaToKotlinType()
-                if(isContinuationParam(paramTypeName))
-                    return@forEachIndexed
-
-                if(paramOutCount > 0)
-                    codeBlock.add(",")
-
-                if(isQueryParam(paramTypeName)) {
-                    if(paramTypeName in QUERY_SINGULAR_TYPES) {
-                        codeBlock.add("%M.request.queryParameters[%S]", callMember, el.simpleName)
-                        if(paramTypeName == String::class.asTypeName()) {
-                            codeBlock.add(" ?: \"\"")
-                        }else {
-                            codeBlock.add("?.to${(paramTypeName as ClassName).simpleName}() ?: ${defaultVal(paramTypeName)}")
-                        }
-                    }else {
-                        codeBlock.add("%M.request.queryParameters.getAll(%S)", callMember,
-                                el.simpleName)
-                        val parameterizedTypeName = paramTypeName as ParameterizedTypeName
-                        if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
-                            codeBlock.add("?.map { it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}() }")
-                        }
-                        codeBlock.add(" ?: listOf()\n")
-                    }
-                }else {
-                    codeBlock.add("%M.%M<%T>()", callMember,
-                            MemberName("io.ktor.request", "receive"),
-                            removeTypeProjection(daoMethodResolved.parameterTypes[index].asTypeName()))
-                }
-
-                paramOutCount++
-            }
-
-            codeBlock.add(")\n")
-
-            when{
-                returnType == UNIT -> codeBlock.add("%M.%M(%T.NoContent, \"\")\n", callMember,
-                        respondMember, HttpStatusCode::class)
-
-                !isNullableResultType(returnType) -> codeBlock.add("%M.%M(_result)\n", callMember,
-                        respondMember)
-
-                else -> codeBlock.beginControlFlow("if(_result != null)")
-                        .add("%M.%M(_result)\n", callMember, respondMember)
-                        .nextControlFlow("else")
-                        .add("%M.%M(%T.NoContent, \"\")\n", callMember,
-                                respondMember, HttpStatusCode::class)
-                        .endControlFlow()
-            }
+            codeBlock.add(generatePassToDaoCodeBlock(daoMethodResolved, daoMethodEl))
 
             codeBlock.endControlFlow()
 
@@ -138,10 +77,84 @@ class DbProcessorKtorServer: AbstractProcessor() {
         return daoImplFile.build()
     }
 
+    /**
+     * Generates a Codeblock that will call the DAO method, and then call.respond with the result
+     */
+    fun generatePassToDaoCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val returnType = resolveReturnTypeIfSuspended(daoMethodResolved)
+        if(returnType != UNIT) {
+            codeBlock.add("val _result = ")
+        }
+
+        codeBlock.add("_dao.${daoMethodEl.simpleName}(")
+        var paramOutCount = 0
+        daoMethodEl.parameters.forEachIndexed {index, el ->
+            val paramTypeName = el.asType().asTypeName().javaToKotlinType()
+            if(isContinuationParam(paramTypeName))
+                return@forEachIndexed
+
+            if(paramOutCount > 0)
+                codeBlock.add(",")
+
+            if(isQueryParam(paramTypeName)) {
+                if(paramTypeName in QUERY_SINGULAR_TYPES) {
+                    codeBlock.add("%M.request.queryParameters[%S]", CALL_MEMBER, el.simpleName)
+                    if(paramTypeName == String::class.asTypeName()) {
+                        codeBlock.add(" ?: \"\"")
+                    }else {
+                        codeBlock.add("?.to${(paramTypeName as ClassName).simpleName}() ?: ${defaultVal(paramTypeName)}")
+                    }
+                }else {
+                    codeBlock.add("%M.request.queryParameters.getAll(%S)", CALL_MEMBER,
+                            el.simpleName)
+                    val parameterizedTypeName = paramTypeName as ParameterizedTypeName
+                    if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
+                        codeBlock.add("?.map { it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}() }")
+                    }
+                    codeBlock.add(" ?: listOf()\n")
+                }
+            }else {
+                codeBlock.add("%M.%M<%T>()", CALL_MEMBER,
+                        MemberName("io.ktor.request", "receive"),
+                        removeTypeProjection(daoMethodResolved.parameterTypes[index].asTypeName()))
+            }
+
+            paramOutCount++
+        }
+
+        codeBlock.add(")\n")
+
+        when{
+            returnType == UNIT -> codeBlock.add("%M.%M(%T.NoContent, \"\")\n", CALL_MEMBER,
+                    RESPOND_MEMBER, HttpStatusCode::class)
+
+            !isNullableResultType(returnType) -> codeBlock.add("%M.%M(_result)\n", CALL_MEMBER,
+                    RESPOND_MEMBER)
+
+            else -> codeBlock.beginControlFlow("if(_result != null)")
+                    .add("%M.%M(_result)\n", CALL_MEMBER, RESPOND_MEMBER)
+                    .nextControlFlow("else")
+                    .add("%M.%M(%T.NoContent, \"\")\n", CALL_MEMBER,
+                            RESPOND_MEMBER, HttpStatusCode::class)
+                    .endControlFlow()
+        }
+
+        return codeBlock.build()
+    }
+
     companion object {
 
         const val OPTION_KTOR_OUTPUT = "door_ktor_server_out"
 
         const val SUFFIX_KTOR_ROUTE = "KtorRoute"
+
+        val GET_MEMBER = MemberName("io.ktor.routing", "get")
+
+        val POST_MEMBER = MemberName("io.ktor.routing", "post")
+
+        val CALL_MEMBER = MemberName("io.ktor.application", "call")
+
+        val RESPOND_MEMBER = MemberName("io.ktor.response", "respond")
     }
 }
