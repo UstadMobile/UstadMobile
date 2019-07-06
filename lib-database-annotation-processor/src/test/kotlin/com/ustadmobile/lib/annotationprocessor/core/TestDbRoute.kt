@@ -47,7 +47,7 @@ class TestDbRoute  {
             }
 
             install(Routing) {
-                ExampleDao2Route(exampleDb.exampleDao2())
+                ExampleDao2Route(exampleDb.exampleDao2(), exampleDb)
             }
         }
 

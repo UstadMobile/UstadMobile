@@ -236,6 +236,9 @@ fun resolveQueryResultType(returnTypeName: TypeName)  =
         if(returnTypeName is ParameterizedTypeName
                 && returnTypeName.rawType == DoorLiveData::class.asClassName()) {
             returnTypeName.typeArguments[0]
+        }else if(returnTypeName is ParameterizedTypeName
+                && returnTypeName.rawType == androidx.paging.DataSource.Factory::class.asClassName()) {
+            List::class.asClassName().parameterizedBy(returnTypeName.typeArguments[1])
         }else {
             returnTypeName
         }

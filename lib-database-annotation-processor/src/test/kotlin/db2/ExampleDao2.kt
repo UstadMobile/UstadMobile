@@ -88,6 +88,6 @@ abstract class ExampleDao2 {
     abstract fun queryUsingArray(uidList: List<Long>): List<ExampleEntity2>
 
     @Query("SELECT * FROM ExampleEntity2")
-    abstract fun queryAllLive(): DataSource.Factory<Int, ExampleEntityPkInt>
+    abstract fun queryAllLive(): DataSource.Factory<Int, ExampleEntity2>
 
 }

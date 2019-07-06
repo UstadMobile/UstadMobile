@@ -59,7 +59,7 @@ the jndi-config directory for tests).
 ### Using kapt
 
 ```
-./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5006\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:jvmTest
+./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5006\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:test
 ```
 
 In IntelliJ select Run, Debug..., Add a remote configuration, and 

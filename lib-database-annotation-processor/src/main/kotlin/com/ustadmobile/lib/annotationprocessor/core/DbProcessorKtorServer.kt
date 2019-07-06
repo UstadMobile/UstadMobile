@@ -1,17 +1,18 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Dao
+import androidx.room.Query
 import com.squareup.kotlinpoet.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
 import java.io.File
-import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Messager
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import com.ustadmobile.door.*
 
 fun isQueryParam(typeName: TypeName) =
     if(QUERY_SINGULAR_TYPES.contains(typeName)) {
@@ -20,11 +21,97 @@ fun isQueryParam(typeName: TypeName) =
         typeName is ParameterizedTypeName && typeName.typeArguments[0] in QUERY_SINGULAR_TYPES
     }
 
-class DbProcessorKtorServer: AbstractProcessor() {
+/**
+ * Generates a codeblock that will get a parameter from a request and add it to the codeblock
+ * with the correct type. This can be with or without a variable declaration.
+ *
+ * e.g. request.queryParameters['uid']?.toLong() :? 0
+ *
+ */
+fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
+                                         declareVariableName: String? = null,
+                                         declareVariableType: String = "val"): CodeBlock {
+    val codeBlock = CodeBlock.builder()
 
-    private var messager: Messager? = null
+    if(declareVariableName != null){
+        codeBlock.add("%L %L =", declareVariableType, declareVariableName)
+    }
+
+    if(isQueryParam(typeName)) {
+        if(typeName in QUERY_SINGULAR_TYPES) {
+            codeBlock.add("%M.request.queryParameters[%S]", DbProcessorKtorServer.CALL_MEMBER, paramName)
+            if(typeName == String::class.asTypeName()) {
+                codeBlock.add(" ?: \"\"")
+            }else {
+                codeBlock.add("?.to${(typeName as ClassName).simpleName}() ?: ${defaultVal(typeName)}")
+            }
+        }else {
+            codeBlock.add("%M.request.queryParameters.getAll(%S)", DbProcessorKtorServer.CALL_MEMBER,
+                    paramName)
+            val parameterizedTypeName = typeName as ParameterizedTypeName
+            if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
+                codeBlock.add("?.map { it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}() }")
+            }
+            codeBlock.add(" ?: listOf()\n")
+        }
+    }else {
+        codeBlock.add("%M.%M<%T>()", DbProcessorKtorServer.CALL_MEMBER,
+                MemberName("io.ktor.request", "receive"),
+                removeTypeProjection(typeName))
+    }
+
+    if(declareVariableName != null){
+        codeBlock.add("\n")
+    }
+
+    return codeBlock.build()
+}
+
+/**
+ * Generate the code required for sending a response back with a KTOR HTTP call.
+ *
+ * e.g.
+ *
+ * when varName is not nullable:
+ * call.respond(_varName)
+ *
+ * when varName is nullable:
+ * if(_varName != null) {
+ *   call.respond(varName)
+ * }else {
+ *   call.sendResponse(HttpResponse.NO_CONTENT, "")
+ * }
+ *
+ * when return type is Unit:
+ * call.sendResponse(HttpResponse.NO_CONTENT, "")
+ *
+ */
+fun generateRespondCall(returnType: TypeName, varName: String): CodeBlock{
+    val codeBlock = CodeBlock.builder()
+    when{
+        returnType == UNIT -> codeBlock.add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
+                DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
+
+        !isNullableResultType(returnType) -> codeBlock.add("%M.%M($varName)\n",
+                DbProcessorKtorServer.CALL_MEMBER,
+                DbProcessorKtorServer.RESPOND_MEMBER)
+
+        else -> codeBlock.beginControlFlow("if($varName != null)")
+                .add("%M.%M($varName)\n", DbProcessorKtorServer.CALL_MEMBER, DbProcessorKtorServer.RESPOND_MEMBER)
+                .nextControlFlow("else")
+                .add("%M.%M(%T.NoContent, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
+                        DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
+                .endControlFlow()
+    }
+
+    return codeBlock.build()
+}
+
+class DbProcessorKtorServer: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
+        setupDb(roundEnv)
+
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
         val outputArg = processingEnv.options[OPTION_KTOR_OUTPUT]
         val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
@@ -43,6 +130,7 @@ class DbProcessorKtorServer: AbstractProcessor() {
         val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}Route")
                 .receiver(Route::class)
                 .addParameter("_dao", daoTypeElement.asType().asTypeName())
+                .addParameter("_db", DoorDatabase::class)
         val codeBlock = CodeBlock.builder()
 
         codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
@@ -65,7 +153,12 @@ class DbProcessorKtorServer: AbstractProcessor() {
 
             codeBlock.beginControlFlow("%M(%S)", memberFn, daoSubEl.simpleName)
 
-            codeBlock.add(generatePassToDaoCodeBlock(daoMethodResolved, daoMethodEl))
+            if(daoSubEl.getAnnotation(Query::class.java) != null) {
+                codeBlock.add(generateSelectCodeBlock(daoMethodResolved, daoMethodEl,
+                        daoTypeElement))
+            }else {
+                codeBlock.add(generatePassToDaoCodeBlock(daoMethodResolved, daoMethodEl))
+            }
 
             codeBlock.endControlFlow()
 
@@ -75,6 +168,34 @@ class DbProcessorKtorServer: AbstractProcessor() {
         daoImplFile.addFunction(daoRouteFn.build())
 
         return daoImplFile.build()
+    }
+
+    fun generateSelectCodeBlock(daoMethodResolved: ExecutableType, daoMethodEl: ExecutableElement,
+                                daoTypeEl: TypeElement) : CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val returnType = resolveQueryResultType(resolveReturnTypeIfSuspended(daoMethodResolved))
+
+        daoMethodResolved.parameterTypes.map { it.asTypeName() }.filter { !isContinuationParam(it) }
+                .forEachIndexed { index, paramType ->
+
+            val paramName = daoMethodEl.parameters[index].simpleName.toString()
+            codeBlock.add(generateGetParamFromRequestCodeBlock(paramType,
+                    paramName, declareVariableName = paramName, declareVariableType = "val"))
+
+        }
+
+        val queryVarsMap = daoMethodResolved.parameterTypes.mapIndexed { index, typeMirror ->
+            daoMethodEl.parameters[index].simpleName.toString() to typeMirror.asTypeName().javaToKotlinType()
+        }.filter {
+            !isContinuationParam(it.second)
+        }.toMap()
+
+        val querySql = daoMethodEl.getAnnotation(Query::class.java).value
+
+        codeBlock.add(generateQueryCodeBlock(returnType, queryVarsMap, querySql, daoTypeEl, daoMethodEl))
+        codeBlock.add(generateRespondCall(returnType, "_result!!"))
+
+        return codeBlock.build()
     }
 
     /**
@@ -90,55 +211,21 @@ class DbProcessorKtorServer: AbstractProcessor() {
         codeBlock.add("_dao.${daoMethodEl.simpleName}(")
         var paramOutCount = 0
         daoMethodEl.parameters.forEachIndexed {index, el ->
-            val paramTypeName = el.asType().asTypeName().javaToKotlinType()
+            val paramTypeName = daoMethodResolved.parameterTypes[index].asTypeName().javaToKotlinType()
             if(isContinuationParam(paramTypeName))
                 return@forEachIndexed
 
             if(paramOutCount > 0)
                 codeBlock.add(",")
 
-            if(isQueryParam(paramTypeName)) {
-                if(paramTypeName in QUERY_SINGULAR_TYPES) {
-                    codeBlock.add("%M.request.queryParameters[%S]", CALL_MEMBER, el.simpleName)
-                    if(paramTypeName == String::class.asTypeName()) {
-                        codeBlock.add(" ?: \"\"")
-                    }else {
-                        codeBlock.add("?.to${(paramTypeName as ClassName).simpleName}() ?: ${defaultVal(paramTypeName)}")
-                    }
-                }else {
-                    codeBlock.add("%M.request.queryParameters.getAll(%S)", CALL_MEMBER,
-                            el.simpleName)
-                    val parameterizedTypeName = paramTypeName as ParameterizedTypeName
-                    if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
-                        codeBlock.add("?.map { it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}() }")
-                    }
-                    codeBlock.add(" ?: listOf()\n")
-                }
-            }else {
-                codeBlock.add("%M.%M<%T>()", CALL_MEMBER,
-                        MemberName("io.ktor.request", "receive"),
-                        removeTypeProjection(daoMethodResolved.parameterTypes[index].asTypeName()))
-            }
+            codeBlock.add(generateGetParamFromRequestCodeBlock(paramTypeName, el.simpleName.toString()))
 
             paramOutCount++
         }
 
         codeBlock.add(")\n")
 
-        when{
-            returnType == UNIT -> codeBlock.add("%M.%M(%T.NoContent, \"\")\n", CALL_MEMBER,
-                    RESPOND_MEMBER, HttpStatusCode::class)
-
-            !isNullableResultType(returnType) -> codeBlock.add("%M.%M(_result)\n", CALL_MEMBER,
-                    RESPOND_MEMBER)
-
-            else -> codeBlock.beginControlFlow("if(_result != null)")
-                    .add("%M.%M(_result)\n", CALL_MEMBER, RESPOND_MEMBER)
-                    .nextControlFlow("else")
-                    .add("%M.%M(%T.NoContent, \"\")\n", CALL_MEMBER,
-                            RESPOND_MEMBER, HttpStatusCode::class)
-                    .endControlFlow()
-        }
+        codeBlock.add(generateRespondCall(returnType, "_result"))
 
         return codeBlock.build()
     }

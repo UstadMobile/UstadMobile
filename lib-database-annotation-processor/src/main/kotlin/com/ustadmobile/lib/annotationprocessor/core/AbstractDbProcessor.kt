@@ -139,22 +139,25 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         if(resultType != UNIT)
             codeBlock.add("var $resultVarName = ${defaultVal(resultType)}\n")
 
-        codeBlock.add("var _con = null as %T?\n", Connection::class)
-                .add("var _stmt = null as %T?\n", PreparedStatement::class)
-                .add("var _resultSet = null as %T?\n", ResultSet::class)
+        codeBlock.add("var _conToClose = null as %T?\n", Connection::class)
+                .add("var _stmtToClose = null as %T?\n", PreparedStatement::class)
+                .add("var _resultSetToClose = null as %T?\n", ResultSet::class)
                 .beginControlFlow("try")
-                .add("_con = _db.openConnection()\n")
+                .add("val _con = _db.openConnection()\n")
+                .add("_conToClose = _con\n")
 
         if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
-            codeBlock.beginControlFlow("_stmt = if(_db!!.jdbcArraySupported)")
+            codeBlock.beginControlFlow("val _stmt = if(_db!!.jdbcArraySupported)")
                     .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
                     .nextControlFlow("else")
                     .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
                             PreparedStatement::class)
                     .endControlFlow()
         }else {
-            codeBlock.add("_stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
+            codeBlock.add("val _stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
         }
+
+        codeBlock.add("_stmtToClose = _stmt\n")
 
 
         var paramIndex = 1
@@ -224,7 +227,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     codeBlock.add("$resultVarName = _numUpdates\n")
                 }
             }else {
-                codeBlock.add("_resultSet = _stmt.executeQuery()\n")
+                codeBlock.add("val _resultSet = _stmt.executeQuery()\n")
+                        .add("_resultSetToClose = _resultSet\n")
                 resultSet = execStmt?.executeQuery(execStmtSql)
                 val metaData = resultSet!!.metaData
                 val colNames = mutableListOf<String>()
@@ -232,7 +236,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     colNames.add(metaData.getColumnName(i))
                 }
 
-                var entityVarName = ""
+                val entityVarName = "_entity"
                 val entityInitializerBlock = if(QUERY_SINGULAR_TYPES.contains(entityType)) {
                     CodeBlock.builder().add("${defaultVal(entityType)}").build()
                 }else {
@@ -241,28 +245,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
                 if(isListOrArray(resultType)) {
                     codeBlock.beginControlFlow("while(_resultSet.next())")
-                    entityVarName = "_entity"
                 }else {
                     codeBlock.beginControlFlow("if(_resultSet.next())")
-                    entityVarName = resultVarName
                 }
 
                 if(QUERY_SINGULAR_TYPES.contains(entityType)) {
-                    if(isListOrArray(resultType)) {
-                        codeBlock.add("val ") //this will be added to the list,so needs declared
-                    }
-                    codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
+                    codeBlock.add("val $entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
                 }else {
-                    if(isListOrArray(resultType)) {
-                        codeBlock.add("val _entity = ")
-                                .add(entityInitializerBlock)
-                                .add("\n")
-                    }else {
-                        codeBlock.add("$resultVarName = ")
-                                .add(entityInitializerBlock)
-                                .add("\n")
-                    }
-
+                    codeBlock.add("val _entity =")
+                            .add(entityInitializerBlock)
+                            .add("\n")
 
                     // Map of the last prop name (e.g. name) to the full property name as it will
                     // be generated (e.g. embedded!!.name)
@@ -293,6 +285,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
                 if(isListOrArray(resultType)) {
                     codeBlock.add("$resultVarName.add(_entity)\n")
+                }else {
+                    codeBlock.add("$resultVarName = _entity\n")
                 }
 
                 codeBlock.endControlFlow()
@@ -307,8 +301,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 .add("_e.printStackTrace()\n")
                 .add("throw %T(_e)\n", RuntimeException::class)
                 .nextControlFlow("finally")
-                .add("_stmt?.close()\n")
-                .add("_con?.close()\n")
+                .add("_stmtToClose?.close()\n")
+                .add("_conToClose?.close()\n")
                 .endControlFlow()
 
         return codeBlock.build()
