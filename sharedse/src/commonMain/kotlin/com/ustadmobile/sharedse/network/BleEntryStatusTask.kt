@@ -42,6 +42,8 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
 
     lateinit var context: Any
 
+    var status:Int = STATUS_NONE
+
     private var entryUidsToCheck: List<Long>? = null
 
     var responseListener: BleMessageResponseListener? = null
@@ -148,6 +150,19 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
         }
 
         responseListener?.onResponseReceived(sourceDeviceAddress, response, error)
+
+    }
+
+    companion object{
+
+        const val STATUS_NONE = 0
+
+        const val STATUS_QUEUED = 1
+
+        const val STATUS_RUNNING = 2
+
+        const val STATUS_COMPLETED = 3
+
 
     }
 }
