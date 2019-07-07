@@ -93,6 +93,7 @@ public class ReportSalesPerformanceDetailPresenter
 
             int startOfWeek = 6; //Sunday //TODO: GET THIS FROM SETTINGS, etc/
             List<Long> producerUids= new ArrayList<>();
+
             saleDao.getSalesPerformanceReportSumGroupedByLocation(reportOptions.getLes(),
                     producerUids, reportOptions.getLocations(), reportOptions.getProductTypes(),
                     reportOptions.getFromDate(), reportOptions.getToDate(),
@@ -101,7 +102,6 @@ public class ReportSalesPerformanceDetailPresenter
                 @Override
                 public void onSuccess(List<ReportSalesPerformance> result) {
                     view.runOnUiThread(() -> view.setReportData((List<Object>)(List<?>)result));
-
                 }
 
                 @Override

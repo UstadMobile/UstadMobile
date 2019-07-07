@@ -152,12 +152,7 @@ public class DashboardEntryListRecyclerAdapter extends
                 break;
         }
 
-        chartLL.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.handleClickReport(entryUid, entryParams, reportType);
-            }
-        });
+        chartLL.setOnClickListener(v -> mPresenter.handleClickReport(entryUid, entryParams, reportType));
     }
 
     public void updateMe(long uid, List<ReportSalesPerformance> data){

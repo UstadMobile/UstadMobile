@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectLanguageDialogPresenter;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -59,7 +60,6 @@ public class SelectLanguageDialogFragment extends UstadDialogFragment implements
         dari = rootView.findViewById(R.id.fragment_select_language_dialog_dari);
         pashto = rootView.findViewById(R.id.fragment_select_language_dialog_pashto);
 
-
         english.setOnClickListener(v -> handleClickEnglish());
         dari.setOnClickListener(v -> handleClickDari());
         pashto.setOnClickListener(v -> handleClickPashto());
@@ -70,52 +70,29 @@ public class SelectLanguageDialogFragment extends UstadDialogFragment implements
 
         //Set any view components and its listener (post presenter work)
 
-
         AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         builder.setTitle(R.string.choose_language);
         builder.setView(rootView);
         dialog = builder.create();
 
         return dialog;
-
     }
 
     private void handleClickEnglish(){
-        Locale englishLocale = Locale.forLanguageTag("en");
-        //TODO
-        Locale.setDefault(englishLocale);
-        Configuration config = new Configuration();
-        config.locale = englishLocale;
-        getActivity().getBaseContext().getResources().updateConfiguration(config,
-                getResources().getDisplayMetrics());
-
-        //ChangeLocaleHelper.setLocale(getContext(), "en");
+        //Set locale
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setLocale("en", getContext());
         finish();
 
     }
     private void handleClickDari(){
-        Locale dariLocale = Locale.forLanguageTag("fa");
-        //TODO
-        Locale.setDefault(dariLocale);
-        Configuration config = new Configuration();
-        config.locale = dariLocale;
-        getActivity().getBaseContext().getResources().updateConfiguration(config,
-                getResources().getDisplayMetrics());
-
-        //ChangeLocaleHelper.setLocale(getContext(), "fa");
-
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setLocale("fa", getContext());
         finish();
     }
     private void handleClickPashto(){
-        Locale pashtoLocale = Locale.forLanguageTag("ps");
-        //TODO
-        Locale.setDefault(pashtoLocale);
-        Configuration config = new Configuration();
-        config.locale = pashtoLocale;
-        getActivity().getBaseContext().getResources().updateConfiguration(config,
-                getResources().getDisplayMetrics());
-        //ChangeLocaleHelper.setLocale(getContext(), "ps");
-
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setLocale("ps", getContext());
         finish();
     }
 

@@ -72,8 +72,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private List<WeakReference<Fragment>> fragmentList;
 
-    private boolean localeChanged = false;
-
     private String localeOnCreate = null;
 
     private boolean isStarted = false;
@@ -142,10 +140,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         //bind to the LRS forwarding service
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
-                intentFilter);
+
+
         super.onCreate(savedInstanceState);
         localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
 
@@ -196,11 +192,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         checkTimeout();
 
-        if (localeChanged) {
-            if (UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
-                new Handler().postDelayed(this::recreate, 200);
-            }
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if (impl.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+            new Handler().postDelayed(this::recreate, 200);
         }
+
     }
 
     @Override
@@ -269,21 +265,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
 
     /**
-     * Handles internal locale changes. When the user changes the locale using the system settings
-     * Android will take care of destroying and recreating the activity.
-     */
-    private BroadcastReceiver mLocaleChangeBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE:
-                    localeChanged = true;
-                    break;
-            }
-        }
-    };
-
-    /**
      * UstadMobileSystemImpl will bind certain services to each activity (e.g. HTTP, P2P services)
      * If needed the child activity can override this method to listen for when the service is ready
      *
@@ -341,7 +322,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             unbindService(bleServiceConnection);
         }
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection);

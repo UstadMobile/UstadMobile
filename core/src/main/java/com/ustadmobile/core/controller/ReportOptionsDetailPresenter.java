@@ -418,7 +418,6 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
      * @param longList    Long list
      */
     public static String convertLongListToStringCSV(List<Long> longList){
-
         return longList.toString().replaceAll("\\[|\\]", "");
     }
 

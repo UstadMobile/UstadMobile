@@ -70,7 +70,6 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
         personDao = repository.getPersonDao();
         saleDao = repository.getSaleDao();
 
-
     }
 
     @Override
@@ -93,12 +92,8 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
             tagLiveData.observe(DashboardEntryListPresenter.this,
                     DashboardEntryListPresenter.this::handleTagsChanged);
 
-
         }
-
     }
-
-
 
     private void handleTagsChanged(List<DashboardTag> tags){
 
@@ -150,7 +145,7 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
      * Primary action on item.
      */
     public void handleAddTag(long entryUid, long tagUid){
-
+        //TODO
     }
 
     /**
@@ -251,12 +246,14 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
 
     public List<ReportSalesPerformance> salesPerformanceResult;
 
+    //TODO: remove,
     public void getSalesPerformanceReport(long entryUid, String reportOptionsString){
         Gson gson = new Gson();
         ReportOptions reportOptions;
         reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
 
         int startOfWeek = 6; //Sunday //TODO: GET THIS FROM SETTINGS, etc/
+
         List<Long> producerUids= new ArrayList<>();
         saleDao.getSalesPerformanceReportSumGroupedByLocation(reportOptions.getLes(),
             producerUids, reportOptions.getLocations(), reportOptions.getProductTypes(),
