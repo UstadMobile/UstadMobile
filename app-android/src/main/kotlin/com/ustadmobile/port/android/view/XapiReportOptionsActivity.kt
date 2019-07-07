@@ -316,7 +316,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.date_range)
         builder.setView(rootView)
-        builder.setPositiveButton(R.string.add, positiveOCL)
+        builder.setPositiveButton(R.string.ok, positiveOCL)
         builder.setNegativeButton(R.string.cancel, negativeOCL)
 
         return builder.create()
