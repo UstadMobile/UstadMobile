@@ -113,7 +113,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual fun setAppPref(key: String, value: String?, context: Any) {
+    override actual fun setAppPref(key: String, value: String?, context: Any) {
         if(value == null){
             localStorage.removeItem(key)
         }else{
