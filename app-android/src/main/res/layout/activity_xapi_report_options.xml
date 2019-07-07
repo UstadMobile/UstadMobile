@@ -22,7 +22,7 @@
                 android:id="@+id/general_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="General"
+                android:text="@string/xapi_options_general"
                 android:textColor="@color/primary"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -38,7 +38,7 @@
                     android:id="@+id/report_title_edittext"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Report Title"
+                    android:hint="@string/xapi_options_report_title"
                     android:textColorHint="@android:color/darker_gray" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -47,7 +47,7 @@
                 android:id="@+id/visual_type_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Visualization Type"
+                android:text="@string/xapi_options_visual_type"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/report_title_input_layout" />
@@ -63,7 +63,7 @@
                 android:id="@+id/axes_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Axes"
+                android:text="@string/xapi_options_axes"
                 android:textColor="@color/primary"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/type_spinner" />
@@ -72,7 +72,7 @@
                 android:id="@+id/yaxis_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Y-Axis"
+                android:text="@string/xapi_options_y_axes"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/axes_label" />
@@ -88,7 +88,7 @@
                 android:id="@+id/xaxis_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="X-Axis"
+                android:text="@string/xapi_options_x_axes"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/yaxis_spinner" />
@@ -104,7 +104,7 @@
                 android:id="@+id/subgroup_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Subgroup by"
+                android:text="@string/xapi_options_subgroup"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/xaxis_spinner" />
@@ -120,7 +120,7 @@
                 android:id="@+id/filters_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Filters"
+                android:text="@string/xapi_options_filters"
                 android:textColor="@color/primary"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/sub_group_spinner" />
@@ -129,7 +129,7 @@
                 android:id="@+id/who_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Who"
+                android:text="@string/xapi_options_who"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/filters_label" />
@@ -138,10 +138,10 @@
                 android:id="@+id/whoFlex"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:flexWrap="wrap"
-                app:alignItems="stretch"
-                app:alignContent="stretch"
                 android:layout_margin="@dimen/dimen_4dp"
+                app:alignContent="stretch"
+                app:alignItems="stretch"
+                app:flexWrap="wrap"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/who_label">
 
@@ -158,19 +158,19 @@
                 android:id="@+id/did_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Did"
+                android:text="@string/xapi_options_did"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/whoFlex" />
+                app:layout_constraintTop_toBottomOf="@id/whoFlex" />
 
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/didFlex"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:flexWrap="wrap"
-                app:alignItems="stretch"
-                app:alignContent="stretch"
                 android:layout_margin="@dimen/dimen_4dp"
+                app:alignContent="stretch"
+                app:alignItems="stretch"
+                app:flexWrap="wrap"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/did_label">
 
@@ -187,88 +187,63 @@
                 android:id="@+id/whatLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="What"
+                android:text="@string/xapi_options_what"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/didFlex" />
 
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/whatFlex"
+
+            <EditText
+                android:id="@+id/whatEditText"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:flexWrap="wrap"
-                app:alignItems="stretch"
-                app:alignContent="stretch"
-                android:layout_margin="@dimen/dimen_4dp"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whatLabel">
+                app:layout_constraintTop_toBottomOf="@id/whatLabel" />
 
-                <AutoCompleteTextView
-                    android:id="@+id/whatAutoCompleteTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="75dp"
-                    app:layout_flexGrow="1" />
-
-            </com.google.android.flexbox.FlexboxLayout>
 
             <TextView
                 android:id="@+id/when_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="When"
+                android:text="@string/xapi_options_when"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whatFlex" />
+                app:layout_constraintTop_toBottomOf="@id/whatEditText" />
 
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/whenFlex"
+            <EditText
+                android:id="@+id/whenEditText"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:flexWrap="wrap"
-                app:alignItems="stretch"
-                app:alignContent="stretch"
-                android:layout_margin="@dimen/dimen_4dp"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/when_label">
-
-                <AutoCompleteTextView
-                    android:id="@+id/whenAutoCompleteTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="75dp"
-                    app:layout_flexGrow="1" />
-
-            </com.google.android.flexbox.FlexboxLayout>
+                app:layout_constraintTop_toBottomOf="@id/when_label" />
 
             <TextView
                 android:id="@+id/where_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Where"
+                android:text="@string/xapi_options_where"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/whenFlex" />
+                app:layout_constraintTop_toBottomOf="@id/whenEditText" />
 
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/whereFlex"
+            <EditText
+                android:id="@+id/whereEditText"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:flexWrap="wrap"
-                app:alignItems="stretch"
-                app:alignContent="stretch"
-                android:layout_margin="@dimen/dimen_4dp"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/where_label">
-
-                <AutoCompleteTextView
-                    android:id="@+id/whereAutoCompleteTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="75dp"
-                    app:layout_flexGrow="1" />
-
-            </com.google.android.flexbox.FlexboxLayout>
+                app:layout_constraintTop_toBottomOf="@id/where_label" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

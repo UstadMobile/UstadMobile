@@ -4,8 +4,8 @@
 
     <item
         android:icon="@drawable/ic_check_white_24dp"
-        android:id="@+id/action_complete"
-        android:title="Complete"
+        android:id="@+id/menu_done"
+        android:title="@string/done"
         app:showAsAction="always"/>
 
 </menu>

@@ -309,5 +309,24 @@
     <string name="tocao">To</string>
     <string name="date_range">Date Range</string>
 
+    <string name="done">Done</string>
+    <string name="select_locations">Select Locations</string>
+
+    <string name="xapi_options_general">General</string>
+    <string name="xapi_options_report_title">Report Title</string>
+    <string name="xapi_options_visual_type">Visualization Type</string>
+    <string name="xapi_options_axes">Axes</string>
+    <string name="xapi_options_y_axes">Y-Axis</string>
+    <string name="xapi_options_x_axes">X-Axis</string>
+    <string name="xapi_options_subgroup">Subgroup by</string>
+    <string name="xapi_options_filters">Filters</string>
+    <string name="xapi_options_who">Who</string>
+    <string name="xapi_options_did">Did</string>
+    <string name="xapi_options_what">What</string>
+    <string name="xapi_options_when">When</string>
+    <string name="xapi_options_where">Where</string>
+
+
+
 
 </resources>

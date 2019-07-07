@@ -307,11 +307,17 @@ dependencies {
     //Work manager
     implementation "android.arch.work:work-runtime:$version_android_workmanager"
 
+    //Klock
+    implementation "com.soywiz:klock-android:$version_klock"
+
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
+
+
+    implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
 
     /*
      * If this needs to be made compatible as a library for something using older appcompat libs -

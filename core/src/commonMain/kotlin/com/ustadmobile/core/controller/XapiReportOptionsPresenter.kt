@@ -6,6 +6,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
+import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportOptionsView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -21,6 +23,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     var fromDateTime: DateTime = DateTime.now()
 
     var toDateTime: DateTime = DateTime.now()
+
+    private var selectedLocations: List<Long> = mutableListOf()
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -39,13 +43,22 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     }
 
-    fun setCalendarFrom(year: Int, month: Int, dayOfMonth: Int){
+    fun handleFromCalendarSelected(year: Int, month: Int, dayOfMonth: Int){
         fromDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
+        handleFromCalendarSelected()
+    }
+
+    fun handleFromCalendarSelected(){
         view.runOnUiThread(Runnable { view.updateFromDialogText(fromDateTime.format("dd/MM/YYYY")) })
     }
 
-    fun setCalendarTo(year: Int, month: Int, dayOfMonth: Int){
+
+    fun handleToCalendarSelected(year: Int, month: Int, dayOfMonth: Int){
         toDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
+        handleToCalendarSelected()
+    }
+
+    fun handleToCalendarSelected(){
         view.runOnUiThread(Runnable { view.updateToDialogText(toDateTime.format("dd/MM/YYYY")) })
     }
 
@@ -68,8 +81,18 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
         }
     }
 
+    fun handleWhereClicked(){
+        val args = mutableMapOf<String, String>()
+        args[ARG_LOCATIONS_SET] = selectedLocations.joinToString { it.toString() }
+        impl.go(SelectMultipleLocationTreeDialogView.VIEW_NAME, args, context)
+    }
+
     fun handleViewReportPreview(chartTypePos: Int, yAxisPos: Int, xAxisPos: Int, subGroupPos: Int, didListOptions: List<String>, whoListPos: List<Long>) {
         var report = XapiReportOptions(listOfGraphs[chartTypePos], yAxisList[yAxisPos], xAxisList[xAxisPos], xAxisList[subGroupPos])
+    }
+
+    fun handleLocationListSelected(locationList: List<Long>) {
+        selectedLocations = locationList
     }
 
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
@@ -16,6 +15,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
 import com.google.android.flexbox.FlexboxLayout
@@ -29,7 +29,8 @@ import com.ustadmobile.core.view.XapiReportOptionsView
 import java.util.*
 
 
-class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
+class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
+        SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener {
 
     private lateinit var visualTypeSpinner: Spinner
 
@@ -51,7 +52,9 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     private lateinit var whoFlexBoxLayout: FlexboxLayout
 
-    private lateinit var whenAutoComplete: AutoCompleteTextView
+    private lateinit var whenEditText: EditText
+
+    private lateinit var whereEditText: EditText
 
     private lateinit var presenter: XapiReportOptionsPresenter
 
@@ -71,8 +74,10 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         didFlexBoxLayout = findViewById(R.id.didFlex)
         whoAutoCompleteView = findViewById(R.id.whoAutoCompleteTextView)
         whoFlexBoxLayout = findViewById(R.id.whoFlex)
-        whenAutoComplete = findViewById(R.id.whenAutoCompleteTextView)
-        whenAutoComplete.setOnClickListener {
+        whenEditText = findViewById(R.id.whenEditText)
+        whereEditText = findViewById(R.id.whereEditText)
+
+        whenEditText.setOnClickListener {
             createDateRangeDialog().show()
         }
 
@@ -84,6 +89,10 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
                 this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+
+        whereEditText.setOnClickListener{
+            presenter.handleWhereClicked()
+        }
 
         whoDataAdapter = ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, listOf<PersonDao.PersonNameAndUid>())
@@ -108,7 +117,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_new_report, menu)
+        menuInflater.inflate(R.menu.menu_done, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -166,7 +175,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
     }
 
     override fun updateWhenRangeText(rangeText: String) {
-        whenAutoComplete.setText(rangeText, false)
+        whenEditText.setText(rangeText)
     }
 
 
@@ -225,7 +234,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_complete -> {
+            R.id.menu_done -> {
                 presenter.handleViewReportPreview(
                         visualTypeSpinner.selectedItemPosition,
                         yAxisSpinner.selectedItemPosition,
@@ -254,10 +263,13 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         fromET = rootView.findViewById(R.id.fragment_select_daterange_dialog_from_time)
         toET = rootView.findViewById(R.id.fragment_select_daterange_dialog_to_time)
 
+        presenter.handleToCalendarSelected()
+        presenter.handleFromCalendarSelected()
+
         //TO:
         //Date pickers's on click listener - sets text
         val toDateListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-            presenter.setCalendarTo(year, month, dayOfMonth)
+            presenter.handleToCalendarSelected(year, month + 1, dayOfMonth)
         }
 
         //Default view: not focusable.
@@ -277,8 +289,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
         //FROM:
         //Date pickers's on click listener - sets text
         val fromDateListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            presenter.setCalendarFrom(year, month, dayOfMonth)
-
+            presenter.handleFromCalendarSelected(year, month + 1, dayOfMonth)
         }
 
         //Default view: not focusable.
@@ -310,6 +321,15 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView {
 
         return builder.create()
     }
+
+    override fun onLocationResult(selected: MutableMap<String, Long>) {
+        var locationList = selected.keys.joinToString { it }
+        runOnUiThread {
+            whereEditText.setText(locationList)
+        }
+        presenter.handleLocationListSelected (selected.values.toList())
+    }
+
 
     private fun hideYearFromDatePicker(dateFieldPicker: DatePickerDialog): DatePickerDialog {
         try {
