@@ -25,6 +25,9 @@ abstract class UstadMobileSystemCommon {
      */
     private var isInitialized: Boolean = false
 
+    //for testing purpose only
+    var networkManager: Any? = null
+
 
     /**
      * The currently active locale

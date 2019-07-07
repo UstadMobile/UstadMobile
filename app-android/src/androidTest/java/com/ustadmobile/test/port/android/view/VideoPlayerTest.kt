@@ -116,7 +116,7 @@ class VideoPlayerTest {
         launchActivityIntent.putExtras(b)
         mActivityRule.launchActivity(launchActivityIntent)
 
-        //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //  mHomeActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // the webview looks for an element "questionController" which is the start button of plix.
         // This is only available once plix has fully loaded and displayed to the user
     }

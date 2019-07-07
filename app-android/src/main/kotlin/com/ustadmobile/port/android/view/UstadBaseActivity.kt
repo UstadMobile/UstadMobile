@@ -65,7 +65,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     /**
      * @return Active NetworkManagerBleCommon
      */
-     var networkManagerBle: NetworkManagerBle? = null
+    var networkManagerBle: NetworkManagerBle? = null
 
     private var fragmentList: MutableList<WeakReference<Fragment>>? = null
 
@@ -115,14 +115,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      */
     private val bleServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            (service as NetworkManagerBleAndroidService.LocalServiceBinder).setHttpdServiceBindListener(object :
-                            NetworkManagerBleAndroidService.HttpdServiceBindListener{
-                override fun onServiceReady(networkManagerBle: NetworkManagerBle) {
-                    bleServiceBound = true
-                    onBleNetworkServiceBound(networkManagerBle)
-                    runWhenServiceConnectedQueue.setReady(true)
-                }
-            })
+            networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
+                    .service.networkManagerBle
+            bleServiceBound = true
+            if(networkManagerBle != null){
+                UstadMobileSystemImpl.instance.networkManager = networkManagerBle
+                onBleNetworkServiceBound(networkManagerBle!!)
+            }
+            runWhenServiceConnectedQueue.setReady(true)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -146,7 +146,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private val mLocaleChangeBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
-                UstadMobileSystemImpl.ACTION_LOCALE_CHANGE -> localeChanged = true
+                ACTION_LOCALE_CHANGE -> localeChanged = true
             }
         }
     }

@@ -2,29 +2,15 @@ package com.ustadmobile.core.networkmanager
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.DownloadJob
-import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
-import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.network.DownloadJobItemManager
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-
 import org.junit.Assert
 import org.junit.Test
-
-import java.util.Arrays
-import java.util.Collections
-import java.util.HashMap
-import java.util.LinkedList
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
