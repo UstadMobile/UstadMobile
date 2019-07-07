@@ -172,5 +172,10 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
          */
         const val STATUS_COMPLETED = 3
 
+        /**
+         * Status to indicate that the task execution encountered an error
+         */
+        const val STATUS_FAILURE = 4
+
     }
 }

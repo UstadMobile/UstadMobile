@@ -4,12 +4,14 @@ import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.BleEntryStatusTask
 import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_COMPLETED
+import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_FAILURE
 import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_NONE
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 class TestEntryTaskExecutor {
@@ -81,5 +83,19 @@ class TestEntryTaskExecutor {
 
         assertEquals("Only one task was removed from the queue",
                 executor.taskQueue.size, taskList.size - 1)
+    }
+
+    @Test
+    fun givenListOfTaskToBeExecuted_whenOnResponseReceivedCalledAndTaskFailed_shouldRemoveCompletedTaskFromQueue() = runBlocking {
+        for(task in taskList){
+            executor.execute(task)
+        }
+
+        delay(DEFAULT_DELAY)
+
+        taskList[0].onResponseReceived(taskList[0].networkNode.bluetoothMacAddress!!,null, Exception("Failed to connect"))
+
+        assertEquals("Only one task was was marked as failure",
+                1, executor.runningOrCompletedTasks.filter { task -> task.status == STATUS_FAILURE }.size)
     }
 }

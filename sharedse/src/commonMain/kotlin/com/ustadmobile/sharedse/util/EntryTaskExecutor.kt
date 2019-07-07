@@ -3,6 +3,7 @@ package com.ustadmobile.sharedse.util
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.sharedse.network.BleEntryStatusTask
 import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_COMPLETED
+import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_FAILURE
 import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_NONE
 import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_QUEUED
 import com.ustadmobile.sharedse.network.BleEntryStatusTask.Companion.STATUS_RUNNING
@@ -62,7 +63,7 @@ class EntryTaskExecutor(numProcessors: Int = 1, private val scope: CoroutineScop
         val index = runningOrCompletedTasks.indexOf(taskToRemove)
         if (taskToRemove != null){
             taskQueue.remove(taskToRemove)
-            runningOrCompletedTasks[index].status = STATUS_COMPLETED
+            runningOrCompletedTasks[index].status = if(error == null) STATUS_COMPLETED else STATUS_FAILURE
             scope.launch {
                 submitTasks()
             }
