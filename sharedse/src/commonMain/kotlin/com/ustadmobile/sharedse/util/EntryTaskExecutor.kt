@@ -15,6 +15,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 /**
  * Class which handle the execution of the BleEntryStatusTask
@@ -22,8 +23,7 @@ import kotlin.coroutines.CoroutineContext
  * @author kileha3
  */
 
-class EntryTaskExecutor(numProcessors: Int = 1,
-                        private val coroutineScope: CoroutineScope = GlobalScope)
+class EntryTaskExecutor(numProcessors: Int = 1, private val scope: CoroutineScope = GlobalScope)
     :BleMessageResponseListener{
 
 
@@ -45,10 +45,11 @@ class EntryTaskExecutor(numProcessors: Int = 1,
 
 
     suspend fun execute(task: BleEntryStatusTask){
+        this.mCoroutineCtx = coroutineContext
         task.responseListener = this
         taskQueue.add(task)
         submitTasks()
-        coroutineScope.launch {
+        scope.launch {
             launch {
                 start(mTaskChannel)
             }
@@ -62,7 +63,7 @@ class EntryTaskExecutor(numProcessors: Int = 1,
         if (taskToRemove != null){
             taskQueue.remove(taskToRemove)
             runningOrCompletedTasks[index].status = STATUS_COMPLETED
-            coroutineScope.launch {
+            scope.launch {
                 submitTasks()
             }
         }

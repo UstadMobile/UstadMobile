@@ -6,11 +6,8 @@ import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageBytesToLong
-//import com.ustadmobile.port.sharedse.networkmanager.BleMessageUtil.bleMessageBytesToLong
-//import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerBle.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import kotlinx.coroutines.Runnable
-//import java.util.*
 
 /**
  * This is an abstract class which is used to implement platform specific BleEntryStatus
@@ -84,7 +81,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
     /**
      * Default constructor for Mockito to spy on this class
      */
-    protected constructor() {}
+    protected constructor()
 
     /**
      * Set content, for test purpose
@@ -115,7 +112,7 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
      * @param sourceDeviceAddress Server device bluetooth MAC address
      * @param response Message received as a response from the server device.
      */
-    override open fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
+    override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
 
         when (response?.requestType ?: -1) {
 
@@ -155,14 +152,25 @@ abstract class BleEntryStatusTask : Runnable, BleMessageResponseListener {
 
     companion object{
 
+        /**
+         * Status to indicate that the task has not been started yet
+         */
         const val STATUS_NONE = 0
 
+        /**
+         * Status to indicate that the task has been queued to the list
+         */
         const val STATUS_QUEUED = 1
 
+        /**
+         * Status to indicate that the task is currently running
+         */
         const val STATUS_RUNNING = 2
 
+        /**
+         * Status to indicate that the task has been completed successfully
+         */
         const val STATUS_COMPLETED = 3
-
 
     }
 }

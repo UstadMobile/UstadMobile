@@ -136,7 +136,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
     }
 
     /**
-     *
+     * Receiver to handle bluetooth state changes
      */
     private val mBluetoothAndWifiStateChangeBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -144,15 +144,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         }
     }
 
-
-    /**
-     * Callback for BLE service scans for devices with
-     * Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP
-     *
-     * @see android.bluetooth.BluetoothAdapter.LeScanCallback
-     */
-
-    //private BluetoothAdapter.LeScanCallback leScanCallback = nu
 
     private val delayedExecutor = Executors.newSingleThreadScheduledExecutor()
 

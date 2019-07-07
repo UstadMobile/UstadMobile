@@ -83,8 +83,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
      */
     constructor(context: Context, managerBle: NetworkManagerBle, message: BleMessage,
                 peerToSendMessageTo: NetworkNode,
-                responseListener: BleMessageResponseListener) : super(context, managerBle, message, peerToSendMessageTo, responseListener) {
-    }
+                responseListener: BleMessageResponseListener) : super(context, managerBle, message, peerToSendMessageTo, responseListener)
 
 
     /**

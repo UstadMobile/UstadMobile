@@ -18,6 +18,8 @@ class TestEntryTaskExecutor {
 
     private val executor = EntryTaskExecutor(2)
 
+    private val DEFAULT_DELAY = TimeUnit.SECONDS.toMillis(1)
+
     class TestBleEntryStatusTask (context: Any,managerBle:NetworkManagerBle, entryUidsToCheck: List<Long>, peerToCheck: NetworkNode)
         : BleEntryStatusTask(context,managerBle, entryUidsToCheck,peerToCheck){
 
@@ -45,7 +47,7 @@ class TestEntryTaskExecutor {
             executor.execute(task)
         }
 
-        delay(TimeUnit.SECONDS.toMillis(2))
+        delay(DEFAULT_DELAY)
 
         assertEquals("All pending task were executed ", taskList.size,
                 executor.runningOrCompletedTasks.filter { task -> task.status != STATUS_NONE }.size)
@@ -58,7 +60,7 @@ class TestEntryTaskExecutor {
             executor.execute(task)
         }
 
-        delay(TimeUnit.SECONDS.toMillis(2))
+        delay(DEFAULT_DELAY)
 
         taskList[0].onResponseReceived(taskList[0].networkNode.bluetoothMacAddress!!,null,null)
 
@@ -73,7 +75,7 @@ class TestEntryTaskExecutor {
             executor.execute(task)
         }
 
-        delay(TimeUnit.SECONDS.toMillis(2))
+        delay(DEFAULT_DELAY)
 
         taskList[0].onResponseReceived(taskList[0].networkNode.bluetoothMacAddress!!,null,null)
 
