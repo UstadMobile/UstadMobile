@@ -9,9 +9,11 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.sharedse.util.EntryTaskExecutor
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import io.ktor.client.HttpClient
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
@@ -42,11 +44,12 @@ abstract class NetworkManagerBleCommon(
 
     private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
 
-//    /**
-//     * @return Active URLConnectionOpener
-//     */
-//    var localConnectionOpener: URLConnectionOpener? = null
-//        protected set
+    /**
+     * @return Active http client
+     */
+
+    var httpClient: HttpClient? = null
+        protected set
 
     /**
      * Holds all created entry status tasks
@@ -69,7 +72,7 @@ abstract class NetworkManagerBleCommon(
 
     private lateinit var umAppDatabaseRepo: UmAppDatabase
 
-    private val localAvailabilityListeners = mutableListOf<LocalAvailabilityListener>()
+    private val localAvailabilityListeners = copyOnWriteListOf<LocalAvailabilityListener>()
 
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
@@ -408,7 +411,7 @@ abstract class NetworkManagerBleCommon(
     /**
      * Trigger availability status change event to all listening parts
      */
-    fun fireLocalAvailabilityChanged() {
+    private fun fireLocalAvailabilityChanged() {
         val listenerList = ArrayList(localAvailabilityListeners)
         for (listener in listenerList) {
             listener.onLocalAvailabilityChanged(locallyAvailableContainerUids)

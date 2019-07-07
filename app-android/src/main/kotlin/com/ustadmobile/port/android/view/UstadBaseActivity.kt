@@ -282,11 +282,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-    }
-
-
     public override fun onStart() {
         isStarted = true
         super.onStart()

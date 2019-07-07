@@ -26,9 +26,12 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
-class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity, private val listener: AdapterViewListener,
+class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
+                                                               private val listener: AdapterViewListener,
                                                                private val monitor: LocalAvailabilityMonitor?,
-                                                               private val managerAndroidBle: NetworkManagerBle?) : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK), LocalAvailabilityListener, OnDownloadJobItemChangeListener {
+                                                               private val managerAndroidBle: NetworkManagerBle)
+    : PagedListAdapter<ContentEntryWithStatusAndMostRecentContainerUid, ContentEntryListRecyclerViewAdapter.ViewHolder>(DIFF_CALLBACK),
+        LocalAvailabilityListener, OnDownloadJobItemChangeListener {
 
     private val containerUidsToMonitor = HashSet<Long>()
 
@@ -62,13 +65,13 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     fun addListeners() {
-        managerAndroidBle?.addLocalAvailabilityListener(this)
-        managerAndroidBle?.addDownloadChangeListener(this)
+        managerAndroidBle.addLocalAvailabilityListener(this)
+        managerAndroidBle.addDownloadChangeListener(this)
     }
 
     fun removeListeners() {
-        managerAndroidBle?.removeLocalAvailabilityListener(this)
-        managerAndroidBle?.removeDownloadChangeListener(this)
+        managerAndroidBle.removeLocalAvailabilityListener(this)
+        managerAndroidBle.removeDownloadChangeListener(this)
     }
 
     fun setEmptyStateListener(stateListener: EmptyStateListener) {
@@ -158,10 +161,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.availabilityStatus.text = ""
             holder.availabilityIcon.setImageDrawable(null)
         } else {
-            var available = false
-            if (managerAndroidBle != null)
-                available = managerAndroidBle.isEntryLocallyAvailable(
-                        entry.mostRecentContainer)
+            val available: Boolean = managerAndroidBle.isEntryLocallyAvailable(
+                    entry.mostRecentContainer)
 
             if (entry.leaf) {
                 holder.updateLocallyAvailabilityStatus(available)
@@ -189,10 +190,10 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 val status = entry.contentEntryStatus
                 val dlStatus = status!!.downloadStatus
 
-                if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.totalSize > 0) {
-                    contentDescription = context.getString(R.string.downloading)
+                contentDescription = if (dlStatus > 0 && dlStatus <= JobStatus.RUNNING_MAX && status.totalSize > 0) {
+                    context.getString(R.string.downloading)
                 } else {
-                    contentDescription = context.getString(R.string.download_entry_state_queued)
+                    context.getString(R.string.download_entry_state_queued)
                 }
 
                 if (dlStatus > 0 && dlStatus < JobStatus.WAITING_MAX) {
@@ -243,7 +244,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
             holder.downloadView.progress = 0
             GlobalScope.launch(Dispatchers.Main) {
-                val downloadJobItemStatus = managerAndroidBle?.findDownloadJobItemStatusByContentEntryUid(
+                val downloadJobItemStatus = managerAndroidBle.findDownloadJobItemStatusByContentEntryUid(
                     entry.contentEntryUid)
                 if(downloadJobItemStatus != null){
                     holder.downloadView.progressVisibility = View.VISIBLE

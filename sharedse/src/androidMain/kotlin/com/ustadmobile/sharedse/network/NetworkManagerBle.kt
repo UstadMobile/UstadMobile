@@ -36,6 +36,8 @@ import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import fi.iki.elonen.NanoHTTPD
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -439,7 +441,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
 
 
     private fun handleDisconnected() {
-        //localConnectionOpener = null
+        httpClient?.close()
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         connectivityStatusRef.value = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null)
@@ -448,7 +450,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
             umAppDatabase.connectivityStatusDao
                     .updateStateAsync(ConnectivityStatus.STATE_DISCONNECTED)
         }
-
     }
 
 
@@ -477,13 +478,20 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher)
         //get network SSID
         if (ssid != null && ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
             status.connectivityState = ConnectivityStatus.STATE_CONNECTED_LOCAL
-            if (isVersionLollipopOrAbove) {
-                //TODO: implement this as an ktor httpclient generator
-//                localConnectionOpener = object : URLConnectionOpener {
-//                    override fun openConnection(url: URL): URLConnection {
-//                        return network!!.openConnection(url)
-//                    }
-//                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //only on main thread
+                //first - check if the old client exists and close it
+
+
+                if(httpClient == null){
+                    httpClient = HttpClient(OkHttp) {
+                        engine {
+                            config {
+                                socketFactory(network!!.socketFactory)
+                            }
+                        }
+                    }
+                }
             }
         }
 
