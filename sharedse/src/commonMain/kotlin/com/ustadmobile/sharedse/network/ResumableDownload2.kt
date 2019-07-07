@@ -103,7 +103,6 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                         headResponse = null
                     }
 
-
                     requestBuilder.url(httpUrl)
                     val requestStart = getSystemTimeInMillis()
                     httpResponse = httpClient.get<HttpResponse>(requestBuilder)
@@ -159,11 +158,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     fileOutput.close()
                     fileOutput = null
 
-                    if (dlPartFile.renameFile(FileSe(destinationFile))) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    return dlPartFile.renameFile(FileSe(destinationFile))
                 }catch(e: Exception) {
                     if(e is CancellationException)
                         throw e

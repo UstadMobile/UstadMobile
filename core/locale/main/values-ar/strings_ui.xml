@@ -88,7 +88,6 @@
     <string name='account'>Account</string>
     <string name='data_usage'>Data usage</string>
     <string name='app_interface_language'>App interface language</string>
-    <string name='enable_supernode'>Enable supernode</string>
     <string name="share_application">Share App</string>
     <string name="share_via">Share via...</string>
     <string name="share">Share</string>

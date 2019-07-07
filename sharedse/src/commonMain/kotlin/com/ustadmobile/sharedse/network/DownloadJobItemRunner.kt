@@ -102,7 +102,9 @@ class DownloadJobItemRunner
 
     private val entriesDownloaded = atomic(0)
 
-    private var downloadContext: CoroutineContext? = null
+    //private var downloadContext: CoroutineContext? = null
+
+    var startDownloadFnJob: Job? = null
 
     private val inProgressDownloadCounters = AtomicLongArray(numConcurrentEntryDownloads)
 
@@ -202,8 +204,8 @@ class DownloadJobItemRunner
     suspend fun stop(newStatus: Int, cancel: Boolean = false) {
         if(!runnerStatus.compareAndSet(JobStatus.STOPPED, JobStatus.STOPPED)) {
             if(cancel) {
-                println("===CANCELLING $downloadContext===")
-                downloadContext?.cancel()
+                println("===CANCELLING $startDownloadFnJob===")
+                startDownloadFnJob?.cancel()
             }
 
             withContext(mainCoroutineDispatcher) {
@@ -220,7 +222,7 @@ class DownloadJobItemRunner
 
 
     suspend fun download() {
-        downloadContext = coroutineContext
+        println("Download started for  ${downloadItem.djiDjUid}")
         runnerStatus.value = JobStatus.RUNNING
         updateItemStatus(JobStatus.RUNNING)
         val downloadJobId = downloadItem.djiDjUid
@@ -266,14 +268,17 @@ class DownloadJobItemRunner
             throw e
         }
 
-        startDownload()
+        withContext(coroutineContext) {
+            startDownloadFnJob =  launch { startDownload() }
+            startDownloadFnJob!!.join()
+        }
     }
 
 
     /**
      * Start downloading a file
      */
-    private suspend fun startDownload() = coroutineScope {
+    private suspend fun startDownload() = withContext(coroutineContext) {
         UMLog.l(UMLog.INFO, 699,
                 "${mkLogPrefix()} StartDownload: ContainerUid = + ${downloadItem.djiContainerUid}")
         var attemptsRemaining = 3
@@ -293,7 +298,7 @@ class DownloadJobItemRunner
             while (isActive) {
                 delay(1000)
                 var totalInProgress = 0L
-                for(i in 0..(numConcurrentEntryDownloads-1)) {
+                for(i in 0 until numConcurrentEntryDownloads) {
                     totalInProgress += inProgressDownloadCounters[i].value
                 }
                 val downloadSoFar = totalInProgress + completedEntriesBytesDownloaded.value
@@ -301,7 +306,7 @@ class DownloadJobItemRunner
             }
         }
 
-        for(attemptNum in attemptsRemaining downTo 0) {
+        for(attemptNum in attemptsRemaining downTo 1) {
             numEntriesToDownload = -1
             numFailures.value = 0
             //TODO: if the content is available on the node we already connected to, take that one
@@ -364,13 +369,14 @@ class DownloadJobItemRunner
 
                 val containerEntryList = containerEntryListClient.get<List<ContainerEntryWithMd5>>(
                         "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
-                numEntriesToDownload = containerEntryList.size
                 entriesDownloaded.value = 0
 
                 val entriesToDownload = containerManager.linkExistingItems(containerEntryList)
+                numEntriesToDownload = entriesToDownload.size
                 history.startTime = getSystemTimeInMillis()
-                withContext(coroutineContext) {
-                    val producer = produce<ContainerEntryWithMd5> {
+
+                withContext(coroutineContext){
+                    val producer = produce {
                         entriesToDownload.forEach { send(it) }
                     }
 
@@ -404,11 +410,14 @@ class DownloadJobItemRunner
                         }
                     }
                 }
+
             } catch (e: Exception) {
                 UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
                         "Failed to download a file from " + endpointUrl, e)
             }
 
+
+            //delay(10000)
 
             val numFails = numFailures.value
             recordHistoryFinished(history, numFails == 0)
@@ -595,12 +604,12 @@ class DownloadJobItemRunner
 
     companion object {
 
-        internal val CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5"
+        internal const val CONTAINER_ENTRY_LIST_PATH = "ContainerEntryList/findByContainerWithMd5"
 
-        internal val CONTAINER_ENTRY_FILE_PATH = "ContainerEntryFile/"
+        internal const val CONTAINER_ENTRY_FILE_PATH = "ContainerEntryFile/"
 
-        val BAD_PEER_FAILURE_THRESHOLD = 2
+        const val BAD_PEER_FAILURE_THRESHOLD = 2
 
-        private val CONNECTION_TIMEOUT = 60
+        private const val CONNECTION_TIMEOUT = 60
     }
 }

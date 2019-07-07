@@ -387,7 +387,7 @@ abstract class NetworkManagerBleCommon(
      * @param downloadJobUid The download job uid that should be canceled and deleted
      */
     suspend fun cancelAndDeleteDownloadJob(downloadJobUid: Int) {
-        umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobUid,
+        umAppDatabase.downloadJobDao.updateJobAndItems(downloadJobUid,
                 JobStatus.CANCELED, -1, JobStatus.CANCELED)
         val taskArgs = HashMap<String, String>()
         taskArgs[DeleteJobTaskRunner.ARG_DOWNLOAD_JOB_UID] = downloadJobUid.toString()

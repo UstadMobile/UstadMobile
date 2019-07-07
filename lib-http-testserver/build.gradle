@@ -6,14 +6,13 @@ buildscript {
             url 'https://plugins.gradle.org/m2/'
         }
     }
+}
 
-    dependencies {
-        classpath "gradle.plugin.com.github.psxpaul:gradle-execfork-plugin:0.1.9"
-    }
+plugins {
+    id 'com.github.psxpaul.execfork' version '0.1.11'
 }
 
 apply plugin: 'java-library'
-apply plugin: "com.github.psxpaul.execfork"
 
 
 dependencies {
@@ -38,18 +37,37 @@ targetCompatibility = "1.8"
 
 
 task runHttpTestServer(type: JavaExec) {
+    //check if test server param was given
+    def umTestServer = ""
+    if(project.hasProperty('test_server')){
+        umTestServer = test_server
+    }else{
+        umTestServer = project.ext.buildConfigProperties["test.um_http_testserver"]
+    }
     classpath sourceSets.main.runtimeClasspath
     standardInput = System.in
     main = "com.ustadmobile.test.http.UmTestServerManager"
-    args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"]
+    args "--controlport", 8400, "--startport", 8500, "--endport", 8600, "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", umTestServer
 }
 
-//task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
-//    classpath = sourceSets.main.runtimeClasspath
-//    main = "com.ustadmobile.test.http.UmTestServerManager"
-//    args = ["--controlport", "8400", "--startport", "8500", "--endport", "8600", "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", project.ext.buildConfigProperties["test.um_http_testserver"] ]
-//    waitForPort = 8400
-//    workingDir = "$projectDir/"
-//    standardOutput = "$projectDir/build/tmp/daemon.log"
-//    errorOutput = "$projectDir/build/tmp/daemon-error.log"
-//}
+
+task startDaemon(type: com.github.psxpaul.task.JavaExecFork) {
+
+    outputs.upToDateWhen { false }
+    //check if test server param was given
+    def umTestServer = ""
+    if(project.hasProperty('test_server')){
+        umTestServer = test_server
+    }else{
+        umTestServer = project.ext.buildConfigProperties["test.um_http_testserver"]
+    }
+
+    classpath = sourceSets.main.runtimeClasspath
+    main = "com.ustadmobile.test.http.UmTestServerManager"
+    args = ["--controlport", "8400", "--startport", "8500", "--endport", "8600", "--httpdir", project.file("www").getAbsolutePath(), "--bindaddr", umTestServer]
+    waitForPort = 8400
+    workingDir = "$projectDir/"
+    standardOutput = "$projectDir/build/tmp/daemon.log"
+    errorOutput = "$projectDir/build/tmp/daemon-error.log"
+    environment 'JAVA_HOME', System.properties.find { it.key == "java.home" }
+}

@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import java.security.AccessController.getContext
 
 
@@ -30,7 +31,16 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     private var presenter: ContentEntryListPresenter? = null
 
+
+    lateinit var managerBle: NetworkManagerBle
+
+
     private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
+
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
+        super.onBleNetworkServiceBound(networkManagerBle)
+        managerBle = networkManagerBle
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
