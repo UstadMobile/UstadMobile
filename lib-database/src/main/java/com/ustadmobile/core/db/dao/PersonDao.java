@@ -248,4 +248,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
 
     @UmUpdate
     public abstract void updateAsync(Person entity, UmCallback<Integer> resultObject);
+
+    @UmQuery("select group_concat(firstNames||' '||lastNAme, ', ') from Person WHERE personUid in (:uids)")
+    public abstract void findAllPeopleNamesInUidList(List<Long> uids, UmCallback<String> resultCallback);
 }

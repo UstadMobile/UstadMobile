@@ -3,6 +3,9 @@ package com.ustadmobile.core.controller;
 import com.google.gson.Gson;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.DashboardEntryDao;
+import com.ustadmobile.core.db.dao.LocationDao;
+import com.ustadmobile.core.db.dao.PersonDao;
+import com.ustadmobile.core.db.dao.SaleProductDao;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UmAccountManager;
 import com.ustadmobile.core.impl.UmCallback;
@@ -17,7 +20,6 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView;
 import com.ustadmobile.core.view.SelectMultiplePeopleView;
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
-
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     private List<Long> selectedLEs;
 
     private ReportOptions reportOptions;
+    private String reportOptionString;
 
     public ReportOptionsDetailPresenter(Object context, Hashtable arguments,
                                         ReportOptionsDetailView view) {
@@ -81,6 +84,9 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
                     Long.parseLong(getArguments().get(ARG_DASHBOARD_ENTRY_UID).toString());
         }
 
+        if(getArguments().containsKey(ARG_REPORT_OPTIONS)){
+            reportOptionString = getArguments().get(ARG_REPORT_OPTIONS).toString();
+        }
     }
 
     @Override
@@ -103,7 +109,7 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
                     exception.printStackTrace();
                 }
             });
-        }else {
+        }else{
             reportOptions = new ReportOptions();
             //Set title based on given.
             setTitleFromArgs();
@@ -112,20 +118,25 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
         }
     }
 
+    private void setReportOptionFromString(String reportOptionsString){
+        Gson gson = new Gson();
+        reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
+        fromDate = reportOptions.getFromDate();
+        toDate = reportOptions.getToDate();
+        fromPrice = reportOptions.getFromPrice();
+        toPrice = reportOptions.getToPrice();
+    }
 
     private void initFromDashboardEntry(){
         if(currentDashboardEntry!= null) {
             //Populate filter from entity.
-            String reportOptionsString = currentDashboardEntry.getDashboardEntryReportParam();
+            String dashboardReportOptionsString = currentDashboardEntry.getDashboardEntryReportParam();
 
-            if (reportOptionsString != null && !reportOptionsString.isEmpty()) {
-                Gson gson = new Gson();
-                reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
-                fromDate = reportOptions.getFromDate();
-                toDate = reportOptions.getToDate();
-                fromPrice = reportOptions.getFromPrice();
-                toPrice = reportOptions.getToPrice();
+            if (dashboardReportOptionsString != null && !dashboardReportOptionsString.isEmpty()) {
+                setReportOptionFromString(dashboardReportOptionsString);
             }
+        }else if (reportOptionString != null && !reportOptionString.isEmpty()){
+            setReportOptionFromString(reportOptionString);
         }
 
         view.setEditMode(currentDashboardEntry != null);
@@ -149,17 +160,57 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
 
         if(selectedLocations.isEmpty()){
             view.setLocationSelected(impl.getString(MessageID.all, context));
+        }else{
+            LocationDao locationDao = repository.getLocationDao();
+            locationDao.findAllLocationNamesInUidList(selectedLocations, new UmCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    view.setLocationSelected(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
         }
+
         if(selectedProducts.isEmpty()){
             view.setProductTypeSelected(impl.getString(MessageID.all, context));
+        }else{
+            SaleProductDao saleProductDao = repository.getSaleProductDao();
+            saleProductDao.findAllProductNamesInUidList(selectedProducts, new UmCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    view.setProductTypeSelected(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
         }
+
         if(selectedLEs.isEmpty()){
             view.setLESelected(impl.getString(MessageID.all, context));
+        }else{
+            PersonDao personDao = repository.getPersonDao();
+            personDao.findAllPeopleNamesInUidList(selectedLEs, new UmCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    view.setLESelected(result);
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+                    exception.printStackTrace();
+                }
+            });
         }
 
         //Group by
         populateGroupBy();
-
 
     }
 
@@ -254,6 +305,9 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
         reportOptions.setToPrice(toPrice);
         reportOptions.setFromDate(fromDate);
         reportOptions.setToDate(toDate);
+        reportOptions.setLocations(selectedLocations);
+        reportOptions.setProductTypes(selectedProducts);
+        reportOptions.setLes(selectedLEs);
 
         //Create json from reportOptions
         Gson gson = new Gson();
@@ -296,17 +350,11 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
         }
     }
 
-    /////Select Multi/////
-
     public void goToProductSelect(){
         Hashtable<String, String> args = new Hashtable<>();
 
         if(selectedProducts != null && !selectedProducts.isEmpty()){
-            Long[] selectedLocationsArray =
-                    convertLongList(selectedProducts);
-
             String selectedProductTypesCSString = convertLongListToStringCSV(selectedProducts);
-            //TODO: Check
             args.put(ARG_PRODUCT_SELECTED_SET, selectedProductTypesCSString);
         }
 
@@ -343,16 +391,6 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
 
     public void setSelectedLEs(List<Long> selectedLEs) {
         this.selectedLEs = selectedLEs;
-    }
-
-    private static Long[] convertLongList(List<Long> list){
-        Long[] array = new Long[list.size()];
-        int i=0;
-        for(Long everyList:list){
-            array[i] = everyList;
-            i++;
-        }
-        return array;
     }
 
     public void handleToggleAverage(boolean ticked){

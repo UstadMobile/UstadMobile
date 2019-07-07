@@ -209,4 +209,8 @@ public abstract class SaleProductDao implements SyncableDao<SaleProduct, SalePro
     public abstract void updateAsync(SaleProduct entity, UmCallback<Integer> updateCallback);
 
 
+    @UmQuery("select group_concat(saleProductName, ', ') from SaleProduct WHERE SaleProductUid in (:uids)")
+    public abstract void findAllProductNamesInUidList(List<Long> uids,
+                                                       UmCallback<String> locationNamesCallback);
+
 }

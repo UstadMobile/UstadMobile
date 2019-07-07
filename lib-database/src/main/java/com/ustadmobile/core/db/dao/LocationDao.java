@@ -55,4 +55,8 @@ public abstract class LocationDao implements SyncableDao<Location, LocationDao> 
     @UmQuery("SELECT * FROM Location WHERE locationActive = 1")
     public abstract UmLiveData<List<Location>> findAllActiveLocationsProvider();
 
+    @UmQuery("select group_concat(title, ', ') from location where locationUid in (:uids)")
+    public abstract void findAllLocationNamesInUidList(List<Long> uids,
+                                                       UmCallback<String> locationNamesCallback);
+
 }

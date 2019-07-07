@@ -20,6 +20,8 @@ import java.util.List;
 
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_ENTRY_UID;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_OPTIONS;
+import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_TYPE;
+import static com.ustadmobile.lib.db.entities.DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE;
 import static com.ustadmobile.lib.db.entities.DashboardEntry.REPORT_TYPE_TOP_LES;
 
 
@@ -132,9 +134,12 @@ public class ReportTopLEsDetailPresenter extends ReportDetailPresenter<ReportTop
     public void handleClickEditReport() {
         view.finish();
         Hashtable<String, String> args = new Hashtable<>();
-        args.put(ARG_REPORT_OPTIONS, reportOptionsString);
+
         if(dashboardEntryUid != 0)
             args.put(ARG_DASHBOARD_ENTRY_UID, String.valueOf(dashboardEntryUid));
+        if(reportOptionsString!= null && !reportOptionsString.isEmpty())
+            args.put(ARG_REPORT_OPTIONS, reportOptionsString);
+        args.put(ARG_REPORT_TYPE, String.valueOf(REPORT_TYPE_TOP_LES));
         impl.go(ReportOptionsDetailView.VIEW_NAME, args, context);
     }
 

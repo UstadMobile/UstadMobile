@@ -35,9 +35,6 @@ public class SelectMultipleLocationTreeDialogPresenter
         if (arguments.containsKey(ARG_LOCATIONS_SET)) {
             String locationsArrayString = arguments.get(ARG_LOCATIONS_SET).toString();
 
-//            long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
-//            selectedLocationsList = convertLongArrayToList(locationsArray);
-            //TODO: Check
             selectedLocationsList = convertCSVStringToLongList(locationsArrayString);
 
         }
