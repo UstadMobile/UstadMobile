@@ -114,6 +114,12 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
         pictureEdit.setOnClickListener(v -> showGetImageAlertDialog());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
 
     public void showGetImageAlertDialog(){
 

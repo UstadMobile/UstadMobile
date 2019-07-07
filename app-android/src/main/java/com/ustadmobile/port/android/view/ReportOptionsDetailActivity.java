@@ -175,6 +175,7 @@ public class ReportOptionsDetailActivity extends UstadBaseActivity
         //Location
         locationCL.setOnClickListener(v -> mPresenter.goToLocationSelect());
 
+
     }
 
     private void showDateRangeDialog(){

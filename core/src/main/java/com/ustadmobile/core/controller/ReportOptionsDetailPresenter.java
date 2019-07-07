@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.SelectMultiplePeopleView;
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -28,6 +29,7 @@ import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_DASHBOARD_EN
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_OPTIONS;
 import static com.ustadmobile.core.view.ReportOptionsDetailView.ARG_REPORT_TYPE;
 import static com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.ARG_LOCATIONS_SET;
+import static com.ustadmobile.core.view.SelectMultiplePeopleView.ARG_SELECTED_PEOPLE;
 import static com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.ARG_PRODUCT_SELECTED_SET;
 
 /**
@@ -297,12 +299,15 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     /////Select Multi/////
 
     public void goToProductSelect(){
-        Hashtable<String, Object> args = new Hashtable<>();
+        Hashtable<String, String> args = new Hashtable<>();
 
         if(selectedProducts != null && !selectedProducts.isEmpty()){
             Long[] selectedLocationsArray =
                     convertLongList(selectedProducts);
-            args.put(ARG_PRODUCT_SELECTED_SET, selectedLocationsArray);
+
+            String selectedProductTypesCSString = convertLongListToStringCSV(selectedProducts);
+            //TODO: Check
+            args.put(ARG_PRODUCT_SELECTED_SET, selectedProductTypesCSString);
         }
 
         impl.go(SelectMultipleProductTypeTreeDialogView.VIEW_NAME, args, context);
@@ -310,17 +315,19 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
 
     public void goToLEsSelect(){
         Hashtable<String, String> args = new Hashtable<>();
+        if(selectedLEs != null && !selectedLEs.isEmpty()){
+            String selectedLEsCSSting = convertLongListToStringCSV(selectedLEs);
+            args.put(ARG_SELECTED_PEOPLE, selectedLEsCSSting);
+        }
         impl.go(SelectMultiplePeopleView.VIEW_NAME, args, context);
     }
 
     public void goToLocationSelect(){
-        Hashtable<String, Object> args = new Hashtable<>();
+        Hashtable<String, String> args = new Hashtable<>();
 
-        //TODO: Change to String
         if(selectedLocations != null && !selectedLocations.isEmpty()){
-            Long[] selectedLocationsArray =
-                    convertLongList(selectedLocations);
-            args.put(ARG_LOCATIONS_SET, selectedLocationsArray);
+            String selectedLocationsCSString = convertLongListToStringCSV(selectedLocations);
+            args.put(ARG_LOCATIONS_SET, selectedLocationsCSString);
         }
 
         impl.go(SelectMultipleLocationTreeDialogView.VIEW_NAME, args, context);
@@ -337,8 +344,6 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
     public void setSelectedLEs(List<Long> selectedLEs) {
         this.selectedLEs = selectedLEs;
     }
-
-////////////
 
     private static Long[] convertLongList(List<Long> list){
         Long[] array = new Long[list.size()];
@@ -368,5 +373,21 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
 
     public void setToPrice(int toPrice) {
         this.toPrice = toPrice;
+    }
+
+    /**
+     * Convert LongList to CSV String
+     * @param longList    Long list
+     */
+    public static String convertLongListToStringCSV(List<Long> longList){
+
+        return longList.toString().replaceAll("\\[|\\]", "");
+    }
+
+    public static List<Long> convertCSVStringToLongList(String csString){
+        List<Long> list = new ArrayList<Long>();
+        for (String s : csString.split(","))
+            list.add(Long.parseLong(s.trim()));
+        return list;
     }
 }

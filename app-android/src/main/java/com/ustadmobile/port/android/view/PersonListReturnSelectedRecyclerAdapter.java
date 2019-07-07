@@ -66,9 +66,12 @@ public class PersonListReturnSelectedRecyclerAdapter extends PagedListAdapter<Pe
         CheckBox checkBox = holder.itemView.findViewById(R.id.item_clazz_list_enroll_person_checkbox);
         checkBox.setText("");
 
-
-        //TODO: Check boxes already ..
         //checkBox.setChecked(???);
+        if(selectedPeople.contains(person.getPersonUid())){
+            checkBox.setChecked(true);
+        }else{
+            checkBox.setChecked(false);
+        }
 
         checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
                 {

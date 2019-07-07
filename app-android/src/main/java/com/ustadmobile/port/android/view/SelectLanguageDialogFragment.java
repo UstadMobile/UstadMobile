@@ -85,30 +85,38 @@ public class SelectLanguageDialogFragment extends UstadDialogFragment implements
         //TODO
         Locale.setDefault(englishLocale);
         Configuration config = new Configuration();
-        // TODO fix deprecation issues
         config.locale = englishLocale;
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        getActivity().getBaseContext().getResources().updateConfiguration(config,
+                getResources().getDisplayMetrics());
+
+        //ChangeLocaleHelper.setLocale(getContext(), "en");
+        finish();
 
     }
     private void handleClickDari(){
-        Locale englishLocale = Locale.forLanguageTag("dr");
+        Locale dariLocale = Locale.forLanguageTag("fa");
         //TODO
-        Locale.setDefault(englishLocale);
+        Locale.setDefault(dariLocale);
         Configuration config = new Configuration();
-        // TODO fix deprecation issues
-        config.locale = englishLocale;
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        //TODO
+        config.locale = dariLocale;
+        getActivity().getBaseContext().getResources().updateConfiguration(config,
+                getResources().getDisplayMetrics());
+
+        //ChangeLocaleHelper.setLocale(getContext(), "fa");
+
+        finish();
     }
     private void handleClickPashto(){
-        Locale englishLocale = Locale.forLanguageTag("ps");
+        Locale pashtoLocale = Locale.forLanguageTag("ps");
         //TODO
-        Locale.setDefault(englishLocale);
+        Locale.setDefault(pashtoLocale);
         Configuration config = new Configuration();
-        // TODO fix deprecation issues
-        config.locale = englishLocale;
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        //TODO
+        config.locale = pashtoLocale;
+        getActivity().getBaseContext().getResources().updateConfiguration(config,
+                getResources().getDisplayMetrics());
+        //ChangeLocaleHelper.setLocale(getContext(), "ps");
+
+        finish();
     }
 
     @Override
@@ -126,6 +134,8 @@ public class SelectLanguageDialogFragment extends UstadDialogFragment implements
     @Override
     public void finish(){
         dialog.dismiss();
+        getActivity().finish();
+        startActivity(getActivity().getIntent());
     }
 
 }

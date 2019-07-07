@@ -84,8 +84,6 @@ public class UserProfilePresenter extends UstadBaseController<UserProfileView> {
                 }
             });
 
-
-
         }
 
     }

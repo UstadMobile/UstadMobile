@@ -37,26 +37,15 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.LocationDao;
 import com.ustadmobile.core.db.dao.PersonDao;
-import com.ustadmobile.core.db.dao.SaleDao;
-import com.ustadmobile.core.db.dao.SaleItemDao;
 import com.ustadmobile.core.db.dao.SaleProductDao;
-import com.ustadmobile.core.db.dao.SaleProductGroupDao;
-import com.ustadmobile.core.db.dao.SaleProductGroupJoinDao;
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao;
 import com.ustadmobile.core.db.dao.SaleProductPictureDao;
-import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.view.OnBoardingView;
-import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.Person;
-import com.ustadmobile.lib.db.entities.Sale;
-import com.ustadmobile.lib.db.entities.SaleItem;
 import com.ustadmobile.lib.db.entities.SaleProduct;
-import com.ustadmobile.lib.db.entities.SaleProductGroup;
-import com.ustadmobile.lib.db.entities.SaleProductGroupJoin;
 import com.ustadmobile.lib.db.entities.SaleProductParentJoin;
 import com.ustadmobile.lib.db.entities.SaleProductPicture;
 
@@ -123,9 +112,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
 
     private void addDummyData(UmAppDatabase repo){
 
-        SaleDao saleDao = repo.getSaleDao();
         LocationDao locationDao = repo.getLocationDao();
-        SaleItemDao saleItemDao = repo.getSaleItemDao();
         SaleProductDao saleProductDao = repo.getSaleProductDao();
         SaleProductParentJoinDao productParentJoinDao = repo.getSaleProductParentJoinDao();
         PersonDao personDao = repo.getPersonDao();
@@ -156,7 +143,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     locationDao.insert(new Location("Kabul Province",
                             "Kabul area", true, centralAfgLocationUid));
 
-                    long easternAfgLocationUid = locationDao.insert(easternAfg);
+                    locationDao.insert(easternAfg);
                     Location northernAfg= new Location("Northern Afghanistan", "Northern region", true, afgLocationUid);
                     long northernAfgLocationUid = locationDao.insert(northernAfg);
                     Location westernAfg = new Location("Western Afghanistan", "Western region", true, afgLocationUid);
@@ -175,7 +162,7 @@ public class SplashScreenActivity extends UstadBaseActivity{
 
                     Location southWestAfg = new Location("Southwest Afghanistan",
                             "Southwest region", true, afgLocationUid);
-                    long southWestAfgLocationUid = locationDao.insert(southWestAfg);
+                    locationDao.insert(southWestAfg);
 
                     //Also add some Producers (People)
 
@@ -199,8 +186,6 @@ public class SplashScreenActivity extends UstadBaseActivity{
                     personDao.insert(person4);
 
 
-                } else {
-                    newLocation = result.get(0);
                 }
 
                 //Insert Products

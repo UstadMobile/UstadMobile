@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
+import static com.ustadmobile.core.controller.ReportOptionsDetailPresenter.convertCSVStringToLongList;
 import static com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.ARG_LOCATIONS_SET;
 
 
@@ -32,8 +33,13 @@ public class SelectMultipleLocationTreeDialogPresenter
         super(context, arguments, view);
 
         if (arguments.containsKey(ARG_LOCATIONS_SET)) {
-            long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
-            selectedLocationsList = convertLongArrayToList(locationsArray);
+            String locationsArrayString = arguments.get(ARG_LOCATIONS_SET).toString();
+
+//            long[] locationsArray = (long[]) arguments.get(ARG_LOCATIONS_SET);
+//            selectedLocationsList = convertLongArrayToList(locationsArray);
+            //TODO: Check
+            selectedLocationsList = convertCSVStringToLongList(locationsArrayString);
+
         }
         selectedOptions = new HashMap<>();
 
@@ -52,19 +58,6 @@ public class SelectMultipleLocationTreeDialogPresenter
 
 
     /**
-     * Util method to convert an array of long to a List of Long
-     * @param array long array
-     * @return  List of Long
-     */
-    private static ArrayList<Long> convertLongArrayToList(long[] array) {
-        ArrayList<Long> result = new ArrayList<Long>(array.length);
-        for (long item : array)
-            result.add(item);
-        return result;
-    }
-
-
-    /**
      * Gets top locations and load initial data to the recycler view
      */
     private void getTopLocations() {
@@ -76,9 +69,7 @@ public class SelectMultipleLocationTreeDialogPresenter
             }
 
             @Override
-            public void onFailure(Throwable exception) {
-
-            }
+            public void onFailure(Throwable exception) { exception.printStackTrace();}
         });
     }
 
@@ -99,9 +90,7 @@ public class SelectMultipleLocationTreeDialogPresenter
         if (checked) {
             selectedOptions.put(entityName, entityUid);
         } else {
-            if (selectedOptions.containsKey(entityName)) {
-                selectedOptions.remove(entityUid);
-            }
+            selectedOptions.remove(entityName);
         }
     }
 

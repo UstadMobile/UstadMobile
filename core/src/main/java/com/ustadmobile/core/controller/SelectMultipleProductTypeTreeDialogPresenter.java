@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
+import static com.ustadmobile.core.controller.ReportOptionsDetailPresenter.convertCSVStringToLongList;
 import static com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView.ARG_PRODUCT_SELECTED_SET;
 
 /**
@@ -31,9 +32,8 @@ public class SelectMultipleProductTypeTreeDialogPresenter
         super(context, arguments, view);
 
         if (arguments.containsKey(ARG_PRODUCT_SELECTED_SET)) {
-            long[] productTypesArray = (long[]) arguments.get(ARG_PRODUCT_SELECTED_SET);
-            selectedProductTypeUidsList =
-                    convertLongArray(productTypesArray);
+            String productTypesArrayString = arguments.get(ARG_PRODUCT_SELECTED_SET).toString();
+            selectedProductTypeUidsList = convertCSVStringToLongList(productTypesArrayString);
         }
 
         selectedOptions = new HashMap<>();
@@ -41,7 +41,7 @@ public class SelectMultipleProductTypeTreeDialogPresenter
 
     }
 
-    public static ArrayList<Long> convertLongArray(long[] array) {
+    static ArrayList<Long> convertLongArray(long[] array) {
         ArrayList<Long> result = new ArrayList<Long>(array.length);
         for (long item : array)
             result.add(item);
@@ -88,9 +88,7 @@ public class SelectMultipleProductTypeTreeDialogPresenter
         if (checked) {
             selectedOptions.put(entityName, entityUid);
         } else {
-            if (selectedOptions.containsKey(entityName)) {
-                selectedOptions.remove(entityUid);
-            }
+            selectedOptions.remove(entityName);
         }
     }
 

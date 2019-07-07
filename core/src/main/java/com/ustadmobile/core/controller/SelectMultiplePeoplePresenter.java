@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
+import static com.ustadmobile.core.controller.ReportOptionsDetailPresenter.convertCSVStringToLongList;
 import static com.ustadmobile.core.controller.SelectMultipleProductTypeTreeDialogPresenter.convertLongArray;
 import static com.ustadmobile.core.view.SelectMultiplePeopleView.ARG_SELECTED_PEOPLE;
 
@@ -32,8 +33,10 @@ public class SelectMultiplePeoplePresenter
                                          SelectMultiplePeopleView view) {
         super(context, arguments, view);
         if(arguments.containsKey(ARG_SELECTED_PEOPLE)){
-            long[] clazzesSelected = (long[]) arguments.get(ARG_SELECTED_PEOPLE);
-            selectedPeopleList = convertLongArray(clazzesSelected);
+            String selectedPeopleCSString = arguments.get(ARG_SELECTED_PEOPLE).toString();
+
+            selectedPeopleList = convertCSVStringToLongList(selectedPeopleCSString);
+
         }
 
     }
