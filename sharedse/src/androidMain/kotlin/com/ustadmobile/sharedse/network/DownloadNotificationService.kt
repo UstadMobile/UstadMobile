@@ -69,7 +69,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val notificationIdRef = AtomicInteger(9)
 
-    private var timeLastUpdate: Long? = null
+    private var timeLastUpdate: Long = 0
 
     private val MAX_UPDATE_TIME_DELAY = TimeUnit.SECONDS.toMillis(2)
 

@@ -410,8 +410,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 builder.setTitle(permissionDialogTitle)
                         .setMessage(permissionDialogMessage)
                         .setNegativeButton(getString(android.R.string.cancel)
-                        ) { dialog, which -> dialog.dismiss() }
-                        .setPositiveButton(getString(android.R.string.ok)) { dialog, which ->
+                        ) { dialog, _ -> dialog.dismiss() }
+                        .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                             runAfterGrantingPermission(permission, afterPermissionMethodRunner,
                                     permissionDialogTitle, permissionDialogMessage)
                         }
