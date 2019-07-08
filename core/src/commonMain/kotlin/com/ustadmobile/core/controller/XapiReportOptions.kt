@@ -23,7 +23,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
             XapiReportOptionsPresenter.COUNT_ACTIVITIES -> "COUNT(StatementEntity.*), "
             else -> ""
         }
-        sql += groupBy(xAxis) + " AS xAxis, "
+        sql += groupBy(xAxis) + "AS xAxis, "
         sql += groupBy(subGroup) + "AS subgroup "
         sql += "FROM StatementEntity "
         if (xAxis == XapiReportOptionsPresenter.GENDER || subGroup == XapiReportOptionsPresenter.GENDER) {
@@ -56,12 +56,12 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
 
     private fun groupBy(value: Int): String {
         return when (value) {
-            XapiReportOptionsPresenter.DAY -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch')"
-            XapiReportOptionsPresenter.WEEK -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day')"
-            XapiReportOptionsPresenter.MONTH -> "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch')"
-            XapiReportOptionsPresenter.CONTENT_ENTRY -> "XObjectEntity.xObjectUid"
+            XapiReportOptionsPresenter.DAY -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch') "
+            XapiReportOptionsPresenter.WEEK -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
+            XapiReportOptionsPresenter.MONTH -> "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch') "
+            XapiReportOptionsPresenter.CONTENT_ENTRY -> "XObjectEntity.xObjectUid "
             //LOCATION -> "Location.title"
-            XapiReportOptionsPresenter.GENDER -> "Person.gender"
+            XapiReportOptionsPresenter.GENDER -> "Person.gender "
             else -> ""
         }
     }

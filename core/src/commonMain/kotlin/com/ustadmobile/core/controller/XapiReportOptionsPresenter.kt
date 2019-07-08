@@ -124,6 +124,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
                 toDateTime.unixMillisLong,
                 selectedLocations)
 
+        report.toSql()
+
 
     }
 
