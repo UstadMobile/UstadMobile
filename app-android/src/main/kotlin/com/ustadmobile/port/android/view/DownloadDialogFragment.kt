@@ -22,6 +22,7 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import java.io.File
 import java.util.*
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import java.util.concurrent.TimeUnit
 
 
@@ -52,25 +53,31 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     private var savedInstanceState : Bundle? = null
 
+    private lateinit var managerBle: NetworkManagerBle
+
     private lateinit var storageDirs: List<UMStorageDir>
 
     internal var viewIdMap = HashMap<Int, Int>()
 
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
-            val managerBle = context.networkManagerBle
-            if(managerBle != null){
-               Handler().postDelayed({
-                   mPresenter = DownloadDialogPresenter(getContext() as Context, managerBle,
-                           bundleToMap(arguments), this, UmAppDatabase.getInstance(context),
-                           UmAccountManager.getRepositoryForActiveAccount(context))
-
-                   mPresenter!!.onCreate(bundleToMap(savedInstanceState))
-               },TimeUnit.SECONDS.toMillis(2))
-            }
+            context.runAfterServiceConnection(Runnable{
+                context.runOnUiThread {
+                    managerBle = context.networkManagerBle!!
+                    checkReady()
+                }
+            })
         }
 
         super.onAttach(context)
+    }
+
+    private fun checkReady(){
+        if(::managerBle.isInitialized){
+            mPresenter = DownloadDialogPresenter(context as Context, managerBle,
+                    bundleToMap(arguments), this, UmAppDatabase.getInstance(context as Context),
+                    UmAccountManager.getRepositoryForActiveAccount(context as Context))
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -103,6 +110,10 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
+
+        if(mPresenter != null){
+            mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        }
 
         return mDialog as AlertDialog
     }

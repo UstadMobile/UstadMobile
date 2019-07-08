@@ -57,7 +57,7 @@ class BleGattServerCommonTest {
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase!!.clearAllTables()
 
-        gattServer = spy<BleGattServerCommon>(BleGattServerCommon::class.java)
+        gattServer = spy(BleGattServerCommon::class.java)
         gattServer!!.setContext(context)
         wiFiDirectGroupBle = WiFiDirectGroupBle("NetworkSsId", "@@@1234")
         wiFiDirectGroupBle!!.ipAddress = "127.0.0.1"
@@ -72,7 +72,7 @@ class BleGattServerCommonTest {
             entryFile.lastModified = currentTimeStamp
             containerList.add(entryFile)
         }
-        containerUids.addAll(Arrays.asList(*umAppDatabase!!.containerDao.insert(containerList)))
+        containerUids.addAll(listOf(*umAppDatabase!!.containerDao.insert(containerList)))
 
     }
 

@@ -17,18 +17,15 @@ open class WiFiDirectGroupBle {
      * @param ssid Group SSID
      * @param passphrase Group passphrase
      */
-    constructor(
-            /**
-             * @return WiFi direct group SSID
-             */
-            ssid: String,
-            /**@return Wifi direct group passphrase
-             */
-            passphrase: String) {
+    constructor(ssid: String,passphrase: String) {
         this.ssid = ssid
         this.passphrase = passphrase
     }
 
+    /**
+     * Constructor used to create WiFiDirectGroupBle from BleMessage payload
+     * @param byteArr message payload
+     */
     constructor(byteArr: ByteArray) {
         val buffer = ByteBufferSe.wrap(byteArr)
         val ipInt = buffer.getInt()
