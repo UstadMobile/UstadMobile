@@ -20,7 +20,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
@@ -28,7 +27,6 @@ import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ACTION_LOCALE_CHANGE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.ViewWithErrorNotifier
@@ -68,8 +66,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     var networkManagerBle: NetworkManagerBle? = null
 
     private var fragmentList: MutableList<WeakReference<Fragment>>? = null
-
-    private var localeChanged = false
 
     private var localeOnCreate: String? = null
 
@@ -139,18 +135,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
 
-    /**
-     * Handles internal locale changes. When the user changes the locale using the system settings
-     * Android will take care of destroying and recreating the activity.
-     */
-    private val mLocaleChangeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                ACTION_LOCALE_CHANGE -> localeChanged = true
-            }
-        }
-    }
-
     override val viewContext: Any
         get() = this
 
@@ -159,10 +143,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         //bind to the LRS forwarding service
         instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_LOCALE_CHANGE)
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
-                intentFilter)
         super.onCreate(savedInstanceState)
         localeOnCreate = instance.getDisplayedLocale(this)
 
@@ -238,11 +218,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onResume() {
         super.onResume()
-        if (localeChanged) {
-            if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
-                Handler().postDelayed({ this.recreate() }, 200)
-            }
+        if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+            Handler().postDelayed({ this.recreate() }, 200)
         }
+
         if (shakeDetector != null && sensorManager != null) {
             shakeDetector!!.start(sensorManager)
         }
@@ -297,7 +276,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             unbindService(bleServiceConnection)
         }
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver)
         instance.handleActivityDestroy(this)
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection)
