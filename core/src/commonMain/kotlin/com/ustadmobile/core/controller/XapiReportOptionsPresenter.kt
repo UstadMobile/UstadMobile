@@ -30,6 +30,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     private var selectedEntries: List<Long> = mutableListOf()
 
+    private var selectedObjects: List<Long> = mutableListOf()
+
     private var selectedYaxis: Int = 0
 
     private var selectedChartType: Int = 0
@@ -55,52 +57,54 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     }
 
-    fun handleFromCalendarSelected(year: Int, month: Int, dayOfMonth: Int){
+    fun handleFromCalendarSelected(year: Int, month: Int, dayOfMonth: Int) {
         fromDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
         handleFromCalendarSelected()
     }
 
-    fun handleFromCalendarSelected(){
+    fun handleFromCalendarSelected() {
         view.runOnUiThread(Runnable { view.updateFromDialogText(fromDateTime.format("dd/MM/YYYY")) })
     }
 
 
-    fun handleToCalendarSelected(year: Int, month: Int, dayOfMonth: Int){
+    fun handleToCalendarSelected(year: Int, month: Int, dayOfMonth: Int) {
         toDateTime = UMCalendarUtil.setDate(year, month, dayOfMonth)
         handleToCalendarSelected()
     }
 
-    fun handleToCalendarSelected(){
+    fun handleToCalendarSelected() {
         view.runOnUiThread(Runnable { view.updateToDialogText(toDateTime.format("dd/MM/YYYY")) })
     }
 
     fun handleDateRangeSelected() {
-        view.runOnUiThread(Runnable { view.updateWhenRangeText(
-                fromDateTime.format("dd MMM yyyy") + " - " + toDateTime.format("dd MMM yyyy")) })
+        view.runOnUiThread(Runnable {
+            view.updateWhenRangeText(
+                    fromDateTime.format("dd MMM yyyy") + " - " + toDateTime.format("dd MMM yyyy"))
+        })
     }
 
-    fun handleWhoDataTyped(name: String, uidList: List<Long>){
+    fun handleWhoDataTyped(name: String, uidList: List<Long>) {
         GlobalScope.launch {
             val personsNames = db.personDao.getAllPersons("%$name%", uidList)
             view.runOnUiThread(Runnable { view.updateWhoDataAdapter(personsNames) })
         }
     }
 
-    fun handleDidDataTyped(verb: String, uidList: List<Long>){
+    fun handleDidDataTyped(verb: String, uidList: List<Long>) {
         GlobalScope.launch {
             val verbs = db.xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
             view.runOnUiThread(Runnable { view.updateDidDataAdapter(verbs) })
         }
     }
 
-    fun handleWhereClicked(){
+    fun handleWhereClicked() {
         val args = mutableMapOf<String, String>()
         args[ARG_LOCATIONS_SET] = selectedLocations.joinToString { it.toString() }
         impl.go(SelectMultipleLocationTreeDialogView.VIEW_NAME, args, context)
     }
 
 
-    fun handleWhatClicked(){
+    fun handleWhatClicked() {
         val args = mutableMapOf<String, String>()
         args[ARG_CONTENT_ENTRY_SET] = selectedEntries.joinToString { it.toString() }
         impl.go(SelectMultipleEntriesTreeDialogView.VIEW_NAME, args, context)
@@ -111,7 +115,16 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
                 listOfGraphs[selectedChartType],
                 yAxisList[selectedYaxis],
                 xAxisList[selectedXAxis],
-                xAxisList[selectedSubGroup])
+                xAxisList[selectedSubGroup],
+                whoOptionsList,
+                didOptionsList,
+                selectedObjects,
+                selectedEntries,
+                fromDateTime.unixMillisLong,
+                toDateTime.unixMillisLong,
+                selectedLocations)
+
+
     }
 
     fun handleLocationListSelected(locationList: List<Long>) {
@@ -120,6 +133,9 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     fun handleEntriesListSelected(entriesList: List<Long>) {
         selectedEntries = entriesList
+        GlobalScope.launch {
+            selectedObjects = db.xObjectDao.findListOfObjectUidFromContentEntryUid(selectedEntries)
+        }
     }
 
     fun handleSelectedYAxis(position: Int) {
@@ -141,41 +157,37 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     companion object {
 
-        private const val BAR_CHART = MessageID.bar_chart
+        const val BAR_CHART = MessageID.bar_chart
 
-        private const val LINE_GRAPH = MessageID.line_graph
+        const val LINE_GRAPH = MessageID.line_graph
 
-        private const val FREQ_GRAPH = MessageID.freq_graph
+        const val FREQ_GRAPH = MessageID.freq_graph
 
         val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH, FREQ_GRAPH)
 
-        private const val SCORE = MessageID.score
+        const val SCORE = MessageID.score
 
-        private const val DURATION = MessageID.duration
+        const val DURATION = MessageID.duration
 
-        private const val COUNT_ACTIVITIES = MessageID.count_activity
+        const val COUNT_ACTIVITIES = MessageID.count_activity
 
         val yAxisList = arrayOf(SCORE, DURATION, COUNT_ACTIVITIES)
 
-        private const val DAY = MessageID.xapi_day
+        const val DAY = MessageID.xapi_day
 
-        private const val WEEK = MessageID.xapi_week
+        const val WEEK = MessageID.xapi_week
 
-        private const val MONTH = MessageID.xapi_month
+        const val MONTH = MessageID.xapi_month
 
-        private const val CUSTOM_DATE = MessageID.xapi_custom_date
+        const val CONTENT_ENTRY = MessageID.xapi_content_entry
 
-        private const val CONTENT_ENTRY = MessageID.xapi_content_entry
+        //TODO to be put back when varuna merges his branch
+        // private const val LOCATION = MessageID.xapi_location
 
-        private const val LOCATION = MessageID.xapi_location
+        const val GENDER = MessageID.xapi_gender
 
-        private const val GENDER = MessageID.xapi_gender
-
-        val xAxisList = arrayOf(DAY, WEEK, MONTH, CUSTOM_DATE, CONTENT_ENTRY, LOCATION, GENDER)
+        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER)
 
     }
-
-    data class XapiReportOptions(var chartType: Int, var yAxis: Int,
-                                 var xAxis: Int, var subGroup: Int)
 
 }

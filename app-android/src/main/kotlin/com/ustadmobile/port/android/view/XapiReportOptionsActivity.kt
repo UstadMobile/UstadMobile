@@ -376,9 +376,9 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
     }
 
     override fun onEntriesSelectedResult(selected: MutableMap<String, Long>) {
-        var locationList = selected.keys.joinToString { it }
+        var entriesList = selected.keys.joinToString { it }
         runOnUiThread {
-            whatEditText.setText(locationList)
+            whatEditText.setText(entriesList)
         }
         presenter.handleEntriesListSelected(selected.values.toList())
     }
