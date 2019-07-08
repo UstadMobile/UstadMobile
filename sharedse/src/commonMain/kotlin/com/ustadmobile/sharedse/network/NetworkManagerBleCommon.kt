@@ -48,7 +48,7 @@ abstract class NetworkManagerBleCommon(
      * @return Active http client
      */
 
-    var httpClient: HttpClient? = null
+    var localHttpClient: HttpClient? = null
         protected set
 
     /**

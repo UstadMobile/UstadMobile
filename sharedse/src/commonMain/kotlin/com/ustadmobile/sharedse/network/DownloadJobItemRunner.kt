@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.httpClient
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
@@ -20,7 +21,6 @@ import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import kotlinx.atomicfu.AtomicLongArray
 import kotlinx.atomicfu.atomic
@@ -88,6 +88,8 @@ class DownloadJobItemRunner
     private val wiFiDirectGroupBle = atomic<WiFiDirectGroupBle?>(null)
 
     private var currentNetworkNode: NetworkNode? = null
+
+    private lateinit var currentHttpClient: HttpClient
 
     /**
      * Boolean to indicate if we are waiting for a local connection.
@@ -327,12 +329,14 @@ class DownloadJobItemRunner
                     //we are connected to a local peer, but need the normal wifi
                     //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
                     // set status to waiting for connection and stop
-                    if (!connectToCloudNetwork()) {
-                        //connection has failed
-                        attemptsRemaining--
-                        recordHistoryFinished(history, false)
-                        //continue
-                    }
+                   launch(mainCoroutineDispatcher) {
+                       if (!connectToCloudNetwork()) {
+                           //connection has failed
+                           attemptsRemaining--
+                           recordHistoryFinished(history, false)
+                           //continue
+                       }
+                   }
                 }
                 downloadEndpoint = endpointUrl
             } else {
@@ -349,9 +353,7 @@ class DownloadJobItemRunner
                 downloadEndpoint = currentNetworkNode!!.endpointUrl
             }
 
-            val containerEntryListClient = (if(networkManager.httpClient != null) networkManager.httpClient else  HttpClient())!!.config {
-                install(JsonFeature)
-            }
+            currentHttpClient = (if(networkManager.localHttpClient != null) networkManager.localHttpClient else  httpClient)!!
 
 
             history.url = downloadEndpoint
@@ -363,7 +365,7 @@ class DownloadJobItemRunner
             try {
                 appDb.downloadJobItemDao.incrementNumAttempts(downloadItem.djiUid)
 
-                val containerEntryList = containerEntryListClient.get<List<ContainerEntryWithMd5>>(
+                val containerEntryList = currentHttpClient.get<List<ContainerEntryWithMd5>>(
                         "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
                 entriesDownloaded.value = 0
 
@@ -378,14 +380,13 @@ class DownloadJobItemRunner
 
                     repeat(numConcurrentEntryDownloads) { procNum ->
                         launch {
-                            val httpClient = HttpClient()
                             for(entry in producer) {
                                 val destFile = FileSe(FileSe(destinationDir!!),
                                         entry.ceCefUid.toString() + ".tmp")
                                 val downloadUrl = downloadEndpoint + CONTAINER_ENTRY_FILE_PATH + entry.ceCefUid
                                 UMLog.l(UMLog.VERBOSE, 100, "Downloader $procNum $downloadUrl -> $destFile")
                                 val resumableDownload = ResumableDownload2(downloadUrl,
-                                        destFile.getAbsolutePath(), httpClient = httpClient)
+                                        destFile.getAbsolutePath(), httpClient = currentHttpClient)
                                 resumableDownload.onDownloadProgress = {inProgressDownloadCounters[procNum].value = it}
                                 if (resumableDownload.download()) {
                                     entriesDownloaded.incrementAndGet()

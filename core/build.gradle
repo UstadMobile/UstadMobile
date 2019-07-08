@@ -110,6 +110,7 @@ kotlin {
                 implementation "com.soywiz:klock-metadata:$version_klock"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
