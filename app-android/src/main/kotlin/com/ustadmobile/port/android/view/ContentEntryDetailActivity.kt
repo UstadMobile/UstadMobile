@@ -39,7 +39,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var presenter: ContentEntryDetailPresenter? = null
 
-    private var managerAndroidBle: NetworkManagerBle? = null
+    private lateinit var managerAndroidBle: NetworkManagerBle
 
     private var localAvailabilityStatusText: TextView? = null
 
@@ -66,7 +66,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     private var fileStatusIcon = HashMap<Int, Int>()
 
     override val allKnowAvailabilityStatus: Set<Long>
-        get() = managerAndroidBle!!.getLocallyAvailableContainerUids()
+        get() = managerAndroidBle.getLocallyAvailableContainerUids()
 
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
@@ -82,7 +82,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 this, networkManagerBle)
         presenter!!.onCreate(bundleToMap(Bundle()))
         presenter!!.onStart()
-        managerAndroidBle?.addLocalAvailabilityListener(this)
+        managerAndroidBle.addLocalAvailabilityListener(this)
 
     }
 
@@ -169,7 +169,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun setDetailsButtonEnabled(enabled: Boolean) {
-        downloadButton!!.isEnabled = enabled
+        downloadButton.isEnabled = enabled
     }
 
     override fun setDownloadSize(fileSize: Long) {
@@ -182,13 +182,13 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun setDownloadButtonVisible(visible: Boolean) {
-        downloadButton!!.visibility = if (visible) View.VISIBLE else View.GONE
+        downloadButton.visibility = if (visible) View.VISIBLE else View.GONE
 
     }
 
 
     override fun setButtonTextLabel(textLabel: String) {
-        downloadButton!!.text = textLabel
+        downloadButton.text = textLabel
     }
 
     override fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String) {
@@ -256,16 +256,18 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {
-        managerAndroidBle!!.startMonitoringAvailability(monitor, entryUidsToMonitor)
+        managerAndroidBle.startMonitoringAvailability(monitor, entryUidsToMonitor)
     }
 
     override fun stopMonitoringAvailability(monitor: Any) {
-        managerAndroidBle!!.stopMonitoringAvailability(monitor)
+        managerAndroidBle.stopMonitoringAvailability(monitor)
     }
 
     override fun onDestroy() {
-        presenter!!.onDestroy()
-        networkManagerBle?.removeLocalAvailabilityListener(this)
+        if(presenter != null){
+            presenter!!.onDestroy()
+            managerAndroidBle.removeLocalAvailabilityListener(this)
+        }
         super.onDestroy()
     }
 

@@ -25,6 +25,9 @@ abstract class UstadMobileSystemCommon {
      */
     private var isInitialized: Boolean = false
 
+    //for testing purpose only
+    var networkManager: Any? = null
+
 
     /**
      * The currently active locale
@@ -151,13 +154,10 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
-    open fun getLocale(context: Any): String? {
-        return locale
-    }
+    open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
-    open fun setLocale(locale: String, context: Any) {
-        this.locale = locale
-    }
+    fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
+
 
 
     /**
@@ -168,6 +168,14 @@ abstract class UstadMobileSystemCommon {
      */
     @JsName("getAppPref")
     abstract fun getAppPref(key: String, context: Any): String?
+
+    /**
+     * Set a preference for the app
+     *
+     * @param key preference that is being set
+     * @param value value to be set
+     */
+    abstract fun setAppPref(key: String, value: String?, context: Any)
 
     /**
      * Get a preference for the app.  If not set, return the provided defaultVal
@@ -418,6 +426,10 @@ abstract class UstadMobileSystemCommon {
          */
         const val LOCALE_USE_SYSTEM = ""
 
+        /**
+         * The preference key where we save a string for the user's locale preference
+         */
+        const val PREFKEY_LOCALE = "locale"
 
 
         /**

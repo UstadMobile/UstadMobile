@@ -92,7 +92,6 @@
 
     <string name='data_usage_label'>مجموع مصرف داده تلفن همراه</string>
     <string name='app_interface_language'>زبان اپلکیشن</string>
-    <string name='enable_supernode'>سوپرنود را فعال سازید</string>
     <string name='share_application'>اپلکیشن را شریک کنید</string>
     <string name='share_via'>بدین وسیله شریک کنید</string>
     <string name='share'>شریک کردن</string>

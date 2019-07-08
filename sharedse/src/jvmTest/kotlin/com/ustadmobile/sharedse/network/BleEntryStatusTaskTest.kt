@@ -21,9 +21,9 @@ import java.util.*
  */
 class BleEntryStatusTaskTest {
 
-    private val containerUids = Arrays.asList(1056289670L, 9076137860L, 4590875612L, 2912543894L)
+    private val containerUids = listOf(1056289670L, 9076137860L, 4590875612L, 2912543894L)
 
-    private val localAvailabilityCheckResponse = Arrays.asList(0L, 9076137860000L, 0L, 2912543894000L)
+    private val localAvailabilityCheckResponse = listOf(0L, 9076137860000L, 0L, 2912543894000L)
 
     private var mockedEntryStatusTask: BleEntryStatusTask? = null
 
@@ -51,7 +51,7 @@ class BleEntryStatusTaskTest {
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.nodeId = 1
         networkNodeDao = umAppDatabase.networkNodeDao
-        networkNodeDao!!.insert(networkNode!!)
+        networkNodeDao!!.insert(networkNode)
 
         entryStatusResponseDao = umAppDatabase.entryStatusResponseDao
 
@@ -78,28 +78,30 @@ class BleEntryStatusTaskTest {
     fun givenNode_whenTryToConnectAndFailedMoreThanThreshold_shouldBeDeletedFromDb() {
 
         for (i in 0..5) {
-            managerBle!!.handleNodeConnectionHistory(networkNode!!.bluetoothMacAddress!!, false)
+            managerBle!!.handleNodeConnectionHistory(networkNode.bluetoothMacAddress!!, false)
         }
 
         assertNull("The node was deleted from the db",
-                networkNodeDao!!.findNodeByBluetoothAddress(networkNode!!.bluetoothMacAddress!!))
+                networkNodeDao!!.findNodeByBluetoothAddress(networkNode.bluetoothMacAddress!!))
     }
 
-    //@Test
+/*    @Test
     fun givenNodeWithFailureBelowThreshold_whenSucceed_shouldResetTheFailureCounterToZero() {
 
         for (i in 0..2) {
-            managerBle!!.handleNodeConnectionHistory(networkNode!!.bluetoothMacAddress!!, false)
+            managerBle!!.handleNodeConnectionHistory(networkNode.bluetoothMacAddress!!, false)
         }
 
-        managerBle!!.handleNodeConnectionHistory(networkNode!!.bluetoothMacAddress!!, true)
+        managerBle!!.handleNodeConnectionHistory(networkNode.bluetoothMacAddress!!, true)
 
         assertNotNull("The node was not deleted from the db and counter was reset to 0",
-                networkNodeDao!!.findNodeByBluetoothAddress(networkNode!!.bluetoothMacAddress!!))
+                networkNodeDao!!.findNodeByBluetoothAddress(networkNode.bluetoothMacAddress!!))
 
 //        TODO: this has been disabled because it is causing a compilation error, and will be updated in
 //         the dev kotlin multi download branch
-//        assertEquals("Counter was reset to 0", 0,
-//                managerBle!!.getBadNodeTracker(networkNode.bluetoothMacAddress!!)!!.value)
-    }
+//
+
+        assertEquals("Counter was reset to 0", 0,
+              managerBle!!.getBadNodeTracker(networkNode.bluetoothMacAddress!!)!!.value)
+    }*/
 }

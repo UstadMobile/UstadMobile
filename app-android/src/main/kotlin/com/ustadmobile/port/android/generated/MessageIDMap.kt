@@ -131,7 +131,6 @@ object MessageIDMap {
 	ID_MAP[MessageID.content_add_page] = R.string.content_add_page
 	ID_MAP[MessageID.content_editor_menu_align_center] = R.string.content_editor_menu_align_center
 	ID_MAP[MessageID.libraries] = R.string.libraries
-	ID_MAP[MessageID.enable_supernode] = R.string.enable_supernode
 	ID_MAP[MessageID.cancel_invite] = R.string.cancel_invite
 	ID_MAP[MessageID.home] = R.string.home
 	ID_MAP[MessageID.field_required_prompt] = R.string.field_required_prompt

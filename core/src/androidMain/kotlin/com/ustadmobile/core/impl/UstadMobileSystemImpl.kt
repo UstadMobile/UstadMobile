@@ -361,7 +361,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param key preference that is being set
      * @param value value to be set
      */
-    actual fun setAppPref(key: String, value: String?, context: Any){
+    override actual fun setAppPref(key: String, value: String?, context: Any){
         val prefs = getAppSharedPreferences(context as Context)
         val editor = prefs.edit()
         if (value != null) {
@@ -568,8 +568,6 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
-
-        const val ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change"
 
         /**
          * Get an instance of the system implementation - relies on the platform

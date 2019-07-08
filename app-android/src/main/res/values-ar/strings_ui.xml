@@ -88,7 +88,6 @@
     <string name='account'>Account</string>
     <string name='data_usage'>Data usage</string>
     <string name='app_interface_language'>App interface language</string>
-    <string name='enable_supernode'>Enable supernode</string>
     <string name="share_application">Share App</string>
     <string name="share_via">Share via...</string>
     <string name="share">Share</string>
@@ -118,7 +117,7 @@
         \n2. Make sure that the device is visible.</string>
     <string name="preparing">Preparing</string>
 
-    
+
     <string name="select_language">Select language</string>
     <!-- For language selector where %s is replaced by the device type name -->
     <string name="device_language">Use device language</string>

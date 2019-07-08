@@ -191,8 +191,9 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
 
     fun handleClickPositive() {
         if (deleteFileOptions) {
-            TODO("Run this on coroutine")
-            //Thread { networkManagerBle?.cancelAndDeleteDownloadJob(currentJobId!!) }.start()
+            GlobalScope.launch {
+                networkManagerBle.cancelAndDeleteDownloadJob(currentJobId)
+            }
         } else {
             GlobalScope.launch {
                 val created = createDownloadJobRecursive()
@@ -210,7 +211,9 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
      */
     fun handleClickNegative(dismissAfter: Boolean = true) {
         if (downloadJobStatus.value == 0) {
-            //Thread { networkManagerBle?.deleteUnusedDownloadJob(currentJobId!!) }.start()
+           GlobalScope.launch {
+               networkManagerBle.deleteUnusedDownloadJob(currentJobId)
+           }
         }
 
         //if the download has not been started

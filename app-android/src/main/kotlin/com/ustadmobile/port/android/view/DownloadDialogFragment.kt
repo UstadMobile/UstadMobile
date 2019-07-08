@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Handler
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +22,8 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import java.io.File
 import java.util.*
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import java.util.concurrent.TimeUnit
 
 
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
@@ -48,19 +51,33 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     private var impl: UstadMobileSystemImpl? = null
 
-    private var storageDirs: List<UMStorageDir>? = null
+    private var savedInstanceState : Bundle? = null
+
+    private lateinit var managerBle: NetworkManagerBle
+
+    private lateinit var storageDirs: List<UMStorageDir>
 
     internal var viewIdMap = HashMap<Int, Int>()
 
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
-            val managerBle = context.networkManagerBle!!
-            mPresenter = DownloadDialogPresenter(getContext() as Context, managerBle,
-                    bundleToMap(arguments), this, UmAppDatabase.getInstance(context),
-                    UmAccountManager.getRepositoryForActiveAccount(context))
+            context.runAfterServiceConnection(Runnable{
+                context.runOnUiThread {
+                    managerBle = context.networkManagerBle!!
+                    checkReady()
+                }
+            })
         }
 
         super.onAttach(context)
+    }
+
+    private fun checkReady(){
+        if(::managerBle.isInitialized){
+            mPresenter = DownloadDialogPresenter(context as Context, managerBle,
+                    bundleToMap(arguments), this, UmAppDatabase.getInstance(context as Context),
+                    UmAccountManager.getRepositoryForActiveAccount(context as Context))
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -68,17 +85,16 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_download_layout_view, null)
 
+        this.savedInstanceState = savedInstanceState
         stackedOptionHolderView = rootView!!.findViewById(R.id.stacked_option_holder)
         statusTextView = rootView!!.findViewById(R.id.download_option_status_text)
         wifiOnlyView = rootView!!.findViewById(R.id.wifi_only_option)
         mStorageOptions = rootView!!.findViewById(R.id.storage_option)
         calculateHolder = rootView!!.findViewById(R.id.download_calculate_holder)
-        val calculateTextView = rootView!!.findViewById<TextView>(R.id.download_dialog_calculating)
         wifiOnlyHolder = rootView!!.findViewById(R.id.wifi_only_option_holder)
 
         impl = UstadMobileSystemImpl.instance
 
-        (rootView!!.findViewById<View>(R.id.wifi_only_option_label) as TextView).text = impl!!.getString(MessageID.download_wifi_only, getContext()!!)
 
         val builder = AlertDialog.Builder(context!!)
         builder.setPositiveButton(R.string.ok, this)
@@ -86,34 +102,36 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
         builder.setView(rootView)
 
         mDialog = builder.create()
-        mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
         wifiOnlyView!!.setOnCheckedChangeListener(this)
         wifiOnlyHolder!!.setOnClickListener(this)
-        calculateTextView.text = impl!!.getString(MessageID.download_calculating, context!!)
 
         //mapping presenter constants to view ids
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
+        if(mPresenter != null){
+            mPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        }
+
         return mDialog as AlertDialog
     }
 
 
-    override fun setUpStorageOptions(storageDirs: List<UMStorageDir>) {
-        val storageOptions = ArrayList<String>()
-        this.storageDirs = storageDirs
-        for (umStorageDir in storageDirs) {
+    override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
+        val options = ArrayList<String>()
+        this.storageDirs = storageOptions
+        for (umStorageDir in storageOptions) {
             val deviceStorageLabel = String.format(impl!!.getString(
                     MessageID.download_storage_option_device, context!!), umStorageDir.name,
                     UMFileUtil.formatFileSize(File(umStorageDir.dirURI!!).usableSpace))
-            storageOptions.add(deviceStorageLabel)
+            options.add(deviceStorageLabel)
         }
 
         val storageOptionAdapter = ArrayAdapter(
                 Objects.requireNonNull<Context>(context),
-                android.R.layout.simple_spinner_item, storageOptions)
+                android.R.layout.simple_spinner_item, options)
         storageOptionAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item)
 
@@ -176,11 +194,13 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
 
     override fun onClick(dialog: DialogInterface, which: Int) {
-        when (which) {
-            DialogInterface.BUTTON_POSITIVE -> mPresenter!!.handleClickPositive()
+       if(mPresenter != null){
+           when (which) {
+               DialogInterface.BUTTON_POSITIVE -> mPresenter!!.handleClickPositive()
 
-            DialogInterface.BUTTON_NEGATIVE -> mPresenter!!.handleClickNegative()
-        }
+               DialogInterface.BUTTON_NEGATIVE -> mPresenter!!.handleClickNegative()
+           }
+       }
     }
 
     override fun onClick(stackedButton: View) {
@@ -208,10 +228,10 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        mPresenter!!.handleStorageOptionSelection(storageDirs!![position].dirURI!!)
+        mPresenter!!.handleStorageOptionSelection(storageDirs[position].dirURI!!)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {
-        mPresenter!!.handleStorageOptionSelection(storageDirs!![0].dirURI!!)
+        mPresenter!!.handleStorageOptionSelection(storageDirs[0].dirURI!!)
     }
 }

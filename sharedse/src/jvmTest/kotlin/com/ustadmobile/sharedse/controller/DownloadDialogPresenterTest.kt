@@ -6,10 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.DownloadJob
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -170,7 +167,8 @@ class DownloadDialogPresenterTest {
 
         presenter.handleClickPositive()
 
-        viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
+        waitForLiveData(umAppDatabase.downloadJobDao.lastJobLive(), 6000) {
+            dj -> dj != null }
 
         val downloadJobUid = umAppDatabase.downloadJobDao
                 .findDownloadJobUidByRootContentEntryUid(rootEntry.contentEntryUid)
@@ -212,16 +210,17 @@ class DownloadDialogPresenterTest {
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
 
-            viewReadyLatch.await(MAX_LATCH_WAITING_TIME.toLong(), TimeUnit.SECONDS)
-
             presenter.handleClickPositive()
 
-            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId!!),
+            waitForLiveData(umAppDatabase.downloadJobDao.lastJobLive(), 6000) {
+                dj -> dj != null }
+
+            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId),
                     MAX_LATCH_WAITING_TIME.toLong()) {
                 it != null && it.djStatus == JobStatus.QUEUED
             }
 
-            val queuedJob = umAppDatabase.downloadJobDao.findByUid(presenter.currentJobId!!)
+            val queuedJob = umAppDatabase.downloadJobDao.findByUid(presenter.currentJobId)
             assertEquals("Job status was changed to Queued after clicking continue",
                     JobStatus.QUEUED, queuedJob!!.djStatus)
         }
@@ -270,7 +269,7 @@ class DownloadDialogPresenterTest {
 
             presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
 
-            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId!!),
+            waitForLiveData(umAppDatabase.downloadJobDao.getJobLive(presenter.currentJobId),
                     MAX_LATCH_WAITING_TIME.toLong()) {
                 it != null && it.djStatus == JobStatus.PAUSED
             }
