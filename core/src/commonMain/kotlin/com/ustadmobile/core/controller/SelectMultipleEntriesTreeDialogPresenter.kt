@@ -15,6 +15,13 @@ class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<Stri
 
     var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
+    init {
+        val locationsArray = arguments.getValue(SelectMultipleEntriesTreeDialogView.ARG_CONTENT_ENTRY_SET)
+        selectedEntriesList = locationsArray!!.split(",").filter { it.isNotEmpty() }.map {
+            it.trim().toLong()
+        }
+        getTopEntries()
+    }
 
     private fun getTopEntries() {
         GlobalScope.launch {

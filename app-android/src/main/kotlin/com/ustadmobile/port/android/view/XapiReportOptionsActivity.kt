@@ -11,10 +11,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
@@ -30,7 +27,8 @@ import java.util.*
 
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
-        SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener {
+        SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,
+        SelectMultipleEntriesTreeDialogFragment.MultiSelectEntriesTreeDialogListener {
 
     private lateinit var visualTypeSpinner: Spinner
 
@@ -56,6 +54,8 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var whereEditText: EditText
 
+    private lateinit var whatEditText: EditText
+
     private lateinit var presenter: XapiReportOptionsPresenter
 
     private lateinit var fromET: EditText
@@ -76,6 +76,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         whoFlexBoxLayout = findViewById(R.id.whoFlex)
         whenEditText = findViewById(R.id.whenEditText)
         whereEditText = findViewById(R.id.whereEditText)
+        whatEditText = findViewById(R.id.whatEditText)
 
         whenEditText.setOnClickListener {
             createDateRangeDialog().show()
@@ -90,8 +91,12 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
                 this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        whereEditText.setOnClickListener{
+        whereEditText.setOnClickListener {
             presenter.handleWhereClicked()
+        }
+
+        whatEditText.setOnClickListener {
+            presenter.handleWhatClicked()
         }
 
         whoDataAdapter = ArrayAdapter(this,
@@ -113,6 +118,50 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             val selected = parent.getItemAtPosition(position) as XLangMapEntryDao.Verb
             addChipToDidFlexLayout(selected.valueLangMap, didFlexBoxLayout, didFlexBoxLayout.childCount - 1, selected.verbLangMapUid)
         }
+
+        yAxisSpinner.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                presenter.handleSelectedYAxis(position)
+            }
+
+        })
+
+        visualTypeSpinner.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                presenter.handleSelectedChartType(position)
+            }
+
+        })
+
+        yAxisSpinner.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                presenter.handleSelectedXAxis(position)
+            }
+
+        })
+
+        subGroupSpinner.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                presenter.handleSelectedSubGroup(position)
+            }
+
+        })
 
     }
 
@@ -236,12 +285,8 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         when (item.itemId) {
             R.id.menu_done -> {
                 presenter.handleViewReportPreview(
-                        visualTypeSpinner.selectedItemPosition,
-                        yAxisSpinner.selectedItemPosition,
-                        xAxisSpinner.selectedItemPosition,
-                        subGroupSpinner.selectedItemPosition,
                         didFlexBoxLayout.children.filter { it is Chip }.map {
-                            (it as Chip).text.toString()
+                            (it as Chip).tag as Long
                         }.toList(),
                         whoFlexBoxLayout.children.filter { it is Chip }.map {
                             (it as Chip).tag as Long
@@ -327,7 +372,15 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         runOnUiThread {
             whereEditText.setText(locationList)
         }
-        presenter.handleLocationListSelected (selected.values.toList())
+        presenter.handleLocationListSelected(selected.values.toList())
+    }
+
+    override fun onEntriesSelectedResult(selected: MutableMap<String, Long>) {
+        var locationList = selected.keys.joinToString { it }
+        runOnUiThread {
+            whatEditText.setText(locationList)
+        }
+        presenter.handleEntriesListSelected(selected.values.toList())
     }
 
 

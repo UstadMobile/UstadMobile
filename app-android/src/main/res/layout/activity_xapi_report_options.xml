@@ -27,22 +27,6 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/report_title_input_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/general_label">
-
-                <EditText
-                    android:id="@+id/report_title_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/xapi_options_report_title"
-                    android:textColorHint="@android:color/darker_gray" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
             <TextView
                 android:id="@+id/visual_type_label"
                 android:layout_width="match_parent"
@@ -50,7 +34,7 @@
                 android:text="@string/xapi_options_visual_type"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/report_title_input_layout" />
+                app:layout_constraintTop_toBottomOf="@id/general_label" />
 
             <Spinner
                 android:id="@+id/type_spinner"

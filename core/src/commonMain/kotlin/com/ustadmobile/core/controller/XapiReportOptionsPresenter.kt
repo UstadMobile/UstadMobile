@@ -6,6 +6,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
+import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView.Companion.ARG_CONTENT_ENTRY_SET
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportOptionsView
@@ -25,6 +27,16 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     var toDateTime: DateTime = DateTime.now()
 
     private var selectedLocations: List<Long> = mutableListOf()
+
+    private var selectedEntries: List<Long> = mutableListOf()
+
+    private var selectedYaxis: Int = 0
+
+    private var selectedChartType: Int = 0
+
+    private var selectedXAxis: Int = 0
+
+    private var selectedSubGroup: Int = 0
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -87,12 +99,43 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
         impl.go(SelectMultipleLocationTreeDialogView.VIEW_NAME, args, context)
     }
 
-    fun handleViewReportPreview(chartTypePos: Int, yAxisPos: Int, xAxisPos: Int, subGroupPos: Int, didListOptions: List<String>, whoListPos: List<Long>) {
-        var report = XapiReportOptions(listOfGraphs[chartTypePos], yAxisList[yAxisPos], xAxisList[xAxisPos], xAxisList[subGroupPos])
+
+    fun handleWhatClicked(){
+        val args = mutableMapOf<String, String>()
+        args[ARG_CONTENT_ENTRY_SET] = selectedEntries.joinToString { it.toString() }
+        impl.go(SelectMultipleEntriesTreeDialogView.VIEW_NAME, args, context)
+    }
+
+    fun handleViewReportPreview(didOptionsList: List<Long>, whoOptionsList: List<Long>) {
+        var report = XapiReportOptions(
+                listOfGraphs[selectedChartType],
+                yAxisList[selectedYaxis],
+                xAxisList[selectedXAxis],
+                xAxisList[selectedSubGroup])
     }
 
     fun handleLocationListSelected(locationList: List<Long>) {
         selectedLocations = locationList
+    }
+
+    fun handleEntriesListSelected(entriesList: List<Long>) {
+        selectedEntries = entriesList
+    }
+
+    fun handleSelectedYAxis(position: Int) {
+        selectedYaxis = position
+    }
+
+    fun handleSelectedChartType(position: Int) {
+        selectedChartType = position
+    }
+
+    fun handleSelectedXAxis(position: Int) {
+        selectedXAxis = position
+    }
+
+    fun handleSelectedSubGroup(position: Int) {
+        selectedSubGroup = position
     }
 
 

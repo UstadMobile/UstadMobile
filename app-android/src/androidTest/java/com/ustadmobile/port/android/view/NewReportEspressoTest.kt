@@ -34,6 +34,8 @@ class NewReportEspressoTest {
         val personDao = db.personDao
         val verbDao = db.verbDao
         val locationDao = db.locationDao
+        val entryDao = db.contentEntryDao
+        val entryJoinDao = db.contentEntryParentChildJoinDao
 
         var firstPerson = Person()
         firstPerson.firstNames = "Hello"
@@ -129,6 +131,56 @@ class NewReportEspressoTest {
         val southWestAfg = Location("Southwest Afghanistan",
                 "Southwest region", true, afgLocationUid)
         locationDao.insert(southWestAfg)
+
+        var firstEntry = ContentEntry()
+        firstEntry.title = "Ustad Mobile"
+        firstEntry.contentEntryUid = entryDao.insert(firstEntry)
+
+        var secondEntry = ContentEntry()
+        secondEntry.title = "Khan Academy"
+        secondEntry.contentEntryUid = entryDao.insert(secondEntry)
+
+        var firstsecondJoin = ContentEntryParentChildJoin()
+        firstsecondJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
+        firstsecondJoin.cepcjChildContentEntryUid = secondEntry.contentEntryUid
+        entryJoinDao.insert(firstsecondJoin)
+
+        var phetEntry = ContentEntry()
+        phetEntry.title = "PHET"
+        phetEntry.contentEntryUid = entryDao.insert(phetEntry)
+
+        var phetJoin = ContentEntryParentChildJoin()
+        phetJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
+        phetJoin.cepcjChildContentEntryUid = phetEntry.contentEntryUid
+        entryJoinDao.insert(phetJoin)
+
+        var edraakEntry = ContentEntry()
+        edraakEntry.title = "EDRAAK"
+        edraakEntry.contentEntryUid = entryDao.insert(edraakEntry)
+
+        var edraakJoin = ContentEntryParentChildJoin()
+        edraakJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
+        edraakJoin.cepcjChildContentEntryUid = edraakEntry.contentEntryUid
+        entryJoinDao.insert(edraakJoin)
+
+
+        var khanclass1 = ContentEntry()
+        khanclass1.title = "Class 1"
+        khanclass1.contentEntryUid = entryDao.insert(khanclass1)
+
+        var khanclassJoin = ContentEntryParentChildJoin()
+        khanclassJoin.cepcjParentContentEntryUid = secondEntry.contentEntryUid
+        khanclassJoin.cepcjChildContentEntryUid = khanclass1.contentEntryUid
+        entryJoinDao.insert(khanclassJoin)
+
+        var khanclass2 = ContentEntry()
+        khanclass2.title = "Class 2"
+        khanclass2.contentEntryUid = entryDao.insert(khanclass2)
+
+        var khanclass2Join = ContentEntryParentChildJoin()
+        khanclass2Join.cepcjParentContentEntryUid = secondEntry.contentEntryUid
+        khanclass2Join.cepcjChildContentEntryUid = khanclass2.contentEntryUid
+        entryJoinDao.insert(khanclass2Join)
 
         val intent = Intent()
         mActivityRule.launchActivity(intent)
