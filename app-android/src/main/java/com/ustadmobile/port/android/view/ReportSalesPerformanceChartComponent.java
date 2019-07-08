@@ -1,15 +1,12 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
@@ -18,144 +15,47 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ReportSalesPerformanceDetailPresenter;
 import com.ustadmobile.core.util.UMCalendarUtil;
-import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
+import com.ustadmobile.core.view.ReportBarChartComponentView;
 import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import ru.dimorinny.floatingtextbutton.FloatingTextButton;
+public class ReportSalesPerformanceChartComponent extends LinearLayout implements
+        ReportBarChartComponentView {
 
-public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
-        implements ReportSalesPerformanceDetailView {
+    BarChart barChart;
+    Context mContext;
 
-    private Toolbar toolbar;
-    private ReportSalesPerformanceDetailPresenter mPresenter;
-    private FloatingTextButton fab;
-    Menu menu;
-    private boolean fabVisibility=true;
-
-    private TextView xLabel, yLabel;
-    private LinearLayout chartLL;
-
-
-    /**
-     * Creates the options on the toolbar - specifically the Done tick menu item
-     * @param thisMenu  The menu options
-     * @return  true. always.
-     */
-    public boolean onCreateOptionsMenu(Menu thisMenu) {
-        menu = thisMenu;
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_report_detail, menu);
-
-        menu.findItem(R.id.menu_report_detail_download).setVisible(true);
-        menu.findItem(R.id.menu_report_detail_edit).setVisible(true);
-
-        return true;
+    public ReportSalesPerformanceChartComponent(Context context) {
+        super(context);
+        mContext = context;
     }
 
-    /**
-     * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
-     * the activity goes back when the back button is pressed.
-     *
-     * @param item The item selected
-     * @return true if accounted for
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int i = item.getItemId();
-        if (i == android.R.id.home) {
-            onBackPressed();
-            return true;
-
-        } else if (i == R.id.menu_report_detail_download) {
-            mPresenter.handleClickDownloadReport();
-            return true;
-        } else if (i == R.id.menu_report_detail_edit) {
-            mPresenter.handleClickEditReport();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        //Setting layout:
-        setContentView(R.layout.activity_report_sales_performance_detail);
-
-        //Toolbar:
-        toolbar = findViewById(R.id.activity_report_sales_performance_detail_toolbar);
-        toolbar.setTitle(getText(R.string.sales_performance_report));
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-        xLabel = findViewById(R.id.activity_report_sales_perforance_detail_x_label);
-        yLabel = findViewById(R.id.activity_report_sales_perforance_detail_y_label);
-        chartLL = findViewById(R.id.activity_report_sales_perforance_detail_report_ll);
-
-        xLabel.setVisibility(View.VISIBLE);
-        yLabel.setVisibility(View.VISIBLE);
-
-        //Call the Presenter
-        mPresenter = new ReportSalesPerformanceDetailPresenter(this,
-                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), this);
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState));
-
-        //FAB and its listener
-        fab = findViewById(R.id.activity_report_sales_performance_detail_fab);
-        fab.setOnClickListener(v -> mPresenter.handleClickAddToDashboard());
-        fab.setVisibility(fabVisibility?View.VISIBLE:View.INVISIBLE);
+    public ReportSalesPerformanceChartComponent(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
     }
 
-
-    @Override
-    public void setTitle(String title) {
-        toolbar.setTitle(title);
+    public ReportSalesPerformanceChartComponent(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     @Override
-    public void showDownloadButton(boolean show) {
-        if(menu!=null){
-            menu.getItem(R.id.menu_report_detail_download).setVisible(show);
-        }
-    }
-
-    @Override
-    public void showAddToDashboardButton(boolean show) {
-        fabVisibility = show;
+    public void setChartData(List<Object> dataSet){
         runOnUiThread(() -> {
-            if(fab!= null){
-                fab.setVisibility(show?View.VISIBLE:View.INVISIBLE);
-            }
+            removeAllViews();
+            barChart = createSalesBarChart(dataSet);
+            addView(barChart);
         });
+
     }
 
-    @Override
-    public void setReportData(List<Object> dataSet) {
+    private BarChart createSalesBarChart(List<Object> dataSet){
 
-        chartLL.removeAllViews();
-        BarChart barChart = createBarChart(dataSet);
-        chartLL.addView(barChart);
-    }
-
-    @Override
-    public void setReportType(int reportType) {
-        runOnUiThread(() -> toolbar.setTitle(R.string.sales_performance_report));
-    }
-
-
-    public BarChart createBarChart(List<Object> dataSet){
-
-        BarChart barChart = new BarChart(this);
+        BarChart barChart = new BarChart(getContext());
         ViewGroup.LayoutParams params =
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
@@ -183,9 +83,6 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
         Map<Long, ArrayList<BarEntry>> locationToBarEntriesMap = new HashMap<>();
 
         Map<Long, String> locationUidToName = new HashMap<>();
-
-
-        List<String> allDatesInOrder = new ArrayList<>();
 
         for(Object data:dataSet){
             ReportSalesPerformance entry = (ReportSalesPerformance) data;
@@ -215,7 +112,6 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
                 int j=0;
                 for(String ignored :allDateOccurences){
                     j++;
-                    //locationBarEntries.add(new BarEntry(j,0));
                 }
             }
 
@@ -227,18 +123,13 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
             if(!allDateOccurences.contains(saleOccurrence)){
                 //Add it
                 allDateOccurences.add(saleOccurrence);
-                index = 1;
-            }else{
-                index = locationBarEntries.size()+1;
             }
             index = allDateOccurences.indexOf(saleOccurrence) + 1;
             //Add entry in this index
             locationBarEntries.add(new BarEntry(index, saleAmount));
 
-
             //END: update bar entries.
             locationToBarEntriesMap.put(locationUid, locationBarEntries);
-
 
         }
 
@@ -269,8 +160,6 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
             data.addDataSet(barDataSet);
 
         }
-
-
 
         //Get yAxis for chart of date occurrences
         for(String everyDateOccurrence:allDateOccurences){
@@ -334,8 +223,11 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
 
         barChart.setTouchEnabled(false);
 
-
-
         return barChart;
+    }
+
+    @Override
+    public void runOnUiThread(Runnable r) {
+        ((Activity)mContext).runOnUiThread(r);
     }
 }

@@ -1,9 +1,5 @@
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.db.entities.DashboardEntry;
-
-
 /**
  * Core View. Screen is for ReportSalesPerformance's View
  */

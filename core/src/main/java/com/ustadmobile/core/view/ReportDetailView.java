@@ -1,9 +1,6 @@
 package com.ustadmobile.core.view;
 
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Core View. Screen is for ReportDetail's View
  */
@@ -26,9 +23,14 @@ public interface ReportDetailView extends UstadView {
 
     void showAddToDashboardButton(boolean show);
 
-    void setReportData(List<Object> dataSet);
-
     void setReportType(int reportType);
+
+    void showSalesPerformanceReport();
+
+    void showSalesLogReport();
+
+    void showTopLEsReport();
+
 
 }
 

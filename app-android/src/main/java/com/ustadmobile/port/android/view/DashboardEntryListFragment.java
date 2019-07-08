@@ -200,9 +200,4 @@ public class DashboardEntryListFragment
         adb.show();
     }
 
-    @Override
-    public void renderChart(long uid) {
-        recyclerAdapter.updateMe(uid, mPresenter.salesPerformanceResult);
-    }
-
 }

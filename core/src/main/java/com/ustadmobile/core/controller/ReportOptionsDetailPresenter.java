@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ReportOptions;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ReportDetailView;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.ReportSalesLogDetailView;
 import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
@@ -333,19 +334,8 @@ public class ReportOptionsDetailPresenter extends UstadBaseController<ReportOpti
             args.put(ARG_REPORT_TYPE, String.valueOf(reportType));
             args.put(ARG_REPORT_OPTIONS, reportOptionsString);
 
-            switch (reportType) {
-                case DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE:
-                    impl.go(ReportSalesPerformanceDetailView.VIEW_NAME, args, context);
-                    break;
-                case DashboardEntry.REPORT_TYPE_SALES_LOG:
-                    impl.go(ReportSalesLogDetailView.VIEW_NAME, args, context);
-                    break;
-                case DashboardEntry.REPORT_TYPE_TOP_LES:
-                    impl.go(ReportTopLEsDetailView.VIEW_NAME, args, context);
-                    break;
-                default:
-                    break;
-            }
+            impl.go(ReportDetailView.VIEW_NAME, args, context);
+
             view.finish();
         }
     }

@@ -19,6 +19,7 @@ import com.ustadmobile.core.model.ReportOptions;
 import com.ustadmobile.core.view.DashboardEntryListView;
 
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.ReportDetailView;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
 import com.ustadmobile.core.view.ReportSalesLogDetailView;
 import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
@@ -91,7 +92,6 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
             tagLiveData = tagDao.findAllActiveLive();
             tagLiveData.observe(DashboardEntryListPresenter.this,
                     DashboardEntryListPresenter.this::handleTagsChanged);
-
         }
     }
 
@@ -185,23 +185,12 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
         Hashtable<String, String> args = new Hashtable<>();
         args.put(ARG_DASHBOARD_ENTRY_UID, String.valueOf(entryUid));
         args.put(ARG_REPORT_OPTIONS, reportOptions);
+        args.put(ARG_REPORT_TYPE, String.valueOf(reportType));
 
-        switch(reportType){
-            case REPORT_TYPE_SALES_PERFORMANCE:
-                impl.go(ReportSalesPerformanceDetailView.VIEW_NAME, args, context);
-                break;
-            case REPORT_TYPE_SALES_LOG:
-                impl.go(ReportSalesLogDetailView.VIEW_NAME, args, context);
-                break;
-            case REPORT_TYPE_TOP_LES:
-                impl.go(ReportTopLEsDetailView.VIEW_NAME, args, context);
-                break;
-            default:
-                break;
-        }
-
+        impl.go(ReportDetailView.VIEW_NAME, args, context);
 
     }
+
     public void handleEditEntry(long entryUid){
         //Go to Report Options with the data here.
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -242,35 +231,4 @@ public class DashboardEntryListPresenter extends UstadBaseController<DashboardEn
             });
         }
     }
-
-
-    public List<ReportSalesPerformance> salesPerformanceResult;
-
-    //TODO: remove,
-    public void getSalesPerformanceReport(long entryUid, String reportOptionsString){
-        Gson gson = new Gson();
-        ReportOptions reportOptions;
-        reportOptions = gson.fromJson(reportOptionsString, ReportOptions.class);
-
-        int startOfWeek = 6; //Sunday //TODO: GET THIS FROM SETTINGS, etc/
-
-        List<Long> producerUids= new ArrayList<>();
-        saleDao.getSalesPerformanceReportSumGroupedByLocation(reportOptions.getLes(),
-            producerUids, reportOptions.getLocations(), reportOptions.getProductTypes(),
-            reportOptions.getFromDate(), reportOptions.getToDate(),
-            reportOptions.getFromPrice(), reportOptions.getToPrice(),
-            new UmCallback<List<ReportSalesPerformance>>() {
-                @Override
-                public void onSuccess(List<ReportSalesPerformance> result) {
-                    salesPerformanceResult = result;
-
-                }
-
-                @Override
-                public void onFailure(Throwable exception) {
-                    exception.printStackTrace();
-                }
-        });
-    }
-
 }

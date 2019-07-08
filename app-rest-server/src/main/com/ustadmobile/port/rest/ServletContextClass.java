@@ -427,10 +427,7 @@ public class ServletContextClass implements ServletContextListener {
                     accessoriesCategoryCollectionJoin.setSaleProductParentJoinUid(
                             productParentJoinDao.insert(accessoriesCategoryCollectionJoin));
 
-
                 }
-
-
 
             }
 

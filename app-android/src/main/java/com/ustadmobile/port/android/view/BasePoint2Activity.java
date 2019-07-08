@@ -74,8 +74,6 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
     AHBottomNavigation bottomNavigation;
     private ActionBar ab;
 
-
-
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
@@ -107,8 +105,6 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
             }
             return true;
         });
-
-
 
         return true;
     }
@@ -176,7 +172,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         bottomNavigation.addItem(inventory_item);
         bottomNavigation.addItem(sales_item);
         bottomNavigation.addItem(courses_item);
-        //bottomNavigation.addItem(reports_item);
+        bottomNavigation.addItem(reports_item);
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
@@ -233,27 +229,27 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
 
             int iconDimen = dpToPx(36);
             runOnUiThread(() -> Picasso.get()
-                    .load(profileImage)
-                    .transform(new CircleTransform())
-                    .resize(iconDimen, iconDimen)
-                    .centerCrop()
-                    .into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                            Drawable d = new BitmapDrawable(getResources(), bitmap);
-                            ab.setHomeAsUpIndicator(d);
-                            ab.setDisplayHomeAsUpEnabled(true);
-                        }
+                .load(profileImage)
+                .transform(new CircleTransform())
+                .resize(iconDimen, iconDimen)
+                .centerCrop()
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        Drawable d = new BitmapDrawable(getResources(), bitmap);
+                        ab.setHomeAsUpIndicator(d);
+                        ab.setDisplayHomeAsUpEnabled(true);
+                    }
 
-                        @Override
-                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                    @Override
+                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
 
-                        }
+                    }
 
-                        @Override
-                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        }
-                    }));
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    }
+                }));
 
         }
 
@@ -417,9 +413,9 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         if (number == 0) {
             nString = "";
         }
-        //TODO: Change to 3 when reports view is active
+
         bottomNavigation.setNotification(nString,
-                bottomNavigation.getItemsCount() - 2);
+                bottomNavigation.getItemsCount() - 3);
     }
 
     /**

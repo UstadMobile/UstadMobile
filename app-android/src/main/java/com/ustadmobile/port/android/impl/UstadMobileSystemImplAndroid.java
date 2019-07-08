@@ -82,10 +82,8 @@ import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.OnBoardingView;
 import com.ustadmobile.core.view.Register2View;
+import com.ustadmobile.core.view.ReportDetailView;
 import com.ustadmobile.core.view.ReportOptionsDetailView;
-import com.ustadmobile.core.view.ReportSalesLogDetailView;
-import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
-import com.ustadmobile.core.view.ReportTopLEsDetailView;
 import com.ustadmobile.core.view.SaleDetailSignatureView;
 import com.ustadmobile.core.view.SaleDetailView;
 import com.ustadmobile.core.view.SaleItemDetailView;
@@ -124,10 +122,8 @@ import com.ustadmobile.port.android.view.H5PContentActivity;
 import com.ustadmobile.port.android.view.Login2Activity;
 import com.ustadmobile.port.android.view.OnBoardingActivity;
 import com.ustadmobile.port.android.view.Register2Activity;
+import com.ustadmobile.port.android.view.ReportDetailActivity;
 import com.ustadmobile.port.android.view.ReportOptionsDetailActivity;
-import com.ustadmobile.port.android.view.ReportSalesLogDetailActivity;
-import com.ustadmobile.port.android.view.ReportSalesPerformanceDetailActivity;
-import com.ustadmobile.port.android.view.ReportTopLEsDetailActivity;
 import com.ustadmobile.port.android.view.SaleDetailActivity;
 import com.ustadmobile.port.android.view.SaleDetailSignatureActivity;
 import com.ustadmobile.port.android.view.SaleItemDetailActivity;
@@ -236,11 +232,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AddReminderDialogView.VIEW_NAME, AddReminderDialogFragment.class);
         viewNameToAndroidImplMap.put(ReportOptionsDetailView.VIEW_NAME, ReportOptionsDetailActivity.class);
         viewNameToAndroidImplMap.put(SelectMultipleLocationTreeDialogView.VIEW_NAME, SelectMultipleLocationTreeDialogFragment.class);
-        viewNameToAndroidImplMap.put(ReportSalesPerformanceDetailView.VIEW_NAME, ReportSalesPerformanceDetailActivity.class);
-        viewNameToAndroidImplMap.put(ReportSalesLogDetailView.VIEW_NAME, ReportSalesLogDetailActivity.class);
-        viewNameToAndroidImplMap.put(ReportTopLEsDetailView.VIEW_NAME, ReportTopLEsDetailActivity.class);
         viewNameToAndroidImplMap.put(SelectMultipleProductTypeTreeDialogView.VIEW_NAME, SelectMultipleProductTypeTreeDialogFragment.class);
         viewNameToAndroidImplMap.put(SelectMultiplePeopleView.VIEW_NAME, SelectMultiplePeopleFragment.class);
+        viewNameToAndroidImplMap.put(ReportDetailView.VIEW_NAME, ReportDetailActivity.class);
 
 
     }
