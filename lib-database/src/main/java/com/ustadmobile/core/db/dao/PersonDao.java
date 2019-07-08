@@ -91,6 +91,7 @@ public abstract class PersonDao implements SyncableDao<Person, PersonDao> {
             @Override
             public void onSuccess(PersonUidAndPasswordHash person) {
                 if(person == null) {
+                    System.out.println("Null personAuth.Nothing found");
                     callback.onSuccess(null);
                 }else if(person.getPasswordHash().startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
                         && person.getPasswordHash().substring(2).equals(password)) {

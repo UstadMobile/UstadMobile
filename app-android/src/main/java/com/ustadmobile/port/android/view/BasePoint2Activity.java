@@ -176,7 +176,7 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         bottomNavigation.addItem(inventory_item);
         bottomNavigation.addItem(sales_item);
         bottomNavigation.addItem(courses_item);
-        bottomNavigation.addItem(reports_item);
+        //bottomNavigation.addItem(reports_item);
 
         //Telling navigation to always show the text on the items. Unlike Google's
         // own implementation.
@@ -417,8 +417,9 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
         if (number == 0) {
             nString = "";
         }
+        //TODO: Change to 3 when reports view is active
         bottomNavigation.setNotification(nString,
-                bottomNavigation.getItemsCount() - 3);
+                bottomNavigation.getItemsCount() - 2);
     }
 
     /**

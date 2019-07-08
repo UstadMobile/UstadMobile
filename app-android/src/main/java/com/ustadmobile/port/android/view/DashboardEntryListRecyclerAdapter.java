@@ -28,6 +28,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.DashboardEntryListPresenter;
 import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.view.ReportSalesPerformanceDetailView;
 import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.lib.db.entities.ReportSalesPerformance;
 
@@ -125,10 +126,15 @@ public class DashboardEntryListRecyclerAdapter extends
             case DashboardEntry.REPORT_TYPE_SALES_PERFORMANCE:
                 if(reportPlaceholder!=null)
                     reportPlaceholder.setVisibility(View.GONE);
-                mPresenter.getSalesPerformanceReport(entryUid, entryParams);
-                BarChart barChart = createBarChart();
-                chartLL.addView(barChart);
-                currencyTV.setVisibility(View.VISIBLE);
+
+//                BarChart barChart = createBarChart();
+//                chartLL.addView(barChart);
+//                currencyTV.setVisibility(View.VISIBLE);
+
+                //OR:
+                //TODO: this
+
+
 
                 break;
             case DashboardEntry.REPORT_TYPE_SALES_LOG:
@@ -335,6 +341,7 @@ public class DashboardEntryListRecyclerAdapter extends
 
         BarDataSet barDataSet = new BarDataSet(heratEntries,"Herat");
         barDataSet.setColor(Color.parseColor("#FF9800"));
+
         BarDataSet barDataSet1 = new BarDataSet(kabulEntries,"Kabul");
         barDataSet1.setColors(Color.parseColor("#FF6D00"));
         BarDataSet barDataSet2 = new BarDataSet(khostEntries,"Khost");

@@ -27,7 +27,6 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -197,7 +196,6 @@ public class ReportSalesPerformanceDetailActivity extends UstadBaseActivity
 
 
         for(int i=0; i<dataSet.size();i++){
-            //TODO: Fix date bug
 
             int index;
             //Get Report data:
