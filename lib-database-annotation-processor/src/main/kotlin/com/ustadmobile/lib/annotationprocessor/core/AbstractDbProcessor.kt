@@ -106,8 +106,10 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * @param resultVarName The variable name for the result of the query (this will be as per resultType,
      * with any wrapping (e.g. LiveData) removed.
      */
-    fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String,
-                               enclosing: TypeElement, method: ExecutableElement, resultVarName: String = "_result"): CodeBlock {
+    //TODO: Check for invalid combos. Cannot have querySql and rawQueryVarName as null. Cannot have rawquery doing update
+    fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String?,
+                               enclosing: TypeElement, method: ExecutableElement,
+                               resultVarName: String = "_result", rawQueryVarName: String? = null): CodeBlock {
         // The result, with any wrapper (e.g. LiveData or DataSource.Factory) removed
         val resultType = resolveQueryResultType(returnType)
 
@@ -126,15 +128,19 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             null
         }
 
-        val isUpdateOrDelete = querySql.trim().startsWith("update", ignoreCase = true)
-                || querySql.trim().startsWith("delete", ignoreCase = true)
+        val isUpdateOrDelete = querySql != null
+                && (querySql.trim().startsWith("update", ignoreCase = true)
+                || querySql.trim().startsWith("delete", ignoreCase = true))
 
         val codeBlock = CodeBlock.builder()
 
-        val namedParams = getQueryNamedParameters(querySql)
-
         var preparedStatementSql = querySql
-        namedParams.forEach { preparedStatementSql = preparedStatementSql.replace(":$it", "?") }
+        var execStmtSql = querySql
+        if(preparedStatementSql != null) {
+            val namedParams = getQueryNamedParameters(querySql!!)
+            namedParams.forEach { preparedStatementSql = preparedStatementSql!!.replace(":$it", "?") }
+            namedParams.forEach { execStmtSql = execStmtSql!!.replace(":$it", "null") }
+        }
 
         if(resultType != UNIT)
             codeBlock.add("var $resultVarName = ${defaultVal(resultType)}\n")
@@ -146,52 +152,58 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 .add("val _con = _db.openConnection()\n")
                 .add("_conToClose = _con\n")
 
-        if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
-            codeBlock.beginControlFlow("val _stmt = if(_db!!.jdbcArraySupported)")
-                    .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
-                    .nextControlFlow("else")
-                    .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
-                            PreparedStatement::class)
-                    .endControlFlow()
+        if(rawQueryVarName == null) {
+            if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
+                codeBlock.beginControlFlow("val _stmt = if(_db!!.jdbcArraySupported)")
+                        .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
+                        .nextControlFlow("else")
+                        .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
+                                PreparedStatement::class)
+                        .endControlFlow()
+            }else {
+                codeBlock.add("val _stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
+            }
         }else {
-            codeBlock.add("val _stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
+            codeBlock.add("val _stmt = _con.prepareStatement($rawQueryVarName.getSql())\n")
         }
+
 
         codeBlock.add("_stmtToClose = _stmt\n")
 
 
-        var paramIndex = 1
-        val queryVarsNotSubstituted = mutableListOf<String>()
-        getQueryNamedParameters(querySql).forEach {
-            val paramType = queryVars[it]
-            if(paramType == null ) {
-                queryVarsNotSubstituted.add(it)
-            }else if(isListOrArray(paramType.javaToKotlinType())) {
-                //val con = null as Connection
-                val arrayTypeName = sqlArrayComponentTypeOf(paramType.javaToKotlinType())
-                codeBlock.add("_stmt.setArray(${paramIndex++}, ")
-                        .beginControlFlow("if(_db!!.jdbcArraySupported) ")
-                        .add("_con!!.createArrayOf(%S, %L.toTypedArray())\n", arrayTypeName, it)
-                        .nextControlFlow("else")
-                        .add("%T.createArrayOf(%S, %L.toTypedArray())\n", PreparedStatementArrayProxy::class,
-                                arrayTypeName, it)
-                        .endControlFlow()
-                        .add(")\n")
-            }else {
-                codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramType.javaToKotlinType())}(${paramIndex++}, " +
-                        "${it})\n")
+        if(querySql != null) {
+            var paramIndex = 1
+            val queryVarsNotSubstituted = mutableListOf<String>()
+            getQueryNamedParameters(querySql).forEach {
+                val paramType = queryVars[it]
+                if(paramType == null ) {
+                    queryVarsNotSubstituted.add(it)
+                }else if(isListOrArray(paramType.javaToKotlinType())) {
+                    //val con = null as Connection
+                    val arrayTypeName = sqlArrayComponentTypeOf(paramType.javaToKotlinType())
+                    codeBlock.add("_stmt.setArray(${paramIndex++}, ")
+                            .beginControlFlow("if(_db!!.jdbcArraySupported) ")
+                            .add("_con!!.createArrayOf(%S, %L.toTypedArray())\n", arrayTypeName, it)
+                            .nextControlFlow("else")
+                            .add("%T.createArrayOf(%S, %L.toTypedArray())\n", PreparedStatementArrayProxy::class,
+                                    arrayTypeName, it)
+                            .endControlFlow()
+                            .add(")\n")
+                }else {
+                    codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramType.javaToKotlinType())}(${paramIndex++}, " +
+                            "${it})\n")
+                }
             }
-        }
 
-        if(queryVarsNotSubstituted.isNotEmpty()) {
-            logMessage(Diagnostic.Kind.ERROR,
-                    "Parameters in query not found in method signature: ${queryVarsNotSubstituted.joinToString()}",
-                    enclosing, method)
-            return CodeBlock.builder().build()
+            if(queryVarsNotSubstituted.isNotEmpty()) {
+                logMessage(Diagnostic.Kind.ERROR,
+                        "Parameters in query not found in method signature: ${queryVarsNotSubstituted.joinToString()}",
+                        enclosing, method)
+                return CodeBlock.builder().build()
+            }
+        }else {
+            codeBlock.add("$rawQueryVarName.bindToPreparedStmt(_stmt)\n")
         }
-
-        var execStmtSql = querySql
-        namedParams.forEach { execStmtSql = execStmtSql.replace(":$it", "null") }
 
         var resultSet = null as ResultSet?
         var execStmt = null as Statement?
@@ -204,7 +216,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                  */
                 execStmt?.executeUpdate(execStmtSql)
                 codeBlock.add("val _numUpdates = _stmt.executeUpdate()\n")
-                val stmtSplit = execStmtSql.trim().split(Regex("\\s+"), limit = 4)
+                val stmtSplit = execStmtSql!!.trim().split(Regex("\\s+"), limit = 4)
                 val tableName = if(stmtSplit[0].equals("UPDATE", ignoreCase = true)) {
                     stmtSplit[1] // in case it is an update statement, will be the second word (e.g. update tablename)
                 }else {
@@ -229,11 +241,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }else {
                 codeBlock.add("val _resultSet = _stmt.executeQuery()\n")
                         .add("_resultSetToClose = _resultSet\n")
-                resultSet = execStmt?.executeQuery(execStmtSql)
-                val metaData = resultSet!!.metaData
+
                 val colNames = mutableListOf<String>()
-                for(i in 1 .. metaData.columnCount) {
-                    colNames.add(metaData.getColumnName(i))
+                if(execStmtSql != null) {
+                    resultSet = execStmt?.executeQuery(execStmtSql)
+                    val metaData = resultSet!!.metaData
+                    for(i in 1 .. metaData.columnCount) {
+                        colNames.add(metaData.getColumnName(i))
+                    }
+                }else {
+                    colNames.addAll(entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') })
                 }
 
                 val entityVarName = "_entity"

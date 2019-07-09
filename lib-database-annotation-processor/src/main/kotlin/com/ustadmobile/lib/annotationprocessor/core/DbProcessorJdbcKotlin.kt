@@ -524,7 +524,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
             val daoMethod = daoSubEl as ExecutableElement
             if(daoMethod.getAnnotation(Insert::class.java) != null) {
                 daoImpl.addFunction(generateInsertFun(daoTypeElement, daoMethod, daoImpl))
-            }else if(daoMethod.getAnnotation(Query::class.java) != null) {
+            }else if(daoMethod.getAnnotation(Query::class.java) != null
+                    || daoMethod.getAnnotation(RawQuery::class.java) != null) {
                 daoImpl.addFunction(generateQueryFun(daoTypeElement, daoMethod, daoImpl))
             }else if(daoMethod.getAnnotation(Update::class.java) != null) {
                 daoImpl.addFunction(generateUpdateFun(daoTypeElement, daoMethod, daoImpl))
@@ -532,7 +533,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 daoImpl.addFunction(generateDeleteFun(daoTypeElement, daoMethod))
             }else {
                 messager?.printMessage(Diagnostic.Kind.ERROR,
-                        "${makeLogPrefix(daoTypeElement, daoMethod)}: Abstract method on DAO not annotated with Query, Update, Delete, or Insert",
+                        "${makeLogPrefix(daoTypeElement, daoMethod)}: Abstract method on DAO not annotated with Query, RawQuery, Update, Delete, or Insert",
                         daoMethod)
             }
         }
@@ -791,7 +792,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         return insertFun.build()
     }
 
-    fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder) : FunSpec {
+    fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder,
+                         isRawQuery: Boolean = false) : FunSpec {
         val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                 daoMethod) as ExecutableType
 
@@ -807,9 +809,10 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 forceNullableParameterTypeArgs = isLiveData(returnTypeResolved)
                         && isNullableResultType((returnTypeResolved as ParameterizedTypeName).typeArguments[0]))
 
-        val querySql = daoMethod.getAnnotation(Query::class.java).value
+        val querySql = daoMethod.getAnnotation(Query::class.java)?.value
 
-        if(!querySql.trim().startsWith("UPDATE", ignoreCase = true)
+        if(querySql != null
+                && !querySql.trim().startsWith("UPDATE", ignoreCase = true)
                 && !querySql.trim().startsWith("DELETE", ignoreCase = true)
                 && resultType == UNIT) {
             logMessage(Diagnostic.Kind.ERROR, "Query method running SELECT must have a return type")
@@ -860,8 +863,14 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             funSpec.addCode(liveDataCodeBlock.build())
         }else {
+            val rawQueryVarName = if(daoMethod.getAnnotation(RawQuery::class.java) !=null ) {
+                daoMethod.parameters[0].simpleName.toString()
+            }else {
+                null
+            }
+
             funSpec.addCode(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
-                    daoTypeElement, daoMethod))
+                    daoTypeElement, daoMethod, rawQueryVarName = rawQueryVarName))
         }
 
         if(returnTypeResolved != UNIT){
