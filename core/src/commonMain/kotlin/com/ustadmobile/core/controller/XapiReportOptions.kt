@@ -1,5 +1,7 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.generated.locale.MessageID
+
 data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var xAxis: Int, var subGroup: Int,
                              var whoFilterList: List<Long> = mutableListOf(),
@@ -10,7 +12,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var locationsList: List<Long> = mutableListOf()) {
 
 
-    data class QueryParts(val sqlStr: String, val queryParams: List<Any>)
+    data class QueryParts(val sqlStr: String, val queryParams: Array<Any>)
 
     fun toSql(): QueryParts {
         if (xAxis == subGroup) {
@@ -18,51 +20,91 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
         }
         val paramList = mutableListOf<Any>()
         var sql = "SELECT " + when (yAxis) {
-            XapiReportOptionsPresenter.SCORE -> "AVG(StatementEntity.resultScoreScaled), "
-            XapiReportOptionsPresenter.DURATION -> "SUM(StatementEntity.resultDuration), "
-            XapiReportOptionsPresenter.COUNT_ACTIVITIES -> "COUNT(StatementEntity.*), "
+            SCORE -> "AVG(StatementEntity.resultScoreScaled), "
+            DURATION -> "SUM(StatementEntity.resultDuration), "
+            COUNT_ACTIVITIES -> "COUNT(StatementEntity.*), "
             else -> ""
         }
         sql += groupBy(xAxis) + "AS xAxis, "
         sql += groupBy(subGroup) + "AS subgroup "
         sql += "FROM StatementEntity "
-        if (xAxis == XapiReportOptionsPresenter.GENDER || subGroup == XapiReportOptionsPresenter.GENDER) {
+        if (xAxis == GENDER || subGroup == GENDER) {
             sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
         }
-        sql += "WHERE "
-        if (objectsList.isNotEmpty()) {
-            sql += "(StatementEntity.xObjectUid IN (?) OR " +
-                    "EXISTS(SELECT contextXObjectStatementJoinUid FROM ContextXObjectStatementJoin " +
-                    "WHERE contextStatementUid = StatementEntity.statementUid AND contextXObjectUid IN (?)) "
-            paramList.addAll(listOf<Any>(objectsList, objectsList))
-        }
+        if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0 && fromDate > 0)) {
+            sql += "WHERE "
+            var whereList = mutableListOf<String>()
+            if (objectsList.isNotEmpty()) {
+                whereList.add("(StatementEntity.xObjectUid IN (?) OR " +
+                        "EXISTS(SELECT contextXObjectStatementJoinUid FROM ContextXObjectStatementJoin " +
+                        "WHERE contextStatementUid = StatementEntity.statementUid AND contextXObjectUid IN (?)) ")
+                paramList.addAll(listOf<Any>(objectsList, objectsList))
+            }
+            if (whoFilterList.isNotEmpty()) {
+                whereList.add("StatementEntity.personUid IN (?) ")
+                paramList.addAll(listOf<Any>(whoFilterList))
+            }
+            if (didFilterList.isNotEmpty()) {
+                whereList.add("StatementEntity.verbUid IN (?) ")
+                paramList.addAll(listOf<Any>(didFilterList))
+            }
+            if (toDate > 0 && fromDate > 0) {
+                whereList.add("(StatementEntity.timestamp > ? AND StatementEntity.timestamp < ?) ")
+                paramList.add(fromDate)
+                paramList.add(toDate)
+            }
+            sql += whereList.joinToString("AND ")
 
-        if (whoFilterList.isNotEmpty()) {
-            sql += "StatementEntity.personUid IN (?) "
-            paramList.addAll(listOf<Any>(whoFilterList))
-        }
-        if (didFilterList.isNotEmpty()) {
-            sql += "AND StatementEntity.verbUid IN (?) "
-            paramList.addAll(listOf<Any>(didFilterList))
-        }
-        if (toDate < 0 && fromDate < 0) {
-            sql += "AND (StatementEntity.timestamp > ? AND StatementEntity.timestamp < ?) "
-            paramList.add(fromDate)
-            paramList.add(toDate)
         }
         sql += "GROUP BY xAxis, subgroup"
-        return QueryParts(sql, paramList.toList())
+        return QueryParts(sql, paramList.toList().toTypedArray())
     }
 
     private fun groupBy(value: Int): String {
         return when (value) {
-            XapiReportOptionsPresenter.DAY -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch') "
-            XapiReportOptionsPresenter.WEEK -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
-            XapiReportOptionsPresenter.MONTH -> "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch') "
-            XapiReportOptionsPresenter.CONTENT_ENTRY -> "XObjectEntity.xObjectUid "
+            DAY -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch') "
+            WEEK -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
+            MONTH -> "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch') "
+            CONTENT_ENTRY -> "XObjectEntity.xObjectUid "
             //LOCATION -> "Location.title"
-            XapiReportOptionsPresenter.GENDER -> "Person.gender "
+            GENDER -> "Person.gender "
             else -> ""
         }
     }
+
+    companion object {
+
+        const val BAR_CHART = MessageID.bar_chart
+
+        const val LINE_GRAPH = MessageID.line_graph
+
+        const val FREQ_GRAPH = MessageID.freq_graph
+
+        val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH, FREQ_GRAPH)
+
+        const val SCORE = MessageID.score
+
+        const val DURATION = MessageID.duration
+
+        const val COUNT_ACTIVITIES = MessageID.count_activity
+
+        val yAxisList = arrayOf(SCORE, DURATION, COUNT_ACTIVITIES)
+
+        const val DAY = MessageID.xapi_day
+
+        const val WEEK = MessageID.xapi_week
+
+        const val MONTH = MessageID.xapi_month
+
+        const val CONTENT_ENTRY = MessageID.xapi_content_entry
+
+        //TODO to be put back when varuna merges his branch
+        // private const val LOCATION = MessageID.xapi_location
+
+        const val GENDER = MessageID.xapi_gender
+
+        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER)
+
+    }
+
 }

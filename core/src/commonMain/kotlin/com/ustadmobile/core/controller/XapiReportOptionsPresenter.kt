@@ -1,8 +1,10 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.listOfGraphs
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.xAxisList
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.yAxisList
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -156,40 +158,5 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
         selectedSubGroup = position
     }
 
-
-    companion object {
-
-        const val BAR_CHART = MessageID.bar_chart
-
-        const val LINE_GRAPH = MessageID.line_graph
-
-        const val FREQ_GRAPH = MessageID.freq_graph
-
-        val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH, FREQ_GRAPH)
-
-        const val SCORE = MessageID.score
-
-        const val DURATION = MessageID.duration
-
-        const val COUNT_ACTIVITIES = MessageID.count_activity
-
-        val yAxisList = arrayOf(SCORE, DURATION, COUNT_ACTIVITIES)
-
-        const val DAY = MessageID.xapi_day
-
-        const val WEEK = MessageID.xapi_week
-
-        const val MONTH = MessageID.xapi_month
-
-        const val CONTENT_ENTRY = MessageID.xapi_content_entry
-
-        //TODO to be put back when varuna merges his branch
-        // private const val LOCATION = MessageID.xapi_location
-
-        const val GENDER = MessageID.xapi_gender
-
-        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER)
-
-    }
 
 }

@@ -40,64 +40,64 @@ class NewReportEspressoTest {
         var firstPerson = Person()
         firstPerson.firstNames = "Hello"
         firstPerson.lastName = "World"
-        personDao.insert(firstPerson)
+        firstPerson.personUid = personDao.insert(firstPerson)
 
         var secondPerson = Person()
         secondPerson.firstNames = "Here"
         secondPerson.lastName = "Now"
-        personDao.insert(secondPerson)
+        secondPerson.personUid = personDao.insert(secondPerson)
 
         var thirdPerson = Person()
         thirdPerson.firstNames = "Lots"
         thirdPerson.lastName = "Maker"
-        personDao.insert(thirdPerson)
+        thirdPerson.personUid = personDao.insert(thirdPerson)
 
         var fourthPerson = Person()
         fourthPerson.firstNames = "Never"
         fourthPerson.lastName = "Give"
-        personDao.insert(fourthPerson)
+        fourthPerson.personUid = personDao.insert(fourthPerson)
 
         var firstVerb = VerbEntity()
         firstVerb.urlId =  "Did"
         firstVerb.verbUid = verbDao.insert(firstVerb)
 
         var firstVerbLangMap = XLangMapEntry( firstVerb.verbUid , 0, 0, 0, "Did")
-        entryLangMap.insert(firstVerbLangMap)
+        firstVerbLangMap.languageLangMapUid =entryLangMap.insert(firstVerbLangMap)
 
         var secondVerb = VerbEntity()
         secondVerb.urlId =  "This"
         secondVerb.verbUid = verbDao.insert(secondVerb)
 
         var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "This")
-        entryLangMap.insert(secondVerbLangMap)
+        secondVerbLangMap.languageLangMapUid = entryLangMap.insert(secondVerbLangMap)
 
         var thirdVerb = VerbEntity()
         thirdVerb.urlId =  "Thing"
         thirdVerb.verbUid = verbDao.insert(thirdVerb)
 
         var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Thing")
-        entryLangMap.insert(thirdVerbLangMap)
+        thirdVerbLangMap.languageLangMapUid = entryLangMap.insert(thirdVerbLangMap)
 
         var firstObject = XObjectEntity()
         firstObject.objectId =  "hello"
         firstObject.xObjectUid = objectDao.insert(firstObject)
 
         var firstObjectLangMap = XLangMapEntry(0, firstObject.xObjectUid, 0, 0, "Answer")
-        entryLangMap.insert(firstObjectLangMap)
+        firstObjectLangMap.languageLangMapUid = entryLangMap.insert(firstObjectLangMap)
 
         var secondObject = XObjectEntity()
         secondObject.objectId =  "world"
         secondObject.xObjectUid = objectDao.insert(secondObject)
 
         var secondObjectLangMap = XLangMapEntry(0, secondObject.xObjectUid, 0, 0, "Me")
-        entryLangMap.insert(secondObjectLangMap)
+        secondObjectLangMap.languageLangMapUid = entryLangMap.insert(secondObjectLangMap)
 
         var thirdObject = XObjectEntity()
         thirdObject.objectId =  "now"
         thirdObject.xObjectUid = objectDao.insert(thirdObject)
 
         var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, "Now")
-        entryLangMap.insert(thirdObjectLangMap)
+        thirdObjectLangMap.languageLangMapUid = entryLangMap.insert(thirdObjectLangMap)
 
         var newLocation = Location("Test Location", "Test location added from Dummy data", false, 0)
         newLocation.locationUid = locationDao.insert(newLocation)
@@ -143,7 +143,7 @@ class NewReportEspressoTest {
         var firstsecondJoin = ContentEntryParentChildJoin()
         firstsecondJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
         firstsecondJoin.cepcjChildContentEntryUid = secondEntry.contentEntryUid
-        entryJoinDao.insert(firstsecondJoin)
+        firstsecondJoin.cepcjUid = entryJoinDao.insert(firstsecondJoin)
 
         var phetEntry = ContentEntry()
         phetEntry.title = "PHET"
@@ -152,7 +152,7 @@ class NewReportEspressoTest {
         var phetJoin = ContentEntryParentChildJoin()
         phetJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
         phetJoin.cepcjChildContentEntryUid = phetEntry.contentEntryUid
-        entryJoinDao.insert(phetJoin)
+        phetJoin.cepcjUid = entryJoinDao.insert(phetJoin)
 
         var edraakEntry = ContentEntry()
         edraakEntry.title = "EDRAAK"
@@ -161,7 +161,7 @@ class NewReportEspressoTest {
         var edraakJoin = ContentEntryParentChildJoin()
         edraakJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
         edraakJoin.cepcjChildContentEntryUid = edraakEntry.contentEntryUid
-        entryJoinDao.insert(edraakJoin)
+        edraakJoin.cepcjUid = entryJoinDao.insert(edraakJoin)
 
 
         var khanclass1 = ContentEntry()
@@ -171,7 +171,7 @@ class NewReportEspressoTest {
         var khanclassJoin = ContentEntryParentChildJoin()
         khanclassJoin.cepcjParentContentEntryUid = secondEntry.contentEntryUid
         khanclassJoin.cepcjChildContentEntryUid = khanclass1.contentEntryUid
-        entryJoinDao.insert(khanclassJoin)
+        khanclassJoin.cepcjUid = entryJoinDao.insert(khanclassJoin)
 
         var khanclass2 = ContentEntry()
         khanclass2.title = "Class 2"
@@ -180,7 +180,7 @@ class NewReportEspressoTest {
         var khanclass2Join = ContentEntryParentChildJoin()
         khanclass2Join.cepcjParentContentEntryUid = secondEntry.contentEntryUid
         khanclass2Join.cepcjChildContentEntryUid = khanclass2.contentEntryUid
-        entryJoinDao.insert(khanclass2Join)
+        khanclass2Join.cepcjUid = entryJoinDao.insert(khanclass2Join)
 
         val intent = Intent()
         mActivityRule.launchActivity(intent)
