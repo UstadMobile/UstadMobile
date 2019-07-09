@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name='app_name'>‫أستاد موبايل‬</string>
+    <string name="app_name">د موبایل له لارې د کاری مهارتونو زده کړه</string>
     <string name='dir'>ltr</string>
     <string name='login'> ننوتون</string>
     <string name='error'> تېروتنه</string>
@@ -259,4 +259,9 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
+
+    <string name="msst_heading_2">زده‌کړه وکړئ</string>
+    <string name="msst_sub_heading_1">  د دې اپلګېشن ماډیولونه وړیا دي. منځپانګې ته یې د لاسرسي لپاره اپلکېشن ډ‌انلود کړئ. تاسو کولای شئ له انټرنټ پرته ورڅخه په هر وخت او هر ځای کې کار واخلئ.</string>
+    <string name="msst_sub_heading_2"> تعاملي ویډیوګانې به تاسو ته د سوانح لنډیز لیکلو، د مرکې مهارتونو، د اړیکو مهارتونو او ډېرو نورو مسائلو په هکله زده کړه درکړي.</string>
+
 </resources>

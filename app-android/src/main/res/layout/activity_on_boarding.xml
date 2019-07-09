@@ -14,6 +14,7 @@
         android:layout_height="match_parent"/>
 
     <ImageView
+        android:id="@+id/supported_by_expo"
         android:layout_marginTop="@dimen/dimen_20dp"
         android:layout_width="90dp"
         android:layout_height="90dp"

@@ -36,7 +36,7 @@ class BleMessageGattClientCallbackTest {
     @Before
     fun setUp() {
         mockedGattClient = mock(BluetoothGatt::class.java)
-        val entryList = Arrays.asList(1056289670L, 4590875612L, 9076137860L, 2912543894L)
+        val entryList = listOf(1056289670L, 4590875612L, 9076137860L, 2912543894L)
         messageToSend = BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(), BleMessageUtil.bleMessageLongToBytes(entryList))
 
         gattClientCallback = BleMessageGattClientCallback(messageToSend!!)

@@ -9,6 +9,8 @@ object MessageID{
 
     const val queued = 2102
 
+    const val msst_heading_2 = 2261
+
     const val about = 2029
 
     const val error_this_device_doesnt_support_bluetooth_sharing = 2104
@@ -343,9 +345,13 @@ object MessageID{
 
     const val phone = 2068
 
+    const val msst_sub_heading_2 = 2263
+
     const val all_users = 2024
 
     const val location_permission_title = 2136
+
+    const val msst_sub_heading_1 = 2262
 
     const val notifications = 2079
 

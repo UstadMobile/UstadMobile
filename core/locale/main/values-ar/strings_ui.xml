@@ -293,6 +293,11 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
 
+    <string name="msst_heading_2">Learn</string>
+    <string name="msst_sub_heading_1">The modules in this app are free! Download them to access their contents. You can complete them offline anytime, anywhere!</string>
+    <string name="msst_sub_heading_2">Interactive videos will teach you CV writing, interview skills, communication skills, and more!</string>
+
+
 
 
 </resources>

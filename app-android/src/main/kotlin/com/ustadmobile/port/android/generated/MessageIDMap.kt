@@ -8,6 +8,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.cancel] = R.string.cancel
 	ID_MAP[MessageID.content_blank_doc_start_label] = R.string.content_blank_doc_start_label
 	ID_MAP[MessageID.queued] = R.string.queued
+	ID_MAP[MessageID.msst_heading_2] = R.string.msst_heading_2
 	ID_MAP[MessageID.about] = R.string.about
 	ID_MAP[MessageID.error_this_device_doesnt_support_bluetooth_sharing] = R.string.error_this_device_doesnt_support_bluetooth_sharing
 	ID_MAP[MessageID.download_delete_btn_label] = R.string.download_delete_btn_label
@@ -175,8 +176,10 @@ object MessageIDMap {
 	ID_MAP[MessageID.waiting_for_sender] = R.string.waiting_for_sender
 	ID_MAP[MessageID.lang_sys] = R.string.lang_sys
 	ID_MAP[MessageID.phone] = R.string.phone
+	ID_MAP[MessageID.msst_sub_heading_2] = R.string.msst_sub_heading_2
 	ID_MAP[MessageID.all_users] = R.string.all_users
 	ID_MAP[MessageID.location_permission_title] = R.string.location_permission_title
+	ID_MAP[MessageID.msst_sub_heading_1] = R.string.msst_sub_heading_1
 	ID_MAP[MessageID.notifications] = R.string.notifications
 	ID_MAP[MessageID.content_editor_menu_superscript] = R.string.content_editor_menu_superscript
 	ID_MAP[MessageID.no_app_found] = R.string.no_app_found

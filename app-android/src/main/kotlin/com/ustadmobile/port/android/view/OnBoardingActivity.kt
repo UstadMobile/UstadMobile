@@ -36,11 +36,11 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
      */
     private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
                                      val layoutResId: Int, val drawableResId: Int){
-        SCREEN_1(R.string.onboarding_no_internet_headline,
-                R.string.onboarding_no_internet_subheadline,
+        SCREEN_1(R.string.download,
+                R.string.msst_sub_heading_1,
                 R.layout.onboard_screen_view, R.drawable.downloading_data),
-        SCREEN_2(R.string.onboarding_offline_sharing,
-                R.string.onboarding_offline_sharing_subheading,
+        SCREEN_2(R.string.msst_heading_2,
+                R.string.msst_sub_heading_2,
                 R.layout.onboard_screen_view, R.drawable.sharing_data)
     }
 
@@ -83,7 +83,8 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
         viewPager = findViewById(R.id.onBoardPagerView)
         getStartedBtn = findViewById(R.id.get_started_btn)
         pageIndicatorView = findViewById(R.id.pageIndicatorView)
-
+        val supportedByExpoLogo: ImageView = findViewById(R.id.supported_by_expo)
+        supportedByExpoLogo.visibility = View.GONE
         presenter = OnBoardingPresenter(this,
                 bundleToMap(intent.extras), this)
         presenter!!.onCreate(bundleToMap(savedInstanceState))

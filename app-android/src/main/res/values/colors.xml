@@ -4,16 +4,16 @@
     Helped by using:
     http://www.materialpalette.com/blue-grey/light-blue
     -->
-    <color name="primary">#009688</color>
-    <color name="primary_dark">#00796B</color>
-    <color name="primary_light">#B2DFDB</color>
-    <color name="accent">#FF9800</color>
+    <color name="primary">#2196f3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#009788</color>
     <color name="primary_text">#FFFFFF</color>
     <color name="secondary_text">#727272</color>
     <color name="secondary_text_light">#41727272</color>
 
     <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
+    <color name="text_secondary">#727272</color>
     <color name="icons">#FFFFFF</color>
     <color name="icons_light">#ABFFFFFF</color>
     <color name="divider">#BDBDBD</color>
@@ -25,7 +25,7 @@
     <item name="umblue" type="color">#FF3F31B5</item>
     <item name="opds_card_pressed" type="color">#FF888888</item>
     <item name="opds_card_normal" type="color">#FFFFFFFF</item>
-    <item name="basepoint_navigation_drawer_tint" type="color">#FF757575</item>
+    <item name="basepoint_navigation_drawer_tint" type="color">@color/primary</item>
 
     <!-- Catalog Entry View colors-->
     <item name="catalog_entry_remove_modify_button_background" type="color">@color/primary_dark</item>

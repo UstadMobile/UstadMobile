@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name='app_name'>‫أستاد موبايل‬</string>
+    <string name="app_name">آموزش مهارتهای شغلی از طریق مبایل</string>
     <string name='dir'>rtl</string>
     <string name='login'>وارد شدن</string>
     <string name='error'>خطا</string>
@@ -284,6 +284,11 @@
     <string name="content_supported_files">Supported files: <![CDATA[<b>H5P, Epub, TinCan (XAPI) Zip</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
+
+    <string name="msst_heading_2">بیاموزید</string>
+    <string name="msst_sub_heading_1">مادیول‌های این اپلکیشن رایگان میباشد. برای دستری به محتوای، اپلکیشن را دانلود نماید. شما می‌توانید بدون انترنت در هرجا و هر وقت از آن استفاده کنید.</string>
+    <string name="msst_sub_heading_2">ویدیوهای تعاملی شما را در نوشتن خلص سوانح، مهارت‌های مصاحبه، مهارت‌های ارتباطات و خیلی مسائل دیگر آموزش خواهد داد.</string>
+
 
 
 </resources>
