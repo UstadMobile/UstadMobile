@@ -17,12 +17,12 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
-import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
@@ -69,6 +69,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var fileStatusIcon = HashMap<Int, Int>()
 
+    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+
+
     override val allKnowAvailabilityStatus: Set<Long>
         get() = managerAndroidBle.getLocallyAvailableContainerUids()
 
@@ -88,7 +92,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
         presenter!!.onStart()
         managerAndroidBle.addLocalAvailabilityListener(this)
-        presenter!!.handleShowEditButton(!BuildConfig.isContentPreviewOnly)
+        presenter!!.handleShowEditButton(showControls)
 
     }
 
@@ -118,7 +122,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
-            if(!BuildConfig.isContentPreviewOnly){
+            if(showControls){
                 if (scrollY > oldScrollY) {
                     editButton.hide()
                 } else {
@@ -161,8 +165,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 presenter!!.handleUpNavigation()
             }
         }
-
-
     }
 
     override fun setContentEntry(contentEntry: ContentEntry) {

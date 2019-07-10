@@ -5,24 +5,26 @@ package com.ustadmobile.core.impl
  */
 object AppConfig {
 
-    val KEY_CONTENT_DIR_NAME = "content_dir"
+    const val KEY_CONTENT_DIR_NAME = "content_dir"
 
-    val KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN = "login_before_open"
+    const val KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN = "login_before_open"
 
-    val KEY_LOGIN_REQUIRED_FOR_CONTENT_DOWNLOAD = "login_before_download"
+    const val KEY_LOGIN_REQUIRED_FOR_CONTENT_DOWNLOAD = "login_before_download"
 
-    val KEY_FIRST_DEST = "first_dest"
+    const val KEY_FIRST_DEST = "first_dest"
 
-    val KEY_FIRST_DEST_LOGIN_REQUIRED = "first_dest_login_required"
+    const val KEY_FIRST_DEST_LOGIN_REQUIRED = "first_dest_login_required"
 
-    val KEY_API_URL = "apiUrl"
+    const val KEY_API_URL = "apiUrl"
 
-    val KEY_APP_BASE_NAME = "appBaseName"
+    const val KEY_APP_BASE_NAME = "appBaseName"
 
-    val KEY_EPUB_TOC_ENABLED = "epubTocEnabled"
+    const val KEY_EPUB_TOC_ENABLED = "epubTocEnabled"
 
-    val KEY_NETWORK_SERVICE_TYPE = "networkServiceType"
+    const val KEY_NETWORK_SERVICE_TYPE = "networkServiceType"
 
-    val KEY_WIFI_P2P_INSTANCE_NAME = "wifiP2pInstanceName"
+    const val KEY_WIFI_P2P_INSTANCE_NAME = "wifiP2pInstanceName"
+
+    const val KEY_SHOW_CONTENT_EDITOR_CONTROLS = "show_content_editor_controls"
 
 }
