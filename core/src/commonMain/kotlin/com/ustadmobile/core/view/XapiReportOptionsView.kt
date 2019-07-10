@@ -23,4 +23,12 @@ interface XapiReportOptionsView : UstadView {
 
     fun updateWhenRangeText(rangeText: String)
 
+    companion object {
+
+        const val VIEW_NAME = "XapiReportOptionsView"
+
+
+
+    }
+
 }

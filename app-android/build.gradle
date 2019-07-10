@@ -351,6 +351,9 @@ dependencies {
     //used for learner progress view
     implementation 'com.txusballesteros:FitChart:1.0'
 
+    //Chart library
+    implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
+
     implementation "com.google.android:flexbox:$version_android_flexbox"
 
     //SVG support for Android

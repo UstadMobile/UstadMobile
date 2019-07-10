@@ -1,7 +1,9 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var xAxis: Int, var subGroup: Int,
                              var whoFilterList: List<Long> = mutableListOf(),
@@ -12,6 +14,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var locationsList: List<Long> = mutableListOf()) {
 
 
+    @Serializable
     data class QueryParts(val sqlStr: String, val queryParams: Array<Any>)
 
     fun toSql(): QueryParts {
@@ -20,9 +23,9 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
         }
         val paramList = mutableListOf<Any>()
         var sql = "SELECT " + when (yAxis) {
-            SCORE -> "AVG(StatementEntity.resultScoreScaled), "
-            DURATION -> "SUM(StatementEntity.resultDuration), "
-            COUNT_ACTIVITIES -> "COUNT(StatementEntity.*), "
+            SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
+            DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
+            COUNT_ACTIVITIES -> "COUNT(*) AS yAxis, "
             else -> ""
         }
         sql += groupBy(xAxis) + "AS xAxis, "
@@ -37,7 +40,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
             if (objectsList.isNotEmpty()) {
                 whereList.add("(StatementEntity.xObjectUid IN (?) OR " +
                         "EXISTS(SELECT contextXObjectStatementJoinUid FROM ContextXObjectStatementJoin " +
-                        "WHERE contextStatementUid = StatementEntity.statementUid AND contextXObjectUid IN (?)) ")
+                        "WHERE contextStatementUid = StatementEntity.statementUid AND contextXObjectUid IN (?))) ")
                 paramList.addAll(listOf<Any>(objectsList, objectsList))
             }
             if (whoFilterList.isNotEmpty()) {
@@ -65,7 +68,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
             DAY -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch') "
             WEEK -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
             MONTH -> "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch') "
-            CONTENT_ENTRY -> "XObjectEntity.xObjectUid "
+            CONTENT_ENTRY -> "StatementEntity.xObjectUid "
             //LOCATION -> "Location.title"
             GENDER -> "Person.gender "
             else -> ""
@@ -78,9 +81,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
 
         const val LINE_GRAPH = MessageID.line_graph
 
-        const val FREQ_GRAPH = MessageID.freq_graph
-
-        val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH, FREQ_GRAPH)
+        val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH)
 
         const val SCORE = MessageID.score
 
