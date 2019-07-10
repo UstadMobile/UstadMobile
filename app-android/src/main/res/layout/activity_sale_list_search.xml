@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <android.support.design.widget.AppBarLayout android:id="@+id/activity_sale_list_search_appbar"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.Toolbar android:id="@+id/activity_sale_list_search_toolbar"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
+            app:layout_scrollFlags="scroll|enterAlways" app:title="@string/filter"
+            tools:layout_editor_absoluteY="0dp" />
+    </android.support.design.widget.AppBarLayout>
+
+    <TextView
+        android:id="@+id/activity_sale_list_search_location_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/location"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_appbar" />
+
+    <Spinner
+        android:id="@+id/activity_sale_list_search_location_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_location_title" />
+
+    <View
+        android:id="@+id/activity_sale_list_search_hline1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/divider"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_location_spinner" />
+
+    <TextView
+        android:id="@+id/activity_sale_list_search_date_range_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/date_range"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline1" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/activity_sale_list_search_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:scrollbars="vertical"
+        android:visibility="visible"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_sort_by_title" />
+
+    <EditText
+        android:id="@+id/activity_sale_list_search_date_range_edittext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_date_range_title" />
+
+
+    <View
+        android:id="@+id/activity_sale_list_search_hline2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/divider"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_date_range_edittext" />
+
+
+    <TextView
+        android:id="@+id/activity_sale_list_search_value_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/value"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline2" />
+
+
+    <com.ustadmobile.port.android.view.RangeSeekCustom
+        android:id="@+id/activity_sale_list_search_value_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:bar_color="@color/color_gray"
+        app:bar_height="1dp"
+        app:bar_highlight_color="@color/fab"
+        app:corner_radius="2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_value_range_textview"
+        app:left_thumb_color="@color/fab"
+        app:left_thumb_color_pressed="@color/fab"
+        app:max_value="100"
+        app:min_value="0"
+        app:right_thumb_color="@color/fab"
+        app:right_thumb_color_pressed="@color/fab" />
+
+    <View
+        android:id="@+id/activity_sale_list_search_hline3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/divider"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_value_seekbar" />
+
+    <TextView
+        android:id="@+id/activity_sale_list_search_sort_by_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/sort_by"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/activity_sale_list_search_sort_spinner"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline3" />
+
+    <Spinner
+        android:id="@+id/activity_sale_list_search_sort_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline3" />
+
+    <TextView
+        android:id="@+id/activity_sale_list_search_value_range_textview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/from"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_value_title" />
+
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list android:id="@+id/recording"
+    android:oneshot="false"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_fiber_manual_record_red_24dp" android:duration="1000" />
+    <item android:drawable="@drawable/ic_fiber_manual_record_light_red_24dp" android:duration="1000" />
+</animation-list>

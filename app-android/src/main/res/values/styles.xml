@@ -4,8 +4,6 @@
 
     <style name="Theme.UstadTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-
-
     <style name="ThemeOnboarding" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/icons</item>
         <item name="colorPrimaryDark">@color/divider</item>
@@ -27,8 +25,21 @@
         <item name="android:layout_marginTop">@dimen/dimen_10dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
 
+    <style name="FullScreenDialogStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:backgroundTint">@color/background_light</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorPrimary">@color/primary</item>
 
+        <!-- Set this to true if you want Full Screen without status bar -->
+        <item name="android:windowFullscreen">true</item>
+
+        <item name="android:windowIsFloating">false</item>
+
+        <!-- This is important! Don't forget to set window background -->
+        <item name="android:windowBackground">@color/background_light</item>
     </style>
 
 </resources>

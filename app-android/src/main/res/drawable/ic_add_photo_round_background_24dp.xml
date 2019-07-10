@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <!-- drawable/circle_card_icon.xml -->
+        <shape xmlns:android="http://schemas.android.com/apk/res/android"
+            android:innerRadius="0dp"
+            android:shape="ring"
+            android:thicknessRatio="2"
+            android:useLevel="false" >
+            <solid android:color="@color/primary_dark"/>
+            <size
+                android:width="68dp"
+                android:height="68dp"
+                />
+        </shape>
+    </item>
+    <item android:width="40dp" android:height="40dp"
+        android:gravity="center" android:drawable="@drawable/ic_add_a_photo_white_round_24dp" />
+</layer-list>
