@@ -294,6 +294,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/edit_content"
+        android:visibility="gone"
         android:background="@color/accent"
         android:tint="@color/icons"
         android:src="@drawable/ic_edit_black_24dp"

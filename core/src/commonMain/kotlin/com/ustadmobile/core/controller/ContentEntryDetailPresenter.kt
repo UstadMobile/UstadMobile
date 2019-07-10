@@ -294,6 +294,10 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable { view.updateLocalAvailabilityViews(icon, status) })
     }
 
+    fun handleShowEditButton(show: Boolean){
+        view.runOnUiThread(Runnable { view.showEditButton(show)})
+    }
+
 
     fun handleStartEditingContent() {
 

@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
@@ -51,6 +52,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_home_activity, menu)
+        menu.findItem(R.id.create_new_content).isVisible = !BuildConfig.isContentPreviewOnly
         return super.onCreateOptionsMenu(menu)
     }
 
