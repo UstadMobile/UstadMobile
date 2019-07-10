@@ -14,7 +14,6 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var locationsList: List<Long> = mutableListOf()) {
 
 
-    @Serializable
     data class QueryParts(val sqlStr: String, val queryParams: Array<Any>)
 
     fun toSql(): QueryParts {

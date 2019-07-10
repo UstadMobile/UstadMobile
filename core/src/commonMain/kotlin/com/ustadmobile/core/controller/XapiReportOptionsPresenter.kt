@@ -12,10 +12,13 @@ import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView.Companion.ARG_CONTENT_ENTRY_SET
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
+import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 
 class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, view: XapiReportOptionsView)
     : UstadBaseController<XapiReportOptionsView>(context, arguments!!, view) {
@@ -126,9 +129,9 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
                 toDateTime.unixMillisLong,
                 selectedLocations)
 
-        report.toSql()
-
-
+        var args = HashMap<String, String?>()
+        args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), report)
+        impl.go(XapiReportDetailView.VIEW_NAME, args, context)
     }
 
     fun handleLocationListSelected(locationList: List<Long>) {

@@ -110,6 +110,8 @@
 
         <activity android:name="com.ustadmobile.port.android.view.XapiReportOptionsActivity" />
 
+        <activity android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity" />
+
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true"/>
