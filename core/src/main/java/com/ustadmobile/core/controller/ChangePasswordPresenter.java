@@ -33,24 +33,12 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
     private String currentPassword;
     private String updatePassword;
 
-    public String getCurrentPassword() {
-        return currentPassword;
-    }
-
     public void setCurrentPassword(String currentPassword) {
         this.currentPassword = currentPassword;
     }
 
-    public String getUpdatePassword() {
-        return updatePassword;
-    }
-
     public void setUpdatePassword(String updatePassword) {
         this.updatePassword = updatePassword;
-    }
-
-    public String getUpdatePasswordConfirm() {
-        return updatePasswordConfirm;
     }
 
     public void setUpdatePasswordConfirm(String updatePasswordConfirm) {
@@ -129,7 +117,8 @@ public class ChangePasswordPresenter extends UstadBaseController<ChangePasswordV
                 @Override
                 public void onSuccess(Integer result) {
 
-                    personAuthDao.selfResetPassword(currentPerson.getUsername(), currentPassword, updatePassword, loggedInPersonUid,
+                    personAuthDao.selfResetPassword(currentPerson.getUsername(), currentPassword,
+                            updatePassword, loggedInPersonUid,
                       new UmCallback<Integer>() {
                         @Override
                         public void onSuccess(Integer result) {

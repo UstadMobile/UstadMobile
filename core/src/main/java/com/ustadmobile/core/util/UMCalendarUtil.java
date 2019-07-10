@@ -221,9 +221,9 @@ public class UMCalendarUtil {
         calendar.setTimeInMillis(thisDate);
         SimpleDateFormat format;
         if(locale != null) {
-            format = new SimpleDateFormat("dd/MMM/YYYY", locale);
+            format = new SimpleDateFormat("dd/MMM/yyyy", locale);
         }else{
-            format = new SimpleDateFormat("dd/MMM/YYYY");
+            format = new SimpleDateFormat("dd/MMM/yyyy");
         }
         return format.format(calendar.getTime());
     }

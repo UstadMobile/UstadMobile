@@ -94,7 +94,7 @@ android {
 
         devMinApi21 {
             dimension "config"
-            minSdkVersion 23
+            minSdkVersion 22
             applicationId "org.fhi360.goldozi"
             testApplicationId "org.fhi360.goldozi.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode

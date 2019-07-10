@@ -78,12 +78,14 @@ public class ReportSalesPerformanceChartComponent extends LinearLayout implement
         String[] barColors = barColorsList.toArray(new String[0]);
 
 
+        //Map of Location Uid (Group 1) and BarEntry list
+        Map<Long, ArrayList<BarEntry>> locationToBarEntriesMap = new HashMap<>();
         List<String> allDateOccurences = new ArrayList<>();
 
-        Map<Long, ArrayList<BarEntry>> locationToBarEntriesMap = new HashMap<>();
-
+        //Map of LocationUid -> Name for Label searching
         Map<Long, String> locationUidToName = new HashMap<>();
 
+        //Get all date occurrences from the data. (This will be x axis - 2nd group)
         for(Object data:dataSet){
             ReportSalesPerformance entry = (ReportSalesPerformance) data;
             if(!allDateOccurences.contains(entry.getFirstDateOccurence())){
@@ -91,40 +93,41 @@ public class ReportSalesPerformanceChartComponent extends LinearLayout implement
             }
         }
 
-
+        //Build every location's value plotting data.
+        //Loop over every data output.
         for(int i=0; i<dataSet.size();i++){
 
-            int index;
             //Get Report data:
-            Object everyEntryObject = dataSet.get(i);
-            ReportSalesPerformance entry = (ReportSalesPerformance) everyEntryObject;
-
+            ReportSalesPerformance entry = (ReportSalesPerformance) dataSet.get(i);
+            //Sale amount
+            long saleAmount = entry.getSaleAmount();
+            //Get date of occurrence
+            String saleOccurrence = entry.getFirstDateOccurence();
+            //Get location
             long locationUid = entry.getLocationUid();
+
+            //Build the Location Uid, Location Name for future lookup.
             String locationName = entry.getLocationName();
             if(!locationUidToName.containsKey(locationUid)){
                 locationUidToName.put(locationUid, locationName);
             }
+
+            //Get the Group 1's Bar Entry list. Its either a new one or one already made.
             ArrayList<BarEntry> locationBarEntries;
             if(locationToBarEntriesMap.containsKey(locationUid)){
                 locationBarEntries = locationToBarEntriesMap.get(locationUid);
             }else{
                 locationBarEntries = new ArrayList<>();
-                int j=0;
-                for(String ignored :allDateOccurences){
-                    j++;
-                }
             }
-
-            //Sale amount
-            long saleAmount = entry.getSaleAmount();
-            //Get date of occurrence
-            String saleOccurrence = entry.getFirstDateOccurence();
 
             if(!allDateOccurences.contains(saleOccurrence)){
                 //Add it
                 allDateOccurences.add(saleOccurrence);
             }
-            index = allDateOccurences.indexOf(saleOccurrence) + 1;
+
+            //Get index of where in the date occurrence this data belongs
+            int index = allDateOccurences.indexOf(saleOccurrence) + 1;
+
             //Add entry in this index
             locationBarEntries.add(new BarEntry(index, saleAmount));
 
@@ -133,13 +136,14 @@ public class ReportSalesPerformanceChartComponent extends LinearLayout implement
 
         }
 
-        //Get data for chart
+        //Buld the bar Data set for every Location
         BarData data = new BarData();
         int colorPos = 0;
         for (Long barEntry : locationToBarEntriesMap.keySet()) {
+            //Get location name
             String locationName = locationUidToName.get(barEntry);
 
-            //Get entries
+            //Get entries (values plotted)
             ArrayList<BarEntry> locationEntry = locationToBarEntriesMap.get(barEntry);
 
             //Create BarDataSet

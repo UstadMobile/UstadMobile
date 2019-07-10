@@ -286,7 +286,7 @@
 
         <com.ustadmobile.port.android.view.RangeSeekCustom
             android:id="@+id/activity_report_options_detail_sales_price_rangeseekcustom"
-            android:layout_width="500dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"

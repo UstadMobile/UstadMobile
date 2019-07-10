@@ -142,7 +142,7 @@ android {
          */
         devMinApi21 {
             dimension "config"
-            minSdkVersion 23
+            minSdkVersion 22
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
                 merge "META-INF/INDEX.LIST"

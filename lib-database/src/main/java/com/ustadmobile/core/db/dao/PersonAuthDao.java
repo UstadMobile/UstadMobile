@@ -183,7 +183,7 @@ public abstract class PersonAuthDao implements BaseDao<PersonAuth> {
                 if(result == null){
                     resetCallback.onFailure(new Exception());
                 }else{
-                    //Create new person auth entry if it doesnt exist
+                    //Create new person auth entry if it doesn't exist
                     PersonAuth existingPersonAuth = findByUid(loggedInPersonUid);
                     if(existingPersonAuth == null){
                         PersonAuth personAuth = new PersonAuth(loggedInPersonUid, passwordHash);
