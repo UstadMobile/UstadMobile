@@ -10,6 +10,7 @@ import android.widget.*
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -53,6 +54,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
         presenter = ContentEntryListPresenter(getContext(),
                 UMAndroidUtil.bundleToMap(intent.extras),   this)
+        presenter!!.handleShowContentEditorOptios(!BuildConfig.isContentPreviewOnly)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
 
@@ -186,6 +188,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.create_new_content).isVisible = showOptions
+        menu.findItem(R.id.edit_category_content).isVisible = showOptions
         return super.onPrepareOptionsMenu(menu)
     }
 
