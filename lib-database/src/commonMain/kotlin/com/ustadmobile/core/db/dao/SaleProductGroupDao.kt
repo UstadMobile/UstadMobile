@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.impl.UmCallback
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
@@ -13,72 +13,71 @@ import com.ustadmobile.lib.db.entities.SaleProductGroup
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-abstract class SaleProductGroupDao : SyncableDao<SaleProductGroup, SaleProductGroupDao> {
+@Dao
+abstract class SaleProductGroupDao :
+        BaseDao<SaleProductGroup> {
 
     //INSERT
 
     @Insert
-    abstract fun insertAsync(entity: SaleProductGroup, insertCallback: UmCallback<Long>)
+    abstract override suspend fun insertAsync(entity: SaleProductGroup) : Long
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveLive(): UmLiveData<List<SaleProductGroup>>
+    abstract fun findAllActiveLive(): DoorLiveData<List<SaleProductGroup>>
 
     @Query(ALL_ACTIVE_QUERY)
     abstract fun findAllActiveList(): List<SaleProductGroup>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveAsync(allActiveCallback: UmCallback<List<SaleProductGroup>>)
+    abstract suspend fun findAllActiveAsync():List<SaleProductGroup>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveProvider(): UmProvider<SaleProductGroup>
+    abstract fun findAllActiveProvider(): DataSource.Factory<Int, SaleProductGroup>
 
     @Query(ALL_ACTIVE_TYPED_QUERY)
-    abstract fun findAllTypedActiveLive(type: Int): UmLiveData<List<SaleProductGroup>>
+    abstract fun findAllTypedActiveLive(type: Int): DoorLiveData<List<SaleProductGroup>>
 
     @Query(ALL_ACTIVE_TYPED_QUERY)
     abstract fun findAllTypedActiveList(type: Int): List<SaleProductGroup>
 
     @Query(ALL_ACTIVE_TYPED_QUERY)
-    abstract fun findAllTypedActiveAsync(type: Int, allActiveCallback: UmCallback<List<SaleProductGroup>>)
+    abstract suspend fun findAllTypedActiveAsync(type: Int):List<SaleProductGroup>
 
     @Query(ALL_ACTIVE_TYPED_QUERY)
-    abstract fun findAllTypedActiveProvider(type: Int): UmProvider<SaleProductGroup>
+    abstract fun findAllTypedActiveProvider(type: Int): DataSource.Factory<Int,SaleProductGroup>
 
     @Query(ALL_ACTIVE_TYPED_SNWI_QUERY)
-    abstract fun findAllTypedActiveSNWILive(type: Int): UmLiveData<List<SaleNameWithImage>>
+    abstract fun findAllTypedActiveSNWILive(type: Int): DoorLiveData<List<SaleNameWithImage>>
 
     @Query(ALL_ACTIVE_TYPED_SNWI_QUERY)
     abstract fun findAllTypedActiveSNWIList(type: Int): List<SaleNameWithImage>
 
     @Query(ALL_ACTIVE_TYPED_SNWI_QUERY)
-    abstract fun findAllTypedActiveSNWIAsync(type: Int, allActiveCallback: UmCallback<List<SaleNameWithImage>>)
+    abstract suspend fun findAllTypedActiveSNWIAsync(type: Int) : List<SaleNameWithImage>
 
     @Query(ALL_ACTIVE_TYPED_SNWI_QUERY)
-    abstract fun findAllTypedActiveSNWIProvider(type: Int): UmProvider<SaleNameWithImage>
+    abstract fun findAllTypedActiveSNWIProvider(type: Int): DataSource.Factory<Int,SaleNameWithImage>
 
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUid(uid: Long): SaleProductGroup
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidAsync(uid: Long, findByUidCallback: UmCallback<SaleProductGroup>)
+    abstract suspend fun findByUidAsync(uid: Long): SaleProductGroup
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): UmLiveData<SaleProductGroup>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductGroup>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)
 
     @Query(INACTIVATE_QUERY)
-    abstract fun inactivateEntityAsync(uid: Long, inactivateCallback: UmCallback<Int>)
+    abstract suspend fun inactivateEntityAsync(uid: Long): Int
 
     //UPDATE:
-
     @Update
-    abstract fun updateAsync(entity: SaleProductGroup, updateCallback: UmCallback<Int>)
+    abstract suspend fun updateAsync(entity: SaleProductGroup): Int
 
     companion object {
-
-
         //FIND ALL ACTIVE
 
         const val ALL_ACTIVE_QUERY = "SELECT * FROM SaleProductGroup WHERE saleProductGroupActive = 1"
@@ -110,4 +109,6 @@ abstract class SaleProductGroupDao : SyncableDao<SaleProductGroup, SaleProductGr
 
         const val INACTIVATE_QUERY = "UPDATE SaleProductGroup SET saleProductGroupActive = 0 WHERE saleProductGroupUid = :uid"
     }
+
+
 }

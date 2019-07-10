@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
@@ -115,7 +114,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String): Person?
 
-    @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
+    @Query("SELECT Person.* FROM PERSON WHERE Person.personUid = :uid")
     abstract fun findByUid(uid: Long): Person?
 
     @Query("SELECT * From Person WHERE personUid = :uid")
@@ -129,13 +128,13 @@ abstract class PersonDao : BaseDao<Person> {
 
 
     @Query("SELECT * FROM Person WHERE active =1")
-    abstract fun findAllPeopleProvider(): UmProvider<Person>
+    abstract fun findAllPeopleProvider(): DoorLiveData<Person?>
 
     @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
-    abstract fun findAllPeopleNameAscProvider(): UmProvider<Person>
+    abstract fun findAllPeopleNameAscProvider(): DoorLiveData<Person?>
 
     @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
-    abstract fun findAllPeopleNameDescProvider(): UmProvider<Person>
+    abstract fun findAllPeopleNameDescProvider(): DoorLiveData<Person?>
 
     @Update
     abstract fun updateAsync(entity: Person):Int

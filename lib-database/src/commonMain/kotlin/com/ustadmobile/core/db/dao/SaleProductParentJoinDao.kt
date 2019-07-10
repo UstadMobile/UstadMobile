@@ -1,8 +1,8 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
@@ -12,7 +12,9 @@ import com.ustadmobile.lib.db.entities.SaleProductSelected
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-abstract class SaleProductParentJoinDao : SyncableDao<SaleProductParentJoin, SaleProductParentJoinDao> {
+@Dao
+abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
+
 
     /**
      * Find all SaleProduct a given SaleProduct is a child of.
@@ -22,8 +24,7 @@ abstract class SaleProductParentJoinDao : SyncableDao<SaleProductParentJoin, Sal
     @Query("SELECT SaleProduct.* FROM SaleProductParentJoin LEFT JOIN SaleProduct ON " +
             " SaleProduct.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
             " WHERE SaleProductParentJoin.saleProductParentJoinChildUid = :childSaleProductUid")
-    abstract fun findAllJoinByChildSaleProductAsync(childSaleProductUid: Long,
-                                                    resultListCallback: UmCallback<List<SaleProduct>>)
+    abstract suspend fun findAllJoinByChildSaleProductAsync(childSaleProductUid: Long):List<SaleProduct>
 
     //Find all categories selected for a sale product
     @Query("SELECT CASE WHEN (SELECT COUNT(*) FROM SaleProductParentJoin " +
@@ -34,17 +35,17 @@ abstract class SaleProductParentJoinDao : SyncableDao<SaleProductParentJoin, Sal
             " SaleProduct.* " +
             "FROM SaleProduct WHERE SaleProduct.saleProductCategory = 1 AND SaleProduct.saleProductActive = 1")
     abstract fun findAllSelectedCategoriesForSaleProductProvider(
-            saleProductUid: Long): UmProvider<SaleProductSelected>
+            saleProductUid: Long): DataSource.Factory<Int,SaleProductSelected>
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND child.saleProductCategory = 0 ")
-    abstract fun findAllItemsInACategory(saleProductCategoryUid: Long): UmProvider<SaleNameWithImage>
+    abstract fun findAllItemsInACategory(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleNameWithImage>
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND child.saleProductCategory = 1 ")
-    abstract fun findAllCategoriesInACategory(saleProductCategoryUid: Long): UmProvider<SaleNameWithImage>
+    abstract fun findAllCategoriesInACategory(saleProductCategoryUid: Long): DataSource.Factory<Int,SaleNameWithImage>
 
 
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
@@ -53,43 +54,36 @@ abstract class SaleProductParentJoinDao : SyncableDao<SaleProductParentJoin, Sal
             "   WHERE SaleProduct.saleProductName = 'Collection' " +
             "   ORDER BY saleProductDateAdded ASC LIMIT 1) " +
             " AND child.saleProductCategory = 1 ")
-    abstract fun findAllCategoriesInCollection(): UmProvider<SaleNameWithImage>
+    abstract fun findAllCategoriesInCollection(): DataSource.Factory<Int, SaleNameWithImage>
 
 
     @Query("SELECT * FROM SaleProductParentJoin WHERE " +
             " SaleProductParentJoin.saleProductParentJoinParentUid = :parentUid AND " +
             " SaleProductParentJoin.saleProductParentJoinChildUid = :childUid ")
-    abstract fun findByChildAndParentUid(childUid: Long, parentUid: Long,
-                                         resultCallback: UmCallback<SaleProductParentJoin>)
+    abstract suspend fun findByChildAndParentUid(childUid: Long, parentUid: Long):SaleProductParentJoin
 
 
-    fun createJoin(childProductUid: Long, parentProductUid: Long, activate: Boolean) {
+    suspend fun createJoin(childProductUid: Long, parentProductUid: Long, activate: Boolean) {
 
         //1. Find existing mapping
-        findByChildAndParentUid(childProductUid, parentProductUid, object : UmCallback<SaleProductParentJoin> {
-            override fun onSuccess(result: SaleProductParentJoin?) {
-                if (result != null) {
-                    //Exists
-                    if (result.isSaleProductParentJoinActive != activate) {
-                        // Is not active
-                        result.isSaleProductParentJoinActive = activate
-                        update(result)
-                    } else {
-                        //Exists but is already set. Ignore
-                    }
-                } else {
-                    //Create new with activate set
-                    val npj = SaleProductParentJoin(childProductUid,
-                            parentProductUid, activate)
-                    insert(npj)
-                }
+        val result = findByChildAndParentUid(childProductUid, parentProductUid)
+        if (result != null) {
+            //Exists
+            if (result.saleProductParentJoinActive != activate) {
+                // Is not active
+                result.saleProductParentJoinActive = activate
+                update(result)
+            } else {
+                //Exists but is already set. Ignore
             }
-
-            override fun onFailure(exception: Throwable?) {
-                println(exception!!.message)
-            }
-        })
+        } else {
+            //Create new with activate set
+            val npj = SaleProductParentJoin(childProductUid,
+                    parentProductUid, activate)
+            insert(npj)
+        }
     }
+
 
     companion object {
 
@@ -101,5 +95,7 @@ abstract class SaleProductParentJoinDao : SyncableDao<SaleProductParentJoin, Sal
                 " LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid " +
                 " WHERE SaleProductParentJoin.saleProductParentJoinActive = 1 AND child.saleProductActive = 1 "
     }
+
+
 
 }

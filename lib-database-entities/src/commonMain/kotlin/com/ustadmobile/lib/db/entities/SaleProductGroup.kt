@@ -3,14 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 69)
 @Entity
-class SaleProductGroup {
+class SaleProductGroup() {
 
     @PrimaryKey(autoGenerate = true)
     var saleProductGroupUid: Long = 0
@@ -30,7 +29,7 @@ class SaleProductGroup {
     //Creation of this collection
     var saleProductGroupCreationDate: Long = 0
 
-    var isSaleProductGroupActive: Boolean = false
+    var saleProductGroupActive: Boolean = false
 
     var saleProductGroupType: Int = 0
 
@@ -44,15 +43,15 @@ class SaleProductGroup {
     var saleProductGroupLCB: Int = 0
 
 
-    constructor() {
-        this.isSaleProductGroupActive = true
+    init {
+        this.saleProductGroupActive = true
         this.saleProductGroupCreationDate = 0
         this.saleProductGroupType = PRODUCT_GROUP_TYPE_CATEGORY
         this.saleProductGroupDesc = ""
     }
 
-    constructor(name: String) {
-        this.isSaleProductGroupActive = true
+    constructor(name: String) : this() {
+        this.saleProductGroupActive = true
         this.saleProductGroupCreationDate = 0
         this.saleProductGroupType = PRODUCT_GROUP_TYPE_CATEGORY
         this.saleProductGroupName = name

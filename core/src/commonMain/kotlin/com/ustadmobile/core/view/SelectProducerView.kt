@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.db.UmProvider
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 
 
@@ -20,7 +21,7 @@ interface SelectProducerView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: UmProvider<Person>)
+    fun setListProvider(listProvider: DoorLiveData<Person?>)
 
     fun updateSpinner(presents: Array<String?>)
 

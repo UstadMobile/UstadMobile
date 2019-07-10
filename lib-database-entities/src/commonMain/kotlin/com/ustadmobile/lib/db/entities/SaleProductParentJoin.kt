@@ -3,14 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 77)
 @Entity
-class SaleProductParentJoin {
+class SaleProductParentJoin() {
 
     /* GETTERS AND SETTER */
 
@@ -23,7 +22,7 @@ class SaleProductParentJoin {
     //Child product eg: A brief history of time
     var saleProductParentJoinChildUid: Long = 0
 
-    var isSaleProductParentJoinActive: Boolean = false
+    var saleProductParentJoinActive: Boolean = false
 
     var saleProductParentJoinDateCreated: Long = 0
 
@@ -36,19 +35,19 @@ class SaleProductParentJoin {
     @UmSyncLastChangedBy
     var saleProductParentJoinLCB: Int = 0
 
-    constructor() {}
 
-    constructor(childUid: Long, parentUid: Long) {
+
+    constructor(childUid: Long, parentUid: Long) : this() {
         this.saleProductParentJoinParentUid = parentUid
         this.saleProductParentJoinChildUid = childUid
-        this.isSaleProductParentJoinActive = false
+        this.saleProductParentJoinActive = false
         this.saleProductParentJoinDateCreated = 0
     }
 
-    constructor(childUid: Long, parentUid: Long, activate: Boolean) {
+    constructor(childUid: Long, parentUid: Long, activate: Boolean) : this() {
         this.saleProductParentJoinParentUid = parentUid
         this.saleProductParentJoinChildUid = childUid
         this.saleProductParentJoinDateCreated = 0
-        this.isSaleProductParentJoinActive = activate
+        this.saleProductParentJoinActive = activate
     }
 }

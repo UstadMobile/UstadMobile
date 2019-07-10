@@ -20,7 +20,7 @@ class SelectProducerPresenter(context: Any,
                               view: SelectProducerView)
     : UstadBaseController<SelectProducerView>(context, arguments, view) {
 
-    private var umProvider: UmProvider<Person>? = null
+
     internal var repository: UmAppDatabase
     private val providerDao: PersonDao
     private var saleItemUid: Long = 0
@@ -56,20 +56,20 @@ class SelectProducerPresenter(context: Any,
         when (sortCode) {
             SORT_ORDER_NAME_ASC -> {
                 //Get provider
-                umProvider = providerDao.findAllPeopleNameAscProvider()
-                view.setListProvider(umProvider!!)
+                val umProvider = providerDao.findAllPeopleNameAscProvider()
+                view.setListProvider(umProvider)
             }
             SORT_ORDER_NAME_DESC -> {
                 //Get provider
-                umProvider = providerDao.findAllPeopleNameDescProvider()
-                view.setListProvider(umProvider!!)
+                val umProvider = providerDao.findAllPeopleNameDescProvider()
+                view.setListProvider(umProvider)
             }
             SORT_ORDER_MOST_USED -> {
             }
             else -> {
                 //Get provider
-                umProvider = providerDao.findAllPeopleProvider()
-                view.setListProvider(umProvider!!)
+                val umProvider = providerDao.findAllPeopleProvider()
+                view.setListProvider(umProvider)
             }
         }
     }

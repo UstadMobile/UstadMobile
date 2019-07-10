@@ -85,7 +85,7 @@ abstract class DownloadJobDao {
     abstract fun getLatestDownloadJobUidForDownloadSet(djDsUid: Long): Int?
 
     @Query("SELECT djiDjUid FROM DownloadJobItem WHERE djiContentEntryUid = :contentEntryUid " + "ORDER BY timeStarted DESC LIMIT 1")
-    abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int?
+    abstract fun getLatestDownloadJobUidForContentEntryUid(contentEntryUid: Long): Int
 
 
     @Query("UPDATE DownloadJob SET djStatus =:djStatus WHERE djUid = :djUid")
@@ -98,11 +98,11 @@ abstract class DownloadJobDao {
 
     @Query("UPDATE DownloadJobItem SET djiStatus = :djiStatus WHERE djiDjUid = :djUid " + "AND djiStatus BETWEEN :jobStatusFrom AND :jobStatusTo")
     abstract suspend fun updateJobItems(djUid: Int, djiStatus: Int, jobStatusFrom: Int,
-                                jobStatusTo: Int)
+                                        jobStatusTo: Int)
 
     @Transaction
     open suspend fun updateJobAndItems(djUid: Int, djStatus: Int, activeJobItemsStatus: Int,
-                          completeJobItemStatus: Int = -1) {
+                                       completeJobItemStatus: Int = -1) {
         updateJobItems(djUid, djStatus, 0, JobStatus.WAITING_MAX)
 
         if (activeJobItemsStatus != -1)

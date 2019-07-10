@@ -314,9 +314,9 @@ private fun getQueryNamedParameters(querySql: String): List<String> {
  */
 data class EntityFieldMap(val fieldMap: Map<String, Element>, val embeddedVarsList: List<Pair<String, Element>>)
 fun mapEntityFields(entityTypeEl: TypeElement, prefix: String = "",
-                           fieldMap: MutableMap<String, Element> = mutableMapOf(),
-                           embeddedVarsList: MutableList<Pair<String, Element>> = mutableListOf(),
-                           processingEnv: ProcessingEnvironment): EntityFieldMap {
+                    fieldMap: MutableMap<String, Element> = mutableMapOf(),
+                    embeddedVarsList: MutableList<Pair<String, Element>> = mutableListOf(),
+                    processingEnv: ProcessingEnvironment): EntityFieldMap {
 
     ancestorsToList(entityTypeEl, processingEnv).forEach {
         val listParted = it.enclosedElements.filter { it.kind == ElementKind.FIELD }.partition { it.getAnnotation(Embedded::class.java) == null }
@@ -424,7 +424,7 @@ fun isMethodImplemented(method: ExecutableElement, enclosingClass: TypeElement, 
                     && !(Modifier.ABSTRACT in it.modifiers)
                     && it.simpleName == method.simpleName
                     && processingEnv.typeUtils.isSubsignature(methodResolved,
-                        processingEnv.typeUtils.asMemberOf(enclosingClassType, it) as ExecutableType)
+                    processingEnv.typeUtils.asMemberOf(enclosingClassType, it) as ExecutableType)
         }
     }
 }
@@ -895,6 +895,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                         "Could not parse SQL to determine livedata tables to watch")
             }
 
+
             val liveDataCodeBlock = CodeBlock.builder()
                     .beginControlFlow("val _result = %T<%T>(_db, listOf(%L)) ",
                             DoorLiveDataJdbcImpl::class.asClassName(),
@@ -903,6 +904,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                     .add(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
                             daoTypeElement, daoMethod, resultVarName = "_liveResult"))
                     .add("_liveResult")
+
 
             if(resultType is ParameterizedTypeName && resultType.rawType == List::class.asClassName())
                 liveDataCodeBlock.add(".toList()")
@@ -979,7 +981,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         if(isListOrArray(paramType)) {
             codeBlock.endControlFlow()
-                .add("_con.commit()\n")
+                    .add("_con.commit()\n")
         }
 
         codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
@@ -1040,7 +1042,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
             codeBlock.beginControlFlow("_stmt = if(_db!!.jdbcArraySupported)")
-                        .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
+                    .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
                     .nextControlFlow("else")
                     .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
                             PreparedStatement::class)
@@ -1156,10 +1158,10 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                                 .add("\n")
                     }
 
-
                     // Map of the last prop name (e.g. name) to the full property name as it will
                     // be generated (e.g. embedded!!.name)
-                    val colNameLastToFullMap = entityFieldMap!!.fieldMap.map { it.key.substringAfterLast('.') to it.key}.toMap()
+                    val colNameLastToFullMap = entityFieldMap!!.fieldMap.map{
+                        it.key.substringAfterLast('.') to it.key}.toMap()
 
                     entityFieldMap.embeddedVarsList.forEach {
                         codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
@@ -1251,8 +1253,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
         if(isListOrArray(paramType)) {
             codeBlock.endControlFlow()
-                .add("_con.commit()\n")
-                .add("_con.autoCommit = true\n")
+                    .add("_con.commit()\n")
+                    .add("_con.autoCommit = true\n")
         }
 
         codeBlock.beginControlFlow("if(_numChanges > 0)")

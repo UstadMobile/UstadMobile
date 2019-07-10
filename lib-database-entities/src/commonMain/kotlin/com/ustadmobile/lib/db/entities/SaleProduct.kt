@@ -3,14 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 67)
 @Entity
-open class SaleProduct {
+open class SaleProduct() {
 
     @PrimaryKey(autoGenerate = true)
     var saleProductUid: Long = 0
@@ -39,10 +38,10 @@ open class SaleProduct {
     var saleProductPictureUid: Long = 0
 
     //If the product active . False is effectively delete
-    var isSaleProductActive: Boolean = false
+    var saleProductActive: Boolean = false
 
     //If it is a category it is true. If it is a product it is false (default)
-    var isSaleProductCategory: Boolean = false
+    var saleProductCategory: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var saleProductMCSN: Long = 0
@@ -53,31 +52,31 @@ open class SaleProduct {
     @UmSyncLastChangedBy
     var saleProductLCB: Int = 0
 
-    constructor() {
-        this.isSaleProductCategory = false
+    init {
+        this.saleProductCategory = false
     }
 
-    constructor(name: String, decs: String) {
+    constructor(name: String, decs: String) : this() {
         this.saleProductName = name
         this.saleProductDesc = decs
-        this.isSaleProductActive = true
-        this.isSaleProductCategory = false
-
-    }
-
-    constructor(name: String, decs: String, category: Boolean) {
-        this.saleProductName = name
-        this.saleProductDesc = decs
-        this.isSaleProductActive = true
-        this.isSaleProductCategory = category
+        this.saleProductActive = true
+        this.saleProductCategory = false
 
     }
 
-    constructor(name: String, decs: String, category: Boolean, isActive: Boolean) {
+    constructor(name: String, decs: String, category: Boolean) : this() {
         this.saleProductName = name
         this.saleProductDesc = decs
-        this.isSaleProductActive = isActive
-        this.isSaleProductCategory = category
+        this.saleProductActive = true
+        this.saleProductCategory = category
+
+    }
+
+    constructor(name: String, decs: String, category: Boolean, isActive: Boolean) : this() {
+        this.saleProductName = name
+        this.saleProductDesc = decs
+        this.saleProductActive = isActive
+        this.saleProductCategory = category
 
     }
 }

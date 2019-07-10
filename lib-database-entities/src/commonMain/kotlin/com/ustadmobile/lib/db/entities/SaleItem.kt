@@ -2,12 +2,14 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.lib.annotation.SyncablePrimaryKey
 import com.ustadmobile.lib.database.annotation.*
 
 @UmEntity(tableId = 63)
 @Entity
-open class SaleItem {
+open class SaleItem() {
 
+    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var saleItemUid: Long = 0
 
@@ -30,17 +32,17 @@ open class SaleItem {
     var saleItemCurrency: String? = null
 
     //If sold ticked.
-    var isSaleItemSold: Boolean = false
+    var saleItemSold: Boolean = false
 
     //If pre order ticked.
-    var isSaleItemPreorder: Boolean = false
+    var saleItemPreorder: Boolean = false
 
     //Any specific discount applied (not used at the moment)
     var saleItemDiscount: Float = 0.toFloat()
 
     //If active or not (false is effectively deleted
     // and is usually set for sale items not saved during creation)
-    var isSaleItemActive: Boolean = false
+    var saleItemActive: Boolean = false
 
     //Date when the sale item was created (Usually current system time)
     var saleItemCreationDate: Long = 0
@@ -60,33 +62,33 @@ open class SaleItem {
     @UmSyncLastChangedBy
     var saleItemLCB: Int = 0
 
-    constructor() {
+    init {
         this.saleItemCreationDate = 0
-        this.isSaleItemActive = false
-        this.isSaleItemSold = false
-        this.isSaleItemPreorder = false
+        this.saleItemActive = false
+        this.saleItemSold = false
+        this.saleItemPreorder = false
     }
 
-    constructor(productUid: Long) {
+    constructor(productUid: Long):this() {
         this.saleItemCreationDate = 0
-        this.isSaleItemActive = false
-        this.isSaleItemSold = true
-        this.isSaleItemPreorder = false
+        this.saleItemActive = false
+        this.saleItemSold = true
+        this.saleItemPreorder = false
         this.saleItemProductUid = productUid
         this.saleItemPricePerPiece = 0F
         this.saleItemQuantity = 0
     }
 
-    constructor(productUid: Long, quantity: Int, ppp: Long, saleUid: Long, dueDate: Long) {
+    constructor(productUid: Long, quantity: Int, ppp: Long, saleUid: Long, dueDate: Long):this() {
         this.saleItemCurrency = "Afs"
-        this.isSaleItemActive = true
+        this.saleItemActive = true
         this.saleItemCreationDate = 0
         this.saleItemProductUid = productUid
         this.saleItemQuantity = quantity
         this.saleItemPricePerPiece = ppp.toFloat()
         this.saleItemSaleUid = saleUid
         this.saleItemDueDate = dueDate
-        this.isSaleItemSold = true
+        this.saleItemSold = true
 
     }
 }

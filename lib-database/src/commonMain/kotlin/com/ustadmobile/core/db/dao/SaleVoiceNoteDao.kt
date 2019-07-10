@@ -1,15 +1,19 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Query
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.lib.database.annotation.*
+import androidx.room.Dao
+import com.ustadmobile.lib.database.annotation.UmDao
+import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleVoiceNote
-import kotlinx.io.InputStream
 
-@UmDao(hasAttachment = true, permissionJoin = " LEFT JOIN Sale ON SaleVoiceNote.saleVoiceNoteSaleUid = Sale.saleUid", selectPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@UmDao(hasAttachment = true,
+        permissionJoin = " LEFT JOIN Sale ON SaleVoiceNote.saleVoiceNoteSaleUid = Sale.saleUid",
+        selectPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
+        updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-abstract class SaleVoiceNoteDao : SyncableDao<SaleVoiceNote, SaleVoiceNoteDao> {
+@Dao
+abstract class SaleVoiceNoteDao : BaseDao<SaleVoiceNote> {
 
+    //TODO: Fix KMP
 //    @UmDbSetAttachment
 //    abstract fun setAttachment(uid: Long, pictureAttachment: InputStream)
 //

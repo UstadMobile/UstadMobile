@@ -21,7 +21,8 @@ import com.ustadmobile.core.db.dao.SaleDao
 
 
 
-@Database(entities = [NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
+@Database(entities = [
+    NetworkNode::class, EntryStatusResponse::class, DownloadJobItemHistory::class,
     DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
     Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
@@ -30,17 +31,21 @@ import com.ustadmobile.core.db.dao.SaleDao
     EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
     LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class,
+    Container::class, ContainerEntry::class, ContainerEntryFile::class
     //Goldozi :
-    Sale::class, SaleItem::class, SalePayment::class, SaleProductGroup::class,
-    SaleProductGroupJoin::class, SaleProductPicture::class, SaleProduct::class,
+    ,Sale::class, SaleItem::class, SalePayment::class,
+    SaleProductGroup::class,
+    SaleProductGroupJoin::class,
+    SaleProductPicture::class, SaleProduct::class,
     SaleVoiceNote::class, SaleProductParentJoin::class,
-    SaleItemReminder::class], version = 22)
+    SaleItemReminder::class
+    ], version = 22)
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
 
     var attachmentsDir: String? = null
+
 
     abstract val networkNodeDao: NetworkNodeDao
 
@@ -71,8 +76,6 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao
 
     abstract val contentEntryRelatedEntryJoinDao: ContentEntryRelatedEntryJoinDao
-
-    // abstract val syncStatusDao: SyncStatusDao
 
     abstract val contentCategorySchemaDao: ContentCategorySchemaDao
 
@@ -116,29 +119,27 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
-    //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
-
     //Goldozi bit:
 
-    abstract fun getSaleDao(): SaleDao
+    abstract val saleDao: SaleDao
 
-    abstract fun getSaleItemDao(): SaleItemDao
+    abstract val saleItemDao: SaleItemDao
 
-    abstract fun getSaleProductDao(): SaleProductDao
+    abstract val saleProductDao: SaleProductDao
 
-    abstract fun getSaleProductPictureDao(): SaleProductPictureDao
+    abstract val saleProductPictureDao: SaleProductPictureDao
 
-    abstract fun getSalePaymentDao(): SalePaymentDao
+    abstract val salePaymentDao: SalePaymentDao
 
-    abstract fun getSaleProductGroupDao(): SaleProductGroupDao
+    abstract val saleProductGroupDao: SaleProductGroupDao
 
-    abstract fun getProductGroupJoinDao(): SaleProductGroupJoinDao
+    abstract val saleProductGroupJoinDao: SaleProductGroupJoinDao
 
-    abstract fun getSaleVoiceNoteDao(): SaleVoiceNoteDao
+    abstract val saleVoiceNoteDao: SaleVoiceNoteDao
 
-    abstract fun getSaleProductParentJoinDao(): SaleProductParentJoinDao
+    abstract val saleProductParentJoinDao: SaleProductParentJoinDao
 
-    abstract fun getSaleItemReminderDao(): SaleItemReminderDao
+    abstract val saleItemReminderDao: SaleItemReminderDao
 
     //end of Goldozi bit.
 

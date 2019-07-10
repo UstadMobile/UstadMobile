@@ -2,21 +2,23 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.lib.annotation.SyncablePrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 61)
 @Entity
-open class Sale {
+open class Sale() {
+
+    @SyncablePrimaryKey
     @PrimaryKey(autoGenerate = true)
     var saleUid: Long = 0
 
     var saleTitle: String? = null
 
-    var isSaleActive: Boolean = false
+    var saleActive: Boolean = false
 
     var saleLocationUid: Long = 0
 
@@ -34,14 +36,14 @@ open class Sale {
 
     //If created successfully - does NOT indicate payed / completed/ etc
     //If false- effectively deleted and will not show up in reports/sales list
-    var isSaleDone: Boolean = false
+    var saleDone: Boolean = false
 
     //Deliberate cancelled option will mark this flag as true.
-    var isSaleCancelled: Boolean = false
+    var saleCancelled: Boolean = false
 
-    var isSalePreOrder: Boolean = false
+    var salePreOrder: Boolean = false
 
-    var isSalePaymentDone: Boolean = false
+    var salePaymentDone: Boolean = false
 
     var saleDiscount: Long = 0
 
@@ -56,15 +58,41 @@ open class Sale {
     @UmSyncLastChangedBy
     var saleLCB: Int = 0
 
-    init {
-        this.isSaleCancelled = false
-        this.isSaleActive = true // false is essentially deleted.
+    constructor(active : Boolean) : this() {
+        this.saleCancelled = false
+        this.saleActive = active // false is essentially deleted.
+        //TODO: Give it a value outside lib-database KMP
         this.saleCreationDate = 0
         this.saleLastUpdateDate = this.saleCreationDate
-        this.isSaleDone = false // It gets done only when Sale is delivered.
-        this.isSalePreOrder = true //default to true
-        this.isSalePaymentDone = true //Defaulting to true. Unless marked as done via payment addition.
+        this.saleDone = false // It gets done only when Sale is delivered.
+        this.salePreOrder = true //default to true
+        this.salePaymentDone = true //Defaulting to true. Unless marked as done via payment addition.
         this.saleTitle = ""
+        this.saleLocationUid = 0
+        this.saleDueDate = 0
+        this.salePersonUid = 0
+        this.saleNotes = ""
+        this.saleDiscount = 0
+        this.saleSignature = ""
+        //Ideally salePaymentDone should be triggered from SaleItem and SalePayment
+    }
+
+    init {
+        this.saleCancelled = false
+        this.saleActive = false // false is essentially deleted.
+        //TODO: Give it a value outside lib-database KMP
+        this.saleCreationDate = 0
+        this.saleLastUpdateDate = this.saleCreationDate
+        this.saleDone = false // It gets done only when Sale is delivered.
+        this.salePreOrder = true //default to true
+        this.salePaymentDone = true //Defaulting to true. Unless marked as done via payment addition.
+        this.saleTitle = ""
+        this.saleLocationUid = 0
+        this.saleDueDate = 0
+        this.salePersonUid = 0
+        this.saleNotes = ""
+        this.saleDiscount = 0
+        this.saleSignature = ""
         //Ideally salePaymentDone should be triggered from SaleItem and SalePayment
     }
 }

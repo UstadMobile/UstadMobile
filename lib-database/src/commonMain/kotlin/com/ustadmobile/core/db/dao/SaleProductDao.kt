@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Insert
+import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.impl.UmCallback
+
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
@@ -14,79 +14,79 @@ import com.ustadmobile.lib.db.entities.SaleProductGroup.Companion.PRODUCT_GROUP_
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-abstract class SaleProductDao : SyncableDao<SaleProduct, SaleProductDao> {
+@Dao
+abstract class SaleProductDao : BaseDao<SaleProduct> {
 
     //INSERT
 
-
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveLive(): UmLiveData<List<SaleProduct>>
+    abstract fun findAllActiveLive(): DoorLiveData<List<SaleProduct>>
 
     @Query(ALL_ACTIVE_QUERY)
     abstract fun findAllActiveList(): List<SaleProduct>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveAsync(allActiveCallback: UmCallback<List<SaleProduct>>)
+    abstract suspend fun findAllActiveAsync() : List<SaleProduct>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveProvider(): UmProvider<SaleProduct>
+    abstract fun findAllActiveProvider(): DataSource.Factory<Int,SaleProduct>
 
     //FIND ALL CATEGORIES
 
     @Query(ALL_ACTIVE_CATEGORY_QUERY)
-    abstract fun findAllCategoriesAsync(allActiveCallback: UmCallback<List<SaleProduct>>)
+    abstract suspend fun findAllCategoriesAsync() : List<SaleProduct>
 
     @Query(ALL_ACTIVE_CATEGORY_QUERY)
-    abstract fun findAllCateogoriesProvider(): UmProvider<SaleProduct>
+    abstract fun findAllCateogoriesProvider(): DataSource.Factory<Int,SaleProduct>
 
     @Query(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveSNWILive(): UmLiveData<List<SaleNameWithImage>>
+    abstract fun findAllActiveSNWILive(): DoorLiveData<List<SaleNameWithImage>>
 
     @Query(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
     abstract fun findAllActiveSNWIList(): List<SaleNameWithImage>
 
     @Query(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveSNWIAsync(allActiveCallback: UmCallback<List<SaleNameWithImage>>)
+    abstract suspend fun findAllActiveSNWIAsync() : List<SaleNameWithImage>
 
     @Query(ALL_ACTIVE_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveSNWIProvider(): UmProvider<SaleNameWithImage>
+    abstract fun findAllActiveSNWIProvider(): DataSource.Factory<Int,SaleNameWithImage>
 
     //ITEMS(PRODUCTS):
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveProductsSNWILive(): UmLiveData<List<SaleNameWithImage>>
+    abstract fun findAllActiveProductsSNWILive(): DoorLiveData<List<SaleNameWithImage>>
 
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
     abstract fun findAllActiveProductsSNWIList(): List<SaleNameWithImage>
 
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveProductsSNWIAsync(allActiveCallback: UmCallback<List<SaleNameWithImage>>)
+    abstract suspend fun findAllActiveProductsSNWIAsync():List<SaleNameWithImage>
 
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveProductsSNWIProvider(): UmProvider<SaleNameWithImage>
+    abstract fun findAllActiveProductsSNWIProvider(): DataSource.Factory<Int,SaleNameWithImage>
 
     //Products not existing already in Category
     @Query(ALL_PRODUCTS_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY)
     abstract fun findAllActiveProductsNotInCategorySNWIProvider(
-            saleProductCategoryUid: Long): UmProvider<SaleNameWithImage>
+            saleProductCategoryUid: Long): DataSource.Factory<Int,SaleNameWithImage>
 
     //CATEGORY:
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveCategoriesSNWILive(): UmLiveData<List<SaleNameWithImage>>
+    abstract fun findAllActiveCategoriesSNWILive(): DoorLiveData<List<SaleNameWithImage>>
 
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
     abstract fun findAllActiveCategoriesSNWIList(): List<SaleNameWithImage>
 
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveCategoriesSNWIAsync(allActiveCallback: UmCallback<List<SaleNameWithImage>>)
+    abstract suspend fun findAllActiveCategoriesSNWIAsync():List<SaleNameWithImage>
 
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY)
-    abstract fun findAllActiveCategoriesSNWIProvider(): UmProvider<SaleNameWithImage>
+    abstract fun findAllActiveCategoriesSNWIProvider(): DataSource.Factory<Int,SaleNameWithImage>
 
     //Categories not existing already in Category
     @Query(ALL_CATEGORIES_NAME_WITH_IMAGE_QUERY_NOT_IN_CATEGORY)
     abstract fun findAllActiveCategoriesNotInCategorySNWIProvider(
             saleProductCategoryUid: Long
-    ): UmProvider<SaleNameWithImage>
+    ): DataSource.Factory<Int, SaleNameWithImage>
 
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUid(uid: Long): SaleProduct
@@ -95,7 +95,7 @@ abstract class SaleProductDao : SyncableDao<SaleProduct, SaleProductDao> {
     abstract suspend fun findByUidAsync(uid: Long): SaleProduct
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): UmLiveData<SaleProduct>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProduct>
 
     @Query(FIND_BY_NAME_QUERY)
     abstract fun findByName(name: String): SaleProduct
@@ -104,7 +104,7 @@ abstract class SaleProductDao : SyncableDao<SaleProduct, SaleProductDao> {
     abstract suspend fun findByNameAsync(name: String):SaleProduct
 
     @Query(FIND_BY_NAME_QUERY)
-    abstract fun findByNameLive(name: String): UmLiveData<SaleProduct>
+    abstract fun findByNameLive(name: String): DoorLiveData<SaleProduct>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)
@@ -117,6 +117,7 @@ abstract class SaleProductDao : SyncableDao<SaleProduct, SaleProductDao> {
 
     @Update
     abstract suspend fun updateAsync(entity: SaleProduct):Int
+
 
     companion object {
 
@@ -198,5 +199,7 @@ abstract class SaleProductDao : SyncableDao<SaleProduct, SaleProductDao> {
 
         const val INACTIVATE_QUERY = "UPDATE SaleProduct SET saleProductActive = 0 WHERE saleProductUid = :uid"
     }
+
+
 
 }

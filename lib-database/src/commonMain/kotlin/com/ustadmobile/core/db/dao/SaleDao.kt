@@ -1,11 +1,10 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -13,117 +12,124 @@ import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleListDetail
 
 
-@UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
+        insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
+@Dao
 @UmRepository
-abstract class SaleDao : SyncableDao<Sale, SaleDao> {
+abstract class SaleDao : BaseDao<Sale> {
 
-    @Query("select count(*) from sale where salePreOrder = 1 AND saleActive = 1")
-    abstract fun preOrderSaleCountProvider(): UmProvider<Int>
+
+    @Query("SELECT COUNT(*) FROM SALE WHERE salePreOrder = 1 AND saleActive = 1")
+    abstract fun removeMe(): DataSource.Factory<Int, Int>
+
+
+    @Query("SELECT COUNT(*) FROM SALE WHERE salePreOrder = 1 AND saleActive = 1")
+    abstract fun preOrderSaleCountProvider(): DataSource.Factory<Int, Int>
 
     //    @Query("select count(*) from sale where salePreOrder = 1 AND saleActive = 1")
     @Query(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
             " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
             " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
-    abstract fun preOrderSaleCountLive(): UmLiveData<Int>
-
+    abstract fun preOrderSaleCountLive(): Int
+    
     //INSERT
 
     @Insert
-    abstract fun insertAsync(entity: Sale, insertCallback: UmCallback<Long>)
+    abstract override suspend fun insertAsync(entity: Sale): Long
 
     @Query(ALL_SALES_QUERY)
     abstract fun findAllList(): List<Sale>
 
     @Query(ALL_SALES_ACTIVE_QUERY)
-    abstract fun findAllActiveLive(): UmLiveData<List<Sale>>
+    abstract fun findAllActiveLive(): DoorLiveData<List<Sale>>
 
     @Query(ALL_SALES_ACTIVE_QUERY)
     abstract fun findAllActiveList(): List<Sale>
 
     @Query(ALL_SALES_ACTIVE_QUERY)
-    abstract fun findAllActiveAsync(allActiveSalesCallback: UmCallback<List<Sale>>)
+    abstract suspend fun findAllActiveAsync():List<Sale>
 
     @Query(ALL_SALES_ACTIVE_QUERY)
-    abstract fun findAllActiveProvider(): UmProvider<Sale>
+    abstract fun findAllActiveProvider(): DataSource.Factory<Int,Sale>
 
     @Query("$ALL_SALES_ACTIVE_QUERY AND salePreOrder = 1 ")
-    abstract fun findAllActivePreorderSalesLive(): UmLiveData<List<Sale>>
+    abstract fun findAllActivePreorderSalesLive(): DoorLiveData<List<Sale>>
 
     @Query("$ALL_SALES_ACTIVE_QUERY AND salePaymentDone = 0")
-    abstract fun findAllActivePaymentDueSalesLive(): UmLiveData<List<Sale>>
+    abstract fun findAllActivePaymentDueSalesLive(): DoorLiveData<List<Sale>>
 
     @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
-    abstract fun findAllSaleWithTitleAsync(saleTitle: String, resultCallback: UmCallback<List<Sale>>)
+    abstract suspend fun findAllSaleWithTitleAsync(saleTitle: String): List<Sale>
 
     @Query("SELECT * FROM Sale WHERE saleTitle = :saleTitle AND saleActive = 1")
     abstract fun findAllSaleWithTitle(saleTitle: String): List<Sale>
 
 
     @Query(ALL_SALE_LIST)
-    abstract fun findAllActiveAsSaleListDetailLive(): UmLiveData<List<SaleListDetail>>
+    abstract fun findAllActiveAsSaleListDetailLive(): DoorLiveData<List<SaleListDetail>>
 
     @Query(ALL_SALE_LIST)
     abstract fun findAllActiveAsSaleListDetailList(): List<SaleListDetail>
 
     @Query(ALL_SALE_LIST)
-    abstract fun findAllActiveAsSaleListDetailAsync(allActiveSalesCallback: UmCallback<List<SaleListDetail>>)
+    abstract suspend fun findAllActiveAsSaleListDetailAsync(): List<SaleListDetail>
 
     @Query("$ALL_SALE_LIST AND salePreOrder = 1")
-    abstract fun findAllActiveSaleListDetailPreOrdersLive(): UmLiveData<List<SaleListDetail>>
+    abstract fun findAllActiveSaleListDetailPreOrdersLive(): DoorLiveData<List<SaleListDetail>>
 
     @Query("$ALL_SALE_LIST AND salePaymentDone = 1")
-    abstract fun findAllActiveSaleListDetailPaymentDueLive(): UmLiveData<List<SaleListDetail>>
+    abstract fun findAllActiveSaleListDetailPaymentDueLive(): DoorLiveData<List<SaleListDetail>>
 
     @Query(ALL_SALE_LIST)
-    abstract fun findAllActiveAsSaleListDetailProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllActiveAsSaleListDetailProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER)
-    abstract fun findAllActiveSaleListDetailPreOrdersProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllActiveSaleListDetailPreOrdersProvider(): DataSource.Factory<Int,SaleListDetail>
 
 
     //Payments due shows the payment amount pending vs the total amount of the sale.
     @Query(ALL_SALE_LIST + FILTER_PAYMENT_DUE)
-    abstract fun findAllActiveSaleListDetailPaymentDueProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllActiveSaleListDetailPaymentDueProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_NAME_ASC)
-    abstract fun findAllSaleFilterAllSortNameAscProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_NAME_DEC)
-    abstract fun findAllSaleFilterAllSortNameDescProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterAllSortNameDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_DESC)
-    abstract fun findAllSaleFilterAllSortTotalAscProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_TOTAL_AMOUNT_ASC)
-    abstract fun findAllSaleFilterAllSortTotalDescProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterAllSortTotalDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_ORDER_DATE_DESC)
-    abstract fun findAllSaleFilterAllSortDateAscProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SORT_ORDER_DATE_ASC)
-    abstract fun findAllSaleFilterAllSortDateDescProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterAllSortDateDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_NAME_ASC)
-    abstract fun findAllSaleFilterPreOrderSortNameAscProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortNameAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_NAME_DEC)
-    abstract fun findAllSaleFilterPreOrderSortNameDescProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortNameDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_TOTAL_AMOUNT_DESC)
-    abstract fun findAllSaleFilterPreOrderSortTotalAscProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortTotalAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_TOTAL_AMOUNT_ASC)
-    abstract fun findAllSaleFilterPreOrderSortTotalDescProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortTotalDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_DESC)
-    abstract fun findAllSaleFilterPreOrderSortDateAscProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortDateAscProvider(): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + FILTER_PREORDER + SORT_ORDER_DATE_ASC)
-    abstract fun findAllSaleFilterPreOrderSortDateDescProvider(): UmProvider<SaleListDetail>
+    abstract fun findAllSaleFilterPreOrderSortDateDescProvider(): DataSource.Factory<Int,SaleListDetail>
 
 
-    fun filterAndSortSale(filter: Int, sort: Int): UmProvider<SaleListDetail> {
+    fun filterAndSortSale(filter: Int, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (filter) {
             ALL_SELECTED -> when (sort) {
@@ -148,7 +154,7 @@ abstract class SaleDao : SyncableDao<Sale, SaleDao> {
         return findAllActiveAsSaleListDetailProvider()
     }
 
-    fun filterAndSortSale(filter: Int, search: String, sort: Int): UmProvider<SaleListDetail> {
+    fun filterAndSortSale(filter: Int, search: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (filter) {
             ALL_SELECTED -> when (sort) {
@@ -175,23 +181,23 @@ abstract class SaleDao : SyncableDao<Sale, SaleDao> {
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY)
     abstract fun findAllSaleItemsWithSearchFilter(locationuid: Long,
-                                                  amountl: Long, amounth: Long, from: Long, to: Long, title: String): UmProvider<SaleListDetail>
+                                                  amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_DATE_ASC)
     abstract fun findAllSaleItemsWithSearchFilterOrderDateAsc(locationuid: Long,
-                                                              amountl: Long, amounth: Long, from: Long, to: Long, title: String): UmProvider<SaleListDetail>
+                                                              amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_ASC)
     abstract fun findAllSaleItemsWithSearchFilterOrderPriceAsc(locationuid: Long,
-                                                               amountl: Long, amounth: Long, from: Long, to: Long, title: String): UmProvider<SaleListDetail>
+                                                               amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
 
     @Query(ALL_SALE_LIST + SEARCH_BY_QUERY + FILTER_ORDER_BY_PRICE_DESC)
     abstract fun findAllSaleItemsWithSearchFilterOrderPriceDesc(locationuid: Long,
-                                                                amountl: Long, amounth: Long, from: Long, to: Long, title: String): UmProvider<SaleListDetail>
+                                                                amountl: Long, amounth: Long, from: Long, to: Long, title: String): DataSource.Factory<Int,SaleListDetail>
 
 
     fun findAllSaleFilterAndSearchProvider(locationUid: Long,
-                                           spl: Long, sph: Long, from: Long, to: Long, searchQuery: String, sort: Int): UmProvider<SaleListDetail> {
+                                           spl: Long, sph: Long, from: Long, to: Long, searchQuery: String, sort: Int): DataSource.Factory<Int,SaleListDetail> {
 
         when (sort) {
             SORT_MOST_RECENT -> return findAllSaleItemsWithSearchFilterOrderDateAsc(
@@ -219,7 +225,7 @@ abstract class SaleDao : SyncableDao<Sale, SaleDao> {
     abstract fun inactivateEntity(saleUid: Long)
 
     @Query(INACTIVATE_SALE_QUERY)
-    abstract fun inactivateEntityAsync(saleUid: Long, inactivateSaleCallback: UmCallback<Int>)
+    abstract suspend fun inactivateEntityAsync(saleUid: Long): Int
 
 
     //UPDATE:
@@ -230,7 +236,7 @@ abstract class SaleDao : SyncableDao<Sale, SaleDao> {
 
     //Get overdue sale count
     @Query("select count(*) from sale where Sale.saleDueDate < :today and Sale.saleDueDate > 0 AND Sale.saleActive = 1")
-    abstract fun getOverDueSaleCountAsync(today: Long, resultCallback: UmCallback<Int>)
+    abstract suspend fun getOverDueSaleCountAsync(today: Long): Int
 
 
     @Query(" SELECT COUNT(*) FROM (SELECT (select (case  when  " +
@@ -238,6 +244,7 @@ abstract class SaleDao : SyncableDao<Sale, SaleDao> {
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
             " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
     abstract fun getPreOrderSaleCountLive(): DoorLiveData<Int?>
+
 
     companion object {
 
@@ -353,4 +360,6 @@ abstract class SaleDao : SyncableDao<Sale, SaleDao> {
 
         const val INACTIVATE_SALE_QUERY = "UPDATE Sale SET saleActive = 0 WHERE saleUid = :saleUid"
     }
+
+
 }

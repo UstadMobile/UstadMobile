@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
-class SaleNameWithImage {
+class SaleNameWithImage() {
 
     var name: String? = null
     var description: String? = null

@@ -3,14 +3,13 @@ package com.ustadmobile.lib.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.lib.database.annotation.UmEntity
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey
 import com.ustadmobile.lib.database.annotation.UmSyncLastChangedBy
 import com.ustadmobile.lib.database.annotation.UmSyncLocalChangeSeqNum
 import com.ustadmobile.lib.database.annotation.UmSyncMasterChangeSeqNum
 
 @UmEntity(tableId = 79)
 @Entity
-class SaleItemReminder {
+class SaleItemReminder() {
 
 
     @PrimaryKey(autoGenerate = true)
@@ -20,7 +19,7 @@ class SaleItemReminder {
 
     var saleItemReminderDays: Int = 0
 
-    var isSaleItemReminderActive: Boolean = false
+    var saleItemReminderActive: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var saleItemReminderMCSN: Long = 0
@@ -31,16 +30,16 @@ class SaleItemReminder {
     @UmSyncLastChangedBy
     var saleItemReminderLCB: Int = 0
 
-    constructor() {
-        this.isSaleItemReminderActive = false
+    init {
+        this.saleItemReminderActive = false
     }
 
-    constructor(active: Boolean) {
-        this.isSaleItemReminderActive = active
+    constructor(active: Boolean) : this() {
+        this.saleItemReminderActive = active
     }
 
-    constructor(days: Int, saleItemUid: Long, active: Boolean) {
-        this.isSaleItemReminderActive = active
+    constructor(days: Int, saleItemUid: Long, active: Boolean) : this() {
+        this.saleItemReminderActive = active
         this.saleItemReminderSaleItemUid = saleItemUid
         this.saleItemReminderDays = days
     }

@@ -25,7 +25,7 @@ interface SaleListView : UstadView {
     fun setListProvider(listProvider: UmProvider<SaleListDetail>, paymentsDueTab: Boolean, preOrderTab: Boolean)
 
 
-    fun updateSortSpinner(presets: Array<String>)
+    fun updateSortSpinner(presets: Array<String?>)
 
     fun updatePreOrderCounter(count: Int)
 

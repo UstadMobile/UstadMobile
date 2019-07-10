@@ -1,29 +1,29 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Insert
+import androidx.paging.DataSource
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.UmLiveData
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.*
+import com.ustadmobile.lib.database.annotation.UmDao
+import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
-abstract class SaleItemDao : SyncableDao<SaleItem, SaleItemDao> {
+@Dao
+abstract class SaleItemDao : BaseDao<SaleItem> {
+
+
 
     //INSERT
-
-
 
     @Query(GENERATE_SALE_NAME)
     abstract fun getTitleForSaleUid(saleUid: Long): String
 
     @Query(GENERATE_SALE_NAME)
-    abstract fun getTitleForSaleUidAsync(saleUid: Long, resultCallback: UmCallback<String>)
+    abstract suspend fun getTitleForSaleUidAsync(saleUid: Long) : String
 
     //FIND ALL ACTIVE
 
@@ -31,43 +31,43 @@ abstract class SaleItemDao : SyncableDao<SaleItem, SaleItemDao> {
     abstract fun findAllList(): List<SaleItem>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveLive(): UmLiveData<List<SaleItem>>
+    abstract fun findAllActiveLive(): DoorLiveData<List<SaleItem>>
 
     @Query(ALL_ACTIVE_QUERY)
     abstract fun findAllActiveList(): List<SaleItem>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveAsync(allActiveCallback: UmCallback<List<SaleItem>>)
+    abstract suspend fun findAllActiveAsync():List<SaleItem>
 
     @Query(ALL_ACTIVE_QUERY)
-    abstract fun findAllActiveProvider(): UmProvider<SaleItem>
+    abstract fun findAllActiveProvider(): DataSource.Factory<Int, SaleItem>
 
     @Query("SELECT count(*) From SaleItem where SaleItem.saleItemSaleUid = :saleUid AND SaleItem.saleItemActive = 1")
-    abstract fun getSaleItemCountFromSale(saleUid: Long, resultCallback: UmCallback<Int>)
+    abstract suspend fun getSaleItemCountFromSale(saleUid: Long): Int
 
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
-    abstract fun findAllSaleItemListDetailActiveLive(): UmLiveData<List<SaleItemListDetail>>
+    abstract fun findAllSaleItemListDetailActiveLive(): DoorLiveData<List<SaleItemListDetail>>
 
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_QUERY)
-    abstract fun findAllSaleItemListDetailActiveProvider(): UmProvider<SaleItemListDetail>
+    abstract fun findAllSaleItemListDetailActiveProvider(): DataSource.Factory<Int,SaleItemListDetail>
 
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
-    abstract fun findAllSaleItemListDetailActiveBySaleLive(saleUid: Long): UmLiveData<List<SaleItemListDetail>>
+    abstract fun findAllSaleItemListDetailActiveBySaleLive(saleUid: Long): DoorLiveData<List<SaleItemListDetail>>
 
     @Query(ALL_ACTIVE_SALE_ITEM_LIST_DETAIL_BY_SALE_QUERY)
-    abstract fun findAllSaleItemListDetailActiveBySaleProvider(saleUid: Long): UmProvider<SaleItemListDetail>
+    abstract fun findAllSaleItemListDetailActiveBySaleProvider(saleUid: Long): DataSource.Factory<Int,SaleItemListDetail>
 
     @Query(TOTAL_PAID_BY_SALE_UID)
     abstract fun findTotalPaidInASale(saleUid: Long): Long
 
     @Query(TOTAL_PAID_BY_SALE_UID)
-    abstract fun findTotalPaidBySaleAsync(saleUid: Long, resultCallback: UmCallback<Long>)
+    abstract suspend fun findTotalPaidBySaleAsync(saleUid: Long):Long
 
     @Query(TOTAL_DISCOUNT_BY_SALE_UID)
     abstract fun findTotalDiscountInASale(saleUid: Long): Long
 
     @Query(TOTAL_DISCOUNT_BY_SALE_UID)
-    abstract fun findTotalDiscountBySaleAsync(saleUid: Long, resultCallback: UmCallback<Long>)
+    abstract suspend fun findTotalDiscountBySaleAsync(saleUid: Long):Long
 
     @Query(FIND_BY_UID_QUERY)
     abstract fun findByUid(uid: Long): SaleItem
@@ -82,13 +82,14 @@ abstract class SaleItemDao : SyncableDao<SaleItem, SaleItemDao> {
     abstract fun inactivateEntity(uid: Long)
 
     @Query(INACTIVATE_QUERY)
-    abstract fun inactivateEntityAsync(uid: Long, inactivateCallback: UmCallback<Int>)
+    abstract suspend fun inactivateEntityAsync(uid: Long):Int
 
 
     //UPDATE:
 
     @Update
     abstract suspend fun updateAsync(entity: SaleItem):Int
+
 
     companion object {
 
@@ -156,5 +157,7 @@ abstract class SaleItemDao : SyncableDao<SaleItem, SaleItemDao> {
 
         const val INACTIVATE_QUERY = "UPDATE SaleItem SET saleItemActive = 0 WHERE saleItemUid = :uid"
     }
+
+
 
 }

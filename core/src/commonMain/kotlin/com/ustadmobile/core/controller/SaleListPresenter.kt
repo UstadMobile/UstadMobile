@@ -21,7 +21,6 @@ import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_GEN_NAME
 import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.core.view.SaleListView
-import com.ustadmobile.door.observe
 import com.ustadmobile.lib.db.entities.SaleListDetail
 
 /**
@@ -48,8 +47,8 @@ class SaleListPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        saleDao = repository.getSaleDao()
-        salePaymentDao = repository.getSalePaymentDao()
+        saleDao = repository.saleDao
+        salePaymentDao = repository.salePaymentDao
 
     }
 
