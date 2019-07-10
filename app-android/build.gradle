@@ -100,7 +100,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "TEST_HOST", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver"] + "\""
         buildConfigField "String", "TEST_PORT", "\"" + rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"] + "\""
-        buildConfigField "Boolean", "isContentPreviewOnly",  rootProject.ext.buildConfigProperties["branding.content_preview_only"]
         testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest,com.ustadmobile.test.core.annotation.ImplementationRequiredTest"
     }
 

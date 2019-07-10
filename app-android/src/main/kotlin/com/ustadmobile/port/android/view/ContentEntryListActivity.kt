@@ -10,10 +10,11 @@ import android.widget.*
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListPresenter
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_FOLDER
@@ -32,8 +33,10 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     private var presenter: ContentEntryListPresenter? = null
 
-
     lateinit var managerBle: NetworkManagerBle
+
+    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
 
 
     private var contentCreationOptionBehaviour: BottomSheetBehavior<LinearLayout>? = null
@@ -54,7 +57,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
         presenter = ContentEntryListPresenter(getContext(),
                 UMAndroidUtil.bundleToMap(intent.extras),   this)
-        presenter!!.handleShowContentEditorOptios(!BuildConfig.isContentPreviewOnly)
+        presenter!!.handleShowContentEditorOptios(showControls)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
 

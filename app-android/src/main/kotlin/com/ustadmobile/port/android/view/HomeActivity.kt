@@ -5,19 +5,18 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
-import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AboutView
@@ -32,6 +31,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +51,10 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+                AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
         menuInflater.inflate(R.menu.menu_home_activity, menu)
-        menu.findItem(R.id.create_new_content).isVisible = !BuildConfig.isContentPreviewOnly
+        menu.findItem(R.id.create_new_content).isVisible = showControls
         return super.onCreateOptionsMenu(menu)
     }
 
