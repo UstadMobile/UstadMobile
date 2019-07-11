@@ -35,8 +35,9 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 
-    override fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions) =
-            chartView.setChartData(chartData, options)
+    override fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions,
+                              xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>) =
+            chartView.setChartData(chartData, options, xAxisLabels, subgroupLabels)
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

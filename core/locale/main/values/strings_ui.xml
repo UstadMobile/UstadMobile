@@ -54,6 +54,8 @@
     <string name='name'>Name</string>
     <string name='male'>Male</string>
     <string name='female'>Female</string>
+    <string name="other">Other</string>
+    <string name="unset">Unset</string>
     <string name='could_not_open_file'>Sorry! Could not open file.</string>
     <string name='settings'>Settings</string>
     <string name='lang_sys'>System Language</string>

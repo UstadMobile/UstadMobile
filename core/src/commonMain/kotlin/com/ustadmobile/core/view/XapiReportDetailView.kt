@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.dao.StatementDao
 
 interface XapiReportDetailView : UstadView {
 
-    fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions)
+    fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions, xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>)
 
     companion object {
 

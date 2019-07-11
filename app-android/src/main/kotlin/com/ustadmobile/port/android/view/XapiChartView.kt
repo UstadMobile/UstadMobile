@@ -23,13 +23,14 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     var colorList = listOf("#009688", "#FF9800", "#2196F3","#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50")
 
-    fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions) {
+    fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions, xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>) {
         removeAllViewsInLayout()
-        var chart = createChart(chartData, options)
+        var chart = createChart(chartData, options, xAxisLabels, subgroupLabels)
         addView(chart)
     }
 
-    private fun createChart(chartData: List<StatementDao.ReportData>, options: XapiReportOptions): View? {
+    private fun createChart(chartData: List<StatementDao.ReportData>, options: XapiReportOptions,
+                            xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>): View? {
 
         if (options.chartType == XapiReportOptions.BAR_CHART) {
 
@@ -61,6 +62,8 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             barChart.setTouchEnabled(false)
 
 
+            var xAxisLabelList: MutableList<String> = mutableListOf()
+            var subgroupList: MutableList<String> = mutableListOf()
             //get a list of distinct subgroups
             val distinctSubgroups = chartData.distinctBy { it.subgroup }.map { it.subgroup }
             val groupedByXAxis = chartData.groupBy { it.xAxis }
@@ -68,7 +71,9 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             var secondList = mutableListOf<MutableList<BarEntry>>()
             distinctSubgroups.forEachIndexed { idx, subGroup ->
                 var xAxisList = mutableListOf<BarEntry>()
+                subgroupList.add(subgroupLabels[subGroup] ?: error(""))
                 groupedByXAxis.keys.forEach { xAxisKey ->
+                    xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
                     val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
                     val barValue = barReportData?.yAxis ?: 0
                     var barEntry = BarEntry((idx).toFloat(), barValue.toFloat())
@@ -82,16 +87,15 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
             var barData = BarData()
             secondList.forEachIndexed { idx, it ->
-                var barDataSet = BarDataSet(it, idx.toString())
+                var barDataSet = BarDataSet(it, subgroupList[idx])
                 barDataSet.color = Color.parseColor(colorList[idx])
                 barData.barWidth = (1/groupedByXAxis.keys.size.toFloat())
                 barData.addDataSet(barDataSet)
             }
 
-            val months = arrayOf("Male", "Female", "Other")
             val xAxis = barChart.xAxis
             barChart.axisLeft.axisMinimum = 0f
-            xAxis.valueFormatter = IndexAxisValueFormatter(months)
+            xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setCenterAxisLabels(true)
             xAxis.granularity = 1f
