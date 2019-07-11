@@ -36,6 +36,9 @@ interface ContentEntryDetailView : ContentWithOptionsView, ViewWithErrorNotifier
     @JsName("showFileOpenWithMimeTypeError")
     fun showFileOpenError(message: String, actionMessageId: Int, mimeType: String)
 
+    @JsName("showEditButton")
+    fun showEditButton(show: Boolean)
+
     @JsName("showFileOpenError")
     fun showFileOpenError(message: String)
 

@@ -19,10 +19,13 @@ class ContentEntryListPresenter (context: Any, arguments: Map<String, String>?, 
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        view.runOnUiThread(Runnable{
-            view.showCreateContentOption(true)
-        })
         contentEntryUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
+    }
+
+    fun handleShowContentEditorOptios(show: Boolean){
+        view.runOnUiThread(Runnable{
+            view.showCreateContentOption(show)
+        })
     }
 
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -21,6 +22,7 @@ import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
@@ -57,6 +59,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var localAvailabilityStatusIcon: ImageView? = null
 
+    private lateinit var editButton: FloatingActionButton
+
     private var flexBox: RecyclerView? = null
 
     private lateinit var downloadButton: Button
@@ -64,6 +68,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     private var downloadProgress: DownloadProgressView? = null
 
     private var fileStatusIcon = HashMap<Int, Int>()
+
+    private val showControls = UstadMobileSystemImpl.instance.getAppConfigString(
+            AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, null, this)!!.toBoolean()
+
 
     override val allKnowAvailabilityStatus: Set<Long>
         get() = managerAndroidBle.getLocallyAvailableContainerUids()
@@ -81,8 +89,10 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 bundleToMap(intent.extras), this,
                 this, networkManagerBle)
         presenter!!.onCreate(bundleToMap(Bundle()))
+
         presenter!!.onStart()
         managerAndroidBle.addLocalAvailabilityListener(this)
+        presenter!!.handleShowEditButton(showControls)
 
     }
 
@@ -102,6 +112,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         translationAvailableLabel = findViewById(R.id.entry_detail_available_label)
         flexBox = findViewById(R.id.entry_detail_flex)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
+        editButton = findViewById(R.id.edit_content)
 
         fileStatusIcon[LOCALLY_AVAILABLE_ICON] = R.drawable.ic_nearby_black_24px
         fileStatusIcon[LOCALLY_NOT_AVAILABLE_ICON] = R.drawable.ic_cloud_download_black_24dp
@@ -110,22 +121,30 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        val editBtn = findViewById<FloatingActionButton>(R.id.edit_content)
         findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
-            if (scrollY > oldScrollY) {
-                editBtn.hide()
-            } else {
-                editBtn.show()
+            if(showControls){
+                if (scrollY > oldScrollY) {
+                    editButton.hide()
+                } else {
+                    editButton.show()
+                }
             }
         }
 
-        editBtn.setOnClickListener {
+        editButton.setOnClickListener {
             presenter!!.handleStartEditingContent()
         }
         downloadButton.setOnClickListener {
             presenter!!.handleDownloadButtonClick()
         }
 
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun showEditButton(show: Boolean) {
+       if(::editButton.isInitialized){
+           editButton.visibility = if(show) View.VISIBLE else View.GONE
+       }
     }
 
 
@@ -146,8 +165,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 presenter!!.handleUpNavigation()
             }
         }
-
-
     }
 
     override fun setContentEntry(contentEntry: ContentEntry) {
