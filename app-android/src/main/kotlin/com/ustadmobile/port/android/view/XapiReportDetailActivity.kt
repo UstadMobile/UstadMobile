@@ -25,6 +25,7 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
+        umToolbar.title = getString(R.string.activity_preview_xapi)
 
         chartView = findViewById(R.id.preview_chart_view)
 
@@ -32,11 +33,6 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
                 this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-    }
-
-
-    override fun setToolbarTitle(title: String) {
-        umToolbar.title = title
     }
 
     override fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions) =

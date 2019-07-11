@@ -21,9 +21,20 @@
 
             <com.ustadmobile.port.android.view.XapiChartView
                 android:id="@+id/preview_chart_view"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="250dp"
-                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/preview_ylabel"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:paddingStart="8dp"/>
+
+            <com.ustadmobile.port.android.view.VerticalTextView
+                android:id="@+id/preview_ylabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom|end"
+                app:layout_constraintBottom_toBottomOf="@+id/preview_chart_view"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
 

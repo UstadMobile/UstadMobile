@@ -7,8 +7,6 @@ interface XapiReportDetailView : UstadView {
 
     fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions)
 
-    fun setToolbarTitle(title: String)
-
     companion object {
 
         const val VIEW_NAME = "XapiReportPreviewView"
