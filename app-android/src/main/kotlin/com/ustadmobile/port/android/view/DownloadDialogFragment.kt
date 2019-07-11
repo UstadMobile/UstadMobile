@@ -208,7 +208,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
         if (viewId != R.id.wifi_only_option_holder && viewId != R.id.use_sdcard_option_holder) {
             mPresenter!!.handleClickStackedButton(viewId)
         } else if (viewId == R.id.wifi_only_option_holder) {
-            mPresenter!!.handleWiFiOnlyOption(!wifiOnlyView!!.isChecked)
+            val checkboxState = !wifiOnlyView!!.isChecked
+            wifiOnlyView!!.isChecked = checkboxState
+            mPresenter!!.handleWiFiOnlyOption(checkboxState)
         }
     }
 

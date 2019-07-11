@@ -1,25 +1,18 @@
-package com.ustadmobile.port.sharedse.contentformats.epub
+package com.ustadmobile.port.sharedse.contentformats.xapi.plugin
 
-import com.ustadmobile.core.catalog.contenttype.EPUBType
-import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
+import com.ustadmobile.core.catalog.contenttype.TinCanType
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.ContentTypePlugin
-
 import org.xmlpull.v1.XmlPullParserException
-
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
-
-/**
- * Class which handles EPUB content import tasks, creates content entry from the H5P file
- */
-class EpubTypePlugin : EPUBType(), ContentTypePlugin {
+class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
 
     override fun getContentEntry(file: File): ContentEntry? {
         var contentEntry: ContentEntry? = null
@@ -29,16 +22,15 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 
                     val fileName = zipEntry?.name
-                    if (fileName!!.contains(".opf")) {
+                    if (fileName!!.toLowerCase() == TINCAN_XML) {
                         val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
-                        val opfDocument = OpfDocument()
-                        opfDocument.loadFromOPF(xpp)
+                        val activity = TinCanXML.loadFromXML(xpp).launchActivity!!
                         contentEntry = ContentEntry()
                         contentEntry!!.imported = true
-                        contentEntry!!.licenseType = LICENSE_TYPE_OTHER
-                        contentEntry!!.title = opfDocument.title
-                        contentEntry!!.author = opfDocument.getCreator(0).creator
-                        contentEntry!!.description = opfDocument.description
+                        contentEntry!!.licenseType = ContentEntry.LICENSE_TYPE_OTHER
+                        contentEntry!!.title = activity.name
+                        contentEntry!!.author = ""
+                        contentEntry!!.description = activity.desc
                         contentEntry!!.leaf = true
                         break
                     }
