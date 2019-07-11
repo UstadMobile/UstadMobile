@@ -39,6 +39,13 @@ class ContentEntryRelatedEntryJoin() {
     @UmSyncMasterChangeSeqNum
     var cerejMasterChangeSeqNum: Long = 0
 
+    constructor(cerejContentEntryUid: Long,cerejRelatedEntryUid: Long, cerejRelLanguageUid: Long, relType: Int) : this() {
+        this.cerejContentEntryUid = cerejContentEntryUid
+        this.cerejRelatedEntryUid = cerejRelatedEntryUid
+        this.relType = relType
+        this. cerejRelLanguageUid = cerejRelLanguageUid
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
 

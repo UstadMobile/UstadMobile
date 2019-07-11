@@ -1,0 +1,32 @@
+[
+    {
+        "iso_639_1_standard": null,
+        "iso_639_2_standard": null,
+        "iso_639_3_standard": null,
+        "langLastChangedBy": 0,
+        "langLocalChangeSeqNum": 0,
+        "langMasterChangeSeqNum": 0,
+        "langUid": 1,
+        "name": "English"
+    },
+    {
+        "iso_639_1_standard": null,
+        "iso_639_2_standard": null,
+        "iso_639_3_standard": null,
+        "langLastChangedBy": 0,
+        "langLocalChangeSeqNum": 0,
+        "langMasterChangeSeqNum": 0,
+        "langUid": 2,
+        "name": "Pushto"
+    },
+    {
+        "iso_639_1_standard": null,
+        "iso_639_2_standard": null,
+        "iso_639_3_standard": null,
+        "langLastChangedBy": 0,
+        "langLocalChangeSeqNum": 0,
+        "langMasterChangeSeqNum": 0,
+        "langUid": 3,
+        "name": "Farsi"
+    }
+]

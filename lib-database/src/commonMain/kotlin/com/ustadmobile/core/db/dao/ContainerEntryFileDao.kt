@@ -19,6 +19,9 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Query("SELECT * FROM ContainerEntryFile WHERE cefUid = :uid")
     abstract fun findByUid(uid: Long): ContainerEntryFile?
 
+    @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile")
+    abstract fun getAllEntryFiles(): List<ContainerEntryFile>
+
     @Query("SELECT SUM(ContainerEntryFile.ceCompressedSize) FROM " +
             "ContainerEntry " +
             "JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +

@@ -34,6 +34,11 @@ class Language() {
     @UmSyncLastChangedBy
     var langLastChangedBy: Int = 0
 
+    constructor(langUid: Long, name: String) : this() {
+        this.langUid = langUid
+        this.name = name
+    }
+
     override fun toString(): String {
         return name.toString()
     }
