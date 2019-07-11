@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,7 @@ import com.ustadmobile.core.db.dao.StatementDao
 class XapiChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
     : LinearLayout(context, attrs, defStyleAttr) {
 
+    var colorList = listOf("#009688", "#FF9800", "#2196F3","#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50")
 
     fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions) {
         removeAllViewsInLayout()
@@ -81,7 +83,8 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             var barData = BarData()
             secondList.forEachIndexed { idx, it ->
                 var barDataSet = BarDataSet(it, idx.toString())
-                barData.barWidth = (1/groupedByXAxis.keys.size.toFloat())// (1 - groupSpace) / it.size - barSpace
+                barDataSet.color = Color.parseColor(colorList[idx])
+                barData.barWidth = (1/groupedByXAxis.keys.size.toFloat())
                 barData.addDataSet(barDataSet)
             }
 

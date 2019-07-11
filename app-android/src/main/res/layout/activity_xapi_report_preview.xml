@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinationLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,21 +10,22 @@
         android:id="@+id/nested_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         android:scrollbars="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="@dimen/dimen_16dp">
 
             <com.ustadmobile.port.android.view.XapiChartView
                 android:id="@+id/preview_chart_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="250dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
@@ -44,15 +46,25 @@
             app:titleEnabled="false">
 
             <include
-                android:id="@+id/new_report_toolbar"
-                layout="@layout/toolbar"
-                android:layout_width="wrap_content"
-                android:layout_height="56dp"
-                app:title="New Report" />
-
+                android:id="@+id/preview_toolbar"
+                layout="@layout/toolbar" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/preview_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/fab_add"
+        app:floating_title="@string/add_to_dashboard"
+        app:floating_title_color="@android:color/white"
+        app:layout_anchorGravity="bottom|center"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

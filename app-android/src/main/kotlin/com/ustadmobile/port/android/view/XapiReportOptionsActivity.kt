@@ -13,7 +13,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
@@ -82,9 +81,11 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             createDateRangeDialog().show()
         }
 
-        val toolbar = findViewById<Toolbar>(R.id.new_report_toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar!!.title = "NewXapiReportOptions"
+        setUMToolbar(R.id.new_report_toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
+        umToolbar.title = "Report Options"
 
         presenter = XapiReportOptionsPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
