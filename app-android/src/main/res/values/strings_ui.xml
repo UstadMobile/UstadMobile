@@ -292,4 +292,5 @@
     <string name="msst_heading_2">Learn</string>
     <string name="msst_sub_heading_1">The modules in this app are free! Download them to access their contents. You can complete them offline anytime, anywhere!</string>
     <string name="msst_sub_heading_2">Interactive videos will teach you CV writing, interview skills, communication skills, and more!</string>
+    <string name="splash_poweredby_label">Powered by</string>
 </resources>

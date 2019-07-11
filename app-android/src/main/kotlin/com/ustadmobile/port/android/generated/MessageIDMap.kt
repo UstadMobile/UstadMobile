@@ -258,6 +258,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.permission_camera_message] = R.string.permission_camera_message
 	ID_MAP[MessageID.content_editor_page_view_hint] = R.string.content_editor_page_view_hint
 	ID_MAP[MessageID.content_preview_title] = R.string.content_preview_title
+	ID_MAP[MessageID.splash_poweredby_label] = R.string.splash_poweredby_label
 	ID_MAP[MessageID.exams] = R.string.exams
 	ID_MAP[MessageID.content_choose_file] = R.string.content_choose_file
 	ID_MAP[MessageID.content_entry_not_found] = R.string.content_entry_not_found

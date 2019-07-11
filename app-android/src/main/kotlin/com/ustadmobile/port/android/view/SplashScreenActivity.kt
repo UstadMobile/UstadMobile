@@ -56,7 +56,7 @@ class SplashScreenActivity : UstadBaseActivity() {
 
         setContentView(R.layout.activity_splash_screen)
 
-        val launched = impl.getAppPref(OnBoardingView.PREF_TAG, this)!!.toBoolean()
+        val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
 
         if(!launched){val dbWork = OneTimeWorkRequest.Builder(
                     DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)

@@ -509,6 +509,8 @@ object MessageID{
 
     const val content_preview_title = 2186
 
+    const val splash_poweredby_label = 2264
+
     const val exams = 2074
 
     const val content_choose_file = 2184

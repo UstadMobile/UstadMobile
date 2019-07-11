@@ -41,7 +41,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
                 R.layout.onboard_screen_view, R.drawable.downloading_data),
         SCREEN_2(R.string.msst_heading_2,
                 R.string.msst_sub_heading_2,
-                R.layout.onboard_screen_view, R.drawable.sharing_data)
+                R.layout.onboard_screen_view, R.drawable.ic_noun_interactivity_2017221)
     }
 
 
