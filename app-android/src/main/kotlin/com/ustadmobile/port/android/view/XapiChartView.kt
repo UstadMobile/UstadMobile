@@ -36,23 +36,25 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                     ViewGroup.LayoutParams.MATCH_PARENT)
             barChart.layoutParams = params
 
-            barChart.xAxis.isEnabled = true;
-            barChart.getXAxis().setDrawGridLines(false);
-            barChart.getXAxis().setDrawLabels(true);
+            barChart.xAxis.isEnabled = true
+            barChart.xAxis.setDrawGridLines(false)
+            barChart.xAxis.setDrawLabels(true)
 
             //Left Values
-            barChart.getAxisLeft().setEnabled(true);
-            barChart.getAxisLeft().setDrawTopYLabelEntry(true);
+            barChart.axisLeft.isEnabled = true
+            barChart.axisLeft.setDrawTopYLabelEntry(true)
 
             //Right Values:
-            barChart.getAxisRight().setEnabled(false);
+            barChart.axisRight.isEnabled = false
 
             //Legend:
-            barChart.getLegend().setEnabled(true);
-            barChart.getLegend().setPosition(Legend.LegendPosition.RIGHT_OF_CHART)
+            barChart.legend.isEnabled = true
+            barChart.legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
+            barChart.legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+            barChart.legend.setDrawInside(true)
 
             //Label Description
-            barChart.getDescription().setEnabled(false)
+            barChart.description.isEnabled = false
 
             barChart.setTouchEnabled(false)
 
@@ -67,34 +69,37 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 groupedByXAxis.keys.forEach { xAxisKey ->
                     val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
                     val barValue = barReportData?.yAxis ?: 0
-                    var barEntry = BarEntry((idx + 1).toFloat(), barValue.toFloat())
+                    var barEntry = BarEntry((idx).toFloat(), barValue.toFloat())
                     xAxisList.add(barEntry)
                 }
                 secondList.add(xAxisList)
             }
 
+            val barSpace = 0.02f
+            val groupSpace = 0.3f
 
             var barData = BarData()
             secondList.forEachIndexed { idx, it ->
                 var barDataSet = BarDataSet(it, idx.toString())
-                barData.barWidth = 0.15f
+                barData.barWidth = (1/groupedByXAxis.keys.size.toFloat())// (1 - groupSpace) / it.size - barSpace
                 barData.addDataSet(barDataSet)
             }
 
             val months = arrayOf("Male", "Female", "Other")
             val xAxis = barChart.xAxis
+            barChart.axisLeft.axisMinimum = 0f
             xAxis.valueFormatter = IndexAxisValueFormatter(months)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setCenterAxisLabels(true)
-
-            val barSpace = 0.02f
-            val groupSpace = 0.3f
-            val groupCount = groupedByXAxis.keys.size
+            xAxis.granularity = 1f
+            xAxis.isGranularityEnabled = true
+            xAxis.axisMinimum = 0f
+            xAxis.axisMaximum = groupedByXAxis.keys.size.toFloat()
 
             barChart.data = barData
-            barChart.xAxis.axisMinimum = 0.toFloat()
-            barChart.xAxis.axisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * groupCount
-            barChart.groupBars(0.toFloat(), groupSpace, barSpace)
+            barChart.xAxis.mAxisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * xAxis.axisMaximum
+            barChart.groupBars(0f, groupSpace, barSpace)
+            barChart.invalidate()
 
             return barChart
         } else if (options.chartType == XapiReportOptions.LINE_GRAPH) {
