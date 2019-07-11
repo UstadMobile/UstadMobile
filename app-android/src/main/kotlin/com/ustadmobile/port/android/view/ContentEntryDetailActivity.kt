@@ -173,8 +173,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         entryDetailsDesc!!.text = Html.fromHtml(contentEntry.description)
         entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
 
-        UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,
-                R.mipmap.ic_launcher,findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
+        UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
+                findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
     }
 
 

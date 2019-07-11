@@ -177,7 +177,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             if (entry.thumbnailUrl == null || entry.thumbnailUrl!!.isEmpty()) {
                 holder.thumbnailView.setImageDrawable(null)
             } else {
-                UMAndroidUtil.loadImage(entry.thumbnailUrl,R.mipmap.ic_launcher,holder.thumbnailView)
+                UMAndroidUtil.loadImage(entry.thumbnailUrl,R.drawable.img_placeholder,
+                        holder.thumbnailView)
             }
 
 
