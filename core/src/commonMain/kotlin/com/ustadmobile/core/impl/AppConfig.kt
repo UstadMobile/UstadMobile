@@ -27,4 +27,6 @@ object AppConfig {
 
     const val KEY_SHOW_CONTENT_EDITOR_CONTROLS = "show_content_editor_controls"
 
+    const val KEY_SHOW_SPASH_SCREEN = "show_splash_screen"
+
 }

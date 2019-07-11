@@ -118,6 +118,18 @@ object UmFileUtilSe {
         FileOutputStream(destFile).use { fout -> UmFileUtilSe::class.java.getResourceAsStream(resourcePath).use { resIn -> UMIOUtils.readFully(resIn, fout) } }
     }
 
+    /**
+     * Copy input stream to a file
+     */
+    @JvmStatic
+    fun File.copyInputStreamToFile(inputStream: InputStream) {
+        inputStream.use { input ->
+            this.outputStream().use { fileOut ->
+                input.copyTo(fileOut)
+            }
+        }
+    }
+
     @Throws(IOException::class)
     fun makeTempDir(prefix: String, postfix: String): File {
         val tmpDir = File.createTempFile(prefix, postfix)

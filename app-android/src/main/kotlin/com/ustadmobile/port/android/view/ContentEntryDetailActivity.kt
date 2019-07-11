@@ -16,13 +16,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
@@ -173,11 +173,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         entryDetailsDesc!!.text = Html.fromHtml(contentEntry.description)
         entryDetailsAuthor!!.text = if(contentEntry.author == null) "" else contentEntry.author
 
-        if(contentEntry.thumbnailUrl != null &&  contentEntry.thumbnailUrl!!.isNotEmpty()){
-            Picasso.get()
-                    .load(contentEntry.thumbnailUrl)
-                    .into(findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
-        }
+        UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
+                findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)
     }
 
 
