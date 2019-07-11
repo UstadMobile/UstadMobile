@@ -165,4 +165,4 @@ annotation class RawQuery(
          *
          * @return List of entities that should invalidate the query if changed.
          */
-        val observedEntities: Array<KClass<*>> = [])
+        val observedEntities: Array<KClass<*>> = arrayOf())

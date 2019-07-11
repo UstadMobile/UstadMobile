@@ -37,7 +37,7 @@ class PreparedStatementArrayProxy
 
     private val queryTypes = TreeMap<Int, Int>()
 
-    private class JdbcArrayProxy(private val typeName: String, val objects: kotlin.Array<Any>) : Array {
+    private class JdbcArrayProxy(private val typeName: String, val objects: kotlin.Array<out Any?>) : Array {
 
         private var baseType: Int = 0
 
@@ -112,7 +112,7 @@ class PreparedStatementArrayProxy
     @Throws(SQLException::class)
     protected fun prepareStatement(): PreparedStatement {
         var arrayOffset = 0
-        val paramValues = TreeMap<Int, Any>()
+        val paramValues = TreeMap<Int, Any?>()
         val paramTypes = TreeMap<Int, Int>()
         var adjustedQuery = query
         for (paramIndex in queryParams.keys) {
@@ -705,7 +705,7 @@ class PreparedStatementArrayProxy
          * @return A java.sql.Array object that can be used as a parameter with this class
          */
         @JvmStatic
-        fun createArrayOf(arrayType: String, objects: kotlin.Array<Any>): Array {
+        fun createArrayOf(arrayType: String, objects: kotlin.Array<out Any?>): Array {
             return JdbcArrayProxy(arrayType, objects)
         }
 

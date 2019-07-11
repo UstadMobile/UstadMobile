@@ -1,9 +1,6 @@
 package com.ustadmobile.door
 
-expect class SimpleDoorQuery: DoorQuery {
+expect class SimpleDoorQuery(sql: String, values: Array<out Any?>? = null): DoorQuery {
 
-    constructor(sql: String, values: Array<Any>?)
-
-    constructor(sql: String)
 
 }

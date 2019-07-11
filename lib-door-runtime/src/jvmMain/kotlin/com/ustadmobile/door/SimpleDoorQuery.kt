@@ -1,21 +1,19 @@
 package com.ustadmobile.door
 
+import java.lang.IllegalArgumentException
+import java.sql.Connection
 import java.sql.PreparedStatement
 
-actual class SimpleDoorQuery : DoorQuery {
+actual class SimpleDoorQuery actual constructor(private val sql: String, override val values: Array<out Any?>?) : DoorQuery {
 
-    private lateinit var sql: String
+    val SQL_COMPONENT_TYPE_MAP = mapOf(Long::class to "BIGINT",
+            Int::class to "INTEGER",
+            Short::class to "SMALLINT",
+            Boolean::class to "BOOLEAN",
+            Float::class to "FLOAT",
+            Double::class to "DOUBLE",
+            String::class to "TEXT")
 
-    private var queryParams: Array<Any>? = null
-
-    actual constructor(sql: String, values: Array<Any>?) {
-        this.sql = sql
-        this.queryParams = values
-    }
-
-    actual constructor(sql: String) {
-        this.sql = sql
-    }
 
     override fun getSql() = sql
 
@@ -23,12 +21,40 @@ actual class SimpleDoorQuery : DoorQuery {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun bindToPreparedStmt(stmt: PreparedStatement) {
-        val paramsToBind = queryParams
+    override fun bindToPreparedStmt(stmt: PreparedStatement, db: DoorDatabase, con: Connection) {
+        val paramsToBind = values
         if(paramsToBind != null) {
             var paramIndex = 1
             for(param in paramsToBind) {
-                stmt.setObject(paramIndex++, param)
+                if(param is List<*> || (param?.javaClass?.isArray ?: false)) {
+                    val paramType = if(param is List<*> && param.isNotEmpty()) {
+                        SQL_COMPONENT_TYPE_MAP.get(param[0]!!::class)
+                    }else if(param is Array<*> && param.isNotEmpty()) {
+                        SQL_COMPONENT_TYPE_MAP.get(param[0]!!::class)
+                    }else {
+                        "TEXT"
+                    }
+
+                    val valuesArr = if(param is List<*>) {
+                        param.toTypedArray()
+                    }else if(param is Array<*>) {
+                        param
+                    }else {
+                        throw IllegalArgumentException("Array param is not a list or array")
+                    }
+
+
+                    val arrayParam = if(db.arraySupported) {
+                        con.createArrayOf(paramType, valuesArr)
+                    }else {
+                        PreparedStatementArrayProxy.createArrayOf(paramType!!, valuesArr)
+                    } as java.sql.Array
+
+                    stmt.setArray(paramIndex++, arrayParam)
+                }else {
+                    stmt.setObject(paramIndex++, param)
+                }
+
             }
         }
     }

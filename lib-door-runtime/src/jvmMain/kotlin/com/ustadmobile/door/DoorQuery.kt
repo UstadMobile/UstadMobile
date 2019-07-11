@@ -1,5 +1,6 @@
 package com.ustadmobile.door
 
+import java.sql.Connection
 import java.sql.PreparedStatement
 
 actual interface DoorQuery {
@@ -8,5 +9,9 @@ actual interface DoorQuery {
 
     actual fun getArgCount(): Int
 
-    fun bindToPreparedStmt(stmt: PreparedStatement)
+    val values: Array<out Any?>?
+
+    fun bindToPreparedStmt(stmt: PreparedStatement, db: DoorDatabase, con: Connection)
+
+
 }

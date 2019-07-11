@@ -164,7 +164,12 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 codeBlock.add("val _stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
             }
         }else {
-            codeBlock.add("val _stmt = _con.prepareStatement($rawQueryVarName.getSql())\n")
+            codeBlock.beginControlFlow("val _stmt = if(_db!!.jdbcArraySupported && ($rawQueryVarName.values?.asList()?.any { it is List<*> || (it?.javaClass?.isArray ?: false)} ?: false))")
+                    .add("%T(_db.adjustQueryWithSelectInParam($rawQueryVarName.getSql()), _con) as %T",
+                            PreparedStatementArrayProxy::class, PreparedStatement::class)
+                    .nextControlFlow("else")
+                    .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam($rawQueryVarName.getSql()))\n")
+                    .endControlFlow()
         }
 
 
@@ -202,7 +207,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 return CodeBlock.builder().build()
             }
         }else {
-            codeBlock.add("$rawQueryVarName.bindToPreparedStmt(_stmt)\n")
+            codeBlock.add("$rawQueryVarName.bindToPreparedStmt(_stmt, _db, _con)\n")
         }
 
         var resultSet = null as ResultSet?
