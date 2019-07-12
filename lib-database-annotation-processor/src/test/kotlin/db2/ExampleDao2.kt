@@ -96,4 +96,7 @@ abstract class ExampleDao2 {
     @Query("SELECT * FROM ExampleEntity2")
     abstract fun queryAllLive(): DataSource.Factory<Int, ExampleEntity2>
 
+    @RawQuery
+    abstract fun rawQueryWithArrParam(query: DoorQuery): List<ExampleEntity2>
+
 }

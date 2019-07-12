@@ -164,8 +164,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 codeBlock.add("val _stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
             }
         }else {
-            codeBlock.beginControlFlow("val _stmt = if(_db!!.jdbcArraySupported && ($rawQueryVarName.values?.asList()?.any { it is List<*> || (it?.javaClass?.isArray ?: false)} ?: false))")
-                    .add("%T(_db.adjustQueryWithSelectInParam($rawQueryVarName.getSql()), _con) as %T",
+            codeBlock.beginControlFlow("val _stmt = if(!_db!!.jdbcArraySupported && ($rawQueryVarName.values?.asList()?.any { it is List<*> || (it?.javaClass?.isArray ?: false)} ?: false))")
+                    .add("%T(_db.adjustQueryWithSelectInParam($rawQueryVarName.getSql()), _con) as %T\n",
                             PreparedStatementArrayProxy::class, PreparedStatement::class)
                     .nextControlFlow("else")
                     .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam($rawQueryVarName.getSql()))\n")
@@ -265,6 +265,12 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     CodeBlock.builder().add("%T()", entityType).build()
                 }
 
+                if(entityType !in QUERY_SINGULAR_TYPES && rawQueryVarName != null) {
+                    codeBlock.add("val _resultMetaData = _resultSet.metaData\n")
+                            .add("val _columnIndexMap = (1 .. _resultMetaData.columnCount).map { _resultMetaData.getColumnLabel(it) to it }.toMap()\n")
+                }
+
+
                 if(isListOrArray(resultType)) {
                     codeBlock.beginControlFlow("while(_resultSet.next())")
                 }else {
@@ -292,7 +298,17 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         if(!fullPropName.isNullOrBlank()) {
                             val propType = entityFieldMap.fieldMap[fullPropName]
                             val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
+
+                            if(rawQueryVarName != null) {
+                                codeBlock.beginControlFlow("if(_columnIndexMap.containsKey(%S))",
+                                        colName)
+                            }
+
                             codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
+                            if(rawQueryVarName != null) {
+                                codeBlock.endControlFlow()
+                            }
+
                         }else {
                             missingPropNames.add(colName)
                         }

@@ -122,4 +122,14 @@ class TestDbBuilderKtKt {
         assertEquals(entity, entityFromQuery, "Entity inserted using DAO is equal to result with raw query")
     }
 
+    @Test
+    fun givenRawQueryWithArrayParam_whenQueryRuns_shouldReturnMatchingRows() {
+        val entityList = (1..3).map { ExampleEntity2(name = "Name$it", someNumber = it.toLong())}
+        entityList.forEach { it.uid = exampleDb2.exampleDao2().insertAndReturnId(it) }
+        val queryResult = exampleDb2.exampleDao2().rawQueryWithArrParam(
+                SimpleDoorQuery("SELECT * FROM ExampleEntity2 WHERE uid IN (?)",
+                        arrayOf(arrayOf(entityList[1].uid, entityList[2].uid))))
+        assertEquals(2, queryResult.size, "Raw query with array param returns expected number of results")
+    }
+
 }
