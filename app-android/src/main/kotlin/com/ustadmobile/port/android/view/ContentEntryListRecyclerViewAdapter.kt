@@ -9,9 +9,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.LocalAvailabilityListener
 import com.ustadmobile.core.networkmanager.LocalAvailabilityMonitor
@@ -177,9 +177,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             if (entry.thumbnailUrl == null || entry.thumbnailUrl!!.isEmpty()) {
                 holder.thumbnailView.setImageDrawable(null)
             } else {
-                Picasso.get()
-                        .load(entry.thumbnailUrl)
-                        .into(holder.thumbnailView)
+                UMAndroidUtil.loadImage(entry.thumbnailUrl,R.drawable.img_placeholder,
+                        holder.thumbnailView)
             }
 
 
@@ -250,22 +249,10 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                     holder.downloadView.progressVisibility = View.VISIBLE
                     holder.onDownloadJobItemChange(downloadJobItemStatus)
                 }else {
-                    holder.downloadView.progressVisibility == View.INVISIBLE
+                    holder.downloadView.progressVisibility = View.INVISIBLE
                 }
             }
-//            managerAndroidBle!!.findDownloadJobItemStatusByContentEntryUid(entry.contentEntryUid,
-//                    object : UmResultCallback<DownloadJobItemStatus?> {
-//                        override fun onDone(result: DownloadJobItemStatus?) {
-//                            if (result != null) {
-//                                activity.runOnUiThread {
-//                                    holder.downloadView.progressVisibility = View.VISIBLE
-//                                    holder.onDownloadJobItemChange(result)
-//                                }
-//                            } else {
-//                                activity.runOnUiThread { holder.downloadView.progressVisibility = View.INVISIBLE }
-//                            }
-//                        }
-//                    })
+
         }
     }
 

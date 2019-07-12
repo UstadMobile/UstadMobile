@@ -59,7 +59,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     private var contentEntryListener: ContentEntryListener? = null
 
-    private var ustadBaseActivity: UstadBaseActivity? = null
+    private lateinit var ustadBaseActivity: UstadBaseActivity
 
     private lateinit var managerAndroidBle: NetworkManagerBle
 
@@ -151,9 +151,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
             this.ustadBaseActivity = context
-            ustadBaseActivity!!.runAfterServiceConnection(Runnable{
-                ustadBaseActivity!!.runOnUiThread {
-                    managerAndroidBle = ustadBaseActivity!!.networkManagerBle!!
+            ustadBaseActivity.runAfterServiceConnection(Runnable{
+                ustadBaseActivity.runOnUiThread {
+                    managerAndroidBle = ustadBaseActivity.networkManagerBle!!
                     checkReady()
                 }
             })
@@ -183,7 +183,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
     override fun onDetach() {
         super.onDetach()
         this.contentEntryListener = null
-        this.ustadBaseActivity = null
     }
 
     override fun setContentEntryProvider(entryProvider: DataSource.Factory<Int, ContentEntryWithStatusAndMostRecentContainerUid>) {
@@ -216,11 +215,13 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
 
     override fun downloadStatusClicked(entry: ContentEntry?) {
         val impl = UstadMobileSystemImpl.instance
-        ustadBaseActivity!!.runAfterGrantingPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
-                impl.getString(MessageID.download_storage_permission_title, context!!),
-                impl.getString(MessageID.download_storage_permission_message, context!!))
+        if(::ustadBaseActivity.isInitialized){
+            ustadBaseActivity.runAfterGrantingPermission(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Runnable { entryListPresenter!!.handleDownloadStatusButtonClicked(entry!!) },
+                    impl.getString(MessageID.download_storage_permission_title, context!!),
+                    impl.getString(MessageID.download_storage_permission_message, context!!))
+        }
     }
 
     override fun startMonitoringAvailability(monitor: Any, entryUidsToMonitor: List<Long>) {

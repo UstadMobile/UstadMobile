@@ -17,12 +17,7 @@ open class H5PContentType : ContentTypePlugin {
         get() = arrayOf("h5p")
 
     companion object{
-        const val TITLE_TAG = "title"
 
-        const val DESCRIPTION_TAG = "metaDescription"
-
-        const val AUTHOR_TAG = "author"
-
-        const val LICENSE_TAG = "license"
+        const val H5P_JSON = "h5p.json"
     }
 }

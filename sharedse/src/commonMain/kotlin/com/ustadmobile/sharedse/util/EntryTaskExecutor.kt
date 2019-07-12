@@ -92,6 +92,8 @@ class EntryTaskExecutor(numProcessors: Int = 1, private val scope: CoroutineScop
     }
 
     fun stop(){
-        mCoroutineCtx.cancel()
+        if(::mCoroutineCtx.isInitialized){
+            mCoroutineCtx.cancel()
+        }
     }
 }

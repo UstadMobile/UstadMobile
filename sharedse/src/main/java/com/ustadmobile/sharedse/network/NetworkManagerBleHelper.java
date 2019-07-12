@@ -1,11 +1,23 @@
 package com.ustadmobile.sharedse.network;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
+import com.ustadmobile.core.impl.UMAndroidUtil;
+
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.ustadmobile.sharedse.network.NetworkManagerBleCommon.WIFI_DIRECT_GROUP_SSID_PREFIX;
+
 
 /**
  * Helper class which handle WiFi P2P connection since it miss behaves when done with Kotlin
@@ -24,20 +36,60 @@ import java.lang.reflect.Proxy;
  */
 public class NetworkManagerBleHelper {
 
+    /**
+     * This class is used when creating a ActionListener proxy to be used on
+     * WifiManager#connect(int,ActionListener) invocation through reflection.
+     */
+    public class WifiConnectInvocationProxyHandler implements InvocationHandler {
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) {
+            Log.d("Invocation","Method was invoked using reflection  "+method.getName());
+            return null;
+        }
+    }
+
     private WifiManager wifiManager;
+
+    private ConnectivityManager connectivityManager;
+
+    private final List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
     private String ssid;
 
     private String passphrase;
 
-    private int networkId = 0;
 
     /**
      * Constrictor used to create new instance of the NetworkManagerBleHelper
-     * @param wifiManager active WifiManager
+     * @param context Application context
      */
-    public NetworkManagerBleHelper(WifiManager wifiManager){
-        this.wifiManager = wifiManager;
+    public NetworkManagerBleHelper(Context context){
+        if(wifiManager == null){
+            wifiManager = (WifiManager) context.getApplicationContext()
+                    .getSystemService(Context.WIFI_SERVICE);
+        }
+
+        if(connectivityManager == null){
+            connectivityManager = (ConnectivityManager)context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+        }
+    }
+
+    /**
+     * Get current active wifimanager
+     * @ wifimanager object
+     */
+    public WifiManager getWifiManager() {
+        return wifiManager;
+    }
+
+    /**
+     * Get instance of an active connectivity manager
+     * @return connectivity manager object
+     */
+    public ConnectivityManager getConnectivityManager() {
+        return connectivityManager;
     }
 
     /**
@@ -48,9 +100,17 @@ public class NetworkManagerBleHelper {
     public void setGroupInfo(String ssid, String passphrase){
         this.ssid = ssid;
         this.passphrase = passphrase;
+
+        if (ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)) {
+            temporaryWifiDirectSsids.add(ssid);
+        }
     }
 
-    private int getNetworkId(){
+    /**
+     * Add new newtwork configuration to the device configuration list
+     * @return newly added nwtwork id
+     */
+    public int addNetwork(){
         WifiConfiguration config = new WifiConfiguration();
         config.SSID = "\""+ ssid +"\"";
         config.preSharedKey = "\""+ passphrase +"\"";
@@ -60,9 +120,45 @@ public class NetworkManagerBleHelper {
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-
         return wifiManager.addNetwork(config);
+    }
 
+
+    public int getNetworkId(){
+        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
+        for(WifiConfiguration config : configuredNetworks){
+            if(UMAndroidUtil.INSTANCE.normalizeAndroidWifiSsid(config.SSID).equals(ssid)){
+                return config.networkId;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Delete all app's specific networks from the list of all congifured device networks
+     */
+    public void deleteTemporaryWifiDirectSsids(){
+        if (temporaryWifiDirectSsids.isEmpty())
+            return;
+        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
+
+        String ssid;
+
+        for(WifiConfiguration config : configuredNetworks){
+            if (config.SSID == null)
+                continue;
+            ssid = UMAndroidUtil.INSTANCE.normalizeAndroidWifiSsid(config.SSID);
+
+            if (temporaryWifiDirectSsids.contains(ssid)) {
+                boolean removedOk = wifiManager.removeNetwork(config.networkId);
+                if (removedOk) {
+                    temporaryWifiDirectSsids.remove(ssid);
+                    if (temporaryWifiDirectSsids.isEmpty())
+                        return;
+                }
+
+            }
+        }
     }
 
     /**
@@ -71,16 +167,19 @@ public class NetworkManagerBleHelper {
      * autodetect. In reality, we should specify these to reduce the chance of the connection
      * timing out.
      */
-    public void enableWiFi(){
+    public void enableWifiNetwork(){
+        if(isConnectedToWifi()) {
+            disableCurrentWifiNetwork();
+        }
+
         try{
-            networkId = getNetworkId();
             Class<?> actionLister = Class.forName("android.net.wifi.WifiManager$ActionListener");
             Object proxyInstance = Proxy.newProxyInstance(actionLister.getClassLoader(),
-                    new Class[] {actionLister}, new NetworkManagerBle.WifiConnectInvocationProxyHandler());
+                    new Class[] {actionLister}, new WifiConnectInvocationProxyHandler());
 
             Method connectMethod = wifiManager.getClass().getMethod("connect",
                     int.class, actionLister);
-            connectMethod.invoke(wifiManager,networkId,proxyInstance);
+            connectMethod.invoke(wifiManager,addNetwork(),proxyInstance);
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -93,24 +192,38 @@ public class NetworkManagerBleHelper {
         }
     }
 
+
     /**
      * Disable currently connected network
-     * @param isConnectedToWifi flag to indicate whether the device is currently connected to WiFi
      */
-    public void disableNetwork(boolean isConnectedToWifi){
+    private void disableCurrentWifiNetwork(){
         //TODO: we must track any networks we successfully disable, so that we can re-enable them
 
         //This may or may not be allowed depending on the version of android we are using.
         //Sometimes Android will feel like reconnecting to the last network, even though we told
         //it what network to connect with.
-        if(isConnectedToWifi && wifiManager.disconnect()){
+        if(isConnectedToWifi() && wifiManager.disconnect()){
             wifiManager.disableNetwork(wifiManager.getConnectionInfo().getNetworkId());
         }
     }
 
-    public void removeNetwork(){
-       if(networkId != -1){
-           wifiManager.removeNetwork(networkId);
-       }
+    /**
+     * @return true if is connected on WiFi otherwise false
+     */
+    private boolean isConnectedToWifi() {
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+
+        return info != null
+                && info.getType() == ConnectivityManager.TYPE_WIFI
+                && info.isConnected();
+    }
+
+    /**
+     * Restore previously connected wifi network
+     */
+    public void restoreWiFi(){
+        wifiManager.disconnect();
+        deleteTemporaryWifiDirectSsids();
+        wifiManager.reconnect();
     }
 }

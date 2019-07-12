@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:visible="false"
         android:icon="@drawable/ic_create_new_folder_white_24dp"
         android:id="@+id/create_new_content"
         android:title="@string/content_editor_create_new"
@@ -14,7 +15,7 @@
         app:showAsAction="never" />
 
     <item
-        android:visible="true"
+        android:visible="false"
         android:id="@+id/action_clear_history"
         android:title="@string/clear_history"
         app:showAsAction="never" />

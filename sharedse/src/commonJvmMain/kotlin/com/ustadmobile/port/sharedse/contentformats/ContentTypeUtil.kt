@@ -11,16 +11,24 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.epub.EpubTypePlugin
 import com.ustadmobile.port.sharedse.contentformats.h5p.H5PTypePlugin
+import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.TinCanTypePlugin
 import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.zip.ZipException
 
+/**
+ * Class which handles entries and containers for all imported content
+ *
+ * @author kileha3
+ */
 object ContentTypeUtil {
 
-    private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), H5PTypePlugin())
+    private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), H5PTypePlugin(), TinCanTypePlugin())
 
-
+    /**
+     * Get generated content entry from the imported content
+     */
     fun getContent(file: File): HashMap<String, Any?> {
         val content = HashMap<String, Any?>()
         for (plugin in CONTENT_PLUGINS) {
@@ -36,6 +44,9 @@ object ContentTypeUtil {
         return content
     }
 
+    /**
+     * Import actual content to the database
+     */
     fun importContentEntryFromFile(context: Any, content: HashMap<String, Any?>, baseDir: String,
                                    file: File, callback: UmCallback<ContentEntry>) {
 

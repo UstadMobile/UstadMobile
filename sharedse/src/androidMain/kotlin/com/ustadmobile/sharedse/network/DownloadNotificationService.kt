@@ -157,6 +157,8 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                                 .updateJobAndItems(downloadJobId, JobStatus.PAUSED,
                                         JobStatus.PAUSING)
                     }
+                }else{
+                    stopForegroundService()
                 }
 
                 ACTION_CANCEL_DOWNLOAD -> if (notificationHolder != null) {
@@ -165,6 +167,8 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                                 .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
                                         JobStatus.CANCELLING)
                     }
+                }else{
+                    stopForegroundService()
                 }
             }
         }

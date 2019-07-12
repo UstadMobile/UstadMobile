@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
@@ -25,6 +24,10 @@ class AboutActivity : UstadBaseActivity(), AboutView {
                 Objects.requireNonNull(bundleToMap(intent.extras)),
                 this)
         mAboutController!!.onCreate(bundleToMap(savedInstanceState))
+
+        setUMToolbar(R.id.um_toolbar)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun setVersionInfo(versionInfo: String) {
@@ -38,15 +41,9 @@ class AboutActivity : UstadBaseActivity(), AboutView {
         }
     }
 
-    //TODO: change this to using the standard up navigation arrow, then remove this menu and it's drawable
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.menu_about, menu)
-        return true
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_finish) {
+        if (item.itemId == android.R.id.home) {
             finish()
             return true
         }
