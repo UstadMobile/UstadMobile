@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'maven-publish'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "io.ktor:ktor-server-netty:$version_ktor"
+    implementation "io.ktor:ktor-jackson:$version_ktor"
+    implementation "io.ktor:ktor-gson:$version_ktor"
+
+    implementation project(":lib-database")
+    implementation project(":lib-database-mpp")
+    implementation project(":lib-door-runtime")
+    implementation project(":lib-database-entities")
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+
+    testImplementation "junit:junit:$version_junit"
+
+    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
