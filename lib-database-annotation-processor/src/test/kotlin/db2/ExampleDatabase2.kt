@@ -4,8 +4,10 @@ import androidx.room.Database
 import com.ustadmobile.door.DoorDatabase
 
 @Database(version = 1, entities = [ExampleEntity2::class, ExampleLinkEntity::class,
-    ExampleEntityPkInt::class])
+    ExampleEntityPkInt::class, ExampleSyncableEntity::class])
 abstract class ExampleDatabase2 : DoorDatabase(){
+
+    abstract fun exampleSyncableDao(): ExampleSyncableDao
 
     abstract fun exampleDao2(): ExampleDao2
 

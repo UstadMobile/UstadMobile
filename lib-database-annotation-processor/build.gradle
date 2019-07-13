@@ -18,6 +18,7 @@ kapt {
     arguments {
         arg("door_jdbc_kt_out", "filer")
         arg("door_ktor_server_out", "filer")
+        arg("door_repo_output", "filer")
     }
 }
 

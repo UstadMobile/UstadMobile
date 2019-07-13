@@ -24,6 +24,7 @@ import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap
 import org.sqlite.SQLiteDataSource
 import java.lang.RuntimeException
 import java.sql.*
+import java.util.Locale
 import javax.lang.model.util.SimpleTypeVisitor7
 import javax.tools.Diagnostic
 
@@ -475,9 +476,6 @@ fun isNullableResultType(typeName: TypeName) = typeName != UNIT
 val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
 
 
-@SupportedAnnotationTypes("androidx.room.Database")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedOptions(OPTION_OUTPUT_DIR)
 class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
 
@@ -574,7 +572,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
             if(subEl.simpleName.startsWith("get")) {
                 //must be overriden using a val
-                val propName = subEl.simpleName.substring(3, 4).toLowerCase() + subEl.simpleName.substring(4)
+                val propName = subEl.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + subEl.simpleName.substring(4)
                 val getterFunSpec = FunSpec.getterBuilder().addStatement("return _${daoTypeEl.simpleName}").build()
                 dbImplType.addProperty(PropertySpec.builder(propName,
                         methodEl.returnType.asTypeName(), KModifier.OVERRIDE)

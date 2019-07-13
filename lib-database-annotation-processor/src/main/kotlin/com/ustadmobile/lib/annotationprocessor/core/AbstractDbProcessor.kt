@@ -1,9 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import androidx.room.Database
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.Query
+import androidx.room.*
 import com.squareup.kotlinpoet.*
 import java.lang.RuntimeException
 import java.sql.*
@@ -19,6 +16,24 @@ import java.io.File
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
+
+fun isUpdateDeleteOrInsertMethod(methodEl: Element)
+        = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
+
+fun isModifyingQueryMethod(methodEl: Element) : Boolean {
+    if(isUpdateDeleteOrInsertMethod(methodEl)) {
+        return true
+    }
+
+    val queryAnnotation = methodEl.getAnnotation(Query::class.java)
+    val queryTrimmed = queryAnnotation?.value?.trim()
+    if(queryTrimmed != null && (queryTrimmed.startsWith("UPDATE", ignoreCase = true)
+            || queryTrimmed.startsWith("DELETE", ignoreCase = true))){
+        return true
+    }
+
+    return false
+}
 
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
@@ -339,6 +354,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 .add("_e.printStackTrace()\n")
                 .add("throw %T(_e)\n", RuntimeException::class)
                 .nextControlFlow("finally")
+                .add("_resultSetToClose?.close()\n")
                 .add("_stmtToClose?.close()\n")
                 .add("_conToClose?.close()\n")
                 .endControlFlow()
