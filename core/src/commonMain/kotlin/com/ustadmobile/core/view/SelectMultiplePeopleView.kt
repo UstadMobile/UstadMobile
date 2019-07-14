@@ -2,14 +2,13 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 
 
 /**
- * Core View. Screen is for SelectProducer's View
+ * Core View. Screen is for SelectMultiplePeople's View
  */
-interface SelectProducerView : UstadView {
+interface SelectMultiplePeopleView : UstadView {
 
     /**
      * Method to finish the screen / view.
@@ -24,16 +23,14 @@ interface SelectProducerView : UstadView {
      */
     fun setListProvider(listProvider: DataSource.Factory<Int, Person>)
 
-    fun updateSpinner(presents: Array<String?>)
-
     companion object {
 
 
         // This defines the view name that is an argument value in the go() in impl.
-        const val VIEW_NAME = "SelectProducer"
+        val VIEW_NAME = "SelectMultiplePeople"
 
         //Any argument keys:
-        const val ARG_PRODUCER_UID = "ArgProducerUid"
+        val ARG_SELECTED_PEOPLE = "ArgSelectedPeople"
     }
 
 

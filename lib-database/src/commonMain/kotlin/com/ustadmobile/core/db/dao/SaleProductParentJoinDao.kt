@@ -10,6 +10,9 @@ import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.lib.db.entities.SaleProductParentJoin
 import com.ustadmobile.lib.db.entities.SaleProductSelected
 
+
+
+
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
@@ -84,6 +87,28 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
         }
     }
 
+
+    //Find Top
+    @Query("SELECT Parent.* FROM SaleProductParentJoin " +
+            "LEFT JOIN SaleProduct as Parent ON " +
+            "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+            " WHERE SaleProductParentJoinActive = 1  " +
+            "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
+            "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
+            " GROUP BY saleProductParentJoinParentUid")
+    abstract suspend fun findTopSaleProductsAsync():List<SaleProduct>
+
+
+    //Find categories in a category uid
+    @Query("SELECT Child.* FROM SaleProductParentJoin " +
+            "   LEFT JOIN SaleProduct as Parent " +
+            "   ON Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
+            "   LEFT JOIN SaleProduct as Child " +
+            "   ON Child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid " +
+            " WHERE SaleProductParentJoinActive = 1 AND Child.saleProductActive = 1 " +
+            "   AND Child.saleProductCategory = 1 " +
+            " AND SaleProductParentJoinParentUid = :uid ")
+    abstract suspend fun findAllChildProductTypesForUidAsync(uid: Long):List<SaleProduct>
 
     companion object {
 

@@ -26,7 +26,7 @@ class SaleDetailSignaturePresenter(context: Any,
 
     init {
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        saleDao = repository.getSaleDao()
+        saleDao = repository.saleDao
         if (arguments.containsKey(ARG_SALE_UID)) {
             currentSaleUid = (arguments.get(ARG_SALE_UID)!!.toLong())
         }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.SaleListDetail
 
@@ -22,7 +23,7 @@ interface SaleListSearchView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: UmProvider<SaleListDetail>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleListDetail>)
 
     fun updateLocationSpinner(locations: Array<String>)
 

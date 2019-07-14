@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemReminder
@@ -24,7 +25,7 @@ interface SaleItemDetailView : UstadView {
 
     fun showPreOrder(show: Boolean)
 
-    fun setReminderProvider(paymentProvider: UmProvider<SaleItemReminder>)
+    fun setReminderProvider(paymentProvider: DataSource.Factory<Int, SaleItemReminder>)
 
     fun setReminderNotification(days: Int, message: String, saleDueDate: Long)
 

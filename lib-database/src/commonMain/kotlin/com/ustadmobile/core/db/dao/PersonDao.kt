@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -128,13 +129,13 @@ abstract class PersonDao : BaseDao<Person> {
 
 
     @Query("SELECT * FROM Person WHERE active =1")
-    abstract fun findAllPeopleProvider(): DoorLiveData<Person?>
+    abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
 
     @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
-    abstract fun findAllPeopleNameAscProvider(): DoorLiveData<Person?>
+    abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person?>
 
     @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
-    abstract fun findAllPeopleNameDescProvider(): DoorLiveData<Person?>
+    abstract fun findAllPeopleNameDescProvider(): DataSource.Factory<Int, Person?>
 
     @Update
     abstract fun updateAsync(entity: Person):Int

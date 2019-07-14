@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 
@@ -18,7 +19,7 @@ interface AddSaleProductToSaleCategoryView : UstadView {
      * Product list
      * @param listProvider SameNameWithImage product provider
      */
-    fun setListProvider(listProvider: UmProvider<SaleNameWithImage>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleNameWithImage>)
 
     fun setAddtitle(title: String)
 

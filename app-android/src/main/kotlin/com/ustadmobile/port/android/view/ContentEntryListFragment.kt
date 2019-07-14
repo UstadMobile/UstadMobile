@@ -162,7 +162,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListFragmentVi
                 managerAndroidBle)
         recyclerAdapter!!.addListeners()
         val data = LivePagedListBuilder(entryProvider, 20).build()
-        data.observe(this, Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>> { recyclerAdapter!!.submitList(it) })
+        data.observe(this,
+                Observer<PagedList<ContentEntryWithStatusAndMostRecentContainerUid>>
+                { recyclerAdapter!!.submitList(it) })
 
         recyclerView!!.adapter = recyclerAdapter
     }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleDao
@@ -31,7 +32,7 @@ class SaleListPresenter(context: Any,
                         view: SaleListView)
     : CommonHandlerPresenter<SaleListView>(context, arguments, view) {
 
-    private var umProvider: UmProvider<SaleListDetail>? = null
+    private var umProvider: DataSource.Factory<Int, SaleListDetail>? = null
     internal var repository: UmAppDatabase
     private val saleDao: SaleDao
     private val salePaymentDao: SalePaymentDao

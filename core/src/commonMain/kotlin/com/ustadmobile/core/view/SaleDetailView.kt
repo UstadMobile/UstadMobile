@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
@@ -22,7 +23,7 @@ interface SaleDetailView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: UmProvider<SaleItemListDetail>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleItemListDetail>)
 
 
     fun setLocationPresets(locationPresets: Array<String>, selectedPosition: Int)
@@ -32,7 +33,7 @@ interface SaleDetailView : UstadView {
      *
      * @param paymentProvider   the provider to set to the view
      */
-    fun setPaymentProvider(paymentProvider: UmProvider<SalePayment>)
+    fun setPaymentProvider(paymentProvider: DataSource.Factory<Int, SalePayment>)
 
     fun updateOrderTotal(orderTotal: Long)
 

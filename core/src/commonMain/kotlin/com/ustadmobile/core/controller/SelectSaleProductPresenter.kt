@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleProductDao
@@ -39,9 +40,9 @@ class SelectSaleProductPresenter(context: Any,
                                  private val catalogMode: Boolean)
     : UstadBaseController<SelectSaleProductView>(context, arguments, view) {
 
-    private var recentProvider: UmProvider<SaleNameWithImage>? = null
-    private var categoryProvider: UmProvider<SaleNameWithImage>? = null
-    private var collectionProvider: UmProvider<SaleNameWithImage>? = null
+    private var recentProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
+    private var categoryProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
+    private var collectionProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
 
     internal var repository: UmAppDatabase
 
@@ -60,9 +61,9 @@ class SelectSaleProductPresenter(context: Any,
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
-        saleProductDao = repository.getSaleProductDao()
-        saleProductGroupDao = repository.getSaleProductGroupDao()
-        productParentJoinDao = repository.getSaleProductParentJoinDao()
+        saleProductDao = repository.saleProductDao
+        saleProductGroupDao = repository.saleProductGroupDao
+        productParentJoinDao = repository.saleProductParentJoinDao
 
         if (arguments.containsKey(ARG_PRODUCER_UID)) {
             producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())

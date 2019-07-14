@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 
@@ -23,11 +24,11 @@ interface SelectSaleProductView : UstadView {
      *
      * @param recentProvider The provider to set to the view
      */
-    fun setRecentProvider(recentProvider: UmProvider<SaleNameWithImage>)
+    fun setRecentProvider(recentProvider: DataSource.Factory<Int, SaleNameWithImage>)
 
-    fun setCategoryProvider(categoryProvider: UmProvider<SaleNameWithImage>)
+    fun setCategoryProvider(categoryProvider: DataSource.Factory<Int, SaleNameWithImage>)
 
-    fun setCollectionProvider(collectionProvider: UmProvider<SaleNameWithImage>)
+    fun setCollectionProvider(collectionProvider: DataSource.Factory<Int, SaleNameWithImage>)
 
     fun showMessage(messageId: Int)
 

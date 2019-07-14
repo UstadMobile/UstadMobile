@@ -25,6 +25,10 @@ class AddReminderDialogFragment : UstadDialogFragment(),
         DialogInterface.OnShowListener, View.OnClickListener, AddReminderDialogView,
         DismissableDialog {
 
+
+    override val viewContext: Any
+        get() = context!!
+
     private var mPresenter: SaleItemDetailPresenter? = null
     private var dialog: AlertDialog? = null
     private var rootView: View? = null
@@ -67,11 +71,11 @@ class AddReminderDialogFragment : UstadDialogFragment(),
         dialog!!.setOnShowListener(this)
 
         mPresenter = SaleItemDetailPresenter(context!!,
-                UMAndroidUtil.bundleToHashtable(arguments),
+                UMAndroidUtil.bundleToMap(arguments),
                 (activity as SaleItemDetailView?)!!, false)
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(arguments))
+        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(arguments))
 
-        return dialog
+        return dialog as AlertDialog
 
     }
 
