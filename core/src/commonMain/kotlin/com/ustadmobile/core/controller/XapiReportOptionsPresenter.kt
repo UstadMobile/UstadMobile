@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -28,8 +29,10 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     private lateinit var db: UmAppDatabase
 
     var fromDateTime: DateTime = DateTime.now()
+    var fromDateTimemillis = 0L
 
     var toDateTime: DateTime = DateTime.now()
+    var toDateTimeMillis = 0L
 
     private var selectedLocations: List<Long> = mutableListOf()
 
@@ -82,6 +85,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     }
 
     fun handleDateRangeSelected() {
+        fromDateTimemillis = fromDateTime.unixMillisLong
+        toDateTimeMillis = toDateTime.unixMillisLong
         view.runOnUiThread(Runnable {
             view.updateWhenRangeText(
                     fromDateTime.format("dd MMM yyyy") + " - " + toDateTime.format("dd MMM yyyy"))
@@ -125,8 +130,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
                 didOptionsList,
                 selectedObjects,
                 selectedEntries,
-                fromDateTime.unixMillisLong,
-                toDateTime.unixMillisLong,
+                fromDateTimemillis,
+                toDateTimeMillis,
                 selectedLocations)
 
         var args = HashMap<String, String?>()

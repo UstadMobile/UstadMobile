@@ -1,13 +1,17 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.CONTENT_ENTRY
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.DAY
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.GENDER
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.MONTH
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.WEEK
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportDetailView.Companion.ARG_REPORT_OPTIONS
+import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_OTHER
@@ -37,7 +41,8 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
         reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
 
         GlobalScope.launch {
-            var data = db.statementDao.findThis()
+            val sql = reportOptions.toSql()
+            var data = db.statementDao.getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
             var xAxisLabel = getLabelList(reportOptions.xAxis, data.map { it.xAxis }.distinct())
             var subgroupLabel = getLabelList(reportOptions.subGroup, data.map { it.subgroup }.distinct())
             view.runOnUiThread(Runnable {
@@ -68,6 +73,12 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
                     mutableMap[it.objectLangMapUid.toString()] = it.valueLangMap
                 }
             }
+            DAY, WEEK, MONTH -> {
+                list.forEach {
+                    mutableMap[it] = it
+                }
+            }
+
         }
 
 

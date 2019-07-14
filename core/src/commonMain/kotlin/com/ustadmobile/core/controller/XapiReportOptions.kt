@@ -10,7 +10,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var didFilterList: List<Long> = mutableListOf(),
                              var objectsList: List<Long> = mutableListOf(),
                              var entriesList: List<Long> = mutableListOf(),
-                             var toDate: Long = 0, var fromDate: Long = 0,
+                             var toDate: Long = 0L, var fromDate: Long = 0L,
                              var locationsList: List<Long> = mutableListOf()) {
 
 
@@ -33,7 +33,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
         if (xAxis == GENDER || subGroup == GENDER) {
             sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
         }
-        if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0 && fromDate > 0)) {
+        if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0L && fromDate > 0L)) {
             sql += "WHERE "
             var whereList = mutableListOf<String>()
             if (objectsList.isNotEmpty()) {
@@ -50,8 +50,8 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                 whereList.add("StatementEntity.verbUid IN (?) ")
                 paramList.addAll(listOf<Any>(didFilterList))
             }
-            if (toDate > 0 && fromDate > 0) {
-                whereList.add("(StatementEntity.timestamp > ? AND StatementEntity.timestamp < ?) ")
+            if (toDate > 0L && fromDate > 0L) {
+                whereList.add("(StatementEntity.timestamp <= ? AND StatementEntity.timestamp >= ?) ")
                 paramList.add(fromDate)
                 paramList.add(toDate)
             }
@@ -64,9 +64,9 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
 
     private fun groupBy(value: Int): String {
         return when (value) {
-            DAY -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch') "
-            WEEK -> "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
-            MONTH -> "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch') "
+            DAY -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+            WEEK -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
+            MONTH -> "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
             CONTENT_ENTRY -> "StatementEntity.xObjectUid "
             //LOCATION -> "Location.title"
             GENDER -> "Person.gender "

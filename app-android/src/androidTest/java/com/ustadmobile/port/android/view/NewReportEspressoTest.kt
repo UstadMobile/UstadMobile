@@ -199,7 +199,7 @@ class NewReportEspressoTest {
         firstStatement.resultScoreScaled = 50
         firstStatement.verbUid = firstVerb.verbUid
         firstStatement.xObjectUid = firstObject.xObjectUid
-        firstStatement.timestamp = DateTime(2018, 6, 11).unixMillisLong
+        firstStatement.timestamp = DateTime(2019, 6, 11).unixMillisLong
         firstStatement.statementUid = statementDao.insert(firstStatement)
 
 
@@ -209,7 +209,7 @@ class NewReportEspressoTest {
         secondStaement.resultScoreScaled = 100
         secondStaement.verbUid = secondVerb.verbUid
         secondStaement.xObjectUid = firstObject.xObjectUid
-        secondStaement.timestamp = DateTime(2018, 5, 1).unixMillisLong
+        secondStaement.timestamp = DateTime(2019, 5, 1).unixMillisLong
         secondStaement.statementUid = statementDao.insert(secondStaement)
 
 
@@ -219,7 +219,7 @@ class NewReportEspressoTest {
         thirdStatement.resultScoreScaled = 50
         thirdStatement.verbUid = firstVerb.verbUid
         thirdStatement.xObjectUid = secondObject.xObjectUid
-        thirdStatement.timestamp = DateTime(2018, 4, 10).unixMillisLong
+        thirdStatement.timestamp = DateTime(2019, 4, 10).unixMillisLong
         thirdStatement.statementUid = statementDao.insert(thirdStatement)
 
         var fourthStatement = StatementEntity()
@@ -228,7 +228,7 @@ class NewReportEspressoTest {
         fourthStatement.resultScoreScaled = 20
         fourthStatement.verbUid = firstVerb.verbUid
         fourthStatement.xObjectUid = secondObject.xObjectUid
-        fourthStatement.timestamp = DateTime(2018, 6, 30).unixMillisLong
+        fourthStatement.timestamp = DateTime(2019, 6, 30).unixMillisLong
         fourthStatement.statementUid = statementDao.insert(fourthStatement)
 
 
@@ -238,7 +238,7 @@ class NewReportEspressoTest {
         fifthStatement.resultScoreScaled = 85
         fifthStatement.verbUid = thirdVerb.verbUid
         fifthStatement.xObjectUid = firstObject.xObjectUid
-        fifthStatement.timestamp = DateTime(2018, 7, 30).unixMillisLong
+        fifthStatement.timestamp = DateTime(2019, 7, 10).unixMillisLong
         fifthStatement.statementUid = statementDao.insert(fifthStatement)
 
 
@@ -248,7 +248,7 @@ class NewReportEspressoTest {
         sixthStatement.resultScoreScaled = 25
         sixthStatement.verbUid = firstVerb.verbUid
         sixthStatement.xObjectUid = secondObject.xObjectUid
-        sixthStatement.timestamp = DateTime(2018, 5, 25).unixMillisLong
+        sixthStatement.timestamp = DateTime(2019, 5, 25).unixMillisLong
         sixthStatement.statementUid = statementDao.insert(sixthStatement)
 
 
@@ -258,7 +258,7 @@ class NewReportEspressoTest {
         seventhStatement.resultScoreScaled = 5
         seventhStatement.verbUid = firstVerb.verbUid
         seventhStatement.xObjectUid = firstObject.xObjectUid
-        seventhStatement.timestamp = DateTime(2018, 6, 11).unixMillisLong
+        seventhStatement.timestamp = DateTime(2019, 6, 11).unixMillisLong
         seventhStatement.statementUid = statementDao.insert(seventhStatement)
 
 

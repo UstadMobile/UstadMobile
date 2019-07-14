@@ -51,7 +51,7 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     abstract suspend fun getParentChildContainerRecursiveAsync(contentEntryUid: Long) : UmContentEntriesWithFileSize ?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
-            "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid)\n" +
+            "WHERE NOT EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjChildContentEntryUid = ContentEntry.contentEntryUid) " +
             "AND EXISTS(SELECT cepcjUid FROM ContentEntryParentChildJoin WHERE cepcjParentContentEntryUid = ContentEntry.contentEntryUid)")
     abstract fun selectTopEntries(): List<ContentEntry>
 }
