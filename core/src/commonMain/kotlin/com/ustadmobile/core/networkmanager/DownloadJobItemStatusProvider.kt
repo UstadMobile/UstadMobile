@@ -1,6 +1,5 @@
 package com.ustadmobile.core.networkmanager
 
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 
 /**

@@ -100,6 +100,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
+
+        statusProvider?.addDownloadChangeListener(this)
     }
 
     private fun onEntryChanged(entry: ContentEntry?) {
@@ -145,7 +147,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = true
-            statusProvider?.addDownloadChangeListener(this)
             GlobalScope.launch {
                 val dlJobStatusResult = statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid)
                 onDownloadJobItemChange(dlJobStatusResult, dlJobStatusResult?.jobItemUid ?: 0)
@@ -342,10 +343,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         const val LOCALLY_NOT_AVAILABLE_ICON = 2
 
         private const val BAD_NODE_FAILURE_THRESHOLD = 3
-
-        private const val TIME_INTERVAL_FROM_LAST_FAILURE = 5
-
-        const val NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype"
     }
 
 }

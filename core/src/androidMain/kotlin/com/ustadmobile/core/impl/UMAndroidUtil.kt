@@ -227,7 +227,7 @@ object UMAndroidUtil {
      */
     fun loadImage(imageUrl: String?, placeHolder: Int, targetView: ImageView){
         Picasso.get()
-                .load(if(imageUrl == null || imageUrl.isEmpty()) "" else imageUrl)
+                .load(if(imageUrl == null || imageUrl.isEmpty()) "empty" else imageUrl)
                 .placeholder(placeHolder)
                 .into(targetView)
     }
