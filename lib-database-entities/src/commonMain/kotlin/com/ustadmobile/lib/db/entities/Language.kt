@@ -39,6 +39,13 @@ class Language() {
         this.name = name
     }
 
+
+    constructor(langUid: Long, name: String, iso_639_1_standard: String) : this() {
+        this.langUid = langUid
+        this.name = name
+        this.iso_639_1_standard = iso_639_1_standard
+    }
+
     override fun toString(): String {
         return name.toString()
     }

@@ -38,6 +38,13 @@ abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
             "AND ContainerEntry.cePath = :pathInContainer")
     abstract fun findByPathInContainer(containerUid: Long, pathInContainer: String): ContainerEntryWithContainerEntryFile?
 
+    @Query("SELECT ContainerEntry.*, ContainerEntryFile.* " +
+            "FROM ContainerEntry " +
+            "LEFT JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
+            "WHERE ContainerEntry.cePath = :pathInContainer")
+    abstract fun findByPathInContainer(pathInContainer: String): ContainerEntryWithContainerEntryFile?
+
+
     @UmRestAccessible
     @Query("SELECT ContainerEntry.*, ContainerEntryFile.cefMd5 AS cefMd5 " +
             "FROM ContainerEntry " +

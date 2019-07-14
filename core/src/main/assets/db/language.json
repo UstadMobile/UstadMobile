@@ -1,6 +1,6 @@
 [
     {
-        "iso_639_1_standard": null,
+        "iso_639_1_standard": "en",
         "iso_639_2_standard": null,
         "iso_639_3_standard": null,
         "langLastChangedBy": 0,
@@ -10,7 +10,7 @@
         "name": "English"
     },
     {
-        "iso_639_1_standard": null,
+        "iso_639_1_standard": "ps",
         "iso_639_2_standard": null,
         "iso_639_3_standard": null,
         "langLastChangedBy": 0,
@@ -20,7 +20,7 @@
         "name": "پښتو"
     },
     {
-        "iso_639_1_standard": null,
+        "iso_639_1_standard": "fa",
         "iso_639_2_standard": null,
         "iso_639_3_standard": null,
         "langLastChangedBy": 0,

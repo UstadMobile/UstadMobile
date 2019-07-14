@@ -11,7 +11,7 @@ import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.InputStream
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -43,8 +43,8 @@ class UmImportContent {
 
     private val DEFAULT_FILE_PATH = ""
 
-    private val languages = listOf(Language(1L,"English"),
-            Language(2L,"Pushto"), Language(3L,"Farsi"))
+    private val languages = listOf(Language(1L,"English","en"),
+            Language(2L,"پښتو","ps"), Language(3L,"دری","fa"))
 
     private val entryFileMap = HashMap<String, ArrayList<File>?>()
 
@@ -67,14 +67,6 @@ class UmImportContent {
 
         for(language in languages){
             appDatabase.languageDao.insert(language)
-        }
-    }
-
-    private fun File.copyInputStreamToFile(inputStream: InputStream) {
-        inputStream.use { input ->
-            this.outputStream().use { fileOut ->
-                input.copyTo(fileOut)
-            }
         }
     }
 
@@ -228,10 +220,12 @@ class UmImportContent {
                     currentEntry.publik = true
                     appDatabase.contentEntryDao.insert(currentEntry)
 
-                    if((entryIdParts[1] == "1")){
-                        appDatabase.contentEntryParentChildJoinDao.insert(
-                                ContentEntryParentChildJoin(rootContentEntry, currentEntry, 0))
-                    }
+                    /*if((entryIdParts[1] == "1")){
+
+                    }*/
+
+                    appDatabase.contentEntryParentChildJoinDao.insert(
+                            ContentEntryParentChildJoin(rootContentEntry, currentEntry, 0))
                     if(entryRelatedMap[entryIdParts[0]] == null){
                         entryRelatedMap[entryIdParts[0]] = hashSetOf()
                     }
@@ -266,13 +260,11 @@ class UmImportContent {
 
         val contentEntryRelatedJoinList = ArrayList<ContentEntryRelatedEntryJoin>()
 
-        for(relationEntry in entryRelatedMap.keys){
+        for(relationEntry in entryRelatedMap.toSortedMap().keys){
             val relatedSet = entryRelatedMap[relationEntry]!!.toList()
             for(relation in relatedSet){
-                if(relation.languageId != 1L){
-                    contentEntryRelatedJoinList.add(ContentEntryRelatedEntryJoin(
-                            relatedSet[0].entryId, relation.entryId,relation.languageId, REL_TYPE_TRANSLATED_VERSION))
-                }
+                contentEntryRelatedJoinList.add(ContentEntryRelatedEntryJoin(
+                        relatedSet[0].entryId, relation.entryId,relation.languageId, REL_TYPE_TRANSLATED_VERSION))
             }
         }
 
@@ -283,6 +275,14 @@ class UmImportContent {
             entryFile.cefPath = entryFile.cefPath!!.replace(
                     contentsDir.absolutePath, DEFAULT_FILE_PATH)
             appDatabase.containerEntryFileDao.update(entryFile)
+        }
+
+        val entries =  appDatabase.contentEntryDao.getChildrenByParent(ROOT_ENTRY_ID)
+
+        for(entry in entries){
+            val entryWithFile = appDatabase.containerEntryDao.findByPathInContainer(entry.thumbnailUrl!!)!!
+            entry.thumbnailUrl = DEFAULT_FILE_PATH + entryWithFile.containerEntryFile!!.cefPath
+            appDatabase.contentEntryDao.update(entry)
         }
 
         modulesDir.deleteRecursively()
