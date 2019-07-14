@@ -99,16 +99,19 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
             barChart.data = barData
 
+
             barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
             barChart.xAxis.setCenterAxisLabels(true)
             barChart.xAxis.granularity = 1f
             xAxis.labelRotationAngle = -45f
-            //barChart.xAxis.textSize = 10f
             barChart.xAxis.isGranularityEnabled = true
             xAxis.axisMinimum = 0f
             xAxis.axisMaximum = xAxisLabelList.size.toFloat()
             barChart.xAxis.mAxisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * xAxis.axisMaximum
-            barChart.groupBars(0f, groupSpace, barSpace)
+            if(sizeOfX > 1){
+                barChart.groupBars(0f, groupSpace, barSpace)
+            }
+
             barChart.invalidate()
 
             return barChart
