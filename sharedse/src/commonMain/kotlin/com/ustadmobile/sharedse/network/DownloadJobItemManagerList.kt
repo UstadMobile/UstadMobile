@@ -56,9 +56,7 @@ class DownloadJobItemManagerList(private val appDatabase: UmAppDatabase,
      */
     suspend fun openDownloadJobItemManager(downloadJobId: Int): DownloadJobItemManager? {
         return mutex.withLock {
-            val downloadJob = appDatabase.downloadJobDao.findByUid(downloadJobId)
-            if(downloadJob == null)
-                return null
+            val downloadJob = appDatabase.downloadJobDao.findByUid(downloadJobId) ?: return null
 
             val downloadJobItemManager = DownloadJobItemManager(appDatabase, downloadJobId,
                     coroutineDispatcher)

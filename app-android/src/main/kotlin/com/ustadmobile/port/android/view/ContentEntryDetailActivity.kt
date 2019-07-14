@@ -33,11 +33,13 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         ContentEntryDetailView, ContentEntryDetailLanguageAdapter.AdapterViewListener,
-        LocalAvailabilityMonitor, LocalAvailabilityListener {
+        LocalAvailabilityMonitor, LocalAvailabilityListener , DownloadProgressView.OnStopDownloadListener {
 
     private var presenter: ContentEntryDetailPresenter? = null
 
@@ -120,6 +122,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         setUMToolbar(R.id.entry_detail_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        downloadProgress!!.setOnStopDownloadListener(this)
 
         findViewById<NestedScrollView>(R.id.nested_scroll).setOnScrollChangeListener { v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
             if(showControls){
@@ -297,5 +301,11 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         val adapter = ContentEntryDetailLanguageAdapter(result,
                 this, entryUuid)
         flexBox!!.adapter = adapter
+    }
+
+    override fun onClickStopDownload(view: DownloadProgressView) {
+        GlobalScope.launch {
+            presenter!!.handleCancelDownload()
+        }
     }
 }

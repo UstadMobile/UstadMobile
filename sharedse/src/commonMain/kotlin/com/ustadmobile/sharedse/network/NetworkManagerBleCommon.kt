@@ -33,8 +33,7 @@ import kotlin.jvm.Synchronized
 abstract class NetworkManagerBleCommon(
         val context: Any = Any(),
         private val singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
-        private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default) : LocalAvailabilityMonitor,/*, LiveDataWorkQueue.OnQueueEmptyListener*/
-        /*DownloadJobItemManager.OnDownloadJobItemChangeListener,*/
+        private val mainDispatcher: CoroutineDispatcher = Dispatchers.Default) : LocalAvailabilityMonitor,
         DownloadJobItemStatusProvider {
 
     private val knownNodesLock = Any()
@@ -77,20 +76,6 @@ abstract class NetworkManagerBleCommon(
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
     private val entryStatusTaskExecutor = EntryTaskExecutor(5)
-
-
-//    private val mJobItemAdapter = object : LiveDataWorkQueue.WorkQueueItemAdapter<DownloadJobItem> {
-//        override fun makeRunnable(item: DownloadJobItem): Runnable {
-//            return DownloadJobItemRunner(mContext!!, item, this@NetworkManagerBleCommon,
-//                    umAppDatabase!!, UmAccountManager.getRepositoryForActiveAccount(mContext!!),
-//                    UmAccountManager.getActiveEndpoint(mContext!!)!!,
-//                    connectivityStatusRef.get())
-//        }
-//
-//        override fun getUid(item: DownloadJobItem): Long {
-//            return item.djiUid.hashCode().toLong() shl 32 or item.numAttempts.toLong()
-//        }
-//    }
 
 
     /**
@@ -422,6 +407,7 @@ abstract class NetworkManagerBleCommon(
      * All all availability statuses received from the peer node
      * @param responses response received
      */
+    @Synchronized
     fun handleLocalAvailabilityResponsesReceived(responses: MutableList<EntryStatusResponse>) {
         if (responses.isEmpty())
             return

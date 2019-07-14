@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_F
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
+import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.atomic
@@ -100,6 +101,8 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         statusUmLiveData = contentEntryStatusDao.findContentEntryStatusByUid(entryUuid)
 
         statusUmLiveData!!.observe(this, this::onEntryStatusChanged)
+
+        statusProvider?.addDownloadChangeListener(this)
     }
 
     private fun onEntryChanged(entry: ContentEntry?) {
@@ -145,7 +148,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (isDownloading && isListeningToDownloadStatus.value) {
             isListeningToDownloadStatus.value = true
-            statusProvider?.addDownloadChangeListener(this)
             GlobalScope.launch {
                 val dlJobStatusResult = statusProvider?.findDownloadJobItemStatusByContentEntryUid(entryUuid)
                 onDownloadJobItemChange(dlJobStatusResult, dlJobStatusResult?.jobItemUid ?: 0)
@@ -298,6 +300,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         view.runOnUiThread(Runnable { view.showEditButton(show)})
     }
 
+    suspend fun handleCancelDownload(){
+        val currentJobId = appdb.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
+        appdb.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
+                        JobStatus.CANCELLING)
+        appdb.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        statusProvider?.removeDownloadChangeListener(this)
+        view.stopForeGroundService(currentJobId.toLong(), true)
+    }
+
 
     fun handleStartEditingContent() {
 
@@ -342,10 +353,6 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         const val LOCALLY_NOT_AVAILABLE_ICON = 2
 
         private const val BAD_NODE_FAILURE_THRESHOLD = 3
-
-        private const val TIME_INTERVAL_FROM_LAST_FAILURE = 5
-
-        const val NO_ACTIVITY_FOR_FILE_FOUND = "No activity found for mimetype"
     }
 
 }
