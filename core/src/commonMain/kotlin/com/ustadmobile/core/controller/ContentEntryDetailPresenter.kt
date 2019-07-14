@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_IMPORT_F
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
+import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.atomicfu.atomic
@@ -297,6 +298,15 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     fun handleShowEditButton(show: Boolean){
         view.runOnUiThread(Runnable { view.showEditButton(show)})
+    }
+
+    suspend fun handleCancelDownload(){
+        val currentJobId = appdb.downloadJobDao.getLatestDownloadJobUidForContentEntryUid(entryUuid)
+        appdb.downloadJobDao.updateJobAndItems(currentJobId, JobStatus.CANCELED,
+                        JobStatus.CANCELLING)
+        appdb.contentEntryStatusDao.updateDownloadStatus(entryUuid, JobStatus.CANCELED)
+        statusProvider?.removeDownloadChangeListener(this)
+        view.stopForeGroundService(currentJobId.toLong(), true)
     }
 
 

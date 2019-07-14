@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 
 import com.toughra.ustadmobile.R
+import kotlin.math.roundToInt
 
 /**
  * Created by mike on 9/22/17.
@@ -25,7 +26,7 @@ class DownloadProgressView : LinearLayout, View.OnClickListener {
     var progress: Float
         get() = progressBar!!.progress.toFloat() / 100f
         set(progress) {
-            val progressPercentage = Math.round(progress * 100)
+            val progressPercentage = (progress * 100).roundToInt()
             progressBar!!.progress = progressPercentage
             downloadPercentageTextView!!.text = "$progressPercentage%"
         }
