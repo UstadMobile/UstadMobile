@@ -356,6 +356,34 @@ dependencies {
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8"
 
+    //Goldozi specific//
+
+    //Bottom Navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
+
+    //Floating text button
+    implementation "com.github.dimorinny:floating-text-button:$version_android_floating_text_button"
+
+    //Image compression library
+    implementation "id.zelory:compressor:${version_compressor}"
+
+    //Chart library
+    implementation "com.github.PhilJay:MPAndroidChart:$version_mpandroidchart"
+
+    //Range seekbar by Crystal
+    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
+
+    //Singature pad by Gcacace
+    implementation "com.github.gcacace:signature-pad:$version_gcacace_signaturepad"
+
+    //SVG
+    implementation "com.caverock:androidsvg-aar:$version_androidsvg"
+
+    //Recycler tree view library
+    implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
+
+    //end of Goldozi speicific//
+
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_support_lib"
 

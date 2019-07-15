@@ -1,10 +1,9 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
@@ -26,12 +25,12 @@ import kotlinx.io.IOException
  * Presenter for SaleDetail view
  */
 class SaleDetailPresenter(context: Any,
-                          arguments: Map<String, String?>,
+                          arguments: Map<String, String>?,
                           view: SaleDetailView)
-    : UstadBaseController<SaleDetailView>(context, arguments, view) {
+    : UstadBaseController<SaleDetailView>(context, arguments!!, view) {
 
-    private var umProvider: UmProvider<SaleItemListDetail>? = null
-    private var pProvider: UmProvider<SalePayment>? = null
+    private lateinit var umProvider: DataSource.Factory<Int,SaleItemListDetail>
+    private lateinit var pProvider: DataSource.Factory<Int,SalePayment>
     internal var repository: UmAppDatabase
     private val saleItemDao: SaleItemDao
     private val saleDao: SaleDao
@@ -58,11 +57,11 @@ class SaleDetailPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        saleItemDao = repository.getSaleItemDao()
-        salePaymentDao = repository.getSalePaymentDao()
-        saleDao = repository.getSaleDao()
+        saleItemDao = repository.saleItemDao
+        salePaymentDao = repository.salePaymentDao
+        saleDao = repository.saleDao
         locationDao = repository.locationDao
-        saleVoiceNoteDao = UmAppDatabase.getInstance(context).getSaleVoiceNoteDao()
+        saleVoiceNoteDao = UmAppDatabase.getInstance(context).saleVoiceNoteDao
 
     }
 
@@ -88,20 +87,15 @@ class SaleDetailPresenter(context: Any,
         } else {
             view.runOnUiThread(Runnable{ view.showPayments(false) })
             updatedSale = Sale()
-            updatedSale!!.isSalePreOrder = true //ie: Not delivered unless ticked.
-            updatedSale!!.isSaleDone = false
-            updatedSale!!.isSaleActive = false
+            updatedSale!!.salePreOrder = true //ie: Not delivered unless ticked.
+            updatedSale!!.saleDone = false
+            updatedSale!!.saleActive = false
             view.showSignature(false)
 
-            saleDao.insertAsync(updatedSale!!, object : UmCallback<Long> {
-                override fun onSuccess(result: Long?) {
-                    initFromSale(result!!)
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    println(exception!!.message)
-                }
-            })
+            GlobalScope.launch {
+                val result = saleDao.insertAsync(updatedSale!!)
+                initFromSale(result)
+            }
         }
 
     }
@@ -109,65 +103,43 @@ class SaleDetailPresenter(context: Any,
     private fun updateSaleItemProvider(saleUid: Long) {
         //Get provider
         umProvider = saleItemDao.findAllSaleItemListDetailActiveBySaleProvider(saleUid)
-        view.setListProvider(umProvider!!)
+        view.setListProvider(umProvider)
 
     }
 
     fun updatePaymentItemProvider(saleUid: Long) {
         //Get provider
         pProvider = salePaymentDao.findBySaleProvider(saleUid)
-        view.setPaymentProvider(pProvider!!)
+        view.setPaymentProvider(pProvider)
     }
 
 
     fun getTotalSaleOrderAndDiscountAndUpdateView(saleUid: Long) {
-        saleItemDao.getSaleItemCountFromSale(saleUid, object : UmCallback<Int> {
-            override fun onSuccess(result: Int?) {
-                if (result!! > 0) {
-                    view.runOnUiThread(Runnable{
-                        view.showSaveButton(true)
-                        view.showNotes(true)
-                        view.showDelivered(true)
-                        view.showCalculations(true)
-                        view.showPayments(true)
-                    })
-                }
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                println(exception!!.message)
-            }
-        })
-
-        saleItemDao.findTotalPaidBySaleAsync(saleUid,
-                object : UmCallback<Long> {
-                    override fun onSuccess(result: Long?) {
-                        view.updateOrderTotal(result!!)
-                    }
-
-                    override fun onFailure(exception: Throwable?) {
-                        println(exception!!.message)
-                    }
+        GlobalScope.launch {
+            val result = saleItemDao.getSaleItemCountFromSale(saleUid)
+            if (result > 0) {
+                view.runOnUiThread(Runnable{
+                    view.showSaveButton(true)
+                    view.showNotes(true)
+                    view.showDelivered(true)
+                    view.showCalculations(true)
+                    view.showPayments(true)
                 })
+            }
 
+            val res = saleItemDao.findTotalPaidBySaleAsync(saleUid)
+            view.updateOrderTotal(res)
+        }
 
     }
 
     //Called every time payment list gets updated (via Recycler Adapter's custom observer)
     fun getTotalPaymentsAndUpdateTotalView(saleUid: Long) {
         //Get total payment count
-        salePaymentDao.findTotalPaidBySaleAsync(saleUid, object : UmCallback<Long> {
-            override fun onSuccess(result: Long?) {
-                // Then update totals
-                totalPayment = result!!
-                updateBalance()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                println(exception!!.message)
-            }
-        })
-
+        GlobalScope.launch {
+            totalPayment = salePaymentDao.findTotalPaidBySaleAsync(saleUid)
+            updateBalance()
+        }
     }
 
     fun updateBalanceDueFromTotal(totalAD: Float) {
@@ -182,16 +154,12 @@ class SaleDetailPresenter(context: Any,
 
     fun getPaymentTotalAndUpdateView() {
         if (currentSaleItem != null) {
-            salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.saleItemUid,
-                    object : UmCallback<Long> {
-                        override fun onSuccess(result: Long?) {
-                            view.updatePaymentTotal(result!!)
-                        }
+            GlobalScope.launch {
+                val result =
+                        salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.saleItemUid)
+                view.updatePaymentTotal(result)
+            }
 
-                        override fun onFailure(exception: Throwable?) {
-                            println(exception!!.message)
-                        }
-                    })
         }
     }
 
@@ -201,21 +169,13 @@ class SaleDetailPresenter(context: Any,
         val saleLiveData = saleDao.findByUidLive(saleUid)
         saleLiveData.observe(this, this::handleSaleChanged )
 
-        //Get the sale entity
-        saleDao.findByUidAsync(saleUid, object : UmCallback<Sale> {
-            override fun onSuccess(result: Sale?) {
-                updatedSale = result
-                view.updateSaleOnView(updatedSale!!)
-
-                startObservingLocations()
-
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                println(exception!!.message)
-            }
-        })
-
+        GlobalScope.launch {
+            //Get the sale entity
+            val result = saleDao.findByUidAsync(saleUid)
+            updatedSale = result
+            view.updateSaleOnView(updatedSale!!)
+            startObservingLocations()
+        }
 
         //Any voice notes
         //TODO: Implement this on KMP
@@ -228,7 +188,6 @@ class SaleDetailPresenter(context: Any,
 //                    }
 //                }
 //            }
-//
 //            override fun onFailure(exception: Throwable?) {
 //
 //            }
@@ -303,7 +262,7 @@ class SaleDetailPresenter(context: Any,
     fun handleClickSave() {
 
         if (updatedSale != null) {
-            updatedSale!!.isSaleActive = true
+            updatedSale!!.saleActive = true
             if (updatedSale!!.saleLocationUid == 0L) {
                 updatedSale!!.saleLocationUid = positionToLocationUid!!.get(0)!!
             }
@@ -326,26 +285,12 @@ class SaleDetailPresenter(context: Any,
                 }
             }
 
-            saleItemDao.getTitleForSaleUidAsync(updatedSale!!.saleUid, object : UmCallback<String> {
-                override fun onSuccess(result: String?) {
-                    updatedSale!!.saleTitle = result
-                    saleDao.updateAsync(updatedSale!!, object : UmCallback<Int> {
-                        override fun onSuccess(result: Int?) {
-
-                            view.finish()
-                        }
-
-                        override fun onFailure(exception: Throwable?) {
-                            println(exception!!.message)
-                        }
-                    })
-                }
-
-                override fun onFailure(exception: Throwable?) {
-                    println(exception!!.message)
-                }
-            })
-
+            GlobalScope.launch {
+                val result = saleItemDao.getTitleForSaleUidAsync(updatedSale!!.saleUid)
+                updatedSale!!.saleTitle = result
+                saleDao.updateAsync(updatedSale!!)
+                view.finish()
+            }
         }
     }
 
@@ -360,29 +305,22 @@ class SaleDetailPresenter(context: Any,
 
     fun handleClickAddPayment() {
         val newSalePayment = SalePayment()
-        newSalePayment.isSalePaymentActive = false
+        newSalePayment.salePaymentActive = false
         newSalePayment.salePaymentPaidDate = getSystemTimeInMillis() //default start to today
         newSalePayment.salePaymentPaidAmount = 0
         newSalePayment.salePaymentCurrency = "Afs"
         newSalePayment.salePaymentSaleUid = updatedSale!!.saleUid
-        newSalePayment.isSalePaymentDone = false
-        salePaymentDao.insertAsync(newSalePayment, object : UmCallback<Long> {
-            override fun onSuccess(result: Long?) {
-                newSalePayment.salePaymentUid = result!!
-
-                val impl = UstadMobileSystemImpl.instance
-                val args = HashMap<String, String>()
-                args.put(ARG_SALE_PAYMENT_UID, newSalePayment.salePaymentUid.toString())
-                args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE, (totalAfterDiscount - totalPayment).toString())
-                impl.go(SalePaymentDetailView.VIEW_NAME, args, context)
-
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                println(exception!!.message)
-            }
-        })
-
+        newSalePayment.salePaymentDone = false
+        GlobalScope.launch {
+            val result = salePaymentDao.insertAsync(newSalePayment)
+            newSalePayment.salePaymentUid = result!!
+            val impl = UstadMobileSystemImpl.instance
+            val args = HashMap<String, String>()
+            args.put(ARG_SALE_PAYMENT_UID, newSalePayment.salePaymentUid.toString())
+            args.put(ARG_SALE_PAYMENT_DEFAULT_VALUE,
+                    (totalAfterDiscount - totalPayment).toString())
+            impl.go(SalePaymentDetailView.VIEW_NAME, args, context)
+        }
     }
 
     fun handleClickAddSaleItem() {
@@ -400,13 +338,10 @@ class SaleDetailPresenter(context: Any,
                 args.put(ARG_SALE_ITEM_UID, saleItemUid.toString())
                 impl.go(SelectProducerView.VIEW_NAME, args, context)
             }catch(e:Exception){
-                println(e!!.message)
+                println(e.message)
             }
         }
-
-
     }
-
 
     fun handleDiscountChanged(discount: Long) {
         updatedSale!!.saleDiscount = discount
@@ -418,8 +353,8 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleSetDelivered(delivered: Boolean) {
-        updatedSale!!.isSaleDone = delivered
-        updatedSale!!.isSalePreOrder = !delivered
+        updatedSale!!.saleDone = delivered
+        updatedSale!!.salePreOrder = !delivered
 
     }
 
@@ -436,7 +371,9 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun handleDeletePayment(salePaymentUid: Long) {
-        salePaymentDao.inactivateEntityAsync(salePaymentUid, null!!)
+        GlobalScope.launch {
+            salePaymentDao.inactivateEntityAsync(salePaymentUid)
+        }
     }
 
     fun handleEditPayment(salePaymentUid: Long) {

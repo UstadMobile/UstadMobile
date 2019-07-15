@@ -36,7 +36,7 @@ class SelectLanguageDialogFragment : UstadDialogFragment(), SelectLanguageDialog
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_select_language_dialog, null)
@@ -55,7 +55,7 @@ class SelectLanguageDialogFragment : UstadDialogFragment(), SelectLanguageDialog
 
         //Set any view components and its listener (post presenter work)
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull(context))
+        val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.choose_language)
         builder.setView(rootView)
         dialog = builder.create()

@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
  * Presenter for ChangePassword view
  */
 class ChangePasswordPresenter(context: Any,
-                              arguments: Map<String, String?>,
+                              arguments: Map<String, String>?,
                               view: ChangePasswordView)
-    : UstadBaseController<ChangePasswordView>(context, arguments, view) {
+    : UstadBaseController<ChangePasswordView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     private val personDao: PersonDao

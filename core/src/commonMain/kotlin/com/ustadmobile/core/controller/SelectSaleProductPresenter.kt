@@ -35,10 +35,10 @@ import kotlinx.coroutines.launch
  * Presenter for SelectSaleProduct view
  */
 class SelectSaleProductPresenter(context: Any,
-                                 arguments: Map<String, String?>,
+                                 arguments: Map<String, String>?,
                                  view: SelectSaleProductView,
                                  private val catalogMode: Boolean)
-    : UstadBaseController<SelectSaleProductView>(context, arguments, view) {
+    : UstadBaseController<SelectSaleProductView>(context, arguments!!, view) {
 
     private var recentProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
     private var categoryProvider: DataSource.Factory<Int, SaleNameWithImage>? = null
@@ -65,7 +65,7 @@ class SelectSaleProductPresenter(context: Any,
         saleProductGroupDao = repository.saleProductGroupDao
         productParentJoinDao = repository.saleProductParentJoinDao
 
-        if (arguments.containsKey(ARG_PRODUCER_UID)) {
+        if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
             producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())
         }
         if (arguments.containsKey(ARG_SALE_ITEM_UID)) {

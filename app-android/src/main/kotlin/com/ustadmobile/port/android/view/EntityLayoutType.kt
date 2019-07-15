@@ -9,9 +9,12 @@ import tellh.com.recyclertreeview_lib.LayoutItemType
  * This is the data that will get fed into the recycler view and hence would need to be
  * updated with at least the name and uid. Selected and leaf are navigation properties.
  */
-class EntityLayoutType(var name: String, var uid: Long?, var selected: Boolean, var leaf: Boolean)
+class EntityLayoutType(var name: String, var uid: Long?,
+                       var selected: Boolean, var leaf: Boolean)
     : LayoutItemType {
 
-    val layoutId: Int
-        get() = R.layout.item_select_multiple_tree_dialog
+    override fun getLayoutId(): Int {
+        return R.layout.item_select_multiple_tree_dialog
+    }
+
 }

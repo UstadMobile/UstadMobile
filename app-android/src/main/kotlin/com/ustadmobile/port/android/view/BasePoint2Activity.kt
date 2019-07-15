@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -9,21 +10,16 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
-import android.widget.Button
 import android.widget.Toast
-
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
-import androidx.work.WorkManager
-
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
 import com.squareup.picasso.Picasso
@@ -33,14 +29,9 @@ import com.ustadmobile.core.controller.BasePoint2Presenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.BasePoint2View
-import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
-import com.ustadmobile.port.android.view.BasePoint2Activity.BasePointViewPagerAdapter.Companion.BASEPOINT_ITEM_COUNT
-
 import java.io.File
-import java.util.WeakHashMap
-import java.util.concurrent.TimeUnit
-
 import java.security.AccessController.getContext
+import java.util.*
 
 
 class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
@@ -122,7 +113,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Get the bottom navigation component
-        bottomNavigation = findViewById<View>(R.id.activity_basepoint2_bottom_navigation)
+        bottomNavigation = findViewById(R.id.activity_basepoint2_bottom_navigation)
 
         //Style it
         bottomNavigation.setDefaultBackgroundColor(getContextCompatColorFromColor(
@@ -134,7 +125,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         bottomNavigation.setBehaviorTranslationEnabled(false)
         bottomNavigation.setNotificationBackgroundColor(getContextCompatColorFromColor(
                 R.color.text_primary, applicationContext))
-        bottomNavigation.setUseElevation(true, 2L)
+        bottomNavigation.setUseElevation(true, 2F)
 
         //Create the items to be added
         val catalog_item = AHBottomNavigationItem(R.string.catalog,
@@ -183,6 +174,10 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
         mPresenter!!.updateDueCountOnView()
 
+    }
+
+    fun getContextCompatColorFromColor(color: Int, context: Context):Int{
+        return ContextCompat.getColor(context, color)
     }
 
     override fun updateImageOnView(imagePath: String) {
@@ -373,6 +368,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
 
         //Map of position and fragment
         private val positionMap: WeakHashMap<Int, UstadBaseFragment>
+        private val BASEPOINT_ITEM_COUNT = 5
 
         init {
             positionMap = WeakHashMap()
@@ -387,38 +383,74 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
         override fun getItem(position: Int): Fragment? {
 
             val thisFragment = positionMap[position]
-            return thisFragment ?: when (position) {
-                0 -> {
-                    catalogListFragment = CatalogListFragment()
-                    this.positionMap[position] = catalogListFragment
-                    catalogListFragment
+            if(thisFragment!=null){
+                return thisFragment
+            }else{
+                when(position){
+                    0 -> {
+                        catalogListFragment = CatalogListFragment()
+                        this.positionMap[position] = catalogListFragment
+                        return catalogListFragment
+                    }
+                    1 -> {
+                        comingSoonFragment = ComingSoonFragment()
+                        this.positionMap[position] = comingSoonFragment
+                        return comingSoonFragment
+                    }
+                    2 -> {
+                        saleListFragment = SaleListFragment.newInstance()
+                        this.positionMap[position] = saleListFragment
+                        return saleListFragment
+                    }
+                    3 -> {
+                        comingSoonFragment = ComingSoonFragment()
+                        this.positionMap[position] = comingSoonFragment
+                        return comingSoonFragment
+                    }
+                    4 -> {
+                        //TODO: KMP Sprint
+                        comingSoonFragment = ComingSoonFragment()
+                        this.positionMap[position] = comingSoonFragment
+                        return comingSoonFragment
+                    }
+                    //                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
+                    //                        this.positionMap.put(position, dashboardEntryListFragment);
+                    //                        return dashboardEntryListFragment;
+                    else -> return null
                 }
-                1 -> {
-                    comingSoonFragment = ComingSoonFragment()
-                    this.positionMap[position] = comingSoonFragment
-                    comingSoonFragment
-                }
-                2 -> {
-                    saleListFragment = SaleListFragment.newInstance()
-                    this.positionMap[position] = saleListFragment
-                    saleListFragment
-                }
-                3 -> {
-                    comingSoonFragment = ComingSoonFragment()
-                    this.positionMap[position] = comingSoonFragment
-                    comingSoonFragment
-                }
-                4 -> {
-                    //TODO: KMP Sprint
-                    comingSoonFragment = ComingSoonFragment()
-                    this.positionMap[position] = comingSoonFragment
-                    comingSoonFragment
-                }
-                //                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
-                //                        this.positionMap.put(position, dashboardEntryListFragment);
-                //                        return dashboardEntryListFragment;
-                else -> null
             }
+//            return thisFragment ?: when (position) {
+//                0 -> {
+//                    catalogListFragment = CatalogListFragment()
+//                    this.positionMap[position] = catalogListFragment
+//                    catalogListFragment
+//                }
+//                1 -> {
+//                    comingSoonFragment = ComingSoonFragment()
+//                    this.positionMap[position] = comingSoonFragment
+//                    comingSoonFragment
+//                }
+//                2 -> {
+//                    saleListFragment = SaleListFragment.newInstance()
+//                    this.positionMap[position] = saleListFragment
+//                    saleListFragment
+//                }
+//                3 -> {
+//                    comingSoonFragment = ComingSoonFragment()
+//                    this.positionMap[position] = comingSoonFragment
+//                    comingSoonFragment
+//                }
+//                4 -> {
+//                    //TODO: KMP Sprint
+//                    comingSoonFragment = ComingSoonFragment()
+//                    this.positionMap[position] = comingSoonFragment
+//                    comingSoonFragment
+//                }
+//                //                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
+//                //                        this.positionMap.put(position, dashboardEntryListFragment);
+//                //                        return dashboardEntryListFragment;
+//                else -> null
+//            }
 
         }
 
@@ -427,9 +459,6 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
             return BASEPOINT_ITEM_COUNT
         }
 
-        companion object {
-            private val BASEPOINT_ITEM_COUNT = 5
-        }
     }
 
     companion object {

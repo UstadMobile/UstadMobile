@@ -15,9 +15,9 @@ import kotlinx.coroutines.launch
  * Presenter for SalePaymentDetail view
  */
 class SalePaymentDetailPresenter(context: Any,
-                                 arguments: Map<String, String?>,
+                                 arguments: Map<String, String>?,
                                  view: SalePaymentDetailView)
-    : UstadBaseController<SalePaymentDetailView>(context, arguments, view) {
+    : UstadBaseController<SalePaymentDetailView>(context, arguments!!, view) {
 
 
     internal var repository: UmAppDatabase
@@ -34,7 +34,7 @@ class SalePaymentDetailPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        paymentDao = repository.getSalePaymentDao()
+        paymentDao = repository.salePaymentDao
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -76,8 +76,8 @@ class SalePaymentDetailPresenter(context: Any,
     }
 
     fun handleClickSave() {
-        currentPayment!!.isSalePaymentActive = true
-        currentPayment!!.isSalePaymentDone = true
+        currentPayment!!.salePaymentActive = true
+        currentPayment!!.salePaymentDone = true
         GlobalScope.launch {
             try{
                 paymentDao.updateAsync(currentPayment!!)

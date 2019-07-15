@@ -243,7 +243,7 @@ abstract class SaleDao : BaseDao<Sale> {
             " (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid " +
             " and sip.saleItemPreOrder = 1 ) > 0 then 1  else 0 end) from Sale)  as saleItemPreOrder " +
             " FROM Sale sl WHERE sl.saleActive = 1  AND (saleItemPreOrder = 1 OR salePreOrder = 1)) ")
-    abstract fun getPreOrderSaleCountLive(): DoorLiveData<Int?>
+    abstract fun getPreOrderSaleCountLive(): DoorLiveData<Int>
 
 
     companion object {

@@ -102,7 +102,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         toolbar = findViewById(R.id.activity_sale_item_detail_toolbar)
         toolbar!!.title = getText(R.string.sale_detail)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         totalTV = findViewById(R.id.activity_sale_item_detail_total_amount)
         saleRB = findViewById(R.id.activity_sale_item_detail_radiobutton_sold)

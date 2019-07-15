@@ -11,9 +11,9 @@ import kotlinx.coroutines.launch
  * The SelectMultipleTreeDialog Presenter.
  */
 class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
-                            Map<String, String?>,view: SelectMultipleProductTypeTreeDialogView)
+                            Map<String, String>?,view: SelectMultipleProductTypeTreeDialogView)
     : CommonEntityHandlerPresenter<SelectMultipleProductTypeTreeDialogView>
-        (context, arguments, view) {
+        (context, arguments!!, view) {
 
     val selectedOptions: HashMap<String, Long>
 
@@ -23,8 +23,8 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
     init {
 
-        if (arguments.containsKey(ARG_PRODUCT_SELECTED_SET)) {
-            val productTypesArrayString = arguments.get(ARG_PRODUCT_SELECTED_SET).toString()
+        if (arguments!!.containsKey(ARG_PRODUCT_SELECTED_SET)) {
+            val productTypesArrayString = arguments!!.get(ARG_PRODUCT_SELECTED_SET).toString()
             selectedProductTypeUidsList = convertCSVStringToLongList(productTypesArrayString)
         }
 

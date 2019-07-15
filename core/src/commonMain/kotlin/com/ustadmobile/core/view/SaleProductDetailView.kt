@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.lib.db.entities.SaleProductSelected
@@ -22,7 +23,7 @@ interface SaleProductDetailView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: UmProvider<SaleProductSelected>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleProductSelected>)
 
     fun updateToolbarTitle(titleName: String)
 

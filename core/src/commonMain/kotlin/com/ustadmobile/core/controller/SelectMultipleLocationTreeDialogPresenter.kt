@@ -10,9 +10,11 @@ import kotlinx.coroutines.launch
 /**
  * The SelectMultipleTreeDialog Presenter.
  */
-class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
-                                                view: SelectMultipleLocationTreeDialogView)
-    : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
+class SelectMultipleLocationTreeDialogPresenter(
+        context: Any, arguments: Map<String, String>?,
+        view: SelectMultipleLocationTreeDialogView)
+    : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(
+        context, arguments!!, view) {
 
     /**
      * Getter for selected Locations
@@ -26,7 +28,7 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
 
     init {
 
-        if (arguments.containsKey(ARG_LOCATIONS_SET)) {
+        if (arguments!!.containsKey(ARG_LOCATIONS_SET)) {
             val locationsArrayString = arguments.get(ARG_LOCATIONS_SET).toString()
 
             selectedLocationsList = convertCSVStringToLongList(locationsArrayString)

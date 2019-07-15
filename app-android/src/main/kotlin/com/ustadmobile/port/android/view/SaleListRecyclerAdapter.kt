@@ -140,14 +140,13 @@ class SaleListRecyclerAdapter : PagedListAdapter<SaleListDetail, SaleListRecycle
             paymentsDue: Boolean,
             preOrder: Boolean,
             fragment: Fragment,
-            context: Context,
-            theFragment: Fragment) : super(diffCallback) {
+            context: Context) : super(diffCallback) {
         mPresenter = thePresenter
         theContext = context
         paymentsDueTab = paymentsDue
         this.theFragment = fragment
         preOrderTab = preOrder
-        this.theFragment = theFragment
+        this.theFragment = fragment
     }
 
     internal constructor(

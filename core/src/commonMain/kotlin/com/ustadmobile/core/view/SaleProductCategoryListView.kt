@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -22,13 +23,13 @@ interface SaleProductCategoryListView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: UmProvider<SaleNameWithImage>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, SaleNameWithImage>)
 
     /**
      * Recycler view for Categories
      * @param listProvider
      */
-    fun setCategoriesListProvider(listProvider: UmProvider<SaleNameWithImage>)
+    fun setCategoriesListProvider(listProvider: DataSource.Factory<Int, SaleNameWithImage>)
 
     fun setMessageOnView(messageCode: Int)
 

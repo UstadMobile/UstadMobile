@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.SelectLanguageDialogView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -19,9 +20,9 @@ import kotlinx.coroutines.launch
  * Presenter for UserProfile view
  */
 class UserProfilePresenter(context: Any,
-                           arguments: Map<String, String?>,
+                           arguments: Map<String, String>?,
                            view: UserProfileView)
-    : UstadBaseController<UserProfileView>(context, arguments, view) {
+    : UstadBaseController<UserProfileView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase =
             UmAccountManager.getRepositoryForActiveAccount(context)
@@ -82,7 +83,9 @@ class UserProfilePresenter(context: Any,
     }
 
     fun handleClickLogout() {
-        UmAccountManager.setActiveAccount(null!!, context)
+        //TODO: KMP Check this
+        val emptyAcccount = UmAccount(0, null, null, null)
+        UmAccountManager.setActiveAccount(emptyAcccount, context)
         UmAccountManager.updatePasswordHash(null, context, UstadMobileSystemImpl.instance)
         val impl = UstadMobileSystemImpl.instance
         val args = HashMap<String, String>()

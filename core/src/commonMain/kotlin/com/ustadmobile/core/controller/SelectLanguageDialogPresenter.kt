@@ -9,9 +9,9 @@ import com.ustadmobile.core.view.SelectLanguageDialogView
  * Presenter for SelectLanguageDialog view
  */
 class SelectLanguageDialogPresenter(context: Any,
-                                    arguments: Map<String, String?>,
+                                    arguments: Map<String, String>?,
                                     view: SelectLanguageDialogView)
-    : UstadBaseController<SelectLanguageDialogView>(context, arguments, view) {
+    : UstadBaseController<SelectLanguageDialogView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
 

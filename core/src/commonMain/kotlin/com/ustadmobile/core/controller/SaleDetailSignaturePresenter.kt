@@ -14,9 +14,9 @@ import kotlinx.coroutines.launch
  * Presenter for SaleDetailSignature view
  */
 class SaleDetailSignaturePresenter(context: Any,
-                                   arguments: Map<String, String?>,
+                                   arguments: Map<String, String>?,
                                    view: SaleDetailSignatureView)
-    : UstadBaseController<SaleDetailSignatureView>(context, arguments, view) {
+    : UstadBaseController<SaleDetailSignatureView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     private var currentSignSvg: String? = null
@@ -27,7 +27,7 @@ class SaleDetailSignaturePresenter(context: Any,
     init {
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         saleDao = repository.saleDao
-        if (arguments.containsKey(ARG_SALE_UID)) {
+        if (arguments!!.containsKey(ARG_SALE_UID)) {
             currentSaleUid = (arguments.get(ARG_SALE_UID)!!.toLong())
         }
     }

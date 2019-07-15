@@ -26,11 +26,11 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
+class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>?,
                                   viewContract: ContentEntryDetailView,
                                   private val monitor: LocalAvailabilityMonitor,
                                   private val statusProvider: DownloadJobItemStatusProvider?)
-    : UstadBaseController<ContentEntryDetailView>(context, arguments, viewContract),
+    : UstadBaseController<ContentEntryDetailView>(context, arguments!!, viewContract),
         OnDownloadJobItemChangeListener {
 
     private var navigation: String? = null

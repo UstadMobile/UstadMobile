@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.ChangePasswordPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ChangePasswordView
-import java.util.*
 
 class ChangePasswordActivity : UstadBaseActivity(), ChangePasswordView {
 
@@ -71,7 +70,7 @@ class ChangePasswordActivity : UstadBaseActivity(), ChangePasswordView {
         toolbar = findViewById(R.id.activity_change_password_toolbar)
         toolbar!!.title = getText(R.string.change_password)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         currentPasswordET = findViewById(R.id.activity_change_password_current)
         updatePasswordET = findViewById(R.id.activity_change_password_new_password)

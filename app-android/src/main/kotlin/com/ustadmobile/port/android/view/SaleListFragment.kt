@@ -3,15 +3,10 @@ package com.ustadmobile.port.android.view
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.Observer
@@ -21,17 +16,11 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
-
-
-import java.util.Objects
-
-
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class SaleListFragment : UstadBaseFragment(), SaleListView {
@@ -73,7 +62,7 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
         val mRecyclerLayoutManager = LinearLayoutManager(context)
         mRecyclerView!!.layoutManager = mRecyclerLayoutManager
 
-        fab = rootContainer.findViewById<View>(R.id.activity_sale_list_fab)
+        fab = rootContainer.findViewById(R.id.activity_sale_list_fab)
 
         sortSpinner = rootContainer.findViewById(R.id.fragment_sale_list_sort_by_spinner)
 
@@ -131,7 +120,7 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
 
     override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
-        val adapter = ArrayAdapter(Objects.requireNonNull(context),
+        val adapter = ArrayAdapter(context,
                 R.layout.item_simple_spinner, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter
@@ -174,7 +163,7 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
     fun getTintedDrawable(drawable: Drawable, color: Int) {
         var drawable = drawable
         drawable = DrawableCompat.wrap(drawable)
-        val tintColor = ContextCompat.getColor(Objects.requireNonNull(context), color)
+        val tintColor = ContextCompat.getColor(context!!, color)
         DrawableCompat.setTint(drawable, tintColor)
     }
 

@@ -11,23 +11,25 @@ import com.ustadmobile.core.controller.CommonEntityHandlerPresenter
 import tellh.com.recyclertreeview_lib.TreeNode
 import tellh.com.recyclertreeview_lib.TreeViewBinder
 
-class EntityNodeBinder internal constructor(internal var mPresenter: CommonEntityHandlerPresenter)
-    : TreeViewBinder<EntityNodeBinder.ViewHolder>() {
+class EntityNodeBinder (
+        var mPresenter: CommonEntityHandlerPresenter<*>)
+    : TreeViewBinder<EntityNodeBinder.TreeHolder>() {
 
-    val layoutId: Int
-        get() = R.layout.item_select_multiple_tree_dialog
-
-    fun provideViewHolder(view: View): ViewHolder {
-        return ViewHolder(view)
+    override fun getLayoutId(): Int {
+        return R.layout.item_select_multiple_tree_dialog
     }
 
-    fun bindView(viewHolder: ViewHolder, i: Int, treeNode: TreeNode) {
-        val locationNode = treeNode.getContent() as EntityLayoutType
+    override fun provideViewHolder(view: View): TreeHolder {
+        return TreeHolder(view)
+    }
+
+    override fun bindView(viewHolder: TreeHolder, i: Int, treeNode: TreeNode<*>?) {
+        val locationNode = treeNode!!.getContent() as EntityLayoutType
         viewHolder.tvName.text = locationNode.name
         viewHolder.locationUid = locationNode.uid
     }
 
-    inner class ViewHolder(rootView: View) : TreeViewBinder.ViewHolder(rootView) {
+    inner class TreeHolder(rootView: View) : TreeViewBinder.ViewHolder(rootView) {
 
         val ivArrow: ImageView
         internal var tvName: TextView

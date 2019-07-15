@@ -6,13 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.SearchView
-import android.widget.Spinner
-import android.widget.TextView
-
+import android.widget.*
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -21,15 +15,12 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleListSearchPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.lib.db.entities.SaleListDetail
-
 import java.text.DecimalFormat
-import java.util.Objects
 
 class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
 
@@ -47,9 +38,10 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
     private var toDate: Long = 0
     internal lateinit var dateRangeET: EditText
     internal lateinit var valueRangeTV: TextView
+    private lateinit var valueSeekbar:RangeSeekCustom
 
     private var sortSpinner: Spinner? = null
-    internal lateinit var sortSpinnerPresets: Array<String>
+    internal lateinit var sortSpinnerPresets: Array<String?>
 
     /**
      * This method catches menu buttons/options pressed in the toolbar. Here it is making sure
@@ -129,7 +121,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
         //Toolbar:
         val toolbar = findViewById<Toolbar>(R.id.activity_sale_list_search_toolbar)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(
@@ -140,7 +132,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
         locationSpinner = findViewById(R.id.activity_sale_list_search_location_spinner)
         dateRangeET = findViewById(R.id.activity_sale_list_search_date_range_edittext)
         dateRangeET.isFocusable = false
-        val valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar)
+        valueSeekbar = findViewById(R.id.activity_sale_list_search_value_seekbar)
 
         valueRangeTV = findViewById(R.id.activity_sale_list_search_value_range_textview)
         sortSpinner = findViewById(R.id.activity_sale_list_search_sort_spinner)
@@ -158,10 +150,11 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        valueSeekbar.setMaxValue(100000)
-        valueSeekbar.setMinValue(0)
-        valueSeekbar.setOnRangeSeekbarChangeListener({ minValue, maxValue ->
-            updateValueRangeOnView(minValue, maxValue)
+        valueSeekbar.setMaxValue(100000F)
+        valueSeekbar.setMinValue(0F)
+        valueSeekbar.setOnRangeSeekbarChangeListener(
+                { minValue, maxValue ->
+            updateValueRangeOnView(minValue as Int, maxValue as Int)
             apl = minValue
             aph = maxValue
 
@@ -222,7 +215,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
      */
     override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
-        val adapter = ArrayAdapter(Objects.requireNonNull(applicationContext),
+        val adapter = ArrayAdapter(applicationContext,
                 R.layout.spinner_item, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter

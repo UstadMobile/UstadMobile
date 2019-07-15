@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -28,11 +29,11 @@ import com.ustadmobile.door.DoorLiveData
  * Presenter for SaleListSearch view
  */
 class SaleListSearchPresenter(context: Any,
-                              arguments: Map<String, String?>,
+                              arguments: Map<String, String>?,
                               view: SaleListSearchView)
-    : CommonHandlerPresenter<SaleListSearchView>(context, arguments, view) {
+    : CommonHandlerPresenter<SaleListSearchView>(context, arguments!!, view) {
 
-    private var umProvider: UmProvider<SaleListDetail>? = null
+    private lateinit var umProvider: DataSource.Factory<Int, SaleListDetail>
     private var locationLiveData: DoorLiveData<List<Location>>? = null
     internal var repository: UmAppDatabase
     private val saleDao: SaleDao
@@ -58,7 +59,7 @@ class SaleListSearchPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        saleDao = repository.getSaleDao()
+        saleDao = repository.saleDao
         locationDao = repository.locationDao
 
     }

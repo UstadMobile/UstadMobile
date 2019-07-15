@@ -103,7 +103,7 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
             " FROM Sale sl " +
             " WHERE sl.saleActive = 1 AND saleAmountPaid < saleAmount " +
             " )")
-    abstract fun getPaymentsDueCountLive(): DoorLiveData<Int?>
+    abstract fun getPaymentsDueCountLive(): DoorLiveData<Int>
 
     companion object {
 

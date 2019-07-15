@@ -12,4 +12,15 @@
         android:title="@string/clear_history"
         app:showAsAction="never"/>
 
+    <item
+        android:visible="false"
+        android:id="@+id/create_new_content"
+        android:title="@string/content_editor_create_new"
+        app:showAsAction="always"/>
+
+
+    <item
+        android:id="@+id/action_send_feedback"
+        android:title="@string/send_feedback"
+        app:showAsAction="never" />
 </menu>

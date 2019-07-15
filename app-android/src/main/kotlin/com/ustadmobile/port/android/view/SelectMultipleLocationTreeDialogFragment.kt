@@ -29,11 +29,12 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.lib.db.entities.Location
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import tellh.com.recyclertreeview_lib.TreeNode
+import tellh.com.recyclertreeview_lib.TreeViewAdapter
+import tellh.com.recyclertreeview_lib.TreeViewBinder
 
-import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashMap
-import java.util.Objects
 
 
 /**
@@ -51,7 +52,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
     internal lateinit var rootView: View
 
     //Recycler view for the tree
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
     //Adapter for tree - tellh's TreeViewAdapter
     private var adapter: TreeViewAdapter? = null
 
@@ -88,7 +89,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_select_multiple_tree_dialog, null)
@@ -160,7 +161,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
 
     override fun populateTopLocation(locations: List<Location>) {
         //1. Create a list of nodes - represents an entry in the Tree list
-        val nodes = ArrayList<TreeNode>()
+        val nodes = mutableListOf<TreeNode<EntityLayoutType>>()
 
         //Add every Tree entry to the list of notes (ie: Every Location)
         for (everyTopLocation in locations) {
@@ -200,12 +201,12 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
                 Arrays.asList(EntityNodeBinder(mPresenter)))
 
         //Set adapter to Recycler view.
-        runOnUiThread { recyclerView!!.adapter = adapter }
+        runOnUiThread (Runnable{ recyclerView.adapter = adapter })
 
         //Set adapter listener
-        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener() {
+        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener {
 
-            fun onClick(treeNode: TreeNode, viewHolder: RecyclerView.ViewHolder): Boolean {
+            override fun onClick(treeNode: TreeNode<*>, viewHolder: RecyclerView.ViewHolder): Boolean {
                 if (!treeNode.isLeaf()) {
                     //A warning is expected
                     val nodeList = treeNode.getChildList()
@@ -215,8 +216,9 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
                             // (via PopulateTreeNodeCallback class)
                             val childLocationUid = (childNode.getContent() as EntityLayoutType).uid!!
                             //Get child locations :
-                            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
-                                    PopulateLocationTreeNodeCallback(childNode))
+                            populateTreeNode(childNode as TreeNode<EntityLayoutType>, childLocationUid)
+//                            locationDao.findAllChildLocationsForUidAsync(childLocationUid,
+//                                    PopulateLocationTreeNodeCallback(childNode))
                         }
                     }
                     onToggle(treeNode.isExpand(), viewHolder)
@@ -235,10 +237,10 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
                 return false
             }
 
-            fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
+            override fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
 
                 //Change icon of the item.
-                val locationViewHolder = viewHolder as EntityNodeBinder.ViewHolder
+                val locationViewHolder = viewHolder as EntityNodeBinder.TreeHolder
                 val arrowImage = locationViewHolder.ivArrow
                 val rotateDegree = if (b) 90 else -90
                 arrowImage.animate().rotationBy(rotateDegree.toFloat()).start()
@@ -256,7 +258,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
         // (parent activity usually)
         selectedOptions = mPresenter.selectedOptions
         if (mAttachedContext is MultiSelectLocationTreeDialogListener) {
-            (mAttachedContext as MultiSelectLocationTreeDialogListener).onLocationResult(selectedOptions)
+            (mAttachedContext as MultiSelectLocationTreeDialogListener).onLocationResult(selectedOptions!!)
         }
         dialog.dismiss()
     }
@@ -334,12 +336,14 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
      * view on every tree node.
      *
      */
-    inner class TreeViewAdapterWithBind(private val selectMultipleTreeDialogFragment: SelectMultipleLocationTreeDialogFragment,
-                                        nodes: List<TreeNode>,
-                                        viewBinders: List<TreeViewBinder>) : TreeViewAdapter(nodes, viewBinders) {
+    inner class TreeViewAdapterWithBind(
+            private val selectMultipleTreeDialogFragment: SelectMultipleLocationTreeDialogFragment,
+            nodes: List<TreeNode<*>>,
+            viewBinders: List<TreeViewBinder<*>>)
+        : TreeViewAdapter(nodes, viewBinders) {
 
 
-        fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             super.onBindViewHolder(holder, position)
 
             val locationCB = holder.itemView.findViewById<CheckBox>(
@@ -348,7 +352,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
                     R.id.item_select_multiple_tree_dialog_arrow)
 
             val displayNodesIterator = getDisplayNodesIterator()
-            var displayNode: TreeNode? = null
+            var displayNode: TreeNode<*>? = null
             var i = 0
             while (displayNodesIterator.hasNext()) {
                 displayNode = displayNodesIterator.next()
@@ -362,7 +366,8 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
             val displayNodeContent = displayNode!!.getContent() as EntityLayoutType
             val locationUid = displayNodeContent.uid!!
 
-            if (selectMultipleTreeDialogFragment.selectedLocationList != null && selectMultipleTreeDialogFragment.selectedLocationList!!.contains(locationUid)) {
+            if (selectMultipleTreeDialogFragment.selectedLocationList != null
+                    && selectMultipleTreeDialogFragment.selectedLocationList!!.contains(locationUid)) {
                 locationCB.isChecked = true
             } else {
                 locationCB.isChecked = false

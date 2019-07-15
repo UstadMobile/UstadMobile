@@ -81,7 +81,7 @@ class SalePaymentDetailActivity : UstadBaseActivity(), SalePaymentDetailView {
         toolbar = findViewById(R.id.activity_sale_payment_detail_toolbar)
         toolbar!!.title = getText(R.string.add_payment)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         amountNP = findViewById(R.id.activity_sale_payment_detail_amount_np)
         amountNP!!.minValue = 1

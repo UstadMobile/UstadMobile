@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.db.dao.SaleProductDao
@@ -33,12 +34,12 @@ import kotlinx.coroutines.launch
  * Presenter for SaleProductCategoryList view
  */
 class SaleProductCategoryListPresenter(context: Any,
-                                       arguments: Map<String, String?>,
+                                       arguments: Map<String, String>?,
                                        view: SaleProductCategoryListView)
-    : UstadBaseController<SaleProductCategoryListView>(context, arguments, view) {
+    : UstadBaseController<SaleProductCategoryListView>(context, arguments!!, view) {
 
-    private var itemProvider: UmProvider<SaleNameWithImage>? = null
-    private var categoryProvider: UmProvider<SaleNameWithImage>? = null
+    private lateinit var itemProvider: DataSource.Factory<Int, SaleNameWithImage>
+    private lateinit var categoryProvider: DataSource.Factory<Int, SaleNameWithImage>
     internal var repository: UmAppDatabase
     private val productDao: SaleProductDao
     private var currentSaleProductCategory: SaleProduct? = null
@@ -58,14 +59,14 @@ class SaleProductCategoryListPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        productDao = repository.getSaleProductDao()
-        productParentJoinDao = repository.getSaleProductParentJoinDao()
+        productDao = repository.saleProductDao
+        productParentJoinDao = repository.saleProductParentJoinDao
 
         impl = UstadMobileSystemImpl.instance
         //Populate itemProvider and categoryProvider
 
-        if (arguments.containsKey(ARG_SELECT_PRODUCT)) {
-            if (arguments.get(ARG_SELECT_PRODUCT) == "true") {
+        if (arguments!!.containsKey(ARG_SELECT_PRODUCT)) {
+            if (arguments!!.get(ARG_SELECT_PRODUCT) == "true") {
                 selectProductMode = true
             }
         }
@@ -136,9 +137,9 @@ class SaleProductCategoryListPresenter(context: Any,
         }
 
         if (recent)
-            view.runOnUiThread(Runnable{ view.setListProvider(itemProvider!!) })
+            view.runOnUiThread(Runnable{ view.setListProvider(itemProvider) })
         if (category)
-            view.runOnUiThread(Runnable{ view.setCategoriesListProvider(categoryProvider!!) })
+            view.runOnUiThread(Runnable{ view.setCategoriesListProvider(categoryProvider) })
 
     }
 

@@ -12,9 +12,9 @@ import com.ustadmobile.lib.db.entities.Person
 /**
  * The SelectClazzesDialog Presenter.
  */
-class SelectMultiplePeoplePresenter(context: Any, arguments: Map<String, String?>,
+class SelectMultiplePeoplePresenter(context: Any, arguments: Map<String, String>?,
                                     view: SelectMultiplePeopleView)
-    : UstadBaseController<SelectMultiplePeopleView>(context, arguments, view) {
+    : UstadBaseController<SelectMultiplePeopleView>(context, arguments!!, view) {
 
     //Any arguments stored as variables here
     private lateinit var personWithEnrollmentUmProvider: DataSource.Factory<Int, Person>
@@ -25,8 +25,8 @@ class SelectMultiplePeoplePresenter(context: Any, arguments: Map<String, String?
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
     init {
-        if (arguments.containsKey(ARG_SELECTED_PEOPLE)) {
-            val selectedPeopleCSString = arguments.get(ARG_SELECTED_PEOPLE).toString()
+        if (arguments!!.containsKey(ARG_SELECTED_PEOPLE)) {
+            val selectedPeopleCSString = arguments!!.get(ARG_SELECTED_PEOPLE).toString()
 
             //TODO: this
             //selectedPeopleList = convertCSVStringToLongList(selectedPeopleCSString)

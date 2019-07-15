@@ -37,7 +37,6 @@ import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
 import com.ustadmobile.lib.db.entities.SalePayment
 import java.io.IOException
-import java.util.*
 
 class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
@@ -48,28 +47,28 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     private var menu: Menu? = null
 
-    private var locationSpinner: Spinner? = null
-    private var discountET: EditText? = null
-    private var orderNotesET: EditText? = null
-    private var deliveredCB: CheckBox? = null
-    private var orderTotal: TextView? = null
-    private var totalAfterDiscount: TextView? = null
-    private var addItemCL: ConstraintLayout? = null
+    private lateinit var locationSpinner: Spinner
+    private lateinit var discountET: EditText
+    private lateinit var orderNotesET: EditText
+    private lateinit var deliveredCB: CheckBox
+    private lateinit var orderTotal: TextView
+    private lateinit var totalAfterDiscount: TextView
+    private lateinit var addItemCL: ConstraintLayout
 
-    private var c1: TextView? = null
-    private var c2: TextView? = null
-    private var c3: TextView? = null
-    private var c4: TextView? = null
-    private var c5: TextView? = null
-    private var c6: TextView? = null
-    private var hlineCalc: View ?= null
+    private lateinit var c1: TextView
+    private lateinit var c2: TextView
+    private lateinit var c3: TextView
+    private lateinit var c4: TextView
+    private lateinit var c5: TextView
+    private lateinit var c6: TextView
+    private lateinit var hlineCalc: View
     private var saleUid: Long = 0
 
-    private var recordVoiceNotesIB: ImageButton? = null
-    private var playIB: ImageButton? = null
-    private var stopIB: ImageButton? = null
+    private lateinit var recordVoiceNotesIB: ImageButton
+    private lateinit var playIB: ImageButton
+    private lateinit var stopIB: ImageButton
 
-    private var recorder: MediaRecorder? = null
+    private var recorder: MediaRecorder?=null
 
     private var player: MediaPlayer? = null
 
@@ -117,10 +116,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
             ActivityCompat.requestPermissions(this, permissions, RECORD_AUDIO_PERMISSION_REQUEST)
             return
         }
-
-
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
@@ -328,7 +324,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         toolbar = findViewById(R.id.activity_sale_detail_toolbar)
         toolbar!!.title = getText(R.string.record_sale)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(
@@ -637,7 +633,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         orderTotal!!.isEnabled = show
         totalAfterDiscount!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         totalAfterDiscount!!.isEnabled = show
-        hlineCalc.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        hlineCalc!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         signatureIB!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         signatureHLine!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
         signatureTitleTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE

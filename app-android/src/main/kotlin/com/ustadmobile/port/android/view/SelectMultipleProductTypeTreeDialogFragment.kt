@@ -23,17 +23,17 @@ import com.ustadmobile.core.controller.SelectMultipleProductTypeTreeDialogPresen
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import tellh.com.recyclertreeview_lib.TreeNode
+import tellh.com.recyclertreeview_lib.TreeViewAdapter
+import tellh.com.recyclertreeview_lib.TreeViewBinder
 
-import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashMap
-import java.util.Objects
 
 
 /**
@@ -42,6 +42,8 @@ import java.util.Objects
  * The data should be provided to it to load.
  */
 class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), SelectMultipleProductTypeTreeDialogView, DismissableDialog {
+    override val viewContext: Any
+        get() = context!!
 
     //Fragment view components:
     internal lateinit var toolbar: Toolbar
@@ -49,7 +51,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
     internal lateinit var rootView: View
 
     //Recycler view for the tree
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
     //Adapter for tree - tellh's TreeViewAdapter
     private var adapter: TreeViewAdapter? = null
 
@@ -88,7 +90,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_select_multiple_tree_dialog, null)
@@ -154,15 +156,15 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
             val locationList = joinDao.findAllChildProductTypesForUidAsync(childLocationUid)
             (childNode.content as EntityLayoutType).leaf = locationList.isEmpty()
             runOnUiThread(Runnable {
-                for (everyLocation in locationList) {
-                    val locationUid = everyLocation.locationUid
+                for (everyProduct in locationList) {
+                    val locationUid = everyProduct.saleProductUid
                     var selected = false
                     if (selectedSaleProductUidList!!.contains(locationUid)) {
                         selected = true
                     }
 
                     childNode.addChild(TreeNode(
-                            EntityLayoutType(everyLocation.title!!,
+                            EntityLayoutType(everyProduct.saleProductName!!,
                                     locationUid, selected, false)))
                 }
 
@@ -173,7 +175,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
 
 
     override fun populateTopProductType(productTypes: List<SaleProduct>) {
-        val nodes = ArrayList<TreeNode>()
+        val nodes = mutableListOf<TreeNode<EntityLayoutType>>()
 
         for (everyProductType in productTypes) {
             val childLocationUid = everyProductType.saleProductUid
@@ -198,7 +200,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
 
         for (childNode in nodes) {
             val childProductTypeUid = (childNode.content as EntityLayoutType).uid
-            populateTreeNode(childNode, childProductTypeUid!!)
+            populateTreeNode(childNode , childProductTypeUid!!)
         }
 
         //Init adapter with the location node binder as types of data to accept
@@ -206,12 +208,12 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
                 Arrays.asList(EntityNodeBinder(mPresenter)))
 
         //Set adapter to Recycler view.
-        runOnUiThread { recyclerView!!.adapter = adapter }
+        runOnUiThread (Runnable{ recyclerView.adapter = adapter })
 
         //Set adapter listener
-        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener() {
+        adapter!!.setOnTreeNodeListener(object : TreeViewAdapter.OnTreeNodeListener {
 
-            fun onClick(treeNode: TreeNode, viewHolder: RecyclerView.ViewHolder): Boolean {
+            override fun onClick(treeNode: TreeNode<*>, viewHolder: RecyclerView.ViewHolder): Boolean {
                 if (!treeNode.isLeaf()) {
                     //A warning is expected
                     val nodeList = treeNode.getChildList()
@@ -221,8 +223,9 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
                             // (via PopulateTreeNodeCallback class)
                             val childProductTypeUid = (childNode.getContent() as EntityLayoutType).uid!!
                             //Get child locations :
-                            joinDao.findAllChildProductTypesForUidAsync(childProductTypeUid,
-                                    PopulateSaleProductTreeNodeCallback(childNode))
+                            populateTreeNode(childNode as TreeNode<EntityLayoutType>, childProductTypeUid)
+//                            joinDao.findAllChildProductTypesForUidAsync(childProductTypeUid,
+//                                    PopulateSaleProductTreeNodeCallback(childNode))
                         }
                     }
                     onToggle(treeNode.isExpand(), viewHolder)
@@ -240,10 +243,10 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
                 return false
             }
 
-            fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
+            override fun onToggle(b: Boolean, viewHolder: RecyclerView.ViewHolder) {
 
                 //Change icon of the item.
-                val locationViewHolder = viewHolder as EntityNodeBinder.ViewHolder
+                val locationViewHolder = viewHolder as EntityNodeBinder.TreeHolder
                 val arrowImage = locationViewHolder.ivArrow
                 val rotateDegree = if (b) 90 else -90
                 arrowImage.animate().rotationBy(rotateDegree.toFloat()).start()
@@ -261,7 +264,8 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
         // (parent activity usually)
         selectedOptions = mPresenter.selectedOptions
         if (mAttachedContext is MultiSelectProductTypeTreeDialogListener) {
-            (mAttachedContext as MultiSelectProductTypeTreeDialogListener).onProductTypesResult(selectedOptions)
+            (mAttachedContext as
+                    MultiSelectProductTypeTreeDialogListener).onProductTypesResult(selectedOptions!!)
         }
         dialog.dismiss()
     }
@@ -324,12 +328,14 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
      * view on every tree node. The type is of the EntityLayoutType POJO
      *
      */
-    inner class TreeViewAdapterWithBind(private val selectMultipleTreeDialogFragment: SelectMultipleProductTypeTreeDialogFragment,
-                                        nodes: List<TreeNode>,
-                                        viewBinders: List<TreeViewBinder>) : TreeViewAdapter(nodes, viewBinders) {
+    inner class TreeViewAdapterWithBind(
+            private val selectMultipleTreeDialogFragment: SelectMultipleProductTypeTreeDialogFragment,
+            nodes: List<TreeNode<*>>,
+            viewBinders: List<TreeViewBinder<*>>)
+        : TreeViewAdapter(nodes, viewBinders) {
 
 
-        fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             super.onBindViewHolder(holder, position)
 
             val locationCB = holder.itemView.findViewById<CheckBox>(
@@ -338,7 +344,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
                     R.id.item_select_multiple_tree_dialog_arrow)
 
             val displayNodesIterator = getDisplayNodesIterator()
-            var displayNode: TreeNode? = null
+            var displayNode: TreeNode<*>? = null
             var i = 0
             while (displayNodesIterator.hasNext()) {
                 displayNode = displayNodesIterator.next()
@@ -352,7 +358,8 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(), Selec
             val displayNodeContent = displayNode!!.getContent() as EntityLayoutType
             val locationUid = displayNodeContent.uid!!
 
-            if (selectMultipleTreeDialogFragment.selectedSaleProductUidList != null && selectMultipleTreeDialogFragment.selectedSaleProductUidList!!.contains(locationUid)) {
+            if (selectMultipleTreeDialogFragment.selectedSaleProductUidList != null
+                    && selectMultipleTreeDialogFragment.selectedSaleProductUidList!!.contains(locationUid)) {
                 locationCB.isChecked = true
             } else {
                 locationCB.isChecked = false

@@ -2,13 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -16,17 +13,13 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.github.clans.fab.FloatingActionMenu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectSaleProductPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
-
-import java.util.Objects
 
 class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
 
@@ -77,7 +70,7 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
         toolbar = findViewById(R.id.activity_select_sale_product_toolbar)
         toolbar!!.title = getText(R.string.add_item)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView - Recent
         recentRV = findViewById(

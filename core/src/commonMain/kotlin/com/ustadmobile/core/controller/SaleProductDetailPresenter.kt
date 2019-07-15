@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmProvider
@@ -28,9 +29,9 @@ import kotlinx.coroutines.launch
  * Presenter for SaleProductDetail view
  */
 class SaleProductDetailPresenter(context: Any,
-                                 arguments: Map<String, String?>,
+                                 arguments: Map<String, String>?,
                                  view: SaleProductDetailView)
-    : UstadBaseController<SaleProductDetailView>(context, arguments, view) {
+    : UstadBaseController<SaleProductDetailView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     private val saleProductDao: SaleProductDao
@@ -38,7 +39,7 @@ class SaleProductDetailPresenter(context: Any,
     private val impl: UstadMobileSystemImpl
     var currentSaleProduct: SaleProduct? = null
         private set
-    internal var categoriesProvider: UmProvider<SaleProductSelected>? = null
+    internal var categoriesProvider: DataSource.Factory<Int, SaleProductSelected>? = null
     private var isCategory: Boolean = false
 
     internal var pictureDao: SaleProductPictureDao
@@ -52,9 +53,9 @@ class SaleProductDetailPresenter(context: Any,
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        saleProductDao = repository.getSaleProductDao()
-        productParentJoinDao = repository.getSaleProductParentJoinDao()
-        pictureDao = repository.getSaleProductPictureDao()
+        saleProductDao = repository.saleProductDao
+        productParentJoinDao = repository.saleProductParentJoinDao
+        pictureDao = repository.saleProductPictureDao
 
         impl = UstadMobileSystemImpl.instance
 
@@ -119,18 +120,14 @@ class SaleProductDetailPresenter(context: Any,
         view.setListProvider(categoriesProvider!!)
 
         //Update image on view
-        pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid, object : UmCallback<SaleProductPicture> {
-            override fun onSuccess(productPicture: SaleProductPicture?) {
-                if (productPicture != null) {
-                    //TODO: Implement this for KMP
-                    //view.updateImageOnView(pictureDao.getAttachmentPath(productPicture.saleProductPictureUid))
-                }
+        GlobalScope.launch {
+            val productPicture =
+                    pictureDao.findBySaleProductUidAsync(currentSaleProduct!!.saleProductUid)
+            if (productPicture != null) {
+                //TODO: Implement this for KMP
+                //view.updateImageOnView(pictureDao.getAttachmentPath(productPicture.saleProductPictureUid))
             }
-
-            override fun onFailure(exception: Throwable?) {
-
-            }
-        })
+        }
 
         //Observe the picture
         pictureLiveData = pictureDao.findByProductUidLive(currentSaleProduct!!.saleProductUid)
@@ -157,10 +154,13 @@ class SaleProductDetailPresenter(context: Any,
             val selected = selectedToCategoriesUid.get(productUid)
 
             //Update assignment.
-            productParentJoinDao.createJoin(currentSaleProduct!!.saleProductUid, productUid, selected!!)
+            GlobalScope.launch {
+                productParentJoinDao.createJoin(currentSaleProduct!!.saleProductUid,
+                        productUid, selected!!)
+            }
 
         }
-        currentSaleProduct!!.isSaleProductActive = true
+        currentSaleProduct!!.saleProductActive = true
         GlobalScope.launch {
             try {
                 saleProductDao.updateAsync(currentSaleProduct!!)

@@ -16,9 +16,9 @@ import com.ustadmobile.lib.db.entities.Person
  * Presenter for SelectProducer view
  */
 class SelectProducerPresenter(context: Any,
-                              arguments: Map<String, String?>,
+                              arguments: Map<String, String>?,
                               view: SelectProducerView)
-    : UstadBaseController<SelectProducerView>(context, arguments, view) {
+    : UstadBaseController<SelectProducerView>(context, arguments!!, view) {
 
 
     internal var repository: UmAppDatabase
@@ -34,8 +34,8 @@ class SelectProducerPresenter(context: Any,
         //Get provider Dao
         providerDao = repository.personDao
 
-        if (arguments.containsKey(ARG_SALE_ITEM_UID)) {
-            saleItemUid = (arguments.get(ARG_SALE_ITEM_UID)!!.toLong())
+        if (arguments!!.containsKey(ARG_SALE_ITEM_UID)) {
+            saleItemUid = (arguments!!.get(ARG_SALE_ITEM_UID)!!.toLong())
         } else {
             //Create a new SaleItem? - shouldn't happen.
             //throw exception.

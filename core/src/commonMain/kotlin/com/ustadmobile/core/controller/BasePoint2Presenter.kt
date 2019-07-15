@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -22,15 +23,15 @@ import kotlinx.coroutines.launch
  * Presenter for BasePoint2 view
  */
 class BasePoint2Presenter(context: Any,
-                          arguments: Map<String, String>,
+                          arguments: Map<String, String>?,
                           view: BasePoint2View)
-    : UstadBaseController<BasePoint2View>(context, arguments, view) {
+    : UstadBaseController<BasePoint2View>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     internal var loggedInPersonUid: Long? = null
     internal var saleDao: SaleDao
-    internal var preOrderLive: DoorLiveData<Int>? = null
-    internal var paymentsDueLive: DoorLiveData<Int>? = null
+    internal lateinit var preOrderLive: DoorLiveData<Int>
+    internal lateinit var paymentsDueLive: DoorLiveData<Int>
     internal var salePaymentDao: SalePaymentDao
     internal var personPictureDao: PersonPictureDao
 
@@ -42,8 +43,8 @@ class BasePoint2Presenter(context: Any,
 
     init {
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
-        saleDao = repository.getSaleDao()
-        salePaymentDao = repository.getSalePaymentDao()
+        saleDao = repository.saleDao
+        salePaymentDao = repository.salePaymentDao
         personPictureDao = repository.personPictureDao
     }
 
@@ -117,7 +118,8 @@ class BasePoint2Presenter(context: Any,
      * Logs out
      */
     fun handleLogOut() {
-        UmAccountManager.setActiveAccount(null!!, context)
+        val blankAccount = UmAccount(0, null, null,null)
+        UmAccountManager.setActiveAccount(blankAccount, context)
         val impl = UstadMobileSystemImpl.instance
         UmAccountManager.updatePasswordHash(null, context, impl)
         val args = HashMap<String, String>()

@@ -1,14 +1,11 @@
 package com.ustadmobile.port.android.view
 
-import android.graphics.Canvas
 import android.graphics.Picture
 import android.graphics.drawable.PictureDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-
 import androidx.appcompat.widget.Toolbar
-
 import com.caverock.androidsvg.SVG
 import com.caverock.androidsvg.SVGParseException
 import com.github.gcacace.signaturepad.views.SignaturePad
@@ -18,15 +15,11 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SaleDetailSignatureView
 import com.ustadmobile.lib.db.entities.Sale
 
-import java.util.Objects
-
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
-
 class SaleDetailSignatureActivity : UstadBaseActivity(), SaleDetailSignatureView {
 
     private var toolbar: Toolbar? = null
     private var mPresenter: SaleDetailSignaturePresenter? = null
-    internal var mSignaturePad: SignaturePad
+    internal lateinit var mSignaturePad: SignaturePad
 
 
     /**
@@ -56,14 +49,14 @@ class SaleDetailSignatureActivity : UstadBaseActivity(), SaleDetailSignatureView
         toolbar = findViewById(R.id.activity_record_signature_toolbar)
         toolbar!!.title = getText(R.string.add_signature)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Call the Presenter
         mPresenter = SaleDetailSignaturePresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        mSignaturePad = findViewById<View>(R.id.activity_record_signature_signaturepad)
+        mSignaturePad = findViewById(R.id.activity_record_signature_signaturepad)
 
 
         //FAB and its listener
@@ -73,15 +66,15 @@ class SaleDetailSignatureActivity : UstadBaseActivity(), SaleDetailSignatureView
         val cancel = findViewById<View>(R.id.activity_record_signature_fab_clear)
         cancel.setOnClickListener({ v -> clearSignature() })
 
-        mSignaturePad.setOnSignedListener(object : SignaturePad.OnSignedListener() {
-            fun onStartSigning() {}
+        mSignaturePad.setOnSignedListener(object : SignaturePad.OnSignedListener {
+            override fun onStartSigning() {}
 
-            fun onSigned() {
+            override fun onSigned() {
                 val signSvg = mSignaturePad.getSignatureSvg()
                 mPresenter!!.updateSignatureSvg(signSvg)
             }
 
-            fun onClear() {
+            override fun onClear() {
                 mPresenter!!.updateSignatureSvg("")
             }
         })

@@ -34,9 +34,10 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             " WHERE SaleProductParentJoin.saleProductParentJoinChildUid = :saleProductUid " +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = SaleProduct.saleProductUid " +
             " AND SaleProductParentJoin.saleProductParentJoinActive = 1) " +
-            " > 0 THEN 1 ELSE 0 END AS selected, " +
+            " > 0 THEN 1 ELSE 0 END AS isSelected, " +
             " SaleProduct.* " +
-            "FROM SaleProduct WHERE SaleProduct.saleProductCategory = 1 AND SaleProduct.saleProductActive = 1")
+            "FROM SaleProduct WHERE SaleProduct.saleProductCategory = 1 " +
+            " AND SaleProduct.saleProductActive = 1")
     abstract fun findAllSelectedCategoriesForSaleProductProvider(
             saleProductUid: Long): DataSource.Factory<Int,SaleProductSelected>
 

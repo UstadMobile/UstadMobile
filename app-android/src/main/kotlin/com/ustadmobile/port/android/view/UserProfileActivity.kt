@@ -89,7 +89,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         toolbar = findViewById(R.id.activity_user_profile_toolbar)
         toolbar!!.title = getText(R.string.app_name)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         changePasswordLL = findViewById(R.id.activity_user_profile_change_password_ll)
         languageLL = findViewById(R.id.activity_user_profile_language_ll)

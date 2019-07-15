@@ -9,7 +9,8 @@ import com.ustadmobile.core.view.UstadView
 abstract class CommonHandlerPresenter<V : UstadView> : UstadBaseController<V> {
 
     //The constructor will throw an uncast check warning. That is expected.
-    constructor(context: Any, arguments: Map<String, String?>, view: UstadView) : super(context, arguments, view as V) {}
+    constructor(context: Any, arguments: Map<String, String>?, view: UstadView)
+            : super(context, arguments!!, view as V) {}
 
     /**
      * Primary action on item.

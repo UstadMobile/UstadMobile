@@ -28,9 +28,9 @@ import com.ustadmobile.lib.db.entities.SaleListDetail
  * Presenter for SaleList view
  */
 class SaleListPresenter(context: Any,
-                        arguments: Map<String, String?>,
+                        arguments: Map<String, String>?,
                         view: SaleListView)
-    : CommonHandlerPresenter<SaleListView>(context, arguments, view) {
+    : CommonHandlerPresenter<SaleListView>(context, arguments!!, view) {
 
     private var umProvider: DataSource.Factory<Int, SaleListDetail>? = null
     internal var repository: UmAppDatabase

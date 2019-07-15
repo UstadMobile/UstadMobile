@@ -17,7 +17,6 @@ import com.ustadmobile.core.controller.AddSaleProductToSaleCategoryPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AddSaleProductToSaleCategoryView
 import com.ustadmobile.lib.db.entities.SaleNameWithImage
-import java.util.*
 
 class AddSaleProductToSaleCategoryActivity
     : UstadBaseActivity(), AddSaleProductToSaleCategoryView {
@@ -55,7 +54,7 @@ class AddSaleProductToSaleCategoryActivity
         toolbar = findViewById(R.id.activity_add_sale_product_to_sale_category_toolbar)
         toolbar!!.title = getText(R.string.add_item)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //RecyclerView
         mRecyclerView = findViewById(

@@ -50,7 +50,7 @@ class SelectDateRangeDialogFragment : UstadDialogFragment(), AdapterView.OnItemS
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = Objects.requireNonNull(context).getSystemService(
+        val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val myCalendarFrom = Calendar.getInstance()
         val myCalendarTo = Calendar.getInstance()
@@ -129,7 +129,7 @@ class SelectDateRangeDialogFragment : UstadDialogFragment(), AdapterView.OnItemS
 
         val negativeOCL = { dialog: DialogInterface, which:Int -> dialog.dismiss() }
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull(context))
+        val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.date_range)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.add, positiveOCL)

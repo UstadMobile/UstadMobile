@@ -127,7 +127,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         toolbar = findViewById(R.id.activity_sale_product_detail_toolbar)
         toolbar!!.title = getText(R.string.create_new_subcategory)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Categories RecyclerView
         cRecyclerView = findViewById(R.id.activity_sale_product_detail_categories_rv)
@@ -232,13 +232,11 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         adb.show()
     }
 
-    override fun setListProvider(listProvider: UmProvider<SaleProductSelected>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, SaleProductSelected>) {
         val recyclerAdapter = SaleProductCategorySelectorRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 applicationContext)
 
         // get the provider, set , observe, etc.
-        // A warning is expected
-        val factory = listProvider.provider as DataSource.Factory<Int, SaleProductSelected>
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
         data.observe(this, Observer<PagedList<SaleProductSelected>> { recyclerAdapter.submitList(it) })

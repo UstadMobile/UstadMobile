@@ -132,10 +132,10 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
 
     @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
-    abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person?>
+    abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person>
 
     @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
-    abstract fun findAllPeopleNameDescProvider(): DataSource.Factory<Int, Person?>
+    abstract fun findAllPeopleNameDescProvider(): DataSource.Factory<Int, Person>
 
     @Update
     abstract fun updateAsync(entity: Person):Int

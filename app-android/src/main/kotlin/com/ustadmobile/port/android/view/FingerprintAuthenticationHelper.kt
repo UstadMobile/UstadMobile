@@ -67,11 +67,11 @@ class FingerprintAuthenticationHelper : FingerprintManager.AuthenticationCallbac
     }
 
 
-    constructor(listener: FingerprintHelperListener) {
+    private constructor(listener: FingerprintHelperListener) {
         this.listener = listener
     }
 
-    constructor(listener: FingerprintHelperListener, context: Context) {
+    private constructor(listener: FingerprintHelperListener, context: Context) {
         this.listener = listener
         this.context = context
     }

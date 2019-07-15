@@ -46,8 +46,8 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
-        saleItemDao = repository.getSaleItemDao()
-        reminderDao = repository.getSaleItemReminderDao()
+        saleItemDao = repository.saleItemDao
+        reminderDao = repository.saleItemReminderDao
     }
 
     constructor(context: Any,
@@ -58,8 +58,8 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
-        saleItemDao = repository.getSaleItemDao()
-        reminderDao = repository.getSaleItemReminderDao()
+        saleItemDao = repository.saleItemDao
+        reminderDao = repository.saleItemReminderDao
         refreshSaleItem = refresh
     }
 
@@ -140,7 +140,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                     GlobalScope.launch {
                         try {
                             val saleProduct =
-                                    repository.getSaleProductDao().findByUidAsync(saleProductUid)
+                                    repository.saleProductDao.findByUidAsync(saleProductUid)
 
                             saleProductName = saleProduct.saleProductName
                             if (saleTitle == null) {
@@ -153,7 +153,8 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                     }
 
                     //Notification observer
-                    val provider = reminderDao!!.findBySaleItemUid(saleItemUid)
+                    val provider =
+                            reminderDao!!.findBySaleItemUid(saleItemUid)
                     view.setReminderProvider(provider)
                 }catch(e:Exception){
                     println(e.message)
@@ -178,7 +179,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 GlobalScope.launch {
                     try {
                         val saleProduct =
-                                repository.getSaleProductDao().findByUidAsync(saleProductUid)
+                                repository.saleProductDao.findByUidAsync(saleProductUid)
                         var productName: String? = ""
                         productName = saleProduct.saleProductName
                         view.updateSaleItemOnView(updatedSaleItem!!, productName!!)
@@ -205,17 +206,17 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     }
 
     fun setSold(sold: Boolean) {
-        updatedSaleItem!!.isSaleItemPreorder = !sold
-        updatedSaleItem!!.isSaleItemSold = sold
+        updatedSaleItem!!.saleItemPreorder = !sold
+        updatedSaleItem!!.saleItemSold = sold
     }
 
     fun setPreOrder(po: Boolean) {
-        if (!updatedSaleItem!!.isSaleItemPreorder && po) {
+        if (!updatedSaleItem!!.saleItemPreorder && po) {
             //Add 1 day reminder
             handleAddReminder(1)
         }
-        updatedSaleItem!!.isSaleItemSold = !po
-        updatedSaleItem!!.isSaleItemPreorder = po
+        updatedSaleItem!!.saleItemSold = !po
+        updatedSaleItem!!.saleItemPreorder = po
         //If recently clicked. Set Reminder. Set reminder on Save as well.
 
     }
@@ -244,13 +245,15 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     }
 
     fun handleDeleteReminder(saleItemReminderUid: Long) {
-        reminderDao!!.invalidateReminder(saleItemReminderUid, null!!)
+        GlobalScope.launch {
+            reminderDao!!.invalidateReminder(saleItemReminderUid)
+        }
     }
 
     fun handleClickSave() {
 
         if (updatedSaleItem != null) {
-            updatedSaleItem!!.isSaleItemActive = true
+            updatedSaleItem!!.saleItemActive = true
 
             if (producerUid != 0L && productUid != 0L) {
                 updatedSaleItem!!.saleItemProductUid = productUid
@@ -276,17 +279,17 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                 } catch (e: Exception) {
                     println(e.message)
                 }
-
             }
         }
     }
 
     fun handleAddReminder(days: Int) {
         val reminder = SaleItemReminder(days, saleItemUid, true)
-        val reminderDao = repository.getSaleItemReminderDao()
+        val reminderDao = repository.saleItemReminderDao
         GlobalScope.launch {
             try {
-                val result = reminderDao.findBySaleItemUidAndDaysAsync(saleItemUid, days)
+                val result =
+                        reminderDao.findBySaleItemUidAndDaysAsync(saleItemUid, days)
                 if (result.size > 0) {
                     //It has it already. Skipp it.
                 } else {

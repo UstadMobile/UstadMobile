@@ -89,7 +89,7 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         toolbar = findViewById(R.id.activity_sale_product_category_list_toolbar)
         toolbar!!.title = getText(R.string.category)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         floatingActionMenu = findViewById(R.id.activity_sale_product_category_list_fab_menu)
         itemActionButton = findViewById(R.id.activity_sale_product_category_list_fab_item)
@@ -122,13 +122,11 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         }
     }
 
-    override fun setListProvider(listProvider: UmProvider<SaleNameWithImage>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
         val recyclerAdapter = SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 this, false, applicationContext)
 
         // get the provider, set , observe, etc.
-        // A warning is expected
-        val factory = listProvider.provider as DataSource.Factory<Int, SaleNameWithImage>
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
         data.observe(this,
@@ -138,14 +136,12 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         mRecyclerView!!.adapter = recyclerAdapter
     }
 
-    override fun setCategoriesListProvider(listProvider: UmProvider<SaleNameWithImage>) {
+    override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleNameWithImage>) {
 
         val recyclerAdapter = SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this, false,
                 true, applicationContext)
 
         // get the provider, set , observe, etc.
-        // A warning is expected
-        val factory = listProvider.provider as DataSource.Factory<Int, SaleNameWithImage>
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
         data.observe(this, Observer<PagedList<SaleNameWithImage>> { recyclerAdapter.submitList(it) })

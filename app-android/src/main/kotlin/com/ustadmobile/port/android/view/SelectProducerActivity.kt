@@ -71,7 +71,7 @@ class SelectProducerActivity : UstadBaseActivity(), SelectProducerView {
         toolbar = findViewById(R.id.activity_select_producer_toolbar)
         toolbar!!.title = getText(R.string.select_producer)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         sortSpinner = findViewById(R.id.activity_select_producer_spinner)
 
