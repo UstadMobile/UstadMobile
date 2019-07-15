@@ -2,14 +2,13 @@ package db2
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 
 @Entity
-data class ExampleSyncableEntityTracker(@PrimaryKey var pk: Long = 0, var eUid: Long = 0,
-                                         var clientId: Int = 0, var lastCsn: Int = 0)
+data class ExampleSyncableEntityTracker(@PrimaryKey var pk: Long = 0,
+                                        @TrackerEntityPrimaryKey var eUid: Long = 0,
+                                        @TrackDestId var clientId: Int = 0,
+                                        @TrackerChangeSeqNum var lastCsn: Int = 0)
 
 @Entity
 @SyncableEntity(tableId = 42, syncTrackerEntity = ExampleSyncableEntityTracker::class)

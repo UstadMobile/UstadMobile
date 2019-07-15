@@ -10,7 +10,8 @@ import javax.lang.model.element.TypeElement
     DbProcessorKtorServer.OPTION_KTOR_OUTPUT, DbProcessorRepository.OPTION_OUTPUT_DIR])
 class AnnotationProcessorWrapper: AbstractProcessor() {
 
-    val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(), DbProcessorRepository())
+    val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(),
+            DbProcessorRepository(), DbProcessorSync())
 
     override fun init(p0: ProcessingEnvironment?) = processors.forEach { it.init(p0) }
 
