@@ -1,11 +1,16 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.AVG_DURATION
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.CONTENT_ENTRY
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.COUNT_ACTIVITIES
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.DAY
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.DURATION
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.GENDER
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.MONTH
+import com.ustadmobile.core.controller.XapiReportOptions.Companion.SCORE
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.WEEK
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -39,17 +44,54 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments.getValue(ARG_REPORT_OPTIONS)!!
         reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
-
         GlobalScope.launch {
             val sql = reportOptions.toSql()
             var data = db.statementDao.getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
-            var xAxisLabel = getLabelList(reportOptions.xAxis, data.map { it.xAxis }.distinct())
-            var subgroupLabel = getLabelList(reportOptions.subGroup, data.map { it.subgroup }.distinct())
+            var time = SECS
+            if (reportOptions.yAxis == DURATION || reportOptions.yAxis == AVG_DURATION) {
+                time = getMeasureTime(data)
+                data = changeUnitInList(data, time)
+            }
+            val xAxisLabel = getLabelList(reportOptions.xAxis, data.map { it.xAxis }.distinct())
+            val subgroupLabel = getLabelList(reportOptions.subGroup, data.map { it.subgroup }.distinct())
+            val yAxisLabel = getLabel(reportOptions.yAxis, time)
             view.runOnUiThread(Runnable {
                 view.setChartData(data, reportOptions, xAxisLabel, subgroupLabel)
+                view.setChartYAxisLabel(yAxisLabel)
             })
         }
 
+    }
+
+    private fun getMeasureTime(data: List<StatementDao.ReportData>): Int {
+        var units = data.maxBy { it.yAxis }
+        if (units?.yAxis!! > 3600000) {
+            return HRS
+        } else if (units.yAxis > 60000) {
+            return MINS
+        }
+        return SECS
+    }
+
+    private fun changeUnitInList(data: List<StatementDao.ReportData>, time: Int): List<StatementDao.ReportData> {
+        data.forEach {
+            when (time) {
+                HRS -> it.yAxis = (it.yAxis / (1000 * 60 * 60)) % 24
+                MINS -> it.yAxis = (it.yAxis / (1000 * 60)) % 60
+                else -> it.yAxis = (it.yAxis / (1000)) % 60
+            }
+        }
+        return data
+    }
+
+    private fun getLabel(value: Int, time: Int): String {
+        return when (value) {
+            SCORE -> impl.getString(MessageID.xapi_score, context)
+            DURATION -> impl.getString(MessageID.xapi_duration, context) + " (" + impl.getString(time, context) + ")"
+            AVG_DURATION -> impl.getString(MessageID.xapi_avg_duration, context) + " (" + impl.getString(time, context) + ")"
+            COUNT_ACTIVITIES -> impl.getString(MessageID.xapi_count_activities, context)
+            else -> ""
+        }
     }
 
     suspend fun getLabelList(value: Int, list: List<String>): Map<String, String> {
@@ -68,7 +110,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
 
             }
             CONTENT_ENTRY -> {
-                var valueList = db.xLangMapEntryDao.getValuesWithListOfId(list.map { it.toInt() })
+                val valueList = db.xLangMapEntryDao.getValuesWithListOfId(list.map { it.toInt() })
                 valueList.forEach {
                     mutableMap[it.objectLangMapUid.toString()] = it.valueLangMap
                 }
@@ -80,10 +122,17 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
             }
 
         }
-
-
-
         return mutableMap.toMap()
+    }
+
+    companion object {
+
+        const val SECS = MessageID.xapi_seconds
+
+        const val MINS = MessageID.xapi_minutes
+
+        const val HRS = MessageID.xapi_hours
+
     }
 
 

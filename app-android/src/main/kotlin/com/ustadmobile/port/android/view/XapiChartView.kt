@@ -10,9 +10,8 @@ import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.ustadmobile.core.controller.XapiReportOptions
 import com.ustadmobile.core.db.dao.StatementDao
@@ -31,6 +30,12 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private fun createChart(chartData: List<StatementDao.ReportData>, options: XapiReportOptions,
                             xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>): View? {
+
+        var xAxisLabelList: MutableSet<String> = mutableSetOf()
+        var subgroupList: MutableSet<String> = mutableSetOf()
+        //get a list of distinct subgroups
+        val distinctSubgroups = chartData.distinctBy { it.subgroup }.map { it.subgroup }
+        val groupedByXAxis = chartData.groupBy { it.xAxis }
 
         if (options.chartType == XapiReportOptions.BAR_CHART) {
 
@@ -61,12 +66,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
             barChart.setTouchEnabled(false)
 
-            var xAxisLabelList: MutableSet<String> = mutableSetOf()
-            var subgroupList: MutableSet<String> = mutableSetOf()
-            //get a list of distinct subgroups
-            val distinctSubgroups = chartData.distinctBy { it.subgroup }.map { it.subgroup }
-            val groupedByXAxis = chartData.groupBy { it.xAxis }
-
             var secondList = mutableListOf<MutableList<BarEntry>>()
             distinctSubgroups.forEachIndexed { idx, subGroup ->
                 var xAxisList = mutableListOf<BarEntry>()
@@ -74,8 +73,8 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 groupedByXAxis.keys.forEach { xAxisKey ->
                     xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
                     val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
-                    val barValue = barReportData?.yAxis ?: 0
-                    var barEntry = BarEntry((idx).toFloat(), barValue.toFloat())
+                    val barValue = barReportData?.yAxis ?: 0f
+                    var barEntry = BarEntry((idx).toFloat(), barValue)
                     xAxisList.add(barEntry)
                 }
                 secondList.add(xAxisList)
@@ -87,10 +86,11 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             val barWidth = (1 - groupSpace) / sizeOfX - barSpace
 
             var barData = BarData()
+            barData.barWidth = barWidth
             secondList.forEachIndexed { idx, it ->
                 var barDataSet = BarDataSet(it, subgroupList.elementAt(idx))
                 barDataSet.color = Color.parseColor(colorList[idx])
-                barData.barWidth = barWidth
+                barDataSet.setDrawValues(false)
                 barData.addDataSet(barDataSet)
             }
 
@@ -117,11 +117,68 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             return barChart
         } else if (options.chartType == XapiReportOptions.LINE_GRAPH) {
 
-
             val lineChart = LineChart(context)
             val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT)
             lineChart.layoutParams = params
+
+
+            lineChart.xAxis.isEnabled = true
+            lineChart.xAxis.setDrawGridLines(false)
+            lineChart.xAxis.setDrawLabels(true)
+
+            //Left Values
+            lineChart.axisLeft.isEnabled = true
+            lineChart.axisLeft.setDrawTopYLabelEntry(true)
+
+            //Right Values:
+            lineChart.axisRight.isEnabled = false
+
+            //Legend:
+            lineChart.legend.isEnabled = true
+            lineChart.legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
+            lineChart.legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+            lineChart.legend.setDrawInside(true)
+
+            //Label Description
+            lineChart.description.isEnabled = false
+            lineChart.setTouchEnabled(false)
+
+
+            var secondList = mutableListOf<MutableList<Entry>>()
+            distinctSubgroups.forEach { subGroup ->
+                var xAxisList = mutableListOf<Entry>()
+                subgroupList.add(subgroupLabels[subGroup] ?: error(""))
+                groupedByXAxis.keys.forEachIndexed { idx, xAxisKey ->
+                    xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
+                    val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                    val barValue = barReportData?.yAxis ?: 0f
+                    var barEntry = Entry((idx).toFloat(), barValue)
+                    xAxisList.add(barEntry)
+                }
+                secondList.add(xAxisList)
+            }
+
+
+            var barData = LineData()
+            secondList.forEachIndexed { idx, it ->
+                var barDataSet = LineDataSet(it, subgroupList.elementAt(idx))
+                barDataSet.axisDependency = YAxis.AxisDependency.LEFT
+                barDataSet.color = Color.parseColor(colorList[idx])
+                barDataSet.setDrawValues(false)
+                barData.addDataSet(barDataSet)
+            }
+            lineChart.data = barData
+
+
+            val xAxis = lineChart.xAxis
+            lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.granularity = 1f
+            xAxis.valueFormatter =  IndexAxisValueFormatter(xAxisLabelList)
+            xAxis.labelRotationAngle = -45f
+            xAxis.axisMinimum = 0f
+
+            lineChart.invalidate()
 
             return lineChart
         }

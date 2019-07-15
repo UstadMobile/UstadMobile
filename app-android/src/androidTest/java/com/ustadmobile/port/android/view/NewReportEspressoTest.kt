@@ -195,7 +195,7 @@ class NewReportEspressoTest {
 
         var firstStatement = StatementEntity()
         firstStatement.personUid = firstPerson.personUid
-        firstStatement.resultDuration = 1000
+        firstStatement.resultDuration = 2400000
         firstStatement.resultScoreScaled = 50
         firstStatement.verbUid = firstVerb.verbUid
         firstStatement.xObjectUid = firstObject.xObjectUid
@@ -205,7 +205,7 @@ class NewReportEspressoTest {
 
         var secondStaement = StatementEntity()
         secondStaement.personUid = firstPerson.personUid
-        secondStaement.resultDuration = 500
+        secondStaement.resultDuration = 7200000
         secondStaement.resultScoreScaled = 100
         secondStaement.verbUid = secondVerb.verbUid
         secondStaement.xObjectUid = firstObject.xObjectUid
@@ -215,7 +215,7 @@ class NewReportEspressoTest {
 
         var thirdStatement = StatementEntity()
         thirdStatement.personUid = secondPerson.personUid
-        thirdStatement.resultDuration = 1000
+        thirdStatement.resultDuration = 600000
         thirdStatement.resultScoreScaled = 50
         thirdStatement.verbUid = firstVerb.verbUid
         thirdStatement.xObjectUid = secondObject.xObjectUid
@@ -224,7 +224,7 @@ class NewReportEspressoTest {
 
         var fourthStatement = StatementEntity()
         fourthStatement.personUid = thirdPerson.personUid
-        fourthStatement.resultDuration = 800
+        fourthStatement.resultDuration = 120000
         fourthStatement.resultScoreScaled = 20
         fourthStatement.verbUid = firstVerb.verbUid
         fourthStatement.xObjectUid = secondObject.xObjectUid
@@ -234,7 +234,7 @@ class NewReportEspressoTest {
 
         var fifthStatement = StatementEntity()
         fifthStatement.personUid = fourthPerson.personUid
-        fifthStatement.resultDuration = 100
+        fifthStatement.resultDuration = 100000
         fifthStatement.resultScoreScaled = 85
         fifthStatement.verbUid = thirdVerb.verbUid
         fifthStatement.xObjectUid = firstObject.xObjectUid
@@ -244,7 +244,7 @@ class NewReportEspressoTest {
 
         var sixthStatement = StatementEntity()
         sixthStatement.personUid = thirdPerson.personUid
-        sixthStatement.resultDuration = 700
+        sixthStatement.resultDuration = 60000
         sixthStatement.resultScoreScaled = 25
         sixthStatement.verbUid = firstVerb.verbUid
         sixthStatement.xObjectUid = secondObject.xObjectUid
@@ -254,7 +254,7 @@ class NewReportEspressoTest {
 
         var seventhStatement = StatementEntity()
         seventhStatement.personUid = secondPerson.personUid
-        seventhStatement.resultDuration = 2000
+        seventhStatement.resultDuration = 30000
         seventhStatement.resultScoreScaled = 5
         seventhStatement.verbUid = firstVerb.verbUid
         seventhStatement.xObjectUid = firstObject.xObjectUid

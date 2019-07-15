@@ -14,7 +14,7 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                              var locationsList: List<Long> = mutableListOf()) {
 
 
-    data class QueryParts(val sqlStr: String, val queryParams: Array<Any>)
+    data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
     fun toSql(): QueryParts {
         if (xAxis == subGroup) {
@@ -22,20 +22,32 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
         }
         val paramList = mutableListOf<Any>()
         var sql = "SELECT " + when (yAxis) {
-            SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
-            DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
-            COUNT_ACTIVITIES -> "COUNT(*) AS yAxis, "
+            SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis"
+            DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis "
+            AVG_DURATION -> "AVG(StatementEntity.resultDuration) AS yAxis"
+            COUNT_ACTIVITIES -> "COUNT(*) AS yAxis"
             else -> ""
         }
+        var sqlList = sql
+        sql += ", "
         sql += groupBy(xAxis) + "AS xAxis, "
         sql += groupBy(subGroup) + "AS subgroup "
-        sql += "FROM StatementEntity "
+
+        val from = "FROM StatementEntity "
+
+        sql += from
+        sqlList += from
         if (xAxis == GENDER || subGroup == GENDER) {
-            sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
+            val person = "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
+            sql += person
+            sqlList += person
         }
         if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0L && fromDate > 0L)) {
-            sql += "WHERE "
-            var whereList = mutableListOf<String>()
+            val where = "WHERE "
+            sql += where
+            sqlList += where
+
+            val whereList = mutableListOf<String>()
             if (objectsList.isNotEmpty()) {
                 whereList.add("(StatementEntity.xObjectUid IN (?) OR " +
                         "EXISTS(SELECT contextXObjectStatementJoinUid FROM ContextXObjectStatementJoin " +
@@ -55,11 +67,13 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                 paramList.add(fromDate)
                 paramList.add(toDate)
             }
-            sql += whereList.joinToString("AND ")
+            val whereString = whereList.joinToString("AND ")
+            sql += whereString
+            sqlList += whereString
 
         }
         sql += "GROUP BY xAxis, subgroup"
-        return QueryParts(sql, paramList.toList().toTypedArray())
+        return QueryParts(sql, sqlList, paramList.toList().toTypedArray())
     }
 
     private fun groupBy(value: Int): String {
@@ -84,11 +98,13 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
 
         const val SCORE = MessageID.score
 
-        const val DURATION = MessageID.duration
+        const val DURATION = MessageID.total_duration
+
+        const val AVG_DURATION = MessageID.average_duration
 
         const val COUNT_ACTIVITIES = MessageID.count_activity
 
-        val yAxisList = arrayOf(SCORE, DURATION, COUNT_ACTIVITIES)
+        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)
 
         const val DAY = MessageID.xapi_day
 
