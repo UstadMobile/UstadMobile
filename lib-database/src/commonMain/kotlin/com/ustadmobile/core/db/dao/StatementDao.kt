@@ -23,5 +23,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<ReportData>
 
+    @RawQuery
+    abstract fun getListResults(query: DoorQuery): List<StatementEntity>
+
     data class ReportData(var yAxis: Float, var xAxis: String, var subgroup: String)
 }

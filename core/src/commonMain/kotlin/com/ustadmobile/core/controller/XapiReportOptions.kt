@@ -21,30 +21,28 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
             throw IllegalArgumentException("XAxis Selection and subGroup selection was the same")
         }
         val paramList = mutableListOf<Any>()
+
+        var sqlList = "SELECT * FROM StatementEntity "
+
         var sql = "SELECT " + when (yAxis) {
-            SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis"
-            DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis "
-            AVG_DURATION -> "AVG(StatementEntity.resultDuration) AS yAxis"
-            COUNT_ACTIVITIES -> "COUNT(*) AS yAxis"
+            SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
+            DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
+            AVG_DURATION -> "AVG(StatementEntity.resultDuration) AS yAxis, "
+            COUNT_ACTIVITIES -> "COUNT(*) AS yAxis, "
             else -> ""
         }
-        var sqlList = sql
-        sql += ", "
         sql += groupBy(xAxis) + "AS xAxis, "
         sql += groupBy(subGroup) + "AS subgroup "
+        sql += "FROM StatementEntity "
 
-        val from = "FROM StatementEntity "
 
-        sql += from
-        sqlList += from
+
         if (xAxis == GENDER || subGroup == GENDER) {
-            val person = "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
-            sql += person
-            sqlList += person
+            sql +=  "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
         }
         if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0L && fromDate > 0L)) {
-            val where = "WHERE "
-            sql += where
+            var where = "WHERE "
+            sql+= where
             sqlList += where
 
             val whereList = mutableListOf<String>()
@@ -67,9 +65,9 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
                 paramList.add(fromDate)
                 paramList.add(toDate)
             }
-            val whereString = whereList.joinToString("AND ")
-            sql += whereString
-            sqlList += whereString
+            var whereListStr = whereList.joinToString("AND ")
+            sql += whereListStr
+            sqlList += whereListStr
 
         }
         sql += "GROUP BY xAxis, subgroup"
