@@ -59,8 +59,8 @@ class SplashScreenActivity : UstadBaseActivity() {
         val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
 
         if(!launched){val dbWork = OneTimeWorkRequest.Builder(
-                    DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
-                    .build()
+                DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
+                .build()
             WorkManager.getInstance().enqueue(dbWork)
         }
 

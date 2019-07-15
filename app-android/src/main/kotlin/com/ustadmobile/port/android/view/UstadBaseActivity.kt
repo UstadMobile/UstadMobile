@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
@@ -34,6 +35,7 @@ import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
+import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
@@ -450,6 +452,19 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 }
             }
         }
+    }
+
+    /**
+     * Stop current runing notification fore ground service
+     */
+    open fun stopForeGroundService(jobId: Long, cancel: Boolean){
+        val notificationServiceIntent = Intent(this,DownloadNotificationService::class.java)
+        notificationServiceIntent.action = if(cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
+        else DownloadNotificationService.ACTION_PAUSE_DOWNLOAD
+        notificationServiceIntent.putExtra(DownloadNotificationService.JOB_ID_TAG, jobId)
+        val servicePendingIntent = PendingIntent.getService(applicationContext,
+                0, notificationServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        servicePendingIntent.send()
     }
 
     /**
