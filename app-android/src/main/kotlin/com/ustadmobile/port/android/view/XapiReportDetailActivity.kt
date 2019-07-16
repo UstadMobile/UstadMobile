@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiReportDetailPresenter
 import com.ustadmobile.core.controller.XapiReportOptions
@@ -10,11 +12,17 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.XapiReportDetailView
 import java.util.*
 
+
+
+
+
 class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
-    private lateinit var chartView: XapiChartView
+    private lateinit var recyclerView: RecyclerView
 
-    private lateinit var verticalTextView: VerticalTextView
+    private lateinit var recyclerAdapter: XapiReportDetailAdapter
+
+    private lateinit var viewManager: RecyclerView.LayoutManager
 
     private lateinit var presenter: XapiReportDetailPresenter
 
@@ -28,8 +36,12 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         umToolbar.title = getString(R.string.activity_preview_xapi)
 
-        chartView = findViewById(R.id.preview_chart_view)
-        verticalTextView = findViewById(R.id.preview_ylabel)
+        recyclerView = findViewById(R.id.preview_report_list)
+        viewManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = viewManager
+
+        recyclerAdapter = XapiReportDetailAdapter(this)
+        recyclerView.adapter = recyclerAdapter
 
         presenter = XapiReportDetailPresenter(viewContext,
                 Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
@@ -37,14 +49,22 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 
-    override fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions,
-                              xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>) =
-            chartView.setChartData(chartData, options, xAxisLabels, subgroupLabels)
-
     override fun setChartYAxisLabel(yAxisLabel: String) {
-        verticalTextView.text = yAxisLabel
+        recyclerAdapter.showVerticalTextView(yAxisLabel)
     }
 
+    override fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions,
+                              xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>) =
+            recyclerAdapter.showChart(chartData, options, xAxisLabels, subgroupLabels)
+
+
+    override fun setReportListData(listResults: List<StatementDao.ReportListData>) {
+        /*   val data = LivePagedListBuilder(listResults, 20).build()
+           data.observe(this, Observer<PagedList<StatementDao.ReportListData>> { recyclerAdapter!!.submitList(it) })
+
+           recyclerView.adapter = recyclerAdapter*/
+        recyclerAdapter.submitList(listResults)
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

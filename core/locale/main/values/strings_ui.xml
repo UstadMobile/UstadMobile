@@ -340,5 +340,10 @@
     <string name="xapi_minutes">Mins</string>
     <string name="xapi_seconds">Secs</string>
 
+    <string name="xapi_person_header">Person</string>
+    <string name="xapi_verb_header">Did what</string>
+    <string name="xapi_result_header">Result</string>
+    <string name="xapi_when_header">When</string>
+
 
 </resources>

@@ -9,6 +9,8 @@ interface XapiReportDetailView : UstadView {
 
     fun setChartYAxisLabel(yAxisLabel: String)
 
+    fun setReportListData(listResults: List<StatementDao.ReportListData>)
+
     companion object {
 
         const val VIEW_NAME = "XapiReportPreviewView"

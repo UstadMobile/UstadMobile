@@ -55,7 +55,8 @@ object XapiUtil {
             val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
             val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-            XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid ?: 0, it.value)
+            XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
+                    ?: 0, it.value)
         }
         dao.insertList(listToInsert)
     }
@@ -274,16 +275,18 @@ object XapiUtil {
             statementEntity.stored = UMCalendarUtil.parse8601Timestamp(statement.stored!!)
             statementEntity.fullStatement = gson.toJson(statement)
             if (statement.result != null) {
-                statementEntity.isResultCompletion = statement.result!!.completion
+                statementEntity.resultCompletion = statement.result!!.completion
                 statementEntity.resultDuration = UMTinCanUtil.parse8601Duration(statement.result!!.duration!!)
                 statementEntity.resultResponse = statement.result!!.response
-                statementEntity.isResultSuccess = statement.result!!.success
+                statementEntity.resultSuccess = statement.result!!.success.toInt().toByte()
                 if (statement.result!!.score != null) {
                     statementEntity.resultScoreMax = statement.result!!.score!!.max
                     statementEntity.resultScoreMin = statement.result!!.score!!.min
                     statementEntity.resultScoreScaled = statement.result!!.score!!.scaled
                     statementEntity.resultScoreRaw = statement.result!!.score!!.raw
                 }
+            } else {
+                statementEntity.resultSuccess = 0.toByte()
             }
             if (statement.context != null) {
                 statementEntity.contextPlatform = statement.context!!.platform
@@ -293,6 +296,8 @@ object XapiUtil {
         }
         return statementEntity
     }
+
+    fun Boolean.toInt() = if (this) 1 else 0
 
 
 }

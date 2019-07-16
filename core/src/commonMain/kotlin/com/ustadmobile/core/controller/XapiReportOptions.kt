@@ -4,8 +4,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class XapiReportOptions(var chartType: Int, var yAxis: Int,
-                             var xAxis: Int, var subGroup: Int,
+data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SCORE,
+                             var xAxis: Int = DAY, var subGroup: Int = MONTH,
                              var whoFilterList: List<Long> = mutableListOf(),
                              var didFilterList: List<Long> = mutableListOf(),
                              var objectsList: List<Long> = mutableListOf(),
@@ -22,7 +22,13 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
         }
         val paramList = mutableListOf<Any>()
 
-        var sqlList = "SELECT * FROM StatementEntity "
+        var sqlList = "SELECT (Person.firstNames || ' ' || Person.lastName) AS name, " +
+                "XLangMapEntry.valueLangMap AS verb, " +
+                "StatementEntity.resultSuccess AS result, " +
+                "StatementEntity.timestamp As whenDate " +
+                "FROM StatementEntity " +
+                "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid " +
+                "LEFT JOIN XLangMapEntry ON StatementEntity.verbUid = XLangMapEntry.verbLangMapUid "
 
         var sql = "SELECT " + when (yAxis) {
             SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
@@ -38,11 +44,11 @@ data class XapiReportOptions(var chartType: Int, var yAxis: Int,
 
 
         if (xAxis == GENDER || subGroup == GENDER) {
-            sql +=  "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
+            sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
         }
         if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0L && fromDate > 0L)) {
             var where = "WHERE "
-            sql+= where
+            sql += where
             sqlList += where
 
             val whereList = mutableListOf<String>()

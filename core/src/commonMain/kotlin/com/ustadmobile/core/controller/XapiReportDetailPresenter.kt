@@ -59,6 +59,11 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
                 view.setChartData(data, reportOptions, xAxisLabel, subgroupLabel)
                 view.setChartYAxisLabel(yAxisLabel)
             })
+            val results = db.statementDao.getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
+            view.runOnUiThread(Runnable {
+                view.setReportListData(results)
+            })
+
         }
 
     }
