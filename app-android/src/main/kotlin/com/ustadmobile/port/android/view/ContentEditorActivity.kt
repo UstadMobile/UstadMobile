@@ -762,7 +762,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mFromCamera.setOnClickListener {
             isOpeningFilePickerOrCamera = true
             viewSwitcher!!.closeAnimatedView(UmEditorAnimatedViewSwitcher.ANIMATED_MEDIA_TYPE_PANEL)
-            runAfterGrantingPermission(Manifest.permission.CAMERA,
+            runAfterGrantingPermission(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     Runnable { this.showMediaTypeDialog() }, getString(R.string.permission_camera_title),
                     getString(R.string.permission_camera_message))
         }

@@ -18,7 +18,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
@@ -38,6 +37,7 @@ import com.ustadmobile.port.sharedse.util.RunnableQueue
 import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
+import androidx.core.app.ActivityCompat
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
@@ -91,7 +91,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var permissionDialogMessage: String? = null
 
-    private var permission: String? = null
+    private var permissions: Array<String>? = null
 
     internal var selectedFileUri: Uri?= null
 
@@ -391,7 +391,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param dialogTitle   Permission dialog title
      * @param dialogMessage Permission dialog message
      */
-    fun runAfterGrantingPermission(permission: String, runnable: Runnable?,
+    fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
                                    dialogTitle: String?, dialogMessage: String?) {
         this.afterPermissionMethodRunner = runnable
 
@@ -404,9 +404,9 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
         this.permissionDialogMessage = dialogMessage
         this.permissionDialogTitle = dialogTitle
-        this.permission = permission
+        this.permissions = permissions
 
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (!permissionGranted(permissions)) {
             if (!permissionRequestRationalesShown) {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle(permissionDialogTitle)
@@ -414,7 +414,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                         .setNegativeButton(getString(android.R.string.cancel)
                         ) { dialog, _ -> dialog.dismiss() }
                         .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                            runAfterGrantingPermission(permission, afterPermissionMethodRunner,
+                            runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
                                     permissionDialogTitle, permissionDialogMessage)
                         }
                 val dialog = builder.create()
@@ -422,12 +422,25 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 permissionRequestRationalesShown = true
             } else {
                 permissionRequestRationalesShown = false
-                ActivityCompat.requestPermissions(this, arrayOf(permission), RUN_TIME_REQUEST_CODE)
+                ActivityCompat.requestPermissions(this, permissions, RUN_TIME_REQUEST_CODE)
             }
         } else {
             afterPermissionMethodRunner!!.run()
             afterPermissionMethodRunner = null
         }
+    }
+
+
+    private fun permissionGranted(permissions: Array<String>) : Boolean{
+        val requiredPermissions: MutableList<String> = mutableListOf<String>()
+        for(permission in permissions){
+            if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+                requiredPermissions.add(permission);
+            }
+        }
+
+        return requiredPermissions.isEmpty()
+
     }
 
 
@@ -440,7 +453,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                     allPermissionGranted = allPermissionGranted and (result == PackageManager.PERMISSION_GRANTED)
                 }
 
-                if (!allPermissionGranted && permission == Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                if (!allPermissionGranted && permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE) ) {
                     afterPermissionMethodRunner!!.run()
                     afterPermissionMethodRunner = null
                 }
