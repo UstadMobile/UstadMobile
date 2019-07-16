@@ -24,6 +24,11 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Content Editor
+-keepclasseswithmembers class * {
+   @android.webkit.JavascriptInterface <methods>;
+}
+
 # database entities
 -keep public class com.ustadmobile.lib.db.entities.**{
        *;
