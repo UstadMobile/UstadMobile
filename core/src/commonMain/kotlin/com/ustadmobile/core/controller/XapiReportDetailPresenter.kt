@@ -68,6 +68,13 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?, v
 
     }
 
+    fun handleAddDashboardClicked(title: String){
+        reportOptions.reportTitle = title
+        var args = HashMap<String, String?>()
+        args[ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions)
+        //impl.go(XapiReportDetailView.VIEW_NAME, args, context)
+    }
+
     private fun getMeasureTime(data: List<StatementDao.ReportData>): Int {
         var units = data.maxBy { it.yAxis }
         if (units?.yAxis!! > 3600000) {

@@ -11,7 +11,8 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
                              var objectsList: List<Long> = mutableListOf(),
                              var entriesList: List<Long> = mutableListOf(),
                              var toDate: Long = 0L, var fromDate: Long = 0L,
-                             var locationsList: List<Long> = mutableListOf()) {
+                             var locationsList: List<Long> = mutableListOf(),
+                             var reportTitle: String = "") {
 
 
     data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
