@@ -252,8 +252,8 @@
     <string name='content_editor_link_error'>Link text or url can not be empty, try again</string>
     <string name='content_editor_link_insert'>Insert Link</string>
     <string name='content_editor_link_remove'>Remove Link</string>
-    <string name="permission_camera_title">Camera Permission Required</string>
-    <string name="permission_camera_message">This app requires camera permission to take photos and record videos</string>
+    <string name="permission_camera_title">Camera and File Permission Required</string>
+    <string name="permission_camera_message">This app requires both camera and file permissions to take photos and record videos</string>
     <string name="content_editor_create_new">Add new</string>
     <string name="content_editor_create_new_import">Import from file</string>
     <string name="content_editor_create_new_content">Create new content</string>
