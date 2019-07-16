@@ -116,6 +116,72 @@
             android:theme="@style/Theme.UstadTheme"
             />
 
+        <!--Goldozi-->
+        <activity android:name="com.ustadmobile.port.android.view.BasePoint2Activity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleItemDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SelectProducerActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SelectSaleProductActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SalePaymentDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.ChangePasswordActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleProductDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleProductCategoryListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.AddSaleProductToSaleCategoryActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleListSearchActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.SaleDetailSignatureActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+
+        <!-- TOOD: Sprint 5 -->
+<!--        <activity android:name="com.ustadmobile.port.android.view.ReportOptionsDetailActivity"-->
+<!--            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"-->
+<!--            android:label="@string/register"-->
+<!--            android:theme="@style/Theme.UstadTheme"/>-->
+<!--        <activity android:name="com.ustadmobile.port.android.view.ReportDetailActivity"-->
+<!--            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"-->
+<!--            android:label="@string/register"-->
+<!--            android:theme="@style/Theme.UstadTheme"/>-->
+
+        <!-- End of Goldozi-->
+
 
 
         <service

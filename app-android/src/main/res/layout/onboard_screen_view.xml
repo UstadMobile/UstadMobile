@@ -22,7 +22,7 @@
         android:layout_marginBottom="@dimen/dimen_50dp"
         android:src="@drawable/downloading_data" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:textColor="@color/text_primary"
         android:gravity="center"
         android:minHeight="@dimen/dimen_30dp"
@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:layout_marginTop="@dimen/dimen_10dp"
         android:lineSpacingExtra="@dimen/dimen_10dp"
         android:textColor="@color/text_secondary"

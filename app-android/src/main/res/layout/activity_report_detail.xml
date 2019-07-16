@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/activity_report_sales_performance_detail_appbar"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/activity_report_sales_performance_detail_toolbar"
             android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
             android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/sales_performance_report" />
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -74,4 +74,4 @@
         app:layout_constraintStart_toEndOf="@+id/activity_report_sales_perforance_detail_x_label"
         app:layout_constraintTop_toBottomOf="@+id/activity_report_sales_performance_detail_appbar" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

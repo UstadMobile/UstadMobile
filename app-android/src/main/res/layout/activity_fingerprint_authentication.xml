@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/activity_fingerprint_authentication_appbar"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/activity_fingerprint_authentication_toolbar"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/fingerprint_authentication" tools:layout_editor_absoluteY="0dp" />
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
 
     <ImageView
@@ -48,4 +48,4 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login2_fingerprint_imageview" />
 
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

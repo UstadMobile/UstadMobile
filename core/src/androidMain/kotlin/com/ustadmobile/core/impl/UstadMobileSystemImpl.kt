@@ -94,7 +94,33 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
             H5PContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}H5PContentActivity"),
             ContentEntryListFragmentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
-            ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"))
+            ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
+
+            //Goldozi
+            BasePoint2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}BasePoint2Activity"),
+            SaleDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDetailActivity"),
+            SaleItemDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleItemDetailActivity"),
+            SelectProducerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectProducerActivity"),
+            SelectSaleProductView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectSaleProductActivity"),
+            ComingSoonView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ComingSoonFragment"),
+            SalePaymentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SalePaymentDetailActivity"),
+            UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
+            ChangePasswordView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ChangePasswordActivity"),
+            SelectLanguageDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectLanguageDialogFragment"),
+            SaleProductDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductDetailActivity"),
+            SaleProductCategoryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductCategoryListActivity"),
+            AddSaleProductToSaleCategoryView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AddSaleProductToSaleCategoryActivity"),
+            SaleListSearchView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleListSearchActivity"),
+            SaleDetailSignatureView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDetailSignatureActivity"),
+            SelectDateRangeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectDateRangeDialogFragment"),
+            AddReminderDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AddReminderDialogFragment"),
+            //TOOD: Sprint 5
+//            ReportOptionsDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportOptionsDetailActivity"),
+//            ReportDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportDetailActivity"),
+            SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
+            SelectMultipleProductTypeTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleProductTypeTreeDialogFragment"),
+            SelectMultiplePeopleView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultiplePeopleFragment")
+            )
 
 
 

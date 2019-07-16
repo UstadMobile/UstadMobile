@@ -24,6 +24,7 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: O
     fun handleGetStarted() {
         val args: Map<String,String?> = arguments;
         impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
-        impl.go(HomeView.VIEW_NAME, args, context)
+        //impl.go(HomeView.VIEW_NAME, args, context)
+        impl.startUI(context)
     }
 }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/activity_sale_detail_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/activity_sale_detail_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
@@ -22,7 +22,7 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/record_sale" />
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
         android:id="@+id/activity_sale_detail_scrollview_sv"
@@ -36,7 +36,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_appbar"
         app:layout_constraintVertical_bias="1.0">
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_sale_detail_scroll_me_cl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_location_spinner" />
 
 
-            <android.support.constraint.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:background="?android:attr/selectableItemBackground"
                 android:id="@+id/activity_sale_detail_add_cl"
                 android:layout_width="0dp"
@@ -117,7 +117,7 @@
                     app:layout_constraintStart_toEndOf="@+id/activity_sale_detail_add_image"
                     app:layout_constraintTop_toTopOf="parent" />
 
-            </android.support.constraint.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
             <android.support.v7.widget.RecyclerView
@@ -289,7 +289,7 @@
                 android:visibility="invisible"
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_payments_title" />
 
-            <android.support.constraint.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:background="?android:attr/selectableItemBackground"
                 android:id="@+id/activity_sale_detail_add_payments_cl"
                 android:layout_width="0dp"
@@ -323,7 +323,7 @@
                     app:layout_constraintStart_toEndOf="@+id/activity_sale_detail_add_payments_image"
                     app:layout_constraintTop_toTopOf="parent" />
 
-            </android.support.constraint.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
                 android:id="@+id/hlinebeforePaymentRV"
@@ -400,7 +400,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_balance_due_textview">
 
-                <android.support.constraint.ConstraintLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -470,7 +470,7 @@
                         app:layout_constraintEnd_toStartOf="@+id/activity_sale_detail_order_notes_record_voice_note_ib"
                         app:layout_constraintTop_toTopOf="parent"
                         app:srcCompat="@drawable/ic_delete_black_24dp" />
-                </android.support.constraint.ConstraintLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
 
@@ -511,8 +511,8 @@
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_signature_button" />
 
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

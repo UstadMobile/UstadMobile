@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <android.support.design.widget.AppBarLayout android:id="@+id/activity_sale_list_search_appbar"
+    <com.google.android.material.appbar.AppBarLayout android:id="@+id/activity_sale_list_search_appbar"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar android:id="@+id/activity_sale_list_search_toolbar"
+        <androidx.appcompat.widget.Toolbar android:id="@+id/activity_sale_list_search_toolbar"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
             app:layout_scrollFlags="scroll|enterAlways" app:title="@string/filter"
             tools:layout_editor_absoluteY="0dp" />
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <TextView
         android:id="@+id/activity_sale_list_search_location_title"
@@ -178,4 +178,4 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_value_title" />
 
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
