@@ -8,7 +8,7 @@ apply plugin: "jacoco"
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
 def keystoreProperties = new Properties()
-def baseAppId = "com.toughra.ustadmobile"
+def baseAppId = "com.ustadmobile.lamsustad"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
@@ -138,7 +138,7 @@ android {
         release {
             testCoverageEnabled = false
             debuggable false
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }

@@ -55,7 +55,7 @@ group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 151
+    ustadVersionCode = 153
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_kotlin_jvmTarget = "1.8"

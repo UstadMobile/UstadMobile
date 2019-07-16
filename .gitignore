@@ -59,7 +59,7 @@ ports/android/.idea
 *.bak
 *~
 
-#any keystore files
+#any keystore.ks files
 *.ks
 .nb-gradle/
 /core/.nb-gradle/
@@ -161,7 +161,7 @@ iOSInjectionProject/
 ### Objective-C Patch ###
 *.xcscmblueprint
 
-#keystore.properties contains signing credentials
+#keystore.ks.properties contains signing credentials
 keystore.properties
 
 # Generated build configuration
