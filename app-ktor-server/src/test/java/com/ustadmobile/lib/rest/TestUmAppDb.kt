@@ -9,7 +9,6 @@ import org.junit.Test
 class TestUmAppDb {
 
 
-    @Test
     fun testModule() {
         val db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
