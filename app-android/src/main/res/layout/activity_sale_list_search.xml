@@ -64,7 +64,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_sale_list_search_hline1" />
 
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/activity_sale_list_search_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"

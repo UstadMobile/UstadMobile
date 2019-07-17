@@ -69,7 +69,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/activity_add_sale_product_to_sale_category_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"

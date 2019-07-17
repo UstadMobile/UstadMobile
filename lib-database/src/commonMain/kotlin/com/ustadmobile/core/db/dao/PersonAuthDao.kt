@@ -12,6 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.AccessToken
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 @UmDao
@@ -43,7 +44,7 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 //    fun resetPassword(personUid: Long, password: String,
 //                      @UmRestAuthorizedUidParam loggedInPersonUid: Long,
 //                      resetCallback: UmCallback<Int>) {
-//        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(password)
+//        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptThisPassword(password)
 //
 //        if (loggedInPersonUid != personUid) {
 //            if (isPersonAdmin(loggedInPersonUid)) {
@@ -107,11 +108,11 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
                 onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback)
 
             } else if (passwordHash.startsWith(ENCRYPTED_PASS_PREFIX) &&
-                    authenticateEncryptedPassword(oldPassword,
+                    authenticateThisEncryptedPassword(oldPassword,
                             passwordHash.substring(2))) {
                 println("ok2")
                 onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback)
-            } else if (authenticateEncryptedPassword(oldPassword,
+            } else if (authenticateThisEncryptedPassword(oldPassword,
                             passwordHash)) {
                 println("ok3")
                 onSuccessCreateAccessToken(loggedInPersonUid, username, resetCallback)
@@ -131,7 +132,7 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 //                          resetCallback: UmCallback<Int>) {
 //
 //        //Generate password Hash
-//        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(newPassword)
+//        val passwordHash = ENCRYPTED_PASS_PREFIX + encryptThisPassword(newPassword)
 //
 //        authenticate(username, loggedInPersonUid, oldPassword, object : UmCallback<UmAccount> {
 //            override fun onSuccess(result: UmAccount?) {
@@ -186,10 +187,11 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
         val PLAIN_PASS_PREFIX = "p:"
 
-        fun encryptPassword(originalPassword: String): String {
-            return originalPassword
+        fun encryptThisPassword(originalPassword: String): String {
+            return encryptPassword(originalPassword)
 
-            //TODO: Implement/Fix this.
+            //Update: Done. Part of Encrypt.kt thingi
+            //TODOne: Implement/Fix this.
             /*
             val keySpec = PBEKeySpec(originalPassword.toCharArray(), SALT.toByteArray(),
                     ITERATIONS, KEY_LENGTH)
@@ -205,9 +207,9 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
             */
         }
 
-        fun authenticateEncryptedPassword(providedPassword: String,
-                                          encryptedPassword: String?): Boolean {
-            return encryptPassword(providedPassword) == encryptedPassword
+        fun authenticateThisEncryptedPassword(providedPassword: String,
+                                              encryptedPassword: String?): Boolean {
+            return encryptThisPassword(providedPassword) == encryptedPassword
         }
     }
 

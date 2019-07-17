@@ -21,6 +21,7 @@ import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.lib.db.entities.SaleProductParentJoin
 import com.ustadmobile.lib.db.entities.SaleProductPicture
 import com.ustadmobile.lib.db.entities.SaleProductSelected
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -117,7 +118,9 @@ class SaleProductDetailPresenter(context: Any,
         //Update provider:
         categoriesProvider = productParentJoinDao.findAllSelectedCategoriesForSaleProductProvider(
                 itemUid)
-        view.setListProvider(categoriesProvider!!)
+        GlobalScope.launch(Dispatchers.Main) {
+            view.setListProvider(categoriesProvider!!)
+        }
 
         //Update image on view
         GlobalScope.launch {
@@ -131,7 +134,10 @@ class SaleProductDetailPresenter(context: Any,
 
         //Observe the picture
         pictureLiveData = pictureDao.findByProductUidLive(currentSaleProduct!!.saleProductUid)
-        pictureLiveData!!.observe(this, this::handleProductPictureChanged)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            pictureLiveData!!.observe(thisP, thisP::handleProductPictureChanged)
+        }
 
     }
 

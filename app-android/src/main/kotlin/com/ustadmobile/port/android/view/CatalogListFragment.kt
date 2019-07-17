@@ -117,7 +117,8 @@ class CatalogListFragment : UstadBaseFragment(), SelectSaleProductView {
                 this,false, true, context!!)
 
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data =
+                LivePagedListBuilder(factory, 20).build()
         //Observe the data:
         data.observe(this,
                 Observer<PagedList<SaleNameWithImage>>

@@ -36,6 +36,9 @@ import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleItemListDetail
 import com.ustadmobile.lib.db.entities.SalePayment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.IOException
 
 class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
@@ -458,17 +461,18 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         val data = LivePagedListBuilder(factory, 20).build()
 
 
-        val customObserver = { o:Any->
+        val customObserver = Observer{ o:PagedList<SaleItemListDetail>->
 
-            recyclerAdapter.submitList(o as PagedList<SaleItemListDetail>)
+            recyclerAdapter.submitList(o)
             mPresenter!!.getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
         }
 
-
         //Observe the data:
         //data.observe(this, recyclerAdapter::submitList);
-        data.observe(this,
-                customObserver as Observer<in PagedList<SaleItemListDetail>>)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP, customObserver)
+        }
 
         //set the adapter
         mRecyclerView!!.adapter = recyclerAdapter
@@ -482,15 +486,18 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20).build()
 
-        val customObserver = { o:Any ->
-            recyclerAdapter.submitList(o as PagedList<SalePayment>)
+        val customObserver = Observer{ o:PagedList<SalePayment> ->
+            recyclerAdapter.submitList(o)
             mPresenter!!.getTotalPaymentsAndUpdateTotalView(saleUid)
         }
 
 
         //Observe the data:
         //data.observe(this, recyclerAdapter::submitList);
-        data.observe(this, customObserver as Observer<in PagedList<SalePayment>>)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP, customObserver)
+        }
 
         //set the adapter
         pRecyclerView!!.adapter = recyclerAdapter

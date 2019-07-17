@@ -63,7 +63,7 @@
 //        val personUid = repo!!.personDao.insert(testPerson)
 //
 //        val testPersonAuth = PersonAuth(personUid,
-//                PersonAuthDao.ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptPassword(VALID_PASS))
+//                PersonAuthDao.ENCRYPTED_PASS_PREFIX + PersonAuthDao.encryptThisPassword(VALID_PASS))
 //        repo!!.personAuthDao.insert(testPersonAuth)
 //
 //        mockView = Mockito.mock(Login2View::class.java)

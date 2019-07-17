@@ -237,9 +237,11 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                 applicationContext)
 
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data =
+                LivePagedListBuilder(factory, 20).build()
         //Observe the data:
-        data.observe(this, Observer<PagedList<SaleProductSelected>> { recyclerAdapter.submitList(it) })
+        data.observe(this,
+                Observer<PagedList<SaleProductSelected>> { recyclerAdapter.submitList(it) })
 
         //set the adapter
         cRecyclerView!!.adapter = recyclerAdapter

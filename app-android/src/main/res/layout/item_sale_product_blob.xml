@@ -33,7 +33,7 @@
         app:layout_constraintEnd_toEndOf="@+id/item_sale_product_blob_image"
         app:layout_constraintStart_toStartOf="@+id/item_sale_product_blob_image" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_sale_product_blob_dots"
         android:layout_width="20dp"
         android:layout_height="20dp"

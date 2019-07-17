@@ -228,7 +228,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
                 val dueDate = saleItem.saleItemDueDate
                 if (dueDate > 0) {
                     orderDueDateET!!.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
-                            dueDate, null!!))
+                            dueDate, null))
                 }
             }
         }

@@ -38,6 +38,19 @@ class Location() {
         this.description = description
     }
 
+    constructor(title: String, description: String, active: Boolean) : this() {
+        this.title = title
+        this.description = description
+        this.locationActive = active
+    }
+
+    constructor(title: String, description: String, active: Boolean, parentUid: Long) : this() {
+        this.title = title
+        this.description = description
+        this.locationActive = active
+        this.parentLocationUid = parentUid
+    }
+
     companion object {
 
        const val TABLE_ID = 29

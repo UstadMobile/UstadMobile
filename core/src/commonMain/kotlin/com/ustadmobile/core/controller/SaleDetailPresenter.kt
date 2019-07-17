@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.SalePaymentDetailView.Companion.ARG_SALE_PAYMEN
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -62,6 +63,8 @@ class SaleDetailPresenter(context: Any,
         saleDao = repository.saleDao
         locationDao = repository.locationDao
         saleVoiceNoteDao = UmAppDatabase.getInstance(context).saleVoiceNoteDao
+
+        positionToLocationUid = HashMap()
 
     }
 
@@ -115,20 +118,24 @@ class SaleDetailPresenter(context: Any,
 
 
     fun getTotalSaleOrderAndDiscountAndUpdateView(saleUid: Long) {
-        GlobalScope.launch {
-            val result = saleItemDao.getSaleItemCountFromSale(saleUid)
-            if (result > 0) {
-                view.runOnUiThread(Runnable{
-                    view.showSaveButton(true)
-                    view.showNotes(true)
-                    view.showDelivered(true)
-                    view.showCalculations(true)
-                    view.showPayments(true)
-                })
-            }
+        if(saleUid != null) {
+            GlobalScope.launch {
+                val result = saleItemDao.getSaleItemCountFromSale(saleUid)
+                if (result > 0) {
+                    view.runOnUiThread(Runnable {
+                        view.showSaveButton(true)
+                        view.showNotes(true)
+                        view.showDelivered(true)
+                        view.showCalculations(true)
+                        view.showPayments(true)
+                    })
+                }
 
-            val res = saleItemDao.findTotalPaidBySaleAsync(saleUid)
-            view.updateOrderTotal(res)
+                val res = saleItemDao.findTotalPaidBySaleAsync(saleUid)
+                if(res!=null) {
+                    view.updateOrderTotal(res as Long)
+                }
+            }
         }
 
     }
@@ -137,8 +144,11 @@ class SaleDetailPresenter(context: Any,
     fun getTotalPaymentsAndUpdateTotalView(saleUid: Long) {
         //Get total payment count
         GlobalScope.launch {
-            totalPayment = salePaymentDao.findTotalPaidBySaleAsync(saleUid)
-            updateBalance()
+            val res = salePaymentDao.findTotalPaidBySaleAsync(saleUid)
+            if(res!=null){
+                totalPayment = res
+                updateBalance()
+            }
         }
     }
 
@@ -157,7 +167,8 @@ class SaleDetailPresenter(context: Any,
             GlobalScope.launch {
                 val result =
                         salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.saleItemUid)
-                view.updatePaymentTotal(result)
+                if(result!=null)
+                    view.updatePaymentTotal(result)
             }
 
         }
@@ -165,45 +176,54 @@ class SaleDetailPresenter(context: Any,
 
     fun initFromSale(saleUid: Long) {
 
-        //Observe this sale entity
-        val saleLiveData = saleDao.findByUidLive(saleUid)
-        saleLiveData.observe(this, this::handleSaleChanged )
+        if(saleUid != null) {
+            //Observe this sale entity
+            val saleLiveData = saleDao.findByUidLive(saleUid)
 
-        GlobalScope.launch {
-            //Get the sale entity
-            val result = saleDao.findByUidAsync(saleUid)
-            updatedSale = result
-            view.updateSaleOnView(updatedSale!!)
-            startObservingLocations()
+            val thisP = this
+            GlobalScope.launch(Dispatchers.Main) {
+                saleLiveData.observe(thisP, thisP::handleSaleChanged)
+            }
+
+            GlobalScope.launch {
+                //Get the sale entity
+                val result = saleDao.findByUidAsync(saleUid)
+                updatedSale = result
+                view.updateSaleOnView(updatedSale!!)
+                startObservingLocations()
+            }
+
+            //Any voice notes
+            //TODO: Implement this on KMP
+            //        saleVoiceNoteDao.findBySaleUidAsync(saleUid, object : UmCallback<SaleVoiceNote> {
+            //            override fun onSuccess(result: SaleVoiceNote?) {
+            //                if (result != null) {
+            //                    val voiceNotePath = saleVoiceNoteDao.getAttachmentPath(result.saleVoiceNoteUid)
+            //                    if (voiceNotePath != null && !voiceNotePath!!.isEmpty()) {
+            //                        view.updateSaleVoiceNoteOnView(voiceNotePath!!)
+            //                    }
+            //                }
+            //            }
+            //            override fun onFailure(exception: Throwable?) {
+            //
+            //            }
+            //        })
+
+            getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
+            updateSaleItemProvider(saleUid)
+            updatePaymentItemProvider(saleUid)
+
+            getPaymentTotalAndUpdateView()
         }
-
-        //Any voice notes
-        //TODO: Implement this on KMP
-//        saleVoiceNoteDao.findBySaleUidAsync(saleUid, object : UmCallback<SaleVoiceNote> {
-//            override fun onSuccess(result: SaleVoiceNote?) {
-//                if (result != null) {
-//                    val voiceNotePath = saleVoiceNoteDao.getAttachmentPath(result.saleVoiceNoteUid)
-//                    if (voiceNotePath != null && !voiceNotePath!!.isEmpty()) {
-//                        view.updateSaleVoiceNoteOnView(voiceNotePath!!)
-//                    }
-//                }
-//            }
-//            override fun onFailure(exception: Throwable?) {
-//
-//            }
-//        })
-
-        getTotalSaleOrderAndDiscountAndUpdateView(saleUid)
-        updateSaleItemProvider(saleUid)
-        updatePaymentItemProvider(saleUid)
-
-        getPaymentTotalAndUpdateView()
     }
 
 
     private fun startObservingLocations() {
         val locLive = locationDao.findAllActiveLocationsLive()
-        locLive.observe(this, this::handleLocationsChanged)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            locLive.observe(thisP, thisP::handleLocationsChanged)
+        }
     }
 
     private fun handleSaleChanged(sale: Sale?) {

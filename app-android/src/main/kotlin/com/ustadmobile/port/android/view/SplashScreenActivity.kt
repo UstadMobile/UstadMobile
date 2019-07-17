@@ -39,6 +39,9 @@ import com.ustadmobile.port.android.impl.DbInitialEntriesInserter
 
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
+import com.ustadmobile.core.db.UmAppDatabase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class SplashScreenActivity : UstadBaseActivity() {
@@ -51,6 +54,13 @@ class SplashScreenActivity : UstadBaseActivity() {
                 .build()
         WorkManager.getInstance().enqueue(dbWork)
 
+        //TODO: KMP Remove When DELEGATE WEB works
+        //Load Dummy data
+        val repo = UmAppDatabase.getInstance(viewContext)
+        val dd = DummyData(viewContext, repo)
+        GlobalScope.launch {
+            dd.loadInitialData()
+        }
     }
 
     override fun onStart() {

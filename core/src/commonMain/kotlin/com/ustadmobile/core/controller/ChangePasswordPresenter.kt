@@ -68,7 +68,7 @@ class ChangePasswordPresenter(context: Any,
 //                return
 //            }
 //
-//            currentPersonAuth!!.passwordHash = PersonAuthDao.encryptPassword(updatePassword!!)
+//            currentPersonAuth!!.passwordHash = PersonAuthDao.encryptThisPassword(updatePassword!!)
 //
 //            GlobalScope.launch {
 //                personAuthDao.updateAsync(currentPersonAuth!!)

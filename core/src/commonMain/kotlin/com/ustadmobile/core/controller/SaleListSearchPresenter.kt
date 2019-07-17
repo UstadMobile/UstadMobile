@@ -24,6 +24,9 @@ import com.ustadmobile.core.view.SaleListSearchView.Companion.SORT_MOST_RECENT
 import com.ustadmobile.core.view.SelectDateRangeDialogView.Companion.ARG_FROM_DATE
 import com.ustadmobile.core.view.SelectDateRangeDialogView.Companion.ARG_TO_DATE
 import com.ustadmobile.door.DoorLiveData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Presenter for SaleListSearch view
@@ -123,7 +126,10 @@ class SaleListSearchPresenter(context: Any,
 
         //Update location spinner
         locationLiveData = locationDao.findAllActiveLocationsProvider()
-        locationLiveData!!.observe(this, this::handleLocationsChanged)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            locationLiveData!!.observe(thisP, thisP::handleLocationsChanged)
+        }
 
         idToOrderInteger = HashMap<Long, Int>()
 

@@ -102,7 +102,7 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
 
         //Sort handler
         sortSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 mPresenter!!.handleChangeSortOrder(id)
             }
 
@@ -178,8 +178,10 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
         val recyclerAdapter = SaleListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
                 paymentsDueTab, preOrderTab,this, context!!)
 
-        val data = LivePagedListBuilder(factory, 20).build()
-        data.observe(this, Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
+        val data =
+                LivePagedListBuilder(factory, 20).build()
+        data.observe(this,
+                Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
 
         mRecyclerView!!.adapter = recyclerAdapter
     }

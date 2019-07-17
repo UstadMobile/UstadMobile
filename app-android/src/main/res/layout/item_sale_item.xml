@@ -188,7 +188,7 @@
         app:layout_constraintStart_toEndOf="@+id/item_sale_item_warning_image"
         app:layout_constraintTop_toBottomOf="@+id/linearLayoutCompat" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_sale_item_warning_image"
         android:layout_width="16dp"
         android:layout_height="16dp"

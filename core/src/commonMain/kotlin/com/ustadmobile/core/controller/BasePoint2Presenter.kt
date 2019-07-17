@@ -15,6 +15,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -56,10 +57,16 @@ class BasePoint2Presenter(context: Any,
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
 
         personLive = repository.personDao.findByUidLive(loggedInPersonUid!!)
-        personLive!!.observe(this, this::handlePersonValueChanged)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            personLive!!.observe(thisP, thisP::handlePersonValueChanged)
+        }
 
         personPictureLive = repository.personPictureDao.findByPersonUidLive(loggedInPersonUid!!)
-        personPictureLive!!.observe(this, this::handlePersonPictureChanged)
+        GlobalScope.launch(Dispatchers.Main) {
+            personPictureLive!!.observe(thisP, thisP::handlePersonPictureChanged)
+        }
+
 
 
     }
@@ -166,10 +173,15 @@ class BasePoint2Presenter(context: Any,
     fun updateDueCountOnView() {
 
         preOrderLive = saleDao.getPreOrderSaleCountLive()
-        preOrderLive!!.observe(this, this::handlePreOrderCountUpdate)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            preOrderLive!!.observe(thisP, thisP::handlePreOrderCountUpdate)
+        }
 
         paymentsDueLive = salePaymentDao.getPaymentsDueCountLive()
-        paymentsDueLive!!.observe(this, this::handlePaymnetsDueCountUpdate)
+        GlobalScope.launch(Dispatchers.Main) {
+            paymentsDueLive!!.observe(thisP, thisP::handlePaymnetsDueCountUpdate)
+        }
 
     }
 

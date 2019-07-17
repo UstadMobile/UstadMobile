@@ -23,6 +23,9 @@ import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Presenter for SaleList view
@@ -138,8 +141,11 @@ class SaleListPresenter(context: Any,
         val preOrderLiveData = saleDao.getPreOrderSaleCountLive()
         val paymentsDueLiveData = salePaymentDao.getPaymentsDueCountLive()
 
-        preOrderLiveData.observe(this, this::handlePreOrderCountUpdate)
-        paymentsDueLiveData.observe(this, this::handlePaymentDueCountUpdate)
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            preOrderLiveData.observe(thisP, thisP::handlePreOrderCountUpdate)
+            paymentsDueLiveData.observe(thisP, thisP::handlePaymentDueCountUpdate)
+        }
     }
 
     fun handlePreOrderCountUpdate(count: Int?) {

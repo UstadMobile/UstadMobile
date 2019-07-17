@@ -178,7 +178,7 @@
                         app:layout_constraintStart_toEndOf="@+id/imageView6"
                         app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_desc_pashto" />
 
-                    <android.support.v7.widget.RecyclerView
+                    <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/activity_sale_product_detail_categories_rv"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

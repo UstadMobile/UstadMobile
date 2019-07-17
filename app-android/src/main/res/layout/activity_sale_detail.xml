@@ -120,7 +120,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/activity_sale_detail_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -335,7 +335,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/activity_sale_detail_add_payments_cl" />
 
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/activity_sale_detail_payments_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -348,7 +348,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/hlinebeforePaymentRV">
 
-            </android.support.v7.widget.RecyclerView>
+            </androidx.recyclerview.widget.RecyclerView>
 
 
             <TextView

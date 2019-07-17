@@ -93,8 +93,8 @@ object UMCalendarUtil {
         return cal.format(httpDateFormat)
     }
 
-    fun getPrettyDateSuperSimpleFromLong(thisDate: Long, locale: Any):String{
-        return UMCalendarUtil.getPrettyDateSuperSimpleFromLong(thisDate)
+    fun getPrettyDateSuperSimpleFromLong(thisDate: Long, locale: Any?):String{
+        return getPrettyDateSuperSimpleFromLong(thisDate)
     }
 
     /***

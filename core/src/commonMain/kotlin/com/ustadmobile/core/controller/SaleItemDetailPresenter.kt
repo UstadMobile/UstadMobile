@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.SaleItemDetailView.Companion.ARG_SALE_ITEM_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemReminder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -119,7 +120,10 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
         if (refreshSaleItem) {
             //Observe it.
             val saleItemLiveData = saleItemDao!!.findByUidLive(saleItemUid)
-            saleItemLiveData.observe(this, this::handleSaleItemChanged)
+            val thisP = this
+            GlobalScope.launch(Dispatchers.Main) {
+                saleItemLiveData.observe(thisP, thisP::handleSaleItemChanged)
+            }
 
 
             //Get the sale item entity
