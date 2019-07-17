@@ -48,6 +48,8 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
     private var selectedSubGroup: Int = 0
 
+    private var reportOptions: XapiReportOptions? = null
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         db = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -62,6 +64,16 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
         view.runOnUiThread(Runnable { view.fillYAxisData(translatedYAxisList) })
 
         view.runOnUiThread(Runnable { view.fillXAxisAndSubGroupData(translatedXAxisList) })
+
+        val json = Json(JsonConfiguration.Stable)
+        val reportOptionsString = arguments[XapiReportDetailView.ARG_REPORT_OPTIONS]
+        if(reportOptions != null){
+            reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString!!)
+            val indexChart = listOfGraphs.indexOf(reportOptions!!.chartType)
+            view.runOnUiThread(Runnable {
+                view.updateChartTypeSelected(indexChart)
+            })
+        }
 
     }
 
@@ -121,7 +133,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
     }
 
     fun handleViewReportPreview(didOptionsList: List<Long>, whoOptionsList: List<Long>) {
-        var report = XapiReportOptions(
+        reportOptions = XapiReportOptions(
                 listOfGraphs[selectedChartType],
                 yAxisList[selectedYaxis],
                 xAxisList[selectedXAxis],
@@ -135,7 +147,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
                 selectedLocations)
 
         var args = HashMap<String, String?>()
-        args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), report)
+        args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions!!)
         impl.go(XapiReportDetailView.VIEW_NAME, args, context)
     }
 

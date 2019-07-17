@@ -64,24 +64,24 @@ class NewReportEspressoTest {
         fourthPerson.personUid = personDao.insert(fourthPerson)
 
         var firstVerb = VerbEntity()
-        firstVerb.urlId =  "Did"
+        firstVerb.urlId = "Did"
         firstVerb.verbUid = verbDao.insert(firstVerb)
 
-        var firstVerbLangMap = XLangMapEntry( firstVerb.verbUid , 0, 0, 0, "Did")
-        firstVerbLangMap.languageLangMapUid =entryLangMap.insert(firstVerbLangMap)
+        var firstVerbLangMap = XLangMapEntry(firstVerb.verbUid, 0, 0, 0, "Attempted question 3 from Entry 1")
+        firstVerbLangMap.languageLangMapUid = entryLangMap.insert(firstVerbLangMap)
 
         var secondVerb = VerbEntity()
-        secondVerb.urlId =  "This"
+        secondVerb.urlId = "This"
         secondVerb.verbUid = verbDao.insert(secondVerb)
 
-        var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "This")
+        var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "Attempted question 1 from Entry 1")
         secondVerbLangMap.languageLangMapUid = entryLangMap.insert(secondVerbLangMap)
 
         var thirdVerb = VerbEntity()
-        thirdVerb.urlId =  "Thing"
+        thirdVerb.urlId = "Thing"
         thirdVerb.verbUid = verbDao.insert(thirdVerb)
 
-        var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Thing")
+        var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Attempted question 5 from Entry 3")
         thirdVerbLangMap.languageLangMapUid = entryLangMap.insert(thirdVerbLangMap)
 
 
@@ -169,15 +169,15 @@ class NewReportEspressoTest {
         khanclass2Join.cepcjUid = entryJoinDao.insert(khanclass2Join)
 
         var firstObject = XObjectEntity()
-        firstObject.objectId =  "hello"
+        firstObject.objectId = "hello"
         firstObject.objectContentEntryUid = khanclass1.contentEntryUid
-                firstObject.xObjectUid = objectDao.insert(firstObject)
+        firstObject.xObjectUid = objectDao.insert(firstObject)
 
         var firstObjectLangMap = XLangMapEntry(0, firstObject.xObjectUid, 0, 0, "Answer")
         firstObjectLangMap.languageLangMapUid = entryLangMap.insert(firstObjectLangMap)
 
         var secondObject = XObjectEntity()
-        secondObject.objectId =  "world"
+        secondObject.objectId = "world"
         secondObject.objectContentEntryUid = khanclass2.contentEntryUid
         secondObject.xObjectUid = objectDao.insert(secondObject)
 
@@ -185,7 +185,7 @@ class NewReportEspressoTest {
         secondObjectLangMap.languageLangMapUid = entryLangMap.insert(secondObjectLangMap)
 
         var thirdObject = XObjectEntity()
-        thirdObject.objectId =  "now"
+        thirdObject.objectId = "now"
         thirdObject.objectContentEntryUid = khanclass1.contentEntryUid
         thirdObject.xObjectUid = objectDao.insert(thirdObject)
 
@@ -199,6 +199,7 @@ class NewReportEspressoTest {
         firstStatement.resultScoreScaled = 50
         firstStatement.verbUid = firstVerb.verbUid
         firstStatement.xObjectUid = firstObject.xObjectUid
+        firstStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         firstStatement.timestamp = DateTime(2019, 6, 11).unixMillisLong
         firstStatement.statementUid = statementDao.insert(firstStatement)
 
@@ -209,6 +210,7 @@ class NewReportEspressoTest {
         secondStaement.resultScoreScaled = 100
         secondStaement.verbUid = secondVerb.verbUid
         secondStaement.xObjectUid = firstObject.xObjectUid
+        secondStaement.resultSuccess = StatementEntity.RESULT_FAILURE
         secondStaement.timestamp = DateTime(2019, 5, 1).unixMillisLong
         secondStaement.statementUid = statementDao.insert(secondStaement)
 
@@ -219,6 +221,7 @@ class NewReportEspressoTest {
         thirdStatement.resultScoreScaled = 50
         thirdStatement.verbUid = firstVerb.verbUid
         thirdStatement.xObjectUid = secondObject.xObjectUid
+        thirdStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         thirdStatement.timestamp = DateTime(2019, 4, 10).unixMillisLong
         thirdStatement.statementUid = statementDao.insert(thirdStatement)
 
@@ -228,6 +231,7 @@ class NewReportEspressoTest {
         fourthStatement.resultScoreScaled = 20
         fourthStatement.verbUid = firstVerb.verbUid
         fourthStatement.xObjectUid = secondObject.xObjectUid
+        fourthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         fourthStatement.timestamp = DateTime(2019, 6, 30).unixMillisLong
         fourthStatement.statementUid = statementDao.insert(fourthStatement)
 
@@ -238,6 +242,7 @@ class NewReportEspressoTest {
         fifthStatement.resultScoreScaled = 85
         fifthStatement.verbUid = thirdVerb.verbUid
         fifthStatement.xObjectUid = firstObject.xObjectUid
+        fifthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         fifthStatement.timestamp = DateTime(2019, 7, 10).unixMillisLong
         fifthStatement.statementUid = statementDao.insert(fifthStatement)
 
@@ -247,6 +252,7 @@ class NewReportEspressoTest {
         sixthStatement.resultDuration = 60000
         sixthStatement.resultScoreScaled = 25
         sixthStatement.verbUid = firstVerb.verbUid
+        sixthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         sixthStatement.xObjectUid = secondObject.xObjectUid
         sixthStatement.timestamp = DateTime(2019, 5, 25).unixMillisLong
         sixthStatement.statementUid = statementDao.insert(sixthStatement)
@@ -258,8 +264,24 @@ class NewReportEspressoTest {
         seventhStatement.resultScoreScaled = 5
         seventhStatement.verbUid = firstVerb.verbUid
         seventhStatement.xObjectUid = firstObject.xObjectUid
+        seventhStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         seventhStatement.timestamp = DateTime(2019, 6, 11).unixMillisLong
         seventhStatement.statementUid = statementDao.insert(seventhStatement)
+
+        var i = 0
+        while(i < 100){
+            var statement = StatementEntity()
+            statement.personUid = secondPerson.personUid
+            statement.resultDuration = 30000
+            statement.resultScoreScaled = 5
+            statement.verbUid = firstVerb.verbUid
+            statement.xObjectUid = firstObject.xObjectUid
+            statement.resultSuccess = StatementEntity.RESULT_SUCCESS
+            statement.timestamp = DateTime(2019, 6, 11).unixMillisLong
+            statement.statementUid = statementDao.insert(statement)
+            i++
+        }
+
 
 
         val intent = Intent()

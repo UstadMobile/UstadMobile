@@ -29,6 +29,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,
         SelectMultipleEntriesTreeDialogFragment.MultiSelectEntriesTreeDialogListener {
 
+
     private lateinit var visualTypeSpinner: Spinner
 
     private lateinit var yAxisSpinner: Spinner
@@ -228,6 +229,33 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         whenEditText.setText(rangeText)
     }
 
+    override fun updateChartTypeSelected(indexChart: Int){
+        visualTypeSpinner.setSelection(indexChart)
+    }
+
+    override fun updateYAxisTypeSelected(indexYAxis: Int) {
+        yAxisSpinner.setSelection(indexYAxis)
+    }
+
+    override fun updateXAxisTypeSelected(indexXAxis: Int) {
+        xAxisSpinner.setSelection(indexXAxis)
+    }
+
+    override fun updateSubgroupTypeSelected(indexSubgroup: Int) {
+        subGroupSpinner.setSelection(indexSubgroup)
+    }
+
+    override fun updateWhoListSelected() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun updateDidListSelected() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun updateDatesSelected() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     private var textWatcher = object : TextWatcher {
 

@@ -23,6 +23,20 @@ interface XapiReportOptionsView : UstadView {
 
     fun updateWhenRangeText(rangeText: String)
 
+    fun updateChartTypeSelected(indexChart: Int)
+
+    fun updateYAxisTypeSelected(indexYAxis: Int)
+
+    fun updateXAxisTypeSelected(indexXAxis: Int)
+
+    fun updateSubgroupTypeSelected(indexSubgroup: Int)
+
+    fun updateWhoListSelected()
+
+    fun updateDidListSelected()
+
+    fun updateDatesSelected()
+
     companion object {
 
         const val VIEW_NAME = "XapiReportOptionsView"
