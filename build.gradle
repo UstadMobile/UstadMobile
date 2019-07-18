@@ -29,12 +29,12 @@ task clean(type: Delete) {
 }
 
 //Major.minor.database version
-version = "0.5.0.0"
+version = "1.5.5.0"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 168
+    ustadVersionCode = 270
 
     version_gradle_buildconfig_plugin = "1.1.7"
 
@@ -106,6 +106,8 @@ ext {
     version_androidsvg="1.4"
 
     version_tellh_recyclertreeview = "1.2.0"
+
+    version_android_seismic = "1.0.2"
 }
 
 ext.buildConfigProperties = new Properties()

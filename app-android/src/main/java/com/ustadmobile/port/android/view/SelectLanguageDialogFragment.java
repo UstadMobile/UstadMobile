@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SelectLanguageDialogPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.SelectLanguageDialogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;

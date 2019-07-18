@@ -13,6 +13,7 @@ import java.util.Hashtable;
 
 import static com.ustadmobile.core.db.dao.PersonAuthDao.ENCRYPTED_PASS_PREFIX;
 import static com.ustadmobile.core.db.dao.PersonAuthDao.encryptPassword;
+import static com.ustadmobile.core.impl.UmAccountManager.PREFKEY_PASSWORD_HASH_USERNAME;
 import static com.ustadmobile.core.view.Login2View.ARG_LOGIN_USERNAME;
 
 public class Login2Presenter extends UstadBaseController<Login2View> {
@@ -45,11 +46,17 @@ public class Login2Presenter extends UstadBaseController<Login2View> {
                     AppConfig.KEY_API_URL, "http://localhost", getContext()));
         }
 
+        String username;
         if(getArguments().containsKey(ARG_LOGIN_USERNAME)){
-            String username = getArguments().get(ARG_LOGIN_USERNAME).toString();
-            if(username!=null && !username.isEmpty()){
-                view.updateUsername(username);
-            }
+            username = getArguments().get(ARG_LOGIN_USERNAME).toString();
+
+        }else{
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            username = impl.getAppPref(PREFKEY_PASSWORD_HASH_USERNAME, context);
+
+        }
+        if(username!=null && !username.isEmpty()){
+            view.updateUsername(username);
         }
     }
 

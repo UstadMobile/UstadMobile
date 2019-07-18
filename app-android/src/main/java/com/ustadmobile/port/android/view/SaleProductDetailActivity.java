@@ -281,7 +281,7 @@ public class SaleProductDetailActivity extends UstadBaseActivity implements Sale
     public void setListProvider(UmProvider<SaleProductSelected> listProvider) {
         SaleProductCategorySelectorRecyclerAdapter recyclerAdapter =
                 new SaleProductCategorySelectorRecyclerAdapter(DIFF_CALLBACK, mPresenter,
-                        getApplicationContext());
+                        this);
 
         // get the provider, set , observe, etc.
         // A warning is expected

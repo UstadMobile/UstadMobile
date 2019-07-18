@@ -59,13 +59,15 @@ public class AddReminderDialogFragment extends UstadDialogFragment implements
         np.setMaxValue(100);
 
         DialogInterface.OnClickListener positiveOCL =
-                (dialog, which) -> {
+                (DialogInterface dialog, int which) -> {
                     days = np.getValue();
                     mPresenter.handleAddReminder(days);
                 };
 
         DialogInterface.OnClickListener negativeOCL =
-                (dialog, which) -> dialog.dismiss();
+                (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         builder.setTitle(R.string.add_reminder);

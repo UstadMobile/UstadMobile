@@ -23,7 +23,7 @@ public class UmAccountManager {
 
     private static final String PREFKEY_PASSWORD_HASH_PERSONUID = "umaccount.passwordhashpersonuid";
 
-    private static final String PREFKEY_PASSWORD_HASH_USERNAME = "umaccount.passwordhashusername";
+    public static final String PREFKEY_PASSWORD_HASH_USERNAME = "umaccount.passwordhashusername";
 
     private static final String PREFKEY_FINGERPRIT_ACCESS_TOKEN = "umaccount.fingerprintaccesstoken";
 

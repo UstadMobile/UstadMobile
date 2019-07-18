@@ -226,5 +226,6 @@ public class CatalogListFragment extends UstadBaseFragment implements SelectSale
                 toast,
                 Toast.LENGTH_SHORT
         ).show());
+
     }
 }

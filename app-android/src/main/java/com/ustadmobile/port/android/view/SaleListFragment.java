@@ -4,12 +4,16 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -101,18 +105,26 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
         allSalesButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterAll();
-            getTintedDrawable(allSalesButton.getBackground(), R.color.fab);
+            allSalesButton.setBackground(
+                getTintedDrawable(allSalesButton.getBackground(), R.color.fab)
+            );
+
 
         });
         preOrdersButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterPreOrder();
-            getTintedDrawable(preOrdersButton.getBackground(), R.color.fab);
+            preOrdersButton.setBackground(
+                    getTintedDrawable(preOrdersButton.getBackground(), R.color.fab)
+            );
         });
         paymentsDueButton.setOnClickListener(v -> {
             disableAllButtonSelected();
             mPresenter.filterPaymentDue();
-            getTintedDrawable(paymentsDueButton.getBackground(), R.color.fab);
+            paymentsDueButton.setBackground(
+                getTintedDrawable(paymentsDueButton.getBackground(), R.color.fab)
+            );
+
         });
 
         //Sort handler
@@ -123,9 +135,7 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         fab.setOnClickListener(v -> mPresenter.handleClickPrimaryActionButton());
@@ -165,13 +175,24 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
     }
 
     public void disableAllButtonSelected(){
-        runOnUiThread(() -> {
 
-            getTintedDrawable(allSalesButton.getBackground(), R.color.color_gray);
-            getTintedDrawable(preOrdersButton.getBackground(), R.color.color_gray);
-            getTintedDrawable(paymentsDueButton.getBackground(), R.color.color_gray);
+        allSalesButton.invalidateDrawable(allSalesButton.getBackground());
+        preOrdersButton.invalidateDrawable(preOrdersButton.getBackground());
+        paymentsDueButton.invalidateDrawable(paymentsDueButton.getBackground());
 
-        });
+
+
+        allSalesButton.setBackground(
+                getTintedDrawable(allSalesButton.getBackground(), R.color.color_gray));
+
+        preOrdersButton.setBackground(
+                getTintedDrawable(preOrdersButton.getBackground(), R.color.color_gray));
+
+        paymentsDueButton.setBackground(
+                getTintedDrawable(paymentsDueButton.getBackground(), R.color.color_gray));
+
+
+
     }
 
     /**
@@ -180,10 +201,12 @@ public class SaleListFragment extends UstadBaseFragment implements SaleListView 
      * @param drawable  The drawable to be tinted
      * @param color     The color of the tint
      */
-    public void getTintedDrawable(Drawable drawable, int color) {
+    public Drawable getTintedDrawable(Drawable drawable, int color) {
         drawable = DrawableCompat.wrap(drawable);
-        int tintColor = ContextCompat.getColor(Objects.requireNonNull(getContext()), color);
+        int tintColor = ContextCompat.getColor(getContext(), color);
         DrawableCompat.setTint(drawable, tintColor);
+
+        return drawable;
     }
 
     @Override

@@ -144,7 +144,7 @@ public class SaleDetailPresenter extends UstadBaseController<SaleDetailView> {
 
     }
 
-    public void updatePaymentItemProvider(long saleUid){
+    private void updatePaymentItemProvider(long saleUid){
         //Get provider
         pProvider = salePaymentDao.findBySaleProvider(saleUid);
         view.setPaymentProvider(pProvider);

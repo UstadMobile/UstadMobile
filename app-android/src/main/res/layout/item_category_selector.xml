@@ -14,6 +14,7 @@
         android:paddingLeft="22dp"
         android:text="CheckBox"
         android:textColor="@color/text_primary"
+        android:shadowColor="@color/text_primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

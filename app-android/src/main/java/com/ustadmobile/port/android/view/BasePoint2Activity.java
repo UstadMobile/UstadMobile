@@ -1,7 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,14 +12,12 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -35,7 +31,6 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePoint2Presenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePoint2View;
-import com.ustadmobile.lib.db.entities.DashboardEntry;
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -94,7 +89,9 @@ public class BasePoint2Activity extends UstadBaseActivity implements BasePoint2V
                 case VIEW_POSITION_POSITION_INVENTORY:
                     break;
                 case VIEW_POSITION_POSITION_SALES:
-                    saleListFragment.goToSearch();
+                    if(saleListFragment!=null) {
+                        saleListFragment.goToSearch();
+                    }
                     break;
                 case VIEW_POSITION_POSITION_COURSES:
                     break;

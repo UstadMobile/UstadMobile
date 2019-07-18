@@ -180,4 +180,12 @@
     <string name="selected_les">Selected LEs</string>
     <string name="select_locations">Select locations</string>
     <string name="select_product_types">Select product types</string>
+
+    <!-- Issue fixes-->
+    <string name="this_language">English</string>
+    <string name="select_image_from_camera_or_gallery">Select image from Camera or Gallery</string>
+    <string name="shake_feedback">Shake for feedback</string>
+    <string name="feedback_hint">Please enter your feedback</string>
+    <string name="send_feedback">Send feedback</string>
+    <string name="feedback_thanks">Thank you for the feedback.</string>
 </resources>

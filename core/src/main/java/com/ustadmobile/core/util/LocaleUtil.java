@@ -28,7 +28,8 @@ public class LocaleUtil {
      * 
      * @return locale to used based on arguments
      */
-    public static String chooseSystemLocale(String userPrefLocale, String systemLocale, String[][] supportedLocales, String fallbackLang) {
+    public static String chooseSystemLocale(String userPrefLocale, String systemLocale,
+                                            String[][] supportedLocales, String fallbackLang) {
         //first check the user's chosen locale is valid and overrides the systemLocale
         int i;
         if(userPrefLocale != null && !userPrefLocale.equals("")) {

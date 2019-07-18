@@ -10,6 +10,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,8 +24,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
@@ -37,6 +41,7 @@ import com.ustadmobile.core.view.Login2View;
 import com.ustadmobile.core.view.UstadViewWithNotifications;
 import com.ustadmobile.core.view.ViewWithErrorNotifier;
 import com.ustadmobile.port.android.impl.LastActive;
+import com.ustadmobile.port.android.impl.UserFeedbackException;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerBleAndroidService;
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService;
@@ -51,13 +56,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.ustadmobile.core.view.Login2View.ARG_LOGIN_USERNAME;
 
+import com.squareup.seismic.ShakeDetector;
+
+import org.acra.ACRA;
+
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
  * <p>
  * Created by mike on 10/15/15.
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection,
-        UstadViewWithNotifications, ViewWithErrorNotifier {
+        UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener {
 
     private UstadBaseController baseController;
 
@@ -135,6 +144,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private volatile boolean bleServiceBound = false;
 
+    private SensorManager sensorManager;
+    private ShakeDetector shakeDetector;
+    boolean feedbackDialogVisible = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //bind to the LRS forwarding service
@@ -154,6 +167,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         Intent bleServiceIntent = new Intent(this, NetworkManagerBleAndroidService.class);
         bindService(bleServiceIntent, bleServiceConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_ADJUST_WITH_ACTIVITY);
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        shakeDetector = new ShakeDetector(this);
     }
 
 
@@ -187,6 +203,33 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     }
 
     @Override
+    public void hearShake() {
+
+        if (feedbackDialogVisible) {
+            return;
+        }
+
+        feedbackDialogVisible = true;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.send_feedback);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.view_feedback_layout, null);
+        EditText editText = dialogView.findViewById(R.id.feedback_edit_comment);
+        builder.setView(dialogView);
+        builder.setPositiveButton(R.string.send, (dialogInterface, whichButton) -> {
+            ACRA.getErrorReporter().handleSilentException(new UserFeedbackException(editText.getText().toString()));
+            Toast.makeText((Context) getContext(), R.string.feedback_thanks, Toast.LENGTH_LONG).show();
+            dialogInterface.cancel();
+        });
+        builder.setNegativeButton(R.string.cancel, ((dialogInterface, i) -> dialogInterface.cancel()));
+        builder.setOnDismissListener(dialogInterface -> feedbackDialogVisible = false);
+        builder.setOnCancelListener(dialogInterface -> feedbackDialogVisible = false);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -194,9 +237,21 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if (impl.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+
             new Handler().postDelayed(this::recreate, 200);
         }
+        if (shakeDetector != null && sensorManager != null) {
+            shakeDetector.start(sensorManager);
+        }
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (shakeDetector != null) {
+            shakeDetector.stop();
+        }
     }
 
     @Override
@@ -326,6 +381,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection);
         }
+
+        shakeDetector = null;
+        sensorManager = null;
         super.onDestroy();
     }
 

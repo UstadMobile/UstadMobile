@@ -243,7 +243,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
 
     @Override
     public void updateLocationSpinner(String[] locations) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.item_simple_spinner, locations);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(adapter);
@@ -262,7 +262,7 @@ public class SaleListSearchActivity extends UstadBaseActivity implements SaleLis
     @Override
     public void updateSortSpinner(String[] presets) {
         this.sortSpinnerPresets = presets;
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getApplicationContext()),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item, sortSpinnerPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(adapter);

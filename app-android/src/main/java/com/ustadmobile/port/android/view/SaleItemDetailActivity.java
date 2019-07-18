@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
@@ -138,7 +139,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
         Calendar myCalendar = Calendar.getInstance();
 
         //A Time picker listener that sets the from time.
-        DatePickerDialog.OnDateSetListener dateListener = (view, year, month, dayOfMonth) -> {
+        DatePickerDialog.OnDateSetListener dateListener = (DatePicker view, int year, int month, int dayOfMonth) -> {
             myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             myCalendar.set(Calendar.MONTH, month);
             myCalendar.set(Calendar.YEAR, year);
@@ -178,7 +179,7 @@ public class SaleItemDetailActivity extends UstadBaseActivity implements SaleIte
             mPresenter.handleChangeQuantity(newVal);
             mPresenter.updateTotal(newVal, ppp);
         });
-        
+
         pppNP.setOnValueChangedListener((picker, oldVal, newVal) ->
         {
             int q = quantityNP.getValue();

@@ -19,6 +19,7 @@ import com.ustadmobile.lib.db.entities.SaleProductPicture;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -124,37 +125,160 @@ public class ServletContextClass implements ServletContextListener {
                     newLocation.setLocationUid(locationDao.insert(newLocation));
 
                     //Add more locations
-                    Location afg = new Location("Afghanistan",
-                            "Afghanistan whole region", true);
-                    long afgLocationUid = locationDao.insert(afg);
 
-                    Location centralAfg = new Location("Central Afghanistan", "Center region", true, afgLocationUid);
-                    long centralAfgLocationUid = locationDao.insert(centralAfg);
-                    Location easternAfg = new Location("Eastern Afghanistan", "Eastern region", true, afgLocationUid);
-                    locationDao.insert(new Location("Kabul Province",
-                            "Kabul area", true, centralAfgLocationUid));
+                    try {
+                        //AFGHANISTAN
+                        Location afg = new Location(
+                                new String("افغانستان".getBytes(), "UTF-8"),
+                                "Afghanistan whole region", true);
+                        long afgLocationUid = locationDao.insert(afg);
 
-                    locationDao.insert(easternAfg);
-                    Location northernAfg= new Location("Northern Afghanistan", "Northern region", true, afgLocationUid);
-                    long northernAfgLocationUid = locationDao.insert(northernAfg);
-                    Location westernAfg = new Location("Western Afghanistan", "Western region", true, afgLocationUid);
-                    locationDao.insert(new Location("Kunduz Province",
-                            "Kunduz area", true, northernAfgLocationUid));
+                        //CENTRAL AFGHANISTAN
+                        Location centralAfg = new Location(
+                                new String("(Central Afghanistan)".getBytes(), "UTF-8"),
+                                "Center region", true, afgLocationUid);
+                        long centralAfgLocationUid = locationDao.insert(centralAfg);
 
-                    long westernAfgLocationUid = locationDao.insert(westernAfg);
-                    Location southeastAfg = new Location("Southeast Afghanistan", "Southeast region", true, afgLocationUid);
-                    locationDao.insert(new Location("Herat Province",
-                            "Herat area", true, westernAfgLocationUid));
-                    long southeastAfgLocationUid = locationDao.insert(southeastAfg);
-                    locationDao.insert(new Location("Khost Province",
-                            "Khost area", true, southeastAfgLocationUid));
-                    locationDao.insert(new Location("Paktika Province",
-                            "Paktika area", true, southeastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("کابل (Kabul)".getBytes(), "UTF-8"),
+                                "Kabul area", true, centralAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("بامیان (Bamyan)".getBytes(), "UTF-8"),
+                                "Bamyan area", true, centralAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Kapisa) كابيسا ".getBytes(), "UTF-8"),
+                                "Kapisa area", true, centralAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Logar) لوغار ".getBytes(), "UTF-8"),
+                                "Logar area", true, centralAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Parwan) پروان ".getBytes(), "UTF-8"),
+                                "Parwan area", true, centralAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Urozgan) اروزكان ".getBytes(), "UTF-8"),
+                                "Urozgan area", true, centralAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Wardak) وردک".getBytes(), "UTF-8"),
+                                "Wardak area", true, centralAfgLocationUid));
 
-                    Location southWestAfg = new Location("Southwest Afghanistan",
-                            "Southwest region", true, afgLocationUid);
-                    locationDao.insert(southWestAfg);
+                        //EASTERN AFGHANISTAN
+                        Location easternAfg = new Location(
+                                new String("(Eastern Afghanistan)".getBytes(), "UTF-8"),
+                                "Eastern region", true, afgLocationUid);
+                        long easternAfgUid = locationDao.insert(easternAfg);
+                        locationDao.insert(new Location(
+                                new String(" (Laghman) لغمان ".getBytes(), "UTF-8"),
+                                "Laghman area", true, easternAfgUid));
+                        locationDao.insert(new Location(
+                                new String("(Nangarhar) ننګرهار ".getBytes(), "UTF-8"),
+                                "Nangarhar area", true, easternAfgUid));
 
+                        //NORTH EAST AFGHANISTAN
+                        Location northEastAfg= new Location(
+                                new String(" (North East Afghanistan)".getBytes(), "UTF-8"),
+                                "Northern region", true, afgLocationUid);
+                        long northEastAfgLocationUid = locationDao.insert(northEastAfg);
+                        locationDao.insert(new Location(
+                                new String(" (Badakhshan  Province) بدخشان".getBytes(), "UTF-8"),
+                                "Badakhshan  area", true, northEastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String(" (Baghlan Province) بغلان".getBytes(), "UTF-8"),
+                                "Baghlan area", true, northEastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String(" (Kunar Province) کونړ".getBytes(), "UTF-8"),
+                                "Kunar area", true, northEastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Kunduz Province) کندوز".getBytes(), "UTF-8"),
+                                "Kunduz area", true, northEastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String(" (Nuristan Province) نورستان".getBytes(), "UTF-8"),
+                                "Nuristan area", true, northEastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Panjshir Province) پنجشیر".getBytes(), "UTF-8"),
+                                "Panjshir area", true, northEastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Takhar Province) تخار".getBytes(), "UTF-8"),
+                                "Takhar area", true, northEastAfgLocationUid));
+
+                        //NORTH WEST AFGHANISTAN
+                        Location northWestAfg= new Location(
+                                new String("(North East Afghanistan)".getBytes(), "UTF-8"),
+                                "Northern region", true, afgLocationUid);
+                        long northWestAfgLocationUid = locationDao.insert(northWestAfg);
+                        locationDao.insert(new Location(
+                                new String("(Balkh  Province) بلخ".getBytes(), "UTF-8"),
+                                "Balkh  area", true, northWestAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Faryab  Province) فارياب".getBytes(), "UTF-8"),
+                                "Faryab  area", true, northWestAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Jowzjan  Province) جوزجان".getBytes(), "UTF-8"),
+                                "Jowzjan area", true, northWestAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Samangan  Province) سمنگان".getBytes(), "UTF-8"),
+                                "Samangan  area", true, northWestAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Sar-e Pol  Province) سرپل".getBytes(), "UTF-8"),
+                                "Sar-e Pol  area", true, northWestAfgLocationUid));
+
+
+                        //SOUTHEAST AFGHANISTAN
+                        Location southeastAfg = new Location(
+                                new String("(Southeast Afghanistan)".getBytes(), "UTF-8"),
+                                "Southeast region", true, afgLocationUid);
+                        long southeastAfgLocationUid = locationDao.insert(southeastAfg);
+                        locationDao.insert(new Location(
+                                new String("(Khost Province) خوست".getBytes(), "UTF-8"),
+                                "Khost area", true, southeastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Paktika Province) پکتیکا".getBytes(), "UTF-8"),
+                                "Paktika area", true, southeastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Ghazni Province) غزنى".getBytes(), "UTF-8"),
+                                "Ghazni area", true, southeastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Kandahar Province) کندهار ".getBytes(), "UTF-8"),
+                                "Kandahar area", true, southeastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Pakika Province) پکتیا".getBytes(), "UTF-8"),
+                                "Pakika area", true, southeastAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Zabul Province) زابل".getBytes(), "UTF-8"),
+                                "Zabul area", true, southeastAfgLocationUid));
+
+                        //SOUTHWEST AFGHANISTAN
+                        Location southWestAfg = new Location(
+                                new String("(Southwest Afghanistan)".getBytes(), "UTF-8"),
+                                "Southwest region", true, afgLocationUid);
+                        long southWestAfgLocationUid = locationDao.insert(southWestAfg);
+                        locationDao.insert(new Location(
+                                new String("(Daykundi Province) دایکندی".getBytes(), "UTF-8"),
+                                "Daykundi area", true, southWestAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Helmand Province) هلمند".getBytes(), "UTF-8"),
+                                "Helmand area", true, southWestAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Nimruz Province) نيمروز".getBytes(), "UTF-8"),
+                                "Nimruz area", true, southWestAfgLocationUid));
+
+
+                        //WESTERN AFGHANISTAN
+                        Location westernAfg = new Location(
+                                "(Western Afghanistan)", "Western region", true, afgLocationUid);
+                        long westernAfgLocationUid = locationDao.insert(westernAfg);
+                        locationDao.insert(new Location(
+                                new String("(Herat Province) هرات".getBytes(), "UTF-8"),
+                                "Herat area", true, westernAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Farah Province) فارا".getBytes(), "UTF-8"),
+                                "Farah area", true, westernAfgLocationUid));
+                        locationDao.insert(new Location(
+                                new String("(Ghor Province) غور".getBytes(), "UTF-8"),
+                                "Ghor area", true, westernAfgLocationUid));
+
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                     //Also add some Producers (People)
 
                     Person person1 = new Person("royarahimi", "Roya",
@@ -175,7 +299,6 @@ public class ServletContextClass implements ServletContextListener {
                     personDao.insert(person2);
                     personDao.insert(person3);
                     personDao.insert(person4);
-
 
                     addSaleProducts();
                 }
@@ -407,7 +530,8 @@ public class ServletContextClass implements ServletContextListener {
                     SaleProduct collectionCategory = new SaleProduct("Collection",
                             "All collections", true);
                     collectionCategory.setSaleProductUid(saleProductDao.insert(collectionCategory));
-                    addPicToProduct(collectionCategory, "", repo);
+                    addPicToProduct(collectionCategory,
+                            "/WEB-INF/goldozi/goldozi_product_placeholder_accessories.png", repo);
 
                     SaleProductParentJoin womenCategoryCollectionJoin =
                             new SaleProductParentJoin(womenCategory.getSaleProductUid(),
@@ -460,6 +584,9 @@ public class ServletContextClass implements ServletContextListener {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (Exception ee){
+                    System.out.println("Unable to process: " + product.getSaleProductName());
+                    ee.printStackTrace();
                 }
             }
 

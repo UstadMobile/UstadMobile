@@ -72,7 +72,6 @@
 
         </LinearLayout>
 
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -97,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
-                android:text="Quantity"
+                android:text="@string/quantity"
                 android:textAppearance="@style/TextAppearance.AppCompat"
                 android:textColor="@color/text_primary"
                 app:layout_constraintStart_toEndOf="@+id/textView19"

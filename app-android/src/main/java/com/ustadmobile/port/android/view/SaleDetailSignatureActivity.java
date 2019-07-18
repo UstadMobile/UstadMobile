@@ -119,7 +119,7 @@ public class SaleDetailSignatureActivity extends UstadBaseActivity implements Sa
                     }
                     PictureDrawable pd = new PictureDrawable(adjustedPic);
 
-                    runOnUiThread(() -> mSignaturePad.setBackground(pd));
+                    runOnUiThread(() -> mSignaturePad.setBackgroundDrawable(pd));
                 }catch (SVGParseException spe) {
                     spe.printStackTrace();
                 }

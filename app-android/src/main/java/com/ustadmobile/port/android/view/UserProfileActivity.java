@@ -112,7 +112,10 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
         logoutLL.setOnClickListener(v -> handleClickLogout());
 
         pictureEdit.setOnClickListener(v -> showGetImageAlertDialog());
+
     }
+
+
 
     @Override
     protected void onResume() {
@@ -125,7 +128,7 @@ public class UserProfileActivity extends UstadBaseActivity implements UserProfil
 
         AlertDialog.Builder adb = new AlertDialog.Builder(this)
                 .setTitle("")
-                .setMessage("Select image from Camera or Gallery")
+                .setMessage(getText(R.string.select_image_from_camera_or_gallery))
 
                 .setPositiveButton(R.string.camera, (dialog, which) -> {
                     addImageFromCamera();

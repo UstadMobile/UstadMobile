@@ -44,7 +44,7 @@ public class SelectMultiplePeoplePresenter
     public void addToPeople(Person person){
         String personName = person.getFirstNames() + " " +
                 person.getLastName();
-        if(!people.containsKey(person.getPersonUid())){
+        if(!people.containsKey(personName)){
             people.put(personName, person.getPersonUid());
         }
     }

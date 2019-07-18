@@ -15,10 +15,12 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -93,7 +95,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     //Signature
     private TextView signatureTitleTV;
-    private ImageButton signatureIB;
+    private AppCompatImageButton signatureIB;
 
 
     public static String getSaleVoiceNoteFilePath() {
@@ -121,7 +123,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     public void requestPermission(){
 
-        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, RECORD_AUDIO_PERMISSION_REQUEST);
             return;
@@ -280,7 +282,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
 
     public void initiateRecording(){
 
-        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermission();
         }else {
@@ -526,7 +528,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     public void setListProvider(UmProvider<SaleItemListDetail> listProvider) {
         SaleItemRecyclerAdapter recyclerAdapter =
                 new SaleItemRecyclerAdapter(DIFF_CALLBACK, mPresenter, this,
-                        getApplicationContext());
+                        this);
 
         // get the provider, set , observe, etc.
         // A warning is expected
@@ -536,7 +538,14 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
         LiveData<PagedList<SaleItemListDetail>> data =
                 new LivePagedListBuilder<>(factory, 20).build();
 
-        Observer customObserver = o -> {
+        Observer co = new Observer() {
+            @Override
+            public void onChanged(@Nullable Object o) {
+                recyclerAdapter.submitList((PagedList<SaleItemListDetail>) o);
+                mPresenter.getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
+            }
+        };
+        Observer customObserver = (Object o) -> {
             recyclerAdapter.submitList((PagedList<SaleItemListDetail>) o);
             mPresenter.getTotalSaleOrderAndDiscountAndUpdateView(saleUid);
         };
@@ -555,7 +564,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     public void setPaymentProvider(UmProvider<SalePayment> paymentProvider) {
         SalePaymentRecyclerAdapter recyclerAdapter =
                 new SalePaymentRecyclerAdapter(DIFF_CALLBACK_PAYMENT, mPresenter, this,
-                        getApplicationContext());
+                        this);
 
         // get the provider, set , observe, etc.
         // A warning is expected
@@ -585,7 +594,7 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
     @Override
     public void setLocationPresets(String[] locationPresets, int selectedPosition) {
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 R.layout.item_simple_spinner, locationPresets);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(adapter);
@@ -664,7 +673,10 @@ public class SaleDetailActivity extends UstadBaseActivity implements SaleDetailV
                         }
                         PictureDrawable  pd = new PictureDrawable(adjustedPic);
 
-                        runOnUiThread(() -> signatureIB.setBackground(pd));
+                        runOnUiThread(() -> {
+                            signatureIB.invalidateDrawable(signatureIB.getBackground());
+                            signatureIB.setBackgroundDrawable(pd);
+                        });
 
 
                     } catch (SVGParseException e) {

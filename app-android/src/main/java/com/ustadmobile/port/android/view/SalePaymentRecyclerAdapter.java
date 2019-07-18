@@ -58,7 +58,7 @@ public class SalePaymentRecyclerAdapter extends
         //Options to Edit/Delete every schedule in the list
         dots.setOnClickListener((View v) -> {
             //creating a popup menu
-            PopupMenu popup = new PopupMenu(theActivity.getApplicationContext(), v);
+            PopupMenu popup = new PopupMenu(theContext, v);
             popup.setOnMenuItemClickListener(item -> {
                 int i = item.getItemId();
                 if (i == R.id.edit) {
@@ -73,7 +73,6 @@ public class SalePaymentRecyclerAdapter extends
             });
             //inflating menu from xml resource
             popup.inflate(R.menu.menu_edit_delete);
-
             popup.getMenu().findItem(R.id.edit).setVisible(true);
 
             //displaying the popup
