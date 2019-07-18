@@ -23,6 +23,7 @@ apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.android.library'
 apply plugin: "maven-publish"
+apply plugin: "jacoco"
 
 
 android {
@@ -263,6 +264,47 @@ kotlin {
 
     }
 }
+
+jacoco {
+    toolVersion = "0.8.2"
+}
+
+/**
+ * Create a Jacocco task for reporting test coverage - as per:
+ * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
+ */
+project.afterEvaluate {
+    def testTaskName = "jvmJacocoTestReport"
+
+    // Create gradle task
+    task "jvm" (type:JacocoReport, dependsOn: "$testTaskName") {
+        group = "Reporting"
+        description = "Generate Jacoco coverage reports on the common module build."
+
+        def excludes = [
+                '**/*Test*.*'
+        ]
+
+        classDirectories = fileTree(
+                dir: "${project.buildDir}/classes/kotlin/jvm/",
+                excludes: excludes
+        )
+
+        def coverageSourceDirs = [
+                "src/commonMain/kotlin"
+        ]
+
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+}
+
 
 
 def translationsOutPath = "${rootDir.absolutePath}/app-angular/src/assets/locale/"
