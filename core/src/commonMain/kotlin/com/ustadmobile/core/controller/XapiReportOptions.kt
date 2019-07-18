@@ -5,12 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SCORE,
-                             var xAxis: Int = DAY, var subGroup: Int = MONTH,
+                             var xAxis: Int = DAY, var subGroup: Int = DAY,
                              var whoFilterList: List<Long> = mutableListOf(),
                              var didFilterList: List<Long> = mutableListOf(),
                              var objectsList: List<Long> = mutableListOf(),
                              var entriesList: List<Long> = mutableListOf(),
-                             var toDate: Long = 0L, var fromDate: Long = 0L,
+                             var fromDate: Long = 0L, var toDate: Long = 0L,
                              var locationsList: List<Long> = mutableListOf(),
                              var reportTitle: String = "") {
 

@@ -9,11 +9,11 @@ import com.ustadmobile.lib.db.entities.XLangMapEntry.Companion.TABLE_ID
 @UmEntity(tableId = TABLE_ID)
 @Entity
 data class XLangMapEntry(
-        var verbLangMapUid: Long,
-        var objectLangMapUid: Long,
-        var languageLangMapUid: Long,
-        var languageVariantLangMapUid: Long,
-        var valueLangMap: String) {
+        var verbLangMapUid: Long = 0L,
+        var objectLangMapUid: Long = 0L,
+        var languageLangMapUid: Long = 0L,
+        var languageVariantLangMapUid: Long = 0L,
+        var valueLangMap: String = "") {
 
     @UmPrimaryKey(autoGenerateSyncable = true)
     @PrimaryKey(autoGenerate = true)

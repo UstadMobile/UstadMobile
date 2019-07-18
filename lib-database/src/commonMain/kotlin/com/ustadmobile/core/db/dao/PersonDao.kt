@@ -100,6 +100,10 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
 
 
+    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name FROM Person WHERE Person.personUid IN (:uidList)")
+    abstract suspend fun getAllPersonsInList(uidList: List<Long>): List<PersonNameAndUid>
+
+
     /**
      * Checks if a user has the given permission over a given person in the database
      *

@@ -12,8 +12,8 @@ class XapiReportOptionsTest {
                 XapiReportOptions.DAY, XapiReportOptions.WEEK)
 
         Assert.assertEquals("SELECT AVG(StatementEntity.resultScoreScaled) AS yAxis, " +
-                "strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch') " +
-                "AS xAxis, strftime('%Y-%m-%d', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') AS subgroup " +
+                "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') " +
+                "AS xAxis, strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') AS subgroup " +
                 "FROM StatementEntity GROUP BY xAxis, subgroup", report.toSql().sqlStr)
 
     }
@@ -26,7 +26,7 @@ class XapiReportOptionsTest {
                 XapiReportOptions.MONTH, XapiReportOptions.CONTENT_ENTRY)
 
         Assert.assertEquals("SELECT SUM(StatementEntity.resultDuration) AS yAxis, " +
-                "strftime('%Y-%m', StatementEntity.timestamp/1000, 'unixepoch') " +
+                "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') " +
                 "AS xAxis, StatementEntity.xObjectUid AS subgroup " +
                 "FROM StatementEntity GROUP BY xAxis, subgroup", report.toSql().sqlStr)
 
@@ -74,7 +74,7 @@ class XapiReportOptionsTest {
                 "WHERE (StatementEntity.xObjectUid IN (?) OR EXISTS(SELECT contextXObjectStatementJoinUid FROM ContextXObjectStatementJoin " +
                 "WHERE contextStatementUid = StatementEntity.statementUid AND contextXObjectUid IN (?))) AND " +
                 "StatementEntity.personUid IN (?) AND StatementEntity.verbUid IN (?) AND " +
-                "(StatementEntity.timestamp > ? AND StatementEntity.timestamp < ?) " +
+                "(StatementEntity.timestamp <= ? AND StatementEntity.timestamp >= ?) " +
                 "GROUP BY xAxis, subgroup", report.toSql().sqlStr)
 
     }

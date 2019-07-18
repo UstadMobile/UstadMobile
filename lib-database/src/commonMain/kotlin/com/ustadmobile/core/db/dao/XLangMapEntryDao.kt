@@ -20,6 +20,11 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
     @Query("SELECT * FROM XLangMapEntry WHERE objectLangMapUid IN (:ids)")
     abstract suspend fun getValuesWithListOfId(ids: List<Int>): List<XLangMapEntry>
 
+    @Query("SELECT verbLangMapUid, valueLangMap FROM XLangMapEntry " +
+            "WHERE verbLangMapUid != 0 AND " +
+            "verbLangMapUid IN (:uidList)")
+    abstract fun getAllVerbsInList(uidList: List<Long>): List<Verb>
+
     data class Verb(var verbLangMapUid: Long = 0, var valueLangMap: String = "") {
 
         override fun toString(): String {

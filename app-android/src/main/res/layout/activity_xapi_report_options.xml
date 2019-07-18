@@ -209,7 +209,7 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/when_label" />
 
-            <TextView
+           <!-- <TextView
                 android:id="@+id/where_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -227,7 +227,7 @@
                 android:focusableInTouchMode="false"
                 android:inputType="none"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/where_label" />
+                app:layout_constraintTop_toBottomOf="@id/where_label" />-->
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

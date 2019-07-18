@@ -46,6 +46,10 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common:$version_kotlin")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
+                compileOnly project(":lib-database-entities")
+                compileOnly project(":lib-database")
+                compileOnly project(":lib-door-runtime")
                 project(":lib-util")
             }
         }

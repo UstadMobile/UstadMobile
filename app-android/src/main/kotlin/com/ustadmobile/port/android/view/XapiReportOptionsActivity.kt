@@ -26,7 +26,7 @@ import java.util.*
 
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
-        SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,
+       /* SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,*/
         SelectMultipleEntriesTreeDialogFragment.MultiSelectEntriesTreeDialogListener {
 
 
@@ -52,7 +52,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var whenEditText: EditText
 
-    private lateinit var whereEditText: EditText
+  //  private lateinit var whereEditText: EditText
 
     private lateinit var whatEditText: EditText
 
@@ -75,7 +75,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         whoAutoCompleteView = findViewById(R.id.whoAutoCompleteTextView)
         whoFlexBoxLayout = findViewById(R.id.whoFlex)
         whenEditText = findViewById(R.id.whenEditText)
-        whereEditText = findViewById(R.id.whereEditText)
+       // whereEditText = findViewById(R.id.whereEditText)
         whatEditText = findViewById(R.id.whatEditText)
 
         whenEditText.setOnClickListener {
@@ -93,10 +93,10 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
                 this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        whereEditText.setOnClickListener {
+      /*  whereEditText.setOnClickListener {
             presenter.handleWhereClicked()
         }
-
+*/
         whatEditText.setOnClickListener {
             presenter.handleWhatClicked()
         }
@@ -194,17 +194,6 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         setAdapterForSpinner(translatedXAxisList, subGroupSpinner)
     }
 
-    override fun fillDidData(didList: List<XLangMapEntryDao.Verb>) {
-        val dataAdapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, didList)
-        didAutoCompleteView.setAdapter(dataAdapter)
-        didAutoCompleteView.setOnItemClickListener { parent, _, position, _ ->
-            didAutoCompleteView.text = null
-            val selected = parent.getItemAtPosition(position) as XLangMapEntryDao.Verb
-            addChipToDidFlexLayout(selected.valueLangMap, didFlexBoxLayout, didFlexBoxLayout.childCount - 1, selected.verbLangMapUid)
-        }
-    }
-
     override fun updateWhoDataAdapter(whoList: List<PersonDao.PersonNameAndUid>) {
         whoDataAdapter.clear()
         whoDataAdapter.addAll(whoList)
@@ -229,7 +218,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         whenEditText.setText(rangeText)
     }
 
-    override fun updateChartTypeSelected(indexChart: Int){
+    override fun updateChartTypeSelected(indexChart: Int) {
         visualTypeSpinner.setSelection(indexChart)
     }
 
@@ -245,12 +234,16 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         subGroupSpinner.setSelection(indexSubgroup)
     }
 
-    override fun updateWhoListSelected() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun updateWhoListSelected(personList: List<PersonDao.PersonNameAndUid>) {
+        personList.forEach {
+            addChipToDidFlexLayout(it.name, whoFlexBoxLayout, whoFlexBoxLayout.childCount - 1, it.personUid)
+        }
     }
 
-    override fun updateDidListSelected() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun updateDidListSelected(verbs: List<XLangMapEntryDao.Verb>) {
+        verbs.forEach {
+            addChipToDidFlexLayout(it.valueLangMap, didFlexBoxLayout, didFlexBoxLayout.childCount - 1, it.verbLangMapUid)
+        }
     }
 
     override fun updateDatesSelected() {
@@ -396,13 +389,14 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         return builder.create()
     }
 
-    override fun onLocationResult(selected: MutableMap<String, Long>) {
+    //TODO when varuna branch merges
+  /*  override fun onLocationResult(selected: MutableMap<String, Long>) {
         var locationList = selected.keys.joinToString { it }
         runOnUiThread {
             whereEditText.setText(locationList)
         }
         presenter.handleLocationListSelected(selected.values.toList())
-    }
+    }*/
 
     override fun onEntriesSelectedResult(selected: MutableMap<String, Long>) {
         var entriesList = selected.keys.joinToString { it }

@@ -14,7 +14,6 @@ import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportOptionsView
-import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -67,12 +66,44 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
 
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments[XapiReportDetailView.ARG_REPORT_OPTIONS]
-        if(reportOptions != null){
-            reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString!!)
-            val indexChart = listOfGraphs.indexOf(reportOptions!!.chartType)
+        if (reportOptionsString != null) {
+            reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
+            selectedChartType = listOfGraphs.indexOf(reportOptions!!.chartType)
+            selectedYaxis = yAxisList.indexOf(reportOptions!!.yAxis)
+            selectedXAxis = xAxisList.indexOf(reportOptions!!.xAxis)
+            selectedSubGroup = xAxisList.indexOf(reportOptions!!.subGroup)
+            selectedLocations = reportOptions!!.locationsList
+            selectedEntries = reportOptions!!.entriesList
+            selectedObjects = reportOptions!!.objectsList
+
+            if (reportOptions!!.fromDate > 0L && reportOptions!!.toDate > 0L) {
+                fromDateTime = DateTime(reportOptions!!.fromDate)
+                toDateTime = DateTime(reportOptions!!.toDate)
+                handleFromCalendarSelected()
+                handleToCalendarSelected()
+                handleDateRangeSelected()
+            }
             view.runOnUiThread(Runnable {
-                view.updateChartTypeSelected(indexChart)
+                view.updateChartTypeSelected(selectedChartType)
+                view.updateYAxisTypeSelected(selectedYaxis)
+                view.updateXAxisTypeSelected(selectedXAxis)
+                view.updateSubgroupTypeSelected(selectedSubGroup)
             })
+            GlobalScope.launch {
+                if (reportOptions!!.didFilterList.isNotEmpty()) {
+                    val verbs = db.xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
+                    view.runOnUiThread(Runnable {
+                        view.updateDidListSelected(verbs)
+                    })
+                }
+                if (reportOptions!!.whoFilterList.isNotEmpty()) {
+                    val personList = db.personDao.getAllPersonsInList(reportOptions!!.whoFilterList)
+                    view.runOnUiThread(Runnable {
+                        view.updateWhoListSelected(personList)
+                    })
+                }
+            }
+
         }
 
     }
@@ -144,7 +175,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
                 selectedEntries,
                 fromDateTimemillis,
                 toDateTimeMillis,
-                selectedLocations)
+                selectedLocations, reportOptions?.reportTitle.toString())
 
         var args = HashMap<String, String?>()
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions!!)

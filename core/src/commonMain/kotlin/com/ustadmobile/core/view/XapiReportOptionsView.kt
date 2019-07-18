@@ -11,8 +11,6 @@ interface XapiReportOptionsView : UstadView {
 
     fun fillXAxisAndSubGroupData(translatedXAxisList: List<String>)
 
-    fun fillDidData(didList: List<XLangMapEntryDao.Verb>)
-
     fun updateWhoDataAdapter(whoList: List<PersonDao.PersonNameAndUid>)
 
     fun updateDidDataAdapter(didList: List<XLangMapEntryDao.Verb>)
@@ -31,9 +29,9 @@ interface XapiReportOptionsView : UstadView {
 
     fun updateSubgroupTypeSelected(indexSubgroup: Int)
 
-    fun updateWhoListSelected()
+    fun updateWhoListSelected(personList: List<PersonDao.PersonNameAndUid>)
 
-    fun updateDidListSelected()
+    fun updateDidListSelected(verbs: List<XLangMapEntryDao.Verb>)
 
     fun updateDatesSelected()
 

@@ -391,6 +391,8 @@ dependencies {
 
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
 
+    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+
 
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
