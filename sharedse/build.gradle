@@ -165,7 +165,7 @@ kotlin {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
-                implementation project(":lib-test-util")
+                implementation project(":lib-test-common")
 
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "com.soywiz:klock-metadata:$version_klock"
