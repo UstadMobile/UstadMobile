@@ -3,7 +3,8 @@ plugins {
     id 'kotlin'
     id 'war'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow'
+    //TODO: This should be defined by a variable, which might need to ome from settings.gradle
+    id 'com.github.johnrengelman.shadow' version "5.1.0"
 }
 
 configurations {
