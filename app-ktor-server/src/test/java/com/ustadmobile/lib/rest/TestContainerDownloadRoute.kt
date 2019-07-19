@@ -95,7 +95,7 @@ class TestContainerDownloadRoute {
                         "http://localhost:8097/ContainerEntryList/findByContainerWithMd5?containerUid=${container.containerUid}")
                 containerManager.allEntries.forEach { cntMgrEntry ->
                     Assert.assertTrue("Entry was in response", containerEntryList.any {
-                        it.ceUid == cntMgrEntry.ceUid && it.cefMd5 == cntMgrEntry.containerEntryFile?.cefMd5})
+                        it.ceUid == cntMgrEntry.ceUid && it.cefMd5 != null && it.cefMd5 == cntMgrEntry.containerEntryFile?.cefMd5})
                 }
             }
         }
