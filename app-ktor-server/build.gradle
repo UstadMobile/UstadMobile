@@ -1,15 +1,46 @@
 plugins {
-    id 'java-library'
+    id 'application'
     id 'kotlin'
+    id 'war'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow'
+}
+
+configurations {
+    servletRuntime.extendsFrom runtime
+    standaloneRuntime.extendsFrom runtime
+}
+
+mainClassName = 'io.ktor.server.netty.EngineMain'
+
+// This task will generate your fat JAR and put it in the ./build/libs/ directory
+shadowJar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+
+    configurations += [project.configurations.standaloneRuntime]
+}
+
+
+war {
+    classpath configurations.servletRuntime
+}
+
+task appRun(type: JavaExec) {
+    classpath = configurations.standaloneRuntime
+    main = 'io.ktor.server.netty.EngineMain'
+    args = ['-port', '8087']
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "io.ktor:ktor-server-netty:$version_ktor"
+    standaloneRuntime "io.ktor:ktor-server-netty:$version_ktor"
+    servletRuntime "io.ktor:ktor-server-servlet:$version_ktor"
     implementation "io.ktor:ktor-jackson:$version_ktor"
     implementation "io.ktor:ktor-gson:$version_ktor"
 
+    implementation project(":core")
     implementation project(":lib-database")
     implementation project(":lib-database-mpp")
     implementation project(":lib-door-runtime")
@@ -17,12 +48,28 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+    testImplementation project(":lib-test-common")
+    testImplementation project(":sharedse")
+
     testImplementation "junit:junit:$version_junit"
 
     testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
     testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
     testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+    standaloneRuntime "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+    standaloneRuntime "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+    standaloneRuntime "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+    standaloneRuntime "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+
+    testImplementation "io.ktor:ktor-client-core:$version_ktor"
+    testImplementation "io.ktor:ktor-client-json:$version_ktor"
+    testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
+    testImplementation "io.ktor:ktor-client-gson:$version_ktor"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+
 }
 
 sourceCompatibility = "8"
