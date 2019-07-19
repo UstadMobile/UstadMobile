@@ -17,7 +17,9 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query("Select Container.* FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
+            //Temporarily disabled for MSST due to discrepency in this count. This would only be called
+            // for entries that are marked downloaded by ContentEntryStatus
+            //"AND Container.cntNumEntries = (SELECT COUNT(ceUid) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid) " +
             "ORDER BY Container.lastModified DESC LIMIT 1")
     @JsName("getMostRecentDownloadedContainerForContentEntryAsync")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?
