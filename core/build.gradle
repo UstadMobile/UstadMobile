@@ -266,7 +266,7 @@ kotlin {
 }
 
 jacoco {
-    toolVersion = "0.8.2"
+    toolVersion = "$version_jacoco_tool"
 }
 
 /**
