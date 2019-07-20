@@ -12,6 +12,8 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+
 
 fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
     val syncEntityAnnotationIndex = entityEl.annotationMirrors.map {processingEnv.typeUtils.asElement(it.annotationType) as TypeElement }
@@ -29,38 +31,53 @@ class DbProcessorSync: AbstractDbProcessor() {
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
 
-        val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
-        val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"]!! else outputArg
+        val (abstractOutputArg, implOutputArg) = Pair(processingEnv.options[OPTION_ABSTRACT_OUTPUT_DIR],
+                processingEnv.options[OPTION_IMPL_OUTPUT_DIR])
+        val (abstractOutputDir, implOutputDir) = listOf(abstractOutputArg, implOutputArg)
+                .map {
+                    if (it == null || it == "filer") {
+                        processingEnv.options["kapt.kotlin.generated"]!!
+                    } else {
+                        implOutputArg!!
+                    }
+                }.zipWithNext()[0]
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         for(dbTypeEl in dbs) {
-            val dbFileSpec = generateSyncDaoInterfaceAndImpl(dbTypeEl as TypeElement)
-            dbFileSpec.writeTo(File(outputDir))
+            val (abstractFileSpec, implFileSpec) = generateSyncDaoInterfaceAndImpl(dbTypeEl as TypeElement)
+
+            abstractFileSpec.writeTo(File(abstractOutputDir))
+            implFileSpec.writeTo(File(implOutputDir))
         }
 
         return true
     }
 
-    fun generateSyncDaoInterfaceAndImpl(dbType: TypeElement): FileSpec {
-        val syncInterfaceSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
-        val syncInterfaceClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
-                syncInterfaceSimpleName)
-        val syncDaoInterface = TypeSpec.interfaceBuilder(syncInterfaceSimpleName)
-        val syncDaoImpl = TypeSpec.classBuilder("${dbType.simpleName}$SUFFIX_SYNCDAO_IMPL")
-                .addSuperinterface(syncInterfaceClassName)
+    /**
+     *
+     * @return Pair of FileSpecs: first = the abstract DAO filespec, the second one is the implementation
+     */
+    fun generateSyncDaoInterfaceAndImpl(dbType: TypeElement): Pair<FileSpec, FileSpec> {
+        val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
+        val abstractDaoClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
+                abstractDaoSimpleName)
+        val abstractDaoTypeSpec = TypeSpec.classBuilder(abstractDaoSimpleName)
                 .addAnnotation(Dao::class.asClassName())
+                .addModifiers(KModifier.ABSTRACT)
         val abstractFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
-                "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT")
+                abstractDaoSimpleName)
+
+
+        val implDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_IMPL"
+        val implDaoClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
+                implDaoSimpleName)
+        val implDaoTypeSpec = jdbcDaoTypeSpecBuilder(implDaoSimpleName, abstractDaoClassName)
+        val implFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
+                implDaoSimpleName)
 
         entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}.forEach {entityType ->
-            //interface and impl funspecs
-            val localUnsentChangeFuns = (0..1).map { FunSpec.builder("_find${entityType.simpleName}LocalUnsentChanges") }
-            localUnsentChangeFuns.forEach {
-                it.addParameter("destClientId", INT)
-                        .addParameter("limit", INT)
-            }
-
             val entityPkField = entityType.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
+            val entityLastModifiedField = entityType.enclosedElements.first { it.getAnnotation(LastChangedBy::class.java) != null}
             val entitySyncTracker = getEntitySyncTracker(entityType, processingEnv)
             val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker)
             val entityLocalCsnFieldEl = entityType.enclosedElements
@@ -71,29 +88,83 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
             val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
                     .first {it.getAnnotation(TrackDestId::class.java) != null}
+            val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
 
+            //Generate the find local unsent changes function for this entity
             val findLocalUnsentSql = "SELECT * FROM " +
                     "(SELECT * FROM ${entityType.simpleName} ) AS ${entityType.simpleName} " +
                     "WHERE " +
+                    "${entityLastModifiedField.simpleName} = (SELECT dbNodeId FROM DoorDatabaseSyncInfo) AND " +
                     "(${entityType.simpleName}.$entityLocalCsnFieldEl > " +
-                    "COALESCE((SELECT ${entitySyncTrackCsnField.simpleName} FROM {${entitySyncTrackerEl.simpleName} " +
+                    "COALESCE((SELECT ${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName} " +
                     "WHERE ${entitySyncTrackerPkField.simpleName} = ${entityType.simpleName}.${entityPkField.simpleName} " +
-                    "AND ${entitySyncTrackerDestField.simpleName} = :destClientId)," +
-                    "0) LIMIT :limit"
-            localUnsentChangeFuns[0].addAnnotation(AnnotationSpec.builder(Query::class)
-                    .addMember("value = %S", findLocalUnsentSql).build())
-            syncDaoInterface.addFunction(localUnsentChangeFuns[0].build())
+                    "AND ${entitySyncTrackerDestField.simpleName} = :destClientId), 0)" +
+                    ") LIMIT :limit"
+
+
+            val findUnsentParamsList = listOf(ParameterSpec.builder("destClientId", INT).build(),
+                    ParameterSpec.builder("limit", INT).build())
+            val (abstractLocalUnsentChangeFun, implLocalUnsetChangeFun) =
+                    generateAbstractAndImplQueryFunSpecs(findLocalUnsentSql,
+                            "_find${entityType.simpleName}LocalUnsentChanges",
+                            entityListClassName, findUnsentParamsList)
+            abstractDaoTypeSpec.addFunction(abstractLocalUnsentChangeFun)
+            implDaoTypeSpec.addFunction(implLocalUnsetChangeFun)
+
+            //Generate the find master unsent changes function for this entity
+            val findMasterUnsentSql = "SELECT * FROM " +
+                    "(SELECT * FROM ${entityType.simpleName} ) AS ${entityType.simpleName} " +
+                    "WHERE ${entityLastModifiedField.simpleName}  != :destClientId AND " +
+                    "(${entityType.simpleName}.$entityLocalCsnFieldEl > " +
+                    "COALESCE((SELECT ${entitySyncTrackCsnField.simpleName} FROM ${entitySyncTrackerEl.simpleName} " +
+                    "WHERE ${entitySyncTrackerPkField.simpleName} = ${entityType.simpleName}.${entityPkField.simpleName} " +
+                    "AND ${entitySyncTrackerDestField.simpleName} = :destClientId), 0)" +
+                    ") LIMIT :limit"
+
+            val (abstractMasterUnsentChangeFun, implMasterUnsentChangeFun) =
+                    generateAbstractAndImplQueryFunSpecs(findMasterUnsentSql,
+                            "_find${entityType.simpleName}MasterUnsentChanges",
+                            entityListClassName, findUnsentParamsList)
+            abstractDaoTypeSpec.addFunction(abstractMasterUnsentChangeFun)
+            implDaoTypeSpec.addFunction(implMasterUnsentChangeFun)
         }
 
 
-        abstractFileSpec.addType(syncDaoInterface.build())
-        return abstractFileSpec.build()
+        abstractFileSpec.addType(abstractDaoTypeSpec.build())
+        implFileSpec.addType(implDaoTypeSpec.build())
+        return Pair(abstractFileSpec.build(), implFileSpec.build())
+    }
+
+    private fun generateAbstractAndImplQueryFunSpecs(querySql: String,
+                                             funName: String,
+                                             returnType: TypeName,
+                                             params: List<ParameterSpec>): Pair<FunSpec, FunSpec> {
+        val funBuilders = (0..1).map {
+            FunSpec.builder(funName)
+                    .returns(returnType)
+                    .addParameters(params)
+        }
+
+        funBuilders[0].addModifiers(KModifier.ABSTRACT)
+        funBuilders[1].addModifiers(KModifier.OVERRIDE)
+
+        funBuilders[0].addAnnotation(AnnotationSpec.builder(Query::class)
+                .addMember("value = %S", querySql).build())
+
+        funBuilders[1].addCode(generateQueryCodeBlock(returnType,
+                params.map { it.name to it.type}.toMap(), querySql,
+                null, null))
+                .addCode("return _result\n")
+
+        return Pair(funBuilders[0].build(), funBuilders[1].build())
     }
 
 
     companion object {
 
-        const val OPTION_OUTPUT_DIR = "door_sync_output"
+        const val OPTION_IMPL_OUTPUT_DIR = "door_sync_impl_output"
+
+        const val OPTION_ABSTRACT_OUTPUT_DIR = "door_sync_interface_output"
 
         const val SUFFIX_SYNCDAO_ABSTRACT = "SyncDao"
 

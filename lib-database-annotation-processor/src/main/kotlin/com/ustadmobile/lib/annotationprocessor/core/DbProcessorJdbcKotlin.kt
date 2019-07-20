@@ -509,11 +509,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         val daoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT")
         daoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
-        val daoImpl = TypeSpec.classBuilder("${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT")
-                .primaryConstructor(FunSpec.constructorBuilder().addParameter("_db",
-                        DoorDatabase::class).build())
-                .addProperty(PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
-                .superclass(daoTypeElement.asClassName())
+        val daoImpl = jdbcDaoTypeSpecBuilder("${daoTypeElement.simpleName}_$SUFFIX_JDBC_KT",
+                daoTypeElement.asClassName())
 
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv).forEach {daoSubEl ->
             if(daoSubEl.kind != ElementKind.METHOD)

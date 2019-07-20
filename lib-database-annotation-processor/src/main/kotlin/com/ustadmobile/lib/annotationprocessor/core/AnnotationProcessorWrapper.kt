@@ -7,7 +7,8 @@ import javax.lang.model.element.TypeElement
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedOptions(value = [DbProcessorJdbcKotlin.OPTION_OUTPUT_DIR,
-    DbProcessorKtorServer.OPTION_KTOR_OUTPUT, DbProcessorRepository.OPTION_OUTPUT_DIR])
+    DbProcessorKtorServer.OPTION_KTOR_OUTPUT, DbProcessorRepository.OPTION_OUTPUT_DIR,
+    DbProcessorSync.OPTION_IMPL_OUTPUT_DIR, DbProcessorSync.OPTION_ABSTRACT_OUTPUT_DIR])
 class AnnotationProcessorWrapper: AbstractProcessor() {
 
     val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(),

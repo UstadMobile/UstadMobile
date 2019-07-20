@@ -35,6 +35,22 @@ fun isModifyingQueryMethod(methodEl: Element) : Boolean {
     return false
 }
 
+val SQL_NUMERIC_TYPES = listOf(BYTE, SHORT, INT, LONG, FLOAT, DOUBLE)
+
+fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
+    "0"
+}else if(typeName == BOOLEAN){
+    "false"
+}else {
+    "null"
+}
+
+fun jdbcDaoTypeSpecBuilder(simpleName: String, superTypeName: TypeName) = TypeSpec.classBuilder(simpleName)
+        .primaryConstructor(FunSpec.constructorBuilder().addParameter("_db",
+                DoorDatabase::class).build())
+        .addProperty(PropertySpec.builder("_db", DoorDatabase::class).initializer("_db").build())
+        .superclass(superTypeName)
+
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected var messager: Messager? = null
@@ -55,6 +71,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val dbs = roundEnv!!.getElementsAnnotatedWith(Database::class.java)
         val dataSource = SQLiteDataSource()
         val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
+        println("Db tmp file: ${dbTmpFile.absolutePath}")
         dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
         messager!!.printMessage(Diagnostic.Kind.NOTE, "Annotation processor db tmp file: ${dbTmpFile.absolutePath}")
 
@@ -123,7 +140,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      */
     //TODO: Check for invalid combos. Cannot have querySql and rawQueryVarName as null. Cannot have rawquery doing update
     fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String?,
-                               enclosing: TypeElement, method: ExecutableElement,
+                               enclosing: TypeElement?, method: ExecutableElement?,
                                resultVarName: String = "_result", rawQueryVarName: String? = null): CodeBlock {
         // The result, with any wrapper (e.g. LiveData or DataSource.Factory) removed
         val resultType = resolveQueryResultType(returnType)
@@ -154,7 +171,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         if(preparedStatementSql != null) {
             val namedParams = getQueryNamedParameters(querySql!!)
             namedParams.forEach { preparedStatementSql = preparedStatementSql!!.replace(":$it", "?") }
-            namedParams.forEach { execStmtSql = execStmtSql!!.replace(":$it", "null") }
+            namedParams.forEach { execStmtSql = execStmtSql!!.replace(":$it",
+                    defaultSqlQueryVal(queryVars[it]!!)) }
         }
 
         if(resultType != UNIT)
@@ -347,7 +365,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         }catch(e: SQLException) {
             logMessage(Diagnostic.Kind.ERROR, "Exception running query SQL '$execStmtSql' : ${e.message}",
                     enclosing = enclosing, element = method,
-                    annotation = method.annotationMirrors.firstOrNull {it.annotationType.asTypeName() == Query::class.asTypeName()})
+                    annotation = method?.annotationMirrors?.firstOrNull {it.annotationType.asTypeName() == Query::class.asTypeName()})
         }
 
         codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
