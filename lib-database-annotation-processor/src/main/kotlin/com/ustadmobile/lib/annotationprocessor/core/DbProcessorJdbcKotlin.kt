@@ -244,9 +244,9 @@ fun resolveQueryResultType(returnTypeName: TypeName)  =
             returnTypeName
         }
 
-fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeName, processingEnv: ProcessingEnvironment): String {
+fun makeInsertAdapterMethodName(paramType: TypeName, returnType: TypeName, processingEnv: ProcessingEnvironment): String {
     var methodName = "insert"
-    if(isList(paramType, processingEnv)) {
+    if(paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()) {
         methodName += "List"
         if(returnType != UNIT)
             methodName += "AndReturnIds"
@@ -677,115 +677,14 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
             return insertFun.build()
         }
 
-        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
-
         val upsertMode = daoMethod.getAnnotation(Insert::class.java).onConflict == OnConflictStrategy.REPLACE
-        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""}"
-        if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
-            val fieldNames = mutableListOf<String>()
-            val parameterHolders = mutableListOf<String>()
-
-            val bindCodeBlock = CodeBlock.builder()
-            var fieldIndex = 1
-            fieldsOnEntity(entityTypeEl).forEach {subEl ->
-                fieldNames.add(subEl.simpleName.toString())
-                val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
-                val setterMethodName = getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())
-                if(pkAnnotation != null && pkAnnotation.autoGenerate) {
-                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
-                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ ${defaultVal(subEl.asType().asTypeName())} " +
-                            "-> stmt.setObject(${fieldIndex}, null) " +
-                            "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})  }\n")
-                }else {
-                    parameterHolders.add("?")
-                    bindCodeBlock.add("stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})\n")
-                }
-            }
-
-            val statementClause = if(upsertMode) {
-                "\${when(_db.jdbcDbType) { DoorDbType.SQLITE -> \"INSERT·OR·REPLACE\" else -> \"INSERT\"} }"
-            }else {
-                "INSERT"
-            }
-
-            val upsertSuffix = if(upsertMode) {
-                val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
-                val nonPkFieldPairs = nonPkFields.map { "${it.simpleName}·=·excluded.${it.simpleName}" }
-                val pkField = entityTypeEl.enclosedElements.firstOrNull { it.getAnnotation(PrimaryKey::class.java) != null }
-                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.simpleName})·" +
-                        "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
-                        "else -> \"·\" } } "
-            } else {
-                ""
-            }
-
-            val sql = """
-                $statementClause INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
-                VALUES (${parameterHolders.joinToString()})
-                $upsertSuffix
-                """.trimIndent()
-
-            val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
-                    .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
-                    .addSuperclassConstructorParameter("_db.jdbcDbType")
-                    .addFunction(FunSpec.builder("makeSql")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addCode("return \"\"\"%L\"\"\"", sql).build())
-                    .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addParameter("stmt", PreparedStatement::class)
-                            .addParameter("entity", entityType.asTypeName())
-                            .addCode(bindCodeBlock.build()).build())
-
-            daoTypeBuilder.addProperty(PropertySpec.builder(entityInserterPropName,
-                    EntityInsertionAdapter::class.asClassName().parameterizedBy(entityType.asTypeName()))
-                    .initializer("%L", insertAdapterSpec.build())
-                    .build())
-        }
-
-
-        val returnType = daoMethodResolved.returnType
-
-        if(resolvedReturnType != UNIT) {
-            insertFun.addCode("val _retVal = ")
-        }
-
-
-        val insertMethodName = makeInsertAdapterMethodName(daoMethodResolved.parameterTypes[0],
-                resolvedReturnType, processingEnv)
-        insertFun.addCode("$entityInserterPropName.$insertMethodName(${daoMethod.parameters[0].simpleName}, _db.openConnection())")
-
-        if(resolvedReturnType != UNIT) {
-            if(isListOrArray(resolvedReturnType)
-                    && resolvedReturnType is ParameterizedTypeName
-                    && resolvedReturnType.typeArguments[0] == INT) {
-                insertFun.addCode(".map { it.toInt() }")
-            }else if(resolvedReturnType == INT){
-                insertFun.addCode(".toInt()")
-            }
-        }
-
-        insertFun.addCode("\n")
-
-        insertFun.addCode("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
-
-        if(resolvedReturnType != UNIT) {
-            insertFun.addCode("return _retVal")
-        }
-
-        if(resolvedReturnType is ParameterizedTypeName
-                && resolvedReturnType.rawType == ARRAY) {
-            insertFun.addCode(".toTypedArray()")
-        }else if(resolvedReturnType == LongArray::class.asClassName()) {
-            insertFun.addCode(".toLongArray()")
-        }else if(resolvedReturnType == IntArray::class.asClassName()) {
-            insertFun.addCode(".toIntArray()")
-        }
-
-        insertFun.addCode("\n")
-
+        val resolvedReturnType = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
+        insertFun.addCode(generateInsertCodeBlock(
+                insertFun.parameters[0],
+                resolvedReturnType, daoTypeBuilder, upsertMode))
         return insertFun.build()
     }
+
 
     fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder,
                          isRawQuery: Boolean = false) : FunSpec {

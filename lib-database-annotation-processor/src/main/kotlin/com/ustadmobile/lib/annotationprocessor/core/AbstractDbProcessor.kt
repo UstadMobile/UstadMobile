@@ -7,15 +7,13 @@ import java.sql.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
-import com.ustadmobile.door.*
 import org.sqlite.SQLiteDataSource
 import java.io.File
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.AnnotationMirror
-import javax.lang.model.element.Element
+import javax.lang.model.element.*
+import com.ustadmobile.door.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 fun isUpdateDeleteOrInsertMethod(methodEl: Element)
         = listOf(Update::class.java, Delete::class.java, Insert::class.java).any { methodEl.getAnnotation(it) != null }
@@ -379,6 +377,148 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         return codeBlock.build()
     }
+
+    /**
+     * Generate a JDBC insert code block. Generates an EntityInsertionAdapter, insert SQL,
+     * and code that will insert from the given parameters
+     *
+     * @param parameterSpec - ParameterSpec representing the entity type to insert. This could be
+     * any POKO with the Entity annotation, or a list thereof
+     * @param returnType - TypeName representing the return value. This can be UNIT for no return type,
+     * a long for a singular insert (return auto generated primary key), or a list of longs (return
+     * all generated primary keys)
+     * @param daoTypeBuilder The TypeBuilder being used to construct the DAO. If not already present,
+     * an entity insertion adapter member variable will be added to the typeBuilder.
+     * @param upsertMode - if true, the query will be generated as an upsert
+     * @param addReturnStmt - if true, a return statement will be added to the codeblock, where the
+     * return type will match the given returnType
+     */
+    fun generateInsertCodeBlock(parameterSpec: ParameterSpec, returnType: TypeName,
+                                   daoTypeBuilder: TypeSpec.Builder,
+                                   upsertMode: Boolean = false,
+                                   addReturnStmt: Boolean = true): CodeBlock {
+        val codeBlock = CodeBlock.builder()
+        val paramType = parameterSpec.type
+        val entityClassName = if(paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()) {
+            val typeArg = paramType.typeArguments[0]
+            if(typeArg is WildcardTypeName) {
+                typeArg.outTypes[0] as ClassName
+            }else {
+                typeArg as ClassName
+            }
+        }else {
+            paramType as ClassName
+        }
+
+        val entityTypeEl = processingEnv.elementUtils.getTypeElement(entityClassName.canonicalName)
+
+        val entityInserterPropName = "_insertAdapter${entityTypeEl.simpleName}_${if(upsertMode) "upsert" else ""}"
+        if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
+            val fieldNames = mutableListOf<String>()
+            val parameterHolders = mutableListOf<String>()
+
+            val bindCodeBlock = CodeBlock.builder()
+            var fieldIndex = 1
+            fieldsOnEntity(entityTypeEl).forEach {subEl ->
+                fieldNames.add(subEl.simpleName.toString())
+                val pkAnnotation = subEl.getAnnotation(PrimaryKey::class.java)
+                val setterMethodName = getPreparedStatementSetterGetterTypeName(subEl.asType().asTypeName())
+                if(pkAnnotation != null && pkAnnotation.autoGenerate) {
+                    parameterHolders.add("\${when(_db.jdbcDbType) { DoorDbType.POSTGRES -> \"COALESCE(?,nextval('${entityTypeEl.simpleName}'))\" else -> \"?\"} }")
+                    bindCodeBlock.add("when(entity.${subEl.simpleName}){ ${defaultVal(subEl.asType().asTypeName())} " +
+                            "-> stmt.setObject(${fieldIndex}, null) " +
+                            "else -> stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})  }\n")
+                }else {
+                    parameterHolders.add("?")
+                    bindCodeBlock.add("stmt.set$setterMethodName(${fieldIndex++}, entity.${subEl.simpleName})\n")
+                }
+            }
+
+            val statementClause = if(upsertMode) {
+                "\${when(_db.jdbcDbType) { DoorDbType.SQLITE -> \"INSERT·OR·REPLACE\" else -> \"INSERT\"} }"
+            }else {
+                "INSERT"
+            }
+
+            val upsertSuffix = if(upsertMode) {
+                val nonPkFields = entityTypeEl.enclosedElements.filter { it.kind == ElementKind.FIELD && it.getAnnotation(PrimaryKey::class.java) == null }
+                val nonPkFieldPairs = nonPkFields.map { "${it.simpleName}·=·excluded.${it.simpleName}" }
+                val pkField = entityTypeEl.enclosedElements.firstOrNull { it.getAnnotation(PrimaryKey::class.java) != null }
+                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.simpleName})·" +
+                        "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
+                        "else -> \"·\" } } "
+            } else {
+                ""
+            }
+
+            val sql = """
+                $statementClause INTO ${entityTypeEl.simpleName} (${fieldNames.joinToString()})
+                VALUES (${parameterHolders.joinToString()})
+                $upsertSuffix
+                """.trimIndent()
+
+            val insertAdapterSpec = TypeSpec.anonymousClassBuilder()
+                    .superclass(EntityInsertionAdapter::class.asClassName().parameterizedBy(entityClassName))
+                    .addSuperclassConstructorParameter("_db.jdbcDbType")
+                    .addFunction(FunSpec.builder("makeSql")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addCode("return \"\"\"%L\"\"\"", sql).build())
+                    .addFunction(FunSpec.builder("bindPreparedStmtToEntity")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addParameter("stmt", PreparedStatement::class)
+                            .addParameter("entity", entityClassName)
+                            .addCode(bindCodeBlock.build()).build())
+
+            daoTypeBuilder.addProperty(PropertySpec.builder(entityInserterPropName,
+                    EntityInsertionAdapter::class.asClassName().parameterizedBy(entityClassName))
+                    .initializer("%L", insertAdapterSpec.build())
+                    .build())
+        }
+
+
+
+        if(returnType != UNIT) {
+            codeBlock.add("val _retVal = ")
+        }
+
+
+        val insertMethodName = makeInsertAdapterMethodName(paramType, returnType, processingEnv)
+        codeBlock.add("$entityInserterPropName.$insertMethodName(${parameterSpec.name}, _db.openConnection())")
+
+        if(returnType != UNIT) {
+            if(isListOrArray(returnType)
+                    && returnType is ParameterizedTypeName
+                    && returnType.typeArguments[0] == INT) {
+                codeBlock.add(".map { it.toInt() }")
+            }else if(returnType == INT){
+                codeBlock.add(".toInt()")
+            }
+        }
+
+        codeBlock.add("\n")
+
+        codeBlock.add("_db.handleTableChanged(listOf(%S))\n", entityTypeEl.simpleName)
+
+        if(addReturnStmt) {
+            if(returnType != UNIT) {
+                codeBlock.add("return _retVal")
+            }
+
+            if(returnType is ParameterizedTypeName
+                    && returnType.rawType == ARRAY) {
+                codeBlock.add(".toTypedArray()")
+            }else if(returnType == LongArray::class.asClassName()) {
+                codeBlock.add(".toLongArray()")
+            }else if(returnType == IntArray::class.asClassName()) {
+                codeBlock.add(".toIntArray()")
+            }
+        }
+
+        codeBlock.add("\n")
+
+        return codeBlock.build()
+    }
+
 
     fun logMessage(kind: Diagnostic.Kind, message: String, enclosing: TypeElement? = null,
                    element: Element? = null, annotation: AnnotationMirror? = null) {

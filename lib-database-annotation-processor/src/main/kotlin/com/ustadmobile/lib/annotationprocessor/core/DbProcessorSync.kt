@@ -1,9 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.PrimaryKey
-import androidx.room.Query
+import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.*
 import java.io.File
@@ -66,6 +63,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addModifiers(KModifier.ABSTRACT)
         val abstractFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 abstractDaoSimpleName)
+                .addImport("com.ustadmobile.door", "DoorDbType")
 
 
         val implDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_IMPL"
@@ -74,12 +72,13 @@ class DbProcessorSync: AbstractDbProcessor() {
         val implDaoTypeSpec = jdbcDaoTypeSpecBuilder(implDaoSimpleName, abstractDaoClassName)
         val implFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 implDaoSimpleName)
+                .addImport("com.ustadmobile.door", "DoorDbType")
 
         entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}.forEach {entityType ->
             val entityPkField = entityType.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
             val entityLastModifiedField = entityType.enclosedElements.first { it.getAnnotation(LastChangedBy::class.java) != null}
             val entitySyncTracker = getEntitySyncTracker(entityType, processingEnv)
-            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker)
+            val entitySyncTrackerEl = processingEnv.typeUtils.asElement(entitySyncTracker) as TypeElement
             val entityLocalCsnFieldEl = entityType.enclosedElements
                     .first { it.getAnnotation(LocalChangeSeqNum::class.java) != null}
             val entitySyncTrackCsnField = entitySyncTrackerEl.enclosedElements
@@ -89,6 +88,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
                     .first {it.getAnnotation(TrackDestId::class.java) != null}
             val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
+            val entitySyncTrackerListClassName = List::class.asClassName().parameterizedBy(entitySyncTrackerEl.asClassName())
 
             //Generate the find local unsent changes function for this entity
             val findLocalUnsentSql = "SELECT * FROM " +
@@ -127,12 +127,45 @@ class DbProcessorSync: AbstractDbProcessor() {
                             entityListClassName, findUnsentParamsList)
             abstractDaoTypeSpec.addFunction(abstractMasterUnsentChangeFun)
             implDaoTypeSpec.addFunction(implMasterUnsentChangeFun)
+
+            //generate an upsert function for the entity itself
+            val (abstractInsertEntityFun, implInsertEntityFun) = generateAbstractAndImplUpsertFuns(
+                    "_replace${entityType.simpleName}",
+                    ParameterSpec.builder("_entities", entityListClassName).build(),
+                    implDaoTypeSpec)
+            abstractDaoTypeSpec.addFunction(abstractInsertEntityFun)
+            implDaoTypeSpec.addFunction(implInsertEntityFun)
+
+            val (abstractInsertTrackerFun, implInsertTrackerFun) = generateAbstractAndImplUpsertFuns(
+                    "_replace${entitySyncTrackerEl.simpleName}",
+                    ParameterSpec.builder("_entities", entitySyncTrackerListClassName).build(),
+                    implDaoTypeSpec)
+            abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
+            implDaoTypeSpec.addFunction(implInsertTrackerFun)
         }
 
 
         abstractFileSpec.addType(abstractDaoTypeSpec.build())
         implFileSpec.addType(implDaoTypeSpec.build())
         return Pair(abstractFileSpec.build(), implFileSpec.build())
+    }
+
+    private fun generateAbstractAndImplUpsertFuns(funName: String, paramSpec: ParameterSpec,
+                                                  daoTypeBuilder: TypeSpec.Builder): Pair<FunSpec, FunSpec> {
+        val funBuilders = (0..1).map {
+            FunSpec.builder(funName)
+                    .returns(UNIT)
+                    .addParameter(paramSpec)
+        }
+        funBuilders[0].addModifiers(KModifier.ABSTRACT)
+        funBuilders[0].addAnnotation(AnnotationSpec.builder(Insert::class)
+                .addMember("onConflict = %T.REPLACE", OnConflictStrategy::class).build())
+
+        funBuilders[1].addModifiers(KModifier.OVERRIDE)
+        funBuilders[1].addCode(generateInsertCodeBlock(paramSpec, UNIT, daoTypeBuilder,
+                true))
+
+        return Pair(funBuilders[0].build(), funBuilders[1].build())
     }
 
     private fun generateAbstractAndImplQueryFunSpecs(querySql: String,
