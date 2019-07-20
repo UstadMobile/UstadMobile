@@ -8,7 +8,10 @@ import com.ustadmobile.door.annotation.*
 data class ExampleSyncableEntityTracker(@PrimaryKey var pk: Long = 0,
                                         @TrackerEntityPrimaryKey var eUid: Long = 0,
                                         @TrackDestId var clientId: Int = 0,
-                                        @TrackerChangeSeqNum var lastCsn: Int = 0)
+                                        @TrackerChangeSeqNum var lastCsn: Int = 0,
+                                        @TrackerReceived var received: Boolean = false,
+                                        @TrackerRequestId var reqId: Int = 0,
+                                        @TrackerTimestamp var ts: Long = 0)
 
 @Entity
 @SyncableEntity(tableId = 42, syncTrackerEntity = ExampleSyncableEntityTracker::class)

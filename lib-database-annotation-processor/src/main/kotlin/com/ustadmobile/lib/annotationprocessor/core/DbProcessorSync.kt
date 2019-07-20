@@ -87,6 +87,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .first {it.getAnnotation(TrackerEntityPrimaryKey::class.java) != null}
             val entitySyncTrackerDestField = entitySyncTrackerEl.enclosedElements
                     .first {it.getAnnotation(TrackDestId::class.java) != null}
+            val entitySyncTrackerReceivedField = entitySyncTrackerEl.enclosedElements
+                    .first {it.getAnnotation(TrackerReceived::class.java) != null}
+            val entitySyncTrackerReqIdField = entitySyncTrackerEl.enclosedElements
+                    .first {it.getAnnotation(TrackerRequestId::class.java) != null}
             val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
             val entitySyncTrackerListClassName = List::class.asClassName().parameterizedBy(entitySyncTrackerEl.asClassName())
 
@@ -142,6 +146,19 @@ class DbProcessorSync: AbstractDbProcessor() {
                     implDaoTypeSpec)
             abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
             implDaoTypeSpec.addFunction(implInsertTrackerFun)
+
+            //generate an update function that can be used to set the status of the sync tracker
+            val updateTrackerReceivedSql = "UPDATE ${entitySyncTrackerEl.simpleName} SET " +
+                    "${entitySyncTrackerReceivedField.simpleName} = :status WHERE " +
+                    "${entitySyncTrackerReqIdField.simpleName} = :requestId"
+            val (abstractUpdateTrackerFun, implUpdateTrackerFun) =
+                    generateAbstractAndImplQueryFunSpecs(updateTrackerReceivedSql,
+                            "_update${entitySyncTrackerEl.simpleName}Received",
+                            UNIT, listOf(ParameterSpec.builder("status", BOOLEAN).build(),
+                            ParameterSpec.builder("requestId", INT).build()),
+                            addReturnStmt = false)
+            abstractDaoTypeSpec.addFunction(abstractUpdateTrackerFun)
+            implDaoTypeSpec.addFunction(implUpdateTrackerFun)
         }
 
 
@@ -171,7 +188,8 @@ class DbProcessorSync: AbstractDbProcessor() {
     private fun generateAbstractAndImplQueryFunSpecs(querySql: String,
                                              funName: String,
                                              returnType: TypeName,
-                                             params: List<ParameterSpec>): Pair<FunSpec, FunSpec> {
+                                             params: List<ParameterSpec>,
+                                             addReturnStmt: Boolean = true): Pair<FunSpec, FunSpec> {
         val funBuilders = (0..1).map {
             FunSpec.builder(funName)
                     .returns(returnType)
@@ -187,7 +205,10 @@ class DbProcessorSync: AbstractDbProcessor() {
         funBuilders[1].addCode(generateQueryCodeBlock(returnType,
                 params.map { it.name to it.type}.toMap(), querySql,
                 null, null))
-                .addCode("return _result\n")
+
+        if(addReturnStmt) {
+            funBuilders[1].addCode("return _result\n")
+        }
 
         return Pair(funBuilders[0].build(), funBuilders[1].build())
     }

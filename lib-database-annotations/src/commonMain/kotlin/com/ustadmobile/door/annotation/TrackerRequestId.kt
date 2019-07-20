@@ -4,6 +4,6 @@ package com.ustadmobile.door.annotation
 @Target(AnnotationTarget.FIELD)
 
 /**
- * Field that represents the destination that the entity was sent to
+ * Represents the requestId
  */
-annotation class TrackDestId
+annotation class TrackerRequestId

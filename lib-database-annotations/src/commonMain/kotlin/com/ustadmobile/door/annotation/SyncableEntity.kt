@@ -10,5 +10,7 @@ import kotlin.reflect.KClass
  *
  * 1. Modify the primary key generation to ensure that primary keys don't collide
  * 2. Require that the entity contains a local and master change sequence number.
+ * 3. Require that a syncTrackerEntity is specified. This will be used to track the delivery of
+ * changes. It must have annotation for the Tracker* annotations
  */
 annotation class SyncableEntity(val tableId: Int, val syncTrackerEntity: KClass<*>)
