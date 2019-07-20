@@ -153,9 +153,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
                 ACTION_PAUSE_DOWNLOAD -> if (notificationHolder != null) {
                     GlobalScope.launch {
-                        umAppDatabase!!.downloadJobDao
-                                .updateJobAndItems(downloadJobId, JobStatus.PAUSED,
+                        umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobId, JobStatus.PAUSED,
                                         JobStatus.PAUSING)
+                        networkManagerBle!!.removeDownloadChangeListener(this@DownloadNotificationService)
                     }
                 }else{
                     stopForegroundService()
@@ -166,6 +166,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                         umAppDatabase!!.downloadJobDao
                                 .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
                                         JobStatus.CANCELLING)
+                        if(downloadJobIdToNotificationMap.size == 1){
+                            stopForegroundService()
+                        }
                     }
                 }else{
                     stopForegroundService()

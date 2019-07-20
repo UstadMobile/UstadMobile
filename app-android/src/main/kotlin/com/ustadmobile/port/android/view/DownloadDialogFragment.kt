@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Handler
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
@@ -15,15 +14,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import java.io.File
 import java.util.*
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import java.util.concurrent.TimeUnit
 
 
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
@@ -59,8 +57,11 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     internal var viewIdMap = HashMap<Int, Int>()
 
+    private lateinit var activity: UstadBaseActivity
+
     override fun onAttach(context: Context?) {
         if (context is UstadBaseActivity) {
+            activity = context
             context.runAfterServiceConnection(Runnable{
                 context.runOnUiThread {
                     managerBle = context.networkManagerBle!!
@@ -235,5 +236,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView, Dialog
 
     override fun onNothingSelected(parent: AdapterView<*>) {
         mPresenter!!.handleStorageOptionSelection(storageDirs[0].dirURI!!)
+    }
+
+    override fun cancelOrPauseDownload(jobId: Long, cancel: Boolean) {
+        activity.stopForeGroundService(jobId, cancel)
     }
 }

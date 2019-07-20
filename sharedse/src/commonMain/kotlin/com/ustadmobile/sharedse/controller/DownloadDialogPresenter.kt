@@ -226,7 +226,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             STACKED_BUTTON_PAUSE -> GlobalScope.launch {
                 appDatabase.downloadJobDao.updateJobAndItems(currentJobId,
                         JobStatus.PAUSED, JobStatus.PAUSING)
-            }.start()
+                view.cancelOrPauseDownload(currentJobId.toLong(), false)
+            }
 
             STACKED_BUTTON_CONTINUE -> continueDownloading()
 
@@ -253,7 +254,8 @@ class DownloadDialogPresenter(context: Any, private val networkManagerBle: Netwo
             appDatabase.downloadJobDao
                     .updateJobAndItems(currentJobId, JobStatus.CANCELED,
                             JobStatus.CANCELLING)
-        }.start()
+            view.cancelOrPauseDownload(currentJobId.toLong(), true)
+        }
     }
 
     fun handleWiFiOnlyOption(wifiOnly: Boolean) {
