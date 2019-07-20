@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -12,6 +13,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.controller.ContentEntryListFragmentPresenter.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
@@ -29,6 +31,7 @@ import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
 
@@ -46,6 +49,12 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView {
         viewPager.adapter = LibraryPagerAdapter(supportFragmentManager, this)
         val tabLayout = findViewById<TabLayout>(R.id.tabs)
         tabLayout.setupWithViewPager(viewPager)
+
+        findViewById<FloatingTextButton>(R.id.download_all).setOnClickListener {
+            val args = HashMap<String, String>()
+            args["contentEntryUid"] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
+            UstadMobileSystemImpl.instance.go("DownloadDialog", args, this@HomeActivity)
+        }
 
 
     }
