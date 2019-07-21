@@ -21,6 +21,12 @@ object UmAccountManager {
 
     private const val PREFKEY_PASSWORD_HASH = "umaccount.passwordhash"
 
+    private const val PREFKEY_FINGERPRINT_USERNAME = "umaccount.fingerprintusername"
+    private const val PREFKEY_FINGERPRINT_PERSON_ID = "umaccount.fingerprintpersonid"
+    private const val PREFKEY_PASSWORD_HASH_PERSONUID = "umaccount.passwordhashpersonuid"
+    const val PREFKEY_PASSWORD_HASH_USERNAME = "umaccount.passwordhashusername"
+    private const val PREFKEY_FINGERPRIT_ACCESS_TOKEN = "umaccount.fingerprintaccesstoken"
+
     @Synchronized
     fun getActiveAccount(context: Any, impl: UstadMobileSystemImpl): UmAccount? {
         if (activeAccount == null) {
@@ -66,7 +72,7 @@ object UmAccountManager {
             impl.setAppPref(PREFKEY_ENDPOINT_URL, account.endpointUrl, context)
         } else {
             impl.setAppPref(PREFKEY_PERSON_ID, "0", context)
-            impl.setAppPref(PREFKEY_USERNAME, null, context)
+            impl.setAppPref(PREFKEY_USERNAME, "", context)
             impl.setAppPref(PREFKEY_ACCESS_TOKEN, null, context)
             impl.setAppPref(PREFKEY_ENDPOINT_URL, null, context)
         }
@@ -99,6 +105,51 @@ object UmAccountManager {
             UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
                     "http://localhost", context)
         }
+    }
+
+    @Synchronized fun setFingerprintUsername(username:String?, context:Any,
+                                             impl:UstadMobileSystemImpl) {
+        impl.setAppPref(PREFKEY_FINGERPRINT_USERNAME, username, context)
+    }
+    @Synchronized fun getFingerprintUsername(context:Any,
+                                             impl:UstadMobileSystemImpl):String? {
+        return impl.getAppPref(PREFKEY_FINGERPRINT_USERNAME, context)
+    }
+    @Synchronized fun setFingerprintPersonId(personId:Long, context:Any,
+                                             impl:UstadMobileSystemImpl) {
+        impl.setAppPref(PREFKEY_FINGERPRINT_PERSON_ID, (personId).toString(), context)
+    }
+    @Synchronized fun getFingerprintPersonId(context:Any,
+                                             impl:UstadMobileSystemImpl):String? {
+        return impl.getAppPref(PREFKEY_FINGERPRINT_PERSON_ID, context)
+    }
+    @Synchronized fun getFingerprintAuth(context:Any,
+                                         impl:UstadMobileSystemImpl):String? {
+        return impl.getAppPref(PREFKEY_FINGERPRIT_ACCESS_TOKEN, context)
+    }
+    @Synchronized fun setFringerprintAuth(auth:String?, context:Any,
+                                          impl:UstadMobileSystemImpl) {
+        impl.setAppPref(PREFKEY_FINGERPRIT_ACCESS_TOKEN, auth, context)
+    }
+    fun updateCredCache(username:String, personUid:Long, passwordHash:String, context:Any,
+                        impl:UstadMobileSystemImpl) {
+        impl.setAppPref(PREFKEY_PASSWORD_HASH, passwordHash, context)
+        impl.setAppPref(PREFKEY_PASSWORD_HASH_PERSONUID, (personUid).toString(), context)
+        impl.setAppPref(PREFKEY_PASSWORD_HASH_USERNAME, username, context)
+    }
+    fun checkCredCache(username:String, passwordHash:String, context:Any,
+                       impl:UstadMobileSystemImpl):Boolean {
+        if (username == impl.getAppPref(PREFKEY_PASSWORD_HASH_USERNAME, context))
+        {
+            if (passwordHash == impl.getAppPref(PREFKEY_PASSWORD_HASH, context))
+            {
+                return true
+            }
+        }
+        return false
+    }
+    fun getCachedPersonUid(context:Any, impl:UstadMobileSystemImpl):Long {
+        return impl.getAppPref(PREFKEY_PASSWORD_HASH_PERSONUID, context)!!.toLong()
     }
 
 }

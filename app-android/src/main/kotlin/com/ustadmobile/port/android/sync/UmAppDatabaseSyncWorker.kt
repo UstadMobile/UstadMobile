@@ -7,6 +7,11 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import java.util.concurrent.TimeUnit
+import androidx.work.WorkManager
+import androidx.work.OneTimeWorkRequest
+import androidx.work.ExistingWorkPolicy
+
+
 
 class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
@@ -53,6 +58,19 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
                     .setConstraints(workConstraint)
                     .build()
             WorkManager.getInstance().enqueue(request)
+        }
+
+        fun queueSyncWorkerWithPolicy(delay: Long, timeUnit: TimeUnit,
+                                      policy: ExistingWorkPolicy) {
+            val workConstraint = Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            val request = OneTimeWorkRequest.Builder(UmAppDatabaseSyncWorker::class.java)
+                    .setInitialDelay(delay, timeUnit)
+                    .addTag(TAG)
+                    .setConstraints(workConstraint)
+                    .build()
+            WorkManager.getInstance().enqueueUniqueWork(TAG, policy, request)
         }
     }
 }

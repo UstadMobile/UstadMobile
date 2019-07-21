@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
@@ -24,12 +25,18 @@ import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ACTION_LOCALE_CHANGE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
+import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.Login2View.Companion.ARG_LOGIN_USERNAME
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.ViewWithErrorNotifier
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.port.android.impl.LastActive
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
@@ -39,6 +46,9 @@ import kotlinx.coroutines.Runnable
 import org.acra.ACRA
 import java.lang.ref.WeakReference
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.collections.HashMap
+
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -46,7 +56,8 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
+        UstadViewWithNotifications, ViewWithErrorNotifier, ShakeDetector.Listener {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -91,6 +102,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var permission: String? = null
 
+    var checkLogout:Boolean = true
+
+    val PREFKEY_LAST_ACTIVE = "prefke.lastactive"
+    val TIMEOUT_LOGOUT = 600000L
+
 
     private val mSyncServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -128,18 +144,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
 
-    /**
-     * Handles internal locale changes. When the user changes the locale using the system settings
-     * Android will take care of destroying and recreating the activity.
-     */
-    private val mLocaleChangeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                UstadMobileSystemImpl.ACTION_LOCALE_CHANGE -> localeChanged = true
-            }
-        }
-    }
-
     override val viewContext: Any
         get() = this
 
@@ -149,9 +153,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
         val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_LOCALE_CHANGE)
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
-                intentFilter)
+
         super.onCreate(savedInstanceState)
         localeOnCreate = instance.getDisplayedLocale(this)
 
@@ -227,6 +229,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onResume() {
         super.onResume()
+
+        checkTimeout()
+
+
         if (localeChanged) {
             if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
                 Handler().postDelayed({ this.recreate() }, 200)
@@ -278,8 +284,66 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     public override fun onStart() {
         isStarted = true
+        checkTimeout()
         super.onStart()
     }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val systemTime = AtomicLong(UMCalendarUtil.getDateInMilliPlusDays(0))
+        updateLastActive(systemTime)
+
+        return super.onTouchEvent(event)
+    }
+
+    fun updateLastActive(time: AtomicLong){
+        LastActive.instance.lastActive = time
+        val impl = instance
+        impl.setAppPref(PREFKEY_LAST_ACTIVE, time.toString(), viewContext)
+    }
+
+    private fun checkTimeout() {
+        val impl = instance
+        val lastInputEventTime = LastActive.instance.lastActive
+        var lt:Long
+        var lastActiveString = impl.getAppPref(PREFKEY_LAST_ACTIVE, viewContext)
+        if (lastActiveString != null && !lastActiveString.isEmpty())
+        {
+            lt = java.lang.Long.parseLong(lastActiveString)
+        }
+        else
+        {
+            lt = 0
+        }
+        val timeoutExceeded = System.currentTimeMillis() - lt
+        val logoutTimeout = TIMEOUT_LOGOUT //TODO: Get and set from app pref
+        if (timeoutExceeded > logoutTimeout)
+        {
+            handleLogout()
+        }
+    }
+
+    private fun handleLogout() {
+        if (checkLogout)
+        {
+            var currentUsername:String ?= null
+            if (UmAccountManager.getActiveAccount(viewContext) != null)
+            {
+                currentUsername = UmAccountManager.getActiveAccount(viewContext)!!.username
+            }
+            finishAffinity()
+            val blankAccount = UmAccount(0, null, null,null)
+            UmAccountManager.setActiveAccount(blankAccount, viewContext)
+            val impl = UstadMobileSystemImpl.instance
+            val args = HashMap<String, String>()
+            if (currentUsername != null)
+            {
+                args.put(ARG_LOGIN_USERNAME, currentUsername)
+            }
+            impl.go(Login2View.VIEW_NAME, args, viewContext)
+        }
+    }
+
+
 
     public override fun onStop() {
         isStarted = false
@@ -291,7 +355,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             unbindService(bleServiceConnection)
         }
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver)
         instance.handleActivityDestroy(this)
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection)
@@ -446,5 +509,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     companion object {
 
         private const val RUN_TIME_REQUEST_CODE = 111
+        const val ACTION_REMINDER_NOTIFICATION = 752
     }
 }

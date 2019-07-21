@@ -152,14 +152,13 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
 
         valueSeekbar.setMaxValue(100000F)
         valueSeekbar.setMinValue(0F)
-        valueSeekbar.setOnRangeSeekbarChangeListener(
-                { minValue, maxValue ->
-            updateValueRangeOnView(minValue as Int, maxValue as Int)
-            apl = minValue
-            aph = maxValue
+        valueSeekbar.setOnRangeSeekbarChangeListener { minValue, maxValue ->
+            updateValueRangeOnView(minValue.toInt() , maxValue.toInt())
+            apl = minValue.toInt()
+            aph = maxValue.toInt()
 
             mPresenter!!.updateFilter(apl, aph, currentValue)
-        })
+        }
 
         updateValueRangeOnView(0, 100000)
 

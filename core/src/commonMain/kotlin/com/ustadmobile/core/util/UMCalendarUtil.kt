@@ -103,7 +103,7 @@ object UMCalendarUtil {
      * @param locale    Locale
      * @return          String "23/Jan/1989"
      */
-    fun getPrettyDateSimpleFromLong(thisDate:Long,locale:Any):String{
+    fun getPrettyDateSimpleFromLong(thisDate:Long,locale:Any?):String{
         return getPrettyDateSuperSimpleFromLong(thisDate)
     }
 }

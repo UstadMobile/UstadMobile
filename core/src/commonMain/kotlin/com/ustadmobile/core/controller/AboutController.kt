@@ -49,6 +49,12 @@ class AboutController(context: Any, args: Map<String, String>?, view: AboutView)
         view.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))
         view.setAboutHTML(aboutHTMLStr!!)
+
+        val currentApiUrl:String = impl.getAppConfigString("apiUrl",
+                "http://localhost", context).toString()
+        view.setVersionInfo(impl.getVersion(context) + " - " +
+                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)) + "\n" +
+                "API: " + currentApiUrl + "\n")
     }
 
 }

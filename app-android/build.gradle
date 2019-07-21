@@ -382,6 +382,10 @@ dependencies {
     //Recycler tree view library
     implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
 
+    // shake detector
+    implementation "com.squareup:seismic:$version_android_seismic"
+
+
     //end of Goldozi speicific//
 
     androidTestImplementation "junit:junit:$version_junit"

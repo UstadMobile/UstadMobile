@@ -19,9 +19,18 @@ interface Login2View : UstadView {
     @JsName("setPassword")
     fun setPassword(password: String)
 
+    fun forceSync()
+
+    fun updateLastActive()
+
+    fun updateUsername(username: String)
+
+    fun setFinishAfficinityOnView()
+
     companion object {
 
         const val VIEW_NAME = "Login"
+        const val ARG_LOGIN_USERNAME = "LoginUsername"
     }
 
 }
