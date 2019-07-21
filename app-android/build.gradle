@@ -55,9 +55,9 @@ tasks.whenTaskAdded { task ->
 
 android {
     sourceSets {
-        main.res.srcDirs = ["src/main/res"]
         main.assets.srcDirs += "../core/src/main/assets/"
         main.res.srcDirs += "../core/locale/main/"
+        main.java.srcDirs += "build/generated/source/umlocale/"
     }
 
     compileOptions {
@@ -188,7 +188,7 @@ gradle.taskGraph.useFilter { task ->
 //connectedCheck.dependsOn(":lib-http-testserver:startDaemon")
 
 task generateCoreStringToAndroidResMap {
-    inputs.files("core/locale/main/*.xml")
+    inputs.files("../core/locale/main/**/*.xml")
     onlyIf {
         /*
          Only run this task if the input files have been updated since the task was last run.
@@ -254,7 +254,12 @@ task generateCoreStringToAndroidResMap {
         outFile.setText(genSrcHeader + genSrcBody + genSrcFooter, "UTF-8")
     }
 }
-assemble.dependsOn(generateCoreStringToAndroidResMap)
+tasks.whenTaskAdded { task ->
+    if(task.name.startsWith("compile") || task.name.startsWith("assemble")) {
+        task.dependsOn(generateCoreStringToAndroidResMap)
+    }
+}
+
 
 configurations.all {
     resolutionStrategy {
