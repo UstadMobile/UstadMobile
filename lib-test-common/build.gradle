@@ -46,7 +46,7 @@ kotlin {
             dependencies {
                 implementation kotlin("stdlib-common:$version_kotlin")
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
-                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
+                implementation "com.soywiz:klock-metadata:$version_klock"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly project(":lib-door-runtime")
@@ -65,6 +65,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.soywiz:klock-jvm:$version_klock"
             }
         }
 
@@ -72,7 +73,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
-
+                implementation "com.soywiz:klock-android:$version_klock"
                 implementation project(":lib-database-android")
                 implementation "androidx.room:room-runtime:$version_android_room"
             }
