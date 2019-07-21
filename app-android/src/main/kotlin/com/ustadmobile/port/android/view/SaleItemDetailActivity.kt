@@ -29,33 +29,36 @@ import com.ustadmobile.core.view.SaleItemDetailView
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemReminder
 import com.ustadmobile.port.android.impl.ReminderReceiver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
 
-    private var toolbar: Toolbar? = null
+    private lateinit var toolbar: Toolbar
     private var mPresenter: SaleItemDetailPresenter? = null
-    private var menu: Menu? = null
+    private lateinit var menu: Menu
 
-    private var totalTV: TextView? = null
-    private var saleRB: RadioButton? = null
-    private var preOrderRB: RadioButton? = null
-    private var quantityNP: NumberPicker? = null
-    private var pppNP: NumberPicker? = null
-    private var pppNPET: EditText? = null
-    private var quantityNPET: EditText? = null
+    private lateinit var totalTV: TextView
+    private lateinit var saleRB: RadioButton
+    private lateinit var preOrderRB: RadioButton
+    private lateinit var quantityNP: NumberPicker
+    private lateinit var pppNP: NumberPicker
+    private lateinit var pppNPET: EditText
+    private lateinit var quantityNPET: EditText
     private var quantityDefaultValue = 1
     internal var pppDefaultValue = 0
     internal var minValue = 0
     internal var maxValue = 99990
 
-    private var preOrderHline: View? = null
-    private var orderDueDateTV: TextView? = null
-    private var orderDueDateET: EditText? = null
+    private lateinit var preOrderHline: View
+    private lateinit var orderDueDateTV: TextView
+    private lateinit var orderDueDateET: EditText
 
-    private var reminderHline: View? = null
-    private var addReminderTV: TextView? = null
-    private var remindersRV: RecyclerView? = null
+    private lateinit var reminderHline: View
+    private lateinit var addReminderTV: TextView
+    private lateinit var remindersRV: RecyclerView
 
     private var preOrderSelected = false
     /**
@@ -123,8 +126,8 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         reminderHline = findViewById(R.id.activity_sale_item_detil_notification_hline)
         addReminderTV = findViewById(R.id.activity_sale_item_detail_add_reminder_tv)
         remindersRV = findViewById(R.id.activity_sale_item_detail_reminder_rv)
-        val pRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-        remindersRV!!.layoutManager = pRecyclerLayoutManager
+        val pRecyclerLayoutManager = LinearLayoutManager(this)
+        remindersRV.layoutManager = pRecyclerLayoutManager
 
         //Date
         val myCalendar = Calendar.getInstance()
@@ -241,14 +244,18 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
                         this, applicationContext)
 
         // get the provider, set , observe, etc.
-        val data = LivePagedListBuilder(factory, 20).build()
+        val data =
+                LivePagedListBuilder(factory, 20).build()
 
         //Observe the data:
-        data.observe(this,
-                Observer<PagedList<SaleItemReminder>> { recyclerAdapter.submitList(it) })
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            data.observe(thisP,
+                    Observer<PagedList<SaleItemReminder>> { recyclerAdapter.submitList(it) })
+        }
 
         //set the adapter
-        runOnUiThread { remindersRV!!.adapter = recyclerAdapter }
+         remindersRV!!.adapter = recyclerAdapter
 
     }
 

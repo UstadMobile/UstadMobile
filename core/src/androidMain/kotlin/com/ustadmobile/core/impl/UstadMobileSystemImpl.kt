@@ -114,7 +114,7 @@ actual class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SaleDetailSignatureView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDetailSignatureActivity"),
             SelectDateRangeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectDateRangeDialogFragment"),
             AddReminderDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AddReminderDialogFragment"),
-            //TOOD: Sprint 5
+            //TODO: Sprint 5
 //            ReportOptionsDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportOptionsDetailActivity"),
 //            ReportDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ReportDetailActivity"),
             SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
