@@ -10,7 +10,9 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.OPTION_KTOR_OUTPUT
+import io.ktor.routing.Route
+import com.ustadmobile.door.*
 
 fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment): TypeMirror? {
     val syncEntityAnnotationIndex = entityEl.annotationMirrors.map {processingEnv.typeUtils.asElement(it.annotationType) as TypeElement }
@@ -25,19 +27,21 @@ fun getEntitySyncTracker(entityEl: Element, processingEnv: ProcessingEnvironment
 
 class DbProcessorSync: AbstractDbProcessor() {
 
+    data class OutputDirs(val abstractOutputArg: String?, val implOutputArg: String?,
+                          val ktorRouteOutputArg: String?)
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
 
-        val (abstractOutputArg, implOutputArg) = Pair(processingEnv.options[OPTION_ABSTRACT_OUTPUT_DIR],
-                processingEnv.options[OPTION_IMPL_OUTPUT_DIR])
-        val (abstractOutputDir, implOutputDir) = listOf(abstractOutputArg, implOutputArg)
+        val (abstractOutputArg, implOutputArg, syncKtorRouteOutputArg) = OutputDirs(processingEnv.options[OPTION_ABSTRACT_OUTPUT_DIR],
+                processingEnv.options[OPTION_IMPL_OUTPUT_DIR], processingEnv.options[OPTION_KTOR_OUTPUT])
+        val (abstractOutputDir, implOutputDir, syncKtorRouteOutputDir) = listOf(abstractOutputArg, implOutputArg, syncKtorRouteOutputArg)
                 .map {
                     if (it == null || it == "filer") {
                         processingEnv.options["kapt.kotlin.generated"]!!
                     } else {
                         implOutputArg!!
                     }
-                }.zipWithNext()[0]
+                }
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         for(dbTypeEl in dbs) {
@@ -45,9 +49,48 @@ class DbProcessorSync: AbstractDbProcessor() {
 
             abstractFileSpec.writeTo(File(abstractOutputDir))
             implFileSpec.writeTo(File(implOutputDir))
+
+            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
+            syncRouteFileSpec.writeTo(File(syncKtorRouteOutputDir))
         }
 
         return true
+    }
+
+    fun generateSyncKtorRoute(dbType: TypeElement): FileSpec {
+        val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
+        val abstractDaoClassName = ClassName(pkgNameOfElement(dbType, processingEnv),
+                abstractDaoSimpleName)
+        val routeFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
+                "${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
+        val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
+                .receiver(Route::class)
+                .addParameter("_syncDao", abstractDaoClassName)
+        val callMemberName = MemberName("io.ktor.application", "call")
+
+        val codeBlock = CodeBlock.builder()
+        codeBlock.beginControlFlow("%M(%S)",
+                MemberName("io.ktor.routing", "route"), "sync")
+        syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
+            codeBlock.beginControlFlow("%M(%S)",
+                    MemberName("io.ktor.routing", "post"), entityType.simpleName)
+                    .add("val _clientNodeId = %M.request.%M(%S)?.toInt() ?: 0\n",
+                            callMemberName,
+                            MemberName("io.ktor.request","header"),
+                            "X-nid")
+                    .add("val _incomingRequest = %M.%M<%T>()\n", callMemberName,
+                            MemberName("io.ktor.request", "receive"),
+                            SyncRequest::class.asClassName().parameterizedBy(entityType.asClassName()))
+                    .add("val _changeToSend = _syncDao._find${entityType.simpleName}LocalUnsentChanges(_clientNodeId, 100)\n")
+
+            codeBlock.endControlFlow()
+
+        }
+        codeBlock.endControlFlow()
+
+        daoRouteFn.addCode(codeBlock.build())
+        routeFileSpec.addFunction(daoRouteFn.build())
+        return routeFileSpec.build()
     }
 
     /**
@@ -74,7 +117,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                 implDaoSimpleName)
                 .addImport("com.ustadmobile.door", "DoorDbType")
 
-        entityTypesOnDb(dbType, processingEnv).filter { it.getAnnotation(SyncableEntity::class.java) != null}.forEach {entityType ->
+        //was .filter { it.getAnnotation(SyncableEntity::class.java) != null}
+        syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val entityPkField = entityType.enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null }
             val entityLastModifiedField = entityType.enclosedElements.first { it.getAnnotation(LastChangedBy::class.java) != null}
             val entitySyncTracker = getEntitySyncTracker(entityType, processingEnv)
@@ -224,7 +268,7 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         const val SUFFIX_SYNCDAO_IMPL = "SyncDaoImpl"
 
-
+        const val SUFFIX_SYNC_ROUTE = "SyncRoute"
     }
 
 }

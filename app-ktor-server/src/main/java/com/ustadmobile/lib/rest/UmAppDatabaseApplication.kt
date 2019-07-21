@@ -36,7 +36,6 @@ fun Route.DaoName(dao: ContentEntryDao) {
         get("findByUidAsync") {
             val person = call.receive<Person>()
             val result = dao.findByUidAsync(call.request.queryParameters["entryUid"]?.toLong() ?: 0L)
-
             if(result != null) {
                 call.respond(result)
             }else {
