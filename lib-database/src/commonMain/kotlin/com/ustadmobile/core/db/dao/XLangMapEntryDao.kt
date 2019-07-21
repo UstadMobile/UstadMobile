@@ -23,7 +23,7 @@ abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
     @Query("SELECT verbLangMapUid, valueLangMap FROM XLangMapEntry " +
             "WHERE verbLangMapUid != 0 AND " +
             "verbLangMapUid IN (:uidList)")
-    abstract fun getAllVerbsInList(uidList: List<Long>): List<Verb>
+    abstract suspend fun getAllVerbsInList(uidList: List<Long>): List<Verb>
 
     data class Verb(var verbLangMapUid: Long = 0, var valueLangMap: String = "") {
 

@@ -12,6 +12,8 @@ import com.ustadmobile.core.controller.XapiReportOptions.Companion.listOfGraphs
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.xAxisList
 import com.ustadmobile.core.controller.XapiReportOptions.Companion.yAxisList
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
@@ -101,16 +103,21 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         val args = Hashtable<String, String>()
         args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptionsWithDataFilled)
 
-        val verbs = db.xLangMapEntryDao.getAllVerbsInList(reportOptionsWithDataFilled.didFilterList)
-        val presenter = XapiReportOptionsPresenter(context,
-                args, mockView)
-        presenter.onCreate(args)
+        GlobalScope.launch {
+            val verbs = db.xLangMapEntryDao.getAllVerbsInList(reportOptionsWithDataFilled.didFilterList)
+            val persons = db.personDao.getAllPersonsInList(reportOptionsWithDataFilled.whoFilterList)
+            val presenter = XapiReportOptionsPresenter(context,
+                    args, mockView)
+            presenter.onCreate(args)
 
-        verify(mockView, timeout(15000)).updateChartTypeSelected(listOfGraphs.indexOf(BAR_CHART))
-        verify(mockView, timeout(15000)).updateYAxisTypeSelected(yAxisList.indexOf(SCORE))
-        verify(mockView, timeout(15000)).updateXAxisTypeSelected(xAxisList.indexOf(MONTH))
-        verify(mockView, timeout(15000)).updateSubgroupTypeSelected(xAxisList.indexOf(GENDER))
-        verify(mockView, timeout(15000)).updateDidListSelected(verbs)
+            verify(mockView, timeout(15000)).updateChartTypeSelected(listOfGraphs.indexOf(BAR_CHART))
+            verify(mockView, timeout(15000)).updateYAxisTypeSelected(yAxisList.indexOf(SCORE))
+            verify(mockView, timeout(15000)).updateXAxisTypeSelected(xAxisList.indexOf(MONTH))
+            verify(mockView, timeout(15000)).updateSubgroupTypeSelected(xAxisList.indexOf(GENDER))
+            verify(mockView, timeout(15000)).updateDidListSelected(verbs)
+            verify(mockView, timeout(15000)).updateWhoListSelected(persons)
+        }
+
 
     }
 
@@ -229,6 +236,58 @@ class TestXapiReportOptionsPresenter : AbstractXapiReportOptionsTest() {
         treeMap[SelectMultipleEntriesTreeDialogView.ARG_CONTENT_ENTRY_SET] = reportOptionsWithDataFilled.entriesList.joinToString { it.toString() }
 
         verify(mockImpl).go(SelectMultipleEntriesTreeDialogView.VIEW_NAME, treeMap, context)
+    }
+
+    @Test
+    fun givenPersonName_whenNothingSelected_thenReturnFullListToActivity() {
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        presenter.onCreate(null)
+
+        presenter.handleWhoDataTyped("He", listOf())
+
+        verify(mockView, timeout(15000)).updateWhoDataAdapter(
+                listOf(PersonDao.PersonNameAndUid(100, "Hello World"), PersonDao.PersonNameAndUid(101, "Here Now")))
+
+    }
+
+    @Test
+    fun givenPersonName_whenNamePreviouslySelected_thenReturnFilteredListToActivity() {
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        presenter.onCreate(null)
+
+        presenter.handleWhoDataTyped("He", listOf(100))
+
+        verify(mockView, timeout(15000)).updateWhoDataAdapter(
+                listOf(PersonDao.PersonNameAndUid(101, "Here Now")))
+
+    }
+
+
+    @Test
+    fun givenVerb_whenNothingSelected_thenReturnFullListToActivity() {
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        presenter.onCreate(null)
+
+        presenter.handleDidDataTyped("Attemp", listOf())
+
+        verify(mockView, timeout(15000)).updateDidDataAdapter(
+                listOf(XLangMapEntryDao.Verb(200, "Attempted question 3 from Entry 1"),
+                        XLangMapEntryDao.Verb(201, "Attempted question 1 from Entry 1"),
+                        XLangMapEntryDao.Verb(202, "Attempted question 5 from Entry 3")))
+
+    }
+
+    @Test
+    fun givenVerb_whenNamePreviouslySelected_thenReturnFilteredListToActivity() {
+        val presenter = XapiReportOptionsPresenter(context, mapOf(), mockView)
+        presenter.onCreate(null)
+
+        presenter.handleDidDataTyped("Attemp", listOf(201))
+
+        verify(mockView, timeout(15000)).updateDidDataAdapter(
+                listOf(XLangMapEntryDao.Verb(200, "Attempted question 3 from Entry 1"),
+                        XLangMapEntryDao.Verb(202, "Attempted question 5 from Entry 3")))
+
     }
 
 

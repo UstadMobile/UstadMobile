@@ -27,7 +27,8 @@ abstract class AbstractXapiReportOptionsTest {
         secondPerson.firstNames = "Here"
         secondPerson.lastName = "Now"
         secondPerson.gender = Person.GENDER_MALE
-        secondPerson.personUid = personDao.insert(secondPerson)
+        secondPerson.personUid = 101
+        personDao.insert(secondPerson)
 
         var thirdPerson = Person()
         thirdPerson.firstNames = "Lots"
@@ -51,14 +52,16 @@ abstract class AbstractXapiReportOptionsTest {
 
         var secondVerb = VerbEntity()
         secondVerb.urlId = "This"
-        secondVerb.verbUid = verbDao.insert(secondVerb)
+        secondVerb.verbUid = 201
+        verbDao.insert(secondVerb)
 
         var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "Attempted question 1 from Entry 1")
         secondVerbLangMap.languageLangMapUid = entryLangMap.insert(secondVerbLangMap)
 
         var thirdVerb = VerbEntity()
         thirdVerb.urlId = "Thing"
-        thirdVerb.verbUid = verbDao.insert(thirdVerb)
+        thirdVerb.verbUid = 202
+        verbDao.insert(thirdVerb)
 
         var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Attempted question 5 from Entry 3")
         thirdVerbLangMap.languageLangMapUid = entryLangMap.insert(thirdVerbLangMap)
