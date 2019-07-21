@@ -191,15 +191,15 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
             }
         })
 
-        preOrderRB!!.setOnCheckedChangeListener { buttonView, isChecked ->
+        preOrderRB.setOnCheckedChangeListener { buttonView, isChecked ->
             mPresenter!!.setPreOrder(isChecked)
             showPreOrder(isChecked)
             preOrderSelected = isChecked
         }
 
-        saleRB!!.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter!!.setSold(isChecked) }
+        saleRB.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter!!.setSold(isChecked) }
 
-        addReminderTV!!.setOnClickListener { v -> mPresenter!!.handleClickAddReminder() }
+        addReminderTV.setOnClickListener { v -> mPresenter!!.handleClickAddReminder() }
     }
 
     override fun updateSaleItemOnView(saleItem: SaleItem, productName: String) {
@@ -210,27 +210,27 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
                 val total = (q * ppp).toLong()
 
                 if (productName != null && productName !== "") {
-                    toolbar!!.title = productName
+                    toolbar.title = productName
                 }
                 if (q != 0) {
-                    quantityNP!!.value = q
+                    quantityNP.value = q
                 }
                 if (ppp > 0) {
-                    pppNP!!.value = ppp.toInt()
+                    pppNP.value = ppp.toInt()
                 }
-                totalTV!!.text = total.toString()
-                saleRB!!.isChecked = saleItem.saleItemSold
+                totalTV.text = total.toString()
+                saleRB.isChecked = saleItem.saleItemSold
 
                 if (preOrderSelected) {
-                    preOrderRB!!.isChecked = preOrderSelected
+                    preOrderRB.isChecked = preOrderSelected
                 } else {
-                    preOrderRB!!.isChecked = saleItem.saleItemPreorder
+                    preOrderRB.isChecked = saleItem.saleItemPreorder
                 }
 
 
                 val dueDate = saleItem.saleItemDueDate
                 if (dueDate > 0) {
-                    orderDueDateET!!.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+                    orderDueDateET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
                             dueDate, null))
                 }
             }
@@ -255,26 +255,26 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         }
 
         //set the adapter
-         remindersRV!!.adapter = recyclerAdapter
+         remindersRV.adapter = recyclerAdapter
 
     }
 
     override fun updateTotal(total: Long) {
-        totalTV!!.text = total.toString()
+        totalTV.text = total.toString()
     }
 
     override fun updatePPP(ppp: Long) {
-        pppNP!!.value = ppp.toInt()
+        pppNP.value = ppp.toInt()
     }
 
     override fun showPreOrder(show: Boolean) {
-        preOrderHline!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        orderDueDateTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        orderDueDateET!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        preOrderHline.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        orderDueDateTV.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        orderDueDateET.visibility = if (show) View.VISIBLE else View.INVISIBLE
 
-        remindersRV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        reminderHline!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-        addReminderTV!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        remindersRV.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        reminderHline.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        addReminderTV.visibility = if (show) View.VISIBLE else View.INVISIBLE
     }
 
     override fun setReminderNotification(days: Int, message: String, saleDueDate: Long) {
@@ -294,7 +294,8 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK_REMINDER: DiffUtil.ItemCallback<SaleItemReminder> = object : DiffUtil.ItemCallback<SaleItemReminder>() {
+        val DIFF_CALLBACK_REMINDER: DiffUtil.ItemCallback<SaleItemReminder> =
+                object : DiffUtil.ItemCallback<SaleItemReminder>() {
             override fun areItemsTheSame(oldItem: SaleItemReminder,
                                          newItem: SaleItemReminder): Boolean {
                 return oldItem == newItem
