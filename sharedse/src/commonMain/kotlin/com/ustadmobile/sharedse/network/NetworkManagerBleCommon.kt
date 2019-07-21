@@ -11,6 +11,7 @@ import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.lib.util.sharedMutableMapOf
 import com.ustadmobile.sharedse.util.EntryTaskExecutor
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import io.ktor.client.HttpClient
@@ -460,26 +461,21 @@ abstract class NetworkManagerBleCommon(
      * otherwise false
      */
     fun handleNodeConnectionHistory(bluetoothAddress: String, success: Boolean) {
+        var record: Int = knownBadNodeTrackList[bluetoothAddress] ?: 0
 
-        var record: AtomicInt? = knownBadNodeTrackList[bluetoothAddress]
-
-        if (record == null || success) {
-            record = atomic(0)
-            knownBadNodeTrackList[bluetoothAddress] = record
+        if (success) {
+            knownBadNodeTrackList[bluetoothAddress] = 0
             UMLog.l(UMLog.DEBUG, 694,
-                    "Connection succeeded bad node counter was set to " + record.value
-                            + " for " + bluetoothAddress)
+                    "Connection succeeded bad node counter was set to 0 for $bluetoothAddress")
         }
 
         if (!success) {
-            record.value = (record.incrementAndGet())
-            knownBadNodeTrackList[bluetoothAddress] = record
+            knownBadNodeTrackList[bluetoothAddress] = record++
             UMLog.l(UMLog.DEBUG, 694,
-                    "Connection failed and bad node counter set to " + record.value
-                            + " for " + bluetoothAddress)
+                    "Connection failed and bad node counter set to $record for $bluetoothAddress")
         }
 
-        if (knownBadNodeTrackList[bluetoothAddress]!!.value > 5) {
+        if ((knownBadNodeTrackList[bluetoothAddress] ?: 0) > 5) {
             UMLog.l(UMLog.DEBUG, 694,
                     "Bad node counter exceeded threshold (5), removing node with address "
                             + bluetoothAddress + " from the list")
@@ -497,7 +493,7 @@ abstract class NetworkManagerBleCommon(
      * @param bluetoothAddress node bluetooth address
      * @return bad node
      */
-    fun getBadNodeTracker(bluetoothAddress: String): AtomicInt? {
+    fun getBadNodeTracker(bluetoothAddress: String): Int? {
         return knownBadNodeTrackList[bluetoothAddress]
     }
 
@@ -581,7 +577,7 @@ abstract class NetworkManagerBleCommon(
             return result
         }
 
-        protected var knownBadNodeTrackList: HashMap<String, AtomicInt?> = HashMap()
+        protected var knownBadNodeTrackList: MutableMap<String, Int> = sharedMutableMapOf()
 
         /**
          * Flag to indicate entry status request

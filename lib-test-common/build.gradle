@@ -50,7 +50,7 @@ kotlin {
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly project(":lib-door-runtime")
-                project(":lib-util")
+                compileOnly project(":lib-util")
             }
         }
 
@@ -72,6 +72,8 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
+
+                implementation "androidx.room:room-runtime:$version_android_room"
             }
         }
 
