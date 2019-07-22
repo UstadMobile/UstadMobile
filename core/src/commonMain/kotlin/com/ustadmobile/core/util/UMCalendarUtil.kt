@@ -90,7 +90,7 @@ object UMCalendarUtil {
 
         val format: DateFormat = DateFormat("dd/MMM/yyyy")
         val cal = DateTime(thisDate)
-        return cal.format(httpDateFormat)
+        return cal.format(format)
     }
 
     fun getPrettyDateSuperSimpleFromLong(thisDate: Long, locale: Any?):String{
@@ -105,5 +105,11 @@ object UMCalendarUtil {
      */
     fun getPrettyDateSimpleFromLong(thisDate:Long,locale:Any?):String{
         return getPrettyDateSuperSimpleFromLong(thisDate)
+    }
+
+    fun convertYYYYMMddToLong(date:String):Long{
+        val format = DateFormat("yyyy-MM-dd")
+        val date = format.parse(date)
+        return date.local.unixMillis.toLong()
     }
 }

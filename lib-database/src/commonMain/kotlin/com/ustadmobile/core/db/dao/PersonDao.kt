@@ -140,6 +140,16 @@ abstract class PersonDao : BaseDao<Person> {
     @Update
     abstract fun updateAsync(entity: Person):Int
 
+    @Query("Select * From Person WHERE active = 1")
+    abstract fun findAllPeople(): List<Person>
+
+    @Query("Select * From Person")
+    abstract fun findAllPeopleIncludingInactive(): List<Person>
+
+    @Query("select group_concat(firstNames||' '||lastNAme, ', ') " +
+            " from Person WHERE personUid in (:uids)")
+    abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR" +

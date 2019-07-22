@@ -8,8 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.Sale
-import com.ustadmobile.lib.db.entities.SaleListDetail
+import com.ustadmobile.lib.db.entities.*
 
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
@@ -246,6 +245,40 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract fun getPreOrderSaleCountLive(): DoorLiveData<Int>
 
 
+    //REPORTING:
+
+    @Query(SALE_PERFORMANCE_REPORT_1)
+    abstract suspend fun getSalesPerformanceReportSumGroupedByLocation(leUids: List<Long> ,
+                                                               producerUids:List<Long>, locationUids:List<Long> ,
+                                                               productTypeUids:List<Long> , fromDate:Long, toDate:Long,
+                                                               fromPrice:Int, toPrice:Int): List<ReportSalesPerformance>
+
+    @Query("SELECT    " +
+            " SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as totalSalesValue,  " +
+            "    LE.firstNames||' '||LE.lastName as leName,   " +
+            "   '' as lastActiveOnApp, " +
+            "   '' as leRank, " +
+            "   LE.personUid as leUid " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
+            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1   " +
+            " GROUP BY leUid " +
+            "  ORDER BY    totalSalesValue DESC")
+    abstract suspend fun getTopLEs(): List<ReportTopLEs>
+
+    @Query("SELECT   LE.firstNames||' '||LE.lastName as leName, " +
+            " (SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleValue,    " +
+            "  Sale.saleCreationDate AS saleDate,  " +
+            "  SaleProduct.saleProductName as productNames, " +
+            "Location.title as locationName " +
+            " FROM SALE    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid   " +
+            " LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid  " +
+            " LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
+            " LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid  WHERE   " +
+            " SALE.saleActive = 1    AND SaleItem.saleItemActive = 1    " +
+            "  ORDER BY    saleDate DESC ")
+    abstract suspend fun getSaleLog(): List<ReportSalesLog>
+
     companion object {
 
         const val ALL_SELECTED = 1
@@ -359,6 +392,77 @@ abstract class SaleDao : BaseDao<Sale> {
         //INACTIVATE:
 
         const val INACTIVATE_SALE_QUERY = "UPDATE Sale SET saleActive = 0 WHERE saleUid = :saleUid"
+
+
+        const val SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_SUM = " SELECT " +
+        "   SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleAmount, ";
+
+        const val SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_AVERAGE = " SELECT " +
+        "   AVERAGE(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as saleAmount, ";
+
+        const val SALE_PERFORMANCE_REPORT_SELECT_BIT1 =
+        "   Location.title as locationName,  " +
+        "   Location.locationUid as locationUid, " +
+        "   Sale.saleUid, " +
+        "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch') AS saleCreationDate, " +
+        "   strftime('%W-%Y', Sale.saleCreationDate/1000, 'unixepoch') AS dateGroup, ";
+        const val SALE_PERFORMANCE_REPORT_SELECT_DATE_WEEKLY =
+        "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-6 day') AS firstDateOccurence, ";
+        //TODO:
+        const val SALE_PERFORMANCE_REPORT_SELECT_DATE_MONTHLY =
+        "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-6 day') AS firstDateOccurence, ";
+        //TODO:
+        const val SALE_PERFORMANCE_REPORT_SELECT_DATE_YEARLY =
+        "   strftime('%Y-%m-%d', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-6 day') AS firstDateOccurence, ";
+
+
+        const val SALE_PERFORMANCE_REPORT_SELECT_BIT2 =
+        "   SaleProduct.saleProductName, " +
+        "   SaleItem.saleItemQuantity, " +
+        "   WE.firstNames||' '||WE.lastName as producerName, " +
+        "   WE.personUid as producerUid, " +
+        "   LE.firstNames||' '||LE.lastName as leName, " +
+        "   LE.personUid as leUid, " +
+        "   ''  AS grantee, " +
+        "   (SELECT PP.saleProductName FROM SaleProductParentJoin " +
+        "   LEFT JOIN SaleProduct AS PP ON SaleProductParentJoin.saleProductParentJoinParentUid = PP.saleProductUid" +
+        "   WHERE SaleProductParentJoin.saleProductParentJoinChildUid = SaleItem.saleItemProductUid) as productTypeName, " +
+        "   (SELECT PP.saleProductUid FROM SaleProductParentJoin " +
+        "   LEFT JOIN SaleProduct AS PP ON SaleProductParentJoin.saleProductParentJoinParentUid = PP.saleProductUid" +
+        "   WHERE SaleProductParentJoin.saleProductParentJoinChildUid = SaleItem.saleItemProductUid) as productTypeUid " +
+        " FROM SALE " +
+        "   LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = SALE.saleUid " +
+        "   LEFT JOIN Location ON Sale.saleLocationUid = Location.locationUid " +
+        "   LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid " +
+        "   LEFT JOIN Person as WE ON SaleItem.saleItemProducerUid = WE.personUid " +
+        "   LEFT JOIN Person as LE ON Sale.salePersonUid = LE.personUid " +
+        " WHERE " +
+        "   SALE.saleActive = 1 " +
+        "   AND SaleItem.saleItemActive = 1 " +
+        "   OR leUid in (:leUids) " +
+        "   OR producerUid in (:producerUids) " +
+        "   OR locationUid in (:locationUids) " +
+        "   OR productTypeUid in (:productTypeUids) " +
+        "   AND Sale.saleCreationDate > :fromDate " +
+        "   AND Sale.saleCreationDate < :toDate " ;
+        const val SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION =
+        " GROUP BY locationName, firstDateOccurence " ;
+        const val SALE_PERFORMANCE_REPORT_GROUP_BY_PRODUCT_TYPE =
+        " GROUP BY productType, firstDateOccurence " ;
+        const val SALE_PERFORMANCE_REPORT_GROUP_BY_GRANTEE =
+        " GROUP BY grantee, firstDateOccurence " ;
+        const val SALE_PERFORMANCE_REPORT_HAVING_BIT =
+        "   HAVING saleAmount > :fromPrice " +
+        "   AND saleAmount < :toPrice ";
+        const val SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC =
+        " ORDER BY " +
+        "   firstDateOccurence ASC ";
+
+        const val SALE_PERFORMANCE_REPORT_1 =
+        SALE_PERFORMANCE_REPORT_SELECT_SALE_AMOUNT_SUM + SALE_PERFORMANCE_REPORT_SELECT_BIT1 +
+        SALE_PERFORMANCE_REPORT_SELECT_DATE_WEEKLY + SALE_PERFORMANCE_REPORT_SELECT_BIT2 +
+        SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION + SALE_PERFORMANCE_REPORT_HAVING_BIT +
+        SALE_PERFORMANCE_REPORT_ORDER_BY_SALE_CREATION_DESC;
     }
 
 

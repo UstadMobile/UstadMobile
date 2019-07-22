@@ -66,7 +66,8 @@ class SelectDateRangeDialogFragment : UstadDialogFragment(), AdapterView.OnItemS
 
         //TO:
         //Date pickers's on click listener - sets text
-        val toDateListener = { view: DatePicker, year:Int, month:Int, dayOfMonth:Int ->
+        val toDateListener =
+                { view: DatePicker, year:Int, month:Int, dayOfMonth:Int ->
             myCalendarTo.set(Calendar.YEAR, year)
             myCalendarTo.set(Calendar.MONTH, month)
             myCalendarTo.set(Calendar.DAY_OF_MONTH, dayOfMonth)

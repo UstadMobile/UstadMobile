@@ -112,11 +112,14 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
     @Query(INACTIVATE_QUERY)
     abstract suspend fun inactivateEntityAsync(uid: Long):Int
 
-
     //UPDATE:
 
     @Update
     abstract suspend fun updateAsync(entity: SaleProduct):Int
+
+    @Query("select group_concat(saleProductName, ', ') from SaleProduct " +
+            " WHERE SaleProductUid in (:uids)")
+    abstract suspend fun findAllProductNamesInUidList(uids:List<Long>):String
 
 
     companion object {

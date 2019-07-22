@@ -26,7 +26,7 @@ interface ReportOptionsDetailView : UstadView {
 
     fun setSalePriceRangeSelected(from: Int, to: Int, salePriceSelected: String)
 
-    fun setGroupByPresets(presets: Array<String>, setGroupByPresets: Int)
+    fun setGroupByPresets(presets: Array<String?>, setGroupByPresets: Int)
 
     fun setEditMode(editMode: Boolean)
 
@@ -36,9 +36,9 @@ interface ReportOptionsDetailView : UstadView {
         val VIEW_NAME = "ReportOptionsDetail"
 
         //Any argument keys:
-        val ARG_DASHBOARD_ENTRY_UID = "ArgDashboardEntryUid"
-        val ARG_REPORT_TYPE = "ArgReportType"
-        val ARG_REPORT_OPTIONS = "ArgReportOptions"
+        public val ARG_DASHBOARD_ENTRY_UID = "ArgDashboardEntryUid"
+        public val ARG_REPORT_TYPE = "ArgReportType"
+        public val ARG_REPORT_OPTIONS = "ArgReportOptions"
     }
 
 }

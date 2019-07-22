@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/bottom_navigation_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/tools">
+
+
+    <android.support.design.chip.ChipGroup
+        android:id="@+id/fragment_dashboard_entry_list_tags_cg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+    </android.support.design.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/pinned"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_dashboard_entry_list_tags_cg" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/fragment_dashboard_entry_list_entries_rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="8dp"
+        android:scrollbars="vertical"
+        android:visibility="visible"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView10"
+        fab:visibility="visible" />
+
+
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fragment_dashboard_entry_list_fab_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fragment_dashboard_entry_list_fab_menu_sales_performance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_insert_chart_white_24dp"
+            app:fab_label="@string/sales_performance"
+            app:fab_size="mini"
+            fab:fab_colorNormal="@color/fab"
+            fab:fab_colorPressed="@color/fab_pressed"
+            fab:fab_colorRipple="@color/fab_ripple" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fragment_dashboard_entry_list_fab_menu_sales_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_assignment_ind_black_24dp"
+            app:fab_label="@string/sales_log"
+            app:fab_size="mini"
+            fab:fab_colorNormal="@color/fab"
+            fab:fab_colorPressed="@color/fab_pressed"
+            fab:fab_colorRipple="@color/fab_ripple" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fragment_dashboard_entry_list_fab_menu_top_les"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_content_paste_black_24dp"
+            app:fab_label="@string/top_les"
+            app:fab_size="mini"
+            fab:fab_colorNormal="@color/fab"
+            fab:fab_colorPressed="@color/fab_pressed"
+            fab:fab_colorRipple="@color/fab_ripple" />
+    </com.github.clans.fab.FloatingActionMenu>
+
+</android.support.constraint.ConstraintLayout>
