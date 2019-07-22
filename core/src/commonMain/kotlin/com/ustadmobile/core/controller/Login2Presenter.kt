@@ -68,7 +68,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
             try {
                 val result = loginRepoDb.personDao.loginAsync(username, password)
                 if (result != null) {
-                    if(saveToFingerprint){
+                    if(saveToFingerprint) {
                         UmAccountManager.setFingerprintPersonId(result.personUid, context,
                                 systemImpl)
                         UmAccountManager.setFingerprintUsername(result.username, context,
@@ -76,10 +76,11 @@ class Login2Presenter(context: Any, arguments: Map<String, String?>, view: Login
                         UmAccountManager.setFringerprintAuth(result.auth, context,
                                 systemImpl)
 
-                        UmAccountManager.updateCredCache(username, result.personUid,
-                                passwordHash, context, systemImpl)
-                        loginOK(result, serverUrl)
                     }
+                    UmAccountManager.updateCredCache(username, result.personUid,
+                            passwordHash, context, systemImpl)
+                    loginOK(result, serverUrl)
+
                 } else {
                     view.runOnUiThread(Runnable {
                         view.setErrorMessage(systemImpl.getString(MessageID.wrong_user_pass_combo,

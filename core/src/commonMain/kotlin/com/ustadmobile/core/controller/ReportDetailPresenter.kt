@@ -30,7 +30,7 @@ class ReportDetailPresenter(context: Any, arguments: Map<String, String?>,
     private var reportOptionsString: String? = null
     private val saleDao: SaleDao
     internal var dashboardEntryUid: Long = 0
-    private val reportTitle: String? = null
+    private val reportTitle: String? = ""
     private var reportType = 0
 
     init {

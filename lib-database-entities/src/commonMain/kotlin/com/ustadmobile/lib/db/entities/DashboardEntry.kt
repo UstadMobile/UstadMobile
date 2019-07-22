@@ -26,7 +26,7 @@ class DashboardEntry {
 
     var dashboardEntryReportType: Int = 0
 
-    var isDashboardEntryActive: Boolean = false
+    var dashboardEntryActive: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var dashboardEntryMCSN: Long = 0
@@ -38,14 +38,14 @@ class DashboardEntry {
     var dashboardEntryLCB: Int = 0
 
     constructor() {
-        this.isDashboardEntryActive = false
+        this.dashboardEntryActive = false
     }
 
     constructor(title: String, reportType: Int, personUid: Long) {
         this.dashboardEntryTitle = title
         this.dashboardEntryReportType = reportType
         this.dashboardEntryPersonUid = personUid
-        this.isDashboardEntryActive = true
+        this.dashboardEntryActive = true
         this.dashboardEntryIndex = 42
     }
 

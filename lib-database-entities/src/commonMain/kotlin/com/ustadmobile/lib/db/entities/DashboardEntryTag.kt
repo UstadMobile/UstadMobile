@@ -20,7 +20,7 @@ class DashboardEntryTag {
 
     var dashboardEntryTagDashboardTagUid: Long = 0
 
-    var isDashboardEntryTagActive: Boolean = false
+    var dashboardEntryTagActive: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var dashboardEntryTagMCSN: Long = 0
@@ -32,11 +32,11 @@ class DashboardEntryTag {
     var dashboardEntryTagLCB: Int = 0
 
     constructor() {
-        isDashboardEntryTagActive = true
+        dashboardEntryTagActive = true
     }
 
     constructor(entryUid: Long, tagUid: Long) {
-        isDashboardEntryTagActive = true
+        dashboardEntryTagActive = true
         this.dashboardEntryTagDashboardEntryUid = entryUid
         this.dashboardEntryTagDashboardTagUid = tagUid
     }

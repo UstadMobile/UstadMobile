@@ -24,6 +24,9 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.DashboardEntryListView
 import com.ustadmobile.lib.db.entities.DashboardEntry
 import com.ustadmobile.lib.db.entities.DashboardTag
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
@@ -48,7 +51,8 @@ class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
 
 
         //Inflate view
-        rootContainer = inflater.inflate(R.layout.fragment_dashboard_entry_list, container, false)
+        rootContainer = inflater.inflate(R.layout.fragment_dashboard_entry_list, container,
+                false)
         setHasOptionsMenu(true)
 
         //Set recycler views
@@ -111,9 +115,13 @@ class DashboardEntryListFragment : UstadBaseFragment(), DashboardEntryListView {
 
         val data =
                 LivePagedListBuilder(factory, 20).build()
-        //Observe the data:
-        data.observe(this,
-                Observer<PagedList<DashboardEntry>> { recyclerAdapter!!.submitList(it) })
+
+        val thisP = this
+        GlobalScope.launch(Dispatchers.Main) {
+            //Observe the data:
+            data.observe(thisP,
+                    Observer<PagedList<DashboardEntry>> { recyclerAdapter!!.submitList(it) })
+        }
 
 
         //set the adapter

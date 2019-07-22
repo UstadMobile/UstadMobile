@@ -171,15 +171,14 @@
             android:label="@string/register"
             android:theme="@style/Theme.UstadTheme"/>
 
-        <!-- TOOD: Sprint 5 -->
-<!--        <activity android:name="com.ustadmobile.port.android.view.ReportOptionsDetailActivity"-->
-<!--            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"-->
-<!--            android:label="@string/register"-->
-<!--            android:theme="@style/Theme.UstadTheme"/>-->
-<!--        <activity android:name="com.ustadmobile.port.android.view.ReportDetailActivity"-->
-<!--            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"-->
-<!--            android:label="@string/register"-->
-<!--            android:theme="@style/Theme.UstadTheme"/>-->
+        <activity android:name="com.ustadmobile.port.android.view.ReportOptionsDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
+        <activity android:name="com.ustadmobile.port.android.view.ReportDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/register"
+            android:theme="@style/Theme.UstadTheme"/>
 
         <!-- End of Goldozi-->
 

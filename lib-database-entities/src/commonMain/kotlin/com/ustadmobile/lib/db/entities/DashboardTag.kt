@@ -18,7 +18,7 @@ class DashboardTag {
 
     var dashboardTagTitle: String? = null
 
-    var isDashboardTagActive: Boolean = false
+    var dashboardTagActive: Boolean = false
 
     @UmSyncMasterChangeSeqNum
     var dashboardTagMCSN: Long = 0
@@ -31,7 +31,7 @@ class DashboardTag {
 
     constructor(title: String) {
         this.dashboardTagTitle = title
-        this.isDashboardTagActive = true
+        this.dashboardTagActive = true
     }
 
     constructor() {

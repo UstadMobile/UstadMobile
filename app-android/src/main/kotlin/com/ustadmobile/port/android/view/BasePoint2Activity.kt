@@ -51,6 +51,7 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
     private var saleListFragment: SaleListFragment? = null
     private var comingSoonFragment: ComingSoonFragment? = null
     private var catalogListFragment: CatalogListFragment? = null
+    private lateinit var dashboardEntryListFragment: DashboardEntryListFragment
 
     internal lateinit var bottomNavigation: AHBottomNavigation
     private var ab: ActionBar? = null
@@ -408,49 +409,14 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
                         return comingSoonFragment
                     }
                     4 -> {
-                        //TODO: KMP Sprint
-                        comingSoonFragment = ComingSoonFragment()
-                        this.positionMap[position] = comingSoonFragment
-                        return comingSoonFragment
+                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
+                        this.positionMap.put(position, dashboardEntryListFragment);
+                        return dashboardEntryListFragment;
                     }
-                    //                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
-                    //                        this.positionMap.put(position, dashboardEntryListFragment);
-                    //                        return dashboardEntryListFragment;
+
                     else -> return null
                 }
             }
-//            return thisFragment ?: when (position) {
-//                0 -> {
-//                    catalogListFragment = CatalogListFragment()
-//                    this.positionMap[position] = catalogListFragment
-//                    catalogListFragment
-//                }
-//                1 -> {
-//                    comingSoonFragment = ComingSoonFragment()
-//                    this.positionMap[position] = comingSoonFragment
-//                    comingSoonFragment
-//                }
-//                2 -> {
-//                    saleListFragment = SaleListFragment.newInstance()
-//                    this.positionMap[position] = saleListFragment
-//                    saleListFragment
-//                }
-//                3 -> {
-//                    comingSoonFragment = ComingSoonFragment()
-//                    this.positionMap[position] = comingSoonFragment
-//                    comingSoonFragment
-//                }
-//                4 -> {
-//                    //TODO: KMP Sprint
-//                    comingSoonFragment = ComingSoonFragment()
-//                    this.positionMap[position] = comingSoonFragment
-//                    comingSoonFragment
-//                }
-//                //                        dashboardEntryListFragment = DashboardEntryListFragment.newInstance();
-//                //                        this.positionMap.put(position, dashboardEntryListFragment);
-//                //                        return dashboardEntryListFragment;
-//                else -> null
-//            }
 
         }
 

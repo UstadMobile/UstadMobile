@@ -90,7 +90,7 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
         toolbar = findViewById(R.id.activity_report_sales_performance_detail_toolbar)
         toolbar!!.title = getText(R.string.sales_performance_report)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         xLabel = findViewById(R.id.activity_report_sales_perforance_detail_x_label)
         yLabel = findViewById(R.id.activity_report_sales_perforance_detail_y_label)

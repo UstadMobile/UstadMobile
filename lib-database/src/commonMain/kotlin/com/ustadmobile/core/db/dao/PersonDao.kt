@@ -31,8 +31,9 @@ abstract class PersonDao : BaseDao<Person> {
         var personUid: Long = 0
     }
 
+    //TODO: KMP Undo when Server bits ready
     @UmRestAccessible
-    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
+    //@UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
     suspend fun loginAsync(username: String, password: String): UmAccount? {
 
         val person = findUidAndPasswordHashAsync(username)
@@ -74,8 +75,12 @@ abstract class PersonDao : BaseDao<Person> {
     protected abstract fun incrementPrimaryKey()*/
 
     private fun onSuccessCreateAccessTokenAsync(personUid: Long, username: String): UmAccount {
-        val accessToken = AccessToken(personUid,
+        var accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
+
+        //TODO: KMP Disable when Access Token TODO is fixed.
+        accessToken = AccessToken(personUid, getSystemTimeInMillis() +
+                SESSION_LENGTH, getSystemTimeInMillis().toString())
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, null)
     }

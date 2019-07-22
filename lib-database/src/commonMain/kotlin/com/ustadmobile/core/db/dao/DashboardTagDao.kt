@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.DashboardTag
         insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class DashboardTagDao : SyncableDao<DashboardTag, DashboardTagDao> {
+abstract class DashboardTagDao : BaseDao<DashboardTag> {
 
     @Query("SELECT * FROM DashboardTag WHERE " + " dashboardTagActive = 1")
     abstract fun findAllActiveProvider(): DataSource.Factory<Int, DashboardTag>

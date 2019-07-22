@@ -102,7 +102,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
         toolbar = findViewById(R.id.activity_report_options_detail_toolbar)
         toolbar!!.title = getText(R.string.report_options)
         setSupportActionBar(toolbar)
-        Objects.requireNonNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         productTypesCL = findViewById(R.id.activity_report_options_detail_product_types_cl)
         groupByCL = findViewById(R.id.activity_report_options_detail_group_by_cl)

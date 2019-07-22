@@ -76,16 +76,16 @@ android {
          */
         vanilla {
             dimension "config"
-            applicationId "com.toughra.ustadmobile"
-            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            applicationId "org.fhi360.goldozi"
+            testApplicationId "org.fhi360.goldozi.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
         }
 
         vanillamultidex {
             dimension "config"
             minSdkVersion 18
-            applicationId "com.toughra.ustadmobile"
-            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            applicationId "org.fhi360.goldozi"
+            testApplicationId "org.fhi360.goldozi.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
@@ -109,8 +109,8 @@ android {
         devMinApi21 {
             dimension "config"
             minSdkVersion 23
-            applicationId "com.toughra.ustadmobile"
-            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            applicationId "org.fhi360.goldozi"
+            testApplicationId "org.fhi360.goldozi.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling

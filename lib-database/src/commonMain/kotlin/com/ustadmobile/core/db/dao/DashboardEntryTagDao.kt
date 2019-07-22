@@ -12,18 +12,21 @@ import com.ustadmobile.lib.db.entities.DashboardEntryTag
         insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class DashboardEntryTagDao : SyncableDao<DashboardEntryTag, DashboardEntryTagDao> {
+abstract class DashboardEntryTagDao
+    : BaseDao<DashboardEntryTag> {
 
     @Query("SELECT * FROM DashboardEntryTag WHERE dashboardEntryTagActive = 1")
     abstract fun findAllActiveProvider(): DataSource.Factory<Int, DashboardEntryTag>
 
-    @Query("SELECT * FROM DashboardEntryTag WHERE dashboardEntryTagActive = 1 " +
-            " AND dashboardEntryTagDashboardEntryUid = :uid ")
-    abstract fun findByEntryProvider(uid: Long): DataSource.Factory<Int, DashboardEntryTag>
+    @Query("SELECT * FROM DashboardEntryTag WHERE dashboardEntryTagActive = 1 "
+            + " AND dashboardEntryTagDashboardEntryUid = :uid ")
+    abstract fun findByEntryProvider(uid: Long)
+            : DataSource.Factory<Int, DashboardEntryTag>
 
-    @Query("SELECT * FROM DashboardEntryTag WHERE dashboardEntryTagActive = 1 " +
-            " AND dashboardEntryTagDashboardTagUid = :uid ")
-    abstract fun findByTagProvider(uid: Long): DataSource.Factory<Int, DashboardEntryTag>
+    @Query("SELECT * FROM DashboardEntryTag WHERE dashboardEntryTagActive = 1 "
+            + " AND dashboardEntryTagDashboardTagUid = :uid ")
+    abstract fun findByTagProvider(uid: Long)
+            : DataSource.Factory<Int, DashboardEntryTag>
 
 
 }
