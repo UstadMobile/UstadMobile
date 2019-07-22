@@ -218,6 +218,7 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
             DashboardEntry.REPORT_TYPE_TOP_LES -> title = getText(R.string.top_les_report).toString()
         }
         toolbar!!.title = title
+        mPresenter!!.reportTitle = title
     }
 
 
