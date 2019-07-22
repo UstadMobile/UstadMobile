@@ -84,10 +84,10 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
         onView(withId(R.id.xaxis_spinner)).check(matches(withSpinnerText(containsString("Day"))))
         onView(withId(R.id.sub_group_spinner)).check(matches(withSpinnerText(containsString("Day"))))
 
-        val whoFlex = activity.findViewById<View>(R.id.whoFlex) as FlexboxLayout
+        val whoFlex = activity.findViewById<FlexboxLayout>(R.id.whoFlex)
         assertEquals(1, whoFlex.childCount)
 
-        val didFlex = activity.findViewById<View>(R.id.didFlex) as FlexboxLayout
+        val didFlex = activity.findViewById<FlexboxLayout>(R.id.didFlex)
         assertEquals(1, didFlex.childCount)
 
         onView(withId(R.id.whenEditText)).check(matches(withText("")))
@@ -138,6 +138,18 @@ class XapiReportOptionsActivityEspressoTest : AbstractXapiReportOptionsTest() {
         assertEquals(2, didFlex.childCount)
 
         onView(withId(R.id.whenEditText)).check(matches(withText("10 Apr 2019 - 11 Jun 2019")))
+
+        val chip = onView(
+                Matchers.allOf(childAtPosition(Matchers.allOf(withId(R.id.whoFlex),
+                        childAtPosition(IsInstanceOf.instanceOf(ViewGroup::class.java), 12)),
+                        0), isDisplayed()))
+        chip.check(matches(withText("Hello World")))
+
+        val didChip = onView(
+                Matchers.allOf(childAtPosition(Matchers.allOf(withId(R.id.didFlex),
+                        childAtPosition(IsInstanceOf.instanceOf(ViewGroup::class.java), 14)),
+                        0), isDisplayed()))
+        didChip.check(matches(withText("Attempted question 3 from Entry 1")))
 
     }
 
