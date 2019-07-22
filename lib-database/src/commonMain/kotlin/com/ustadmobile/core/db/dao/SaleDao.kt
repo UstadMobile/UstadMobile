@@ -212,13 +212,13 @@ abstract class SaleDao : BaseDao<Sale> {
     }
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(saleUid: Long): Sale
+    abstract fun findByUid(saleUid: Long): Sale?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(saleUid: Long):Sale
+    abstract suspend fun findByUidAsync(saleUid: Long):Sale?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(saleUid: Long): DoorLiveData<Sale>
+    abstract fun findByUidLive(saleUid: Long): DoorLiveData<Sale?>
 
     @Query(INACTIVATE_SALE_QUERY)
     abstract fun inactivateEntity(saleUid: Long)

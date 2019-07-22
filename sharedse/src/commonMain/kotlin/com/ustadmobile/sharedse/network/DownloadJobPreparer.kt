@@ -20,12 +20,11 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
     suspend fun run() {
         val startTime = getSystemTimeInMillis()
         val downloadJobUid = jobItemManager.downloadJobUid
+        jobItemManager.awaitLoaded()
         val contentEntryUid = jobItemManager.rootContentEntryUid
-
+        println("Prepare download job for content entry uid: $contentEntryUid")
         UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: start " +
                 "entry uid = " + contentEntryUid + " download job uid = " + downloadJobUid)
-
-        var numItemsCreated = 0
 
         val jobItemDao = appDatabase.downloadJobItemDao
         var childItemsToCreate: List<DownloadJobItemDao.DownloadJobItemToBeCreated2>
@@ -35,6 +34,8 @@ class DownloadJobPreparer(private val jobItemManager: DownloadJobItemManager, pr
                 jobItemManager.downloadJobUid, contentEntryUid,
                 rootEntryContainer?.containerUid ?: 0,
                 rootEntryContainer?.fileSize ?: 0)
+
+        var numItemsCreated = 1
 
         jobItemManager.insertDownloadJobItems(listOf(rootDownlaodJobItem))
 

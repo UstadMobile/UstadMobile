@@ -22,10 +22,10 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
 
     @Query("SELECT * FROM PersonAuth WHERE personAuthUid = :uid")
-    abstract suspend fun findByUidAsync(uid: Long):PersonAuth
+    abstract suspend fun findByUidAsync(uid: Long):PersonAuth?
 
     @Query("SELECT * FROM PersonAuth WHERE personAuthUid = :uid")
-    abstract fun findByUid(uid: Long) : PersonAuth
+    abstract fun findByUid(uid: Long) : PersonAuth?
 
     @Update
     abstract suspend fun updateAsync(entity: PersonAuth):Int

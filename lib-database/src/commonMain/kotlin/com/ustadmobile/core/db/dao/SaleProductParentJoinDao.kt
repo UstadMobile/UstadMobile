@@ -64,7 +64,8 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     @Query("SELECT * FROM SaleProductParentJoin WHERE " +
             " SaleProductParentJoin.saleProductParentJoinParentUid = :parentUid AND " +
             " SaleProductParentJoin.saleProductParentJoinChildUid = :childUid ")
-    abstract suspend fun findByChildAndParentUid(childUid: Long, parentUid: Long):SaleProductParentJoin
+    abstract suspend fun findByChildAndParentUid(childUid: Long, parentUid: Long)
+            :SaleProductParentJoin?
 
 
     suspend fun createJoin(childProductUid: Long, parentProductUid: Long, activate: Boolean) {

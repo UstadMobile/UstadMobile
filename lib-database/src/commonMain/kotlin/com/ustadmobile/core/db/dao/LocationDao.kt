@@ -50,6 +50,6 @@ abstract class LocationDao : BaseDao<Location> {
     abstract fun findAllActiveLocationsProvider(): DoorLiveData<List<Location>>
 
     @Query("select group_concat(title, ', ') from location where locationUid in (:uids)")
-    abstract suspend fun findAllLocationNamesInUidList(uids:List<Long>):String
+    abstract suspend fun findAllLocationNamesInUidList(uids:List<Long>):String?
 
 }

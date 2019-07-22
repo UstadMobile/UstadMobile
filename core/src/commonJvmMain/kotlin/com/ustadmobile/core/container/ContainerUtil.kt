@@ -4,6 +4,8 @@ import kotlinx.coroutines.runBlocking
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import java.io.File
+import java.io.FileInputStream
 
 class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile) : ContainerManagerCommon.EntrySource {
     override val length = zipEntry.size
@@ -28,6 +30,7 @@ class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile) : ContainerMa
         md5Digest.digest()
     }
 }
+
 
 actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: ContainerManager) {
     runBlocking {

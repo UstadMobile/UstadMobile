@@ -578,4 +578,18 @@ object UMUtil {
         return categories.toTypedArray()
     }
 
+
+    @JvmStatic
+    fun getH5pLicenceId(licence: String?): Int{
+        when(licence){
+            "cc-by" -> return 1
+            "cc-by-sa" -> return 2
+            "cc-by-nc" -> return 4
+            "cc-by-nc-sa" -> return 6
+
+        }
+        return 8
+    }
+
+
 }

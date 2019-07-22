@@ -40,13 +40,13 @@ abstract class SaleProductGroupJoinDao : BaseDao<SaleProductGroupJoin> {
     abstract fun findListOfProductsInACollectionLive(collectionUid: Long): DoorLiveData<List<SaleProduct>>
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(uid: Long): SaleProductGroupJoin
+    abstract fun findByUid(uid: Long): SaleProductGroupJoin?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long):SaleProductGroupJoin
+    abstract suspend fun findByUidAsync(uid: Long):SaleProductGroupJoin?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductGroupJoin>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductGroupJoin?>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)

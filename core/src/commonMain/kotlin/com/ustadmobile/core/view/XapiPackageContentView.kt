@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.impl.UmCallback
-
 /**
  * Created by mike on 9/13/17.
  */

@@ -29,7 +29,11 @@ import com.ustadmobile.core.db.dao.SaleDao
     EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
     LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
-    Container::class, ContainerEntry::class, ContainerEntryFile::class
+    Container::class, ContainerEntry::class, ContainerEntryFile::class,
+    VerbEntity::class, XObjectEntity::class, StatementEntity::class,
+    ContextXObjectStatementJoin::class, AgentEntity::class,
+    StateEntity::class, StateContentEntity::class
+
     //Goldozi :
     ,Sale::class, SaleItem::class, SalePayment::class,
     SaleProductGroup::class,
@@ -38,7 +42,8 @@ import com.ustadmobile.core.db.dao.SaleDao
     SaleVoiceNote::class, SaleProductParentJoin::class,
     SaleItemReminder::class,
     DashboardEntry::class, DashboardTag::class, DashboardEntryTag::class
-    ], version = 22)
+    ], version = 24)
+
 abstract class UmAppDatabase : DoorDatabase() {
 
     var isMaster: Boolean = false
@@ -118,6 +123,23 @@ abstract class UmAppDatabase : DoorDatabase() {
 
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
+    abstract val verbDao: VerbDao
+
+    abstract val xObjectDao: XObjectDao
+
+    abstract val statementDao: StatementDao
+
+    abstract val contextXObjectStatementJoinDao: ContextXObjectStatementJoinDao
+
+    abstract val stateDao: StateDao
+
+    abstract val stateContentDao: StateContentDao
+
+    abstract val agentDao: AgentDao
+
+    //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
+
+
     //Goldozi bit:
 
     abstract val saleDao: SaleDao
@@ -145,6 +167,21 @@ abstract class UmAppDatabase : DoorDatabase() {
     abstract val dashboardTagDao:DashboardTagDao
 
     abstract val dashboarfEntryTagDao:DashboardEntryTagDao
+
+    //@UmRepository
+    //abstract fun getRepository(baseUrl: String?, auth: String?): UmAppDatabase
+
+    // @UmSyncOutgoing
+    // abstract fun syncWith(otherDb: UmAppDatabase, accountUid: Long, sendLimit: Int, receiveLimit: Int)
+
+
+    // fun invalidateDeviceBits() {
+    //     syncablePrimaryKeyDao.invalidateDeviceBits()
+    // }
+
+    // @UmSyncCountLocalPendingChanges
+    // abstract fun countPendingLocalChanges(accountUid: Long, deviceId: Int): Int
+
 
     //end of Goldozi bit.
 
@@ -201,6 +238,8 @@ abstract class UmAppDatabase : DoorDatabase() {
             }
             return db
         }
+
+
     }
 
 }

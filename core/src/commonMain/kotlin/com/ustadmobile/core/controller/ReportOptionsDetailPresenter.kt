@@ -140,7 +140,7 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             val locationDao = repository.locationDao
             GlobalScope.launch {
                 val result = locationDao.findAllLocationNamesInUidList(selectedLocations!!)
-                view.setLocationSelected(result)
+                view.setLocationSelected(result!!)
             }
 
         }
@@ -151,7 +151,7 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             val saleProductDao = repository.saleProductDao
             GlobalScope.launch {
                 val result = saleProductDao.findAllProductNamesInUidList(selectedProducts!!)
-                view.setProductTypeSelected(result)
+                view.setProductTypeSelected(result!!)
             }
         }
 
@@ -161,7 +161,7 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             val personDao = repository.personDao
             GlobalScope.launch {
                 val result = personDao.findAllPeopleNamesInUidList(selectedLEs!!)
-                view.setLESelected(result)
+                view.setLESelected(result!!)
             }
         }
 

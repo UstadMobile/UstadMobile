@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  *
  * - When trying to send a message, it will need write permission from the BLE node,
- * and when requested response might be as discussed in [BleGattServerAndroid].
+ * and when requested response might be as discussed in [BleGattServer].
  *
  *
  * - If it will receive [BluetoothGatt.GATT_SUCCESS] response, then it will start data

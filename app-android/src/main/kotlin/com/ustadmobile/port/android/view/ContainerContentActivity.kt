@@ -17,6 +17,7 @@ abstract class ContainerContentActivity: UstadBaseActivity() {
     private val httpdServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             httpContainer = ((service as EmbeddedHttpdService.LocalServiceBinder).getHttpd())
+            onHttpdConnected(httpContainer!!)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -24,7 +25,7 @@ abstract class ContainerContentActivity: UstadBaseActivity() {
         }
     }
 
-    protected open fun onHttpdConnected(httpd: com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD) {
+    protected open fun onHttpdConnected(httpd: EmbeddedHTTPD) {
 
     }
 

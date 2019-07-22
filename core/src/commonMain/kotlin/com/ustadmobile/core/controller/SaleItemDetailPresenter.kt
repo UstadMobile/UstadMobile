@@ -128,7 +128,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
             //Get the sale item entity
             GlobalScope.launch {
-                val result:SaleItem
+                val result:SaleItem?
                 try {
                     result = saleItemDao!!.findByUidAsync(saleItemUid)
 
@@ -146,7 +146,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                             val saleProduct =
                                     repository.saleProductDao.findByUidAsync(saleProductUid)
 
-                            saleProductName = saleProduct.saleProductName
+                            saleProductName = saleProduct!!.saleProductName
                             if (saleTitle == null) {
                                 saleTitle = saleProductName
                             }
@@ -185,7 +185,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
                         val saleProduct =
                                 repository.saleProductDao.findByUidAsync(saleProductUid)
                         var productName: String? = ""
-                        productName = saleProduct.saleProductName
+                        productName = saleProduct!!.saleProductName
                         view.updateSaleItemOnView(updatedSaleItem!!, productName!!)
                     }catch (e:Exception){
                         println(e.message)

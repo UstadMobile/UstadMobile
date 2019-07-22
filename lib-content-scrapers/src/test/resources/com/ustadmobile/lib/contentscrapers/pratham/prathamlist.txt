@@ -2,9 +2,9 @@
   "ok": true,
   "metadata": {
     "hits": 9439,
-    "perPage": 5,
+    "perPage": 1,
     "page": 2,
-    "totalPages": 1888
+    "totalPages": 1
   },
   "data": [
     {

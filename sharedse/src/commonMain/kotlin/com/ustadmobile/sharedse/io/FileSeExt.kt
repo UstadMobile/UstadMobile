@@ -43,3 +43,5 @@ fun FileSe.readBytes(): ByteArray {
         streamIn?.close()
     }
 }
+
+expect fun FileSe.renameFile(file: FileSe): Boolean

@@ -6,7 +6,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.ContentEntryListFragmentView
+import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DistinctCategorySchema
 import com.ustadmobile.lib.db.entities.Language
@@ -41,23 +43,26 @@ class ContentEntryListFragmentPresenter(
         }
     }
 
+
+    private fun onContentEntryChanged(entry: ContentEntry?){
+        if (entry == null) {
+            fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
+            return
+        }
+        val resultTitle = entry.title
+        if (resultTitle != null)
+            fragmentViewContract.setToolbarTitle(resultTitle)
+    }
+
     private fun showContentByParent() {
         parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()
         fragmentViewContract.setContentEntryProvider(contentEntryDao!!.getChildrenByParentUidWithCategoryFilter(parentUid!!, 0, 0))
 
-        GlobalScope.launch {
-            try {
-                val result = contentEntryDao!!.getContentByUuidAsync(parentUid!!)
-                if (result == null) {
-                    fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
-                    return@launch
-                }
-                val resultTitle = result.title
-                if (resultTitle != null)
-                    fragmentViewContract.setToolbarTitle(resultTitle)
-            } catch (e: Exception) {
-                fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
-            }
+        try{
+            val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDao!!.findLiveContentEntry(parentUid!!)
+            entryLiveData.observe(this, this::onContentEntryChanged)
+        }catch (e:Exception){
+            fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })
         }
 
         GlobalScope.launch {
@@ -129,7 +134,7 @@ class ContentEntryListFragmentPresenter(
                     impl.go(ContentEntryDetailView.VIEW_NAME, args, view.viewContext)
                 } else {
                     args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-                    impl.go(ContentEntryListFragmentView.VIEW_NAME, args, view.viewContext)
+                    impl.go(ContentEntryListView.VIEW_NAME, args, view.viewContext)
                 }
             } catch (e: Exception) {
                 fragmentViewContract.runOnUiThread(Runnable { fragmentViewContract.showError() })

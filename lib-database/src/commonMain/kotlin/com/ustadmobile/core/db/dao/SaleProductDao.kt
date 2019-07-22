@@ -89,22 +89,22 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
     ): DataSource.Factory<Int, SaleNameWithImage>
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(uid: Long): SaleProduct
+    abstract fun findByUid(uid: Long): SaleProduct?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long): SaleProduct
+    abstract suspend fun findByUidAsync(uid: Long): SaleProduct?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProduct>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProduct?>
 
     @Query(FIND_BY_NAME_QUERY)
-    abstract fun findByName(name: String): SaleProduct
+    abstract fun findByName(name: String): SaleProduct?
 
     @Query(FIND_BY_NAME_QUERY)
-    abstract suspend fun findByNameAsync(name: String):SaleProduct
+    abstract suspend fun findByNameAsync(name: String):SaleProduct?
 
     @Query(FIND_BY_NAME_QUERY)
-    abstract fun findByNameLive(name: String): DoorLiveData<SaleProduct>
+    abstract fun findByNameLive(name: String): DoorLiveData<SaleProduct?>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)
@@ -119,7 +119,7 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
     @Query("select group_concat(saleProductName, ', ') from SaleProduct " +
             " WHERE SaleProductUid in (:uids)")
-    abstract suspend fun findAllProductNamesInUidList(uids:List<Long>):String
+    abstract suspend fun findAllProductNamesInUidList(uids:List<Long>):String?
 
 
     companion object {

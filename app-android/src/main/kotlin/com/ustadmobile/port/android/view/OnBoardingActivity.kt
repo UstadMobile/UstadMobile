@@ -36,22 +36,21 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
     /**
      * Model for the the onboarding screen
      */
+
     private enum class OnBoardScreen private constructor(val headlineStringResId: Int,
                                                          val subHeadlineStringResId: Int,
                                                          val layoutResId: Int,
                                                          val drawableResId: Int) {
 
 
-        SCREEN_1(R.string.onboarding_goldozi_1,R.string.onboarding_goldozi_1b
-        ,R.layout.onboard_screen_view, R.drawable.ic_goldozi_logo_cropped_outline),
-        SCREEN_2(R.string.onboarding_goldozi_2,R.string.onboarding_empty,
-        R.layout.onboard_screen_view, R.drawable.goldozi_products1),
-        SCREEN_3(R.string.onboarding_goldozi_3,R.string.onboarding_empty,
-        R.layout.onboard_screen_view, R.drawable.goldozi_sales1),
-        SCREEN_4(R.string.onboarding_goldozi_4,R.string.onboarding_empty,
-        R.layout.onboard_screen_view, R.drawable.goldozi_courses1)
-
-
+        SCREEN_1(R.string.onboarding_goldozi_1, R.string.onboarding_goldozi_1b
+                , R.layout.onboard_screen_view, R.drawable.ic_goldozi_logo_cropped_outline),
+        SCREEN_2(R.string.onboarding_goldozi_2, R.string.onboarding_empty,
+                R.layout.onboard_screen_view, R.drawable.goldozi_products1),
+        SCREEN_3(R.string.onboarding_goldozi_3, R.string.onboarding_empty,
+                R.layout.onboard_screen_view, R.drawable.goldozi_sales1),
+        SCREEN_4(R.string.onboarding_goldozi_4, R.string.onboarding_empty,
+                R.layout.onboard_screen_view, R.drawable.goldozi_courses1)
     }
 
 
@@ -103,9 +102,9 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView {
 
     }
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        if (networkManagerBle != null && networkManagerBle.isVersionKitKatOrBelow) {
+        if (networkManagerBle.isVersionKitKatOrBelow) {
             getStartedBtn!!.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
             getStartedBtn!!.setTextColor(resources
                     .getColorStateList(R.color.pre_lollipop_btn_selector_txt_onboarding))

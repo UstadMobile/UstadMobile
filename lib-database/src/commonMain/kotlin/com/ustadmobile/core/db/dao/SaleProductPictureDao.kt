@@ -14,10 +14,10 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
 
 
     @Query("SELECT * FROM SaleProductPicture WHERE SaleProductPicture.saleProductPictureUid = :uid")
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductPicture>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductPicture?>
 
     @Query("SELECT * FROM SaleProductPicture where saleProductPictureSaleProductUid = :uid ORDER BY " + " saleProductPictureTimestamp DESC LIMIT 1")
-    abstract fun findByProductUidLive(uid: Long): DoorLiveData<SaleProductPicture>
+    abstract fun findByProductUidLive(uid: Long): DoorLiveData<SaleProductPicture?>
 
 //TODO: Fix KMP
 //    @UmDbSetAttachment
@@ -35,7 +35,8 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
     @Query("SELECT * FROM SaleProductPicture where " +
             " saleProductPictureSaleProductUid = :saleProductUid " +
             " ORDER BY saleProductPictureTimestamp DESC LIMIT 1")
-    abstract suspend fun findBySaleProductUidAsync(saleProductUid: Long):SaleProductPicture
+    abstract suspend fun findBySaleProductUidAsync(saleProductUid: Long)
+            :SaleProductPicture?
 
 //TODO: Fix KMP
 //    @UmDbSetAttachment

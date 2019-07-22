@@ -71,6 +71,7 @@ open class UMLog {
                 WARN -> Napier.w(message = logMessage, throwable = exception as Exception)
                 VERBOSE -> Napier.v(message = logMessage, throwable = exception as Exception)
                 ERROR -> Napier.e(message = logMessage, throwable = exception as Exception)
+                else -> Napier.d(message =logMessage, throwable = exception as Exception)
             }
         }
 
@@ -90,6 +91,7 @@ open class UMLog {
                 WARN -> Napier.w(message = logMessage)
                 VERBOSE -> Napier.v(message = logMessage)
                 ERROR -> Napier.e(message = logMessage)
+                else -> Napier.d(message = logMessage)
             }
         }
     }

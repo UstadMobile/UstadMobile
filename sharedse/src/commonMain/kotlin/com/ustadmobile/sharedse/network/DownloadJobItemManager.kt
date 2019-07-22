@@ -27,17 +27,39 @@ class DownloadJobItemManager(private val db: UmAppDatabase, val downloadJobUid: 
     var rootContentEntryUid: Long = 0
         private set
 
+    val size: Int
+        get()  = jobItemUidToStatusMap.size
+
+
+    private lateinit var loadJob: Deferred<Unit>
+
     init {
-        GlobalScope.launch {
+        loadJob = GlobalScope.async {
             withContext(coroutineScope){
                 //TODO: fix this to check a variable
                 loadFromDb()
-                while(true) {
+            }
+        }
+
+        GlobalScope.launch {
+            withContext(coroutineScope) {
+                while (true) {
                     delay(1000)
                     doCommit()
                 }
             }
         }
+    }
+
+    /**
+     * Loading is done in a suspended method. Most methods are also suspended, and linked to a
+     * single threaded scope. As loading is the first thing that gets executed, any suspended
+     * function can be relied upon to return the correct result right away. If something is accessing
+     * a property, like the root content entry UID, then it might be required to explicitly
+     * wait for the loadFromDb method to have finished
+     */
+    internal suspend fun awaitLoaded() {
+        loadJob.await()
     }
 
     private fun loadFromDb() {

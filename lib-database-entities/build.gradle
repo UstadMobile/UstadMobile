@@ -48,19 +48,19 @@ kotlin {
 
         jvmMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
             }
         }
 
         jsMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
             }
         }
 
         androidMain {
             dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
             }
         }
     }

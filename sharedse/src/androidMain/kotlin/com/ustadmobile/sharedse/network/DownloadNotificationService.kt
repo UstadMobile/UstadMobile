@@ -10,7 +10,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -19,6 +18,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.DownloadJobItemStatus
+import com.ustadmobile.port.sharedse.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -34,17 +34,16 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     private val mNetworkServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             mNetworkServiceBound.set(true)
+
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
-            //TODO: this needs fixed to use the modified download manager
-//            networkManagerBle!!.addDownloadChangeListener(this@DownloadNotificationService)
-//            val activeDownloadManagers = networkManagerBle!!
-//                    .activeDownloadJobItemManagers
-//            for (manager in activeDownloadManagers) {
-//                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
-//                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
-//                }
-//            }
+            networkManagerBle?.addDownloadChangeListener(this@DownloadNotificationService)
+            val activeDownloadManagers = networkManagerBle?.activeDownloadJobItemManagers!!
+            for (manager in activeDownloadManagers) {
+                if (manager.rootItemStatus != null && manager.rootContentEntryUid == manager.rootItemStatus!!.contentEntryUid) {
+                    onDownloadJobItemChange(manager.rootItemStatus, manager.downloadJobUid)
+                }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -70,7 +69,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val notificationIdRef = AtomicInteger(9)
 
-    private var timeLastUpdate: Long? = null
+    private var timeLastUpdate: Long = 0
 
     private val MAX_UPDATE_TIME_DELAY = TimeUnit.SECONDS.toMillis(2)
 
@@ -82,8 +81,6 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
     private val stopped = AtomicBoolean(false)
 
-    private val isVersionLollipopOrAbove: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
     /**
      * Holder class for the entire notification
@@ -156,10 +153,12 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
 
                 ACTION_PAUSE_DOWNLOAD -> if (notificationHolder != null) {
                     GlobalScope.launch {
-                        umAppDatabase!!.downloadJobDao
-                                .updateJobAndItems(downloadJobId, JobStatus.PAUSED,
+                        umAppDatabase!!.downloadJobDao.updateJobAndItems(downloadJobId, JobStatus.PAUSED,
                                         JobStatus.PAUSING)
+                        networkManagerBle!!.removeDownloadChangeListener(this@DownloadNotificationService)
                     }
+                }else{
+                    stopForegroundService()
                 }
 
                 ACTION_CANCEL_DOWNLOAD -> if (notificationHolder != null) {
@@ -167,69 +166,76 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                         umAppDatabase!!.downloadJobDao
                                 .updateJobAndItems(downloadJobId, JobStatus.CANCELED,
                                         JobStatus.CANCELLING)
+                        if(downloadJobIdToNotificationMap.size == 1){
+                            stopForegroundService()
+                        }
                     }
+                }else{
+                    stopForegroundService()
                 }
             }
         }
-        return Service.START_STICKY
+        return START_STICKY
     }
 
     @Synchronized
     override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
         val notificationHolder = downloadJobIdToNotificationMap[downloadJobUid]
-        val isRunning = status!!.status >= JobStatus.RUNNING_MIN && status!!.status <= JobStatus.RUNNING_MAX
+        val isRunning = status != null && status.status >= JobStatus.RUNNING_MIN && status.status <= JobStatus.RUNNING_MAX
 
-        if (notificationHolder == null) {
-            UMLog.l(UMLog.VERBOSE, 699,
-                    "Service #" + serviceInstanceId +
-                            " Creating new notification for download #" + downloadJobUid)
-            totalBytesToBeDownloaded += status.totalBytes
-            val notificationId = notificationIdRef.incrementAndGet()
-            val contentTitle = String.format(impl!!.getString(
-                    MessageID.download_downloading_placeholder, this),
-                    UMFileUtil.formatFileSize(status.bytesSoFar),
-                    UMFileUtil.formatFileSize(status.totalBytes))
-            val holder = createNotification(downloadJobUid.toLong(), notificationId,
-                    "", contentTitle, contentTitle, false)
-            downloadJobIdToNotificationMap[downloadJobUid] = holder
+        if(status != null){
+            if (notificationHolder == null) {
+                UMLog.l(UMLog.VERBOSE, 699,
+                        "Service #" + serviceInstanceId +
+                                " Creating new notification for download #" + downloadJobUid)
+                totalBytesToBeDownloaded += status.totalBytes
+                val notificationId = notificationIdRef.incrementAndGet()
+                val contentTitle = String.format(impl!!.getString(
+                        MessageID.download_downloading_placeholder, this),
+                        UMFileUtil.formatFileSize(status.bytesSoFar),
+                        UMFileUtil.formatFileSize(status.totalBytes))
+                val holder = createNotification(downloadJobUid.toLong(), notificationId,
+                        "", contentTitle, contentTitle, false)
+                downloadJobIdToNotificationMap[downloadJobUid] = holder
 
-            GlobalScope.launch {
-                val title = umAppDatabase!!.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
-                holder.setContentTitle(title)
-                mNotificationManager!!.notify(notificationId, holder.build())
-            }
+                GlobalScope.launch {
+                    val title = umAppDatabase!!.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
+                    holder.setContentTitle(title)
+                    mNotificationManager!!.notify(notificationId, holder.build())
+                }
 
-        } else if (status.status >= JobStatus.COMPLETE_MIN) {
-            //job has completed and notification needs to be removed
-            val notification = downloadJobIdToNotificationMap[downloadJobUid]
-            if (notification != null) {
-                mNotificationManager!!.cancel(notification.notificationId)
-                downloadJobIdToNotificationMap.remove(downloadJobUid)
-                if (downloadJobIdToNotificationMap.isEmpty()) {
-                    UMLog.l(UMLog.INFO, 699, "DownloadNotificationService: Stop")
-                    stopForegroundService()
+            } else if (status.status >= JobStatus.COMPLETE_MIN) {
+                //job has completed and notification needs to be removed
+                val notification = downloadJobIdToNotificationMap[downloadJobUid]
+                if (notification != null) {
+                    mNotificationManager!!.cancel(notification.notificationId)
+                    downloadJobIdToNotificationMap.remove(downloadJobUid)
+                    if (downloadJobIdToNotificationMap.isEmpty()) {
+                        UMLog.l(UMLog.INFO, 699, "DownloadNotificationService: Stop")
+                        stopForegroundService()
+                    }
+                } else {
+                    UMLog.l(UMLog.ERROR, 699, "Cannot find notification for download!")
                 }
             } else {
-                UMLog.l(UMLog.ERROR, 699, "Cannot find notification for download!")
+                totalBytesDownloadedSoFar += status.bytesSoFar
+                val progress = (status.bytesSoFar.toDouble() / status.totalBytes * 100).toInt()
+                val timeCurrentUpdate = System.currentTimeMillis()
+                notificationHolder.downloadProgress = progress
+
+                if (timeCurrentUpdate - timeLastUpdate!! < MAX_UPDATE_TIME_DELAY
+                        && notificationHolder.downloadProgress > 0 && isRunning)
+                    return
+
+                timeLastUpdate = timeCurrentUpdate
+                val contentTitle = String.format(impl!!.getString(
+                        MessageID.download_downloading_placeholder, this),
+                        UMFileUtil.formatFileSize(status.bytesSoFar),
+                        UMFileUtil.formatFileSize(status.totalBytes))
+                updateDownloadJobNotification(downloadJobUid.toLong(), progress, contentTitle,
+                        notificationHolder.jobTitle, notificationHolder.jobTitle)
+                updateDownloadSummary()
             }
-        } else {
-            totalBytesDownloadedSoFar += status.bytesSoFar
-            val progress = (status.bytesSoFar.toDouble() / status.totalBytes * 100).toInt()
-            val timeCurrentUpdate = Calendar.getInstance().timeInMillis
-            notificationHolder.downloadProgress = progress
-
-            if (timeCurrentUpdate - timeLastUpdate!! < MAX_UPDATE_TIME_DELAY
-                    && notificationHolder.downloadProgress > 0 && isRunning)
-                return
-
-            timeLastUpdate = timeCurrentUpdate
-            val contentTitle = String.format(impl!!.getString(
-                    MessageID.download_downloading_placeholder, this),
-                    UMFileUtil.formatFileSize(status.bytesSoFar),
-                    UMFileUtil.formatFileSize(status.totalBytes))
-            updateDownloadJobNotification(downloadJobUid.toLong(), progress, contentTitle,
-                    notificationHolder.jobTitle, notificationHolder.jobTitle)
-            updateDownloadSummary()
         }
     }
 
@@ -260,7 +266,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
     private fun createAction(downloadJobId: Long, actionTag: String,
                              actionLabel: String): NotificationCompat.Action {
         val actionIntent = Intent(this, DownloadNotificationService::class.java)
-        actionIntent.putExtra(JOB_ID_TAG, downloadJobId)
+        actionIntent.putExtra(JOB_ID_TAG, downloadJobId.toInt())
         actionIntent.action = actionTag
         val actionPendingIntent = PendingIntent.getService(this,
                 0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
@@ -277,7 +283,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
      * @param isGroupSummary Flag to indicate if the notification will act as a group summary or not.
      * @return constructed notification object
      */
-    fun createNotification(downloadJobId: Long, notificationId: Int, contentTitle: String,
+    private fun createNotification(downloadJobId: Long, notificationId: Int, contentTitle: String,
                            contentText: String, contentSubText: String,
                            isGroupSummary: Boolean): NotificationHolder {
 
@@ -296,10 +302,9 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
                 .setContentIntent(mNotificationPendingIntent)
                 .setDefaults(Notification.DEFAULT_SOUND)
 
-        if (isVersionLollipopOrAbove) {
-            //TODO: fix this icon - add to res
-//            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
-//                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         }
 
         val notificationHolder = NotificationHolder(notificationId, contentTitle,
@@ -376,10 +381,7 @@ class DownloadNotificationService : Service(), OnDownloadJobItemChangeListener {
      */
     private fun stopForegroundService() {
         if (!stopped.getAndSet(true)) {
-            val networkManager = networkManagerBle
-            //TODO: fix this once we update to use the new download manager
-//            if (networkManager != null)
-//                networkManagerBle!!.removeDownloadChangeListener(this)
+            networkManagerBle?.removeDownloadChangeListener(this)
 
             downloadJobIdToNotificationMap.clear()
             stopForeground(true)

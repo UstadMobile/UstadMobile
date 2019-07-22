@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.ScormPackageView
  * Created by mike on 1/6/18.
  */
 
-class ScormTypePlugin : ContentTypePlugin() {
+class ScormTypePlugin : ContentTypePlugin {
 
     override val viewName: String
         get() = ScormPackageView.VIEW_NAME
@@ -15,7 +15,7 @@ class ScormTypePlugin : ContentTypePlugin() {
         get() = arrayOf(*MIME_TYPES)
 
     override val fileExtensions: Array<String>
-        get() = arrayOf(*arrayOf("zip"))
+        get() = arrayOf("zip")
 
     companion object {
 

@@ -52,7 +52,7 @@ class UserProfilePresenter(context: Any,
                 val result = personDao.findByUidAsync(loggedInPersonUid)
                 loggedInPerson = result
                 if (loggedInPerson != null) {
-                    val personName = result.firstNames + " " + result.lastName
+                    val personName = result!!.firstNames + " " + result.lastName
                     view.updateToolbarTitle(personName)
 
                     personPictureDao = repository.personPictureDao

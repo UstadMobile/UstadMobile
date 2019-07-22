@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.ContentEntryRelatedEntryJoinDao;
 import com.ustadmobile.core.db.dao.LanguageDao;
 import com.ustadmobile.core.db.dao.LanguageVariantDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig;
 import com.ustadmobile.lib.contentscrapers.khanacademy.ItemData;
@@ -31,7 +32,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin;
 import com.ustadmobile.lib.db.entities.Language;
 import com.ustadmobile.lib.db.entities.LanguageVariant;
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem;
-import com.ustadmobile.port.sharedse.container.ContainerManager;
+import com.ustadmobile.core.container.ContainerManager
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -482,6 +483,21 @@ public class ContentScraperUtil {
         File modifiedFile = new File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.LAST_MODIFIED_TXT);
         if (lastModified != null) {
             return ContentScraperUtil.isFileContentsUpdated(modifiedFile, lastModified);
+        }
+
+        return true;
+    }
+
+    public static long getLastModified(URLConnection conn) {
+        return UMCalendarUtil.INSTANCE.parseHTTPDate(conn.getHeaderField("Last-Modified"));
+    }
+
+    public static boolean isEtagUpdated(HttpURLConnection conn, File destinationDirectory, String name) throws IOException {
+        String eTag = conn.getHeaderField("ETag");
+        if (eTag != null) {
+            eTag = eTag.replaceAll("\"", EMPTY_STRING);
+            File eTagFile = new File(destinationDirectory, FilenameUtils.getBaseName(name) + ScraperConstants.ETAG_TXT);
+            return ContentScraperUtil.isFileContentsUpdated(eTagFile, eTag);
         }
 
         return true;
@@ -1231,10 +1247,10 @@ public class ContentScraperUtil {
         return logs;
     }
 
-    public static void createSrtFile(List<SrtFormat> srtFormatList, File srtFile) throws IOException {
+    public static String createSrtFile(List<SrtFormat> srtFormatList, File srtFile) throws IOException {
 
         if (srtFormatList == null || srtFormatList.isEmpty()) {
-            return;
+            return "";
         }
 
         StringBuilder buffer = new StringBuilder();
@@ -1254,6 +1270,8 @@ public class ContentScraperUtil {
         }
 
         FileUtils.writeStringToFile(srtFile, buffer.toString(), UTF_ENCODING);
+
+        return buffer.toString();
     }
 
     public static String formatTimeInMs(long timeMs) {
@@ -1284,4 +1302,6 @@ public class ContentScraperUtil {
         return -1;
 
     }
+
+
 }

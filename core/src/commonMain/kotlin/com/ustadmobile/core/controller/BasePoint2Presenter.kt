@@ -39,8 +39,8 @@ class BasePoint2Presenter(context: Any,
     private var preOrderCount = 0
     private var paymentsDueCount = 0
 
-    private var personLive: DoorLiveData<Person>? = null
-    private var personPictureLive: DoorLiveData<PersonPicture>? = null
+    private lateinit var personLive: DoorLiveData<Person?>
+    private lateinit var personPictureLive: DoorLiveData<PersonPicture?>
 
     init {
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
@@ -59,12 +59,12 @@ class BasePoint2Presenter(context: Any,
         personLive = repository.personDao.findByUidLive(loggedInPersonUid!!)
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            personLive!!.observe(thisP, thisP::handlePersonValueChanged)
+            personLive.observe(thisP, thisP::handlePersonValueChanged)
         }
 
         personPictureLive = repository.personPictureDao.findByPersonUidLive(loggedInPersonUid!!)
         GlobalScope.launch(Dispatchers.Main) {
-            personPictureLive!!.observe(thisP, thisP::handlePersonPictureChanged)
+            personPictureLive.observe(thisP, thisP::handlePersonPictureChanged)
         }
 
 

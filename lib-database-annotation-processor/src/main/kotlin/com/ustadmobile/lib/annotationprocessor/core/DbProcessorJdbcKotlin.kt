@@ -28,7 +28,7 @@ import javax.lang.model.util.SimpleTypeVisitor7
 import javax.tools.Diagnostic
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
-        String::class.asTypeName())
+        String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
 
 
 fun isList(type: TypeMirror, processingEnv: ProcessingEnvironment): Boolean =
@@ -149,7 +149,7 @@ fun getFieldSqlType(fieldEl: VariableElement, processingEnv: ProcessingEnvironme
 }
 
 //As per https://github.com/square/kotlinpoet/issues/236
-private fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
+internal fun TypeName.javaToKotlinType(): TypeName = if (this is ParameterizedTypeName) {
     (rawType.javaToKotlinType() as ClassName).parameterizedBy(
             *typeArguments.map { it.javaToKotlinType() }.toTypedArray()
     )
@@ -211,17 +211,23 @@ fun resolveReturnTypeIfSuspended(method: ExecutableType) : TypeName {
     return if(continuationParam != null) {
         //The continuation parameter is always the last parameter, and has one type argument
         val contReturnType = (method.parameterTypes.last() as DeclaredType).typeArguments.first().extendsBoundOrSelf().asTypeName()
-
+        removeTypeProjection(contReturnType)
         //Open classes can result in <out T> being generated instead of just <T>. Therefor we want to remove the wildcard
-        if(contReturnType is ParameterizedTypeName && contReturnType.typeArguments[0] is WildcardTypeName) {
-            contReturnType.rawType.parameterizedBy((contReturnType.typeArguments[0] as WildcardTypeName).outTypes[0]).javaToKotlinType()
-        }else {
-            contReturnType.javaToKotlinType()
-        }
     }else {
         method.returnType.asTypeName().javaToKotlinType()
     }
 }
+
+/**
+ * Remove <out T>
+ */
+fun removeTypeProjection(typeName: TypeName) =
+        if(typeName is ParameterizedTypeName && typeName.typeArguments[0] is WildcardTypeName) {
+            typeName.rawType.parameterizedBy((typeName.typeArguments[0] as WildcardTypeName).outTypes[0]).javaToKotlinType()
+        }else {
+            typeName.javaToKotlinType()
+        }
+
 
 /**
  * If the return type is LiveData, Factory, etc. then unwrap that into the result type.
@@ -230,6 +236,9 @@ fun resolveQueryResultType(returnTypeName: TypeName)  =
         if(returnTypeName is ParameterizedTypeName
                 && returnTypeName.rawType == DoorLiveData::class.asClassName()) {
             returnTypeName.typeArguments[0]
+        }else if(returnTypeName is ParameterizedTypeName
+                && returnTypeName.rawType == androidx.paging.DataSource.Factory::class.asClassName()) {
+            List::class.asClassName().parameterizedBy(returnTypeName.typeArguments[1])
         }else {
             returnTypeName
         }
@@ -249,7 +258,7 @@ fun makeInsertAdapterMethodName(paramType: TypeMirror, returnType: TypeName, pro
     return methodName
 }
 
-private fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String? {
+fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String? {
     val kotlinType = typeName.javaToKotlinType()
     when(kotlinType) {
         INT -> return "Int"
@@ -276,7 +285,7 @@ private fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String
  * @param querySql SQL that may contain named parameters
  * @return String list of named parameters (e.g. "paramName"). Empty if no named parameters are present.
  */
-private fun getQueryNamedParameters(querySql: String): List<String> {
+fun getQueryNamedParameters(querySql: String): List<String> {
     val namedParams = mutableListOf<String>()
     var insideQuote = false
     var insideDoubleQuote = false
@@ -469,53 +478,22 @@ val PRIMITIVE = listOf(INT, LONG, BOOLEAN, SHORT, BYTE, FLOAT, DOUBLE)
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedOptions(OPTION_OUTPUT_DIR)
-class DbProcessorJdbcKotlin: AbstractProcessor() {
-
-    private var messager: Messager? = null
-
-    private var dbConnection: Connection? = null
-
-    private val allKnownEntities = mutableListOf<TypeElement>()
+class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
 
-    override fun init(p0: ProcessingEnvironment?) {
-        super.init(p0)
-        messager = p0?.messager
-    }
+    override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
+        setupDb(roundEnv)
 
-    override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment?): Boolean {
-        val dbs = roundEnv!!.getElementsAnnotatedWith(Database::class.java)
+        val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
         val outputArg = processingEnv.options[OPTION_OUTPUT_DIR]
         val outputDir = if(outputArg == null || outputArg == "filer") processingEnv.options["kapt.kotlin.generated"] else outputArg
         messager?.printMessage(Diagnostic.Kind.NOTE, "DbProcessorJdbcKotlin: output to ${File(outputDir).absolutePath}")
-
-        val dataSource = SQLiteDataSource()
-        val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
-        dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
-        messager!!.printMessage(Diagnostic.Kind.NOTE, "Annotation processor db tmp file: ${dbTmpFile.absolutePath}")
 
         for(dbTypeEl in dbs) {
             val dbFileSpec = generateDbImplClass(dbTypeEl as TypeElement)
             dbFileSpec.writeTo(File(outputDir))
         }
 
-        dbConnection = dataSource.connection
-        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {
-            if(it.getAnnotation(Entity::class.java) == null) {
-                logMessage(Diagnostic.Kind.ERROR,
-                        "Class used as entity on database does not have @Entity annotation",
-                        it)
-            }
-
-            if(!it.enclosedElements.any { it.getAnnotation(PrimaryKey::class.java) != null }) {
-                logMessage(Diagnostic.Kind.ERROR,
-                        "Class used as entity does not have a field annotated @PrimaryKey")
-            }
-
-            val stmt = dbConnection!!.createStatement()
-            stmt.execute(makeCreateTableStatement(it, DoorDbType.SQLITE))
-            allKnownEntities.add(it)
-        }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
 
@@ -546,7 +524,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             val daoMethod = daoSubEl as ExecutableElement
             if(daoMethod.getAnnotation(Insert::class.java) != null) {
                 daoImpl.addFunction(generateInsertFun(daoTypeElement, daoMethod, daoImpl))
-            }else if(daoMethod.getAnnotation(Query::class.java) != null) {
+            }else if(daoMethod.getAnnotation(Query::class.java) != null
+                    || daoMethod.getAnnotation(RawQuery::class.java) != null) {
                 daoImpl.addFunction(generateQueryFun(daoTypeElement, daoMethod, daoImpl))
             }else if(daoMethod.getAnnotation(Update::class.java) != null) {
                 daoImpl.addFunction(generateUpdateFun(daoTypeElement, daoMethod, daoImpl))
@@ -554,7 +533,7 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 daoImpl.addFunction(generateDeleteFun(daoTypeElement, daoMethod))
             }else {
                 messager?.printMessage(Diagnostic.Kind.ERROR,
-                        "${makeLogPrefix(daoTypeElement, daoMethod)}: Abstract method on DAO not annotated with Query, Update, Delete, or Insert",
+                        "${makeLogPrefix(daoTypeElement, daoMethod)}: Abstract method on DAO not annotated with Query, RawQuery, Update, Delete, or Insert",
                         daoMethod)
             }
         }
@@ -676,36 +655,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         return dropFunSpec.build()
     }
 
-
-    private fun makeCreateTableStatement(entitySpec: TypeElement, dbType: Int): String {
-        var sql = "CREATE TABLE IF NOT EXISTS ${entitySpec.simpleName} ("
-        var commaNeeded = false
-        for (fieldEl in getEntityFieldElements(entitySpec, true)) {
-            sql += """${if(commaNeeded) "," else " "} ${fieldEl.simpleName} """
-            val pkAnnotation = fieldEl.getAnnotation(PrimaryKey::class.java)
-            if(pkAnnotation != null && pkAnnotation.autoGenerate) {
-                when(dbType) {
-                    DoorDbType.SQLITE -> sql += " INTEGER "
-                    DoorDbType.POSTGRES -> sql += " SERIAL "
-                }
-            }else {
-                sql += " ${getFieldSqlType(fieldEl, processingEnv)} "
-            }
-
-            if(pkAnnotation != null) {
-                sql += " PRIMARY KEY "
-                if(pkAnnotation.autoGenerate && dbType == DoorDbType.SQLITE)
-                    sql += " AUTOINCREMENT "
-
-                sql += " NOT NULL "
-            }
-
-            commaNeeded = true
-        }
-        sql += ")"
-
-        return sql
-    }
 
 
     fun generateInsertFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder): FunSpec {
@@ -843,7 +792,8 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
         return insertFun.build()
     }
 
-    fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder) : FunSpec {
+    fun generateQueryFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement, daoTypeBuilder: TypeSpec.Builder,
+                         isRawQuery: Boolean = false) : FunSpec {
         val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                 daoMethod) as ExecutableType
 
@@ -859,9 +809,10 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                 forceNullableParameterTypeArgs = isLiveData(returnTypeResolved)
                         && isNullableResultType((returnTypeResolved as ParameterizedTypeName).typeArguments[0]))
 
-        val querySql = daoMethod.getAnnotation(Query::class.java).value
+        val querySql = daoMethod.getAnnotation(Query::class.java)?.value
 
-        if(!querySql.trim().startsWith("UPDATE", ignoreCase = true)
+        if(querySql != null
+                && !querySql.trim().startsWith("UPDATE", ignoreCase = true)
                 && !querySql.trim().startsWith("DELETE", ignoreCase = true)
                 && resultType == UNIT) {
             logMessage(Diagnostic.Kind.ERROR, "Query method running SELECT must have a return type")
@@ -895,7 +846,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                         "Could not parse SQL to determine livedata tables to watch")
             }
 
-
             val liveDataCodeBlock = CodeBlock.builder()
                     .beginControlFlow("val _result = %T<%T>(_db, listOf(%L)) ",
                             DoorLiveDataJdbcImpl::class.asClassName(),
@@ -905,7 +855,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
                             daoTypeElement, daoMethod, resultVarName = "_liveResult"))
                     .add("_liveResult")
 
-
             if(resultType is ParameterizedTypeName && resultType.rawType == List::class.asClassName())
                 liveDataCodeBlock.add(".toList()")
 
@@ -914,8 +863,14 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
 
             funSpec.addCode(liveDataCodeBlock.build())
         }else {
+            val rawQueryVarName = if(daoMethod.getAnnotation(RawQuery::class.java) !=null ) {
+                daoMethod.parameters[0].simpleName.toString()
+            }else {
+                null
+            }
+
             funSpec.addCode(generateQueryCodeBlock(returnTypeResolved, queryVarsMap, querySql,
-                    daoTypeElement, daoMethod))
+                    daoTypeElement, daoMethod, rawQueryVarName = rawQueryVarName))
         }
 
         if(returnTypeResolved != UNIT){
@@ -1001,214 +956,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
     }
 
 
-    fun generateQueryCodeBlock(returnType: TypeName, queryVars: Map<String, TypeName>, querySql: String,
-                               enclosing: TypeElement, method: ExecutableElement, resultVarName: String = "_result"): CodeBlock {
-        // The result, with any wrapper (e.g. LiveData or DataSource.Factory) removed
-        val resultType = resolveQueryResultType(returnType)
-
-        // The individual entity type e.g. Entity or String etc
-        val entityType = resolveEntityFromResultType(resultType)
-
-        val entityTypeElement = if(entityType is ClassName) {
-            processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
-        } else {
-            null
-        }
-
-        val entityFieldMap = if(entityTypeElement != null) {
-            mapEntityFields(entityTypeEl = entityTypeElement, processingEnv = processingEnv)
-        }else {
-            null
-        }
-
-        val isUpdateOrDelete = querySql.trim().startsWith("update", ignoreCase = true)
-                || querySql.trim().startsWith("delete", ignoreCase = true)
-
-        val codeBlock = CodeBlock.builder()
-
-        val namedParams = getQueryNamedParameters(querySql)
-
-        var preparedStatementSql = querySql
-        namedParams.forEach { preparedStatementSql = preparedStatementSql.replace(":$it", "?") }
-
-        if(resultType != UNIT)
-            codeBlock.add("var $resultVarName = ${defaultVal(resultType)}\n")
-
-        codeBlock.add("var _con = null as %T?\n", Connection::class)
-                .add("var _stmt = null as %T?\n", PreparedStatement::class)
-                .add("var _resultSet = null as %T?\n", ResultSet::class)
-                .beginControlFlow("try")
-                .add("_con = _db.openConnection()\n")
-
-        if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
-            codeBlock.beginControlFlow("_stmt = if(_db!!.jdbcArraySupported)")
-                    .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
-                    .nextControlFlow("else")
-                    .add("%T(%S, _con) as %T\n", PreparedStatementArrayProxy::class, preparedStatementSql,
-                            PreparedStatement::class)
-                    .endControlFlow()
-        }else {
-            codeBlock.add("_stmt = _con.prepareStatement(%S)\n", preparedStatementSql)
-        }
-
-
-        var paramIndex = 1
-        val queryVarsNotSubstituted = mutableListOf<String>()
-        getQueryNamedParameters(querySql).forEach {
-            val paramType = queryVars[it]
-            if(paramType == null ) {
-                queryVarsNotSubstituted.add(it)
-            }else if(isListOrArray(paramType.javaToKotlinType())) {
-                //val con = null as Connection
-                val arrayTypeName = sqlArrayComponentTypeOf(paramType.javaToKotlinType())
-                codeBlock.add("_stmt.setArray(${paramIndex++}, ")
-                        .beginControlFlow("if(_db!!.jdbcArraySupported) ")
-                        .add("_con!!.createArrayOf(%S, %L.toTypedArray())\n", arrayTypeName, it)
-                        .nextControlFlow("else")
-                        .add("%T.createArrayOf(%S, %L.toTypedArray())\n", PreparedStatementArrayProxy::class,
-                                arrayTypeName, it)
-                        .endControlFlow()
-                        .add(")\n")
-            }else {
-                codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(paramType.javaToKotlinType())}(${paramIndex++}, " +
-                        "${it})\n")
-            }
-        }
-
-        if(queryVarsNotSubstituted.isNotEmpty()) {
-            logMessage(Diagnostic.Kind.ERROR,
-                    "Parameters in query not found in method signature: ${queryVarsNotSubstituted.joinToString()}",
-                    enclosing, method)
-            return CodeBlock.builder().build()
-        }
-
-        var execStmtSql = querySql
-        namedParams.forEach { execStmtSql = execStmtSql.replace(":$it", "null") }
-
-        var resultSet = null as ResultSet?
-        var execStmt = null as Statement?
-        try {
-            execStmt = dbConnection?.createStatement()
-
-            if(isUpdateOrDelete) {
-                /*
-                 Run this query now so that we would get an exception if there is something wrong with it.
-                 */
-                execStmt?.executeUpdate(execStmtSql)
-                codeBlock.add("val _numUpdates = _stmt.executeUpdate()\n")
-                val stmtSplit = execStmtSql.trim().split(Regex("\\s+"), limit = 4)
-                val tableName = if(stmtSplit[0].equals("UPDATE", ignoreCase = true)) {
-                    stmtSplit[1] // in case it is an update statement, will be the second word (e.g. update tablename)
-                }else {
-                    stmtSplit[2] // in case it is a delete statement, will be the third word (e.g. delete from tablename)
-                }
-
-                /*
-                 * If the entity did not exist, then our attempt to run the query would have thrown
-                 * an SQLException . When calling handleTableChanged, we want to use the same case
-                 * as the entity, so we look it up from the list of known entities to find the correct
-                 * case to use.
-                 */
-                val entityModified = allKnownEntities.first {it.simpleName.toString().equals(tableName, ignoreCase = true)}
-
-                codeBlock.beginControlFlow("if(_numUpdates > 0)")
-                        .add("_db.handleTableChanged(listOf(%S))\n", entityModified.simpleName.toString())
-                        .endControlFlow()
-
-                if(resultType != UNIT) {
-                    codeBlock.add("$resultVarName = _numUpdates\n")
-                }
-            }else {
-                codeBlock.add("_resultSet = _stmt.executeQuery()\n")
-                resultSet = execStmt?.executeQuery(execStmtSql)
-                val metaData = resultSet!!.metaData
-                val colNames = mutableListOf<String>()
-                for(i in 1 .. metaData.columnCount) {
-                    colNames.add(metaData.getColumnName(i))
-                }
-
-                var entityVarName = ""
-                val entityInitializerBlock = if(QUERY_SINGULAR_TYPES.contains(entityType)) {
-                    CodeBlock.builder().add("${defaultVal(entityType)}").build()
-                }else {
-                    CodeBlock.builder().add("%T()", entityType).build()
-                }
-
-                if(isListOrArray(resultType)) {
-                    codeBlock.beginControlFlow("while(_resultSet.next())")
-                    entityVarName = "_entity"
-                }else {
-                    codeBlock.beginControlFlow("if(_resultSet.next())")
-                    entityVarName = resultVarName
-                }
-
-                if(QUERY_SINGULAR_TYPES.contains(entityType)) {
-                    if(isListOrArray(resultType)) {
-                        codeBlock.add("val ") //this will be added to the list,so needs declared
-                    }
-                    codeBlock.add("$entityVarName = _resultSet.get${getPreparedStatementSetterGetterTypeName(entityType)}(1)\n")
-                }else {
-                    if(isListOrArray(resultType)) {
-                        codeBlock.add("val _entity = ")
-                                .add(entityInitializerBlock)
-                                .add("\n")
-                    }else {
-                        codeBlock.add("$resultVarName = ")
-                                .add(entityInitializerBlock)
-                                .add("\n")
-                    }
-
-                    // Map of the last prop name (e.g. name) to the full property name as it will
-                    // be generated (e.g. embedded!!.name)
-                    val colNameLastToFullMap = entityFieldMap!!.fieldMap.map{
-                        it.key.substringAfterLast('.') to it.key}.toMap()
-
-                    entityFieldMap.embeddedVarsList.forEach {
-                        codeBlock.add("$entityVarName${it.first} = %T()\n", it.second.asType())
-                    }
-
-                    val missingPropNames = mutableListOf<String>()
-                    colNames.forEach {colName ->
-                        val fullPropName = colNameLastToFullMap[colName]
-                        if(!fullPropName.isNullOrBlank()) {
-                            val propType = entityFieldMap.fieldMap[fullPropName]
-                            val getterName = "get${getPreparedStatementSetterGetterTypeName(propType!!.asType().asTypeName()) }"
-                            codeBlock.add("$entityVarName$fullPropName = _resultSet.$getterName(%S)\n", colName)
-                        }else {
-                            missingPropNames.add(colName)
-                        }
-                    }
-
-                    if(missingPropNames.isNotEmpty()) {
-                        logMessage(Diagnostic.Kind.ERROR, " Cannot map the following columns " +
-                                "from query to properties on return type of element $entityType : " +
-                                "$missingPropNames", enclosing, method)
-                    }
-                }
-
-                if(isListOrArray(resultType)) {
-                    codeBlock.add("$resultVarName.add(_entity)\n")
-                }
-
-                codeBlock.endControlFlow()
-            }
-        }catch(e: SQLException) {
-            logMessage(Diagnostic.Kind.ERROR, "Exception running query SQL '$execStmtSql' : ${e.message}",
-                    enclosing = enclosing, element = method,
-                    annotation = method.annotationMirrors.firstOrNull {it.annotationType.asTypeName() == Query::class.asTypeName()})
-        }
-
-        codeBlock.nextControlFlow("catch(_e: %T)", SQLException::class)
-                .add("_e.printStackTrace()\n")
-                .add("throw %T(_e)\n", RuntimeException::class)
-                .nextControlFlow("finally")
-                .add("_stmt?.close()\n")
-                .add("_con?.close()\n")
-                .endControlFlow()
-
-        return codeBlock.build()
-    }
-
     fun generateDeleteFun(daoTypeElement: TypeElement, daoMethod: ExecutableElement): FunSpec {
         val deleteFun = overrideAndConvertToKotlinTypes(daoMethod, daoTypeElement.asType() as DeclaredType,
                 processingEnv)
@@ -1274,18 +1021,6 @@ class DbProcessorJdbcKotlin: AbstractProcessor() {
             codeBlock.add("return _numChanges")
 
         return deleteFun.addCode(codeBlock.build()).build()
-    }
-
-    fun logMessage(kind: Diagnostic.Kind, message: String, enclosing: TypeElement? = null,
-                   element: Element? = null, annotation: AnnotationMirror? = null) {
-        val messageStr = "DoorDb: ${enclosing?.qualifiedName}#${element?.simpleName} $message "
-        if(annotation != null && element != null) {
-            messager?.printMessage(kind, messageStr, element, annotation)
-        }else if(element != null) {
-            messager?.printMessage(kind, messageStr, element)
-        }else {
-            messager?.printMessage(kind, messageStr)
-        }
     }
 
     fun makeLogPrefix(enclosing: TypeElement, method: ExecutableElement) = "DoorDb: ${enclosing.qualifiedName}. ${method.simpleName} "

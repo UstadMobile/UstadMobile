@@ -40,6 +40,7 @@
 
         <!-- This is important! Don't forget to set window background -->
         <item name="android:windowBackground">@color/background_light</item>
+
     </style>
 
 </resources>

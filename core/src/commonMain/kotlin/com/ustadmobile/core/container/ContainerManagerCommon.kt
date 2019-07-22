@@ -2,7 +2,6 @@ package com.ustadmobile.core.container
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.io.InputStream
@@ -16,8 +15,18 @@ abstract class ContainerManagerCommon(protected val container: Container,
     data class AddEntryOptions(val moveExistingFiles: Boolean = false,
                                val dontUpdateTotals: Boolean = false)
 
+    var containerUid: Long = 0
+
     val allEntries: List<ContainerEntryWithContainerEntryFile>
         get() = pathToEntryMap.values.toList()
+
+
+    init {
+        ///load from database
+        val entryList = db.containerEntryDao.findByContainer(container.containerUid)
+        containerUid = container.containerUid
+        pathToEntryMap.putAll(entryList.map { it.cePath!! to it }.toMap())
+    }
 
     interface EntrySource {
 
@@ -50,6 +59,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
 
     }
 
+
     /**
      * Make a copy of this container as a new container - e.g. when making a new version of this
      * file, adding files, etc.
@@ -72,7 +82,7 @@ abstract class ContainerManagerCommon(protected val container: Container,
                 ContainerEntryWithContainerEntryFile(it.value.cePath!!, newContainer, it.value.containerEntryFile!!)
         }.toMap()
 
-        db.containerEntryDao.insertList(newEntryMap.values.map { it as ContainerEntry })
+        db.containerEntryDao.insertList(newEntryMap.values.map { it })
         return ContainerManager(newContainer, db, dbRepo, newFilePath,
                 newEntryMap.toMutableMap())
     }

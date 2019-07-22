@@ -41,7 +41,9 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <application android:supportsRtl="true"
+    <application
+        android:theme="@style/Theme.UstadTheme"
+        android:supportsRtl="true"
         android:usesCleartextTraffic="true">
         <activity
             android:theme="@style/ThemeOnboarding"
@@ -50,7 +52,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -61,13 +63,11 @@
         <activity
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
@@ -78,38 +78,31 @@
         <activity
             android:name="com.ustadmobile.port.android.view.H5PContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:theme="@style/Theme.UstadTheme"
             android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label=""/>
         <activity
             android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
             android:configChanges="keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.HomeActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label=""/>
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.Login2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/login"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/login" />
 
         <activity android:name="com.ustadmobile.port.android.view.Register2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
@@ -182,7 +175,8 @@
 
         <!-- End of Goldozi-->
 
-
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContentEditorActivity"/>
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"

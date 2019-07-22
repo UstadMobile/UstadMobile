@@ -59,13 +59,13 @@ abstract class SaleProductGroupDao :
     abstract fun findAllTypedActiveSNWIProvider(type: Int): DataSource.Factory<Int,SaleNameWithImage>
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(uid: Long): SaleProductGroup
+    abstract fun findByUid(uid: Long): SaleProductGroup?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long): SaleProductGroup
+    abstract suspend fun findByUidAsync(uid: Long): SaleProductGroup?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductGroup>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleProductGroup?>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)

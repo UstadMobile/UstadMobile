@@ -32,7 +32,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
     abstract suspend fun findByPersonUidAsync(personUid: Long): PersonPicture?
 
     @Query("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " + " picTimestamp DESC LIMIT 1")
-    abstract fun findByPersonUidLive(personUid: Long): DoorLiveData<PersonPicture>
+    abstract fun findByPersonUidLive(personUid: Long): DoorLiveData<PersonPicture?>
 
 
 //    @UmDbSetAttachment

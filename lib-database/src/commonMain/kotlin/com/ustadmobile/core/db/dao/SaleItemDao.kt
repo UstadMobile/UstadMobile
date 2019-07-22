@@ -20,10 +20,10 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
     //INSERT
 
     @Query(GENERATE_SALE_NAME)
-    abstract fun getTitleForSaleUid(saleUid: Long): String
+    abstract fun getTitleForSaleUid(saleUid: Long): String?
 
     @Query(GENERATE_SALE_NAME)
-    abstract suspend fun getTitleForSaleUidAsync(saleUid: Long) : String
+    abstract suspend fun getTitleForSaleUidAsync(saleUid: Long) : String?
 
     //FIND ALL ACTIVE
 
@@ -71,13 +71,13 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
     abstract suspend fun findTotalDiscountBySaleAsync(saleUid: Long):Long?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(uid: Long): SaleItem
+    abstract fun findByUid(uid: Long): SaleItem?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long):SaleItem
+    abstract suspend fun findByUidAsync(uid: Long):SaleItem?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleItem>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SaleItem?>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)

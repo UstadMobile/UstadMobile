@@ -1,6 +1,11 @@
 package com.ustadmobile.core.util
 
 import com.soywiz.klock.*
+import com.soywiz.klock.DateFormat
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.Month
+import com.soywiz.klock.Year
+
 
 /**
  * Basic calendar related utility methods. These are isolated in their own class as Calendar is not
@@ -10,7 +15,7 @@ object UMCalendarUtil {
 
     private val httpDateFormat: DateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
     private val httpDateFormat2: DateFormat = DateFormat("EEE, dd-MMM-yyyy HH:mm:ss z")
-    private val iso8601DateFormat: DateFormat = ISO8601.DATE_CALENDAR_COMPLETE
+    private val iso8601DateFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
 
     private val listOfFormats = listOf(httpDateFormat, httpDateFormat2, iso8601DateFormat)
 
@@ -37,7 +42,15 @@ object UMCalendarUtil {
      *
      */
     fun parse8601Timestamp(timestamp: String): Long {
-        return iso8601DateFormat.parse(timestamp).local.unixMillisLong
+        val date = DateTime(
+                Year(timestamp.substring(0, 4).toInt()),
+                Month(timestamp.substring(5, 7).toInt()),
+                timestamp.substring(8, 10).toInt(),
+                timestamp.substring(11,13).toInt(),
+                timestamp.substring(14,16).toInt(),
+                timestamp.substring(17,19).toInt(),
+                0)
+        return date.unixMillisLong
     }
 
 

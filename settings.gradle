@@ -15,7 +15,8 @@ pluginManagement {
 }
 
 include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-angular',
-        ':lib-test-util',
+        ':app-ktor-server',
+        ':lib-test-common',
         ':core',
         ':sharedse',
         ':app-android-launcher',
@@ -26,7 +27,8 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':app-
         ':lib-database-annotation-processor',
         ':lib-database',
         ':lib-database-android',
-        ':lib-room-annotations'
+        ':lib-room-annotations',
+        ':lib-content-editor'
         //':lib-content-scrapers'
 //include ':app-rest-server'
 

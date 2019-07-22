@@ -10,6 +10,7 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.filter
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.io.ByteBuffer
 import kotlinx.io.IOException
@@ -38,6 +39,10 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
     private var md5SumBytes: ByteArray? = null
 
+    var onDownloadProgress: (Long) -> Unit = {}
+
+    private val bytesDownloaded = atomic(0L)
+
     val md5Sum: ByteArray
         get() = /*if(md5SumBytes == null) {
                 throw IllegalStateException("Download not complete: cannot provide md5")
@@ -52,10 +57,9 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
 
     suspend fun download(maxAttempts: Int = 3) : Boolean {
         try {
+            UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - starting download")
             val dlInfoFile = FileSe(destinationFile + DLINFO_EXTENSION)
             val dlPartFile = FileSe(destinationFile + DLPART_EXTENSION)
-            println("Start download: $httpUrl")
-
 
             val dlInfoMap = mutableMapOf<String, String?>()
 
@@ -100,7 +104,6 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                         headResponse = null
                     }
 
-
                     requestBuilder.url(httpUrl)
                     val requestStart = getSystemTimeInMillis()
                     httpResponse = httpClient.get<HttpResponse>(requestBuilder)
@@ -113,6 +116,9 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                     }
 
                     appendOutput = (httpResponse.status == HttpStatusCode.PartialContent)
+                    if(appendOutput)
+                        bytesDownloaded.value = startFrom
+
 
                     //save the etag and last modified info (if known)
                     dlInfoMap.clear()
@@ -138,31 +144,39 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
                             throw CancellationException("coroutine canceled - not reading anymore")
                         }
                         if (rc == -1) break
-                        //copied += rc
+                        bytesDownloaded.addAndGet(rc.toLong())
+                        onDownloadProgress(bytesDownloaded.value)
                         fileOutput.writeFully(buffer)
                     } while (true)
-
 
                     copyTime = getSystemTimeInMillis() - copyStartTime
 
                     //Can be added for checking performance
                     //println("Response time: $responseTime ms | Copy time: $copyTime")
 
-                    if (dlPartFile.renameTo(FileSe(destinationFile))) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    fileOutput.flush()
+                    fileOutput.close()
+                    fileOutput = null
+
+                    val byteCount = bytesDownloaded.value
+                    UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - completed " +
+                            "downloaded ${byteCount} . Response time = $responseTime ms, " +
+                            "download time = $copyTime ms")
+
+                    return dlPartFile.renameFile(FileSe(destinationFile))
                 }catch(e: Exception) {
+                    UMLog.l(UMLog.INFO, 0, "ResumableDownload2: $httpUrl - exception " +
+                            " $e : ${e.message}")
                     if(e is CancellationException)
                         throw e
 
                     delay(retryDelay.toLong())
                 }finally {
                     withContext(NonCancellable) {
-                        println("Cleaning up resumabledownload of $httpUrl")
+                        //println("Cleaning up resumabledownload of $httpUrl")
                         httpIn?.close()
                         httpResponse?.close()
+                        fileOutput?.flush()
                         fileOutput?.close()
                         headResponse?.close()
                         buffer.release(IoBuffer.Pool)
@@ -171,7 +185,7 @@ class ResumableDownload2(val httpUrl: String, val destinationFile: String, val r
             }
 
         }catch (e: CancellationException) {
-            println("ResumableDownload2: cancellation exception on $httpUrl")
+            println("ResumableDownload2: $httpUrl - cancellation exception")
             throw e
         }
 

@@ -8,6 +8,7 @@ apply plugin: "jacoco"
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
 def keystoreProperties = new Properties()
+def baseAppId = "org.fhi360.goldozi"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
@@ -29,7 +30,9 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/INDEX.LIST'
+        // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
+        // use kotlin reflection, which we don't.
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata"]
     }
 
     compileOptions {
@@ -38,7 +41,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.fhi360.goldozi"
+
+        applicationId "${baseAppId}.launcher"
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
@@ -76,16 +80,17 @@ android {
          */
         vanilla {
             dimension "config"
-            applicationId "org.fhi360.goldozi"
-            testApplicationId "org.fhi360.goldozi.appandroid.test"
+
+            applicationId "${baseAppId}"
+            testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
         }
 
         vanillamultidex {
             dimension "config"
             minSdkVersion 18
-            applicationId "org.fhi360.goldozi"
-            testApplicationId "org.fhi360.goldozi.appandroid.test"
+            applicationId "${baseAppId}"
+            testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
@@ -108,9 +113,10 @@ android {
 
         devMinApi21 {
             dimension "config"
-            minSdkVersion 22
-            applicationId "org.fhi360.goldozi"
-            testApplicationId "org.fhi360.goldozi.appandroid.test"
+
+            minSdkVersion 21
+            applicationId "${baseAppId}"
+            testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
             multiDexEnabled true
             packagingOptions { //Required: otherwise we get complaints on assembling
@@ -138,6 +144,7 @@ android {
             testCoverageEnabled = false
             debuggable false
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }

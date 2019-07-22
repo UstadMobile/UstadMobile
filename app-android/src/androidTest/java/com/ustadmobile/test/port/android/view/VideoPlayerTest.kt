@@ -1,42 +1,35 @@
 package com.ustadmobile.test.port.android.view
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-
-import androidx.test.InstrumentationRegistry
 import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
-
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerDao
-import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.view.VideoPlayerActivity
-import com.ustadmobile.port.sharedse.container.ContainerManager
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
-
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
-import java.util.HashMap
 
 @RunWith(AndroidJUnit4::class)
 class VideoPlayerTest {
 
-    @Rule
+    @get:Rule
     var mActivityRule = IntentsTestRule(VideoPlayerActivity::class.java, false, false)
-    @Rule
+    @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
     private var containerUid: Long = 0
@@ -44,15 +37,15 @@ class VideoPlayerTest {
 
     val db: UmAppDatabase
         get() {
-            val context = InstrumentationRegistry.getTargetContext()
+            val context = InstrumentationRegistry.getInstrumentation().context
             val db = UmAppDatabase.getInstance(context)
             db.clearAllTables()
-            return  UmAppDatabase.getInstance(context)//db.getRepository("https://localhost", "")
+            return UmAppDatabase.getInstance(context)//db.getRepository("https://localhost", "")
         }
 
     @Throws(IOException::class)
     fun createDummyContent() {
-        val db = UmAppDatabase.getInstance(InstrumentationRegistry.getTargetContext())
+        val db = db
         val repo = db
         val contentDao = repo.contentEntryDao
         val containerDao = repo.containerDao
@@ -72,7 +65,8 @@ class VideoPlayerTest {
         tmpDir.mkdirs()
         val videoFile = File(tmpDir, "video1.webm")
         val audioTempFile = File(tmpDir, "audio.c2")
-        val srtTmpFile = File(tmpDir, "subtitle.srt")
+        val srtTmpFile = File(tmpDir, "subtitle-english.srt")
+        val germanTmpFile = File(tmpDir, "subtitle-Deutsch.srt")
 
         FileUtils.copyInputStreamToFile(
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/video1.webm")!!,
@@ -82,8 +76,12 @@ class VideoPlayerTest {
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/video1-codec2-version2.c2")!!,
                 audioTempFile)
         FileUtils.copyInputStreamToFile(
-                javaClass.getResourceAsStream("/com/ustadmobile/app/android/srtfile.srt")!!,
+                javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-english.srt")!!,
                 srtTmpFile)
+
+        FileUtils.copyInputStreamToFile(
+                javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-Deutsch.srt")!!,
+                germanTmpFile)
 
         val dir = Environment.getExternalStorageDirectory()
 
@@ -95,12 +93,12 @@ class VideoPlayerTest {
         val manager = ContainerManager(container, db,
                 repo, dir.absolutePath)
 
-        val fileMap = HashMap<File, String>()
-        fileMap[videoFile] = "video1.webm"
-        fileMap[audioTempFile] = "audio.c2"
-        fileMap[srtTmpFile] = "subtitle.srt"
-        manager.addEntries(fileMap, true)
-
+        runBlocking {
+            manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video1.webm"),
+                    ContainerManager.FileEntrySource(audioTempFile, "audio.c2"),
+                    ContainerManager.FileEntrySource(srtTmpFile, "subtitle-english.srt"),
+                    ContainerManager.FileEntrySource(germanTmpFile, "subtitle-Deutsch.srt"))
+        }
     }
 
 
@@ -118,7 +116,7 @@ class VideoPlayerTest {
         launchActivityIntent.putExtras(b)
         mActivityRule.launchActivity(launchActivityIntent)
 
-        //  mActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //  mHomeActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // the webview looks for an element "questionController" which is the start button of plix.
         // This is only available once plix has fully loaded and displayed to the user
     }

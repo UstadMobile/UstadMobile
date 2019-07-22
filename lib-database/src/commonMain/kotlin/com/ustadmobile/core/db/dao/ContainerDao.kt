@@ -98,4 +98,9 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("updateMimeType")
     abstract fun updateMimeType(mimeType: String, containerUid: Long)
 
+    @Query("Select Container.* FROM Container " +
+            "WHERE Container.containerContentEntryUid = :contentEntry " +
+            "ORDER BY Container.lastModified DESC LIMIT 1")
+    abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
+
 }

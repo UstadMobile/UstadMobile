@@ -95,10 +95,10 @@ class TinCanXML {
                     } else {
                         if (tagName == "extension") {
                             extKey = xpp.getAttributeValue(null, "key")!!
-                            if (xpp.next() == KMPPullParser.TEXT) {
-                                extVal = xpp.getText()?: ""
+                            extVal = if (xpp.next() == KMPPullParser.TEXT) {
+                                xpp.getText()?: ""
                             } else {
-                                extVal = ""
+                                ""
                             }
                             activity!!.setExtension(extKey, extVal)
                         }

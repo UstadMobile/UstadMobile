@@ -1,0 +1,28 @@
+{
+	"id":"fd41c918-b88b-4b20-a0a5-a4c32391aaa0",
+	"timestamp": "2015-11-18T12:17:00+00:00",
+	"actor":{
+		"objectType": "Agent",
+		"name":"Project Tin Can API",
+		"mbox":"mailto:user@example.com"
+	},
+	"verb":{
+		"id":"http://example.com/xapi/verbs#sent-a-statement",
+		"display":{
+			"en-US":"sent"
+		}
+	},
+	"object":{
+		"id":"http://example.com/xapi/activity/simplestatement",
+		"definition":{
+			"name":{
+				"en-US":"simple statement"
+			},
+			"description":{
+				"en-US":"A simple Experience API statement. Note that the LRS
+				does not need to have any prior information about the Actor (learner), the
+				verb, or the Activity/object."
+			}
+		}
+	}
+}

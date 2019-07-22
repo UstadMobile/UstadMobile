@@ -2,16 +2,23 @@ package com.ustadmobile.lib.contentscrapers.khanacademy;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.ContainerDao;
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil;
 import com.ustadmobile.lib.contentscrapers.LogIndex;
 import com.ustadmobile.lib.contentscrapers.LogResponse;
 import com.ustadmobile.lib.contentscrapers.ScraperConstants;
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil;
 import com.ustadmobile.lib.contentscrapers.UMLogUtil;
+import com.ustadmobile.lib.contentscrapers.util.SrtFormat;
+import com.ustadmobile.lib.db.entities.Container;
 import com.ustadmobile.lib.db.entities.ContentEntry;
+import com.ustadmobile.lib.util.Base64Coder;
+import com.ustadmobile.port.sharedse.container.ContainerManager;
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -28,6 +35,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,6 +55,7 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.CORRECT_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HINT_JSON_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HINT_JSON_LINK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.HUGE_FILE_SIZE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INTERNAL_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.INTERNAL_JSON_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN;
@@ -57,10 +66,13 @@ import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JSON
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_SVG;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SRT_EXT;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.SUBTITLE_FILENAME;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_FILE;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.TRY_AGAIN_KHAN_LINK;
 import static com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING;
+import static com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT;
 import static com.ustadmobile.lib.contentscrapers.ck12.CK12ContentScraper.RESPONSE_RECEIVED;
 
 
@@ -120,15 +132,21 @@ public class KhanContentScraper implements Runnable {
 
     private String regexUrlPrefix = "https://(www.khanacademy.org|cdn.kastatic.org)/(.*)";
 
+    private String subTitleUrl = "http://www.khanacademy.org/api/internal/videos/";
+
+    private String subTitlePostUrl = "/transcript?lang=";
+
     private String secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/";
 
     private String exerciseMidleUrl = "/items/";
 
     private String exercisePostUrl = "/assessment_item";
 
-    private boolean isContentUpdated = true;
+    private boolean isContentUpdated = false;
     private String nodeSlug;
-    private String mimeType;
+    private ContainerDao containerDao;
+    private UmAppDatabase repository;
+    private UmAppDatabase db;
 
 
     public KhanContentScraper(URL scrapeUrl, File destinationDirectory, File containerDir, ContentEntry parent, String contentType, int sqiUid, GenericObjectPool<ChromeDriver> factory) {
@@ -151,14 +169,14 @@ public class KhanContentScraper implements Runnable {
     @Override
     public void run() {
         System.gc();
-        UmAppDatabase db = UmAppDatabase.getInstance(null);
-        UmAppDatabase repository = db.getRepository("https://localhost", "");
-        ContainerDao containerDao = repository.getContainerDao();
+        db = UmAppDatabase.getInstance(null);
+        repository = db.getRepository("https://localhost", "");
+        containerDao = repository.getContainerDao();
         ScrapeQueueItemDao queueDao = db.getScrapeQueueItemDao();
 
 
         long startTime = System.currentTimeMillis();
-        UMLogUtil.logInfo("Started scraper url " + url + " at start time: " + startTime);
+        UMLogUtil.logInfo("Started scraper url " + url + " for destination " + destinationDirectory.getName() + "at start time: " + startTime);
         queueDao.setTimeStarted(sqiUid, startTime);
 
         boolean successful = false;
@@ -183,9 +201,8 @@ public class KhanContentScraper implements Runnable {
 
             if (isContentUpdated()) {
                 ContentScraperUtil.insertContainer(containerDao, parentEntry, true,
-                        mimetype, content.lastModified(), content, db, repository,
+                        mimetype, System.currentTimeMillis(), content, db, repository,
                         containerDir);
-                FileUtils.deleteDirectory(content);
             }
 
         } catch (Exception e) {
@@ -201,12 +218,8 @@ public class KhanContentScraper implements Runnable {
         queueDao.updateSetStatusById(sqiUid, successful ? ScrapeQueueItemDao.STATUS_DONE : ScrapeQueueItemDao.STATUS_FAILED);
         queueDao.setTimeFinished(sqiUid, System.currentTimeMillis());
         long duration = System.currentTimeMillis() - startTime;
-        UMLogUtil.logInfo("Ended scrape for url " + url + " in duration: " + duration);
+        UMLogUtil.logInfo("Ended scrape for url " + url + " for destination " + destinationDirectory.getName() + " in duration: " + duration);
 
-    }
-
-    public String getMimeType() {
-        return mimeType;
     }
 
     public boolean isContentUpdated() {
@@ -216,9 +229,19 @@ public class KhanContentScraper implements Runnable {
     public void scrapeVideoContent(String scrapUrl) throws IOException {
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        Type type = new TypeToken<List<SrtFormat>>() {
+        }.getType();
 
         File folder = new File(destinationDirectory, destinationDirectory.getName());
         folder.mkdirs();
+
+        Container container = containerDao.getMostRecentContainerForContentEntry(parentEntry.getContentEntryUid());
+        ContainerManager manager = null;
+        if (container != null) {
+            isContentUpdated = true;
+            manager = new ContainerManager(container, db,
+                    repository, containerDir.getAbsolutePath());
+        }
 
         String initialJson = KhanContentIndexer.getJsonStringFromScript(scrapUrl);
         SubjectListResponse data = gson.fromJson(initialJson, SubjectListResponse.class);
@@ -227,6 +250,7 @@ public class KhanContentScraper implements Runnable {
         }
 
         SubjectListResponse.ComponentData compProps = data.componentProps;
+        SubjectListResponse.FooterData footerProps = data.footerProps;
         SubjectListResponse.ComponentData.NavData navData = compProps.tutorialNavData;
         if (navData == null) {
             navData = compProps.tutorialPageData;
@@ -255,26 +279,109 @@ public class KhanContentScraper implements Runnable {
                 try {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("HEAD");
-                    mimeType = conn.getContentType();
 
-                    isContentUpdated = ContentScraperUtil.isFileModified(conn, destinationDirectory, destinationDirectory.getName());
-
-                    if (ContentScraperUtil.fileHasContent(folder)) {
-                        isContentUpdated = false;
-                        FileUtils.deleteDirectory(folder);
+                    String contentLength = conn.getHeaderField("content-length");
+                    UMLogUtil.logInfo("content length = " + contentLength);
+                    if (contentLength != null) {
+                        if (Long.parseLong(contentLength) > HUGE_FILE_SIZE) {
+                            UMLogUtil.logInfo("File size too big");
+                            break;
+                        }
                     }
 
-                    if (!isContentUpdated) {
-                        return;
+                    long lastModifiedServer = manager != null ? manager.getEntry(url.getPath()) != null ?
+                            manager.getEntry(url.getPath()).getContainerEntryFile().getLastModified() : 1552521600 : 1552521600;
+
+                    lastModifiedServer = lastModifiedServer == 0 ? 1552521600 : lastModifiedServer;
+
+                    long lastModifiedVideo = ContentScraperUtil.getLastModified(conn);
+
+                    File oldETagLocation = new File(folder, FilenameUtils.getBaseName(url.getPath()) + ScraperConstants.ETAG_TXT);
+                    oldETagLocation = !ContentScraperUtil.fileHasContent(oldETagLocation) ?
+                            new File(folder, FilenameUtils.getBaseName(content.downloadUrls.mp4Low) + ScraperConstants.ETAG_TXT) : oldETagLocation;
+
+                    boolean isEtagUpdated = ContentScraperUtil.isEtagUpdated(conn, destinationDirectory, destinationDirectory.getName());
+                    if (ContentScraperUtil.fileHasContent(oldETagLocation)) {
+                        FileUtils.deleteQuietly(oldETagLocation);
                     }
 
                     File contentFile = new File(folder, FilenameUtils.getName(url.getPath()));
-                    FileUtils.copyURLToFile(url, contentFile);
-                    File webMFile = new File(folder, FilenameUtils.getName(url.getPath()));
-                    ShrinkerUtil.convertKhanVideoToWebMAndCodec2(contentFile, webMFile);
+                    File webMFile = new File(folder, UMFileUtil.INSTANCE.stripExtensionIfPresent(contentFile.getName()) + WEBM_EXT);
+                    if ((isEtagUpdated || lastModifiedVideo > lastModifiedServer) || !ContentScraperUtil.fileHasContent(webMFile)) {
 
-                } catch (IOException e) {
-                    throw e;
+                        UMLogUtil.logTrace("Downloading content for url " + url.toString());
+                        FileUtils.copyURLToFile(url, contentFile);
+                        ShrinkerUtil.convertKhanVideoToWebMAndCodec2(contentFile, webMFile);
+                        ContentScraperUtil.deleteFile(contentFile);
+                        isContentUpdated = true;
+                    }
+
+                    List<List<String>> langList = footerProps.languages;
+                    HashMap<String, String> langMap = new HashMap<>();
+                    for (List<String> lang : langList) {
+                        if (lang.size() > 0) {
+                            String code = lang.get(0).length() == 2 ? lang.get(0) : lang.get(1);
+                            String name = lang.get(0).length() != 2 ? lang.get(0) : lang.get(1);
+                            langMap.put(code, name);
+                        }
+                    }
+
+                    String locale = footerProps.kaLocale;
+                    File oldSrtFile = new File(folder, SUBTITLE_FILENAME + SRT_EXT);
+                    if (ContentScraperUtil.fileHasContent(oldSrtFile)) {
+                        FileUtils.deleteQuietly(oldSrtFile);
+                    }
+
+                    File originalSrtFile = new File(folder, SUBTITLE_FILENAME + "-" + langMap.get(locale) + SRT_EXT);
+                    String srtText = saveSrtContent(originalSrtFile, locale, content.youtubeId, gson, type);
+                    UMLogUtil.logTrace("Created the original language subtitle file " + locale);
+
+
+                    String localeMd5 = manager != null ? manager.getEntry(originalSrtFile.getName()) != null ?
+                            manager.getEntry(originalSrtFile.getName()).getContainerEntryFile().getCefMd5() : "" : "";
+                    String localeSrtMd5 = Base64Coder.encodeToString(UmFileUtilSe.getMd5Sum(originalSrtFile));
+                    isContentUpdated = !localeSrtMd5.equals(localeMd5);
+
+                    for (String code : langMap.keySet()) {
+
+                        try {
+
+                            String name = langMap.get(code);
+
+                            if (code.equals(locale)) {
+                                continue;
+                            }
+
+                            File srtFile = new File(folder, SUBTITLE_FILENAME + "-" + name + SRT_EXT);
+                            String langSrtText = saveSrtContent(srtFile, code, content.youtubeId, gson, type);
+
+                            if (srtText.equals(langSrtText)) {
+                                FileUtils.deleteQuietly(srtFile);
+                                continue;
+                            }
+
+                            UMLogUtil.logTrace("Created the translated language subtitle file " + code);
+
+                            if (!isContentUpdated) {
+                                String md5 = manager != null ? manager.getEntry(srtFile.getName()) != null ?
+                                        manager.getEntry(srtFile.getName()).getContainerEntryFile().getCefMd5() : "" : "";
+
+                                String srtFileMd5 = Base64Coder.encodeToString(UmFileUtilSe.getMd5Sum(srtFile));
+
+                                isContentUpdated = !srtFileMd5.equals(md5);
+                            }
+                        } catch (Exception e) {
+                            UMLogUtil.logDebug("Language " + code + " didnt exist");
+                            UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e));
+                        }
+
+                    }
+
+                    if (srtText.isEmpty()) {
+                        UMLogUtil.logInfo("deleting orginal because empty " + destinationDirectory.getName());
+                        FileUtils.deleteQuietly(originalSrtFile);
+                    }
+
                 } finally {
                     if (conn != null) {
                         conn.disconnect();
@@ -284,6 +391,19 @@ public class KhanContentScraper implements Runnable {
             }
         }
 
+    }
+
+    private String saveSrtContent(File srtFile, String code, String youtubeId, Gson gson, Type type) throws IOException {
+        URL subTitleUrl = new URL(generateSubtitleUrl(youtubeId, code));
+
+        String subtitleScript = IOUtils.toString(subTitleUrl, UTF_ENCODING);
+        List<SrtFormat> subTitleList = gson.fromJson(subtitleScript, type);
+
+        return ContentScraperUtil.createSrtFile(subTitleList, srtFile);
+    }
+
+    private String generateSubtitleUrl(String youtubeId, String code) {
+        return subTitleUrl + youtubeId + subTitlePostUrl + code;
     }
 
 
@@ -349,20 +469,21 @@ public class KhanContentScraper implements Runnable {
 
         }
 
-        boolean isUpdated;
         File modifiedFile = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
-        isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
+
+        File oldModifiedFile = new File(khanDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+        if (ContentScraperUtil.fileHasContent(oldModifiedFile)) {
+            FileUtils.deleteQuietly(oldModifiedFile);
+        }
+
+        isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
 
         File indexJsonFile = new File(khanDirectory, "index.json");
 
-        if (ContentScraperUtil.fileHasContent(khanDirectory)) {
-            isUpdated = false;
-            FileUtils.deleteDirectory(khanDirectory);
-        }
-
-        if (!isUpdated) {
-            isContentUpdated = false;
+        if (!isContentUpdated) {
             return;
+        } else {
+            FileUtils.deleteDirectory(khanDirectory);
         }
 
         if (driver == null) {
@@ -598,18 +719,20 @@ public class KhanContentScraper implements Runnable {
                 ArticleResponse response = gson.fromJson(IOUtils.toString(new URL(articleUrl), UTF_ENCODING), ArticleResponse.class);
                 long dateModified = ContentScraperUtil.parseServerDate(response.date_modified);
 
-                boolean isUpdated;
                 File modifiedFile = new File(destinationDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
-                isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
-
-                if (ContentScraperUtil.fileHasContent(khanDirectory)) {
-                    isUpdated = false;
-                    FileUtils.deleteDirectory(khanDirectory);
+                File oldModifiedFile = new File(khanDirectory, destinationDirectory.getName() + ScraperConstants.LAST_MODIFIED_TXT);
+                if (ContentScraperUtil.fileHasContent(oldModifiedFile)) {
+                    FileUtils.deleteQuietly(oldModifiedFile);
                 }
 
-                if (!isUpdated) {
-                    isContentUpdated = false;
+
+
+                isContentUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, String.valueOf(dateModified));
+
+                if (!isContentUpdated) {
                     return;
+                } else {
+                    FileUtils.deleteDirectory(khanDirectory);
                 }
 
                 break;

@@ -47,7 +47,7 @@ class SaleProductDetailPresenter(context: Any,
 
     private val selectedToCategoriesUid: HashMap<Long, Boolean>
 
-    private var pictureLiveData: DoorLiveData<SaleProductPicture>? = null
+    private lateinit var pictureLiveData: DoorLiveData<SaleProductPicture?>
 
     init {
 
@@ -136,7 +136,7 @@ class SaleProductDetailPresenter(context: Any,
         pictureLiveData = pictureDao.findByProductUidLive(currentSaleProduct!!.saleProductUid)
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
-            pictureLiveData!!.observe(thisP, thisP::handleProductPictureChanged)
+            pictureLiveData.observe(thisP, thisP::handleProductPictureChanged)
         }
 
     }

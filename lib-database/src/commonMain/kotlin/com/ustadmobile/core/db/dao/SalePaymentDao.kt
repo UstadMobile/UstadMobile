@@ -71,13 +71,13 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
 
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUid(uid: Long): SalePayment
+    abstract fun findByUid(uid: Long): SalePayment?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long):SalePayment
+    abstract suspend fun findByUidAsync(uid: Long):SalePayment?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract fun findByUidLive(uid: Long): DoorLiveData<SalePayment>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<SalePayment?>
 
     @Query(INACTIVATE_QUERY)
     abstract fun inactivateEntity(uid: Long)

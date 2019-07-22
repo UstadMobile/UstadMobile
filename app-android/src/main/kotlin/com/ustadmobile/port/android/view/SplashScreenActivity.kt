@@ -32,6 +32,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.os.Handler
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -42,17 +43,29 @@ import androidx.work.WorkManager
 import com.ustadmobile.core.db.UmAppDatabase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.view.OnBoardingView
+import java.util.concurrent.TimeUnit
 
 
 class SplashScreenActivity : UstadBaseActivity() {
 
+    private val impl =  UstadMobileSystemImpl.instance
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setTheme(R.style.ThemeOnboarding)
+
         setContentView(R.layout.activity_splash_screen)
-        val dbWork = OneTimeWorkRequest.Builder(
+
+        val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",this).toBoolean()
+
+        if(!launched){val dbWork = OneTimeWorkRequest.Builder(
                 DbInitialEntriesInserter.DbInitialEntriesInserterWorker::class.java)
                 .build()
-        WorkManager.getInstance().enqueue(dbWork)
+            WorkManager.getInstance().enqueue(dbWork)
+        }
 
         //TODO: KMP Remove When DELEGATE WEB works
         //Load Dummy data
@@ -61,11 +74,15 @@ class SplashScreenActivity : UstadBaseActivity() {
         GlobalScope.launch {
             dd.loadInitialData()
         }
-    }
 
-    override fun onStart() {
-        super.onStart()
-        UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
+        val showSplash = impl.getAppConfigString(
+                AppConfig.KEY_SHOW_SPASH_SCREEN, null, this)!!.toBoolean()
+
+        Handler().postDelayed({
+            impl.startUI(this@SplashScreenActivity)
+        }, if(showSplash || !launched) TimeUnit.SECONDS.toMillis(2) else 0)
+
+
     }
 
 }

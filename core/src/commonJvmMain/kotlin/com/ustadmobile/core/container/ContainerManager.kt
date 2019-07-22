@@ -1,9 +1,12 @@
 package com.ustadmobile.core.container
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.lib.util.Base64Coder
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
@@ -28,7 +31,7 @@ actual class ContainerManager actual constructor(container: Container,
 
     val mutex = Mutex()
 
-    class FileEntrySource(private val file: File, override val pathInContainer: String) : EntrySource {
+    open class FileEntrySource(private val file: File, override val pathInContainer: String) : EntrySource {
         override val length: Long
             get() = file.length()
 
@@ -72,7 +75,7 @@ actual class ContainerManager actual constructor(container: Container,
             //delete any ContainerEntry that is being overwritten
             val newEntryPaths = entries.map { it.pathInContainer }
             db.containerEntryDao.deleteList(
-                    pathToEntryMap.filter { it.key in newEntryPaths }.map {it.value as ContainerEntry})
+                    pathToEntryMap.filter { it.key in newEntryPaths }.map { it.value })
 
             //for all entries that we already have
             newContainerEntries.addAll(entriesParted.first.map { ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
@@ -109,8 +112,8 @@ actual class ContainerManager actual constructor(container: Container,
                 }
 
                 val containerEntryFile = ContainerEntryFile(Base64Coder.encodeToString(it.md5Sum),
-                        destFile.length(), destFile.length(), 0)
-                containerEntryFile.cefPath = destFile.getAbsolutePath()
+                        destFile.length(), destFile.length(), 0, getSystemTimeInMillis())
+                containerEntryFile.cefPath = destFile.absolutePath
                 containerEntryFile.cefUid = db.containerEntryFileDao.insert(containerEntryFile)
                 newContainerEntries.add(ContainerEntryWithContainerEntryFile(it.pathInContainer, container,
                         containerEntryFile))

@@ -201,7 +201,7 @@ class SelectSaleProductPresenter(context: Any,
         GlobalScope.launch {
             try{
                 val result = saleProductDao.findByNameAsync("Collection")
-                handleClickProduct(result.saleProductUid, true)
+                handleClickProduct(result!!.saleProductUid, true)
 
             }catch(e:Exception){
                 println(e.message)

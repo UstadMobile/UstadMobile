@@ -30,8 +30,10 @@
  */
 package com.ustadmobile.core.util
 
+import com.soywiz.klock.ISO8601
 import com.ustadmobile.core.impl.UmAccountManager
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.content
 import kotlinx.serialization.json.json
 import kotlin.math.floor
 
@@ -48,15 +50,74 @@ import kotlin.math.floor
  */
 object UMTinCanUtil {
 
-    val ADL_PREFIX_VERB = "http://adlnet.gov/expapi/verbs/"
+    const val ADL_PREFIX_VERB = "http://adlnet.gov/expapi/verbs/"
 
-    val VERB_PASSED = ADL_PREFIX_VERB + "passed"
+    const val VERB_PASSED = ADL_PREFIX_VERB + "passed"
 
-    val VERB_FAILED = ADL_PREFIX_VERB + "failed"
+    const val VERB_FAILED = ADL_PREFIX_VERB + "failed"
 
-    val VERB_ANSWERED = ADL_PREFIX_VERB + "answered"
+    const val VERB_ANSWERED = ADL_PREFIX_VERB + "answered"
 
 
+    /**
+     * Generate a JSON Object representing a TinCan statement for 'experience' a
+     * given page.
+     *
+     * Statement ID will be the EPUB ID/pageName
+     *
+     * @param pageTitle Title of the page
+     * @param pageLang language of the page for tincan purposes (e.g. en-US)
+     * @param duration Duration viewed in ms
+     * @param actor TinCan actor JSONObject
+     *
+     * @return JSONObject representing the TinCan stmt, null if error
+     */
+    fun makePageViewStmt(tinCanID: String, pageTitle: String, pageLang: String, duration: Long, actor: JsonObject): JsonObject {
+
+        val stmtObject = json { "actor" to actor }
+        val activityDef = json {
+            "type" to "http://adlnet.gov/expapi/activities/module"
+            "name" to makeLangMapVal(pageLang, pageTitle)
+            "description" to makeLangMapVal(pageLang, pageTitle)
+        }
+        val objectDef = json {
+            "id" to tinCanID
+            "definition" to activityDef
+            "objectType" to "Activity"
+        }
+
+        stmtObject.plus("object" to objectDef)
+
+        val verbDef = json { "id" to "http://adlnet.gov/expapi/verbs/experienced" }
+        val verbDisplay = json { "en-US" to "experienced" }
+
+        verbDef.plus("display" to verbDisplay)
+
+        stmtObject.plus("verb" to verbDef)
+
+        val resultDef = json { "duration" to format8601Duration(duration) }
+
+        stmtObject.plus("result" to resultDef)
+
+        return stmtObject
+    }
+
+    /**
+     * Generate a JSONObject representing an Activity which is simply referenced
+     * by it's ID.  Using just the ID is a good idea when the activity is already
+     * known on the server end anyway.
+     *
+     * @param id ID of the Activity object
+     * @return JSONObject representing the Activity
+     */
+    fun makeActivityObjectById(id: String): JsonObject {
+        val definitionVal: Any? = null
+        return json {
+            "id" to id
+            "objectType" to "Activity"
+            "definition" to definitionVal
+        }
+    }
 
 
     /**
@@ -94,6 +155,13 @@ object UMTinCanUtil {
         return "PT" + hours + "H" + mins + "M" + secs + "S"
     }
 
+
+    fun parse8601Duration(duration: String): Long {
+        val time = ISO8601.INTERVAL_COMPLETE0.tryParse(duration, false)
+        return time?.totalMilliseconds?.toLong() ?: 0L
+    }
+
+
     /**
      * Makes an actor JSON in the form of
      * {
@@ -109,10 +177,15 @@ object UMTinCanUtil {
      * @param username The user id used for authentication on the server
      * @param xAPIServer The XAPI server to use for the homePage.  Should be the base e.g. server.com/xapi not server.com/xapi/statements
      */
-    fun makeActorFromUserAccount(username: String, xAPIServer: String): JsonObject? {
-        val accountObj = json { "homePage" to xAPIServer}.plus("name" to username)
-        val actorObj = json { "account" to accountObj}.plus("objectType" to "Agent")
-        return actorObj as JsonObject
+    fun makeActorFromUserAccount(username: String, xAPIServer: String): JsonObject {
+        val accountObj = json {
+            "homePage" to xAPIServer
+            "name" to username
+        }
+        return json {
+            "account" to accountObj
+            "objectType" to "Agent"
+        }
     }
 
     /**
@@ -123,7 +196,7 @@ object UMTinCanUtil {
      * @param context Current context object
      * @return JSON Object representing the currently logged in user.
      */
-    fun makeActorFromActiveUser(context: Any): JsonObject? {
+    fun makeActorFromActiveUser(context: Any): JsonObject {
         val account = UmAccountManager.getActiveAccount(context)
         val accountUsername = account?.username
         val accountEndpoint = account?.endpointUrl
@@ -153,7 +226,27 @@ object UMTinCanUtil {
      * @return
      */
     fun makeVerbObject(id: String, lang: String, display: String): JsonObject {
-        return json { "id" to id }.plus("display" to makeLangMapVal(lang, display)) as JsonObject
+        return json {
+            "id" to id
+            "display" to makeLangMapVal(lang, display)
+        }
+    }
+
+    /**
+     * Gets the registration from a JSONObject representing an XAPI statement
+     * if it has one
+     *
+     * @param stmt JSONObject that represents a TinCan statement
+     * @return The registration UUID if present in the context of statement, null otherwise
+     */
+    fun getStatementRegistration(stmt: JsonObject): String? {
+        if (stmt.containsKey("context")) {
+            val context = stmt["context"] as JsonObject
+            if (context.containsKey("registration")) {
+                return context["registration"]?.content
+            }
+        }
+        return null
     }
 
 }

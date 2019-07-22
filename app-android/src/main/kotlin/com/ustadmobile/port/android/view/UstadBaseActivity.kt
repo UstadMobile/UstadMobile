@@ -1,9 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -19,7 +22,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
@@ -28,7 +30,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.ACTION_LOCALE_CHANGE
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.Login2View
@@ -41,6 +42,7 @@ import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
+import com.ustadmobile.sharedse.network.DownloadNotificationService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
@@ -74,13 +76,13 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
     /**
      * @return Active NetworkManagerBleCommon
      */
-     var networkManagerBle: NetworkManagerBle? = null
+    var networkManagerBle: NetworkManagerBle? = null
 
     private var fragmentList: MutableList<WeakReference<Fragment>>? = null
 
-    private var localeChanged = false
-
     private var localeOnCreate: String? = null
+
+    private var runAfterFileSelection: Runnable? = null
 
     /**
      * Can be used to check if the activity has been started.
@@ -102,10 +104,16 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
 
     private var permission: String? = null
 
+
     var checkLogout:Boolean = true
 
     val PREFKEY_LAST_ACTIVE = "prefke.lastactive"
     val TIMEOUT_LOGOUT = 600000L
+
+    internal var selectedFileUri: Uri?= null
+
+    internal var isOpeningFilePickerOrCamera = false
+
 
 
     private val mSyncServiceConnection = object : ServiceConnection {
@@ -126,7 +134,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
             networkManagerBle = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
                     .service.networkManagerBle
             bleServiceBound = true
-            onBleNetworkServiceBound(networkManagerBle)
+            if(networkManagerBle != null){
+                UstadMobileSystemImpl.instance.networkManager = networkManagerBle
+                onBleNetworkServiceBound(networkManagerBle!!)
+            }
             runWhenServiceConnectedQueue.setReady(true)
         }
 
@@ -152,6 +163,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         //bind to the LRS forwarding service
         instance.handleActivityCreate(this, savedInstanceState)
         fragmentList = ArrayList()
+
         val intentFilter = IntentFilter()
 
         super.onCreate(savedInstanceState)
@@ -191,8 +203,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
             dialogInterface.cancel()
         }
         builder.setNegativeButton(R.string.cancel) { dialogInterface, i -> dialogInterface.cancel() }
-        builder.setOnDismissListener { dialogInterface -> feedbackDialogVisible = false }
-        builder.setOnCancelListener { dialogInterface -> feedbackDialogVisible = false }
+        builder.setOnDismissListener { feedbackDialogVisible = false }
+        builder.setOnCancelListener { feedbackDialogVisible = false }
         val dialog = builder.create()
         dialog.show()
 
@@ -221,7 +233,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
      *
      * @param networkManagerBle
      */
-    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle?) {}
+    protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {}
 
     protected fun onBleNetworkServiceUnbound() {
 
@@ -232,12 +244,10 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
 
         checkTimeout()
 
-
-        if (localeChanged) {
-            if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
-                Handler().postDelayed({ this.recreate() }, 200)
-            }
+        if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+            Handler().postDelayed({ this.recreate() }, 200)
         }
+
         if (shakeDetector != null && sensorManager != null) {
             shakeDetector!!.start(sensorManager)
         }
@@ -274,11 +284,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
 
     protected fun setBaseController(baseController: UstadBaseController<*>) {
         this.baseController = baseController
-    }
-
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
     }
 
 
@@ -383,6 +388,18 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
     }
 
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(resultCode == RESULT_OK){
+            if (requestCode == FILE_SELECTION_REQUEST_CODE) {
+                selectedFileUri = data?.data
+                runAfterFileSelection?.run()
+                runAfterFileSelection = null
+            }
+        }
+    }
+
+
     /**
      * Handle our own delegation of back button presses.  This allows UstadBaseFragment child classes
      * to handle back button presses if they want to.
@@ -426,6 +443,28 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
         runOnUiThread { Toast.makeText(this, notification, length).show() }
     }
 
+
+    @SuppressLint("ObsoleteSdkInt")
+    protected fun runAfterFileSection(runnable: java.lang.Runnable, vararg mimeTypes: String) {
+        this.runAfterFileSelection = runnable
+
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        } else {
+            val mimeTypesStr = StringBuilder()
+            for (mimeType in mimeTypes) {
+                mimeTypesStr.append(mimeType).append("|")
+            }
+            intent.type = mimeTypesStr.substring(0, mimeTypesStr.length - 1)
+        }
+        startActivityForResult(Intent.createChooser(intent, ""),
+                FILE_SELECTION_REQUEST_CODE)
+    }
+
     /**
      * Responsible for running task after checking permissions
      *
@@ -455,8 +494,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
                 builder.setTitle(permissionDialogTitle)
                         .setMessage(permissionDialogMessage)
                         .setNegativeButton(getString(android.R.string.cancel)
-                        ) { dialog, which -> dialog.dismiss() }
-                        .setPositiveButton(getString(android.R.string.ok)) { dialog, which ->
+                        ) { dialog, _ -> dialog.dismiss() }
+                        .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
                             runAfterGrantingPermission(permission, afterPermissionMethodRunner,
                                     permissionDialogTitle, permissionDialogMessage)
                         }
@@ -498,6 +537,19 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
     }
 
     /**
+     * Stop current runing notification fore ground service
+     */
+    open fun stopForeGroundService(jobId: Long, cancel: Boolean){
+        val notificationServiceIntent = Intent(this,DownloadNotificationService::class.java)
+        notificationServiceIntent.action = if(cancel) DownloadNotificationService.ACTION_CANCEL_DOWNLOAD
+        else DownloadNotificationService.ACTION_PAUSE_DOWNLOAD
+        notificationServiceIntent.putExtra(DownloadNotificationService.JOB_ID_TAG, jobId)
+        val servicePendingIntent = PendingIntent.getService(applicationContext,
+                0, notificationServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        servicePendingIntent.send()
+    }
+
+    /**
      * Make sure NetworkManagerBleCommon is not null when running a certain logic
      *
      * @param runnable Future task to be executed
@@ -510,5 +562,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection,
 
         private const val RUN_TIME_REQUEST_CODE = 111
         const val ACTION_REMINDER_NOTIFICATION = 752
+
+        private const val FILE_SELECTION_REQUEST_CODE = 112
+
     }
 }
