@@ -21,6 +21,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.top_les] = R.string.top_les
 	ID_MAP[MessageID.inviting] = R.string.inviting
 	ID_MAP[MessageID.onboarding_goldozi_1b] = R.string.onboarding_goldozi_1b
+	ID_MAP[MessageID.shake_feedback] = R.string.shake_feedback
 	ID_MAP[MessageID.optional] = R.string.optional
 	ID_MAP[MessageID.sale_list_sort_by_date_asc] = R.string.sale_list_sort_by_date_asc
 	ID_MAP[MessageID.field_password_min] = R.string.field_password_min
@@ -78,8 +79,10 @@ object MessageIDMap {
 	ID_MAP[MessageID.content_media_message] = R.string.content_media_message
 	ID_MAP[MessageID.download_pause_download] = R.string.download_pause_download
 	ID_MAP[MessageID.phone_number] = R.string.phone_number
+	ID_MAP[MessageID.send_feedback] = R.string.send_feedback
 	ID_MAP[MessageID.app_name_goldozi] = R.string.app_name_goldozi
 	ID_MAP[MessageID.content_untitled_document] = R.string.content_untitled_document
+	ID_MAP[MessageID.feedback_hint] = R.string.feedback_hint
 	ID_MAP[MessageID.waiting] = R.string.waiting
 	ID_MAP[MessageID.delivery_signature] = R.string.delivery_signature
 	ID_MAP[MessageID.browse_feeds] = R.string.browse_feeds
@@ -202,6 +205,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.send_in_zip_file] = R.string.send_in_zip_file
 	ID_MAP[MessageID.forgot_password] = R.string.forgot_password
 	ID_MAP[MessageID.entry_details_author] = R.string.entry_details_author
+	ID_MAP[MessageID.select_image_from_camera_or_gallery] = R.string.select_image_from_camera_or_gallery
 	ID_MAP[MessageID.content_blank_doc_start_label] = R.string.content_blank_doc_start_label
 	ID_MAP[MessageID.queued] = R.string.queued
 	ID_MAP[MessageID.grantee] = R.string.grantee
@@ -393,6 +397,7 @@ object MessageIDMap {
 	ID_MAP[MessageID.app_interface_language] = R.string.app_interface_language
 	ID_MAP[MessageID.connecting] = R.string.connecting
 	ID_MAP[MessageID.content_editor_menu_outdent] = R.string.content_editor_menu_outdent
+	ID_MAP[MessageID.feedback_thanks] = R.string.feedback_thanks
 	ID_MAP[MessageID.product_types] = R.string.product_types
 	ID_MAP[MessageID.use_password] = R.string.use_password
 	ID_MAP[MessageID.content_entry_label_select_file] = R.string.content_entry_label_select_file

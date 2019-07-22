@@ -115,7 +115,6 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     }
 
-
     fun showGetImageAlertDialog() {
 
         val adb = AlertDialog.Builder(this)
