@@ -131,7 +131,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
         //Categories RecyclerView
         cRecyclerView = findViewById(R.id.activity_sale_product_detail_categories_rv)
-        val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+        val mRecyclerLayoutManager = LinearLayoutManager(this)
         cRecyclerView!!.layoutManager = mRecyclerLayoutManager
 
         titleEng = findViewById(R.id.activity_sale_product_detail_title_english)
@@ -234,7 +234,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductSelected>) {
         val recyclerAdapter = SaleProductCategorySelectorRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                applicationContext)
+                this)
 
         // get the provider, set , observe, etc.
         val data =
@@ -310,7 +310,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
         val output = File(dir, mPresenter!!.currentSaleProduct!!.saleProductUid.toString() + "_image.png")
         imagePathFromCamera = output.absolutePath
 
-        val cameraImage = FileProvider.getUriForFile(applicationContext,
+        val cameraImage = FileProvider.getUriForFile(this,
                 "$packageName.fileprovider", output)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImage)
 
@@ -408,7 +408,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
 
     override fun addImageFromCamera() {
-        if (ContextCompat.checkSelfPermission(applicationContext,
+        if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this@SaleProductDetailActivity,
                     arrayOf(Manifest.permission.CAMERA),
@@ -420,7 +420,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
     override fun addImageFromGallery() {
         //READ_EXTERNAL_STORAGE
-        if (ContextCompat.checkSelfPermission(applicationContext,
+        if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this@SaleProductDetailActivity,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),

@@ -60,7 +60,7 @@
     <string name="current_password">رمز عبور فعلی</string>
     <string name="confirm_new_password">تأید رمز عبور ججدید</string>
     <string name="choose_language">انتخاب زبان</string>
-    <string name="language_english">انگلیسی</string>
+    <string name="language_english">English</string>
     <string name="language_dari">دری</string>
     <string name="language_pashto">پشتو</string>
     <string name="confirm_logout">تأید خارج شدن</string>
@@ -172,4 +172,10 @@
     <string name="set_title">تنظیم عنوان</string>
 
     <string name="this_language">دری</string>
+
+    <string name="select_image_from_camera_or_gallery">تصویر را از دوربین یا گالری انتخاب کنید</string>
+    <string name="shake_feedback">برای بازخورد لرزش</string>
+    <string name="feedback_hint">لطفا نظرات خود را وارد کنید</string>
+    <string name="send_feedback">ارسال بازخورد</string>
+    <string name="feedback_thanks">متشکرم</string>
 </resources>

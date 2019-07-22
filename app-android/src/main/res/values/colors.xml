@@ -23,7 +23,7 @@
     <color name="icons_light">#ABFFFFFF</color>
     <color name="divider">#EAEAEA</color>
 
-    <color name="color_gray">#CBA3A3A3</color>
+    <color name="color_gray">#FF888888</color>
     <color name="background_light">#E8EAED</color>
 
     <item name="umblue" type="color">#FF3F31B5</item>

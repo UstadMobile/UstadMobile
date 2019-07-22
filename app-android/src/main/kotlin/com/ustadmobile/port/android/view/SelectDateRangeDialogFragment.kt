@@ -20,7 +20,9 @@ import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.core.view.SelectDateRangeDialogView
 import java.util.*
 
-class SelectDateRangeDialogFragment : UstadDialogFragment(), AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener, DialogInterface.OnShowListener, View.OnClickListener, SelectDateRangeDialogView, DismissableDialog {
+class SelectDateRangeDialogFragment : UstadDialogFragment(), AdapterView.OnItemSelectedListener,
+        DialogInterface.OnClickListener, DialogInterface.OnShowListener, View.OnClickListener,
+        SelectDateRangeDialogView, DismissableDialog {
     override val viewContext: Any
         get() = context!!
 

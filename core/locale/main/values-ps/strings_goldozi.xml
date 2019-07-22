@@ -60,7 +60,7 @@
     <string name="current_password">اوسنی پټ نوم</string>
     <string name="confirm_new_password">د نوی پټ نوم تائیدول</string>
     <string name="choose_language">د ژبې غوره کول</string>
-    <string name="language_english">انګلیسی</string>
+    <string name="language_english">English</string>
     <string name="language_dari">دری</string>
     <string name="language_pashto">پښتو</string>
     <string name="confirm_logout">د وتل تائیدول</string>
@@ -172,4 +172,10 @@
     <string name="set_title">د عنوان ټاکل</string>
 
     <string name="this_language">پښتو</string>
+
+    <string name="select_image_from_camera_or_gallery">د کیمرې یا ګالر څخه انځور انتخاب کړئ</string>
+    <string name="shake_feedback">د نظریاتو لپاره ځړول</string>
+    <string name="feedback_hint">مهرباني وکړئ خپل نظر ولیکئ</string>
+    <string name="send_feedback">غبرګون واستوئ</string>
+    <string name="feedback_thanks">مننه</string>
 </resources>

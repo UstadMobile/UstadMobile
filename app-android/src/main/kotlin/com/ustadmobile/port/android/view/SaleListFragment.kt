@@ -86,18 +86,21 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
         allSalesButton!!.setOnClickListener { v ->
             disableAllButtonSelected()
             mPresenter!!.filterAll()
-            getTintedDrawable(allSalesButton!!.background, R.color.fab)
+            allSalesButton!!.background = getTintedDrawable(allSalesButton!!.background, R.color.fab)
+            //getTintedDrawable(allSalesButton!!.background, R.color.fab)
 
         }
         preOrdersButton!!.setOnClickListener { v ->
             disableAllButtonSelected()
             mPresenter!!.filterPreOrder()
-            getTintedDrawable(preOrdersButton!!.background, R.color.fab)
+            preOrdersButton!!.background = getTintedDrawable(preOrdersButton!!.background, R.color.fab)
+//            getTintedDrawable(preOrdersButton!!.background, R.color.fab)
         }
         paymentsDueButton!!.setOnClickListener { v ->
             disableAllButtonSelected()
             mPresenter!!.filterPaymentDue()
-            getTintedDrawable(paymentsDueButton!!.background, R.color.fab)
+            //getTintedDrawable(paymentsDueButton!!.background, R.color.fab)
+            paymentsDueButton!!.background = getTintedDrawable(paymentsDueButton!!.background, R.color.fab)
         }
 
         //Sort handler
@@ -145,13 +148,28 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
     }
 
     fun disableAllButtonSelected() {
-        runOnUiThread ( Runnable {
+        allSalesButton!!.invalidateDrawable(allSalesButton!!.getBackground())
+        preOrdersButton!!.invalidateDrawable(preOrdersButton!!.getBackground())
+        paymentsDueButton!!.invalidateDrawable(paymentsDueButton!!.getBackground())
 
-            getTintedDrawable(allSalesButton!!.background, R.color.color_gray)
-            getTintedDrawable(preOrdersButton!!.background, R.color.color_gray)
-            getTintedDrawable(paymentsDueButton!!.background, R.color.color_gray)
-            }
-        )
+
+
+        allSalesButton!!.setBackground(
+                getTintedDrawable(allSalesButton!!.getBackground(), R.color.color_gray))
+
+        preOrdersButton!!.setBackground(
+                getTintedDrawable(preOrdersButton!!.getBackground(), R.color.color_gray))
+
+        paymentsDueButton!!.setBackground(
+                getTintedDrawable(paymentsDueButton!!.getBackground(), R.color.color_gray))
+
+//        runOnUiThread ( Runnable {
+//
+//            getTintedDrawable(allSalesButton!!.background, R.color.color_gray)
+//            getTintedDrawable(preOrdersButton!!.background, R.color.color_gray)
+//            getTintedDrawable(paymentsDueButton!!.background, R.color.color_gray)
+//            }
+//        )
     }
 
     /**
@@ -160,11 +178,13 @@ class SaleListFragment : UstadBaseFragment(), SaleListView {
      * @param drawable  The drawable to be tinted
      * @param color     The color of the tint
      */
-    fun getTintedDrawable(drawable: Drawable, color: Int) {
+    fun getTintedDrawable(drawable: Drawable, color: Int):Drawable {
         var drawable = drawable
         drawable = DrawableCompat.wrap(drawable)
         val tintColor = ContextCompat.getColor(context!!, color)
         DrawableCompat.setTint(drawable, tintColor)
+
+        return drawable
     }
 
     override fun finish() {

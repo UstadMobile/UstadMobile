@@ -75,7 +75,11 @@ class BasePoint2Activity : UstadBaseActivity(), BasePoint2View {
                 }
                 VIEW_POSITION_POSITION_INVENTORY -> {
                 }
-                VIEW_POSITION_POSITION_SALES -> saleListFragment!!.goToSearch()
+                VIEW_POSITION_POSITION_SALES ->
+                    {
+                        if(saleListFragment!=null)
+                            saleListFragment!!.goToSearch()
+                    }
                 VIEW_POSITION_POSITION_COURSES -> {
                 }
                 VIEW_POSITION_POSITION_REPORTS -> {

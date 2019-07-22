@@ -19,7 +19,8 @@ import com.ustadmobile.core.view.SelectLanguageDialogView
 import java.util.Objects
 
 
-class SelectLanguageDialogFragment : UstadDialogFragment(), SelectLanguageDialogView, DismissableDialog {
+class SelectLanguageDialogFragment : UstadDialogFragment(),
+        SelectLanguageDialogView, DismissableDialog {
     override val viewContext: Any
         get() = context!!
 

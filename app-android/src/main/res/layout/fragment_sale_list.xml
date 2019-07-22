@@ -159,7 +159,7 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_button_selector"
                 android:paddingLeft="@dimen/dimen_8dp"
-                android:paddingRight="@dimen/dimen_4dp"
+                android:paddingRight="@dimen/dimen_8dp"
                 android:text="@string/payments_due"
                 android:textAppearance="@style/TextAppearance.AppCompat.Inverse"
                 app:layout_constraintBottom_toBottomOf="parent"

@@ -15,6 +15,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -96,7 +97,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     //Signature
     private var signatureTitleTV: TextView? = null
-    private var signatureIB: ImageButton? = null
+    private var signatureIB: AppCompatImageButton? = null
 
     override fun onStop() {
         super.onStop()
@@ -114,7 +115,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     fun requestPermission() {
 
-        if (ContextCompat.checkSelfPermission(applicationContext,
+        if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, permissions, RECORD_AUDIO_PERMISSION_REQUEST)
             return
@@ -266,7 +267,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     fun initiateRecording() {
 
-        if (ContextCompat.checkSelfPermission(applicationContext,
+        if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermission()
         } else {
@@ -332,12 +333,12 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
         //RecyclerView
         mRecyclerView = findViewById(
                 R.id.activity_sale_detail_recyclerview)
-        val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+        val mRecyclerLayoutManager = LinearLayoutManager(this)
         mRecyclerView!!.layoutManager = mRecyclerLayoutManager
 
         pRecyclerView = findViewById(
                 R.id.activity_sale_detail_payments_recyclerview)
-        val pRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+        val pRecyclerLayoutManager = LinearLayoutManager(this)
         pRecyclerView!!.layoutManager = pRecyclerLayoutManager
 
 
@@ -455,7 +456,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleItemListDetail>) {
         val recyclerAdapter = SaleItemRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
-                applicationContext)
+                this)
 
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20).build()
@@ -481,7 +482,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     override fun setPaymentProvider(factory: DataSource.Factory<Int, SalePayment>) {
         val recyclerAdapter = SalePaymentRecyclerAdapter(DIFF_CALLBACK_PAYMENT, mPresenter!!, this,
-                applicationContext)
+                this)
 
         // get the provider, set , observe, etc.
         val data = LivePagedListBuilder(factory, 20).build()
@@ -507,7 +508,7 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
 
     override fun setLocationPresets(locationPresets: Array<String>, selectedPosition: Int) {
 
-        val adapter = ArrayAdapter(applicationContext,
+        val adapter = ArrayAdapter(this,
                 R.layout.item_simple_spinner, locationPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         locationSpinner!!.adapter = adapter
@@ -580,7 +581,10 @@ class SaleDetailActivity : UstadBaseActivity(), SaleDetailView {
                         }
                         val pd = PictureDrawable(adjustedPic)
 
-                        runOnUiThread { signatureIB!!.background = pd }
+                        runOnUiThread {
+                            signatureIB!!.invalidateDrawable(signatureIB!!.background)
+                            signatureIB!!.background = pd
+                        }
 
 
                     } catch (e: SVGParseException) {

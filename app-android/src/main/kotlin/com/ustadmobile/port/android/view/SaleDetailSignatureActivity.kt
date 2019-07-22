@@ -109,7 +109,9 @@ class SaleDetailSignatureActivity : UstadBaseActivity(), SaleDetailSignatureView
                     }
                     val pd = PictureDrawable(adjustedPic)
 
-                    runOnUiThread { mSignaturePad.setBackground(pd) }
+                    runOnUiThread {
+                        mSignaturePad.setBackground(pd)
+                    }
                 } catch (spe: SVGParseException) {
                     spe.printStackTrace()
                 }

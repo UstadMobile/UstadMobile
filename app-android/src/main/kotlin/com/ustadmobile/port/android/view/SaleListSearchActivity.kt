@@ -126,7 +126,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
         //RecyclerView
         mRecyclerView = findViewById(
                 R.id.activity_sale_list_search_recyclerview)
-        val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
+        val mRecyclerLayoutManager = LinearLayoutManager(this)
         mRecyclerView!!.layoutManager = mRecyclerLayoutManager
 
         locationSpinner = findViewById(R.id.activity_sale_list_search_location_spinner)
@@ -189,7 +189,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
     override fun setListProvider(factory: DataSource.Factory<Int, SaleListDetail>) {
 
         val recyclerAdapter = SaleListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, false, false,
-                this, applicationContext)
+                this, this)
         val data = LivePagedListBuilder(factory, 20).build()
         data.observe(this, Observer<PagedList<SaleListDetail>> { recyclerAdapter.submitList(it) })
 
@@ -197,7 +197,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
     }
 
     override fun updateLocationSpinner(locations: Array<String>) {
-        val adapter = ArrayAdapter(applicationContext,
+        val adapter = ArrayAdapter(this,
                 R.layout.item_simple_spinner, locations)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         locationSpinner!!.adapter = adapter
@@ -214,7 +214,7 @@ class SaleListSearchActivity : UstadBaseActivity(), SaleListSearchView {
      */
     override fun updateSortSpinner(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
-        val adapter = ArrayAdapter(applicationContext,
+        val adapter = ArrayAdapter(this,
                 R.layout.spinner_item, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner!!.adapter = adapter
