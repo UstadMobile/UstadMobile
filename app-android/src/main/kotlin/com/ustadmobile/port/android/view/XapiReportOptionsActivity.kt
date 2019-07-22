@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -26,7 +27,7 @@ import java.util.*
 
 
 class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
-       /* SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,*/
+        /* SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,*/
         SelectMultipleEntriesTreeDialogFragment.MultiSelectEntriesTreeDialogListener {
 
 
@@ -52,7 +53,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var whenEditText: EditText
 
-  //  private lateinit var whereEditText: EditText
+    //  private lateinit var whereEditText: EditText
 
     private lateinit var whatEditText: EditText
 
@@ -75,7 +76,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         whoAutoCompleteView = findViewById(R.id.whoAutoCompleteTextView)
         whoFlexBoxLayout = findViewById(R.id.whoFlex)
         whenEditText = findViewById(R.id.whenEditText)
-       // whereEditText = findViewById(R.id.whereEditText)
+        // whereEditText = findViewById(R.id.whereEditText)
         whatEditText = findViewById(R.id.whatEditText)
 
         whenEditText.setOnClickListener {
@@ -93,10 +94,10 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
                 this)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-      /*  whereEditText.setOnClickListener {
-            presenter.handleWhereClicked()
-        }
-*/
+        /*  whereEditText.setOnClickListener {
+              presenter.handleWhereClicked()
+          }
+  */
         whatEditText.setOnClickListener {
             presenter.handleWhatClicked()
         }
@@ -246,43 +247,39 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         }
     }
 
-    override fun updateDatesSelected() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     private var textWatcher = object : TextWatcher {
 
-        private var timer = Timer()
-        private val DELAY: Long = 250 // milliseconds
+        private var handler = Handler()
+        private val DELAY: Long = 150 // milliseconds
+        private var string: Editable? = null
 
         override fun afterTextChanged(s: Editable?) {
-            timer.cancel()
-            timer = Timer()
-            timer.schedule(
-                    object : TimerTask() {
-                        override fun run() {
-                            val hash = s.hashCode()
-                            if (hash == whoAutoCompleteView.text.hashCode()) {
-                                val name = whoAutoCompleteView.text.toString()
-                                presenter.handleWhoDataTyped(name, whoFlexBoxLayout.children.filter {
-                                    it is Chip
-                                }.map {
-                                    (it as Chip).tag as Long
-                                }.toList())
-
-                            } else if (hash == didAutoCompleteView.text.hashCode()) {
-                                val verb = didAutoCompleteView.text.toString()
-                                presenter.handleDidDataTyped(verb, didFlexBoxLayout.children.filter {
-                                    it is Chip
-                                }.map {
-                                    (it as Chip).tag as Long
-                                }.toList())
-                            }
-                        }
-                    },
-                    DELAY)
-
+            string = s
+            handler.removeCallbacks(myRunnable)
+            handler = Handler()
+            handler.postDelayed(myRunnable, DELAY)
         }
+
+        var myRunnable = Runnable {
+            val hash = string.hashCode()
+            if (hash == whoAutoCompleteView.text.hashCode()) {
+                val name = whoAutoCompleteView.text.toString()
+                presenter.handleWhoDataTyped(name, whoFlexBoxLayout.children.filter {
+                    it is Chip
+                }.map {
+                    (it as Chip).tag as Long
+                }.toList())
+
+            } else if (hash == didAutoCompleteView.text.hashCode()) {
+                val verb = didAutoCompleteView.text.toString()
+                presenter.handleDidDataTyped(verb, didFlexBoxLayout.children.filter {
+                    it is Chip
+                }.map {
+                    (it as Chip).tag as Long
+                }.toList())
+            }
+        }
+
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
@@ -389,14 +386,14 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         return builder.create()
     }
 
-    //TODO when varuna branch merges
-  /*  override fun onLocationResult(selected: MutableMap<String, Long>) {
-        var locationList = selected.keys.joinToString { it }
-        runOnUiThread {
-            whereEditText.setText(locationList)
-        }
-        presenter.handleLocationListSelected(selected.values.toList())
-    }*/
+//TODO when varuna branch merges
+/*  override fun onLocationResult(selected: MutableMap<String, Long>) {
+      var locationList = selected.keys.joinToString { it }
+      runOnUiThread {
+          whereEditText.setText(locationList)
+      }
+      presenter.handleLocationListSelected(selected.values.toList())
+  }*/
 
     override fun onEntriesSelectedResult(selected: MutableMap<String, Long>) {
         var entriesList = selected.keys.joinToString { it }

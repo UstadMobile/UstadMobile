@@ -33,8 +33,6 @@ interface XapiReportOptionsView : UstadView {
 
     fun updateDidListSelected(verbs: List<XLangMapEntryDao.Verb>)
 
-    fun updateDatesSelected()
-
     companion object {
 
         const val VIEW_NAME = "XapiReportOptionsView"

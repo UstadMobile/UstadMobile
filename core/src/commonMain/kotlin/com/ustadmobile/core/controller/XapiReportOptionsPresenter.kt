@@ -79,8 +79,6 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?, 
             if (reportOptions!!.fromDate > 0L && reportOptions!!.toDate > 0L) {
                 fromDateTime = DateTime(reportOptions!!.fromDate)
                 toDateTime = DateTime(reportOptions!!.toDate)
-                handleFromCalendarSelected()
-                handleToCalendarSelected()
                 handleDateRangeSelected()
             }
             view.runOnUiThread(Runnable {
